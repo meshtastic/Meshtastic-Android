@@ -1264,11 +1264,21 @@ private fun TracerouteMapContent(
     displayNodes.forEach { node ->
         // Key by the stable node num so each marker's composition state (and MarkerComposable's cached
         // icon bitmap) stays bound to its node. Without this, reordering displayNodes between reloads
-        // reuses marker slots positionally and swaps node labels/positions (#6197). node.user.short_name
-        // is included as a bitmap key so the rendered chip refreshes when node metadata arrives.
+        // reuses marker slots positionally and swaps node labels/positions (#6197). The remaining keys
+        // are every NodeChip input (short name, colors, ignored strike-through) so the rendered chip
+        // bitmap refreshes when node metadata changes.
         key(node.num) {
             val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
-            MarkerComposable(node.num, node.user.short_name, state = markerState, zIndex = 4f) { NodeChip(node = node) }
+            MarkerComposable(
+                node.num,
+                node.user.short_name,
+                node.colors,
+                node.isIgnored,
+                state = markerState,
+                zIndex = 4f,
+            ) {
+                NodeChip(node = node)
+            }
         }
     }
 }
