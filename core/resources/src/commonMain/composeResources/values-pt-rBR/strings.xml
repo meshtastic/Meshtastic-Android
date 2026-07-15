@@ -736,7 +736,6 @@
     <string name="view_release">Ver Lançamento</string>
     <string name="voltage">Voltagem</string>
     <string name="warning">Atenção</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Excluir ponto de referência?</string>
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_new">Novo ponto de referência</string>

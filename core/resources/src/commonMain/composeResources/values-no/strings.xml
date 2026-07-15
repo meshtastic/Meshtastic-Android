@@ -302,7 +302,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">via MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Fjern veipunkt?</string>
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_new">Nytt veipunkt</string>

@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11015",
+      "title": "feat: add driver for MCP23017",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11015",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "11014",
       "title": "Fix replayed satellite-DB packets masquerading as fresh live traffic",
       "page_url": "https://github.com/meshtastic/firmware/pull/11014",
@@ -313,12 +319,6 @@
       "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10917",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10915",
-      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

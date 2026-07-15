@@ -584,7 +584,6 @@
     <string name="username">Utilizador</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="voltage">Voltagem</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Apagar o ponto de referência?</string>
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_new">Novo ponto de referência</string>

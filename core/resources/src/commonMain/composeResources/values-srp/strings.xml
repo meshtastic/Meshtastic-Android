@@ -509,7 +509,6 @@
     <string name="username">Корисничко име</string>
     <string name="via_mqtt">преко MQTT-а</string>
     <string name="voltage">Напон</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Обрисати тачку путање?</string>
     <string name="waypoint_edit">Измените тачку путање</string>
     <string name="waypoint_new">Нова тачка путање</string>

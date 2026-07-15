@@ -291,7 +291,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">trí MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Scrios an pointe bealach?</string>
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_new">Pointe bealach nua</string>

@@ -1477,7 +1477,6 @@
     <string name="wait_for_bluetooth_duration_seconds">Zeit für Warten auf Bluetooth</string>
     <string name="wake_on_tap_or_motion">Aufwachen durch Tippen oder Bewegung</string>
     <string name="warning">Warnung</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Wegpunkt löschen?</string>
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_new">Wegpunkt hinzufügen</string>

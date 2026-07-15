@@ -166,35 +166,35 @@ Meshtastic поддерживает два режима связи: **вещан
 - **Ответить** — процитировать сообщение в твоём ответе
 - **Реагировать** — добавить реакцию-эмодзи
 - **Перевести** — перевести полученное сообщение на язык твоего устройства и переключаться между оригиналом и переводом (только в сборке Google Play; используется встроенный перевод)
-- **Delete** — remove a message you sent (local deletion)
+- **Удалить** — удалить отправленное тобою сообщение (локальное удаление)
 
-### Message Priority
+### Приоритет сообщений
 
-Messages are queued and transmitted based on priority:
+Сообщения ставятся в очередь и передаются в соответствии с приоритетом:
 
-1. Emergency/alert messages (highest)
+1. Экстренные/аварийные сообщения (наивысший)
 2. Личные сообщения
-3. Channel broadcasts (lowest)
+3. Широковещательные сообщения в канале (самый низкий)
 
-### Message Limits
+### Ограничения сообщений
 
-- **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
-- **Delivery:** Messages are retried automatically if no acknowledgment is received
+- **Максимальная длина**: 200 байт (примерно 200 символов для текста в ASCII)
+- **Ограничение скорости**: Mesh-сеть обеспечивает справедливое распределение эфирного времени; большой объем сообщений может быть ограничен
+- **Доставка**: Сообщения автоматически повторяются при отсутствии подтверждения
 
-## Best Practices
+## Рекомендации
 
-- Use channels for group coordination
-- Use direct messages for private person-to-person communication
-- Keep messages short — mesh bandwidth is limited
-- Configure encryption for sensitive communications
+- Используйте каналы для координации в группах
+- Используйте личные сообщения для приватного общения один на один
+- Пишите короткие сообщения — пропускная способность mesh-сети ограничена
+- Настройте шифрование для конфиденциальной связи
 
-## Related Topics
+## Связанные темы
 
-- [Nodes](nodes) — tap a node to start a direct message
-- [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
-- [MQTT](mqtt) — bridge channel messages to the internet
-- [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
+- [Ноды](nodes) — нажмите на ноду, чтобы начать личный чат
+- [Настройки — Радио и пользователь](settings-radio-user) — настройка шифрования каналов и пресетов
+- [MQTT](mqtt) — мост для передачи сообщений канала в интернет
+- [Конфигурация каналов](https://meshtastic.org/docs/configuration/radio/channels) — подробные параметры каналов на meshtastic.org
 
 ---
 

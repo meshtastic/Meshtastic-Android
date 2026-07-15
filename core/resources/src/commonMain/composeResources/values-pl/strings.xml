@@ -835,7 +835,6 @@
     <string name="voltage">Napięcie</string>
     <string name="wake_on_tap_or_motion">Wybudź przy dotknięciu lub ruchu</string>
     <string name="warning">Uwaga</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>

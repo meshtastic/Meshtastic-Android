@@ -299,7 +299,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">per MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Ištrinti orientyrą?</string>
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_new">Naujas orientyras</string>
