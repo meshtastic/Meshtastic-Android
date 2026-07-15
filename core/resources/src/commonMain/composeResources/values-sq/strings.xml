@@ -50,6 +50,10 @@
     <string name="clear">Pastro</string>
     <string name="close">Mbylle</string>
     <!-- COMPASS -->
+    <string name="compass_bearing">Азимут: %1$s</string>
+    <string name="compass_bearing_na">Азимут: Н/А</string>
+    <string name="compass_no_location_fix">Жду, пока GPS определит местоположение, чтобы вычислить расстояние и азимут.</string>
+    <string name="compass_no_location_permission">Нужно разрешение на доступ к местоположению, чтобы показывать расстояние и азимут.</string>
     <!-- CONFIG -->
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <!-- DEBUG -->
@@ -163,6 +167,7 @@
     <string name="node_filter_include_unknown">Përfshi të panjohurat</string>
     <string name="node_filter_placeholder">Filtrimi</string>
     <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_distance_and_bearing">Расстояние и азимут</string>
     <string name="node_layout_hops_away">Hops larg</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanca</string>

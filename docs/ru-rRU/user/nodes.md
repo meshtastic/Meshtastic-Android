@@ -34,55 +34,55 @@ aliases:
 | ⚪ Оффлайн   | Нода не отвечала больше 2 часов           |
 | ⭐ Избранный | Нода отмечена пользователем как избранная |
 
-A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
+Нода считается **онлайн**, если с ней связывались в последние 2 часа, и **офлайн** в противном случае — отдельного статуса «отошёл» нет.
 
 ### Роли ноды
 
-Nodes can be configured with different roles that affect their mesh behavior:
+У нод можно настраивать разные роли, которые влияют на их поведение в сети:
 
-| Роль                             | Описание                                                                                                                                               |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Client                           | Standard end-user device                                                                                                                               |
-| Client Base                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                     |
-| Client Mute                      | Receives but doesn't retransmit                                                                                                                        |
-| Client Hidden                    | Like Client Mute, plus hides from node list                                                                                                            |
-| Router                           | Prioritizes message forwarding; stays awake to relay                                                                                                   |
-| Router Late                      | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage)                         |
-| ~~Router Client~~                | ⚠️ **Deprecated** (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead |
-| ~~Repeater~~                     | ⚠️ **Deprecated** (removed in firmware 2.7.11) — no longer selectable; use Router instead           |
-| Tracker                          | Optimized for position reporting at regular intervals                                                                                                  |
-| Sensor                           | Optimized for telemetry reporting                                                                                                                      |
-| Тактический                      | Interoperates with TAK systems (sends/receives CoT)                                                                                 |
-| TAK Tracker                      | TAK position reporting only                                                                                                                            |
-| Lost & Found | Continuous position beacon for recovery                                                                                                                |
+| Роль                             | Описание                                                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client                           | Стандартное пользовательское устройство                                                                                                                         |
+| Client Base                      | Обрабатывает трафик избранных нод как приоритет Router Late; весь остальной трафик как Client                                                                   |
+| Client Mute                      | Принимает, но не ретранслирует                                                                                                                                  |
+| Client Hidden                    | Как Client Mute, плюс скрыт из списка нод                                                                                                                       |
+| Router                           | Ставит в приоритет пересылку сообщений; не засыпает чтобы передавать их                                                                                         |
+| Router Late                      | Инфраструктурная нода, которая ретранслирует один раз, но только после всех остальных режимов (обеспечивает дополнительное покрытие)         |
+| ~~Router Client~~                | ⚠️ **Устарело** (удалено в прошивке 2.3.15) — больше не выбирается; используй вместо этого Router или Client |
+| ~~Repeater~~                     | ⚠️ **Устарело** (удалено в прошивке 2.7.11) — больше не выбирается; используй вместо этого Router            |
+| Tracker                          | Оптимизировано для передачи данных о местоположении через регулярные промежутки времени                                                                         |
+| Sensor                           | Оптимизировано для данных телеметрии                                                                                                                            |
+| Тактический                      | Взаимодействует с системами TAK (отправляет/принимает CoT)                                                                                   |
+| TAK Tracker                      | Только отчет о позиции TAK                                                                                                                                      |
+| Lost & Found | Непрерывный маяк для поиска                                                                                                                                     |
 
 ### Выбор роли
 
-Most users should keep the default **Client** role. Consider a different role when:
+Большинству пользователей стоит оставить роль **Client** по умолчанию. Рассмотри другую роль, когда:
 
-- **Router** — У тебя есть узел в фиксированном, высоком месте с надежным источником питания (крыша, вершина холма). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
-- **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
-- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
-- **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
-- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
-- **TAK / TAK Tracker** — Only needed if interoperating with ATAK/WinTAK systems. See [TAK Integration](tak) for details.
+- **Router** — У тебя есть узел в фиксированном, высоком месте с надежным источником питания (крыша, вершина холма). Router постоянно бодрствуют, чтобы пересылать сообщения для других, и они необходимы для расширения покрытия сети. Не используй Router на портативных устройствах с батареей.
+- **Router Late** — инфраструктурная нода, которая всегда пересылает пакеты только один раз, но только после того, как все другие режимы маршрутизации выполнили свои ходы. Обеспечивает дополнительное покрытие для локальных кластеров, не конкурируя с основными роутерами.
+- **Client Base** — обрабатывает трафик от/к вашим избранным нодам с приоритетом Router Late (обеспечивая этим сообщениям дополнительное ретранслирование), а всё остальное обрабатывает как обычный Client.
+- **Client Mute** — хочешь принимать трафик сети, но не участвовать в его ретрансляции. Полезно для устройств только для мониторинга или чтобы уменьшить нагрузку в густонаселённых местах.
+- **Tracker** — это устройство, которое работает само по себе и его единственная цель — передавать местоположение по GPS (например, автомобиль, питомец или имущество). Спит между передачами для экономии батареи.
+- **Sensor** — это автономное устройство, которое отслеживает показатели окружающей среды (температуру, влажность, качество воздуха). Похожий профиль мощности на Tracker.
+- **TAK / TAK Tracker** — нужно только если работать с системами ATAK/WinTAK. Смотри [Интеграция TAK](tak) для подробностей.
 
-> 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **Совет:** Сеть работает лучше, когда большинство нод **Client** или **Router**. Слишком много нод Mute снижает устойчивость сети; слишком много роутеров в плотной зоне может вызвать перегрузку. A good rule of thumb: one Router per 5–10 Clients in your area.
 
-### Encryption Indicators
+### Индикаторы шифрования
 
-Nodes display encryption status icons next to their name:
+У нод рядом с именем отображаются значки статуса шифрования:
 
-| Icon        | Meaning                                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Locked   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Значок            | Значение                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Заблокировано  | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
+| 🔓 Разблокировано | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
+| ⚠️ Несовпадение   | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
 
 > 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
 
-## Quick Actions
+## Быстрые действия
 
 From the node list, you can:
 
@@ -91,44 +91,44 @@ From the node list, you can:
   - Mark/remove favorite
   - Mute/unmute notifications
   - Send a direct message
-  - Trace route
+  - Трассировка
   - Ignore/unignore
   - Удалить ноду
 
-## Filtering & Sorting
+## Фильтрация и сортировка
 
 ### Text Search
 
 Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
 
-### Filter Toggles
+### Переключатели фильтра
 
-| Фильтр                     | Описание                                                                                       |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 2 hours                                                  |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                                 |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
+| Фильтр                       | Описание                                                                                           |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Только онлайн**            | Show only nodes heard within the last 2 hours                                                      |
+| **Только прямые**            | Show only nodes with direct (non-relayed) connections                           |
+| **Включить неизвестные**     | Показать ноды, которые еще не отправили информацию о пользователе                                  |
+| **Исключить инфраструктуру** | Скрыть ноды с ролью инфраструктуры (Router, Repeater, Router Late, Client Base) |
+| **Исключить MQTT**           | Скрыть ноды, слышимые только через интернет-мост MQTT                                              |
+| **Показать игнорируемые**    | Показать ноды, которые ты раньше скрывал или заглушал                                              |
 
-### Sort Options
+### Параметры сортировки
 
-| Sort                                        | Описание                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| **Last heard** (default) | Most recently heard nodes first                                    |
-| **Alphabetical**                            | Sorted by node long name                                           |
-| **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
-| **Channel**                                 | Grouped by channel index                                           |
-| **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
-| **Favorites**                               | Favorited nodes first                                              |
+| Сортировка                                  | Описание                                                              |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| **Last heard** (default) | Сначала недавно слышимые узлы                                         |
+| **По алфавиту**                             | Сортировать по полному имени ноды                                     |
+| **Расстояние**                              | Сначала ближайшие ноды (требуется обмен позициями) |
+| **Hops away**                               | Сначала с наименьшим количеством ретрансляций                         |
+| **Канал**                                   | Группировать по индексу канала                                        |
+| **Через MQTT**                              | Grouped by MQTT vs. radio-heard                       |
+| **Избранное**                               | Сначала избранные ноды                                                |
 
-## Nodes per Hop
+## Нод на хоп
 
 Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
 
-## Node Detail
+## Детали ноды
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
@@ -140,27 +140,27 @@ The detail screen includes device info, position, and action buttons:
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator              | Screenshot                                                    |
-| ---------------------- | ------------------------------------------------------------- |
-| Signal quality         | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
-| Уровень заряда батареи | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
-| Hop count              | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
-| Последний раз слышен   | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
-| Расстояние             | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+| Индикатор              | Снимок экрана                                                   |
+| ---------------------- | --------------------------------------------------------------- |
+| Качество сигнала       | ![Сигнал](../../assets/screenshots/nodes_signal_info.png)       |
+| Уровень заряда батареи | ![Батарея](../../assets/screenshots/nodes_battery_info.png)     |
+| Количество хопов       | ![Хопы](../../assets/screenshots/nodes_hops_info.png)           |
+| Последний раз слышен   | ![Last heard](../../assets/screenshots/nodes_last_heard.png)    |
+| Расстояние             | ![Расстояние](../../assets/screenshots/nodes_distance_info.png) |
 
-### Device Links ("I want one")
+### Ссылки на устройства ("Хочу такое")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Устройства без подходящих ссылок не показывают этот раздел.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+Полный каталог всех ссылок, который можно просматривать, также доступен в **Настройки → Ссылки устройства**.
 
-## Related Topics
+## Связанные темы
 
 - [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
 - [Messages & Channels](messages-and-channels) — send a direct message to a node
 - [Map & Waypoints](map-and-waypoints) — view node positions geographically
 - [Discovery](discovery) — traceroute and neighbor info for topology exploration
-- [Signal Meter](signal-meter) — understand what the signal bars mean
+- [Индикатор сигнала](signal-meter) — пойми, что означают полоски сигнала
 
 ---
 

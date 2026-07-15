@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11014",
+      "title": "Fix replayed satellite-DB packets masquerading as fresh live traffic",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11014",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11009",
       "title": "Nz region sf16 preset",
       "page_url": "https://github.com/meshtastic/firmware/pull/11009",
@@ -228,12 +234,6 @@
       "id": "10969",
       "title": "Sign plaintext packets in licensed mode",
       "page_url": "https://github.com/meshtastic/firmware/pull/10969",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10968",
-      "title": "Update LovyanGFX to v1.2.25",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10968",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -309,16 +309,16 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10918",
-      "title": "Add RAK WisMesh Repeater Mini V2 and HP variants",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10918",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10917",
       "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10917",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10915",
+      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

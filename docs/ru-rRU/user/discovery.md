@@ -3,7 +3,7 @@ title: Обнаружение
 parent: Руководство пользователя
 nav_order: 12
 last_updated: 2026-07-08
-description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
+description: Исследуйте свою mesh-сеть — сканер локального обнаружения mesh-сети, трассировка путей, карты соседей и инструменты обнаружения нодов.
 aliases:
   - mesh-discovery
   - local-discovery
@@ -18,79 +18,79 @@ aliases:
 
 Приложение предлагает два дополнительных подхода:
 
-- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
-- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
+- **Локальное обнаружение mesh-сети (сканер)** — автоматический режим, который по очереди перебирает на твоём подключённом радио разные пресеты LoRa, слушает каждый и определяет, какой пресет лучше всего работает в твоём местоположении.
+- **Ручное исследование** — трассировка, информация о соседях и список нод, которые ты можешь использовать в любое время для изучения конкретных путей и топологии.
 
 ---
 
 ## Обнаружение локальной сети (Сканер)
 
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+Локальное обнаружение mesh-сети — это специализированный режим сканирования, который помогает найти лучший пресет LoRa-модема для твоего местоположения и увидеть, какие ноды активны на каждом пресете. Он циклически переключает твоё подключённое радио между одним или несколькими выбранными тобою пресетами, слушает (или "задерживается") на каждом заданное время для сбора пакетов, затем анализирует и ранжирует результаты.
 
-Open it from **Settings → Local Mesh Discovery**.
+Откройте его через **Настройки → Локальное обнаружение mesh-сети**.
 
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+> ⚠️ **Примечание**: Обнаружение временно изменяет настройки LoRa твоего радио во время сканирования, а затем восстанавливает исходную конфигурацию после завершения. Твоё устройство должно быть подключено для запуска сканирования.
 
 ### Настройка сканирования
 
-Before starting, configure these controls:
+Перед началом, настройте эти параметры:
 
-| Управление                  | Описание                                                                                                                                                                                                                                                    |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| \*\*Выбор пресета LoRa \*\* | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                                                       |
-| **Dwell time**              | Время послушки каждого пресета. Выбери один из вариантов: 1, 5, 15, 30, 45, 60, 90, 120 или 180 минут. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Не выключать экран**      | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                                                  |
+| Управление             | Описание                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Выбор пресета LoRa** | Выберите один или несколько пресетов для сканирования. Обнаружение по очереди задерживается на каждом выбранном пресете.                                                                                                                             |
+| **Время задержки**     | Время прослушки каждого пресета. Выбери один из вариантов: 1, 5, 15, 30, 45, 60, 90, 120 или 180 минут. Более долгое время задержки собирает больше пакетов и даёт более чёткую картину, но занимает больше времени. |
+| **Не выключать экран** | Дополнительный переключатель, который не даёт экрану гаснуть во время длительного сканирования.                                                                                                                                                                      |
 
-The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
+Кнопка **Старт** остаётся неактивной — с объяснением причины — пока сканирование не может быть запущено. Распространённые причины, почему она отключена:
 
-- The device is **not connected**.
-- **No presets** have been selected to scan.
-- The selected preset uses **2.4 GHz**, which your hardware doesn't support.
+- Устройство **не подключено**.
+- **Не выбраны пресеты** для сканирования.
+- Выбранный пресет использует частоту **2,4 ГГц**, которую ваше оборудование не поддерживает.
 
 ### Текущий прогресс
 
-While a scan runs, Discovery shows its current stage:
+Во время сканирования "Обнаружение" показывает текущий этап:
 
-| Этап                                                  | What's happening                                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Подготовка**                                        | Saving your current configuration and getting ready to scan.                           |
-| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
-| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
-| **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
-| **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
-| **Restoring**                                         | Putting your original LoRa configuration back.                                         |
+| Этап                                                      | Что происходит                                                                                           |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Подготовка**                                            | Сохранение твоей текущей конфигурации и подготовка к сканированию.                       |
+| **Переключение на \<preset\>** | Переключение радио на следующий пресет для тестирования.                                 |
+| **Переподключение**                                       | Восстановление соединения после смены пресета.                                           |
+| **Прослушивание**                                         | Прослушивание текущего пресета для сбора пакетов с обратным отсчётом до следующего шага. |
+| **Анализ**                                                | Обработка собранных пакетов и ранжирование пресетов.                                     |
+| **Восстановление**                                        | Возврат твоей исходной конфигурации LoRa.                                                |
 
-![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
+![Обратный отсчёт времени прослушивания, показывающий оставшееся время на текущем пресете](../../assets/screenshots/discovery_dwell_progress.png)
 
 ### Чтение результатов
 
-When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
+По завершении сканирования "Обнаружение" показывает карточку результатов для каждого протестированного пресета, а также общую сводку.
 
-![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
+![Карточка результатов по пресету с рейтингом и собранными метриками](../../assets/screenshots/discovery_preset_result.png)
 
-Metrics include:
+Метрики включают:
 
-| Метрическая                              | What it tells you                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| RF health                                | Overall quality of the radio environment on that preset.                       |
-| Использование канала                     | How busy the airwaves were during the dwell.                                   |
-| Время вещания                            | Transmission time observed.                                                    |
-| Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
-| Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
+| Метрическая                     | Что для тебя это значит                                                                            |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Состояние радиоэфира            | Общее качество радиообстановки на этом пресете.                                    |
+| Использование канала            | Насколько загруженным был эфир во время прослушивания.                             |
+| Время вещания                   | Наблюдаемое время передачи.                                                        |
+| Прямые и ретранслированные ноды | Сколько mesh-нод было услышано напрямую, а сколько через ретранслятор.             |
+| Повреждённые / повторные пакеты | Количество повреждённых и повторных пакетов, указывающее на перегрузку или помехи. |
 
-Additional features available from the results:
+Дополнительные функции, доступные из результатов:
 
-- **Scan History** — saved sessions you can revisit; view or delete past scans.
-- **Discovery Map** — a map of the nodes found during the scan.
-- **Report export** — export a report as a PDF on Android, or as text on other platforms.
+- **История сканирования** — сохранённые сеансы, которые ты можешь просмотреть снова; просматривайте или удаляйте прошлые сканирования.
+- **Карта обнаружения** — карта нод, найденных во время сканирования.
+- **Экспорт отчёта** — экспортируйте отчёт в формате PDF на Android или в виде текста на других платформах.
 
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Совет:** На Android "Обнаружение" может создавать на устройстве сводку твоих результатов с помощью ИИ (Gemini Nano). Если модель на устройстве недоступна, вместо неё используется алгоритмическая сводка — так что ты всегда получаешь читаемую интерпретацию сканирования.
 
 ---
 
-## Manual Exploration
+## Ручное исследование
 
-The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
+Приведённые ниже инструменты доступны в любое время из списка нод и с экранов сведений ноде. Используйте их для исследования конкретных путей и построения картины топологии — вместе с полным сканированием или вместо него.
 
 ## Трассировка маршрута
 
@@ -113,12 +113,12 @@ The tools below are available at any time from the node list and node detail scr
 
 Каждый хоп представляет собой ретранслирующую ноду, которая переслала сообщение. Значения SNR и RSSI на каждой ноде говорят о качестве соединения на этом конкретном участке.
 
-| На что обращать внимание                                                          | Что это значит                                                                      |
-| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| All hops show Good SNR (≥ −7 dB, green)                        | Здоровый путь — сообщения идут без сбоев                                            |
-| One hop shows Bad SNR (< −15 dB, red) | Слабое звено — этот сегмент ретрансляции хрупкий                                    |
-| Много хопов (4+)                                               | Длинный путь — подумай о перемещении ноды для его сокращения                        |
-| Другой путь при повторе                                                           | Сеть адаптируется — существуют несколько маршрутов (это хорошо!) |
+| На что обращать внимание                                                                            | Что это значит                                                                      |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Все хопы показывают хороший SNR (≥ −7 дБ, зелёный цвет)                          | Здоровый путь — сообщения идут без сбоев                                            |
+| Один хоп показывает плохой SNR (< −15 дБ, красный цвет) | Слабое звено — этот сегмент ретрансляции хрупкий                                    |
+| Много хопов (4+)                                                                 | Длинный путь — подумай о перемещении ноды для его сокращения                        |
+| Другой путь при повторе                                                                             | Сеть адаптируется — существуют несколько маршрутов (это хорошо!) |
 
 > 💡 **Совет:** Запусти трассировку несколько раз в течение нескольких минут. Если путь изменяется, у твоей сети есть лишние маршруты — признак хорошо связанной сети.
 
@@ -126,62 +126,62 @@ The tools below are available at any time from the node list and node detail scr
 
 - **''Маршрут не найден''** — Целевая нода может быть оффлайн, находиться вне зоны действия или на другом канале. Проверь, что обе ноды имеют хотя бы один канал с одинаковым ключом шифрования.
 - **Время ожидания трассировки истекло** — путь может быть слишком длинным (превышен лимит хопов) или нода ретрансляции перегружена. Попробуй увеличить лимит хопов в **Настройки → Конфигурация LoRa**.
-- **Асимметричные маршруты** — трассировка от A→B может проходить по другому пути, чем B→A. This is normal — radio propagation is not always symmetric.
+- **Асимметричные маршруты** — трассировка от A→B может проходить по другому пути, чем B→A. Это нормально — распространение радиоволн не всегда симметрично.
 
 ---
 
 ## Информация об окружении
 
-The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
+Модуль информации о соседях позволяет каждой ноде передавать список нод, которые она может **слышать напрямую** (на расстоянии одного хопа). Когда несколько нод делятся своими списками соседей, ты можешь составить карту топологии всей mesh-сети.
 
 ### Включение информации о соседях
 
 1. Перейдите в **Настройки → Конфигурация модуля → Информация о соседях**.
 2. Включение модуля
-3. Set the broadcast interval (default: 900 seconds / 15 minutes).
+3. Установите интервал передачи (по умолчанию: 900 секунд / 15 минут).
 
-Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+После включения твоя нода периодически передаёт свою таблицу соседей. Другие ноды с включённым модулем информации о соседях делают то же самое.
 
 ### Просмотр данных соседа
 
-- Open any node's detail screen and look for the **Neighbors** section.
-- Each neighbor entry shows the node that was directly heard and its signal quality.
-- Combine neighbor data from multiple nodes to understand the full mesh topology.
+- Откройте экран сведений любой ноды и найдите раздел **"Соседи"**.
+- Каждая запись о соседе показывает ноду, которая была услышана напрямую, и качество её сигнала.
+- Объединяйте данные о соседях от нескольких нод, чтобы понять полную топологию mesh-сети.
 
-> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
+> ⚠️ **Примечание:** Информация о соседях увеличивает использование эфирного времени, поскольку каждая включённая нода периодически передаёт свой список соседей. В загруженных mesh-сетях с большим количеством нод рассмотрите более длинные интервалы передачи (3600 секунд или более), чтобы избежать перегрузки.
 
 ---
 
 ## Список узлов как инструмент для обзора
 
-The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
+Сам по себе список нод — мощный инструмент обнаружения, если ты эффективно будешь использовать его возможности фильтрации и сортировки.
 
 ### Поиск новых узлов
 
-- Sort by **Last heard** to see the most recently active nodes at the top.
-- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
+- Сортируйте по **"Последнему приёму"**, чтобы увидеть вверху списка ноды, активные в последнее время.
+- Включите **"Включая неизвестные"**, чтобы увидеть ноды, которые появились в mesh-сети, но ещё не передали информацию о пользователе — часто это недавно включённые устройства.
 
 ### Оценка подключения
 
-- Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
-- Sort by **Distance** to find nearby nodes and verify they're reachable.
-- Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
+- Сортируйте по «Хопам», чтобы видеть, какие ноды доступны напрямую (0 хопов), а какие — через ретрансляцию.
+- Сортируйте по **"Расстоянию"**, чтобы найти близлежащие ноды и убедиться, что они доступны.
+- Используйте **"Исключить MQTT"**, чтобы сосредоточиться на нодах, доступных по радио (а не через интернет-мост).
 
 ### Аудит инфраструктуры
 
-- Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
-- Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
+- Отключите **"Исключить инфраструктуру"**, чтобы увидеть ноды Router, Repeater, Router Late и Client Base.
+- Проверьте качество их сигнала и время последнего приёма, чтобы убедиться, что твои ноды инфраструктуры работают исправно.
 
-See [Nodes](nodes) for full details on filtering and sorting options.
+См. раздел [Ноды](Nodes) для получения полной информации о параметрах фильтрации и сортировки.
 
 ---
 
 ## Советы по исследованию сети
 
-- **Start with traceroute** — it gives you immediate, actionable information about a specific path.
-- **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
-- **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
-- **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
+- **Начните с трассировки** — она даёт тебе немедленную, пригодную для использования информацию о конкретном пути.
+- **Включите информацию о соседях на ключевых нодах** — особенно на роутерах и ретрансляторах, чтобы составить картину магистральной сети.
+- **Проверьте карту** — расположение нод на [Карте](map-and-waypoints) в сочетании с данными о сигнале помогает тебе понять, почему одни соединения сильные, а другие слабые.
+- **Сравнивайте сигнал с течением времени** — используйте руководство по [Измерителю сигнала](signal-meter) для правильной интерпретации значений SNR и RSSI.
 
 ---
 

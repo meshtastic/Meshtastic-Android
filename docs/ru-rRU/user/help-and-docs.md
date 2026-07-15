@@ -1,9 +1,9 @@
 ---
-title: Help & In-App Docs
+title: Справка и встроенная документация
 parent: Руководство пользователя
 nav_order: 21
 last_updated: 2026-06-25
-description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
+description: Просматривайте эту документацию внутри приложения, выполняйте по ней поиск и задавайте вопросы о Meshtastic ассистенту Chirpy — встроенному ИИ-помощнику на устройстве.
 aliases:
   - help
   - docs-browser
@@ -11,39 +11,39 @@ aliases:
   - assistant
 ---
 
-# Help & In-App Docs
+# Справка и встроенная документация
 
-This same user documentation ships **inside the app**, so you can read it offline without leaving Meshtastic. Open it from **Settings → Help & Documentation**.
+Эта же пользовательская документация поставляется **внутри приложения**, поэтому вы можете читать её офлайн, не покидая Meshtastic. Откройте её через **Настройки → Справка и документация**.
 
-## Browsing
+## Просмотр
 
-The docs browser lists every user-guide page. Tap a page to read it; images and cross-links work just like they do here.
+Браузер документации отображает список всех страниц руководства пользователя. Нажмите на страницу, чтобы прочитать её; изображения и перекрёстные ссылки работают точно так же, как здесь.
 
-![In-app documentation browser table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Оглавление встроенного браузера документации](../../assets/screenshots/docs-browser_toc.png)
 
-### Search
+### Поиск
 
-Tap the search icon and type to filter pages by title and keywords — results update as you type.
+Нажмите на значок поиска и введите текст, чтобы отфильтровать страницы по названию и ключевым словам — результаты обновляются по мере твоего ввода.
 
-![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
+![Поиск во встроенной документации](../../assets/screenshots/docs-browser_search.png)
 
-A page open in the browser:
+Страница, открытая в браузере:
 
-![A documentation page rendered in the app](../../assets/screenshots/docs-browser_page.png)
+![Страница документации, отображаемая в приложении](../../assets/screenshots/docs-browser_page.png)
 
-## Chirpy — the AI Assistant
+## Chirpy — ИИ-ассистент
 
-**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Tap the Chirpy button in the docs browser, type a question, and it replies with an answer and links to the relevant pages.
+**Chirpy** отвечает на вопросы о Meshtastic на естественном языке, используя в качестве источника эту встроенную документацию. Нажмите кнопку Chirpy в браузере документации, введите вопрос — и он ответит, предложив ответ и ссылки на соответствующие страницы.
 
-![Chirpy AI assistant answering a question with page links](../../assets/screenshots/docs-browser_chirpy.png)
+![ИИ-ассистент Chirpy отвечает на вопрос, показывая ссылки на страницы](../../assets/screenshots/docs-browser_chirpy.png)
 
-> 🔒 **Privacy:** On supported Google-flavor devices, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. A small model downloads on first use.
+> 🔒 **Приватность:** На поддерживаемых устройствах Google-версии Chirpy работает на самом устройстве с помощью Gemini Nano — твои вопросы никогда не покидают твой телефон. Небольшая модель загружается при первом использовании.
 
-> ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
+> ⚠️ **Примечание:** В сборках для F-Droid, настольного приложения и iOS Chirpy переключается на **поиск по ключевым словам** в документации вместо генеративной модели. Если твоё устройство не поддерживает встроенный ИИ, ассистент скрыт, и ты по-прежнему можешь просматривать и искать документацию обычным способом.
 
 ## Связанные темы
 
-- [Translate the App](translate) — how these pages get localized into other languages
-- [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
+- [Перевод приложения](translate) — как эти страницы локализуются на другие языки
+- [Функции приложения](app-functions) — отдельная интеграция с системным ИИ (отличается от Chirpy)
 
 ---

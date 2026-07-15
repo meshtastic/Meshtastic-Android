@@ -164,6 +164,8 @@
     <string name="compass_north_top">Zobrazit sever kompasu nahoře</string>
     <string name="compass_orientation">Orientace kompasu</string>
     <string name="compass_title">Kompas</string>
+    <string name="compass_uncertainty">Odhadovaná oblast: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Odhadovaná oblast: neznámá přesnost</string>
     <string name="compromised_keys">Zjištěny kompromitované klíče, zvolte OK pro obnovení.</string>
     <!-- CONFIG -->
     <string name="config_device_doubleTapAsButtonPress_summary">Zachází s dvojitým poklepáním na podporovaných akcelerometrech jako se stisknutím uživatelského tlačítka.</string>
@@ -275,6 +277,8 @@
     <string name="device_db_cache_limit">Limit mezipaměti databáze zařízení</string>
     <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
     <string name="device_gps">GPS zařízení</string>
+    <string name="device_links">Odkazy na zařízení</string>
+    <string name="device_links_i_want_one">Chci jeden taky</string>
     <string name="device_links_open_in_browser">Otevřít v prohlížeči</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Metriky zařízení</string>
@@ -288,6 +292,7 @@
     <string name="dew_point">Rosný bod</string>
     <string name="direct_message">Přímá zpráva</string>
     <string name="direct_message_key">Klíč pro přímé zprávy</string>
+    <string name="direct_messages">Přímé zprávy</string>
     <string name="discard_changes">Zrušit</string>
     <string name="disconnect">Odpojit</string>
     <string name="disconnected">Odpojeno</string>
@@ -476,6 +481,7 @@
     <string name="help_and_documentation">Nápověda a dokumentace</string>
     <string name="hide_layer">Skrýt vrstvu</string>
     <string name="hide_password">Skrýt heslo</string>
+    <string name="hop_histogram_title">Uzly podle počtu skoků</string>
     <string name="hop_limit">Počet skoků</string>
     <string name="hops_away">Počet skoků</string>
     <string name="humidity">Vlhkost</string>
@@ -499,6 +505,7 @@
     <string name="incoming_messages">Příchozí zprávy</string>
     <string name="indoor_air_quality_iaq">Kvalita vnitřního ovzduší (IAQ)</string>
     <string name="info">Informace</string>
+    <string name="input_channel_url">Vložit URL adresu sdílených kanálů</string>
     <string name="input_shared_contact_url">Vložit URL adresu sdíleného kontaktu</string>
     <string name="installed_firmware_version">Aktuálně instalováno</string>
     <string name="interval_always_on">Vždy zapnuto</string>
@@ -621,7 +628,9 @@
     <string name="message_device_managed">Toto rádio je spravováno vzdáleným správcem a změny může provádět jen on.</string>
     <string name="message_input_label">Zpráva</string>
     <string name="message_status_delivered">Doručeno do mesh sítě</string>
+    <string name="message_status_enroute">Odesílání...</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
+    <string name="message_status_recipient_delivered">Doručeno příjemci</string>
     <string name="message_status_unknown">Neznámé</string>
     <string name="messages">Zprávy</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
@@ -932,6 +941,8 @@
     <!-- SCAN -->
     <string name="scan">Skenovat</string>
     <string name="scan_bluetooth_devices">Vyhledat Bluetooth zařízení</string>
+    <string name="scan_channels_nfc">Naskenovat sdílené kanály NFC</string>
+    <string name="scan_channels_qr">Naskenovat QR kód sdílených kanálů</string>
     <string name="scan_network_devices">Vyhledat síťová zařízení</string>
     <string name="scan_nfc">Naskenovat NFC</string>
     <string name="scan_nfc_text">Přiložte zařízení k NFC tagu pro naskenování.</string>
@@ -981,6 +992,7 @@
     <!-- SHARE -->
     <string name="share">Sdílet</string>
     <string name="share_channels_qr">Sdílet QR kód kanálů</string>
+    <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
     <string name="share_location_description">Použijte GPS telefonu k odesílání polohy do svého uzlu namísto použití hardwarového GPS přímo na uzlu.</string>
@@ -1001,7 +1013,26 @@
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
     <!-- SITE -->
+    <string name="site_planner">Plánovač mesh sítě</string>
+    <string name="site_planner_antenna_gain_dbi">Zisk antény (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Výška antény (m)</string>
+    <string name="site_planner_color_scale">Paleta barev</string>
+    <string name="site_planner_estimate">Odhadované pokrytí</string>
+    <string name="site_planner_estimating">Odhaduji pokrytí…</string>
+    <string name="site_planner_failed">Odhad pokrytí selhal</string>
+    <string name="site_planner_frequency_mhz">Frekvence (MHz)</string>
+    <string name="site_planner_high_resolution">Terén s vysokým rozlišení</string>
+    <string name="site_planner_max_range_km">Maximální dosah (km)</string>
+    <string name="site_planner_rx_height_meters">Výška přijímače (m)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Citlivost přijímače (dBm)</string>
     <string name="site_planner_section_display">Obrazovka</string>
+    <string name="site_planner_section_receiver">Přijímač</string>
+    <string name="site_planner_section_simulation">Nastavení simulace</string>
+    <string name="site_planner_section_transmitter">Síť / vysílač</string>
+    <string name="site_planner_subtitle">Odhad pokrytí rádiovým signálem vysílače</string>
+    <string name="site_planner_use_current_location">Použít aktuální polohu</string>
+    <string name="site_planner_use_map_center">Použít střed mapy</string>
+    <string name="site_planner_use_node_location">Použít aktuální polohu uzlu</string>
     <string name="skip">Přeskočit</string>
     <string name="smart_position">Chytrá poloha</string>
     <string name="snr">SNR</string>
@@ -1066,8 +1097,13 @@
     <string name="traffic_management_position_min_interval">Minimální interval pozice (v sekundách)</string>
     <string name="translate">Překlad</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">Překlad zpráv vyžaduje stažení jednorázového modelu (o %1$d MB).</string>
+    <string name="translation_download_title">Stáhnout překladový model?</string>
+    <string name="translation_downloading">Stahování překladového modelu…</string>
+    <string name="translation_model_download_failed">Stažení překladového modelu se nezdařilo</string>
     <string name="transmit_over_lora">Přenos přes LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport">Přenos</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_usb">USB</string>
@@ -1148,5 +1184,9 @@
     <string name="wifi_rssi_threshold_defaults_to_80">Práh WiFi RSSI (výchozí hodnota -80)</string>
     <!-- WIND -->
     <string name="wind">Vítr</string>
+    <string name="write_nfc">Zapsat na NFC tag</string>
+    <string name="write_nfc_failed">Nelze zapsat do tagu. Použijte zapisovatelný, prázdný NFC tag a podržte jej stabilně.</string>
+    <string name="write_nfc_success">Zapsáno do tagu</string>
+    <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
     <string name="you">Vy</string>
 </resources>
