@@ -286,7 +286,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">përmes MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Të fshihet pika e rreshtit?</string>
     <string name="waypoint_edit">Redakto pikën e rreshtit</string>
     <string name="waypoint_new">Pikë e re rreshti</string>

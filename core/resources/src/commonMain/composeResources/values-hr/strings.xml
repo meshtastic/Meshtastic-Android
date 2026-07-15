@@ -231,7 +231,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">putem MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Obriši putnu točku?</string>
     <string name="waypoint_edit">Uredi putnu točku</string>
     <string name="waypoint_new">Nova putna točka</string>

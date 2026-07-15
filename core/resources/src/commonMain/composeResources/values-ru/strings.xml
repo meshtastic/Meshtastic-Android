@@ -1770,14 +1770,10 @@
     <string name="wait_for_bluetooth_duration_seconds">Длительность ожидания Bluetooth</string>
     <string name="wake_on_tap_or_motion">Включать экран при касании или движении</string>
     <string name="warning">Предупреждение</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
-    <string name="waypoint_recipient_broadcast">Трансляция (все ноды)</string>
-    <string name="waypoint_recipient_channel">Канал %1$d</string>
-    <string name="waypoint_send_to">Отправить</string>
     <string name="weight">Вес</string>
     <!-- WIFI -->
     <string name="wifi_config">Настройки WiFi</string>

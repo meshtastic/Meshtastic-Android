@@ -301,7 +301,6 @@
     <string name="user">Карыстальнік</string>
     <string name="username">Імя карыстальніка</string>
     <string name="via_mqtt">праз MQTT</string>
-    <!-- WAYPOINT -->
     <!-- WIFI -->
     <string name="wifi_ip">Wifi IP:</string>
     <string name="wifi_provision_success_ip_address">IP-адрас</string>

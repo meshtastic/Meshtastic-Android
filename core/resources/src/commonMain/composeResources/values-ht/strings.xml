@@ -279,7 +279,6 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">atravè MQTT</string>
-    <!-- WAYPOINT -->
     <string name="waypoint_delete">Efase pwen?</string>
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_new">Nouvo pwen</string>
