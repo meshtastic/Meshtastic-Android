@@ -106,21 +106,30 @@ class NetworkModule {
      * crashes with "Unbalanced enter/exit" (Crashlytics 97ae5ea1, 2.8.0 only). Square's OkHttp has no such bug.
      */
     @Single
-    fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
-        HttpClient(engineFactory = OkHttp) {
-            install(plugin = ContentNegotiation) { json(json) }
-            install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
-            install(plugin = HttpTimeout) {
-                requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
-                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-            }
-            install(plugin = HttpRequestRetry) { configureDefaultRetry() }
-            if (buildConfigProvider.isDebug) {
-                install(plugin = Logging) {
-                    logger = KermitHttpLogger
-                    level = LogLevel.INFO
-                }
+    fun provideHttpClient(
+        json: Json,
+        buildConfigProvider: BuildConfigProvider,
+        networkInstrumentation: OkHttpNetworkInstrumentation,
+    ): HttpClient = HttpClient(engineFactory = OkHttp) {
+        engine {
+            // Flavor-provided analytics hooks: google supplies Datadog's interceptor + event listener so RUM
+            // captures per-request network timing; fdroid supplies OkHttpNetworkInstrumentation.NONE (no-op).
+            networkInstrumentation.interceptors.forEach { addInterceptor(it) }
+            networkInstrumentation.eventListenerFactory?.let { factory -> config { eventListenerFactory(factory) } }
+        }
+        install(plugin = ContentNegotiation) { json(json) }
+        install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
+        install(plugin = HttpTimeout) {
+            requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
+            connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+            socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+        }
+        install(plugin = HttpRequestRetry) { configureDefaultRetry() }
+        if (buildConfigProvider.isDebug) {
+            install(plugin = Logging) {
+                logger = KermitHttpLogger
+                level = LogLevel.INFO
             }
         }
+    }
 }

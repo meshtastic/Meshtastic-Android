@@ -260,6 +260,7 @@ coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.r
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 
 dd-sdk-android-logs = { module = "com.datadoghq:dd-sdk-android-logs", version.ref = "dd-sdk-android" }
+dd-sdk-android-okhttp = { module = "com.datadoghq:dd-sdk-android-okhttp", version.ref = "dd-sdk-android" }
 dd-sdk-android-rum = { module = "com.datadoghq:dd-sdk-android-rum", version.ref = "dd-sdk-android" }
 dd-sdk-android-session-replay = { module = "com.datadoghq:dd-sdk-android-session-replay", version.ref = "dd-sdk-android" }
 dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", version.ref = "dd-sdk-android" }
@@ -337,6 +338,7 @@ meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "mes
 # Datadog RUM/telemetry stack — always consumed together (androidApp google flavor)
 dd-sdk-android = [
     "dd-sdk-android-logs",
+    "dd-sdk-android-okhttp",
     "dd-sdk-android-rum",
     "dd-sdk-android-session-replay",
     "dd-sdk-android-timber",
