@@ -184,7 +184,7 @@ private fun DeviceHeadline(device: DeviceListEntry) {
     if (node != null) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NodeChip(node = node)
-            DeviceName(text = node.user.long_name.ifEmpty { device.name }, modifier = Modifier.weight(1f))
+            DeviceName(text = node.user.long_name.ifBlank { device.name }, modifier = Modifier.weight(1f))
         }
     } else {
         DeviceName(text = device.name)
