@@ -265,6 +265,16 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         GlobalRumMonitor.get().addAction(RumActionType.CUSTOM, "connect", attributes)
     }
 
+    override fun startScreenView(key: String, name: String) {
+        if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
+        GlobalRumMonitor.get().startView(key = key, name = name)
+    }
+
+    override fun stopScreenView(key: String) {
+        if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
+        GlobalRumMonitor.get().stopView(key = key)
+    }
+
     private val isGooglePlayAvailable: Boolean
         get() =
             GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(context).let {

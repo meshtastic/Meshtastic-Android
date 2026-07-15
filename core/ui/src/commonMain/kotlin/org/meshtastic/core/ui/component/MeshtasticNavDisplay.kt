@@ -30,6 +30,7 @@ import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,8 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
 import org.meshtastic.core.navigation.MultiBackstack
+import org.meshtastic.core.navigation.rumViewName
+import org.meshtastic.core.repository.PlatformAnalytics
 
 /** Duration in milliseconds for the shared crossfade transition between navigation scenes. */
 private const val TRANSITION_DURATION_MS = 350
@@ -57,6 +60,7 @@ fun MeshtasticNavDisplay(
     multiBackstack: MultiBackstack,
     entryProvider: (key: NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
+    analytics: PlatformAnalytics? = null,
 ) {
     val backStack = multiBackstack.activeBackStack
     MeshtasticNavDisplay(
@@ -64,6 +68,7 @@ fun MeshtasticNavDisplay(
         onBack = { multiBackstack.goBack() },
         entryProvider = entryProvider,
         modifier = modifier,
+        analytics = analytics,
     )
 }
 
@@ -73,10 +78,23 @@ fun MeshtasticNavDisplay(
 @Composable
 fun MeshtasticNavDisplay(
     backStack: NavBackStack<NavKey>,
-    onBack: (() -> Unit)? = null,
     entryProvider: (key: NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
+    analytics: PlatformAnalytics? = null,
 ) {
+    // Track the top-of-backstack destination as a RUM view. Datadog's dd-sdk-android-compose
+    // NavigationViewTrackingEffect only supports Jetpack Navigation, so Nav3 is wired manually here.
+    // No-op when [analytics] is null (fdroid/desktop hosts and the intro flow pass nothing).
+    if (analytics != null) {
+        val currentKey = backStack.lastOrNull()
+        DisposableEffect(currentKey) {
+            val name = currentKey?.rumViewName()
+            if (name != null) analytics.startScreenView(key = name, name = name)
+            onDispose { if (name != null) analytics.stopScreenView(key = name) }
+        }
+    }
+
     val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
             paneExpansionState = rememberPaneExpansionState(),
