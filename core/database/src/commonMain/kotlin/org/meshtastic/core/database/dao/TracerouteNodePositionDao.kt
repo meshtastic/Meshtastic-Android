@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
@@ -35,4 +36,18 @@ interface TracerouteNodePositionDao {
     suspend fun getAllSnapshot(): List<TracerouteNodePositionEntity>
 
     @Upsert suspend fun insertAll(entities: List<TracerouteNodePositionEntity>)
+
+    /**
+     * Atomically replaces all positions for [logUuid]: deletes the old snapshot and inserts [entities] in one
+     * transaction. If insertion fails, the old snapshot is preserved (rollback). Observers never see an empty
+     * intermediate state.
+     */
+    @Transaction
+    suspend fun replaceByLogUuid(logUuid: String, entities: List<TracerouteNodePositionEntity>) {
+        require(entities.all { it.logUuid == logUuid }) { "All traceroute positions must belong to $logUuid" }
+        deleteByLogUuid(logUuid)
+        if (entities.isNotEmpty()) {
+            insertAll(entities)
+        }
+    }
 }
