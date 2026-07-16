@@ -772,7 +772,9 @@ ignore_add
 ignore_incoming
 ignore_mqtt
 ignore_remove
+### IMPORT ###
 import_configuration
+import_export_label
 import_known_shared_contact_text
 import_label
 import_shared_contact
