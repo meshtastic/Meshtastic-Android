@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -117,6 +118,32 @@ class MapPrefsImpl(
     override suspend fun awaitNetworkMapLayers(): Set<String> =
         dataStore.data.map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }.first()
 
+    override val selectedTileSourceId: StateFlow<String?> =
+        dataStore.data.map { it[KEY_SELECTED_TILE_SOURCE_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+
+    override fun setSelectedTileSourceId(id: String?) {
+        scope.launch {
+            dataStore.edit {
+                if (id == null) it.remove(KEY_SELECTED_TILE_SOURCE_PREF) else it[KEY_SELECTED_TILE_SOURCE_PREF] = id
+            }
+        }
+    }
+
+    override val mapCameraPosition: StateFlow<String?> =
+        dataStore.data.map { it[KEY_MAP_CAMERA_POSITION_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+
+    override fun setMapCameraPosition(encoded: String?) {
+        scope.launch {
+            dataStore.edit {
+                if (encoded == null) {
+                    it.remove(KEY_MAP_CAMERA_POSITION_PREF)
+                } else {
+                    it[KEY_MAP_CAMERA_POSITION_PREF] = encoded
+                }
+            }
+        }
+    }
+
     companion object {
         val KEY_MAP_STYLE_PREF = intPreferencesKey("map_style_id")
         val KEY_SHOW_ONLY_FAVORITES_PREF = booleanPreferencesKey("show_only_favorites")
@@ -126,5 +153,7 @@ class MapPrefsImpl(
         val KEY_LAST_HEARD_TRACK_FILTER_PREF = longPreferencesKey("last_heard_track_filter")
         val KEY_HIDDEN_LAYER_URLS_PREF = stringSetPreferencesKey("hidden_layer_urls")
         val KEY_NETWORK_MAP_LAYERS_PREF = stringSetPreferencesKey("network_map_layers")
+        val KEY_SELECTED_TILE_SOURCE_PREF = stringPreferencesKey("selected_tile_source_id")
+        val KEY_MAP_CAMERA_POSITION_PREF = stringPreferencesKey("map_camera_position")
     }
 }

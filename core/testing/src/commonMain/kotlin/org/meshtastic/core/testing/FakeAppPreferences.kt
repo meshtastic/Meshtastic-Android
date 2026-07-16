@@ -297,6 +297,18 @@ class FakeMapPrefs : MapPrefs {
     }
 
     override suspend fun awaitNetworkMapLayers(): Set<String> = networkMapLayers.value
+
+    override val selectedTileSourceId = MutableStateFlow<String?>(null)
+
+    override fun setSelectedTileSourceId(id: String?) {
+        selectedTileSourceId.value = id
+    }
+
+    override val mapCameraPosition = MutableStateFlow<String?>(null)
+
+    override fun setMapCameraPosition(encoded: String?) {
+        mapCameraPosition.value = encoded
+    }
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {

@@ -25,17 +25,26 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.ktor.client.core)
+            implementation(libs.mapcompose.mp)
+            implementation(libs.okio)
+            implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
+            implementation(projects.core.network)
             implementation(projects.core.prefs)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
             implementation(projects.core.di)
+        }
+        commonTest.dependencies {
+            implementation(libs.okio.fakefilesystem)
+            implementation(libs.ktor.client.mock)
         }
     }
 }

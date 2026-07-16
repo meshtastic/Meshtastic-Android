@@ -264,6 +264,16 @@ interface MapPrefs {
 
     /** Persisted [networkMapLayers]; suspends for the first disk load to avoid a cold-start empty default. */
     suspend fun awaitNetworkMapLayers(): Set<String>
+
+    /** Stable id of the selected raster tile source (see feature:map TileSourceCatalog); null = default source. */
+    val selectedTileSourceId: StateFlow<String?>
+
+    fun setSelectedTileSourceId(id: String?)
+
+    /** Last main-map camera position encoded as `lat,lon,zoom`; null until the user first moves the map. */
+    val mapCameraPosition: StateFlow<String?>
+
+    fun setMapCameraPosition(encoded: String?)
 }
 
 /** Reactive interface for map consent. */
