@@ -57,7 +57,8 @@ object PolylineGeometry {
         return points.mapIndexed { index, point ->
             val heading = headings[index.coerceIn(0, headings.lastIndex)]
             val perpendicularHeading = heading + (90.0 * sideMultiplier)
-            val (lat, lon) = WebMercator.offset(point.latitude, point.longitude, abs(offsetMeters), perpendicularHeading)
+            val (lat, lon) =
+                WebMercator.offset(point.latitude, point.longitude, abs(offsetMeters), perpendicularHeading)
             GeoPoint(lat, lon)
         }
     }

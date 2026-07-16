@@ -23,8 +23,8 @@ import okio.Path
 
 /**
  * A size-bounded LRU disk cache for map tiles, keyed by `sourceId/zoom/row/col`. Backed by Okio so tests inject a
- * `FakeFileSystem`; recency is tracked in memory (rebuilt from a directory walk on first use) rather than via a
- * journal file, which keeps corruption handling trivial — any unreadable entry is treated as a miss and deleted.
+ * `FakeFileSystem`; recency is tracked in memory (rebuilt from a directory walk on first use) rather than via a journal
+ * file, which keeps corruption handling trivial — any unreadable entry is treated as a miss and deleted.
  */
 class TileDiskCache(
     private val fileSystem: FileSystem,
@@ -38,24 +38,23 @@ class TileDiskCache(
     private var totalBytes = 0L
     private var scanned = false
 
-    suspend fun read(sourceId: String, zoom: Int, row: Int, col: Int): ByteArray? =
-        mutex.withLock {
-            ensureScanned()
-            val key = key(sourceId, zoom, row, col)
-            val path = root / key
-            val size = entries.remove(key) ?: return null
-            runCatching { fileSystem.read(path) { readByteArray() } }
-                .onFailure {
-                    totalBytes -= size
-                    runCatching { fileSystem.delete(path) }
-                    return null
-                }
-                .map { bytes ->
-                    entries[key] = size // re-insert as most recently used
-                    bytes
-                }
-                .getOrNull()
-        }
+    suspend fun read(sourceId: String, zoom: Int, row: Int, col: Int): ByteArray? = mutex.withLock {
+        ensureScanned()
+        val key = key(sourceId, zoom, row, col)
+        val path = root / key
+        val size = entries.remove(key) ?: return null
+        runCatching { fileSystem.read(path) { readByteArray() } }
+            .onFailure {
+                totalBytes -= size
+                runCatching { fileSystem.delete(path) }
+                return null
+            }
+            .map { bytes ->
+                entries[key] = size // re-insert as most recently used
+                bytes
+            }
+            .getOrNull()
+    }
 
     suspend fun write(sourceId: String, zoom: Int, row: Int, col: Int, bytes: ByteArray) {
         mutex.withLock {

@@ -32,8 +32,7 @@ class TileDiskCacheTest {
     private fun cache(fs: FakeFileSystem = FakeFileSystem(), maxBytes: Long = 1024): TileDiskCache =
         TileDiskCache(fs, root, maxBytes)
 
-    @Test
-    fun miss_returnsNull() = runTest { assertNull(cache().read("osm", 10, 1, 2)) }
+    @Test fun miss_returnsNull() = runTest { assertNull(cache().read("osm", 10, 1, 2)) }
 
     @Test
     fun writeThenRead_roundTrips() = runTest {

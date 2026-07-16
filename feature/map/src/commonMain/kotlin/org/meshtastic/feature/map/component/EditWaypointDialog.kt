@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.map.component
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.widget.DatePicker
-import android.widget.TimePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +36,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +48,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +59,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -67,9 +67,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
-import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
@@ -93,6 +93,7 @@ import org.meshtastic.core.resources.geofence_remove_area
 import org.meshtastic.core.resources.geofence_set_area
 import org.meshtastic.core.resources.locked
 import org.meshtastic.core.resources.name
+import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.time
 import org.meshtastic.core.resources.waypoint_edit
@@ -129,38 +130,19 @@ fun EditWaypointDialog(
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
     val tz = systemTimeZone
 
-    var selectedDateString by remember { mutableStateOf("") }
-    var selectedTimeString by remember { mutableStateOf("") }
     var isExpiryEnabled by remember {
         mutableStateOf(waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE)
     }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
-    val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
-    val timeFormat = remember { android.text.format.DateFormat.getTimeFormat(context) }
-    dateFormat.timeZone = java.util.TimeZone.getDefault()
-    timeFormat.timeZone = java.util.TimeZone.getDefault()
-
+    // Seed a concrete default expiry (now + 8h) as soon as the toggle turns on without one.
     LaunchedEffect(waypointInput.expire, isExpiryEnabled) {
-        val expireValue = waypointInput.expire
-        if (isExpiryEnabled) {
-            if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                val instant = kotlin.time.Instant.fromEpochSeconds(expireValue.toLong())
-                val date = java.util.Date(instant.toEpochMilliseconds())
-                selectedDateString = dateFormat.format(date)
-                selectedTimeString = timeFormat.format(date)
-            } else {
-                val futureInstant = kotlin.time.Clock.System.now() + 8.hours
-                val date = java.util.Date(futureInstant.toEpochMilliseconds())
-                selectedDateString = dateFormat.format(date)
-                selectedTimeString = timeFormat.format(date)
-                waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
-            }
-        } else {
-            selectedDateString = ""
-            selectedTimeString = ""
+        if (isExpiryEnabled && (waypointInput.expire == 0 || waypointInput.expire == Int.MAX_VALUE)) {
+            val futureInstant = kotlin.time.Clock.System.now() + 8.hours
+            waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
         }
     }
 
@@ -188,7 +170,7 @@ fun EditWaypointDialog(
                         trailingIcon = {
                             IconButton(onClick = { showEmojiPickerView = true }) {
                                 Text(
-                                    text = String(Character.toChars(currentEmojiCodepoint)),
+                                    text = emojiCodePointToString(currentEmojiCodepoint),
                                     modifier =
                                     Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                                         .padding(6.dp),
@@ -269,76 +251,9 @@ fun EditWaypointDialog(
                                 }
                             }
                         val ldt = currentInstant.toLocalDateTime(tz)
+                        val selectedTimeString =
+                            "${ldt.hour.toString().padStart(2, '0')}:${ldt.minute.toString().padStart(2, '0')}"
 
-                        val datePickerDialog =
-                            DatePickerDialog(
-                                context,
-                                { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                                    val currentLdt =
-                                        (waypointInput.expire)
-                                            .let {
-                                                if (it != 0 && it != Int.MAX_VALUE) {
-                                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
-                                                } else {
-                                                    kotlin.time.Clock.System.now() + 8.hours
-                                                }
-                                            }
-                                            .toLocalDateTime(tz)
-
-                                    val newLdt =
-                                        LocalDate(
-                                            year = selectedYear,
-                                            month = Month(selectedMonth + 1),
-                                            day = selectedDay,
-                                        )
-                                            .atTime(
-                                                hour = currentLdt.hour,
-                                                minute = currentLdt.minute,
-                                                second = currentLdt.second,
-                                                nanosecond = currentLdt.nanosecond,
-                                            )
-                                    waypointInput =
-                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
-                                },
-                                ldt.year,
-                                ldt.month.number - 1,
-                                ldt.day,
-                            )
-
-                        val timePickerDialog =
-                            TimePickerDialog(
-                                context,
-                                { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                                    val currentLdt =
-                                        (waypointInput.expire)
-                                            .let {
-                                                if (it != 0 && it != Int.MAX_VALUE) {
-                                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
-                                                } else {
-                                                    kotlin.time.Clock.System.now() + 8.hours
-                                                }
-                                            }
-                                            .toLocalDateTime(tz)
-
-                                    val newLdt =
-                                        LocalDate(
-                                            year = currentLdt.year,
-                                            month = currentLdt.month,
-                                            day = currentLdt.day,
-                                        )
-                                            .atTime(
-                                                hour = selectedHour,
-                                                minute = selectedMinute,
-                                                second = currentLdt.second,
-                                                nanosecond = currentLdt.nanosecond,
-                                            )
-                                    waypointInput =
-                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
-                                },
-                                ldt.hour,
-                                ldt.minute,
-                                android.text.format.DateFormat.is24HourFormat(context),
-                            )
                         Spacer(modifier = Modifier.size(8.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -346,21 +261,51 @@ fun EditWaypointDialog(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(Res.string.date)) }
+                                Button(onClick = { showDatePicker = true }) { Text(stringResource(Res.string.date)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
-                                    text = selectedDateString,
+                                    text = ldt.date.toString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(Res.string.time)) }
+                                Button(onClick = { showTimePicker = true }) { Text(stringResource(Res.string.time)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
                                     text = selectedTimeString,
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
                             }
+                        }
+
+                        if (showDatePicker) {
+                            ExpiryDatePickerDialog(
+                                current = ldt,
+                                onDismiss = { showDatePicker = false },
+                                onDateSelected = { newDate ->
+                                    val newLdt =
+                                        newDate.atTime(
+                                            hour = ldt.hour,
+                                            minute = ldt.minute,
+                                            second = ldt.second,
+                                            nanosecond = ldt.nanosecond,
+                                        )
+                                    waypointInput =
+                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
+                                },
+                            )
+                        }
+
+                        if (showTimePicker) {
+                            ExpiryTimePickerDialog(
+                                current = ldt,
+                                onDismiss = { showTimePicker = false },
+                                onTimeSelected = { hour, minute ->
+                                    val newLdt = ldt.date.atTime(hour = hour, minute = minute)
+                                    waypointInput =
+                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
+                                },
+                            )
                         }
                     }
 
@@ -403,6 +348,65 @@ fun EditWaypointDialog(
             waypointInput = waypointInput.copy(icon = selectedEmoji.codePointAt(0))
         }
     }
+}
+
+/** M3 date picker for the waypoint expiry, initialized to the current expiry's calendar date. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExpiryDatePickerDialog(current: LocalDateTime, onDismiss: () -> Unit, onDateSelected: (LocalDate) -> Unit) {
+    // DatePicker works in UTC-midnight millis; seed it with the current expiry's date, not its instant, so the
+    // preselected day matches the local-time date shown in the dialog.
+    val datePickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = current.date.atTime(0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds(),
+        )
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        onDateSelected(
+                            kotlin.time.Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date,
+                        )
+                    }
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(Res.string.okay))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+/** M3 time picker for the waypoint expiry, initialized to the current expiry's local time. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExpiryTimePickerDialog(
+    current: LocalDateTime,
+    onDismiss: () -> Unit,
+    onTimeSelected: (hour: Int, minute: Int) -> Unit,
+) {
+    val timePickerState = rememberTimePickerState(initialHour = current.hour, initialMinute = current.minute)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.time)) },
+        text = { TimePicker(state = timePickerState) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onTimeSelected(timePickerState.hour, timePickerState.minute)
+                    onDismiss()
+                },
+            ) {
+                Text(stringResource(Res.string.okay))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    )
 }
 
 /**

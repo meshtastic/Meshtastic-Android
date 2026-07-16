@@ -65,8 +65,8 @@ object WebMercator {
     }
 
     /**
-     * Smallest axis-aligned bounding box (in normalized space) containing [points], expanded by [paddingRatio] on
-     * every side. Returns null when [points] is empty.
+     * Smallest axis-aligned bounding box (in normalized space) containing [points], expanded by [paddingRatio] on every
+     * side. Returns null when [points] is empty.
      */
     fun boundingBox(points: List<NormalizedPoint>, paddingRatio: Double = 0.1): NormalizedBox? {
         if (points.isEmpty()) return null
@@ -138,17 +138,26 @@ data class NormalizedPoint(val x: Double, val y: Double)
 
 /** An axis-aligned box in normalized space; used for fit-bounds camera targets. */
 data class NormalizedBox(val xLeft: Double, val yTop: Double, val xRight: Double, val yBottom: Double) {
-    val centerX: Double get() = (xLeft + xRight) / 2
-    val centerY: Double get() = (yTop + yBottom) / 2
-    val width: Double get() = xRight - xLeft
-    val height: Double get() = yBottom - yTop
+    val centerX: Double
+        get() = (xLeft + xRight) / 2
+
+    val centerY: Double
+        get() = (yTop + yBottom) / 2
+
+    val width: Double
+        get() = xRight - xLeft
+
+    val height: Double
+        get() = yBottom - yTop
 }
 
 /** Latitude in degrees from the 1e-7 fixed-point proto field. */
-val Position.latitudeDegrees: Double get() = (latitude_i ?: 0) * DEG_D
+val Position.latitudeDegrees: Double
+    get() = (latitude_i ?: 0) * DEG_D
 
 /** Longitude in degrees from the 1e-7 fixed-point proto field. */
-val Position.longitudeDegrees: Double get() = (longitude_i ?: 0) * DEG_D
+val Position.longitudeDegrees: Double
+    get() = (longitude_i ?: 0) * DEG_D
 
 fun Position.toNormalized(): NormalizedPoint = WebMercator.toNormalized(latitudeDegrees, longitudeDegrees)
 

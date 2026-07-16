@@ -67,7 +67,7 @@ fun WaypointInfoDialog(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = "${String(Character.toChars(emoji))}  $title", fontWeight = FontWeight.Bold) },
+        title = { Text(text = "${emojiCodePointToString(emoji)}  $title", fontWeight = FontWeight.Bold) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (waypoint.description.isNotBlank()) {

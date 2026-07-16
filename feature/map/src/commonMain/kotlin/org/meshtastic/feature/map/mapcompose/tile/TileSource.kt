@@ -17,9 +17,9 @@
 package org.meshtastic.feature.map.mapcompose.tile
 
 /**
- * Axis order of a slippy-map URL template. OSM-style servers order tiles `{z}/{x}/{y}` (column before row); ArcGIS
- * REST tile servers (ESRI, USGS) order them `{z}/{y}/{x}` (row before column). MapCompose hands us `(row, col)`, so
- * every URL goes through [TileSource.tileUrl], the single place this distinction is interpreted.
+ * Axis order of a slippy-map URL template. OSM-style servers order tiles `{z}/{x}/{y}` (column before row); ArcGIS REST
+ * tile servers (ESRI, USGS) order them `{z}/{y}/{x}` (row before column). MapCompose hands us `(row, col)`, so every
+ * URL goes through [TileSource.tileUrl], the single place this distinction is interpreted.
  */
 enum class TileUrlScheme {
     ZXY,
@@ -48,8 +48,8 @@ data class TileSource(
 
 /**
  * The keyless raster sources available to the shared MapCompose renderer, ported from the osmdroid catalog in the
- * fdroid flavor (`CustomTileSource.kt`). Keyed sources (OpenWeatherMap radar) and WMS are deliberately absent — see
- * the workpad's deferred list.
+ * fdroid flavor (`CustomTileSource.kt`). Keyed sources (OpenWeatherMap radar) and WMS are deliberately absent — see the
+ * workpad's deferred list.
  */
 object TileSourceCatalog {
 
@@ -98,7 +98,8 @@ object TileSourceCatalog {
             imageExtension = ".jpg",
             minZoom = 0,
             maxZoom = 20,
-            attribution = "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community",
+            attribution =
+            "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community",
         )
 
     val USGS_SATELLITE =

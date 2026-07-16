@@ -31,7 +31,10 @@ class TileSourceTest {
 
     @Test
     fun osmScheme_ordersColumnBeforeRow() {
-        assertEquals("https://tile.openstreetmap.org/10/163/395.png", TileSourceCatalog.OSM_MAPNIK.tileUrl(zoom, row, col))
+        assertEquals(
+            "https://tile.openstreetmap.org/10/163/395.png",
+            TileSourceCatalog.OSM_MAPNIK.tileUrl(zoom, row, col),
+        )
     }
 
     @Test
