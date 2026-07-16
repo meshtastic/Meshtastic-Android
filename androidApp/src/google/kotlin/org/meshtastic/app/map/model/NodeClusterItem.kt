@@ -48,8 +48,11 @@ data class NodeClusterItem(
                 else -> 4.0f
             }
 
-    fun getPrecisionMeters(): Double? {
-        val precisionMap =
+    fun getPrecisionMeters(): Double? = PRECISION_METERS_BY_BITS[node.position.precision_bits]
+
+    companion object {
+        // Allocated once: this lookup runs for every unclustered item on each cluster pass.
+        private val PRECISION_METERS_BY_BITS =
             mapOf(
                 10 to 23345.484932,
                 11 to 11672.7369,
@@ -62,6 +65,5 @@ data class NodeClusterItem(
                 18 to 91.182212,
                 19 to 45.58554,
             )
-        return precisionMap[this.node.position.precision_bits]
     }
 }
