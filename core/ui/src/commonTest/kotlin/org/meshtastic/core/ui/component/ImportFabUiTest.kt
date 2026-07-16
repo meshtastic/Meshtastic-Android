@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -107,6 +108,33 @@ class ImportFabUiTest {
 
         onNodeWithTag(testTag).performClick()
         onNodeWithTag("share_contact").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_describesImport_whenNoShareCallbacks() = runComposeUiTest {
+        setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true) }
+
+        onNodeWithContentDescription("Import").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_describesImportExport_whenShareCallbackProvided() = runComposeUiTest {
+        setContent { MeshtasticImportFAB(onImport = {}, onShareChannels = {}, isContactContext = false) }
+
+        onNodeWithContentDescription("Import/Export").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_describesClose_whenExpanded() = runComposeUiTest {
+        val testTag = "import_fab"
+        setContent {
+            MeshtasticImportFAB(onImport = {}, onShareChannels = {}, isContactContext = false, testTag = testTag)
+        }
+
+        onNodeWithTag(testTag).performClick()
+
+        onNodeWithContentDescription("Close").assertIsDisplayed()
+        onNodeWithContentDescription("Import/Export").assertDoesNotExist()
     }
 
     @Test
