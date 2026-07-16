@@ -78,8 +78,9 @@ internal fun DiscoveryLayer(mapState: MapState, mode: MapComposeMode.Discovery) 
                     DiscoveryNeighborType.DIRECT -> DirectColor
                     DiscoveryNeighborType.MESH -> MeshColor
                 }
-            val icon = if (node.isSensorNode) MeshtasticIcons.Temperature else MeshtasticIcons.Person
             mapState.addMarker(id = "discovery-$index", x = p.x, y = p.y, zIndex = 4f) {
+                // Icon getters are composable, so resolve them inside the marker content.
+                val icon = if (node.isSensorNode) MeshtasticIcons.Temperature else MeshtasticIcons.Person
                 DiscoveryMarkerChip(label = node.shortName ?: "?", color = color, icon = icon)
             }
         }

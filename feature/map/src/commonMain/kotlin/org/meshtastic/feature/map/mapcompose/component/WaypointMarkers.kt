@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.feature.map.component.emojiCodePointToString
 import org.meshtastic.feature.map.mapcompose.geo.GeoPoint
 import org.meshtastic.feature.map.mapcompose.geo.NormalizedPoint
 import org.meshtastic.feature.map.mapcompose.geo.PolylineGeometry

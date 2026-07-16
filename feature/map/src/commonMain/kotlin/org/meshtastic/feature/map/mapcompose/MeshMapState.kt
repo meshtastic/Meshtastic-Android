@@ -39,7 +39,6 @@ import ovh.plrapps.mapcompose.api.centroidY
 import ovh.plrapps.mapcompose.api.disableGestures
 import ovh.plrapps.mapcompose.api.scale
 import ovh.plrapps.mapcompose.api.scrollTo
-import ovh.plrapps.mapcompose.api.shutdown
 import ovh.plrapps.mapcompose.ui.layout.Fit
 import ovh.plrapps.mapcompose.ui.state.MapState
 import kotlin.math.ln

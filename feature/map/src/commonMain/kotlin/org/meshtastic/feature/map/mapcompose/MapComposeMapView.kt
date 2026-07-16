@@ -48,6 +48,7 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.mapcompose.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.mapcompose.component.DiscoveryLayer
+import org.meshtastic.feature.map.mapcompose.component.InlineLayer
 import org.meshtastic.feature.map.mapcompose.component.MapAttributionBar
 import org.meshtastic.feature.map.mapcompose.component.MapComposeFilterDropdown
 import org.meshtastic.feature.map.mapcompose.component.MapComposeTrackFilterDropdown
