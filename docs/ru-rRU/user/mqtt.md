@@ -3,7 +3,7 @@ title: MQTT
 parent: Руководство пользователя
 nav_order: 11
 last_updated: 2026-05-13
-description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
+description: Подключите свою mesh-сеть к интернету — настройка MQTT-брокера, уровни шифрования и отчётность на карте.
 aliases:
   - mqtt
   - internet-bridge
@@ -12,97 +12,97 @@ aliases:
 
 # MQTT
 
-MQTT bridges your Meshtastic mesh network to the internet, enabling long-range communication beyond radio range.
+MQTT соединяет твою mesh-сеть Meshtastic с интернетом, обеспечивая связь на больших расстояниях за пределами радиодиапазона.
 
 ## Обзор
 
-The MQTT module connects your node to an MQTT broker, allowing:
+Модуль MQTT подключает вашу ноду к MQTT-брокеру, что позволяет:
 
-- Messages to reach nodes on different physical meshes via the internet
-- Integration with home automation and monitoring systems
-- Publishing node positions to the public Meshtastic map
-- Custom data pipelines for logging and alerting
+- Сообщениям достигать нод в других физических mesh-сетях через интернет
+- Интегрироваться с системами домашней автоматизации и мониторинга
+- Публиковать местоположения нод на публичной карте Meshtastic
+- Создавать собственные каналы данных для журналирования и оповещений
 
 ## Как это работает
 
 ```
-[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+[Ваша нода] → Радио → [Шлюзовая нода с WiFi] → MQTT-брокер → [Удалённый шлюз] → Радио → [Удалённая нода]
 ```
 
-A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.
+Шлюзовая нода с доступом в интернет (WiFi или Ethernet) публикует сообщения mesh-сети в топик MQTT. Удалённые шлюзы, подписанные на тот же топик, передают эти сообщения в свою локальную mesh-сеть.
 
 ## Настройки
 
 ### Включение MQTT
 
-1. Navigate to **Settings → Module Config → MQTT**.
-2. Enable the MQTT module.
-3. Configure the broker connection:
+1. Перейдите в **Настройки → Конфигурация модулей → MQTT**.
+2. Включите модуль MQTT.
+3. Настройте подключение к брокеру:
 
-![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
+![Переключатель MQTT](../../assets/screenshots/settings_switch.png)
 
-| Настройка        | Описание                                                                                      | По умолчанию                                        |
-| ---------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Адрес сервера    | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| Имя пользователя | Broker authentication                                                                         | meshdev                                             |
-| Пароль           | Broker authentication                                                                         | large4cats                                          |
-| Корневая тема    | Base topic for messages                                                                       | msh                                                 |
-| Шифрование       | Encrypt MQTT payload                                                                          | Включено                                            |
-| ~~JSON Output~~  | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Отключено                                           |
-| TLS              | Secure connection to broker                                                                   | Отключено                                           |
-| Map Reporting    | Report position to public map                                                                 | Отключено                                           |
+| Настройка           | Описание                                                                            | По умолчанию                                        |
+| ------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Адрес сервера       | Имя хоста MQTT-брокера                                                              | mqtt.meshtastic.org |
+| Имя пользователя    | Аутентификация брокера                                                              | meshdev                                             |
+| Пароль              | Аутентификация брокера                                                              | large4cats                                          |
+| Корневая тема       | Базовый топик для сообщений                                                         | msh                                                 |
+| Шифрование          | Шифровать полезную нагрузку MQTT                                                    | Включено                                            |
+| ~~Вывод в JSON~~    | ⚠️ **Устарело** — поддержка JSON-пакетов удалена из прошивки; это поле игнорируется | Отключено                                           |
+| TLS                 | Безопасное подключение к брокеру                                                    | Отключено                                           |
+| Публикация на карте | Сообщать о местоположении на публичную карту                                        | Отключено                                           |
 
-### Default Meshtastic Broker
+### Стандартный брокер Meshtastic
 
-The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
+Сообщество поддерживает публичный брокер по адресу `mqtt.meshtastic.org`. Он предназначен для общего использования и тестирования.
 
-> ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+> ℹ️ **Примечание:** Подключения к `mqtt.meshtastic.org` всегда используют TLS (порт 8883), даже если переключатель TLS выключен. Для любого другого брокера TLS используется только при включении (порт 8883 с TLS, 1883 без).
 
-> 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
+> 🔒 **Приватность:** Сообщения на публичном брокере доступны для чтения всем, кто подписан. Всегда используйте шифрование каналов для конфиденциальной связи.
 
-### Private Broker
+### Частный брокер
 
-For better privacy and control, you can run your own MQTT broker:
+Для большей приватности и контроля ты можешь запустить собственный MQTT-брокер:
 
-- Mosquitto (lightweight, open-source)
+- Mosquitto (легковесный, с открытым исходным кодом)
 - HiveMQ
 - EMQX
 
-Configure your node to point to your private broker with appropriate credentials.
+Настройте свою ноду на подключение к частному брокеру с соответствующими учётными данными.
 
-## Map Reporting
+## Публикация на карте
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+Когда публикация на карте включена, твоя нода отправляет своё местоположение на карту сообщества Meshtastic:
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
-- Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+- Доступно на [meshmap.net](https://meshmap.net) и аналогичных картографических сервисах сообщества
+- Передаются только координаты и информация о ноде
+- Отключи эту функцию, если не хочешь, чтобы твоё местоположение было общедоступным
 
-## Uplink vs Downlink
+## Uplink и Downlink
 
-| Direction    | Описание                         |
-| ------------ | -------------------------------- |
-| **Uplink**   | Messages from mesh → MQTT broker |
-| **Downlink** | Messages from MQTT broker → mesh |
+| Направление                                  | Описание                              |
+| -------------------------------------------- | ------------------------------------- |
+| **Uplink** (восходящий)   | Сообщения из mesh-сети → MQTT-брокер  |
+| **Downlink** (нисходящий) | Сообщения от MQTT-брокера → mesh-сеть |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+Настройте для каждого канала активные направления, чтобы управлять потоком сообщений и использованием эфирного времени.
 
-## Message Formats
+## Форматы сообщений
 
-MQTT uses protobuf message format:
+MQTT использует формат сообщений protobuf:
 
-| Format       | Описание                            | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| Формат       | Описание                                 | Сценарий использования           |
+| ------------ | ---------------------------------------- | -------------------------------- |
+| **Protobuf** | Бинарное кодирование Meshtastic protobuf | Соединение нод между mesh-сетями |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **Примечание:** Поддержка вывода в JSON была удалена из прошивки. Настройка `json_enabled` всё ещё отображается в приложении для обратной совместимости, но не влияет на текущие версии прошивки.
 
-## Encryption & Privacy
+## Шифрование и приватность
 
-Understanding the layered encryption model:
+Понимание многоуровневой модели шифрования:
 
-1. **Channel encryption** happens on the mesh _before_ MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
-2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
+1. **Шифрование канала** происходит в mesh-сети _до_ MQTT. Если твой канал использует PSK, полезная нагрузка MQTT уже зашифрована — брокер и любые подписчики видят только зашифрованный текст.
+2. **Шифрование MQTT** (настройка модуля) добавляет дополнительный уровень шифрования при передаче к брокеру. Это защищает метаданные и информацию о маршрутизации.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 
 > 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
