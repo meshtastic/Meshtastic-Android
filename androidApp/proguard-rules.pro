@@ -45,6 +45,21 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
+# ---- Datadog compiler-plugin annotations (google flavor) --------------------
+# The Datadog SDK (dd-sdk-android, google flavor only) is itself compiled with
+# Datadog's dd-javac compiler plugin, which stamps every class/method with
+# `@datadog.compiler.annotations.SourceLines` (build-time source-line metadata).
+# Datadog does not package the annotation class in the consumer artifacts, so
+# under R8 full mode (AGP 9) the dangling references — e.g. from
+# com.datadog.android.internal.utils.FixedWindowCallback and ~1000 other SDK
+# classes — are promoted from warnings to a hard "Missing classes detected"
+# error, failing minifyGoogleReleaseWithR8. The annotation is absent at runtime
+# regardless, so suppressing it changes no behaviour; this is the same rule R8
+# auto-generates into missing_rules.txt. Surfaced by the dd-sdk-android 3.12.0
+# bump (#6277). fdroid has no Datadog on the classpath, so this is a harmless
+# no-op there.
+-dontwarn datadog.compiler.annotations.**
+
 # ---- AppSearch / AppFunctions generated document factories ------------------
 # AppSearch's DocumentClassFactoryRegistry loads the generated
 # `$$__AppSearch__*` factory classes by name and instantiates them via their
