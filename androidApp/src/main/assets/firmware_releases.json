@@ -207,12 +207,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11005",
-      "title": "Double-press: fall back to first channel with position enabled when primary precision == 0",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11005",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "10994",
       "title": "Remove UA_868 as obsolete",
       "page_url": "https://github.com/meshtastic/firmware/pull/10994",
@@ -258,12 +252,6 @@
       "id": "10954",
       "title": "Flatpak: rename Meshtastic -> MeshtasticD",
       "page_url": "https://github.com/meshtastic/firmware/pull/10954",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10953",
-      "title": "Add RAK WisMesh Pocket V3 variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10953",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -319,6 +307,12 @@
       "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10917",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10915",
+      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
