@@ -28,6 +28,22 @@ internal fun emojiCodePointToString(codePoint: Int): String {
     return charArrayOf(high, low).concatToString()
 }
 
+/**
+ * First Unicode code point of [text] — the multiplatform equivalent of the JVM-only `String.codePointAt(0)`, decoding
+ * a leading surrogate pair when present. Returns null for an empty string.
+ */
+internal fun firstCodePoint(text: String): Int? {
+    val high = text.firstOrNull() ?: return null
+    val low = text.getOrNull(1)
+    return if (high.isHighSurrogate() && low != null && low.isLowSurrogate()) {
+        SUPPLEMENTARY_PLANE_START +
+            ((high.code - HIGH_SURROGATE_START) shl HALF_SHIFT) +
+            (low.code - LOW_SURROGATE_START)
+    } else {
+        high.code
+    }
+}
+
 private const val SUPPLEMENTARY_PLANE_START = 0x10000
 private const val HALF_SHIFT = 10
 private const val LOW_MASK = 0x3FF

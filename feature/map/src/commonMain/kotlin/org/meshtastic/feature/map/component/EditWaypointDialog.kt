@@ -345,7 +345,7 @@ fun EditWaypointDialog(
     } else {
         EmojiPickerDialog(onDismiss = { showEmojiPickerView = false }) { selectedEmoji ->
             showEmojiPickerView = false
-            waypointInput = waypointInput.copy(icon = selectedEmoji.codePointAt(0))
+            firstCodePoint(selectedEmoji)?.let { codePoint -> waypointInput = waypointInput.copy(icon = codePoint) }
         }
     }
 }
