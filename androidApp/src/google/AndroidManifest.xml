@@ -83,11 +83,22 @@
                 <action android:name="android.app.appfunctions.AppFunctionService" />
             </intent-filter>
         </service>
+        <!--
+          tools:ignore="Instantiatable": lint can't resolve this library-provided service's superclass chain
+          up to android.app.Service. ExtensionAppFunctionService extends the abstract
+          ExtensionsAppFunctionService, whose base is com.android.extensions.appfunctions.AppFunctionService —
+          a class supplied at runtime by the optional "com.android.extensions.appfunctions" <uses-library>
+          (declared android:required="false" in the appfunctions AAR), not by any compile/lint-classpath
+          artifact. Lint therefore can't prove it's a Service and false-positives. The sibling
+          PlatformAppFunctionService is fine because its chain ends in the compile-SDK
+          android.app.appfunctions.AppFunctionService, so the check stays active there and on our own services.
+        -->
         <service
             android:name="androidx.appfunctions.ExtensionAppFunctionService"
             android:enabled="@bool/enableExtensionAppFunctionService"
             android:exported="true"
-            android:permission="android.permission.BIND_APP_FUNCTION_SERVICE">
+            android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
+            tools:ignore="Instantiatable">
             <property
                 android:name="android.app.appfunctions"
                 android:value="app_functions.xml" />
