@@ -796,7 +796,9 @@
     <string name="ignore_incoming">Ignore incoming</string>
     <string name="ignore_mqtt">Ignore MQTT</string>
     <string name="ignore_remove">Remove '%1$s' from ignore list?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Import configuration</string>
+    <string name="import_export_label">Import/Export</string>
     <string name="import_known_shared_contact_text">Warning: This contact is known, importing will overwrite the previous contact information.</string>
     <string name="import_label">Import</string>
     <string name="import_shared_contact">Import Shared Contact?</string>

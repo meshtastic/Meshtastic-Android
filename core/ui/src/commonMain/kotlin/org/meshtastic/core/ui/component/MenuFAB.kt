@@ -34,6 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.OfflineShare
@@ -48,13 +51,14 @@ fun MenuFAB(
     contentDescription: String? = null,
     testTag: String? = null,
 ) {
+    val stateAwareDescription = if (expanded) stringResource(Res.string.close) else contentDescription
     FloatingActionButtonMenu(
         modifier = modifier.then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         expanded = expanded,
         button = {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = { contentDescription?.let { PlainTooltip { Text(it) } } },
+                tooltip = { stateAwareDescription?.let { PlainTooltip { Text(it) } } },
                 state = rememberTooltipState(),
             ) {
                 ToggleFloatingActionButton(
@@ -62,7 +66,7 @@ fun MenuFAB(
                     onCheckedChange = onExpandedChange,
                     content = {
                         val imageVector = if (expanded) MeshtasticIcons.Close else MeshtasticIcons.OfflineShare
-                        Icon(imageVector = imageVector, contentDescription = contentDescription)
+                        Icon(imageVector = imageVector, contentDescription = stateAwareDescription)
                     },
                     containerColor = ToggleFloatingActionButtonDefaults.containerColor(),
                 )
