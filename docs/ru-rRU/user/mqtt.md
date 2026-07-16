@@ -103,38 +103,38 @@ MQTT использует формат сообщений protobuf:
 
 1. **Шифрование канала** происходит в mesh-сети _до_ MQTT. Если твой канал использует PSK, полезная нагрузка MQTT уже зашифрована — брокер и любые подписчики видят только зашифрованный текст.
 2. **Шифрование MQTT** (настройка модуля) добавляет дополнительный уровень шифрования при передаче к брокеру. Это защищает метаданные и информацию о маршрутизации.
-3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+3. **TLS** шифрует само TCP-соединение с брокером, предотвращая перехват на сетевом уровне.
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 **Важно:** Публичный канал по умолчанию использует общеизвестный ключ. Сообщения в канале по умолчанию, отправленные через MQTT, фактически **не зашифрованы** — кто угодно может их расшифровать. Всегда используйте собственный PSK для конфиденциальной связи.
 
-## Best Practices
+## Рекомендации
 
-- Use channel-level encryption (PSK) on channels that bridge to MQTT
-- Don't enable MQTT on nodes without internet access (it will buffer and waste memory)
-- Use a private broker for sensitive deployments
-- Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
-- Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
+- Используйте шифрование на уровне канала (PSK) на каналах, подключённых к MQTT
+- Не включайте MQTT на нодах без доступа в интернет (это приведёт к буферизации и напрасной трате памяти)
+- Используйте частный брокер для задач, требующих повышенной безопасности
+- Учитывайте эфирное время при передаче сообщений из загруженных MQTT-топиков — каждое такое сообщение расходует радиоэфирное время в вашей локальной mesh-сети
+- Рассмотрите включение режима "только uplink", если нужно лишь удалённо наблюдать за mesh-сетью, не отправляя сообщения обратно
 
-## Troubleshooting
+## Устранение неполадок
 
-### MQTT Not Connecting
+### MQTT не подключается
 
-- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.
-- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
-- **Firewall** — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- **Проверьте WiFi** — шлюзовая нода должна иметь активное подключение к интернету (WiFi или Ethernet). MQTT не работает через сам радиоканал LoRa.
+- **Проверьте учётные данные** — неверное имя пользователя или пароль на большинстве брокеров приводят к тихому сбою. Проверьте, нет ли лишних пробелов в конце.
+- **Брандмауэр** — порт 1883 (MQTT) или 8883 (MQTT+TLS) должен быть открыт. Некоторые сети блокируют нестандартные порты.
+- **Разрешение DNS** — если используется имя хоста собственного брокера, убедитесь, что нода может его разрешить. Попробуйте подключиться напрямую по IP-адресу брокера.
 
-### Messages Not Bridging
+### Сообщения не проходят через мост
 
-- **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- **Проверьте настройки uplink/downlink** — если включён только uplink, сообщения идут из mesh-сети в MQTT, но не обратно. Включите downlink на принимающем шлюзе.
+- **Несовпадение каналов** — оба шлюза должны использовать один и тот же канал с одинаковым PSK. Несовпадение означает, что сообщения зашифрованы разными ключами и выглядят как мусор.
+- **Несовпадение топиков** — убедитесь, что оба шлюза используют одинаковый корневой топик. Стандартный `msh` работает для публичного брокера.
 
-## Related Topics
+## Связанные темы
 
-- [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
-- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
-- [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
+- [Настройки — Модули и администрирование](settings-module-admin) — справочник по конфигурации модуля MQTT
+- [Сообщения и каналы](messages-and-channels) — шифрование каналов и настройка PSK
+- [Руководство по интеграции MQTT](https://meshtastic.org/docs/software/integrations/mqtt) — подробная документация по MQTT на meshtastic.org
 
 ---
 
