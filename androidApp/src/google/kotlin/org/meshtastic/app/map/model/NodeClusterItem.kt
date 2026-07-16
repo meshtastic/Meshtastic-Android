@@ -27,21 +27,26 @@ data class NodeClusterItem(
     val nodeSnippet: String,
     val myNodeNum: Int? = null,
 ) : ClusterItem {
-    override fun getPosition(): LatLng = nodePosition
+    override val position: LatLng
+        get() = nodePosition
 
-    override fun getTitle(): String = nodeTitle
+    override val title: String
+        get() = nodeTitle
 
-    override fun getSnippet(): String = nodeSnippet
+    override val snippet: String
+        get() = nodeSnippet
 
-    override fun getZIndex(): Float = when {
-        node.num == myNodeNum -> 5.0f
+    override val zIndex: Float
+        get() =
+            when {
+                node.num == myNodeNum -> 5.0f
 
-        // My node is always highest
-        node.isFavorite -> 5.0f
+                // My node is always highest
+                node.isFavorite -> 5.0f
 
-        // Favorites are equally high priority
-        else -> 4.0f
-    }
+                // Favorites are equally high priority
+                else -> 4.0f
+            }
 
     fun getPrecisionMeters(): Double? {
         val precisionMap =

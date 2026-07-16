@@ -1348,7 +1348,14 @@ private fun Layer.safeRemoveLayerFromMap() {
 
 private fun Layer.safeAddLayerToMap() {
     try {
-        if (!isLayerOnMap) addLayerToMap()
+        // maps-utils 5.0.0 dropped isLayerOnMap() from the Layer base class; both concrete layers still expose it.
+        val isOnMap =
+            when (this) {
+                is GeoJsonLayer -> isLayerOnMap()
+                is KmlLayer -> isLayerOnMap()
+                else -> false
+            }
+        if (!isOnMap) addLayerToMap()
     } catch (e: Exception) {
         Logger.withTag("MapView").e(e) { "Error adding map layer" }
     }
@@ -1368,15 +1375,15 @@ private fun GeoJsonLayer.applySimpleStyleSpec() {
         val stroke = feature.cssColor("stroke") ?: feature.cssColor("color")
         val fillOpacity = feature.getProperty("fill-opacity")?.toFloatOrNull()
         val strokeWidth = feature.getProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
-        when (feature.geometry?.geometryType) {
+        when (feature.getGeometry()?.getGeometryType()) {
             "Polygon",
             "MultiPolygon",
             ->
                 feature.polygonStyle =
                     GeoJsonPolygonStyle().apply {
                         fill?.let { fillColor = it.resolveFillAlpha(fillOpacity) }
-                        stroke?.let { strokeColor = it }
-                        this.strokeWidth = strokeWidth
+                        stroke?.let { setStrokeColor(it) }
+                        setStrokeWidth(strokeWidth)
                     }
 
             "LineString",
@@ -1385,7 +1392,7 @@ private fun GeoJsonLayer.applySimpleStyleSpec() {
                 feature.lineStringStyle =
                     GeoJsonLineStringStyle().apply {
                         stroke?.let { color = it }
-                        width = strokeWidth
+                        setWidth(strokeWidth)
                     }
 
             else -> Unit // Points keep the default marker.
