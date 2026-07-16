@@ -75,6 +75,7 @@ fun MapControlsOverlay(
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     onSitePlannerClick: (() -> Unit)? = null,
+    showLocationTracking: Boolean = true,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
@@ -129,12 +130,14 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button
-        MapButton(
-            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
-            contentDescription = stringResource(Res.string.toggle_my_position),
-            onClick = onToggleLocationTracking,
-        )
+        // Location tracking button — hidden on platforms with no location source (e.g. desktop).
+        if (showLocationTracking) {
+            MapButton(
+                icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                onClick = onToggleLocationTracking,
+            )
+        }
     }
 }
 

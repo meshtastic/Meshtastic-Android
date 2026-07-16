@@ -32,9 +32,13 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.data.datasource.BundledAssetReader
+import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
@@ -111,6 +115,7 @@ import org.meshtastic.feature.discovery.di.module as featureDiscoveryModule
 import org.meshtastic.feature.docs.di.module as featureDocsModule
 import org.meshtastic.feature.firmware.di.module as featureFirmwareModule
 import org.meshtastic.feature.intro.di.module as featureIntroModule
+import org.meshtastic.feature.map.mapcompose.tile.TileCacheEnvironment
 import org.meshtastic.feature.map.di.module as featureMapModule
 import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule
@@ -165,6 +170,13 @@ fun desktopModule() = module {
  */
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
+    // Shared MapCompose renderer: where the tile disk cache lives on this platform.
+    single<TileCacheEnvironment> {
+        object : TileCacheEnvironment {
+            override val fileSystem: FileSystem = FileSystem.SYSTEM
+            override val cacheRoot: Path = (desktopDataDir() + "/tile_cache").toPath()
+        }
+    }
     single<ServiceRepository> { ServiceRepositoryImpl() }
     single<ConnectionStateProvider> { get<ServiceRepository>() }
     single<TracerouteResponseProvider> { get<ServiceRepository>() }

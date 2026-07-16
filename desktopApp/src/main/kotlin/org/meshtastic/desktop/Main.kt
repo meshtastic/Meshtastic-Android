@@ -90,8 +90,14 @@ import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.ui.util.LocalEventBranding
+import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.rememberOpenUrl
+import org.meshtastic.feature.map.mapcompose.ProvideMapComposeMap
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
@@ -373,7 +379,25 @@ private fun ApplicationScope.MeshtasticWindow(
 
         CoilImageLoaderSetup()
         CompositionLocalProvider(LocalEventBranding provides eventEdition) {
-            AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+            // Shared MapCompose renderer behind the map seams; the traceroute screen seam is bound here (not inside
+            // ProvideMapComposeMap) because its screen lives in feature:node — mirrors MainActivity's binding block.
+            ProvideMapComposeMap {
+                CompositionLocalProvider(
+                    LocalTracerouteMapScreenProvider provides
+                        { destNum, requestId, logUuid, onNavigateUp ->
+                            val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
+                            metricsViewModel.setNodeId(destNum)
+                            TracerouteMapScreen(
+                                metricsViewModel = metricsViewModel,
+                                requestId = requestId,
+                                logUuid = logUuid,
+                                onNavigateUp = onNavigateUp,
+                            )
+                        },
+                ) {
+                    AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+                }
+            }
         }
     }
 }
