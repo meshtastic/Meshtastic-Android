@@ -651,6 +651,7 @@
     <string name="ignore_incoming">Eingehende ignorieren</string>
     <string name="ignore_mqtt">MQTT ignorieren</string>
     <string name="ignore_remove">'%1$s' von der Ignorieren-Liste entfernen?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Einstellungen importieren</string>
     <string name="import_known_shared_contact_text">Warnung: Dieser Kontakt ist bekannt, beim Importieren werden die vorherigen Kontaktinformationen überschreiben.</string>
     <string name="import_label">Importieren</string>

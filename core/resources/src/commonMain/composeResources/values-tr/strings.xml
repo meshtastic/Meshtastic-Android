@@ -258,6 +258,7 @@
     <string name="ignore_incoming">Gelenleri Yoksay</string>
     <string name="ignore_mqtt">MQTT'yi Yoksay</string>
     <string name="ignore_remove">Yoksay listesinden '%1$s' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Ayarları içe aktar</string>
     <string name="import_known_shared_contact_text">Uyarı: Bu kişi biliniyor, içe aktarma işlemi önceki kişi bilgilerini üzerine yazacaktır.</string>
     <string name="import_label">İçeri aktar</string>

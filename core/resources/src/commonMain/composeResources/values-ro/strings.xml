@@ -504,6 +504,7 @@
     <string name="ignore_incoming">Ignoră primirea</string>
     <string name="ignore_mqtt">Ignoră MQTT</string>
     <string name="ignore_remove">Elimină '%1$s' din lista de ignor? Radioul tău va reporni după această modificare.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importă configurația</string>
     <string name="import_label">Importa</string>
     <string name="import_shared_contact">Importați contactul partajat?</string>

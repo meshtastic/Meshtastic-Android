@@ -755,6 +755,7 @@
     <string name="ignore_incoming">無視リスト (ノード番号を登録)</string>
     <string name="ignore_mqtt">MQTT を無視</string>
     <string name="ignore_remove">'%1$s'を無視リストから削除しますか？</string>
+    <!-- IMPORT -->
     <string name="import_configuration">設定をインポート</string>
     <string name="import_known_shared_contact_text">警告: この連絡先は登録済です。インポートすると以前の連絡先情報が上書きされます。</string>
     <string name="import_label">インポート</string>

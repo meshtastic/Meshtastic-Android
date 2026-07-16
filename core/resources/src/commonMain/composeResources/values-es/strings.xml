@@ -389,6 +389,7 @@ Rango de Valores 0 - 500.</string>
     <string name="ignore_incoming">Ignorar entrante</string>
     <string name="ignore_mqtt">Ignorar Paquetes MQTT</string>
     <string name="ignore_remove">¿Eliminar '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importar una configuración</string>
     <string name="import_known_shared_contact_text">Advertencia: Este contacto ya es conocido, importar sobrescribirá la información anterior del contacto.</string>
     <string name="import_label">Importar</string>

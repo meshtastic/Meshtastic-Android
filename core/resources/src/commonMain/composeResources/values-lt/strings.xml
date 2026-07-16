@@ -106,6 +106,7 @@
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
+    <!-- IMPORT -->
     <string name="info">Informacija</string>
     <string name="interval_unset">Nenustatyta</string>
     <string name="intro_show">Rodyti įvadą</string>

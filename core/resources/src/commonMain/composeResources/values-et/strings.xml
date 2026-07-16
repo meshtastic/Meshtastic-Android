@@ -775,6 +775,7 @@
     <string name="ignore_incoming">Ignoreeri sissetulevaid</string>
     <string name="ignore_mqtt">Keela MQTT</string>
     <string name="ignore_remove">Eemaldada '%1$s' eiramis loendist?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Lae sätted</string>
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="import_label">Lae</string>

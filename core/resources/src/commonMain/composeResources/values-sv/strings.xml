@@ -502,6 +502,7 @@
     <string name="ignore_incoming">Ignorera inkommande</string>
     <string name="ignore_mqtt">Ignorera MQTT</string>
     <string name="ignore_remove">Ta bort '%1$s' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importera konfiguration</string>
     <string name="import_known_shared_contact_text">Varning: Denna kontakt är känd, en import kommer att skriva över tidigare kontaktuppgifter.</string>
     <string name="import_label">Importera</string>

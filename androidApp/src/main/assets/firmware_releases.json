@@ -195,27 +195,9 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "11014",
-      "title": "Fix replayed satellite-DB packets masquerading as fresh live traffic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11014",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11009",
       "title": "Nz region sf16 preset",
       "page_url": "https://github.com/meshtastic/firmware/pull/11009",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10994",
-      "title": "Remove UA_868 as obsolete",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10994",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10990",
-      "title": "Auto-enable nanopb PB_NO_ERRMSG when DEBUG_MUTE is set",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10990",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -276,42 +258,6 @@
       "id": "10935",
       "title": "Fix size report stale baseline",
       "page_url": "https://github.com/meshtastic/firmware/pull/10935",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10928",
-      "title": "Add chunked PhoneAPI transport payloads",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10928",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10926",
-      "title": "WIP: Big Display Node",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10926",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10921",
-      "title": "Align Base UI message status wording",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10921",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10920",
-      "title": "Add waypoint & geofence support with notifications for BaseUI and InkHUD",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10920",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10917",
-      "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10917",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10915",
-      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

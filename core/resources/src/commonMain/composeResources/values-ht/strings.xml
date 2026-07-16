@@ -103,6 +103,7 @@
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
+    <!-- IMPORT -->
     <string name="info">Enfòmasyon</string>
     <string name="interval_unset">Pa konfigire</string>
     <string name="intro_show">Montre entwodiksyon</string>

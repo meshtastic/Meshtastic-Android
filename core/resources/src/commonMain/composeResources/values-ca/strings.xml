@@ -91,6 +91,7 @@
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
     <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
+    <!-- IMPORT -->
     <string name="interval_unset">No configurat</string>
     <string name="intro_show">Mostrar Introducció</string>
     <string name="ip_address">Adreça IP:</string>

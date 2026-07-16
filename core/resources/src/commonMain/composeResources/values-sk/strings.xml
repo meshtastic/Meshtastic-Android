@@ -194,6 +194,7 @@
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importovať konfiguráciu</string>
     <string name="info">Informácia</string>
     <string name="interval_unset">Nenastavené</string>

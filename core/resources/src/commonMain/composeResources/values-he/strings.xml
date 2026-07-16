@@ -90,6 +90,7 @@
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף '%1$s' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד '%1$s' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
+    <!-- IMPORT -->
     <string name="interval_unset">לא מוגדר</string>
     <string name="intro_show">הראה מקדמה</string>
     <string name="ip_address">‏כתובת IP:</string>

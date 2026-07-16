@@ -752,6 +752,7 @@
     <string name="ignore_incoming">忽略接收</string>
     <string name="ignore_mqtt">忽略 MQTT</string>
     <string name="ignore_remove">从忽略列表中删除 '%1$s' ？</string>
+    <!-- IMPORT -->
     <string name="import_configuration">导入配置</string>
     <string name="import_known_shared_contact_text">警告：此联系人已知，导入将覆盖之前的联系人信息。</string>
     <string name="import_label">导入</string>

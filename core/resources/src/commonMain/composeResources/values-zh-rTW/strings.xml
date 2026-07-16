@@ -603,6 +603,7 @@
     <string name="ignore_incoming">忽略來訊</string>
     <string name="ignore_mqtt">無視MQTT</string>
     <string name="ignore_remove">從忽略清單中移除 '%1$s' 嗎？</string>
+    <!-- IMPORT -->
     <string name="import_configuration">匯入設定</string>
     <string name="import_known_shared_contact_text">警告:聯絡人已存在，匯入將會覆蓋先前的聯絡人資訊。</string>
     <string name="import_label">匯入</string>

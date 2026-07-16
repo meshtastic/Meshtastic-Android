@@ -214,6 +214,7 @@
     <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
     <string name="ignore_mqtt">Игнориши MQTT</string>
     <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>
+    <!-- IMPORT -->
     <string name="indoor_air_quality_iaq">Квалитет ваздуха у затвореном простору (IAQ)</string>
     <string name="info">Информација</string>
     <string name="interval_always_on">Увек укључен</string>

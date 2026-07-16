@@ -239,6 +239,7 @@
     <string name="ignore_incoming">수신 무시</string>
     <string name="ignore_mqtt">MQTT로 부터 수신 무시</string>
     <string name="ignore_remove">%1$s를 무시 목록에서 삭제하시겠습니까?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">설정 불러오기</string>
     <string name="import_known_shared_contact_text">경고: 이 연락처는 이미 등록되어 있습니다. 내려받으면 이전 연락처 정보가 덮어쓰어질 수 있습니다.</string>
     <string name="import_label">불러오기</string>

@@ -107,6 +107,7 @@
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
+    <!-- IMPORT -->
     <string name="info">Eolas</string>
     <string name="interval_unset">Díshocraigh</string>
     <string name="intro_show">Taispeáin Úvod</string>

@@ -96,6 +96,7 @@
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <!-- IMPORT -->
     <string name="interval_unset">Nepostavljeno</string>
     <string name="intro_show">Prikaži uvod</string>
     <string name="ip_address">IP Adresa:</string>

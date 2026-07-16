@@ -109,6 +109,7 @@
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
     <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>
+    <!-- IMPORT -->
     <string name="info">Informasjon</string>
     <string name="interval_unset">Lås opp</string>
     <string name="intro_show">Vis introduksjon</string>
