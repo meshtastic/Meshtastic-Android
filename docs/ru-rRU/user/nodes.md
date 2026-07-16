@@ -68,45 +68,45 @@ aliases:
 - **Sensor** — это автономное устройство, которое отслеживает показатели окружающей среды (температуру, влажность, качество воздуха). Похожий профиль мощности на Tracker.
 - **TAK / TAK Tracker** — нужно только если работать с системами ATAK/WinTAK. Смотри [Интеграция TAK](tak) для подробностей.
 
-> 💡 **Совет:** Сеть работает лучше, когда большинство нод **Client** или **Router**. Слишком много нод Mute снижает устойчивость сети; слишком много роутеров в плотной зоне может вызвать перегрузку. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **Совет:** Сеть работает лучше, когда большинство нод **Client** или **Router**. Слишком много нод Mute снижает устойчивость сети; слишком много роутеров в плотной зоне может вызвать перегрузку. Хорошее практическое правило: один роутер на 5–10 клиентов в вашей зоне.
 
 ### Индикаторы шифрования
 
 У нод рядом с именем отображаются значки статуса шифрования:
 
-| Значок            | Значение                                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Заблокировано  | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Разблокировано | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Несовпадение   | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Значок            | Значение                                                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Заблокировано  | Связь использует PKI (инфраструктуру публичных ключей) — сквозное шифрование с проверкой идентичности   |
+| 🔓 Разблокировано | Связь использует общий канал PSK — зашифровано, но личность не проверяется индивидуально                                   |
+| ⚠️ Несовпадение   | Несовпадение открытого ключа — ключ ноды изменился с последнего раза (разберитесь, прежде чем доверять) |
 
-> 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
+> 💡 **Совет:** Шифрование PKI (прошивка 2.5+) обеспечивает более надёжную защиту, чем общий PSK для канала, потому что у каждой ноды есть уникальная пара ключей. Если видишь предупреждение о несоответствии ключа, нода могла быть сброшена или скомпрометирована.
 
 ## Быстрые действия
 
-From the node list, you can:
+Из списка нод ты можешь:
 
-- **Tap** a node to view its detail page
-- **Long-press** for quick actions:
-  - Mark/remove favorite
-  - Mute/unmute notifications
-  - Send a direct message
+- **Нажмите** на ноду, чтобы увидеть её страницу с деталями
+- **Долгое нажатие** для быстрых действий:
+  - Отметить/убрать из избранного
+  - Отключить/включить уведомления
+  - Отправить личное сообщение
   - Трассировка
-  - Ignore/unignore
+  - Игнорировать/разблокировать
   - Удалить ноду
 
 ## Фильтрация и сортировка
 
-### Text Search
+### Поиск текста
 
-Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
+Введи в поле поиска, чтобы отфильтровать ноды по имени или короткому имени. Фильтр обновляется в реальном времени по мере набора текста.
 
 ### Переключатели фильтра
 
 | Фильтр                       | Описание                                                                                           |
 | ---------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Только онлайн**            | Show only nodes heard within the last 2 hours                                                      |
-| **Только прямые**            | Show only nodes with direct (non-relayed) connections                           |
+| **Только онлайн**            | Показывать только ноды, услышанные за последние 2 часа                                             |
+| **Только прямые**            | Показывать только ноды с прямыми (без посредников) соединениями                 |
 | **Включить неизвестные**     | Показать ноды, которые еще не отправили информацию о пользователе                                  |
 | **Исключить инфраструктуру** | Скрыть ноды с ролью инфраструктуры (Router, Repeater, Router Late, Client Base) |
 | **Исключить MQTT**           | Скрыть ноды, слышимые только через интернет-мост MQTT                                              |
@@ -114,31 +114,31 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 ### Параметры сортировки
 
-| Сортировка                                  | Описание                                                              |
-| ------------------------------------------- | --------------------------------------------------------------------- |
-| **Last heard** (default) | Сначала недавно слышимые узлы                                         |
-| **По алфавиту**                             | Сортировать по полному имени ноды                                     |
-| **Расстояние**                              | Сначала ближайшие ноды (требуется обмен позициями) |
-| **Hops away**                               | Сначала с наименьшим количеством ретрансляций                         |
-| **Канал**                                   | Группировать по индексу канала                                        |
-| **Через MQTT**                              | Grouped by MQTT vs. radio-heard                       |
-| **Избранное**                               | Сначала избранные ноды                                                |
+| Сортировка                                                | Описание                                                              |
+| --------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Последнее слышанное** (по умолчанию) | Сначала недавно слышимые ноды                                         |
+| **По алфавиту**                                           | Сортировать по полному имени ноды                                     |
+| **Расстояние**                                            | Сначала ближайшие ноды (требуется обмен позициями) |
+| **Hops away**                                             | Сначала с наименьшим количеством ретрансляций                         |
+| **Канал**                                                 | Группировать по индексу канала                                        |
+| **Через MQTT**                                            | Сгруппировать по MQTT и радиоприему                                   |
+| **Избранное**                                             | Сначала избранные ноды                                                |
 
 ## Нод на хоп
 
-Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
+Нажми на значок гистограммы хопов в панели приложений списка нод, чтобы открыть столбчатую диаграмму того, сколько нод находится на каждом расстоянии хопа (0 = напрямую, 1 = через один ретранслятор и так далее). Отфильтруй график по окну **последнего услышанного** — за всё время, 1 час, 8 часов или 24 часа — чтобы посмотреть, как сейчас выглядит сеть по сравнению с более длительным периодом. Это быстрый способ понять, насколько занята и разветвлена твоя местная сеть.
 
 ## Детали ноды
 
-Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
+Нажатие на ноду открывает подробный вид с полной информацией. Смотри [Метрики ноды](node-metrics) для полной информации о метриках и телеметрии.
 
-![Node detail view](../../assets/screenshots/nodes_node_list.png)
+![Просмотр деталей ноды](../../assets/screenshots/nodes_node_list.png)
 
-The detail screen includes device info, position, and action buttons:
+Экран с деталями включает информацию об устройстве, его местоположение и кнопки действий:
 
-![Node detail section](../../assets/screenshots/nodes_detail_section.png)
+![Раздел деталей ноды](../../assets/screenshots/nodes_detail_section.png)
 
-Inline status indicators show key metrics at a glance:
+Встроенные индикаторы статуса показывают ключевые показатели с первого взгляда:
 
 | Индикатор              | Снимок экрана                                                   |
 | ---------------------- | --------------------------------------------------------------- |
@@ -150,16 +150,16 @@ Inline status indicators show key metrics at a glance:
 
 ### Ссылки на устройства ("Хочу такое")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Устройства без подходящих ссылок не показывают этот раздел.
+Когда оборудование ноды распознано, в детальном просмотре появляется сворачиваемый раздел **"Хочу такой"**, содержащий ссылки на места, где можно купить или узнать больше об этом устройстве: страницу продукта у производителя, варианты продукта и объявления на региональных торговых площадках (например, AliExpress, Amazon и у поддерживаемых продавцов), отфильтрованные по твоей стране. Каждая ссылка открывается через сервис перенаправления `msh.to`. Устройства без подходящих ссылок не показывают этот раздел.
 
 Полный каталог всех ссылок, который можно просматривать, также доступен в **Настройки → Ссылки устройства**.
 
 ## Связанные темы
 
-- [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
-- [Messages & Channels](messages-and-channels) — send a direct message to a node
-- [Map & Waypoints](map-and-waypoints) — view node positions geographically
-- [Discovery](discovery) — traceroute and neighbor info for topology exploration
+- [Метрики ноды](node-metrics) — подробные телеметрические панели для каждой ноды
+- [Сообщения и каналы](messages-and-channels) — отправь личное сообщение ноде
+- [Карта и путевые точки](map-and-waypoints) — просмот позиции нод на карте
+- [Обнаружение](discovery) — трассировка и информация о соседях для изучения топологии
 - [Индикатор сигнала](signal-meter) — пойми, что означают полоски сигнала
 
 ---

@@ -3,7 +3,7 @@ title: Метрики ноды
 parent: Руководство пользователя
 nav_order: 5
 last_updated: 2026-07-08
-description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
+description: Панели телеметрии для каждой ноды mesh-сети — состояние устройства, датчики окружающей среды, качество воздуха, качество сигнала, питание, трассировка и история местоположения.
 aliases:
   - metrics
   - telemetry
@@ -13,164 +13,164 @@ aliases:
 
 # Метрики ноды
 
-The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
+Экран сведений о ноде предоставляет подробную телеметрию и метрики для каждой ноды твоей mesh-сети.
 
 ## Интервал передачи
 
-Basic operating information reported by each node:
+Основная информация о работе, сообщаемая каждой нодой:
 
-| Metric               | Описание                            |
-| -------------------- | ----------------------------------- |
-| Battery Level        | Current battery percentage          |
-| Напряжение           | Battery voltage reading             |
-| Использование канала | Percentage of airtime consumed      |
-| Airtime              | Transmission time used by this node |
-| Аптайм               | Time since last reboot              |
+| Метрическая          | Описание                                  |
+| -------------------- | ----------------------------------------- |
+| Уровень заряда       | Текущий процент заряда батареи            |
+| Напряжение           | Показания напряжения батареи              |
+| Использование канала | Процент израсходованного эфирного времени |
+| Эфирное время        | Время передачи, использованное этой нодой |
+| Аптайм               | Время с момента последней перезагрузки    |
 
-Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
+Метрики устройства отображаются в виде отдельных карточек с трендовыми спарклайнами, показывающими уровень заряда, напряжение, использование канала, эфирное время и время безотказной работы(аптайма) с течением времени.
 
-> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
+> 💡 **Совет:** Нажмите на любую карточку метрики, чтобы развернуть её в полноценный график с историческими точками данных. Масштабируйте временную ось щипком.
 
 ## Метрики окружения
 
-Environmental sensor data (requires compatible hardware):
+Данные датчиков окружающей среды (требуется совместимое оборудование):
 
-| Metric                               | Sensor Examples       |
-| ------------------------------------ | --------------------- |
-| Температура                          | BME280, BME680, SHT31 |
-| Влажность                            | BME280, BME680, SHT31 |
-| Давление на барометре                | BME280, BMP280        |
-| Сопротивление газа                   | BME680                |
-| IAQ (Air Quality) | BME680                |
+| Метрическая                               | Примеры сенсоров      |
+| ----------------------------------------- | --------------------- |
+| Температура                               | BME280, BME680, SHT31 |
+| Влажность                                 | BME280, BME680, SHT31 |
+| Давление на барометре                     | BME280, BMP280        |
+| Сопротивление газа                        | BME680                |
+| IAQ (Качества воздуха) | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Метрики окружающей среды отображаются на графиках с течением времени для удобного анализа тенденций — температура, влажность и давление выводятся каждый в виде отдельного линейного графика с единицами измерения по оси Y.
 
-The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
+Индекс **IAQ (качество воздуха в помещении)** датчика BME680 представляет собой единое значение от 0 до 500+, полученное на основе сопротивления газа, и отображается на цветовой шкале от **"Отлично"** до **"Опасно загрязнён"**:
 
-![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
+![Шкала индекса IAQ от Отлично до Опасно загрязнён](../../assets/screenshots/node-metrics_iaq_scale.png)
 
-> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+> 💡 **Совет:** Для получения метрик окружающей среды к удалённой ноде должен быть подключён датчик. Не все ноды передают данные об окружающей среде. См. [Телеметрия и датчики](telemetry-and-sensors) для получения полного списка поддерживаемых датчиков.
 
-## Air Quality Metrics
+## Метрики качества воздуха
 
-Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+Качество воздуха — это отдельный экран метрик для нод, оснащённых датчиком взвешенных частиц и/или CO₂. Этот **экран отделён от показателя IAQ датчика BME680**, отображаемого в разделе "Метрики окружающей среды" — IAQ представляет собой единый индекс, основанный на сопротивлении газа, тогда как экран качества воздуха показывает графики исходных измерений взвешенных частиц и CO₂.
 
-| Metric                | Единица   | Описание                                                                                                                                                                                                                   |
-| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                        |
-| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                       |
-| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                        |
-| AQI                   | EPA index | EPA **NowCast** AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
-| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                               |
-| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                              |
-| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                               |
+| Метрическая           | Единица    | Описание                                                                                                                                                                                                                                                      |
+| --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PM1.0 | мкг/м³     | Взвешенные частицы размером до 1,0 микрона                                                                                                                                                                                                                    |
+| PM2.5 | мкг/м³     | Взвешенные частицы размером до 2,5 микрона                                                                                                                                                                                                                    |
+| PM10                  | мкг/м³     | Взвешенные частицы размером до 10 микронов                                                                                                                                                                                                                    |
+| AQI                   | Индекс EPA | AQI EPA по методу **NowCast**, вычисляемый на основе твоей недавней истории PM2.5, с цветовой меткой уровня опасности. Отображается рядом с PM2.5, как только накопится достаточно показаний. |
+| CO₂                   | ppm        | Концентрация углекислого газа                                                                                                                                                                                                                                 |
+| Температура CO₂       | °C / °F    | Температура, сообщаемая самим датчиком CO₂ (например, SCD4x)                                                                                                                                                                               |
+| Влажность CO₂         | %          | Относительная влажность, сообщаемая датчиком CO₂                                                                                                                                                                                                              |
 
-CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+Показания CO₂ окрашены по уровню опасности, чтобы качество воздуха можно было легко оценить с первого взгляда:
 
-| Band     | CO₂ Range (ppm) | Color     |
-| -------- | ---------------------------------- | --------- |
-| Хороший  | < 1000    | Зеленый   |
-| Stuffy   | < 2000    | Amber     |
-| Poor     | < 5000    | Оранжевый |
-| Unsafe   | < 30000   | Красный   |
-| Evacuate | ≥ 30000                            | Dark red  |
+| Диапазон    | Диапазон CO₂ (ppm) | Цвет          |
+| ----------- | ------------------------------------- | ------------- |
+| Хороший     | < 1000       | Зеленый       |
+| Душно       | < 2000       | Янтарный      |
+| Плохо       | < 5000       | Оранжевый     |
+| Небезопасно | < 30000      | Красный       |
+| Эвакуация   | ≥ 30000                               | Тёмно-красный |
 
-![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
+![Показания качества воздуха с цветовой кодировкой уровня CO₂](../../assets/screenshots/node-metrics_air_quality.png)
 
-An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
+Кнопка журнала/метрик качества воздуха появляется на экране сведений о ноде **только в том случае, если нода передала телеметрию о качестве воздуха**. В режиме просмотра качества воздуха ты можешь:
 
-- Select a **time frame** for the charts.
-- Filter with **metric chips** — only metrics that have data are shown.
-- **Refresh / request** the latest air-quality telemetry.
-- **Export to CSV** for analysis in a spreadsheet.
+- Выбрать **временной интервал** для графиков.
+- Фильтровать с помощью **кнопок метрик** — отображаются только те метрики, по которым есть данные.
+- **Обновить / запросить** последнюю телеметрию о качестве воздуха.
+- **Экспортировать в CSV** для анализа в электронных таблицах.
 
-> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **Совет:** Для получения метрик качества воздуха на удалённой ноде должен быть установлен совместимый датчик. Если у ноды нет датчика взвешенных частиц или CO₂, кнопка качества воздуха не появится. См. [Телеметрия и датчики](telemetry-and-sensors) для получения информации о поддерживаемом оборудовании.
 
 ## Показатели сигнала
 
-Radio signal quality information:
+Информация о качестве радиосигнала:
 
-| Metric      | Описание                                                                       |
-| ----------- | ------------------------------------------------------------------------------ |
-| Сигнал/шум  | Signal-to-Noise Ratio (higher is better)                    |
-| RSSI        | Received Signal Strength Indicator (closer to 0 is better)  |
-| Noise Floor | Local background RF noise in dBm (more negative is quieter) |
-| Hop Count   | Number of mesh hops for last message                                           |
+| Метрическая               | Описание                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Сигнал/шум                | Отношение сигнал/шум (SNR) (чем выше, тем лучше)                        |
+| RSSI                      | Индикатор уровня принимаемого сигнала (Rssi) (чем ближе к 0, тем лучше) |
+| Уровень собственных шумов | Местный фоновый радиочастотный шум в дБм (чем более отрицательное значение, тем тише)      |
+| Количество хопов          | Количество хопов в mesh-сети для последнего сообщения                                                         |
 
-### Signal Quality Reference
+### Оценка качества сигнала
 
-Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+Качество сигнала оценивается по **SNR относительно минимального уровня демодуляции активного пресета LoRa-модема**, а не по фиксированным порогам — конкретное значение SNR означает разное на разных пресетах (например, −15 дБ нормально для LongSlow, но неприемлемо для ShortFast). RSSI отображается, но не учитывается в оценке. Пусть `limit` — это предельное значение SNR для пресета:
 
-| Quality     | Критерии                                                         |
-| ----------- | ---------------------------------------------------------------- |
-| Хороший     | SNR above the preset's limit                                     |
-| Средний     | less than 5.5 dB below the limit                 |
-| Плохой      | 5.5 dB to 7.5 dB below the limit |
-| Отсутствует | more than 7.5 dB below the limit                 |
+| Качество    | Критерии                         |
+| ----------- | -------------------------------- |
+| Хороший     | SNR выше предела пресета         |
+| Средний     | менее чем на 5,5 дБ ниже предела |
+| Плохой      | от 5,5 до 7,5 дБ ниже предела    |
+| Отсутствует | более чем на 7,5 дБ ниже предела |
 
-See [Understanding the Signal Meter](signal-meter) for the full explanation.
+См. [Понимание измерителя сигнала](signal-meter) для полного объяснения.
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+Локальная статистика твоего подключённого радио также отображается в разделе "Качество сигнала", когда она доступна. Эти журналы включают уровень шума, счётчики трафика, счётчики ретрансляций, количество нод в сети и время работы радио. График уровня шума использует пунктирную опорную линию на уровне -85 дБм, чтобы помочь определить загруженность радиоэфира. Используйте **"Запросить"**, чтобы запросить у подключённого радио свежий отчёт телеметрии локальной статистики, **"Очистить"** — чтобы удалить журналы локальной статистики для этой ноды, и **"Сохранить"** — чтобы экспортировать видимую историю локальной статистики в формате CSV.
 
 ## Метрики питания
 
-Power management telemetry (requires INA sensor or compatible hardware):
+Телеметрия управления питанием (требуется датчик INA или совместимое оборудование):
 
-| Метрическая | Описание                |
-| ----------- | ----------------------- |
-| Bus Voltage | Supply voltage          |
-| Ток         | Power draw in milliamps |
-| Питание     | Calculated wattage      |
+| Метрическая     | Описание                        |
+| --------------- | ------------------------------- |
+| Напряжение шины | Напряжение питания              |
+| Ток             | Потребляемый ток в миллиамперах |
+| Питание         | Расчётная мощность              |
 
 ## Трассировка маршрута
 
-Traceroute shows the path a message takes through the mesh:
+Трассировка показывает путь сообщения через mesh-сеть:
 
-1. From the node detail screen, tap **Traceroute**.
-2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+1. На экране сведений о ноде нажмите **"Трассировка"**.
+2. Приложение отправляет запрос трассировки целевой ноде.
+3. Результаты показывают каждый хоп со значениями SNR/RSSI.
 
-### Reading Traceroute Results
+### Чтение результатов трассировки
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+Ты → Нода A (SNR: 8.5) → Нода B (SNR: 5.2) → Цель
 ```
 
-Each hop represents a relay node that forwarded the message.
+Каждый хоп обозначает ретранслирующую ноду, которая переслала сообщение.
 
 ## Журнал местоположения
 
-Historical position data for nodes that share their location:
+Исторические данные о местоположении для нод, которые делятся своими координатами:
 
-- GPS coordinates
+- GPS-координаты
 - Высота
-- Speed (if moving)
-- Timestamp for each position report
+- Скорость (при движении)
+- Временная метка для каждого отчёта о местоположении
 
 ## Информация об окружении
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+Показывает, какие ноды данная нода может слышать напрямую — полезно для понимания топологии mesh-сети.
 
-## Viewing Metrics
+## Просмотр метрик
 
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+1. Перейдите в раздел **Ноды**.
+2. Нажмите на ноду, которую хотите просмотреть.
+3. Выберите категорию метрик на вкладках с подробностями.
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![Сведения о ноде — локальное устройство](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+Вкладка "Местоположение" показывает координаты нод, которые передают GPS-данные:
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![Встроенное содержимое о местоположении](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ⚠️ **Примечание:** Метрики доступны только в том случае, если они были переданы удалённой нодой. Метрики обновляются с интервалами, настроенными в параметрах телеметрии каждой ноды.
 
-## Related Topics
+## Связанные темы
 
-- [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
-- [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [Ноды](nodes) — список нод, фильтрация и сортировка
+- [Телеметрия и датчики](telemetry-and-sensors) — поддерживаемые датчики и настройка
+- [Измеритель сигнал](signal-meter) — как рассчитывается качество сигнала на основе SNR и RSSI
+- [Обнаружение](discovery)— сведения о трассировке и информации о соседях
+- [Единицы измерения и регион](units-and-locale) — форматы отображения температуры, расстояния и скорости
 
 ---
