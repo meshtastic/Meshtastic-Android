@@ -106,8 +106,10 @@ import com.google.maps.android.data.renderer.model.LineStyle
 import com.google.maps.android.data.renderer.model.MultiGeometry
 import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
@@ -1316,7 +1318,10 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
         val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect
         val layer =
             try {
-                val dataLayer = inputStream.use { stream -> parseMapLayer(layerItem.layerType, stream) }
+                val dataLayer =
+                    withContext(Dispatchers.IO) {
+                        inputStream.use { stream -> parseMapLayer(layerItem.layerType, stream) }
+                    }
                 if (dataLayer == null) {
                     Logger.withTag("MapView").e { "Error loading map layer: ${layerItem.name} (unrecognized format)" }
                     null
@@ -1421,18 +1426,22 @@ private fun RenderedMapLayer.safeHide() {
 /**
  * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a parsed GeoJSON layer.
  *
- * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity` itself, but misses several things
- * this app relies on for Meshtastic Site Planner coverage exports: the legacy `color` fallback, `rgb()`/`rgba()`
- * colors, a default fill opacity so stacked contour bands read as a gradient, and polygon styling for MultiPolygon
- * features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its properties so the
- * coverage draws in its dBm colors instead of the default black outline.
+ * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but misses
+ * several things this app relies on for Meshtastic Site Planner coverage exports: the legacy `color` fallback,
+ * `rgb()`/`rgba()` colors, a default fill opacity so stacked contour bands read as a gradient, and polygon styling for
+ * MultiPolygon features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its
+ * properties so the coverage draws in its dBm colors instead of the default black outline.
  */
 private fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
 
 private fun Feature.applySimpleStyleSpec(): Feature {
     val fill = cssColor("fill") ?: cssColor("color")
-    val stroke = cssColor("stroke") ?: cssColor("color")
     val fillOpacity = stringProperty("fill-opacity")?.toFloatOrNull()
+    val strokeOpacity = stringProperty("stroke-opacity")?.toFloatOrNull()
+    val stroke =
+        (cssColor("stroke") ?: cssColor("color"))?.let {
+            if (strokeOpacity != null) it.withAlpha(strokeOpacity) else it
+        }
     val strokeWidth = stringProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
     return when {
         geometry.isPolygonal() ->
