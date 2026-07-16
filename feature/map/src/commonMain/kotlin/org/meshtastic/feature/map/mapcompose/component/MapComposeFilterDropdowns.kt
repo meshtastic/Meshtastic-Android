@@ -107,7 +107,7 @@ internal fun MapComposeFilterDropdown(expanded: Boolean, onDismissRequest: () ->
                 },
             )
         }
-        LastHeardSlider(selected = mapFilterState.lastHeardFilter, onSelected = { viewModel.setLastHeardFilter(it) })
+        LastHeardSlider(selected = mapFilterState.lastHeardFilter, onSelect = { viewModel.setLastHeardFilter(it) })
     }
 }
 
@@ -122,13 +122,13 @@ internal fun MapComposeTrackFilterDropdown(
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         LastHeardSlider(
             selected = mapFilterState.lastHeardTrackFilter,
-            onSelected = { viewModel.setLastHeardTrackFilter(it) },
+            onSelect = { viewModel.setLastHeardTrackFilter(it) },
         )
     }
 }
 
 @Composable
-private fun LastHeardSlider(selected: LastHeardFilter, onSelected: (LastHeardFilter) -> Unit) {
+private fun LastHeardSlider(selected: LastHeardFilter, onSelect: (LastHeardFilter) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         val filterOptions = LastHeardFilter.entries
         val selectedIndex = filterOptions.indexOf(selected)
@@ -143,7 +143,7 @@ private fun LastHeardSlider(selected: LastHeardFilter, onSelected: (LastHeardFil
             onValueChange = { sliderPosition = it },
             onValueChangeFinished = {
                 val newIndex = sliderPosition.roundToInt().coerceIn(0, filterOptions.size - 1)
-                onSelected(filterOptions[newIndex])
+                onSelect(filterOptions[newIndex])
             },
             valueRange = 0f..(filterOptions.size - 1).toFloat(),
             steps = filterOptions.size - 2,

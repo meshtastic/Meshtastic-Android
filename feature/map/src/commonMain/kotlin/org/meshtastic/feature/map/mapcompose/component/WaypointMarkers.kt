@@ -92,45 +92,49 @@ internal fun WaypointMarkers(mapState: MapState, waypoints: List<Waypoint>, show
             placed[id] = point
         }
 
-        // Geofence regions: a filled circle and/or box polygon per waypoint that defines one.
-        val circles =
-            if (showWaypoints) {
-                waypoints.mapNotNull { wp -> wp.toGeofence()?.circle?.let { "geofence-circle-${wp.id}" to it } }.toMap()
-            } else {
-                emptyMap()
-            }
-        mapState.reconcilePaths(
-            group = "geofence-circle-",
-            targets = circles,
-            pathFor = { circle ->
-                PolylineGeometry.circlePolygon(circle.centerLat, circle.centerLon, circle.radiusMeters.toDouble())
-            },
-            color = { GEOFENCE_OVERLAY_COLOR },
-            fillAlpha = GEOFENCE_FILL_ALPHA,
-        )
-
-        val boxes =
-            if (showWaypoints) {
-                waypoints.mapNotNull { wp -> wp.toGeofence()?.box?.let { "geofence-box-${wp.id}" to it } }.toMap()
-            } else {
-                emptyMap()
-            }
-        mapState.reconcilePaths(
-            group = "geofence-box-",
-            targets = boxes,
-            pathFor = { box ->
-                listOf(
-                    GeoPoint(box.south, box.west),
-                    GeoPoint(box.north, box.west),
-                    GeoPoint(box.north, box.east),
-                    GeoPoint(box.south, box.east),
-                    GeoPoint(box.south, box.west),
-                )
-            },
-            color = { GEOFENCE_OVERLAY_COLOR },
-            fillAlpha = GEOFENCE_FILL_ALPHA,
-        )
+        mapState.reconcileGeofenceOverlays(waypoints, showWaypoints)
     }
+}
+
+/** Geofence regions: a filled circle and/or box polygon per waypoint that defines one. */
+private fun MapState.reconcileGeofenceOverlays(waypoints: List<Waypoint>, showWaypoints: Boolean) {
+    val circles =
+        if (showWaypoints) {
+            waypoints.mapNotNull { wp -> wp.toGeofence()?.circle?.let { "geofence-circle-${wp.id}" to it } }.toMap()
+        } else {
+            emptyMap()
+        }
+    reconcilePaths(
+        group = "geofence-circle-",
+        targets = circles,
+        pathFor = { circle ->
+            PolylineGeometry.circlePolygon(circle.centerLat, circle.centerLon, circle.radiusMeters.toDouble())
+        },
+        color = { GEOFENCE_OVERLAY_COLOR },
+        fillAlpha = GEOFENCE_FILL_ALPHA,
+    )
+
+    val boxes =
+        if (showWaypoints) {
+            waypoints.mapNotNull { wp -> wp.toGeofence()?.box?.let { "geofence-box-${wp.id}" to it } }.toMap()
+        } else {
+            emptyMap()
+        }
+    reconcilePaths(
+        group = "geofence-box-",
+        targets = boxes,
+        pathFor = { box ->
+            listOf(
+                GeoPoint(box.south, box.west),
+                GeoPoint(box.north, box.west),
+                GeoPoint(box.north, box.east),
+                GeoPoint(box.south, box.east),
+                GeoPoint(box.south, box.west),
+            )
+        },
+        color = { GEOFENCE_OVERLAY_COLOR },
+        fillAlpha = GEOFENCE_FILL_ALPHA,
+    )
 }
 
 // Shared geofence overlay styling (orange, matching the google and fdroid flavors).

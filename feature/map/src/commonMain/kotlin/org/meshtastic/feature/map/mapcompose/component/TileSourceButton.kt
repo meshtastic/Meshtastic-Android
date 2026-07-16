@@ -104,7 +104,7 @@ internal fun MapScaleBar(mapState: MapState, tileSource: TileSource, modifier: M
     val latitude = WebMercator.yToLatitude(centroidY)
     // The rendered world is (fullSize * scale) pixels wide and spans the equatorial circumference shrunk by cos(lat).
     val mapSizePx = TILE_SIZE * (1 shl tileSource.maxZoom) * scale
-    val worldMeters = 2 * PI * WebMercator.EARTH_RADIUS_M * cos(latitude * PI / 180.0)
+    val worldMeters = 2 * PI * WebMercator.EARTH_RADIUS_M * cos(latitude * PI / HALF_TURN_DEGREES)
     val rulerMeters = worldMeters / mapSizePx * RULER_WIDTH_PX
 
     val label =
@@ -126,3 +126,4 @@ internal fun MapScaleBar(mapState: MapState, tileSource: TileSource, modifier: M
 private const val SCRIM_ALPHA = 0.7f
 private const val RULER_WIDTH_PX = 100.0
 private const val METERS_PER_KM = 1000.0
+private const val HALF_TURN_DEGREES = 180.0

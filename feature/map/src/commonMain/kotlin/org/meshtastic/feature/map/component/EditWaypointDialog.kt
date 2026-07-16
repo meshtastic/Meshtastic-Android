@@ -282,7 +282,7 @@ fun EditWaypointDialog(
                             ExpiryDatePickerDialog(
                                 current = ldt,
                                 onDismiss = { showDatePicker = false },
-                                onDateSelected = { newDate ->
+                                onDateSelect = { newDate ->
                                     val newLdt =
                                         newDate.atTime(
                                             hour = ldt.hour,
@@ -300,7 +300,7 @@ fun EditWaypointDialog(
                             ExpiryTimePickerDialog(
                                 current = ldt,
                                 onDismiss = { showTimePicker = false },
-                                onTimeSelected = { hour, minute ->
+                                onTimeSelect = { hour, minute ->
                                     val newLdt = ldt.date.atTime(hour = hour, minute = minute)
                                     waypointInput =
                                         waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
@@ -353,7 +353,7 @@ fun EditWaypointDialog(
 /** M3 date picker for the waypoint expiry, initialized to the current expiry's calendar date. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExpiryDatePickerDialog(current: LocalDateTime, onDismiss: () -> Unit, onDateSelected: (LocalDate) -> Unit) {
+private fun ExpiryDatePickerDialog(current: LocalDateTime, onDismiss: () -> Unit, onDateSelect: (LocalDate) -> Unit) {
     // DatePicker works in UTC-midnight millis; seed it with the current expiry's date, not its instant, so the
     // preselected day matches the local-time date shown in the dialog.
     val datePickerState =
@@ -366,7 +366,7 @@ private fun ExpiryDatePickerDialog(current: LocalDateTime, onDismiss: () -> Unit
             TextButton(
                 onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        onDateSelected(
+                        onDateSelect(
                             kotlin.time.Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date,
                         )
                     }
@@ -388,7 +388,7 @@ private fun ExpiryDatePickerDialog(current: LocalDateTime, onDismiss: () -> Unit
 private fun ExpiryTimePickerDialog(
     current: LocalDateTime,
     onDismiss: () -> Unit,
-    onTimeSelected: (hour: Int, minute: Int) -> Unit,
+    onTimeSelect: (hour: Int, minute: Int) -> Unit,
 ) {
     val timePickerState = rememberTimePickerState(initialHour = current.hour, initialMinute = current.minute)
     AlertDialog(
@@ -398,7 +398,7 @@ private fun ExpiryTimePickerDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onTimeSelected(timePickerState.hour, timePickerState.minute)
+                    onTimeSelect(timePickerState.hour, timePickerState.minute)
                     onDismiss()
                 },
             ) {

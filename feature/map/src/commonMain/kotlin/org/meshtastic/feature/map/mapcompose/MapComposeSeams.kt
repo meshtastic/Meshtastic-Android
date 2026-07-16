@@ -38,18 +38,6 @@ import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.node.NodeMapViewModel
 
-/** [MapViewProvider] backed by the shared MapCompose renderer. */
-object MapComposeMapViewProvider : MapViewProvider {
-    @Composable
-    override fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
-        MapComposeMapView(
-            mode = MapComposeMode.Main(waypointId),
-            navigateToNodeDetails = navigateToNodeDetails,
-            modifier = modifier,
-        )
-    }
-}
-
 /**
  * Binds every map seam that `feature:map` can satisfy to the shared MapCompose renderer — one call in an app's
  * composition root gives it the full map experience (the pattern MainActivity's `AppCompositionLocals` establishes for
@@ -59,6 +47,7 @@ object MapComposeMapViewProvider : MapViewProvider {
  * depend on — bind it alongside this call, mirroring MainActivity) and `LocalSitePlannerAvailable` (deliberately left
  * at its `false` default).
  */
+@Suppress("ModifierMissing") // Pure CompositionLocalProvider wrapper; it lays out nothing of its own.
 @Composable
 fun ProvideMapComposeMap(content: @Composable () -> Unit) {
     CompositionLocalProvider(
@@ -78,23 +67,23 @@ fun ProvideMapComposeMap(content: @Composable () -> Unit) {
                 MapComposeNodeMapScreen(destNum = destNum, onNavigateUp = onNavigateUp)
             },
         LocalNodeTrackMapProvider provides
-            { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+            { destNum, positions, modifier, selectedPositionTime, onPositionSelect ->
                 MapComposeNodeTrackMap(
                     destNum = destNum,
                     positions = positions,
                     modifier = modifier,
                     selectedPositionTime = selectedPositionTime,
-                    onPositionSelected = onPositionSelected,
+                    onPositionSelect = onPositionSelect,
                 )
             },
         LocalTracerouteMapProvider provides
-            { overlay, nodePositions, onMappableCountChanged, modifier ->
+            { overlay, nodePositions, onMappableCountChange, modifier ->
                 MapComposeMapView(
                     mode =
                     MapComposeMode.Traceroute(
                         overlay = overlay,
                         nodePositions = nodePositions,
-                        onMappableCountChanged = onMappableCountChanged,
+                        onMappableCountChange = onMappableCountChange,
                     ),
                     navigateToNodeDetails = {},
                     modifier = modifier,
@@ -116,14 +105,26 @@ fun ProvideMapComposeMap(content: @Composable () -> Unit) {
     )
 }
 
+/** [MapViewProvider] backed by the shared MapCompose renderer. */
+object MapComposeMapViewProvider : MapViewProvider {
+    @Composable
+    override fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
+        MapComposeMapView(
+            mode = MapComposeMode.Main(waypointId),
+            navigateToNodeDetails = navigateToNodeDetails,
+            modifier = modifier,
+        )
+    }
+}
+
 /** Position-track map for a node, resolved through the shared [NodeMapViewModel] position logs. */
 @Composable
 private fun MapComposeNodeTrackMap(
     destNum: Int,
     positions: List<org.meshtastic.proto.Position>,
-    modifier: Modifier,
     selectedPositionTime: Int?,
-    onPositionSelected: ((Int) -> Unit)?,
+    onPositionSelect: ((Int) -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     val viewModel = koinViewModel<SharedMapViewModel>()
     MapComposeMapView(
@@ -132,7 +133,7 @@ private fun MapComposeNodeTrackMap(
             focusedNode = viewModel.getNodeOrFallback(destNum),
             positions = positions,
             selectedPositionTime = selectedPositionTime,
-            onPositionSelected = onPositionSelected,
+            onPositionSelect = onPositionSelect,
         ),
         navigateToNodeDetails = {},
         modifier = modifier,
@@ -166,7 +167,7 @@ private fun MapComposeNodeMapScreen(destNum: Int, onNavigateUp: () -> Unit) {
                 focusedNode = node,
                 positions = positions,
                 selectedPositionTime = null,
-                onPositionSelected = null,
+                onPositionSelect = null,
             ),
             navigateToNodeDetails = {},
             modifier = Modifier.fillMaxSize().padding(paddingValues),

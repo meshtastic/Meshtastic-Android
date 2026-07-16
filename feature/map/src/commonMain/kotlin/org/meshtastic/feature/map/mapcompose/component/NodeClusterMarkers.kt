@@ -137,11 +137,16 @@ internal fun NodeClusterMarkers(
     PrecisionCircles(mapState = mapState, nodes = nodes, show = showPrecisionCircles)
 }
 
+private const val Z_INDEX_DEFAULT = 1f
+private const val Z_INDEX_NODE = 4f
+private const val Z_INDEX_FAVORITE = 4.5f
+private const val Z_INDEX_OUR_NODE = 5f
+
 private fun Node?.markerZIndex(myNodeNum: Int?): Float = when {
-    this == null -> 1f
-    num == myNodeNum -> 5f
-    isFavorite -> 4.5f
-    else -> 4f
+    this == null -> Z_INDEX_DEFAULT
+    num == myNodeNum -> Z_INDEX_OUR_NODE
+    isFavorite -> Z_INDEX_FAVORITE
+    else -> Z_INDEX_NODE
 }
 
 private fun ClusterData.isSingleLocation(): Boolean =

@@ -69,6 +69,7 @@ internal const val TRACK_MARKER_PREFIX = "track-"
 internal const val HOP_MARKER_PREFIX = "hop-"
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val MAX_TRACK_SEGMENTS = 100
+private const val COORDINATE_DECIMAL_PLACES = 5
 
 internal fun trackMarkerId(time: Int): String = "$TRACK_MARKER_PREFIX$time"
 
@@ -80,7 +81,7 @@ internal fun Position.toGeoPoint(): GeoPoint = GeoPoint((latitude_i ?: 0) * DEG_
 /**
  * A focused node's historical position track: per-segment polylines whose alpha fades from oldest to newest
  * (approximating the google renderer's gradient), a [NodeChip][PulsingNodeChip] on the newest position, and dots for
- * older positions. Tapping any point invokes [onPositionSelected] for list synchronization.
+ * older positions. Tapping any point invokes [onPositionSelect] for list synchronization.
  */
 @Composable
 internal fun NodeTrackLayer(
@@ -231,11 +232,11 @@ internal fun PositionCalloutContent(position: Position, displayUnits: DisplayUni
         Column(modifier = Modifier.padding(8.dp)) {
             PositionRow(
                 label = stringResource(Res.string.latitude),
-                value = NumberFormatter.format((position.latitude_i ?: 0) * DEG_D, 5),
+                value = NumberFormatter.format((position.latitude_i ?: 0) * DEG_D, COORDINATE_DECIMAL_PLACES),
             )
             PositionRow(
                 label = stringResource(Res.string.longitude),
-                value = NumberFormatter.format((position.longitude_i ?: 0) * DEG_D, 5),
+                value = NumberFormatter.format((position.longitude_i ?: 0) * DEG_D, COORDINATE_DECIMAL_PLACES),
             )
             PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view.toString())
             PositionRow(

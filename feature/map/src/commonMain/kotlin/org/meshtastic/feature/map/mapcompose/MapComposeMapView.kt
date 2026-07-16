@@ -78,34 +78,6 @@ import ovh.plrapps.mapcompose.api.rotation
 import ovh.plrapps.mapcompose.api.scrollTo
 import ovh.plrapps.mapcompose.ui.MapUI
 
-/** The mode sealed for the shared renderer — mirrors the google flavor's `GoogleMapMode` (plus Discovery/Inline). */
-sealed interface MapComposeMode {
-    /** Standard map: clustered nodes, waypoints with editing, geofence overlays. */
-    data class Main(val waypointId: Int? = null) : MapComposeMode
-
-    /** Focused node position track: fading polyline + selectable historical positions. */
-    data class NodeTrack(
-        val focusedNode: Node?,
-        val positions: List<Position>,
-        val selectedPositionTime: Int? = null,
-        val onPositionSelected: ((Int) -> Unit)? = null,
-    ) : MapComposeMode
-
-    /** Traceroute visualization: offset forward/return polylines + hop markers. */
-    data class Traceroute(
-        val overlay: TracerouteOverlay?,
-        val nodePositions: Map<Int, Position>,
-        val onMappableCountChanged: (shown: Int, total: Int) -> Unit,
-    ) : MapComposeMode
-
-    /** Discovery results around a scanned position. */
-    data class Discovery(val userLatitude: Double, val userLongitude: Double, val nodes: List<DiscoveryMapNode>) :
-        MapComposeMode
-
-    /** Small non-interactive single-node map embedded in detail screens. */
-    data class Inline(val node: Node) : MapComposeMode
-}
-
 /**
  * The shared MapCompose renderer behind every map seam — the multiplatform twin of the google flavor's `MapView`. One
  * slippy-map scaffold ([MapUI] over [rememberMeshMapState]) hosts mode-specific content layers.
@@ -185,7 +157,7 @@ fun MapComposeMapView(mode: MapComposeMode, navigateToNodeDetails: (Int) -> Unit
                 }
             }
             trackTimeFromMarkerId(id)?.let { time ->
-                (currentMode as? MapComposeMode.NodeTrack)?.onPositionSelected?.invoke(time)
+                (currentMode as? MapComposeMode.NodeTrack)?.onPositionSelect?.invoke(time)
             }
         }
         mapState.onLongPress { x, y ->
@@ -274,7 +246,7 @@ fun MapComposeMapView(mode: MapComposeMode, navigateToNodeDetails: (Int) -> Unit
         val shownNodes = tracerouteSelection?.nodesForMarkers ?: emptyList()
         LaunchedEffect(mode.overlay, shownNodes) {
             if (mode.overlay != null) {
-                mode.onMappableCountChanged(shownNodes.size, mode.overlay.relatedNodeNums.size)
+                mode.onMappableCountChange(shownNodes.size, mode.overlay.relatedNodeNums.size)
             }
         }
     }

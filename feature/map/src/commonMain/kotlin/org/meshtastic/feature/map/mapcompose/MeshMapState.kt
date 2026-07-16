@@ -54,13 +54,15 @@ data class MapCamera(val latitude: Double, val longitude: Double, val zoom: Doub
     fun encode(): String = "$latitude,$longitude,$zoom"
 
     companion object {
+        private const val COMPONENT_COUNT = 3
+
         fun decode(encoded: String?): MapCamera? {
-            val parts = encoded?.split(',') ?: return null
-            if (parts.size != 3) return null
-            val lat = parts[0].toDoubleOrNull() ?: return null
-            val lon = parts[1].toDoubleOrNull() ?: return null
-            val zoom = parts[2].toDoubleOrNull() ?: return null
-            return MapCamera(lat, lon, zoom)
+            val values =
+                encoded
+                    ?.split(',')
+                    ?.mapNotNull { it.toDoubleOrNull() }
+                    ?.takeIf { it.size == COMPONENT_COUNT } ?: return null
+            return MapCamera(latitude = values[0], longitude = values[1], zoom = values[2])
         }
     }
 }
