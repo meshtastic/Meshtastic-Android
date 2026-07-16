@@ -37,8 +37,9 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.feature.map.LastHeardFilter
@@ -67,7 +68,6 @@ import org.meshtastic.feature.map.mapcompose.component.waypointIdFromMarkerId
 import org.meshtastic.feature.map.mapcompose.geo.WebMercator
 import org.meshtastic.feature.map.mapcompose.geo.toNormalized
 import org.meshtastic.feature.map.mapcompose.tile.TileSourceCatalog
-import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -77,7 +77,6 @@ import ovh.plrapps.mapcompose.api.rotateTo
 import ovh.plrapps.mapcompose.api.rotation
 import ovh.plrapps.mapcompose.api.scrollTo
 import ovh.plrapps.mapcompose.ui.MapUI
-import ovh.plrapps.mapcompose.ui.state.MapState
 
 /** The mode sealed for the shared renderer — mirrors the google flavor's `GoogleMapMode` (plus Discovery/Inline). */
 sealed interface MapComposeMode {
@@ -108,16 +107,12 @@ sealed interface MapComposeMode {
 }
 
 /**
- * The shared MapCompose renderer behind every map seam — the multiplatform twin of the google flavor's `MapView`.
- * One slippy-map scaffold ([MapUI] over [rememberMeshMapState]) hosts mode-specific content layers.
+ * The shared MapCompose renderer behind every map seam — the multiplatform twin of the google flavor's `MapView`. One
+ * slippy-map scaffold ([MapUI] over [rememberMeshMapState]) hosts mode-specific content layers.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MapComposeMapView(
-    mode: MapComposeMode,
-    navigateToNodeDetails: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun MapComposeMapView(mode: MapComposeMode, navigateToNodeDetails: (Int) -> Unit, modifier: Modifier = Modifier) {
     val viewModel = koinViewModel<SharedMapViewModel>()
     val mapPrefs = koinInject<MapPrefs>()
     val coroutineScope = rememberCoroutineScope()
@@ -126,9 +121,9 @@ fun MapComposeMapView(
     val tileSource = TileSourceCatalog.byId(selectedTileSourceId)
 
     val isMainMode = mode is MapComposeMode.Main
-    val savedCamera = remember(isMainMode) { if (isMainMode) MapCamera.decode(mapPrefs.mapCameraPosition.value) else null }
-    val inlineCamera =
-        (mode as? MapComposeMode.Inline)?.node?.let { MapCamera(it.latitude, it.longitude, INLINE_ZOOM) }
+    val savedCamera =
+        remember(isMainMode) { if (isMainMode) MapCamera.decode(mapPrefs.mapCameraPosition.value) else null }
+    val inlineCamera = (mode as? MapComposeMode.Inline)?.node?.let { MapCamera(it.latitude, it.longitude, INLINE_ZOOM) }
 
     val mapState =
         rememberMeshMapState(
@@ -215,19 +210,28 @@ fun MapComposeMapView(
                     if (savedCamera == null) filteredNodes.map { it.toNormalized() } else emptyList()
 
                 is MapComposeMode.NodeTrack -> m.positions.map { it.toNormalized() }
+
                 is MapComposeMode.Traceroute -> m.nodePositions.values.map { it.toNormalized() }
+
                 is MapComposeMode.Discovery ->
-                    (m.nodes.map { WebMercator.toNormalized(it.latitude, it.longitude) } +
-                        listOfNotNull(
-                            WebMercator.toNormalized(m.userLatitude, m.userLongitude)
-                                .takeIf { m.userLatitude != 0.0 || m.userLongitude != 0.0 },
-                        ))
+                    (
+                        m.nodes.map { WebMercator.toNormalized(it.latitude, it.longitude) } +
+                            listOfNotNull(
+                                WebMercator.toNormalized(m.userLatitude, m.userLongitude).takeIf {
+                                    m.userLatitude != 0.0 || m.userLongitude != 0.0
+                                },
+                            )
+                        )
 
                 is MapComposeMode.Inline -> emptyList()
             }
         when {
             points.size == 1 -> {
-                mapState.scrollTo(points.first().x, points.first().y, zoomToScale(SINGLE_POINT_ZOOM, tileSource.maxZoom))
+                mapState.scrollTo(
+                    points.first().x,
+                    points.first().y,
+                    zoomToScale(SINGLE_POINT_ZOOM, tileSource.maxZoom),
+                )
                 hasCentered = true
             }
 

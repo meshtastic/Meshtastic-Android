@@ -110,11 +110,7 @@ fun ProvideMapComposeMap(content: @Composable () -> Unit) {
             },
         LocalInlineMapProvider provides
             { node, modifier ->
-                MapComposeMapView(
-                    mode = MapComposeMode.Inline(node),
-                    navigateToNodeDetails = {},
-                    modifier = modifier,
-                )
+                MapComposeMapView(mode = MapComposeMode.Inline(node), navigateToNodeDetails = {}, modifier = modifier)
             },
         content = content,
     )

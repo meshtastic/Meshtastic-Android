@@ -91,6 +91,7 @@ import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.NoOpDocTranslator
+import org.meshtastic.feature.map.mapcompose.tile.TileCacheEnvironment
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
@@ -115,7 +116,6 @@ import org.meshtastic.feature.discovery.di.module as featureDiscoveryModule
 import org.meshtastic.feature.docs.di.module as featureDocsModule
 import org.meshtastic.feature.firmware.di.module as featureFirmwareModule
 import org.meshtastic.feature.intro.di.module as featureIntroModule
-import org.meshtastic.feature.map.mapcompose.tile.TileCacheEnvironment
 import org.meshtastic.feature.map.di.module as featureMapModule
 import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule

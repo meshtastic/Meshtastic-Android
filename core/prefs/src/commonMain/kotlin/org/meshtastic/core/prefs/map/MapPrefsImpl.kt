@@ -37,6 +37,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapPrefs
 
+@Suppress("TooManyFunctions")
 @Single
 class MapPrefsImpl(
     @Named("MapDataStore") private val dataStore: DataStore<Preferences>,

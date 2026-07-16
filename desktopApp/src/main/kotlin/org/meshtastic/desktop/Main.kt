@@ -70,7 +70,9 @@ import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
+import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -90,20 +92,18 @@ import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.rememberOpenUrl
-import org.meshtastic.feature.map.mapcompose.ProvideMapComposeMap
-import org.meshtastic.feature.node.metrics.MetricsViewModel
-import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
+import org.meshtastic.feature.map.mapcompose.ProvideMapComposeMap
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 import java.awt.Desktop
 import java.util.Locale
 import coil3.util.Logger as CoilLogger

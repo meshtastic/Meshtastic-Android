@@ -222,6 +222,7 @@ interface NotificationPrefs {
 }
 
 /** Reactive interface for general map preferences. */
+@Suppress("TooManyFunctions")
 interface MapPrefs {
     val mapStyle: StateFlow<Int>
 

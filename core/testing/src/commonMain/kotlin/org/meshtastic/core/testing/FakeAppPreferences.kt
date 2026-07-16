@@ -245,6 +245,7 @@ class FakeUiPrefs : UiPrefs {
     }
 }
 
+@Suppress("TooManyFunctions")
 class FakeMapPrefs : MapPrefs {
     override val mapStyle = MutableStateFlow(0)
 

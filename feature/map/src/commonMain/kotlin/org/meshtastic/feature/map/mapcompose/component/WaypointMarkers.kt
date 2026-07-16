@@ -95,9 +95,7 @@ internal fun WaypointMarkers(mapState: MapState, waypoints: List<Waypoint>, show
         // Geofence regions: a filled circle and/or box polygon per waypoint that defines one.
         val circles =
             if (showWaypoints) {
-                waypoints
-                    .mapNotNull { wp -> wp.toGeofence()?.circle?.let { "geofence-circle-${wp.id}" to it } }
-                    .toMap()
+                waypoints.mapNotNull { wp -> wp.toGeofence()?.circle?.let { "geofence-circle-${wp.id}" to it } }.toMap()
             } else {
                 emptyMap()
             }

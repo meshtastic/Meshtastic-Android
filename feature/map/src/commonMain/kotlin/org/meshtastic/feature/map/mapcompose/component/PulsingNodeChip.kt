@@ -34,8 +34,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.NodeChip
 
 /**
- * A [NodeChip] that flashes briefly when the node was heard within the last few seconds — the shared twin of the
- * google renderer's marker chip.
+ * A [NodeChip] that flashes briefly when the node was heard within the last few seconds — the shared twin of the google
+ * renderer's marker chip.
  */
 @Composable
 internal fun PulsingNodeChip(node: Node, modifier: Modifier = Modifier) {

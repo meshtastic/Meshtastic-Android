@@ -67,8 +67,8 @@ internal fun nodeNumFromMarkerId(id: String): Int? =
  * google renderer's count-based `minClusterSize = 10`, MapCompose clusters purely by marker overlap; the behavioral
  * deviation is documented in the PR.
  *
- * Marker identity is the stable node number (#6197/#6270 convention); chip content reads the node from an updated
- * state so metadata changes (name, colors) recompose in place without marker churn.
+ * Marker identity is the stable node number (#6197/#6270 convention); chip content reads the node from an updated state
+ * so metadata changes (name, colors) recompose in place without marker churn.
  */
 @Composable
 internal fun NodeClusterMarkers(
@@ -103,10 +103,7 @@ internal fun NodeClusterMarkers(
     }
 
     LaunchedEffect(myNodeNum, mapState) {
-        mapState.setClustererExemptList(
-            NODES_CLUSTERER_ID,
-            myNodeNum?.let { setOf(nodeMarkerId(it)) } ?: emptySet(),
-        )
+        mapState.setClustererExemptList(NODES_CLUSTERER_ID, myNodeNum?.let { setOf(nodeMarkerId(it)) } ?: emptySet())
     }
 
     // Keyed add/move/remove reconciliation against the current node list.

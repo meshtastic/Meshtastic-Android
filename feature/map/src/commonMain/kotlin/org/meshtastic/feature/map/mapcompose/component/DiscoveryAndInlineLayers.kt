@@ -37,8 +37,8 @@ import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.feature.map.mapcompose.MapComposeMode
-import org.meshtastic.feature.map.mapcompose.geo.PolylineGeometry
 import org.meshtastic.feature.map.mapcompose.geo.GeoPoint
+import org.meshtastic.feature.map.mapcompose.geo.PolylineGeometry
 import org.meshtastic.feature.map.mapcompose.geo.WebMercator
 import org.meshtastic.feature.map.mapcompose.geo.toNormalized
 import ovh.plrapps.mapcompose.api.addMarker
@@ -52,8 +52,8 @@ private val UserColor = Color(0xFFFF9800)
 private val DirectLineColor = Color(0xFF4CAF50).copy(alpha = 0.5f)
 
 /**
- * Discovery-map content: color-coded markers per discovered node (green = direct, blue = mesh), polylines from the
- * user position to direct neighbors — the shared twin of `DiscoveryGoogleMap`'s content.
+ * Discovery-map content: color-coded markers per discovered node (green = direct, blue = mesh), polylines from the user
+ * position to direct neighbors — the shared twin of `DiscoveryGoogleMap`'s content.
  */
 @Composable
 internal fun DiscoveryLayer(mapState: MapState, mode: MapComposeMode.Discovery) {
@@ -144,8 +144,6 @@ internal fun InlineLayer(mapState: MapState, node: Node, showPrecision: Boolean)
         }
 
         val p = node.toNormalized()
-        mapState.addMarker(id = nodeMarkerId(node.num), x = p.x, y = p.y, clickable = false) {
-            PulsingNodeChip(node)
-        }
+        mapState.addMarker(id = nodeMarkerId(node.num), x = p.x, y = p.y, clickable = false) { PulsingNodeChip(node) }
     }
 }

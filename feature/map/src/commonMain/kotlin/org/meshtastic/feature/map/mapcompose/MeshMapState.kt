@@ -75,7 +75,11 @@ internal fun scaleToZoom(scale: Double, maxZoom: Int): Double = maxZoom + ln(sca
  * source changes and shut down when the composition leaves (the state owns an internal coroutine scope).
  */
 @Composable
-internal fun rememberMeshMapState(tileSource: TileSource, interactive: Boolean = true, initialCamera: MapCamera? = null): MapState {
+internal fun rememberMeshMapState(
+    tileSource: TileSource,
+    interactive: Boolean = true,
+    initialCamera: MapCamera? = null,
+): MapState {
     val client = koinInject<HttpClient>()
     val cacheProvider = koinInject<TileCacheProvider>()
     val buildConfig = koinInject<BuildConfigProvider>()

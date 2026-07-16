@@ -51,8 +51,8 @@ import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
-import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.mapcompose.geo.GeoPoint
 import org.meshtastic.feature.map.mapcompose.geo.NormalizedPoint
 import org.meshtastic.feature.map.mapcompose.geo.PolylineGeometry
@@ -106,7 +106,12 @@ internal fun NodeTrackLayer(
             val alpha = if (sortedPositions.size > 1) index.toFloat() / (sortedPositions.size - 1) else 1f
             val isSelected = position.time == selectedPositionTime
             val isNewest = index == sortedPositions.lastIndex
-            mapState.addMarker(id = id, x = point.x, y = point.y, zIndex = if (isNewest || isSelected) 5f else 1f + alpha) {
+            mapState.addMarker(
+                id = id,
+                x = point.x,
+                y = point.y,
+                zIndex = if (isNewest || isSelected) 5f else 1f + alpha,
+            ) {
                 if (isNewest) {
                     PulsingNodeChip(nodeState)
                 } else {

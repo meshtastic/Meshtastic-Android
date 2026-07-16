@@ -107,10 +107,7 @@ internal fun MapComposeFilterDropdown(expanded: Boolean, onDismissRequest: () ->
                 },
             )
         }
-        LastHeardSlider(
-            selected = mapFilterState.lastHeardFilter,
-            onSelected = { viewModel.setLastHeardFilter(it) },
-        )
+        LastHeardSlider(selected = mapFilterState.lastHeardFilter, onSelected = { viewModel.setLastHeardFilter(it) })
     }
 }
 

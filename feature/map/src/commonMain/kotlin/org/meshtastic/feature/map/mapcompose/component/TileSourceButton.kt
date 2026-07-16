@@ -95,8 +95,9 @@ internal fun MapAttributionBar(tileSource: TileSource, modifier: Modifier = Modi
  */
 @Composable
 internal fun MapScaleBar(mapState: MapState, tileSource: TileSource, modifier: Modifier = Modifier) {
-    val camera by remember(mapState) { mapState.centroidSnapshotFlow().map { mapState.scale to mapState.centroidY } }
-        .collectAsState(initial = mapState.scale to mapState.centroidY)
+    val camera by
+        remember(mapState) { mapState.centroidSnapshotFlow().map { mapState.scale to mapState.centroidY } }
+            .collectAsState(initial = mapState.scale to mapState.centroidY)
 
     val (scale, centroidY) = camera
     if (scale <= 0.0) return

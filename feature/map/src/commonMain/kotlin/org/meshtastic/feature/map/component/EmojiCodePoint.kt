@@ -29,8 +29,8 @@ internal fun emojiCodePointToString(codePoint: Int): String {
 }
 
 /**
- * First Unicode code point of [text] — the multiplatform equivalent of the JVM-only `String.codePointAt(0)`, decoding
- * a leading surrogate pair when present. Returns null for an empty string.
+ * First Unicode code point of [text] — the multiplatform equivalent of the JVM-only `String.codePointAt(0)`, decoding a
+ * leading surrogate pair when present. Returns null for an empty string.
  */
 internal fun firstCodePoint(text: String): Int? {
     val high = text.firstOrNull() ?: return null
