@@ -510,6 +510,7 @@
     <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
     <string name="ignore_mqtt">Игнориране на MQTT</string>
     <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Импортиране на конфигурацията</string>
     <string name="import_known_shared_contact_text">Предупреждение: Този контакт е известен, импортирането ще презапише предишната информация за контакта.</string>
     <string name="import_label">Импортиране</string>

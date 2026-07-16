@@ -123,6 +123,7 @@
     <string name="iaq">Якасць паветра</string>
     <!-- IGNORE -->
     <string name="ignore">Ігнараваць</string>
+    <!-- IMPORT -->
     <string name="info">Звесткі</string>
     <string name="installed_firmware_version">Зараз усталявана</string>
     <string name="intro_welcome">Вітаем у</string>

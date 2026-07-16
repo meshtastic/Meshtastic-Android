@@ -499,6 +499,7 @@
     <string name="ignore_incoming">Ignorovat příchozí</string>
     <string name="ignore_mqtt">Ignorovat MQTT</string>
     <string name="ignore_remove">Odstranit '%1$s' ze seznamu ignorování?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importovat nastavení</string>
     <string name="import_known_shared_contact_text">Upozornění: Tento kontakt je znám, import přepíše předchozí kontaktní informace.</string>
     <string name="import_shared_contact">Importovat sdílený kontakt?</string>

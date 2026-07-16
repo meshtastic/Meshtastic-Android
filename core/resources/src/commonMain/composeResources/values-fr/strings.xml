@@ -629,6 +629,7 @@
     <string name="ignore_incoming">Ignorer les entrées</string>
     <string name="ignore_mqtt">Ignorer MQTT</string>
     <string name="ignore_remove">Supprimer '%1$s' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importer la configuration</string>
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="import_label">Importer</string>

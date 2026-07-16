@@ -363,6 +363,7 @@
     <string name="ignore_incoming">Ignoruj przychodzące</string>
     <string name="ignore_mqtt">Zignoruj MQTT</string>
     <string name="ignore_remove">Usunąć '%1$s' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Import konfiguracji</string>
     <string name="import_label">Import</string>
     <string name="incoming_messages">Wiadomości przychodzące</string>

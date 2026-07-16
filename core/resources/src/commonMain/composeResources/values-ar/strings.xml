@@ -105,6 +105,7 @@
     <!-- IGNORE -->
     <string name="ignore">تجاهل</string>
     <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
+    <!-- IMPORT -->
     <string name="info">معلومات</string>
     <string name="interval_unset">إلغاء تعيين</string>
     <string name="ip_address">عنوان الـ IP:</string>

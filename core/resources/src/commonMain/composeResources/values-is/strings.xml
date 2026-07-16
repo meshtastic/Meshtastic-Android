@@ -81,6 +81,7 @@
     <string name="ignore">Hunsa</string>
     <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
     <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
+    <!-- IMPORT -->
     <string name="interval_unset">Óstillt</string>
     <string name="intro_show">Sýna kynningu</string>
     <string name="ip_address">IP Tala:</string>

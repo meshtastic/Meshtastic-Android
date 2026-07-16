@@ -108,6 +108,7 @@
     <string name="ignore">Injoro</string>
     <string name="ignore_add">Të shtohet ‘%1$s’ në listën e injoruar?</string>
     <string name="ignore_remove">Të hiqet ‘%1$s’ nga lista e injoruar?</string>
+    <!-- IMPORT -->
     <string name="info">Informacion</string>
     <string name="interval_unset">I pa konfiguruar</string>
     <string name="intro_show">Shfaq prezantimin</string>

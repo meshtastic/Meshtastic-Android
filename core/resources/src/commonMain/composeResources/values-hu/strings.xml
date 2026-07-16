@@ -376,6 +376,7 @@
     <string name="ignore_incoming">Bejövő figyelmen kívül hagyása</string>
     <string name="ignore_mqtt">MQTT figyelmen kívül hagyása</string>
     <string name="ignore_remove">Eltávolítod „%1$s”-t a figyelmen kívül hagyási listáról?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Beállítás importálása</string>
     <string name="import_known_shared_contact_text">Figyelmeztetés: Ez a kapcsolat már létezik, az importálás felülírja a korábbi kapcsolati adatokat.</string>
     <string name="import_label">Importálás</string>
