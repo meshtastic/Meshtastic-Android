@@ -794,6 +794,7 @@
     <string name="ignore_remove">Poistetaanko '%1$s' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Asetusten tuonti</string>
+    <string name="import_export_label">Tuonti ja vienti</string>
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="import_label">Tuo</string>
     <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
