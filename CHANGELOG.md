@@ -7,6 +7,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* fix: label channel share FAB "Import/Export" and announce Close when expanded by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6303
+#### 📝 Other Changes
+* refactor(map): adopt maps-compose 8.4.0 stock clustering, drop custom renderer workaround by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6301
+* refactor(map): migrate custom overlays to the maps-utils 5.0 data layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6304
+
 ### Internal (v2.8.0-internal.29)
 Changes since [`v2.8.0-closed.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.9):
 
@@ -21,7 +29,6 @@ Changes since [`v2.8.0-closed.9`](https://github.com/meshtastic/Meshtastic-Andro
 * fix: adopt 2024 EPA PM2.5 AQI breakpoints for cross-platform alignment by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6273
 * fix(analytics): restore Datadog RUM network tracking (google) & unify service name by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6280
 * fix(connections): use a segmented button for transport selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6285
-#### 📝 Other Changes
 * fix: silence false-positive Instantiatable lint on ExtensionAppFunctionService by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6293
 
 ### Closed Beta (v2.8.0-closed.9)
