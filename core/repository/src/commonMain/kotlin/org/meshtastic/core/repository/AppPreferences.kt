@@ -146,6 +146,12 @@ interface UiPrefs {
 
     fun setSelectedConnectionTransport(type: DeviceType)
 
+    /** Keys for firmware-update notifications already scheduled on this device. */
+    val firmwareUpdateNotificationKeys: StateFlow<Set<String>>
+
+    /** Records a notification key after the platform notification has been scheduled successfully. */
+    fun recordFirmwareUpdateNotificationKey(key: String)
+
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)

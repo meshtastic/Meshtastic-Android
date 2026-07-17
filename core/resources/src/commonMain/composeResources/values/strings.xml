@@ -630,6 +630,7 @@
     <string name="firmware_update_almost_there">Almost there...</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_archive_missing_target">No firmware for %2$s (%3$s) was found in \"%1$s\".</string>
+    <string name="firmware_update_available">Firmware update available</string>
     <string name="firmware_update_battery_low">Battery too low (%1$d%). Please charge your device before updating.</string>
     <string name="firmware_update_checking">Checking for updates...</string>
     <string name="firmware_update_confirm_file_button">Start Flashing</string>
@@ -669,6 +670,10 @@
     <string name="firmware_update_no_device">No device connected</string>
     <string name="firmware_update_node_info_missing">Node user information is missing.</string>
     <string name="firmware_update_not_found_in_release">Could not find firmware for %1$s in release.</string>
+    <string name="firmware_update_notification_android">%1$s is installed. Stable %2$s is available. Open Firmware Updates when you\'re ready.</string>
+    <string name="firmware_update_notification_flasher">%1$s is installed. Stable %2$s is available. Open Meshtastic Flasher to update this hardware.</string>
+    <string name="firmware_update_open">Open Firmware Updates</string>
+    <string name="firmware_update_open_flasher">Open Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA update failed: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">This device\'s OTA loader rejected the requested update method: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor\'s serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>

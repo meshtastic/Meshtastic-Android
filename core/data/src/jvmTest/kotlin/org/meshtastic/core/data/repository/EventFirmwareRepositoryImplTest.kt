@@ -28,6 +28,7 @@ import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareFonts
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.EventFirmwareTheme
 import org.meshtastic.core.model.EventFirmwareThemeColors
 import org.meshtastic.core.model.NetworkDeviceHardware
@@ -55,6 +56,8 @@ class EventFirmwareRepositoryImplTest {
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
+
+        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
 
         override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
 

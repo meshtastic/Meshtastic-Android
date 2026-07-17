@@ -124,4 +124,19 @@ class UiPrefsImplTest {
 
         assertEquals(DeviceType.USB, prefs.selectedConnectionTransport.value)
     }
+
+    @Test
+    fun `firmware update notification keys persist without duplicates`() = testScope.runTest {
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.8.0")
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.8.0")
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.9.0")
+
+        assertEquals(
+            setOf(
+                "firmware-update-notified:node:target:2.8.0",
+                "firmware-update-notified:node:target:2.9.0",
+            ),
+            prefs.firmwareUpdateNotificationKeys.value,
+        )
+    }
 }

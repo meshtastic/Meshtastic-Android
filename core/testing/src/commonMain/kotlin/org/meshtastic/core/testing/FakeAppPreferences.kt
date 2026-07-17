@@ -175,6 +175,12 @@ class FakeUiPrefs : UiPrefs {
         selectedConnectionTransport.value = type
     }
 
+    override val firmwareUpdateNotificationKeys = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun recordFirmwareUpdateNotificationKey(key: String) {
+        firmwareUpdateNotificationKeys.value += key
+    }
+
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =

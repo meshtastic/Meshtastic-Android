@@ -55,6 +55,10 @@ open class FirmwareReleaseRepositoryImpl(
     /** Single-flight guard so concurrent collectors share one network refresh. */
     private val refreshMutex = Mutex()
 
+    /** Serializes target-manifest downloads and preserves successful results for the selected release URL. */
+    private val manifestMutex = Mutex()
+    private val manifestTargetsByUrl = mutableMapOf<String, Set<String>>()
+
     /**
      * Guards [bundledSnapshot] decode so concurrent collectors decode the bundled JSON at most once per process. The
      * apply/skip decision itself is re-evaluated every time against the CURRENT active DB — the active Room database
@@ -74,6 +78,21 @@ open class FirmwareReleaseRepositoryImpl(
     override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
     override val nightlyRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.NIGHTLY)
+
+    override suspend fun getManifestTargets(release: FirmwareRelease): Set<String>? {
+        val manifestUrl = release.zipUrl.takeIf { it.isNotBlank() } ?: return null
+        return manifestMutex.withLock {
+            manifestTargetsByUrl[manifestUrl]
+                ?: safeCatching { remoteDataSource.getFirmwareReleaseManifest(manifestUrl) }
+                    .onFailure { error -> Logger.w(error) { "FirmwareReleaseRepository: manifest fetch failed" } }
+                    .getOrNull()
+                    ?.targets
+                    ?.map { target -> target.platform.trim() }
+                    ?.filter(String::isNotBlank)
+                    ?.toSet()
+                    ?.also { targets -> manifestTargetsByUrl[manifestUrl] = targets }
+        }
+    }
 
     private fun getLatestFirmware(releaseType: FirmwareReleaseType): Flow<FirmwareRelease?> = staleWhileRevalidateFlow(
         loadFromCache = {
