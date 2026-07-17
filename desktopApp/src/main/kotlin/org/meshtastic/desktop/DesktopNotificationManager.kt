@@ -62,7 +62,7 @@ class DesktopNotificationManager(
      */
     val fallbackNotifications: SharedFlow<ComposeNotification> = _fallbackNotifications.asSharedFlow()
 
-    override fun dispatch(notification: Notification) {
+    override fun dispatch(notification: Notification): Boolean {
         val enabled =
             when (notification.category) {
                 Notification.Category.Message -> prefs.messagesEnabled.value
@@ -74,7 +74,7 @@ class DesktopNotificationManager(
             }
 
         Logger.d { "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled" }
-        if (!enabled) return
+        if (!enabled) return false
 
         scope.launch {
             val success = nativeSender.send(notification)
@@ -83,6 +83,7 @@ class DesktopNotificationManager(
                 emitFallback(notification)
             }
         }
+        return true
     }
 
     private fun emitFallback(notification: Notification) {

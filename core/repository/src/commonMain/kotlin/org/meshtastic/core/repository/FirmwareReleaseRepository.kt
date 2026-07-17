@@ -33,8 +33,8 @@ interface FirmwareReleaseRepository {
     val nightlyRelease: Flow<FirmwareRelease?>
 
     /**
-     * Fetches the authoritative firmware targets from a release's manifest URL. Returns null when the manifest cannot
-     * be retrieved or parsed, so callers can fail closed rather than offering an incompatible firmware update.
+     * Fetches the authoritative firmware board targets from a release's manifest URL. Returns null when the manifest
+     * cannot be retrieved or parsed, so callers can fail closed rather than offering an incompatible firmware update.
      */
     suspend fun getManifestTargets(release: FirmwareRelease): Set<String>?
 

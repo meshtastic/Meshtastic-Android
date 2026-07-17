@@ -29,6 +29,7 @@ import org.meshtastic.core.repository.Notification
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -83,6 +84,17 @@ class AndroidNotificationManagerTest {
 
         val posted = shadowOf(systemNotificationManager).allNotifications.last()
         assertEquals(NotificationChannels.NEW_NODES, posted.channelId)
+    }
+
+    @Test
+    fun `dispatch reports false when its notification channel is disabled`() {
+        createChannel(NotificationChannels.NEW_NODES, NotificationManager.IMPORTANCE_NONE)
+        val manager = AndroidNotificationManager(context)
+
+        val dispatched = manager.dispatch(Notification(title = "Node", message = "Seen", category = Notification.Category.NodeEvent))
+
+        assertFalse(dispatched)
+        assertEquals(0, shadowOf(systemNotificationManager).allNotifications.size)
     }
 
     @Test
@@ -187,9 +199,9 @@ class AndroidNotificationManagerTest {
         assertEquals(expectedChannelId, posted.channelId)
     }
 
-    private fun createChannel(id: String) {
+    private fun createChannel(id: String, importance: Int = NotificationManager.IMPORTANCE_DEFAULT) {
         systemNotificationManager.createNotificationChannel(
-            NotificationChannel(id, id, NotificationManager.IMPORTANCE_DEFAULT),
+            NotificationChannel(id, id, importance),
         )
     }
 

@@ -149,16 +149,16 @@ class FirmwareReleaseRepositoryImplTest {
     }
 
     @Test
-    fun `manifest targets are fetched once and cached by release URL`() = runBlocking {
+    fun `manifest board targets are fetched once and cached by release URL`() = runBlocking {
         val release = org.meshtastic.core.database.entity.FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
         api.manifest =
             FirmwareReleaseManifest(
                 version = "2.8.0",
-                targets = listOf(FirmwareTarget(board = "T-Echo", platform = "t-echo")),
+                targets = listOf(FirmwareTarget(board = "tbeam-s3-core", platform = "esp32s3")),
             )
 
-        assertEquals(setOf("t-echo"), repository.getManifestTargets(release))
-        assertEquals(setOf("t-echo"), repository.getManifestTargets(release))
+        assertEquals(setOf("tbeam-s3-core"), repository.getManifestTargets(release))
+        assertEquals(setOf("tbeam-s3-core"), repository.getManifestTargets(release))
         assertEquals(1, api.manifestCalls)
     }
 

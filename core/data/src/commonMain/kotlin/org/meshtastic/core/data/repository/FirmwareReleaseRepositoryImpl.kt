@@ -87,7 +87,7 @@ open class FirmwareReleaseRepositoryImpl(
                     .onFailure { error -> Logger.w(error) { "FirmwareReleaseRepository: manifest fetch failed" } }
                     .getOrNull()
                     ?.targets
-                    ?.map { target -> target.platform.trim() }
+                    ?.map { target -> target.board.trim() }
                     ?.filter(String::isNotBlank)
                     ?.toSet()
                     ?.also { targets -> manifestTargetsByUrl[manifestUrl] = targets }

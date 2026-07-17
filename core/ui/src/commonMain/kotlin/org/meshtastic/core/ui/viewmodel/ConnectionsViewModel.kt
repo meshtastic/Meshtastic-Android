@@ -274,23 +274,29 @@ class ConnectionsViewModel(
                                 notice.stableVersion,
                             )
                     }
-                notificationManager.dispatch(
-                    Notification(
-                        id = notice.notificationKey.hashCode(),
-                        title = getStringSuspend(Res.string.firmware_update_available),
-                        message = message,
-                        type = Notification.Type.Info,
-                        category = Notification.Category.NodeEvent,
-                        deepLinkUri =
-                        if (notice.destination == org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate) {
-                            "meshtastic:///firmware/update"
-                        } else {
-                            "https://flasher.meshtastic.org"
-                        },
-                    ),
-                )
-                scheduledFirmwareUpdateNotificationKeys += notice.notificationKey
-                uiPrefs.recordFirmwareUpdateNotificationKey(notice.notificationKey)
+                if (
+                    notificationManager.dispatch(
+                        Notification(
+                            id = notice.notificationKey.hashCode(),
+                            title = getStringSuspend(Res.string.firmware_update_available),
+                            message = message,
+                            type = Notification.Type.Info,
+                            category = Notification.Category.NodeEvent,
+                            deepLinkUri =
+                            if (
+                                notice.destination ==
+                                    org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate
+                            ) {
+                                "meshtastic:///firmware/update"
+                            } else {
+                                "https://flasher.meshtastic.org"
+                            },
+                        ),
+                    )
+                ) {
+                    scheduledFirmwareUpdateNotificationKeys += notice.notificationKey
+                    uiPrefs.recordFirmwareUpdateNotificationKey(notice.notificationKey)
+                }
             }
             .launchIn(viewModelScope)
     }
