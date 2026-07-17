@@ -3,7 +3,7 @@ title: Интеграция TAK
 parent: Руководство пользователя
 nav_order: 10
 last_updated: 2026-07-08
-description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
+description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
   - atak
@@ -12,124 +12,124 @@ aliases:
 
 # Интеграция TAK
 
-Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.
+Meshtastic интегрируется с экосистемой Team Awareness Kit (TAK), обеспечивая взаимодействие между устройствами mesh-сети Meshtastic и приложениями TAK, такими как ATAK и WinTAK.
 
 ## Обзор
 
-The TAK module allows Meshtastic nodes to:
+Модуль TAK позволяет нодам Meshtastic:
 
-- Share position data in TAK-compatible CoT (Cursor on Target) format
-- Appear as team members on TAK map displays
-- Receive TAK PLI (Position Location Information) messages
+- Делиться данными о местоположении в формате CoT (Cursor on Target), совместимом с TAK
+- Отображаться как члены команды на картах TAK
+- Получать сообщения PLI (информация о местоположении) TAK
 
-## Setup
+## Настройка
 
-### Prerequisites
+### Необходимые условия
 
-- ATAK (Android Team Awareness Kit) or WinTAK installed
-- Meshtastic ATAK Plugin installed
-- TAK module enabled on your Meshtastic radio
+- Установлен ATAK (Android Team Awareness Kit) или WinTAK
+- Установлен Meshtastic ATAK Plugin
+- Модуль TAK включён на вашем радио Meshtastic
 
 ### Настройки
 
-1. Navigate to **Settings → Module Config → TAK**.
-2. Enable the TAK module.
-3. Configure the TAK team/group settings:
+1. Перейдите в **Настройки → Конфигурация модулей → TAK**.
+2. Включите модуль TAK.
+3. Настройте параметры команды/группы TAK:
 
-![Module toggle switch](../../assets/screenshots/settings_switch.png)
+![Переключатель модуля](../../assets/screenshots/settings_switch.png)
 
-| Настройка    | Описание                   |
-| ------------ | -------------------------- |
-| Включено     | Activate TAK interop       |
-| Режим обмена | TAK-compatible output mode |
+| Настройка    | Описание                          |
+| ------------ | --------------------------------- |
+| Включено     | Активировано взаимодействие с TAK |
+| Режим обмена | Режим вывода, совместимый с TAK   |
 
-### ATAK Plugin Setup
+### Настройка плагина ATAK
 
-1. Install the Meshtastic ATAK Plugin from the plugin repository.
-2. Open ATAK and enable the Meshtastic plugin.
-3. The plugin bridges messages between ATAK and your mesh network.
+1. Установите Meshtastic ATAK Plugin из репозитория плагинов.
+2. Откройте ATAK и включите плагин Meshtastic.
+3. Плагин соединяет сообщения между ATAK и твоей mesh-сетью.
 
-### Local TAK Server
+### Локальный TAK-сервер
 
-The app can also run a **local TAK server** so ATAK/iTAK clients on the same device or network can connect directly, without a remote TAK server. Open **Settings → Module Config → TAK → TAK Server**:
+Приложение также может запускать **локальный TAK-сервер**, чтобы клиенты ATAK/iTAK на том же устройстве или в сети могли подключаться напрямую, без удалённого TAK-сервера. Откройте **Настройки → Конфигурация модулей → TAK → TAK-сервер**:
 
-![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
+![Настройки локального TAK-сервера с переключателем включения и опцией экспорта](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts a local TLS server on port **8089** for ATAK/iTAK connections.
-- **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
+- **Включить локальный TAK-сервер** — запускает локальный TLS-сервер на порту **8089** для подключений ATAK/iTAK.
+- **Экспорт пакета данных TAK** — создаёт пакет данных `.zip`, который ATAK/iTAK может импортировать для подключения к этому серверу.
 
-## TAK Roles
+## Роли TAK
 
-Nodes configured with TAK-related roles behave differently from standard clients:
+Ноды, настроенные с ролями, связанными с TAK, ведут себя иначе, чем стандартные клиенты:
 
-| Роль            | Описание                                                                                                                                                                                                                                                                            |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TAK**         | Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge.                                                                                                            |
-| **TAK Tracker** | Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |
+| Роль            | Описание                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TAK**         | Полная совместимость с TAK — отправляет и принимает данные CoT, сообщения чата и обновления PLI. Выполняет функции стандартного клиента и TAK-моста.                                                                                                                                                      |
+| **TAK Tracker** | Вывод только координат в формате TAK — автоматически передаёт PLI через равные промежутки времени без участия пользователя. Оптимизирован для автономных маячков местоположения (транспортные средства, оборудование, путевые точки). Не ретранслирует сообщения чата. |
 
-> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a radio mounted in a vehicle). Use **TAK** for devices where users actively participate in TAK operations.
+> 💡 **Совет:** Используйте **TAK Tracker** для устройств, которым требуется только передавать координаты (например, радио, установленное в автомобиле). Используйте **TAK** для устройств, где пользователи активно участвуют в операциях TAK.
 
-### CoT (Cursor on Target) Format
+### Формат CoT (Cursor on Target)
 
-TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
+Сообщения TAK используют формат XML Cursor on Target — военный стандарт для обмена данными о ситуационной осведомлённости. Meshtastic преобразует свои внутренние сообщения protobuf в формат CoT при соединении с системами TAK, поэтому ручное преобразование формата не требуется.
 
-## TAK Identity
+## Идентификация в TAK
 
-When using TAK roles, your node broadcasts identity information that appears on TAK maps:
+При использовании ролей TAK твоя нода передаёт идентификационную информацию, которая отображается на картах TAK:
 
-| Настройка      | Описание                                                                                                         |
-| -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Цвет команды   | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
-| Роль участника | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |
+| Настройка      | Описание                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Цвет команды   | Цвет твоей команды на карте TAK (например, Синий, Красный, Голубой, Зелёный)                           |
+| Роль участника | Твоя оперативная роль (Team Member, Team Lead, HQ, Medic, RTO и т. д.) |
 
-These settings appear in **Settings → Module Config → TAK** when the TAK module is enabled. Your TAK callsign isn't a separate setting — it's derived automatically from your Meshtastic node name.
+Эти настройки появляются в **Настройки → Конфигурация модулей → TAK**, когда модуль TAK включён. Твой позывной в TAK не задаётся отдельно — он автоматически берётся из имени твоей ноды Meshtastic.
 
-> 💡 **Tip:** Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.
+> 💡 **Совет:** Цвета команд/ролей являются стандартными цветами принадлежности в TAK. Согласуй с твоей командой TAK использование единообразных назначений команд.
 
-## Wire Format (V1 / V2)
+## Формат передачи (V1 / V2)
 
-Meshtastic supports two TAK wire formats, chosen automatically based on the connected radio's firmware — no manual configuration needed:
+Meshtastic поддерживает два формата передачи данных TAK, которые выбираются автоматически в зависимости от прошивки подключённого радио — ручная настройка не требуется:
 
-| Format                          | Compatibility                                            | Features                                                                                                                                                                                                           |
-| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| V1 (Legacy)  | Firmware 2.7.x and older | Bare protobuf encoding on port 72. Supports position sharing (PLI) and chat (GeoChat) only — shapes, markers, routes, and other typed CoT events are dropped |
-| V2 (Current) | Firmware 2.8.0+          | Compact, zstd-compressed encoding on port 78. Adds shapes, markers, routes, aircraft, casevac, emergency, and task CoT types on top of everything V1 supports                                      |
+| Формат                             | Совместимость                                           | Особенности                                                                                                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V1 (Устаревший) | Прошивка 2.7.x и старше | Простое кодирование protobuf на порт 72. Поддерживает только передачу местоположения (PLI) и чат (GeoChat) — фигуры, маркеры, маршруты и другие типизированные события CoT отбрасываются |
+| V2 (Текущий)    | Прошивка 2.8.0 и новее  | Компактное кодирование со сжатием zstd на порт 78. Добавляет типы CoT: фигуры, маркеры, маршруты, воздушные суда, эвакуацию, чрезвычайные ситуации и задачи — в дополнение ко всему, что поддерживает V1       |
 
-A node still relays legacy V1 packets from older nodes even while running V2 itself, so mixed-firmware meshes keep working.
+Нода продолжает ретранслировать устаревшие пакеты V1 от старых нод, даже если сама работает на V2, поэтому смешанные по прошивке mesh-сети продолжают функционировать.
 
-## Usage with ATAK
+## Использование с ATAK
 
-Once configured:
+После настройки:
 
-- Meshtastic nodes appear as markers on the ATAK map with callsign labels
-- Chat messages can bridge between mesh and TAK networks
-- Position updates flow bidirectionally between Meshtastic and TAK
-- TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
+- Ноды Meshtastic отображаются как маркеры на карте ATAK с подписями позывных
+- Сообщения чата могут передаваться между mesh-сетью и сетями TAK
+- Обновления местоположения передаются двунаправленно между Meshtastic и TAK
+- Ноды TAK Tracker автоматически передают PLI — их координаты отображаются на картах ATAK без какой-либо настройки на стороне ATAK
 
-> ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+> ⚠️ **Примечание:** Для интеграции с TAK требуются определённые роли нод и настройка модуля. Стандартные клиентские ноды не участвуют в операциях TAK автоматически.
 
-## Troubleshooting
+## Устранение неполадок
 
-| Problem                                 | Cause                                                                                                     | Solution                                                                                        |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Node doesn't appear on ATAK map         | TAK module disabled or wrong role                                                                         | Verify TAK module is enabled and node role is TAK or TAK Tracker                                |
-| Position updates are stale              | GPS fix lost or interval too long                                                                         | Check GPS status; reduce position broadcast interval in Position Config                         |
-| ATAK plugin shows "disconnected"        | BLE connection lost or plugin crashed                                                                     | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin                                 |
-| Shapes, markers, or routes not bridging | Sending node is on legacy V1 (firmware 2.7.x or older) | Update the sending node's firmware to 2.8.0+ for V2 wire format |
-| CoT data not flowing                    | Channel mismatch                                                                                          | All TAK nodes must be on the same channel with matching encryption                              |
+| Проблема                                   | Причина                                                                                                                   | Решение                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Нода не отображается на карте ATAK         | Модуль TAK отключён или выбрана неверная роль                                                                             | Убедитесь, что модуль TAK включён, а роль ноды — TAK или TAK Tracker                                                |
+| Данные о местоположении устарели           | Потерян сигнал GPS или слишком большой интервал                                                                           | Проверьте состояние GPS; уменьшите интервал передачи координат в настройках Position Config                         |
+| Плагин ATAK показывает "не подключён"      | Потеряно соединение BLE или произошёл сбой плагина                                                                        | Переподключите Bluetooth в приложении Meshtastic, затем перезапустите плагин ATAK                                   |
+| Фигуры, маркеры или маршруты не передаются | Отправляющая нода использует устаревший V1 (прошивка 2.7.x или старше) | Обновите прошивку отправляющей ноды до 2.8.0+ для использования формата передачи V2 |
+| Данные CoT не передаются                   | Несовпадение каналов                                                                                                      | Все ноды TAK должны находиться на одном канале с одинаковым шифрованием                                             |
 
-## Security Considerations
+## Соображения безопасности
 
-- TAK data shares your position and callsign information
-- Ensure your channel encryption is configured when using TAK in sensitive environments
-- The TAK module respects the same channel encryption as other Meshtastic messages
+- Данные TAK передают ваше местоположение и позывной
+- Убедись, что шифрование канала настроено при использовании TAK в чувствительных средах
+- Модуль TAK соблюдает то же шифрование канала, что и другие сообщения Meshtastic
 
-## Related Topics
+## Связанные темы
 
-- [Settings — Modules & Admin](settings-module-admin) — TAK module configuration
-- [Nodes](nodes) — TAK and TAK Tracker roles in the node list
-- [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/atak-plugin) — detailed ATAK setup on meshtastic.org
+- [Настройки — Модули и администрирование](settings-module-admin) — конфигурация модуля TAK
+- [Ноды](nodes) — роли TAK и TAK Tracker в списке нод
+- [Карта и путевые точки](map-and-waypoints) — расположение нод на карте
+- [Руководство по плагину ATAK](https://meshtastic.org/docs/software/integrations/atak-plugin) — подробная настройка ATAK на meshtastic.org
 
 ---
 

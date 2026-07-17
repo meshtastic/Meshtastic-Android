@@ -189,6 +189,24 @@
   },
   "pullRequests": [
     {
+      "id": "11042",
+      "title": "meshnology-w10: define HAS_SPI_TFT so the TFT screen initializes again",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11042",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "11031",
+      "title": "Add native Windows build of meshtasticd",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11031",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11025",
+      "title": "Stop accelerometer thread when double-tap/wake-on-motion disabled at runtime",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11025",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11015",
       "title": "feat: add driver for MCP23017",
       "page_url": "https://github.com/meshtastic/firmware/pull/11015",
@@ -225,12 +243,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10961",
-      "title": "stm32wl: add hardware RTC support (rak3172)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10961",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10954",
       "title": "Flatpak: rename Meshtastic -> MeshtasticD",
       "page_url": "https://github.com/meshtastic/firmware/pull/10954",
@@ -247,12 +259,6 @@
       "title": "Fixed pin state setup when SX126X_ANT_SW is defined",
       "page_url": "https://github.com/meshtastic/firmware/pull/10947",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10936",
-      "title": "Snake!",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10936",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10935",
