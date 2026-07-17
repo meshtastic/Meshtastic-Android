@@ -209,13 +209,6 @@ enum class RegionInfo(
     UA_433(RegionCode.UA_433, "Ukraine 433MHz", 433.0f, 434.7f),
 
     /**
-     * Ukraine 868MHz 868,0-868,6 Mhz 25 mW
-     *
-     * @see [NKZRZI](https://nkrzi.gov.ua/images/upload/256/5810/PDF_UUZ_19_01_2016.pdf)
-     */
-    UA_868(RegionCode.UA_868, "Ukraine 868MHz", 868.0f, 868.6f),
-
-    /**
      * Malaysia 433MHz 433 - 435 MHz at 100mW, no restrictions.
      *
      * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
