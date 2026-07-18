@@ -37,11 +37,9 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.repository.MapPrefs
-import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.EditWaypointDialog
@@ -69,7 +67,6 @@ import org.meshtastic.feature.map.mapcompose.geo.WebMercator
 import org.meshtastic.feature.map.mapcompose.geo.toNormalized
 import org.meshtastic.feature.map.mapcompose.tile.TileSourceCatalog
 import org.meshtastic.feature.map.tracerouteNodeSelection
-import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import ovh.plrapps.mapcompose.api.onLongPress
 import ovh.plrapps.mapcompose.api.onMarkerClick
