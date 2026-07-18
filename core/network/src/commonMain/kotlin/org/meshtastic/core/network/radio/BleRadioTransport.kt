@@ -707,7 +707,9 @@ class BleRadioTransport(
                             return@withLock
                         }
                 try {
-                    retryBleOperation(tag = address) { currentService.sendToRadio(p) }
+                    retryBleOperation(tag = address, retryWhile = { currentService === radioService }) {
+                        currentService.sendToRadio(p)
+                    }
                     val sent = packetsSent.incrementAndGet()
                     val txBytes = bytesSent.addAndGet(p.size.toLong())
                     Logger.v {
@@ -726,7 +728,7 @@ class BleRadioTransport(
                         }
                         handleFailure(e)
                     } else {
-                        Logger.w(e) { "[$address] Stale write failure ignored (session was replaced)" }
+                        Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
                     }
                 }
             }

@@ -419,6 +419,45 @@ class BleRadioTransportReconnectCrashTest {
     }
 
     @Test
+    fun `write retry stops when remote disconnect retires the captured session`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Radio")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        try {
+            bleTransport.start()
+            advanceTimeBy(4_000L)
+
+            val attemptsBefore = connection.service.writeAttempts
+            connection.service.writeException = NotConnectedException("session closed")
+            bleTransport.handleSendToRadio(byteArrayOf(1))
+            testScheduler.runCurrent()
+            assertEquals(attemptsBefore + 1, connection.service.writeAttempts)
+
+            connection.simulateRemoteDisconnect()
+            testScheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                attemptsBefore + 1,
+                connection.service.writeAttempts,
+                "A write captured from a retired session must not consume more retry attempts",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
     fun `repeated writes after session failure do not spam onDisconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
