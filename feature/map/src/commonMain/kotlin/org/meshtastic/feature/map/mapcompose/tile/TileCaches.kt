@@ -25,8 +25,7 @@ package org.meshtastic.feature.map.mapcompose.tile
 internal object TileCaches {
     private val caches = mutableMapOf<String, TileDiskCache>()
 
-    fun shared(environment: TileCacheEnvironment): TileDiskCache =
-        caches.getOrPut(environment.cacheRoot.toString()) {
-            TileDiskCache(environment.fileSystem, environment.cacheRoot)
-        }
+    fun shared(environment: TileCacheEnvironment): TileDiskCache = caches.getOrPut(environment.cacheRoot.toString()) {
+        TileDiskCache(environment.fileSystem, environment.cacheRoot)
+    }
 }
