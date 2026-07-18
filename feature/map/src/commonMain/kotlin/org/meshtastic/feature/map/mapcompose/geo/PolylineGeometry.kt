@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Bearing/segment math is inherently constant-heavy (90°, 360°, ring closure).
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.feature.map.mapcompose.geo

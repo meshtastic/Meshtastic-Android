@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Projection formulas are inherently constant-heavy; naming every 180/360/0.5 hurts readability.
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.feature.map.mapcompose.geo

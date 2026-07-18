@@ -16,14 +16,17 @@
  */
 package org.meshtastic.feature.map.mapcompose.tile
 
-import org.koin.core.annotation.Single
-
 /**
- * App-wide [TileDiskCache] singleton so every map surface shares one LRU budget and one on-disk tree. Resolvable only
- * where the app binds a [TileCacheEnvironment] (desktop today); Koin singles are lazy, so platforms without a binding
- * are unaffected as long as nothing composes the shared map renderer.
+ * Process-wide [TileDiskCache] registry so every map surface over the same cache root shares one LRU budget and one
+ * in-memory index. Deliberately NOT a Koin definition: `FeatureMapModule` is included on every platform, but only
+ * platforms that actually render the shared map bind a [TileCacheEnvironment] — resolving it here at use-time (from
+ * composition, main-thread only) keeps the Android Koin graph verifiable without a stub binding.
  */
-@Single
-class TileCacheProvider(environment: TileCacheEnvironment) {
-    val cache: TileDiskCache = TileDiskCache(environment.fileSystem, environment.cacheRoot)
+internal object TileCaches {
+    private val caches = mutableMapOf<String, TileDiskCache>()
+
+    fun shared(environment: TileCacheEnvironment): TileDiskCache =
+        caches.getOrPut(environment.cacheRoot.toString()) {
+            TileDiskCache(environment.fileSystem, environment.cacheRoot)
+        }
 }

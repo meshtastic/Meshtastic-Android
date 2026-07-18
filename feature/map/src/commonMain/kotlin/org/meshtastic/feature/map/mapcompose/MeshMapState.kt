@@ -29,7 +29,8 @@ import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.feature.map.mapcompose.geo.NormalizedBox
 import org.meshtastic.feature.map.mapcompose.geo.WebMercator
 import org.meshtastic.feature.map.mapcompose.tile.MeshTileStreamProvider
-import org.meshtastic.feature.map.mapcompose.tile.TileCacheProvider
+import org.meshtastic.feature.map.mapcompose.tile.TileCacheEnvironment
+import org.meshtastic.feature.map.mapcompose.tile.TileCaches
 import org.meshtastic.feature.map.mapcompose.tile.TileSource
 import ovh.plrapps.mapcompose.api.BoundingBox
 import ovh.plrapps.mapcompose.api.addLayer
@@ -58,10 +59,8 @@ data class MapCamera(val latitude: Double, val longitude: Double, val zoom: Doub
 
         fun decode(encoded: String?): MapCamera? {
             val values =
-                encoded
-                    ?.split(',')
-                    ?.mapNotNull { it.toDoubleOrNull() }
-                    ?.takeIf { it.size == COMPONENT_COUNT } ?: return null
+                encoded?.split(',')?.mapNotNull { it.toDoubleOrNull() }?.takeIf { it.size == COMPONENT_COUNT }
+                    ?: return null
             return MapCamera(latitude = values[0], longitude = values[1], zoom = values[2])
         }
     }
@@ -83,8 +82,9 @@ internal fun rememberMeshMapState(
     initialCamera: MapCamera? = null,
 ): MapState {
     val client = koinInject<HttpClient>()
-    val cacheProvider = koinInject<TileCacheProvider>()
+    val cacheEnvironment = koinInject<TileCacheEnvironment>()
     val buildConfig = koinInject<BuildConfigProvider>()
+    val cache = remember(cacheEnvironment) { TileCaches.shared(cacheEnvironment) }
 
     val mapState =
         remember(tileSource.id) {
@@ -107,7 +107,7 @@ internal fun rememberMeshMapState(
                 }
             }
                 .apply {
-                    addLayer(MeshTileStreamProvider(tileSource, cacheProvider.cache, client, userAgent))
+                    addLayer(MeshTileStreamProvider(tileSource, cache, client, userAgent))
                     if (!interactive) disableGestures()
                 }
         }
