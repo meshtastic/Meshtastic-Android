@@ -33,14 +33,14 @@ internal fun createBarcodeAnalyzer(onResult: (String) -> Unit): ImageAnalysis.An
 
     return ImageAnalysis.Analyzer { imageProxy ->
         try {
-            val buffer: ByteBuffer = imageProxy.planes[0].buffer
+            val lumaPlane = imageProxy.planes[0]
+            val buffer: ByteBuffer = lumaPlane.buffer.duplicate()
             val data = ByteArray(buffer.remaining())
             buffer.get(data)
 
             val width = imageProxy.width
             val height = imageProxy.height
-
-            val source = PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false)
+            val source = PlanarYUVLuminanceSource(data, lumaPlane.rowStride, height, 0, 0, width, height, false)
             val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
 
             val result = reader.decodeWithState(binaryBitmap)
