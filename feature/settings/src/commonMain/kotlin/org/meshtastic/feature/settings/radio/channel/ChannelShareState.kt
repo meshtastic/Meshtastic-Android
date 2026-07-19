@@ -16,23 +16,18 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
-import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.model.util.toChannelSet
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config.LoRaConfig
-import org.meshtastic.proto.Config.LoRaConfig.RegionCode
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
-class ChannelScreenTest {
-    @Test
-    fun `channel share state defaults to a replace URL`() {
-        val channelSet = ChannelSet(lora_config = LoRaConfig(region = RegionCode.US))
+internal class ChannelShareState {
+    var shouldAdd by mutableStateOf(false)
 
-        val url = ChannelShareState().uriString(channelSet)
-
-        assertFalse(url.contains("?add=true"))
-        assertEquals(channelSet.lora_config, CommonUri.parse(url).toChannelSet().lora_config)
-    }
+    fun uriString(channelSet: ChannelSet): String = channelSet.getChannelUrl(shouldAdd = shouldAdd).toString()
 }
+
+@Composable internal fun rememberChannelShareState(): ChannelShareState = remember { ChannelShareState() }
