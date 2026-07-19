@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
+import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.proto.ChannelSet
@@ -43,14 +44,32 @@ class ChannelSetUrlTest {
     fun `all supported channel counts preserve settings for replace and add`() {
         for (channelCount in 1..8) {
             val original = channelSet(channelCount)
-            val replace = original.getChannelUrl().toChannelSet()
-            val add = original.getChannelUrl(shouldAdd = true).toChannelSet()
+            val replaceUrl = original.getChannelUrl()
+            val addUrl = original.getChannelUrl(shouldAdd = true)
+            val replace = replaceUrl.toChannelSet()
+            val add = addUrl.toChannelSet()
+            val replacePayload = replaceUrl.encodedChannelSet()
+            val addPayload = addUrl.encodedChannelSet()
 
+            assertEquals(original.settings, replacePayload.settings, "$channelCount-channel replace payload settings")
+            assertEquals(
+                original.lora_config,
+                replacePayload.lora_config,
+                "$channelCount-channel replace payload LoRa config",
+            )
             assertEquals(original.settings, replace.settings, "$channelCount-channel replace settings")
             assertEquals(original.lora_config, replace.lora_config, "$channelCount-channel replace LoRa config")
+            assertEquals(original.settings, addPayload.settings, "$channelCount-channel add payload settings")
+            assertNull(addPayload.lora_config, "$channelCount-channel add payload must omit LoRa config")
             assertEquals(original.settings, add.settings, "$channelCount-channel add settings")
             assertNull(add.lora_config, "$channelCount-channel add must not retune")
         }
+    }
+
+    private fun CommonUri.encodedChannelSet(): ChannelSet {
+        val base64 = requireNotNull(fragment).substringBefore('?').replace('-', '+').replace('_', '/')
+        val bytes = requireNotNull(base64.decodeBase64())
+        return ChannelSet.ADAPTER.decode(bytes)
     }
 
     private fun channelSet(channelCount: Int): ChannelSet = ChannelSet(

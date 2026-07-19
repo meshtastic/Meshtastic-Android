@@ -100,6 +100,8 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 
+internal const val DEFAULT_SHOULD_ADD_CHANNELS = false
+
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
  * configurations via QR codes or URLs.
@@ -126,7 +128,7 @@ fun ChannelScreen(
 
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(true) }
+    var shouldAddChannelsState by remember { mutableStateOf(DEFAULT_SHOULD_ADD_CHANNELS) }
 
     val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
 

@@ -184,7 +184,7 @@ private fun ChannelSettings.withoutPositionSharing(): ChannelSettings =
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): CommonUri {
-    val channelBytes = ChannelSet.ADAPTER.encode(this)
+    val channelBytes = ChannelSet.ADAPTER.encode(if (shouldAdd) copy(lora_config = null) else this)
     val enc = channelBytes.toByteString().base64Url().replace("=", "")
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
