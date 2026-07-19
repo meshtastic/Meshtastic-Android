@@ -57,12 +57,15 @@ fun CommonUri.toChannelSet(): ChannelSet {
     val fragmentBytes =
         fragmentBase64.decodeBase64() ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment")
     val url = ChannelSet.ADAPTER.decode(fragmentBytes)
-    val shouldAdd =
-        fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")
-            ?: getBooleanQueryParameter("add", false)
+    val shouldAdd = fragment?.substringAfter('?', "")?.addParameter() ?: getBooleanQueryParameter("add", false)
 
     return if (shouldAdd) url.copy(lora_config = null) else url
 }
+
+private fun String.addParameter(): Boolean? = split('&')
+    .firstOrNull { it.substringBefore('=').equals("add", ignoreCase = true) }
+    ?.substringAfter('=', missingDelimiterValue = "true")
+    ?.equals("true", ignoreCase = true)
 
 /** @return A list of globally unique channel IDs usable with MQTT subscribe() */
 val ChannelSet.subscribeList: List<String>
