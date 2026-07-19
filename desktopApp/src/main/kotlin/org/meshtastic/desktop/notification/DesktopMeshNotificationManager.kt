@@ -16,6 +16,10 @@
  */
 package org.meshtastic.desktop.notification
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -43,6 +47,13 @@ import org.meshtastic.proto.Telemetry
  */
 @Suppress("TooManyFunctions")
 class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
+
+    /**
+     * Bridges the non-suspend [MeshNotificationManager] entry points to the suspending [NotificationManager.dispatch].
+     */
+    @Suppress("InjectDispatcher")
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun clearNotifications() {
         notificationManager.cancelAll()
     }
@@ -115,39 +126,45 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         val notification =
             Notification(title = name, message = alert, category = Notification.Category.Alert, contactKey = contactKey)
-        notificationManager.dispatch(notification)
+        scope.launch { notificationManager.dispatch(notification) }
     }
 
     override fun showNewNodeSeenNotification(node: Node) {
-        notificationManager.dispatch(
-            Notification(
-                title = getString(Res.string.new_node_seen, node.user.short_name),
-                message = node.user.long_name,
-                category = Notification.Category.NodeEvent,
-            ),
-        )
+        scope.launch {
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.new_node_seen, node.user.short_name),
+                    message = node.user.long_name,
+                    category = Notification.Category.NodeEvent,
+                ),
+            )
+        }
     }
 
     override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        notificationManager.dispatch(
-            Notification(
-                title = getString(Res.string.low_battery_title, node.user.short_name),
-                message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
-                category = Notification.Category.Battery,
-                id = node.num,
-            ),
-        )
+        scope.launch {
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.low_battery_title, node.user.short_name),
+                    message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                    category = Notification.Category.Battery,
+                    id = node.num,
+                ),
+            )
+        }
     }
 
     override fun showClientNotification(clientNotification: ClientNotification) {
-        notificationManager.dispatch(
-            Notification(
-                title = getString(Res.string.desktop_notification_title),
-                message = clientNotification.message,
-                category = Notification.Category.Alert,
-                id = clientNotification.toString().hashCode(),
-            ),
-        )
+        scope.launch {
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.desktop_notification_title),
+                    message = clientNotification.message,
+                    category = Notification.Category.Alert,
+                    id = clientNotification.toString().hashCode(),
+                ),
+            )
+        }
     }
 
     override fun cancelMessageNotification(contactKey: String) {

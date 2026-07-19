@@ -17,13 +17,11 @@
 package org.meshtastic.desktop
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
@@ -37,7 +35,8 @@ import androidx.compose.ui.window.Notification as ComposeNotification
  * macOS, PowerShell toast on Windows) for proper native look-and-feel. Falls back to Compose Desktop tray notifications
  * (via [fallbackNotifications]) when the native sender is unavailable or fails.
  *
- * All native sends are dispatched on a background scope to avoid blocking callers.
+ * Native sends run on [Dispatchers.IO] within the suspending [dispatch] call, so the returned Boolean reflects the
+ * resolved outcome (native success, or acceptance by the tray fallback) rather than an optimistic guess.
  *
  * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
@@ -46,9 +45,6 @@ class DesktopNotificationManager(
     private val prefs: NotificationPrefs,
     private val nativeSender: NativeNotificationSender,
 ) : NotificationManager {
-
-    @Suppress("InjectDispatcher")
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         Logger.i { "DesktopNotificationManager initialized (native sender: ${nativeSender::class.simpleName})" }
@@ -62,7 +58,8 @@ class DesktopNotificationManager(
      */
     val fallbackNotifications: SharedFlow<ComposeNotification> = _fallbackNotifications.asSharedFlow()
 
-    override fun dispatch(notification: Notification): Boolean {
+    @Suppress("InjectDispatcher")
+    override suspend fun dispatch(notification: Notification): Boolean {
         val enabled =
             when (notification.category) {
                 Notification.Category.Message -> prefs.messagesEnabled.value
@@ -76,17 +73,19 @@ class DesktopNotificationManager(
         Logger.d { "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled" }
         if (!enabled) return false
 
-        scope.launch {
+        return withContext(Dispatchers.IO) {
             val success = nativeSender.send(notification)
-            if (!success) {
+            if (success) {
+                true
+            } else {
                 Logger.w { "Native notification failed, falling back to tray: ${notification.title}" }
                 emitFallback(notification)
             }
         }
-        return true
     }
 
-    private fun emitFallback(notification: Notification) {
+    /** Returns true when the tray fallback accepted the notification. */
+    private fun emitFallback(notification: Notification): Boolean {
         val composeType =
             when (notification.type) {
                 Notification.Type.None -> ComposeNotification.Type.None
@@ -94,7 +93,9 @@ class DesktopNotificationManager(
                 Notification.Type.Warning -> ComposeNotification.Type.Warning
                 Notification.Type.Error -> ComposeNotification.Type.Error
             }
-        _fallbackNotifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
+        return _fallbackNotifications.tryEmit(
+            ComposeNotification(notification.title, notification.message, composeType),
+        )
     }
 
     override fun cancel(id: Int) {
