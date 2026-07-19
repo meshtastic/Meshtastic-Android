@@ -28,9 +28,9 @@ import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareFonts
 import org.meshtastic.core.model.EventFirmwareResponse
-import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.EventFirmwareTheme
 import org.meshtastic.core.model.EventFirmwareThemeColors
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly

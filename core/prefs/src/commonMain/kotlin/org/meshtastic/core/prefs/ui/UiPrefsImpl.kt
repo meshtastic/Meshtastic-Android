@@ -171,10 +171,7 @@ class UiPrefsImpl(
     override val firmwareUpdateNotificationKeys: StateFlow<Set<String>> =
         dataStore.data
             .map { preferences ->
-                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]
-                    ?.split('|')
-                    ?.filter(String::isNotBlank)
-                    ?.toSet()
+                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]?.split('|')?.filter(String::isNotBlank)?.toSet()
                     ?: emptySet()
             }
             .stateIn(scope, SharingStarted.Eagerly, emptySet())
@@ -186,8 +183,7 @@ class UiPrefsImpl(
                     preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]
                         ?.split('|')
                         ?.filter(String::isNotBlank)
-                        ?.toMutableList()
-                        ?: mutableListOf()
+                        ?.toMutableList() ?: mutableListOf()
                 keys.remove(key)
                 keys.add(key)
                 preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS] =

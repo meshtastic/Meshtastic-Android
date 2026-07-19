@@ -47,17 +47,17 @@ import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.LocalConfig
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_available
 import org.meshtastic.core.resources.firmware_update_notification_android
 import org.meshtastic.core.resources.firmware_update_notification_flasher
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 
 /**
  * Derived, UI-friendly summary of the device connection state. Combines [ServiceRepository.connectionState] with
@@ -201,8 +201,7 @@ class ConnectionsViewModel(
                 // timestamp only when it writes a current catalog; its bundled seed and a successful refresh are
                 // both valid sources, while an old cache fails closed.
                 stableRelease =
-                    stableRelease
-                        ?.takeIf { it.lastUpdated >= nowMillis - TimeConstants.ONE_HOUR.inWholeMilliseconds },
+                stableRelease?.takeIf { it.lastUpdated >= nowMillis - TimeConstants.ONE_HOUR.inWholeMilliseconds },
                 address = address,
             )
         }
@@ -240,7 +239,8 @@ class ConnectionsViewModel(
                                 releaseTargets = releaseTargets,
                             ),
                         )
-                    }.catch { emit(null) }
+                    }
+                        .catch { emit(null) }
                 } ?: flowOf(null)
             }
             .distinctUntilChanged()
@@ -285,7 +285,7 @@ class ConnectionsViewModel(
                             deepLinkUri =
                             if (
                                 notice.destination ==
-                                    org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate
+                                org.meshtastic.core.model.FirmwareUpdateDestination.AndroidUpdate
                             ) {
                                 "meshtastic:///firmware/update"
                             } else {
@@ -319,8 +319,8 @@ private data class FirmwareUpdateCandidate(
 )
 
 private fun Char.toFirmwareUpdateTransport(): FirmwareUpdateTransport? = when (this) {
-        'x' -> FirmwareUpdateTransport.Bluetooth
-        's' -> FirmwareUpdateTransport.Serial
-        't' -> FirmwareUpdateTransport.Tcp
-        else -> null
-    }
+    'x' -> FirmwareUpdateTransport.Bluetooth
+    's' -> FirmwareUpdateTransport.Serial
+    't' -> FirmwareUpdateTransport.Tcp
+    else -> null
+}

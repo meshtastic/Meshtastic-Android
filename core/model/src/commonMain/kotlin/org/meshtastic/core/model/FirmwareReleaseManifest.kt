@@ -23,5 +23,4 @@ import kotlinx.serialization.Serializable
 data class FirmwareReleaseManifest(val version: String = "", val targets: List<FirmwareTarget> = emptyList())
 
 /** One firmware target declared by a [FirmwareReleaseManifest]. */
-@Serializable
-data class FirmwareTarget(val board: String = "", val platform: String = "")
+@Serializable data class FirmwareTarget(val board: String = "", val platform: String = "")

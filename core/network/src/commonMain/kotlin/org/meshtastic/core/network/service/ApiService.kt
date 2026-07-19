@@ -25,10 +25,10 @@ import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
-import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkFirmwareReleases
 
 /**

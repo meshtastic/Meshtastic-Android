@@ -19,8 +19,8 @@ package org.meshtastic.core.network
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
 

@@ -89,24 +89,23 @@ object FirmwareUpdateNoticePolicy {
         hardware: DeviceHardware,
         transport: FirmwareUpdateTransport,
     ): FirmwareUpdateDestination = if (hardware.supportsAndroidUpdate(transport)) {
-            FirmwareUpdateDestination.AndroidUpdate
-        } else {
-            FirmwareUpdateDestination.MeshtasticFlasher
-        }
+        FirmwareUpdateDestination.AndroidUpdate
+    } else {
+        FirmwareUpdateDestination.MeshtasticFlasher
+    }
 
     private fun DeviceHardware.supportsAndroidUpdate(transport: FirmwareUpdateTransport): Boolean = when (transport) {
-            FirmwareUpdateTransport.Bluetooth ->
-                isEsp32Arc || architecture.contains("nrf", ignoreCase = true)
+        FirmwareUpdateTransport.Bluetooth -> isEsp32Arc || architecture.contains("nrf", ignoreCase = true)
 
-            FirmwareUpdateTransport.Serial ->
-                !isEsp32Arc &&
-                    (
-                        architecture.contains("nrf", ignoreCase = true) ||
-                            architecture.contains("rp2040", ignoreCase = true)
+        FirmwareUpdateTransport.Serial ->
+            !isEsp32Arc &&
+                (
+                    architecture.contains("nrf", ignoreCase = true) ||
+                        architecture.contains("rp2040", ignoreCase = true)
                     )
 
-            FirmwareUpdateTransport.Tcp -> isEsp32Arc
-        }
+        FirmwareUpdateTransport.Tcp -> isEsp32Arc
+    }
 
     @Suppress("ReturnCount")
     private fun parseVersion(value: String): ParsedVersion? {

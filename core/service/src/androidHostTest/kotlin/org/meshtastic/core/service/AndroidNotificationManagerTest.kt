@@ -91,7 +91,8 @@ class AndroidNotificationManagerTest {
         createChannel(NotificationChannels.NEW_NODES, NotificationManager.IMPORTANCE_NONE)
         val manager = AndroidNotificationManager(context)
 
-        val dispatched = manager.dispatch(Notification(title = "Node", message = "Seen", category = Notification.Category.NodeEvent))
+        val dispatched =
+            manager.dispatch(Notification(title = "Node", message = "Seen", category = Notification.Category.NodeEvent))
 
         assertFalse(dispatched)
         assertEquals(0, shadowOf(systemNotificationManager).allNotifications.size)
@@ -200,9 +201,7 @@ class AndroidNotificationManagerTest {
     }
 
     private fun createChannel(id: String, importance: Int = NotificationManager.IMPORTANCE_DEFAULT) {
-        systemNotificationManager.createNotificationChannel(
-            NotificationChannel(id, id, importance),
-        )
+        systemNotificationManager.createNotificationChannel(NotificationChannel(id, id, importance))
     }
 
     /**

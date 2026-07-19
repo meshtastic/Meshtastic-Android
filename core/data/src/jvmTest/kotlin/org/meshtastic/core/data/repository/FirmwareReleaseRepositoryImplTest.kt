@@ -150,7 +150,8 @@ class FirmwareReleaseRepositoryImplTest {
 
     @Test
     fun `manifest board targets are fetched once and cached by release URL`() = runBlocking {
-        val release = org.meshtastic.core.database.entity.FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
+        val release =
+            org.meshtastic.core.database.entity.FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
         api.manifest =
             FirmwareReleaseManifest(
                 version = "2.8.0",

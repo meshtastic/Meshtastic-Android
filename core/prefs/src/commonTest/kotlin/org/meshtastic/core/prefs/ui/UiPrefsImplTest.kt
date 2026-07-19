@@ -132,10 +132,7 @@ class UiPrefsImplTest {
         prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.9.0")
 
         assertEquals(
-            setOf(
-                "firmware-update-notified:node:target:2.8.0",
-                "firmware-update-notified:node:target:2.9.0",
-            ),
+            setOf("firmware-update-notified:node:target:2.8.0", "firmware-update-notified:node:target:2.9.0"),
             prefs.firmwareUpdateNotificationKeys.value,
         )
     }

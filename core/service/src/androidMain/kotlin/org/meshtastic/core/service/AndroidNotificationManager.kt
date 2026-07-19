@@ -153,8 +153,8 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
                     notificationManager.getNotificationChannel(channelId)?.importance !=
-                        SystemNotificationManager.IMPORTANCE_NONE
-            )
+                    SystemNotificationManager.IMPORTANCE_NONE
+                )
 
     /**
      * Builds a [PendingIntent] that launches [MainActivity] with the given deep-link URI as [Intent.ACTION_VIEW], so
