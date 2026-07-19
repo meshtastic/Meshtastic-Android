@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import org.koin.core.annotation.Single
@@ -118,11 +119,13 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }
 
-    override fun dispatch(notification: Notification) {
+    override fun dispatch(notification: Notification): Boolean {
         ensureChannelsInitialized()
+        val channelId = notification.category.channelConfig().id
+        if (!canPostNotifications(channelId)) return false
         val id = notification.id ?: notification.hashCode()
         val builder =
-            NotificationCompat.Builder(context, notification.category.channelConfig().id)
+            NotificationCompat.Builder(context, channelId)
                 .setContentTitle(notification.title)
                 .setContentText(notification.message)
                 .setSmallIcon(drawable.meshtastic_ic_notification)
@@ -137,8 +140,21 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
         notification.deepLinkUri?.let { uri -> builder.setContentIntent(createDeepLinkPendingIntent(uri, id)) }
 
-        notificationManager.notify(id, builder.build())
+        return try {
+            notificationManager.notify(id, builder.build())
+            true
+        } catch (_: SecurityException) {
+            false
+        }
     }
+
+    private fun canPostNotifications(channelId: String): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+            (
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+                    notificationManager.getNotificationChannel(channelId)?.importance !=
+                    SystemNotificationManager.IMPORTANCE_NONE
+                )
 
     /**
      * Builds a [PendingIntent] that launches [MainActivity] with the given deep-link URI as [Intent.ACTION_VIEW], so

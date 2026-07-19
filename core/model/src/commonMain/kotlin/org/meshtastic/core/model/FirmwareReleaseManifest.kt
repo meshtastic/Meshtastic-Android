@@ -14,20 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.repository
+package org.meshtastic.core.model
 
-/**
- * Platform-agnostic notification dispatch primitive. Posts opaque [Notification] records, cancels by id, or wipes all
- * active notifications. Intended as the lowest layer of the notification stack.
- *
- * Domain-specific notification builders (mesh message arrivals, low-battery alerts, etc.) live in
- * [MeshNotificationManager], which composes over this dispatcher.
- */
-interface NotificationManager {
-    /** Returns true only when the platform accepted the notification for delivery. */
-    fun dispatch(notification: Notification): Boolean
+import kotlinx.serialization.Serializable
 
-    fun cancel(id: Int)
+/** Authoritative target catalogue referenced by a firmware release's `zip_url`. */
+@Serializable
+data class FirmwareReleaseManifest(val version: String = "", val targets: List<FirmwareTarget> = emptyList())
 
-    fun cancelAll()
-}
+/** One firmware target declared by a [FirmwareReleaseManifest]. */
+@Serializable data class FirmwareTarget(val board: String = "", val platform: String = "")

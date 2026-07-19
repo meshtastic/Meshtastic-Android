@@ -20,23 +20,33 @@ import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.FirmwareUpdateDestination
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeDeviceHardwareRepository
+import org.meshtastic.core.testing.FakeFirmwareReleaseRepository
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -51,14 +61,33 @@ class ConnectionsViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val serviceRepository = FakeServiceRepository()
     private val nodeRepository = FakeNodeRepository()
-    private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val uiPrefs = FakeUiPrefs()
+    private val deviceHardwareRepository = FakeDeviceHardwareRepository()
+    private val firmwareReleaseRepository = FakeFirmwareReleaseRepository()
+    private val radioPrefs = FakeRadioPrefs()
+    private val dispatchedNotifications = mutableListOf<Notification>()
+    private var notificationsCanBeScheduled = true
+    private val notificationManager =
+        object : NotificationManager {
+            override fun dispatch(notification: Notification): Boolean {
+                if (notificationsCanBeScheduled) dispatchedNotifications += notification
+                return notificationsCanBeScheduled
+            }
+
+            override fun cancel(id: Int) = Unit
+
+            override fun cancelAll() = Unit
+        }
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        dispatchedNotifications.clear()
+        notificationsCanBeScheduled = true
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { uiPrefs.hasShownNotPairedWarning } returns MutableStateFlow(false)
+        uiPrefs.hasShownNotPairedWarning.value = false
+        uiPrefs.firmwareUpdateNotificationKeys.value = emptySet()
 
         viewModel =
             ConnectionsViewModel(
@@ -66,6 +95,10 @@ class ConnectionsViewModelTest {
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
                 uiPrefs = uiPrefs,
+                deviceHardwareRepository = deviceHardwareRepository,
+                firmwareReleaseRepository = firmwareReleaseRepository,
+                radioPrefs = radioPrefs,
+                notificationManager = notificationManager,
             )
     }
 
@@ -81,12 +114,10 @@ class ConnectionsViewModelTest {
 
     @Test
     fun `suppressNoPairedWarning updates state and prefs`() {
-        every { uiPrefs.setHasShownNotPairedWarning(any()) } returns Unit
-
         viewModel.suppressNoPairedWarning()
 
         assertEquals(true, viewModel.hasShownNotPairedWarning.value)
-        verify { uiPrefs.setHasShownNotPairedWarning(true) }
+        assertEquals(true, uiPrefs.hasShownNotPairedWarning.value)
     }
 
     @Test
@@ -137,6 +168,105 @@ class ConnectionsViewModelTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `connected older known node exposes Android firmware update notice`() = runTest {
+        val hardwareModel = HardwareModel.TBEAM.value
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = hardwareModel,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User(hw_model = HardwareModel.TBEAM)))
+        radioPrefs.setDevAddr("x:connected")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        val notice = assertNotNull(viewModel.firmwareUpdateNotice.value)
+        assertEquals("2.7.0", notice.currentVersion)
+        assertEquals("2.8.0", notice.stableVersion)
+        assertEquals(FirmwareUpdateDestination.AndroidUpdate, notice.destination)
+        assertEquals(1, dispatchedNotifications.size)
+        assertEquals(setOf(notice.notificationKey), uiPrefs.firmwareUpdateNotificationKeys.value)
+        assertEquals("Firmware update available", dispatchedNotifications.single().title)
+        assertEquals(Notification.Type.Info, dispatchedNotifications.single().type)
+        assertEquals("meshtastic:///firmware/update", dispatchedNotifications.single().deepLinkUri)
+    }
+
+    @Test
+    fun `does not persist firmware notification dedupe when scheduling is unavailable`() = runTest {
+        val hardwareModel = HardwareModel.TBEAM.value
+        val target = "tbeam"
+        notificationsCanBeScheduled = false
+        deviceHardwareRepository.setHardware(
+            hwModel = hardwareModel,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User(hw_model = HardwareModel.TBEAM)))
+        radioPrefs.setDevAddr("x:connected")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.firmwareUpdateNotice.value)
+        assertEquals(emptyList(), dispatchedNotifications)
+        assertEquals(emptySet(), uiPrefs.firmwareUpdateNotificationKeys.value)
+    }
+
+    @Test
+    fun `stale firmware catalog does not expose a notice`() = runTest {
+        val hardwareModel = HardwareModel.TBEAM.value
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = hardwareModel,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User(hw_model = HardwareModel.TBEAM)))
+        radioPrefs.setDevAddr("x:connected")
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0", lastUpdated = 0))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.firmwareUpdateNotice.value)
+    }
+
+    @Test
+    fun `stable manifest missing the connected target does not expose a notice`() = runTest {
+        val hardwareModel = HardwareModel.TBEAM.value
+        val target = "tbeam"
+        deviceHardwareRepository.setHardware(
+            hwModel = hardwareModel,
+            target = target,
+            device = DeviceHardware(architecture = "esp32", platformioTarget = target),
+        )
+        nodeRepository.setMyId("!local")
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
+        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User(hw_model = HardwareModel.TBEAM)))
+        radioPrefs.setDevAddr("x:connected")
+        firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf("t-echo"))
+        firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.firmwareUpdateNotice.value)
+        assertEquals(emptyList(), dispatchedNotifications)
     }
 
     /**

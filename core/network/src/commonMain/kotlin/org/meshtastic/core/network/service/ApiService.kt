@@ -25,6 +25,7 @@ import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -49,6 +50,9 @@ interface ApiService {
 
     /** Fetches the list of available firmware releases from the Meshtastic API. */
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
+
+    /** Fetches the target manifest referenced by a firmware release's `zip_url`. */
+    suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest
 
     /**
      * Fetches the nightly preview build pointer from meshtastic.github.io. Returns null when no nightly is currently
@@ -75,6 +79,9 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = client.get("resource/deviceLinks").body()
 
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
+
+    override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
+        client.get(manifestUrl).body()
 
     override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
         val response = client.get(NIGHTLY_INDEX_URL)

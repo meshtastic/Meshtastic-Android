@@ -25,6 +25,7 @@ import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLink
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
@@ -48,6 +49,8 @@ class DeviceLinkRepositoryImplTest {
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = response
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
+
+        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest = error("unused")
 
         override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
 

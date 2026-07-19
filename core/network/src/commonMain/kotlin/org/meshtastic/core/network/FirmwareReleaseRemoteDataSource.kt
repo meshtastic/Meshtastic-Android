@@ -19,6 +19,7 @@ package org.meshtastic.core.network
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
@@ -30,6 +31,9 @@ class FirmwareReleaseRemoteDataSource(
 ) {
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
         withContext(dispatchers.io) { apiService.getFirmwareReleases() }
+
+    suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
+        withContext(dispatchers.io) { apiService.getFirmwareReleaseManifest(manifestUrl) }
 
     /** The nightly preview pointer from meshtastic.github.io, or null when no nightly is published. */
     suspend fun getNightlyFirmware(): NetworkFirmwareNightly? =

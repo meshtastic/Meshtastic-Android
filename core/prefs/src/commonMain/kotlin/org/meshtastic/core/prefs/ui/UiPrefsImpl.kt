@@ -168,6 +168,30 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_SELECTED_CONNECTION_TRANSPORT] = type.name } }
     }
 
+    override val firmwareUpdateNotificationKeys: StateFlow<Set<String>> =
+        dataStore.data
+            .map { preferences ->
+                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]?.split('|')?.filter(String::isNotBlank)?.toSet()
+                    ?: emptySet()
+            }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun recordFirmwareUpdateNotificationKey(key: String) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val keys =
+                    preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]
+                        ?.split('|')
+                        ?.filter(String::isNotBlank)
+                        ?.toMutableList() ?: mutableListOf()
+                keys.remove(key)
+                keys.add(key)
+                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS] =
+                    keys.takeLast(MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS).joinToString("|")
+            }
+        }
+    }
+
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         cachedFlow(provideNodeLocationFlows, nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
@@ -290,9 +314,11 @@ class UiPrefsImpl(
         val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
         val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
         val KEY_SELECTED_CONNECTION_TRANSPORT = stringPreferencesKey("selected-connection-transport")
+        val KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS = stringPreferencesKey("firmware-update-notification-keys")
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+        private const val MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS = 100
 
         private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
 

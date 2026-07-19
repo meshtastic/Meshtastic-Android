@@ -28,6 +28,8 @@ import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.FirmwareTarget
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -49,12 +51,19 @@ class FirmwareReleaseRepositoryImplTest {
     private class FakeApiService(var response: NetworkFirmwareReleases) : ApiService {
         var nightly: NetworkFirmwareNightly? = null
         var nightlyUnreachable = false
+        var manifest: FirmwareReleaseManifest? = null
+        var manifestCalls = 0
 
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
 
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = response
+
+        override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest {
+            manifestCalls++
+            return checkNotNull(manifest) { "manifest not configured" }
+        }
 
         override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
             if (nightlyUnreachable) error("nightly index unreachable")
@@ -137,6 +146,21 @@ class FirmwareReleaseRepositoryImplTest {
             dao.getReleasesByType(FirmwareReleaseType.ALPHA).map { it.id },
             "pulled and reclassified releases are pruned from the alpha rows",
         )
+    }
+
+    @Test
+    fun `manifest board targets are fetched once and cached by release URL`() = runBlocking {
+        val release =
+            org.meshtastic.core.database.entity.FirmwareRelease(id = "v2.8.0", zipUrl = "https://example.com/manifest")
+        api.manifest =
+            FirmwareReleaseManifest(
+                version = "2.8.0",
+                targets = listOf(FirmwareTarget(board = "tbeam-s3-core", platform = "esp32s3")),
+            )
+
+        assertEquals(setOf("tbeam-s3-core"), repository.getManifestTargets(release))
+        assertEquals(setOf("tbeam-s3-core"), repository.getManifestTargets(release))
+        assertEquals(1, api.manifestCalls)
     }
 
     @Test

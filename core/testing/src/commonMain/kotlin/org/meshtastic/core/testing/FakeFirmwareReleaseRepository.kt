@@ -33,16 +33,22 @@ class FakeFirmwareReleaseRepository :
     private val _stableRelease = mutableStateFlow<FirmwareRelease?>(null)
     private val _alphaRelease = mutableStateFlow<FirmwareRelease?>(null)
     private val _nightlyRelease = mutableStateFlow<FirmwareRelease?>(null)
+    private val manifestTargets = mutableMapOf<String, Set<String>?>()
 
     override val stableRelease: Flow<FirmwareRelease?> = _stableRelease
     override val alphaRelease: Flow<FirmwareRelease?> = _alphaRelease
     override val nightlyRelease: Flow<FirmwareRelease?> = _nightlyRelease
 
+    override suspend fun getManifestTargets(release: FirmwareRelease): Set<String>? = manifestTargets[release.id]
+
     var invalidateCacheCalls: Int = 0
         private set
 
     init {
-        registerResetAction { invalidateCacheCalls = 0 }
+        registerResetAction {
+            invalidateCacheCalls = 0
+            manifestTargets.clear()
+        }
     }
 
     override suspend fun invalidateCache() {
@@ -59,5 +65,9 @@ class FakeFirmwareReleaseRepository :
 
     fun setNightlyRelease(release: FirmwareRelease?) {
         _nightlyRelease.value = release
+    }
+
+    fun setManifestTargets(releaseId: String, targets: Set<String>?) {
+        manifestTargets[releaseId] = targets
     }
 }
