@@ -46,13 +46,20 @@ import org.meshtastic.proto.Telemetry
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 @Suppress("TooManyFunctions")
-class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
+class DesktopMeshNotificationManager(
+    private val notificationManager: NotificationManager,
+    // Bridges the non-suspend MeshNotificationManager entry points to the suspending NotificationManager.dispatch.
+    // Injectable so tests can substitute a TestScope / TestDispatcher.
+    @Suppress("InjectDispatcher") private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+) : MeshNotificationManager {
 
     /**
-     * Bridges the non-suspend [MeshNotificationManager] entry points to the suspending [NotificationManager.dispatch].
+     * Launches [build] on [scope] and dispatches the resulting [Notification], bridging the non-suspend entry points to
+     * the suspending [NotificationManager.dispatch]. [build] runs inside the coroutine so it may call suspend resource
+     * getters (e.g. [getString]).
      */
-    @Suppress("InjectDispatcher")
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private fun dispatchAsync(build: suspend () -> Notification) =
+        scope.launch { notificationManager.dispatch(build()) }
 
     override fun clearNotifications() {
         notificationManager.cancelAll()
@@ -124,45 +131,39 @@ class DesktopMeshNotificationManager(private val notificationManager: Notificati
     }
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        val notification =
+        dispatchAsync {
             Notification(title = name, message = alert, category = Notification.Category.Alert, contactKey = contactKey)
-        scope.launch { notificationManager.dispatch(notification) }
+        }
     }
 
     override fun showNewNodeSeenNotification(node: Node) {
-        scope.launch {
-            notificationManager.dispatch(
-                Notification(
-                    title = getString(Res.string.new_node_seen, node.user.short_name),
-                    message = node.user.long_name,
-                    category = Notification.Category.NodeEvent,
-                ),
+        dispatchAsync {
+            Notification(
+                title = getString(Res.string.new_node_seen, node.user.short_name),
+                message = node.user.long_name,
+                category = Notification.Category.NodeEvent,
             )
         }
     }
 
     override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
-        scope.launch {
-            notificationManager.dispatch(
-                Notification(
-                    title = getString(Res.string.low_battery_title, node.user.short_name),
-                    message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
-                    category = Notification.Category.Battery,
-                    id = node.num,
-                ),
+        dispatchAsync {
+            Notification(
+                title = getString(Res.string.low_battery_title, node.user.short_name),
+                message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
+                category = Notification.Category.Battery,
+                id = node.num,
             )
         }
     }
 
     override fun showClientNotification(clientNotification: ClientNotification) {
-        scope.launch {
-            notificationManager.dispatch(
-                Notification(
-                    title = getString(Res.string.desktop_notification_title),
-                    message = clientNotification.message,
-                    category = Notification.Category.Alert,
-                    id = clientNotification.toString().hashCode(),
-                ),
+        dispatchAsync {
+            Notification(
+                title = getString(Res.string.desktop_notification_title),
+                message = clientNotification.message,
+                category = Notification.Category.Alert,
+                id = clientNotification.toString().hashCode(),
             )
         }
     }

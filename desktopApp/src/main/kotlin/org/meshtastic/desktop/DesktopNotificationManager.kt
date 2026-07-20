@@ -17,6 +17,7 @@
 package org.meshtastic.desktop
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -58,7 +59,7 @@ class DesktopNotificationManager(
      */
     val fallbackNotifications: SharedFlow<ComposeNotification> = _fallbackNotifications.asSharedFlow()
 
-    @Suppress("InjectDispatcher")
+    @Suppress("InjectDispatcher", "TooGenericExceptionCaught")
     override suspend fun dispatch(notification: Notification): Boolean {
         val enabled =
             when (notification.category) {
@@ -74,7 +75,17 @@ class DesktopNotificationManager(
         if (!enabled) return false
 
         return withContext(Dispatchers.IO) {
-            val success = nativeSender.send(notification)
+            val success =
+                try {
+                    nativeSender.send(notification)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Native senders shell out to OS tools / JNA; guard against any unexpected throw so fire-and-forget
+                    // callers still get the tray fallback instead of silently swallowing the failure.
+                    Logger.e(e) { "Native notification send threw: ${notification.title}" }
+                    false
+                }
             if (success) {
                 true
             } else {
