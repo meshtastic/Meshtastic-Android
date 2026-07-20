@@ -65,6 +65,32 @@ class ProtomapsRegionDownloaderTest {
     }
 
     @Test
+    fun `retains z15 streets within Burning Man pack limits`() = runTest {
+        val today = LocalDate(2026, 9, 2)
+        val resolver = ProtomapsArchiveResolver { date -> "https://example.test/$date.pmtiles" }
+        val fakeClient =
+            FakeRangeClient(
+                mapOf(
+                    resolver.urlFor(today) to
+                        FakeArchive(statusCode = 206, bytes = vectorPmtiles(maxZoom = 15, runLength = Int.MAX_VALUE)),
+                ),
+            )
+        val directory = Files.createTempDirectory("protomaps-region-test").toFile()
+        val destination = File(directory, "region.pmtiles")
+
+        try {
+            ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                .download(bounds = BURNING_MAN_BOUNDS, destination = destination)
+
+            val header = PmtilesV3Reader(destination).header
+            assertEquals(15, header.maxZoom)
+            assertTrue(header.rootDirectoryLength <= MAX_ROOT_DIRECTORY_BYTES)
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `rejects a region whose root directory exceeds the PMTiles limit`() = runTest {
         val today = LocalDate(2026, 9, 2)
         val resolver = ProtomapsArchiveResolver { date -> "https://example.test/$date.pmtiles" }
@@ -143,7 +169,7 @@ class ProtomapsRegionDownloaderTest {
 
     private data class FakeArchive(val statusCode: Int, val bytes: ByteArray)
 
-    private fun vectorPmtiles(runLength: Int = 1): ByteArray {
+    private fun vectorPmtiles(maxZoom: Int = 13, runLength: Int = 1): ByteArray {
         val tile = byteArrayOf(0x1A, 0x00)
         val directory = byteArrayOf(1, 0) + varint(runLength) + byteArrayOf(tile.size.toByte(), 1)
         val metadata = "{}".encodeToByteArray()
@@ -166,7 +192,7 @@ class ProtomapsRegionDownloaderTest {
         header.put(1)
         header.put(PmtilesTileType.Mvt.value)
         header.put(0)
-        header.put(13)
+        header.put(maxZoom.toByte())
 
         return header.array() + directory + metadata + tile
     }
@@ -185,5 +211,7 @@ class ProtomapsRegionDownloaderTest {
 
     private companion object {
         const val TILE_DATA_OFFSET = 134L
+        const val MAX_ROOT_DIRECTORY_BYTES = 16 * 1024L
+        val BURNING_MAN_BOUNDS = GeoBounds(minLon = -119.287957, minLat = 40.722536, maxLon = -119.128520, maxLat = 40.843420)
     }
 }
