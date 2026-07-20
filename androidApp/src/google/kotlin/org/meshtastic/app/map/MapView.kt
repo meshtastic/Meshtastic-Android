@@ -558,12 +558,15 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val burningManPackCoversCamera =
-        currentCustomTileProviderUrl == null &&
-            burningManTileProvider?.covers(
-                latitude = cameraPositionState.position.target.latitude,
-                longitude = cameraPositionState.position.target.longitude,
-            ) == true
+    val burningManTileProviderForCamera =
+        burningManTileProvider?.takeIf { tileProvider ->
+            currentCustomTileProviderUrl == null &&
+                tileProvider.covers(
+                    latitude = cameraPositionState.position.target.latitude,
+                    longitude = cameraPositionState.position.target.longitude,
+                )
+        }
+    val burningManPackCoversCamera = burningManTileProviderForCamera != null
     val effectiveGoogleMapType =
         if (currentCustomTileProviderUrl != null || burningManPackCoversCamera) MapType.NONE else selectedGoogleMapType
 
@@ -636,8 +639,8 @@ fun MapView(
         ) {
             // The validated local pack is active only while the camera remains inside its coverage boundary.
             key(selectedBurningManPack?.file, burningManPackCoversCamera) {
-                if (burningManPackCoversCamera) {
-                    TileOverlay(tileProvider = burningManTileProvider, fadeIn = false, transparency = 0f, zIndex = -2f)
+                burningManTileProviderForCamera?.let { tileProvider ->
+                    TileOverlay(tileProvider = tileProvider, fadeIn = false, transparency = 0f, zIndex = -2f)
                 }
             }
 
