@@ -99,6 +99,12 @@ class BurningManPackCoordinator(
     private val _selectedPack = MutableStateFlow<SelectedBurningManPack?>(null)
     val selectedPack: StateFlow<SelectedBurningManPack?> = _selectedPack.asStateFlow()
 
+    /** Restores the persisted pack only when it still passes the same validation used by reconciliation. */
+    suspend fun restoreValidatedSelection(): SelectedBurningManPack? =
+        stateMutex.withLock {
+            store.load()?.let(::validatedSelection).also { selected -> _selectedPack.value = selected }
+        }
+
     suspend fun reconcile(now: Instant, lastAuthorizedLocation: PackLocation?): SelectedBurningManPack? =
         stateMutex.withLock { reconcileLocked(now, lastAuthorizedLocation) }
 

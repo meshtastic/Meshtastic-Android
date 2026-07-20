@@ -121,6 +121,7 @@ import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.offline.BurningManGoogleTileProvider
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
@@ -280,6 +281,7 @@ fun MapView(
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
+    val selectedBurningManPack by mapViewModel.selectedBurningManPack.collectAsStateWithLifecycle()
 
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
@@ -288,6 +290,12 @@ fun MapView(
     // Main mode persists camera; NodeTrack/Traceroute use ephemeral state with auto-centering.
     val cameraPositionState =
         if (mode is GoogleMapMode.Main) mapViewModel.cameraPositionState else rememberCameraPositionState()
+    val burningManTileProvider =
+        remember(selectedBurningManPack?.file) {
+            selectedBurningManPack?.file?.let { file ->
+                runCatching { BurningManGoogleTileProvider(file) }.getOrNull()
+            }
+        }
 
     if (mode is GoogleMapMode.Main) {
         LaunchedEffect(cameraPositionState.isMoving) {
@@ -550,7 +558,14 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) MapType.NONE else selectedGoogleMapType
+    val burningManPackCoversCamera =
+        currentCustomTileProviderUrl == null &&
+            burningManTileProvider?.covers(
+                latitude = cameraPositionState.position.target.latitude,
+                longitude = cameraPositionState.position.target.longitude,
+            ) == true
+    val effectiveGoogleMapType =
+        if (currentCustomTileProviderUrl != null || burningManPackCoversCamera) MapType.NONE else selectedGoogleMapType
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -619,6 +634,13 @@ fun MapView(
                 }
             },
         ) {
+            // The validated local pack is active only while the camera remains inside its coverage boundary.
+            key(selectedBurningManPack?.file, burningManPackCoversCamera) {
+                if (burningManPackCoversCamera) {
+                    TileOverlay(tileProvider = burningManTileProvider, fadeIn = false, transparency = 0f, zIndex = -2f)
+                }
+            }
+
             // Custom tile overlay (all modes)
             key(currentCustomTileProviderUrl) {
                 currentCustomTileProviderUrl?.let { url ->
