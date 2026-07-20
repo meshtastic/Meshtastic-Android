@@ -19,11 +19,7 @@ package org.meshtastic.feature.map.offline
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
-data class PackLocation(
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Instant,
-)
+data class PackLocation(val latitude: Double, val longitude: Double, val timestamp: Instant)
 
 data class BurningManPackManifest(
     val packId: String,
@@ -44,27 +40,24 @@ class BurningManPackPolicy(
 ) {
 
     fun reconcile(now: Instant, location: PackLocation?): PackAction {
-        if (now >= noLocationCleanupDate) return PackAction.Remove
-
         val recentLocation = location?.takeIf { it.timestamp >= now - locationMaxAge }
-        if (now >= outsideAreaCleanupDate && recentLocation != null && !contains(recentLocation)) {
-            return PackAction.Remove
-        }
+        return when {
+            now >= noLocationCleanupDate -> PackAction.Remove
 
-        return if (
+            now >= outsideAreaCleanupDate && recentLocation != null && !contains(recentLocation) ->
+                PackAction.Remove
+
             recentLocation != null &&
-            contains(recentLocation) &&
-            manifest == null &&
-            !installationLatched
-        ) {
-            PackAction.Install
-        } else {
-            PackAction.Retain
+                contains(recentLocation) &&
+                manifest == null &&
+                !installationLatched -> PackAction.Install
+
+            else -> PackAction.Retain
         }
     }
 
     fun contains(location: PackLocation): Boolean =
-        location.longitude in minLon..maxLon && location.latitude in minLat..maxLat
+        location.longitude in MIN_LON..MAX_LON && location.latitude in MIN_LAT..MAX_LAT
 
     private companion object {
         // Midnight in America/Los_Angeles is 07:00 UTC while daylight saving time is active.
@@ -72,9 +65,9 @@ class BurningManPackPolicy(
         val noLocationCleanupDate = Instant.parse("2026-09-12T07:00:00Z")
         val locationMaxAge = 24.hours
 
-        const val minLon = -119.287957
-        const val minLat = 40.722536
-        const val maxLon = -119.128520
-        const val maxLat = 40.843420
+        const val MIN_LON = -119.287957
+        const val MIN_LAT = 40.722536
+        const val MAX_LON = -119.128520
+        const val MAX_LAT = 40.843420
     }
 }
