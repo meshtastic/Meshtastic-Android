@@ -89,6 +89,7 @@ import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.DownloadButton
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
+import org.meshtastic.app.map.offline.BurningManOsmDroidTileProvider
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
@@ -154,6 +155,7 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.offline.BurningManPackRuntime
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -309,6 +311,47 @@ fun MapView(
             box = initialCameraView,
             tileSource = loadOnlineTileSourceBase(),
         )
+    val onlineTileProvider = remember(map) { map.tileProvider }
+    val burningManRuntime = remember(context.applicationContext) { BurningManPackRuntime.forContext(context) }
+    val burningManPack by burningManRuntime.coordinator.selectedPack.collectAsStateWithLifecycle()
+    val burningManTileProvider =
+        remember(burningManPack?.file) {
+            burningManPack?.file?.let { file -> runCatching { BurningManOsmDroidTileProvider(file) }.getOrNull() }
+        }
+
+    // Use the opaque app-private pack only inside its validated bounds. Restoring the original provider outside
+    // coverage keeps the user's selected online style available, while the local provider has no downloader.
+    DisposableEffect(map, onlineTileProvider, burningManTileProvider) {
+        fun reconcileTileProvider() {
+            val localProvider =
+                burningManTileProvider?.takeIf { provider ->
+                    map.mapCenter.let { center -> provider.covers(center.latitude, center.longitude) }
+                }
+            if (localProvider != null) {
+                showDownloadButton = false
+                if (map.tileProvider !== localProvider) map.setTileProvider(localProvider)
+            } else {
+                if (map.tileProvider !== onlineTileProvider) map.setTileProvider(onlineTileProvider)
+                loadOnlineTileSourceBase()
+            }
+            map.invalidate()
+        }
+        val tileProviderListener =
+            object : MapListener {
+                override fun onScroll(event: ScrollEvent): Boolean {
+                    reconcileTileProvider()
+                    return false
+                }
+
+                override fun onZoom(event: ZoomEvent): Boolean = false
+            }
+        reconcileTileProvider()
+        map.addMapListener(tileProviderListener)
+        onDispose {
+            map.removeMapListener(tileProviderListener)
+            if (map.tileProvider === burningManTileProvider) map.setTileProvider(onlineTileProvider)
+        }
+    }
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -812,7 +855,8 @@ fun MapView(
             onDismiss = { showMapStyleDialog = false },
             onSelectMapStyle = {
                 mapViewModel.mapStyleId = it
-                map.setTileSource(loadOnlineTileSourceBase())
+                onlineTileProvider.setTileSource(loadOnlineTileSourceBase())
+                map.invalidate()
             },
         )
     }
