@@ -50,6 +50,24 @@ class BurningManPackRuntimeTest {
         }
     }
 
+    @Test
+    fun `runtime keeps the factory captured during singleton creation`() {
+        val context = ApplicationContext()
+        val filesDirectory = createTempDirectory("burning-man-first").toFile()
+        try {
+            val firstCoordinator = BurningManPackCoordinator(filesDirectory, EmptyStore)
+            BurningManPackRuntime.installFactoryForTest { firstCoordinator }
+            val runtime = BurningManPackRuntime.forContext(context)
+
+            BurningManPackRuntime.resetForTest()
+            BurningManPackRuntime.installFactoryForTest { error("A reset must not alter an existing runtime") }
+
+            assertSame(firstCoordinator, runtime.coordinator)
+        } finally {
+            filesDirectory.deleteRecursively()
+        }
+    }
+
     private fun installedRecord() =
         BurningManPackRecord(
             packId = "burning-man-2026",
@@ -96,5 +114,11 @@ class BurningManPackRuntimeTest {
 
     private class ApplicationContext : ContextWrapper(null) {
         override fun getApplicationContext(): Context = this
+    }
+
+    private data object EmptyStore : BurningManPackStore {
+        override fun load(): BurningManPackRecord? = null
+
+        override fun save(record: BurningManPackRecord?) = Unit
     }
 }
