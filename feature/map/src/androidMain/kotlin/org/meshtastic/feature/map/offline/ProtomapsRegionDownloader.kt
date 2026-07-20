@@ -93,9 +93,9 @@ class ProtomapsRegionDownloader(
         val resolved = requestedTileIds.mapNotNull { tileId -> resolveTile(source.url, header, root, tileId) }
         require(resolved.isNotEmpty()) { "Source has no tiles in the requested area" }
 
-        val temporary = File(destination.parentFile, ".${destination.name}.tmp")
-        destination.parentFile?.mkdirs()
-        temporary.delete()
+        val parent = destination.parentFile ?: File(".")
+        parent.mkdirs()
+        val temporary = File.createTempFile(".${destination.name}.", ".tmp", parent)
         var completed = false
         try {
             writeExtractedArchive(

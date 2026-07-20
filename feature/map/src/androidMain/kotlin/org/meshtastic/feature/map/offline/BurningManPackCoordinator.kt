@@ -22,6 +22,8 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.Instant
 import java.io.File
@@ -91,15 +93,40 @@ class BurningManPackCoordinator(
     private val downloader: BurningManPackDownloader =
         BurningManPackDownloader { bounds, destination -> ProtomapsRegionDownloader().download(bounds, destination) },
 ) {
+    private val stateMutex = Mutex()
     private val _selectedPack = MutableStateFlow<SelectedBurningManPack?>(null)
     val selectedPack: StateFlow<SelectedBurningManPack?> = _selectedPack.asStateFlow()
 
-    suspend fun reconcile(now: Instant, lastAuthorizedLocation: PackLocation?): SelectedBurningManPack? {
+    suspend fun reconcile(now: Instant, lastAuthorizedLocation: PackLocation?): SelectedBurningManPack? =
+        stateMutex.withLock { reconcileLocked(now, lastAuthorizedLocation) }
+
+    suspend fun removeByUser() {
+        stateMutex.withLock {
+            destination.delete()
+            val record =
+                store.load() ?: BurningManPackRecord(
+                    packId = PACK_ID,
+                    sourceBuild = "",
+                    replicationTimestamp = "",
+                    installedAt = Clock.System.now(),
+                    userSuppressed = true,
+                )
+            store.save(record.copy(userSuppressed = true))
+            _selectedPack.value = null
+        }
+    }
+
+    private suspend fun reconcileLocked(now: Instant, lastAuthorizedLocation: PackLocation?): SelectedBurningManPack? {
         var record = store.load()
         var selected = record?.let(::validatedSelection)
-        if (record != null && selected == null && !record.userSuppressed) {
+        if (
+            record != null &&
+            (record.packId != PACK_ID || (selected == null && !record.userSuppressed))
+        ) {
+            destination.delete()
             store.save(null)
             record = null
+            selected = null
         }
         if (record?.userSuppressed == true) {
             _selectedPack.value = null
@@ -111,20 +138,6 @@ class BurningManPackCoordinator(
             PackAction.Retain -> selected.also { _selectedPack.value = it }
             PackAction.Remove -> removeAutomatically()
         }
-    }
-
-    fun removeByUser() {
-        destination.delete()
-        val record =
-            store.load() ?: BurningManPackRecord(
-                packId = PACK_ID,
-                sourceBuild = "",
-                replicationTimestamp = "",
-                installedAt = Clock.System.now(),
-                userSuppressed = true,
-            )
-        store.save(record.copy(userSuppressed = true))
-        _selectedPack.value = null
     }
 
     private suspend fun install(now: Instant): SelectedBurningManPack? = runCatching {
@@ -163,6 +176,7 @@ class BurningManPackCoordinator(
     }
 
     private fun validatedSelection(record: BurningManPackRecord): SelectedBurningManPack? = runCatching {
+            require(record.packId == PACK_ID) { "Burning Man pack identifier does not match" }
             require(destination.isFile) { "Burning Man pack is missing" }
             val reader = PmtilesV3Reader(destination)
             require(reader.header.tileType == PmtilesTileType.Mvt) { "Burning Man pack is not vector MVT" }

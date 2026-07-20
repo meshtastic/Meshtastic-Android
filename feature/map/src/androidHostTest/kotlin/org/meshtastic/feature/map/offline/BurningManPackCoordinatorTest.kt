@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.map.offline
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runCurrent
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -122,6 +125,74 @@ class BurningManPackCoordinatorTest {
         }
     }
 
+    @Test
+    fun `user removal during installation leaves the pack suppressed and absent`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val store = FakeStore()
+        val downloader = BlockingDownloader()
+        val coordinator = BurningManPackCoordinator(filesDirectory, store, downloader)
+
+        try {
+            val installation = async { coordinator.reconcile(INSTALL_TIME, INSIDE_LOCATION) }
+            downloader.started.await()
+            val removal = async { coordinator.removeByUser() }
+            runCurrent()
+            downloader.release.complete(Unit)
+            installation.await()
+            removal.await()
+
+            assertNull(coordinator.selectedPack.value)
+            assertTrue(store.record?.userSuppressed == true)
+            assertFalse(File(filesDirectory, "offline/burning-man-2026.pmtiles").exists())
+        } finally {
+            downloader.release.complete(Unit)
+            filesDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `concurrent reconciliations perform one installation`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val downloader = BlockingDownloader()
+        val coordinator = BurningManPackCoordinator(filesDirectory, FakeStore(), downloader)
+
+        try {
+            val first = async { coordinator.reconcile(INSTALL_TIME, INSIDE_LOCATION) }
+            downloader.started.await()
+            val second = async { coordinator.reconcile(INSTALL_TIME, INSIDE_LOCATION) }
+
+            try {
+                runCurrent()
+                assertEquals(1, downloader.destinations.size)
+            } finally {
+                downloader.release.complete(Unit)
+            }
+
+            assertEquals(first.await()?.file, second.await()?.file)
+            assertEquals(1, downloader.destinations.size)
+        } finally {
+            downloader.release.complete(Unit)
+            filesDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `mismatched persisted pack identity clears the manifest and file`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val file = File(filesDirectory, "offline/burning-man-2026.pmtiles")
+        writeValidatedPack(file)
+        val store = FakeStore(record = installedRecord().copy(packId = "other-pack"))
+        val coordinator = BurningManPackCoordinator(filesDirectory, store, FakeDownloader())
+
+        try {
+            assertNull(coordinator.reconcile(INSTALL_TIME, null))
+            assertNull(store.record)
+            assertFalse(file.exists())
+        } finally {
+            filesDirectory.deleteRecursively()
+        }
+    }
+
     private class FakeStore(record: BurningManPackRecord? = null) : BurningManPackStore {
         var record: BurningManPackRecord? = record
 
@@ -143,6 +214,20 @@ class BurningManPackCoordinatorTest {
                 failFirstDownload = false
                 throw IllegalStateException("download failed")
             }
+            writeValidatedPack(destination)
+            return DownloadedPack("20260902", destination)
+        }
+    }
+
+    private class BlockingDownloader : BurningManPackDownloader {
+        val destinations = mutableListOf<File>()
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+
+        override suspend fun download(bounds: GeoBounds, destination: File): DownloadedPack {
+            destinations += destination
+            started.complete(Unit)
+            release.await()
             writeValidatedPack(destination)
             return DownloadedPack("20260902", destination)
         }
