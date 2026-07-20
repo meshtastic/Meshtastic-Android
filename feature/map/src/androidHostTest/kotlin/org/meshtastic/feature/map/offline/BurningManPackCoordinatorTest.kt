@@ -151,6 +151,31 @@ class BurningManPackCoordinatorTest {
     }
 
     @Test
+    fun `automatic cleanup queued during installation leaves no selected pack`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val store = FakeStore()
+        val downloader = BlockingDownloader()
+        val coordinator = BurningManPackCoordinator(filesDirectory, store, downloader)
+
+        try {
+            val installation = async { coordinator.reconcile(INSTALL_TIME, INSIDE_LOCATION) }
+            downloader.started.await()
+            val cleanup = async { coordinator.reconcile(AUTOMATIC_CLEANUP_TIME, null) }
+            runCurrent()
+            downloader.release.complete(Unit)
+            installation.await()
+            cleanup.await()
+
+            assertNull(coordinator.selectedPack.value)
+            assertNull(store.record)
+            assertFalse(File(filesDirectory, "offline/burning-man-2026.pmtiles").exists())
+        } finally {
+            downloader.release.complete(Unit)
+            filesDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `concurrent reconciliations perform one installation`() = runTest {
         val filesDirectory = createTempDirectory("burning-man-pack").toFile()
         val downloader = BlockingDownloader()
