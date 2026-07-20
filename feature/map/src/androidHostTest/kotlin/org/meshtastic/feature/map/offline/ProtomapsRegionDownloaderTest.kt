@@ -126,7 +126,8 @@ class ProtomapsRegionDownloaderTest {
         val fakeClient =
             FakeRangeClient(
                 mapOf(
-                    resolver.urlFor(today) to FakeArchive(statusCode = 206, bytes = vectorPmtiles(runLength = 100_000_000)),
+                    resolver.urlFor(today) to
+                        FakeArchive(statusCode = 206, bytes = vectorPmtiles(runLength = 100_000_000)),
                 ),
             )
         val directory = Files.createTempDirectory("protomaps-region-test").toFile()
@@ -135,12 +136,17 @@ class ProtomapsRegionDownloaderTest {
         try {
             val failure =
                 runCatching {
-                    ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                    ProtomapsRegionDownloader(
+                        archiveResolver = resolver,
+                        rangeClient = fakeClient,
+                        utcDate = { today },
+                    )
                         .download(
                             bounds = GeoBounds(minLon = -3.0, minLat = -3.0, maxLon = 3.0, maxLat = 3.0),
                             destination = destination,
                         )
-                }.exceptionOrNull()
+                }
+                    .exceptionOrNull()
 
             assertTrue(checkNotNull(failure).message?.contains("root directory") == true)
             assertTrue(!destination.exists())
@@ -164,12 +170,17 @@ class ProtomapsRegionDownloaderTest {
         try {
             val failure =
                 runCatching {
-                    ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                    ProtomapsRegionDownloader(
+                        archiveResolver = resolver,
+                        rangeClient = fakeClient,
+                        utcDate = { today },
+                    )
                         .download(
                             bounds = GeoBounds(minLon = -119.21, minLat = 40.78, maxLon = -119.20, maxLat = 40.79),
                             destination = destination,
                         )
-                }.exceptionOrNull()
+                }
+                    .exceptionOrNull()
 
             assertTrue(checkNotNull(failure).message?.contains("truncated") == true)
             assertTrue(!destination.exists())
@@ -241,6 +252,7 @@ class ProtomapsRegionDownloaderTest {
     private companion object {
         const val TILE_DATA_OFFSET = 134L
         const val MAX_ROOT_DIRECTORY_BYTES = 16 * 1024L
-        val BURNING_MAN_BOUNDS = GeoBounds(minLon = -119.287957, minLat = 40.722536, maxLon = -119.128520, maxLat = 40.843420)
+        val BURNING_MAN_BOUNDS =
+            GeoBounds(minLon = -119.287957, minLat = 40.722536, maxLon = -119.128520, maxLat = 40.843420)
     }
 }

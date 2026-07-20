@@ -44,13 +44,10 @@ class BurningManPackPolicy(
         return when {
             now >= noLocationCleanupDate -> PackAction.Remove
 
-            now >= outsideAreaCleanupDate && recentLocation != null && !contains(recentLocation) ->
-                PackAction.Remove
+            now >= outsideAreaCleanupDate && recentLocation != null && !contains(recentLocation) -> PackAction.Remove
 
-            recentLocation != null &&
-                contains(recentLocation) &&
-                manifest == null &&
-                !installationLatched -> PackAction.Install
+            recentLocation != null && contains(recentLocation) && manifest == null && !installationLatched ->
+                PackAction.Install
 
             else -> PackAction.Retain
         }

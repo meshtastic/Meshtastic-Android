@@ -27,8 +27,8 @@ import kotlinx.datetime.toLocalDateTime
 import org.meshtastic.core.common.util.ioDispatcher
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
@@ -121,7 +121,9 @@ class ProtomapsRegionDownloader(
         val today = utcDate()
         for (offset in 0 until BUILD_LOOKBACK_DAYS) {
             val day = today.minus(DatePeriod(days = offset))
-            sourceFor(day)?.let { return it }
+            sourceFor(day)?.let {
+                return it
+            }
         }
         return null
     }
@@ -131,11 +133,12 @@ class ProtomapsRegionDownloader(
         val first = 0L
         val last = PmtilesV3Reader.HEADER_SIZE - 1L
         val response = rangeClient.fetch(url, first..last)
-        val header = if (response.statusCode == HttpURLConnection.HTTP_PARTIAL) {
-            PmtilesV3Reader.parseHeader(exactRangeBody(response, first, last))
-        } else {
-            null
-        }
+        val header =
+            if (response.statusCode == HttpURLConnection.HTTP_PARTIAL) {
+                PmtilesV3Reader.parseHeader(exactRangeBody(response, first, last))
+            } else {
+                null
+            }
         return header?.let { Source(url = url, build = day.compact(), header = it) }
     }
 
@@ -271,6 +274,8 @@ object HttpPmtilesRangeClient : PmtilesRangeClient {
         val connection = URL(url).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "GET"
+            connection.connectTimeout = CONNECT_TIMEOUT_MILLIS
+            connection.readTimeout = READ_TIMEOUT_MILLIS
             connection.setRequestProperty("Range", "bytes=${range.first}-${range.last}")
             connection.setRequestProperty("Accept-Encoding", "identity")
             val status = connection.responseCode
@@ -287,15 +292,30 @@ class PmtilesV3Reader(file: File) {
     val metadata: Map<String, String>
 
     init {
-        val bytes = FileInputStream(file).use { it.readBytes() }
-        header = requireNotNull(parseHeader(bytes)) { "Invalid PMTiles v3 header" }
-        val metadataEnd = header.metadataOffset + header.metadataLength
-        require(metadataEnd <= bytes.size) { "Invalid PMTiles metadata range" }
-        metadata = parseMetadata(bytes.copyOfRange(header.metadataOffset.toInt(), metadataEnd.toInt()).decodeToString())
+        RandomAccessFile(file, "r").use { input ->
+            val headerBytes = ByteArray(HEADER_SIZE)
+            input.readFully(headerBytes)
+            header = requireNotNull(parseHeader(headerBytes)) { "Invalid PMTiles v3 header" }
+            val fileSize = input.length()
+            require(
+                header.metadataOffset >= 0 &&
+                    header.metadataLength >= 0 &&
+                    header.metadataOffset <= fileSize &&
+                    header.metadataLength <= fileSize - header.metadataOffset &&
+                    header.metadataLength <= MAX_METADATA_BYTES,
+            ) {
+                "Invalid PMTiles metadata range"
+            }
+            val metadataBytes = ByteArray(header.metadataLength.toInt())
+            input.seek(header.metadataOffset)
+            input.readFully(metadataBytes)
+            metadata = parseMetadata(metadataBytes.decodeToString())
+        }
     }
 
     companion object {
         const val HEADER_SIZE = 127
+        private const val MAX_METADATA_BYTES = 16 * 1024 * 1024
 
         fun parseHeader(bytes: ByteArray): PmtilesHeader? {
             if (
@@ -321,6 +341,9 @@ class PmtilesV3Reader(file: File) {
         }
     }
 }
+
+private const val CONNECT_TIMEOUT_MILLIS = 15_000
+private const val READ_TIMEOUT_MILLIS = 30_000
 
 data class PmtilesHeader(
     val rootDirectoryOffset: Long,

@@ -19,17 +19,13 @@ package org.meshtastic.app.map
 import com.google.maps.android.compose.MapType
 
 /** Chooses one opaque map base so a local Burning Man pack never mixes with remote custom tiles. */
-internal data class GoogleMapTileLayerSelection(
-    val mapType: MapType,
-    val attachCustomTileSource: Boolean,
-)
+internal data class GoogleMapTileLayerSelection(val mapType: MapType, val attachCustomTileSource: Boolean)
 
 internal fun googleMapTileLayerSelection(
     selectedMapType: MapType,
     hasCustomTileSource: Boolean,
     burningManPackCoversCamera: Boolean,
-): GoogleMapTileLayerSelection =
-    GoogleMapTileLayerSelection(
-        mapType = if (hasCustomTileSource || burningManPackCoversCamera) MapType.NONE else selectedMapType,
-        attachCustomTileSource = hasCustomTileSource && !burningManPackCoversCamera,
-    )
+): GoogleMapTileLayerSelection = GoogleMapTileLayerSelection(
+    mapType = if (hasCustomTileSource || burningManPackCoversCamera) MapType.NONE else selectedMapType,
+    attachCustomTileSource = hasCustomTileSource && !burningManPackCoversCamera,
+)

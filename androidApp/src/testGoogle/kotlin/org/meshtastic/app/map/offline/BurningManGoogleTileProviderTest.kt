@@ -81,35 +81,36 @@ class BurningManGoogleTileProviderTest {
         header.put(0)
         header.put(0)
 
-        return temporaryFolder.newFile("burning-man.pmtiles").apply { writeBytes(header.array() + directory + metadata + tile) }
+        return temporaryFolder.newFile("burning-man.pmtiles").apply {
+            writeBytes(header.array() + directory + metadata + tile)
+        }
     }
 
     private fun vectorTile(): ByteArray = field(3, roadsLayer())
 
-    private fun roadsLayer(): ByteArray =
-        scalar(15, 2) +
-            field(1, "roads".encodeToByteArray()) +
-            field(2, roadFeature(kindDetail = 1, geometry = verticalLine())) +
-            field(2, roadFeature(kindDetail = 2, geometry = footwayLine())) +
-            field(3, "kind".encodeToByteArray()) +
-            field(3, "kind_detail".encodeToByteArray()) +
-            field(4, field(1, "path".encodeToByteArray())) +
-            field(4, field(1, "pedestrian".encodeToByteArray())) +
-            field(4, field(1, "footway".encodeToByteArray())) +
-            scalar(5, 4096)
+    private fun roadsLayer(): ByteArray = scalar(15, 2) +
+        field(1, "roads".encodeToByteArray()) +
+        field(2, roadFeature(kindDetail = 1, geometry = verticalLine())) +
+        field(2, roadFeature(kindDetail = 2, geometry = footwayLine())) +
+        field(3, "kind".encodeToByteArray()) +
+        field(3, "kind_detail".encodeToByteArray()) +
+        field(4, field(1, "path".encodeToByteArray())) +
+        field(4, field(1, "pedestrian".encodeToByteArray())) +
+        field(4, field(1, "footway".encodeToByteArray())) +
+        scalar(5, 4096)
 
     private fun roadFeature(kindDetail: Int, geometry: ByteArray): ByteArray =
-        field(2, byteArrayOf(0, 0, 1, kindDetail.toByte())) +
-            scalar(3, 2) +
-            field(4, geometry)
+        field(2, byteArrayOf(0, 0, 1, kindDetail.toByte())) + scalar(3, 2) + field(4, geometry)
 
     private fun verticalLine(): ByteArray = packed(9, 4096, 0, 10, 0, 8192)
 
     private fun footwayLine(): ByteArray = packed(9, 0, 2048, 10, 2048, 0)
 
-    private fun packed(vararg values: Int): ByteArray = values.fold(byteArrayOf()) { bytes, value -> bytes + varint(value) }
+    private fun packed(vararg values: Int): ByteArray =
+        values.fold(byteArrayOf()) { bytes, value -> bytes + varint(value) }
 
-    private fun field(number: Int, bytes: ByteArray): ByteArray = varint((number shl 3) or 2) + varint(bytes.size) + bytes
+    private fun field(number: Int, bytes: ByteArray): ByteArray =
+        varint((number shl 3) or 2) + varint(bytes.size) + bytes
 
     private fun scalar(number: Int, value: Int): ByteArray = varint(number shl 3) + varint(value)
 

@@ -104,7 +104,6 @@ class MapViewModel(
 
     val selectedBurningManPack: StateFlow<SelectedBurningManPack?> = burningManPackRuntime.coordinator.selectedPack
 
-
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 

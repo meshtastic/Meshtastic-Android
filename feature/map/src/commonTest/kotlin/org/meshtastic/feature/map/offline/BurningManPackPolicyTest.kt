@@ -71,14 +71,16 @@ class BurningManPackPolicyTest {
 
     @Test
     fun `manifest prevents a second installation`() {
-        val installedPolicy = BurningManPackPolicy(
-            manifest = BurningManPackManifest(
-                packId = "burning-man-2026",
-                sourceBuild = "2026-08-29",
-                installedAt = instant("2026-09-01T07:00:00Z"),
-                userSuppressed = false,
-            ),
-        )
+        val installedPolicy =
+            BurningManPackPolicy(
+                manifest =
+                BurningManPackManifest(
+                    packId = "burning-man-2026",
+                    sourceBuild = "2026-08-29",
+                    installedAt = instant("2026-09-01T07:00:00Z"),
+                    userSuppressed = false,
+                ),
+            )
 
         assertEquals(
             PackAction.Retain,

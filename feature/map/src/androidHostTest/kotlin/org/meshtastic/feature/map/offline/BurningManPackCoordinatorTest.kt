@@ -18,8 +18,11 @@ package org.meshtastic.feature.map.offline
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,9 +30,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
-import java.io.File
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 class BurningManPackCoordinatorTest {
 
@@ -261,10 +261,8 @@ class BurningManPackCoordinatorTest {
         }
     }
 
-    private class FakeDownloader(
-        private var failFirstDownload: Boolean = false,
-        private val maxZoom: Int = 15,
-    ) : BurningManPackDownloader {
+    private class FakeDownloader(private var failFirstDownload: Boolean = false, private val maxZoom: Int = 15) :
+        BurningManPackDownloader {
         val destinations = mutableListOf<File>()
 
         override suspend fun download(bounds: GeoBounds, destination: File): DownloadedPack {
@@ -292,24 +290,19 @@ class BurningManPackCoordinatorTest {
         }
     }
 
-    private fun installedRecord() =
-        BurningManPackRecord(
-            packId = "burning-man-2026",
-            sourceBuild = "20260901",
-            replicationTimestamp = REPLICATION_TIME,
-            installedAt = INSTALL_TIME,
-            userSuppressed = false,
-        )
+    private fun installedRecord() = BurningManPackRecord(
+        packId = "burning-man-2026",
+        sourceBuild = "20260901",
+        replicationTimestamp = REPLICATION_TIME,
+        installedAt = INSTALL_TIME,
+        userSuppressed = false,
+    )
 
     private companion object {
         val INSTALL_TIME: Instant = Instant.parse("2026-09-07T20:00:00Z")
         val AUTOMATIC_CLEANUP_TIME: Instant = Instant.parse("2026-09-12T07:00:00Z")
         val INSIDE_LOCATION =
-            PackLocation(
-                latitude = 40.7864,
-                longitude = -119.2065,
-                timestamp = Instant.parse("2026-09-07T19:00:00Z"),
-            )
+            PackLocation(latitude = 40.7864, longitude = -119.2065, timestamp = Instant.parse("2026-09-07T19:00:00Z"))
         const val REPLICATION_TIME = "20260901"
     }
 }

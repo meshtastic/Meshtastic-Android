@@ -43,14 +43,15 @@ class BurningManPackRuntime private constructor(private val coordinatorFactory: 
 
         fun forContext(context: Context): BurningManPackRuntime {
             val applicationContext = context.applicationContext
-            return instance ?: synchronized(instanceLock) {
-                instance ?: run {
-                    val coordinatorFactory = factoryForTest ?: ::newCoordinator
-                    BurningManPackRuntime(
-                        coordinatorFactory = { coordinatorFactory(applicationContext) },
-                    ).also { instance = it }
+            return instance
+                ?: synchronized(instanceLock) {
+                    instance
+                        ?: run {
+                            val coordinatorFactory = factoryForTest ?: ::newCoordinator
+                            BurningManPackRuntime(coordinatorFactory = { coordinatorFactory(applicationContext) })
+                                .also { instance = it }
+                        }
                 }
-            }
         }
 
         fun installFactoryForTest(factory: (Context) -> BurningManPackCoordinator) {
