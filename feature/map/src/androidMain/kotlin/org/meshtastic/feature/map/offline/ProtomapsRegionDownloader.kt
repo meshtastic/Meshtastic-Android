@@ -128,9 +128,11 @@ class ProtomapsRegionDownloader(
 
     private suspend fun sourceFor(day: LocalDate): Source? {
         val url = archiveResolver.urlFor(day)
-        val response = rangeClient.fetch(url, 0L until PmtilesV3Reader.HEADER_SIZE.toLong())
+        val first = 0L
+        val last = PmtilesV3Reader.HEADER_SIZE - 1L
+        val response = rangeClient.fetch(url, first..last)
         val header = if (response.statusCode == HttpURLConnection.HTTP_PARTIAL) {
-            PmtilesV3Reader.parseHeader(response.body)
+            PmtilesV3Reader.parseHeader(exactRangeBody(response, first, last))
         } else {
             null
         }
@@ -205,6 +207,9 @@ class ProtomapsRegionDownloader(
                 }
                 .sortedBy { it.tileId }
         val rootDirectory = serializeDirectory(entries)
+        require(rootDirectory.size <= MAX_ROOT_DIRECTORY_SIZE) {
+            "PMTiles root directory exceeds $MAX_ROOT_DIRECTORY_SIZE bytes"
+        }
         val metadata = "{\"$REPLICATION_TIME_KEY\":\"${source.build}\"}".encodeToByteArray()
         val tileDataOffset = PmtilesV3Reader.HEADER_SIZE + rootDirectory.size + metadata.size
         val header =
@@ -236,6 +241,14 @@ class ProtomapsRegionDownloader(
         require(first >= 0 && last >= first) { "Invalid PMTiles byte range" }
         val response = rangeClient.fetch(url, first..last)
         require(response.statusCode == HttpURLConnection.HTTP_PARTIAL) { "Range request was not honored" }
+        return exactRangeBody(response, first, last)
+    }
+
+    private fun exactRangeBody(response: PmtilesRangeResponse, first: Long, last: Long): ByteArray {
+        val expectedLength = last - first + 1
+        require(expectedLength > 0 && response.body.size.toLong() == expectedLength) {
+            "Range response was truncated or oversized"
+        }
         return response.body
     }
 
@@ -248,6 +261,7 @@ class ProtomapsRegionDownloader(
         const val MIN_ZOOM = 0
         const val MAX_ZOOM = 13
         const val MAX_TILES = 600_000
+        const val MAX_ROOT_DIRECTORY_SIZE = 16 * 1024
         const val MAX_DIRECTORY_DEPTH = 4
     }
 }

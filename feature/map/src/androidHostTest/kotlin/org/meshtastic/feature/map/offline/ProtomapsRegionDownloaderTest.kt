@@ -64,7 +64,69 @@ class ProtomapsRegionDownloaderTest {
         }
     }
 
-    private class FakeRangeClient(private val archives: Map<String, FakeArchive>) : PmtilesRangeClient {
+    @Test
+    fun `rejects a region whose root directory exceeds the PMTiles limit`() = runTest {
+        val today = LocalDate(2026, 9, 2)
+        val resolver = ProtomapsArchiveResolver { date -> "https://example.test/$date.pmtiles" }
+        val fakeClient =
+            FakeRangeClient(
+                mapOf(
+                    resolver.urlFor(today) to FakeArchive(statusCode = 206, bytes = vectorPmtiles(runLength = 100_000_000)),
+                ),
+            )
+        val directory = Files.createTempDirectory("protomaps-region-test").toFile()
+        val destination = File(directory, "region.pmtiles")
+
+        try {
+            val failure =
+                runCatching {
+                    ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                        .download(
+                            bounds = GeoBounds(minLon = -3.0, minLat = -3.0, maxLon = 3.0, maxLat = 3.0),
+                            destination = destination,
+                        )
+                }.exceptionOrNull()
+
+            assertTrue(checkNotNull(failure).message?.contains("root directory") == true)
+            assertTrue(!destination.exists())
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `rejects truncated range responses and removes temporary file`() = runTest {
+        val today = LocalDate(2026, 9, 2)
+        val resolver = ProtomapsArchiveResolver { date -> "https://example.test/$date.pmtiles" }
+        val fakeClient =
+            FakeRangeClient(
+                archives = mapOf(resolver.urlFor(today) to FakeArchive(statusCode = 206, bytes = vectorPmtiles())),
+                truncateTilePayload = true,
+            )
+        val directory = Files.createTempDirectory("protomaps-region-test").toFile()
+        val destination = File(directory, "region.pmtiles")
+
+        try {
+            val failure =
+                runCatching {
+                    ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                        .download(
+                            bounds = GeoBounds(minLon = -119.21, minLat = 40.78, maxLon = -119.20, maxLat = 40.79),
+                            destination = destination,
+                        )
+                }.exceptionOrNull()
+
+            assertTrue(checkNotNull(failure).message?.contains("truncated") == true)
+            assertTrue(!destination.exists())
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    private class FakeRangeClient(
+        private val archives: Map<String, FakeArchive>,
+        private val truncateTilePayload: Boolean = false,
+    ) : PmtilesRangeClient {
         val probedUrls = mutableListOf<String>()
 
         override suspend fun fetch(url: String, range: LongRange): PmtilesRangeResponse {
@@ -72,15 +134,18 @@ class ProtomapsRegionDownloaderTest {
             if (range.first == 0L && range.last == PmtilesV3Reader.HEADER_SIZE - 1L) probedUrls += url
             val start = range.first.toInt()
             val end = (range.last + 1).coerceAtMost(archive.bytes.size.toLong()).toInt()
-            return PmtilesRangeResponse(archive.statusCode, archive.bytes.copyOfRange(start, end))
+            val body = archive.bytes.copyOfRange(start, end)
+            val result =
+                if (truncateTilePayload && range.first >= TILE_DATA_OFFSET) body.dropLast(1).toByteArray() else body
+            return PmtilesRangeResponse(archive.statusCode, result)
         }
     }
 
     private data class FakeArchive(val statusCode: Int, val bytes: ByteArray)
 
-    private fun vectorPmtiles(): ByteArray {
+    private fun vectorPmtiles(runLength: Int = 1): ByteArray {
         val tile = byteArrayOf(0x1A, 0x00)
-        val directory = byteArrayOf(1, 0, 1, tile.size.toByte(), 1)
+        val directory = byteArrayOf(1, 0) + varint(runLength) + byteArrayOf(tile.size.toByte(), 1)
         val metadata = "{}".encodeToByteArray()
         val header = ByteBuffer.allocate(PmtilesV3Reader.HEADER_SIZE).order(ByteOrder.LITTLE_ENDIAN)
         header.put("PMTiles".encodeToByteArray())
@@ -100,7 +165,25 @@ class ProtomapsRegionDownloaderTest {
         header.put(1)
         header.put(1)
         header.put(PmtilesTileType.Mvt.value)
+        header.put(0)
+        header.put(13)
 
         return header.array() + directory + metadata + tile
+    }
+
+    private fun varint(value: Int): ByteArray {
+        var remainder = value
+        val result = mutableListOf<Byte>()
+        do {
+            var next = remainder and 0x7f
+            remainder = remainder ushr 7
+            if (remainder > 0) next = next or 0x80
+            result += next.toByte()
+        } while (remainder > 0)
+        return result.toByteArray()
+    }
+
+    private companion object {
+        const val TILE_DATA_OFFSET = 134L
     }
 }
