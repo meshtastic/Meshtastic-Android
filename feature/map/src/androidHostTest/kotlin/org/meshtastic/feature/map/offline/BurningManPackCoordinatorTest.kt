@@ -72,6 +72,39 @@ class BurningManPackCoordinatorTest {
     }
 
     @Test
+    fun `lower-detail pack is rejected and deleted on install`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val store = FakeStore()
+        val downloader = FakeDownloader(maxZoom = 14)
+        val coordinator = BurningManPackCoordinator(filesDirectory, store, downloader)
+
+        try {
+            assertNull(coordinator.reconcile(INSTALL_TIME, INSIDE_LOCATION))
+            assertFalse(File(filesDirectory, "offline/burning-man-2026.pmtiles").exists())
+            assertNull(store.record)
+        } finally {
+            filesDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `lower-detail persisted pack is rejected and deleted on restore`() = runTest {
+        val filesDirectory = createTempDirectory("burning-man-pack").toFile()
+        val file = File(filesDirectory, "offline/burning-man-2026.pmtiles")
+        writeValidatedPack(file, maxZoom = 14)
+        val store = FakeStore(record = installedRecord())
+        val coordinator = BurningManPackCoordinator(filesDirectory, store, FakeDownloader())
+
+        try {
+            assertNull(coordinator.restoreValidatedSelection())
+            assertFalse(file.exists())
+            assertNull(store.record)
+        } finally {
+            filesDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `user removal suppresses a later install`() = runTest {
         val filesDirectory = createTempDirectory("burning-man-pack").toFile()
         val store = FakeStore()
@@ -230,6 +263,7 @@ class BurningManPackCoordinatorTest {
 
     private class FakeDownloader(
         private var failFirstDownload: Boolean = false,
+        private val maxZoom: Int = 15,
     ) : BurningManPackDownloader {
         val destinations = mutableListOf<File>()
 
@@ -239,7 +273,7 @@ class BurningManPackCoordinatorTest {
                 failFirstDownload = false
                 throw IllegalStateException("download failed")
             }
-            writeValidatedPack(destination)
+            writeValidatedPack(destination, maxZoom)
             return DownloadedPack("20260902", destination)
         }
     }
@@ -280,7 +314,7 @@ class BurningManPackCoordinatorTest {
     }
 }
 
-private fun writeValidatedPack(destination: File) {
+private fun writeValidatedPack(destination: File, maxZoom: Int = 15) {
     destination.parentFile?.mkdirs()
     val metadata = "{\"$REPLICATION_TIME_KEY\":\"20260901\"}".encodeToByteArray()
     val root = byteArrayOf(1, 0, 1, 1, 1)
@@ -302,5 +336,7 @@ private fun writeValidatedPack(destination: File) {
     header.put(PmtilesCompression.None.value)
     header.put(PmtilesCompression.None.value)
     header.put(PmtilesTileType.Mvt.value)
+    header.put(0)
+    header.put(maxZoom.toByte())
     destination.writeBytes(header.array() + root + metadata + byteArrayOf(0))
 }

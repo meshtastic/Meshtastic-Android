@@ -560,15 +560,18 @@ fun MapView(
 
     val burningManTileProviderForCamera =
         burningManTileProvider?.takeIf { tileProvider ->
-            currentCustomTileProviderUrl == null &&
-                tileProvider.covers(
-                    latitude = cameraPositionState.position.target.latitude,
-                    longitude = cameraPositionState.position.target.longitude,
-                )
+            tileProvider.covers(
+                latitude = cameraPositionState.position.target.latitude,
+                longitude = cameraPositionState.position.target.longitude,
+            )
         }
     val burningManPackCoversCamera = burningManTileProviderForCamera != null
-    val effectiveGoogleMapType =
-        if (currentCustomTileProviderUrl != null || burningManPackCoversCamera) MapType.NONE else selectedGoogleMapType
+    val tileLayerSelection =
+        googleMapTileLayerSelection(
+            selectedMapType = selectedGoogleMapType,
+            hasCustomTileSource = currentCustomTileProviderUrl != null,
+            burningManPackCoversCamera = burningManPackCoversCamera,
+        )
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -604,7 +607,7 @@ fun MapView(
             ),
             properties =
             MapProperties(
-                mapType = effectiveGoogleMapType,
+                mapType = tileLayerSelection.mapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
             onMapClick = { latLng ->
@@ -645,14 +648,16 @@ fun MapView(
             }
 
             // Custom tile overlay (all modes)
-            key(currentCustomTileProviderUrl) {
-                currentCustomTileProviderUrl?.let { url ->
-                    val config =
-                        mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
-                            it.urlTemplate == url || it.localUri == url
+            key(currentCustomTileProviderUrl, tileLayerSelection.attachCustomTileSource) {
+                if (tileLayerSelection.attachCustomTileSource) {
+                    currentCustomTileProviderUrl?.let { url ->
+                        val config =
+                            mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
+                                it.urlTemplate == url || it.localUri == url
+                            }
+                        mapViewModel.getTileProvider(config)?.let { tileProvider ->
+                            TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
-                    mapViewModel.getTileProvider(config)?.let { tileProvider ->
-                        TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
                 }
             }

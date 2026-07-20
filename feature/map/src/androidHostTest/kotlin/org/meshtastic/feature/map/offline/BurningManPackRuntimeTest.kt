@@ -98,6 +98,8 @@ class BurningManPackRuntimeTest {
         header.put(PmtilesCompression.None.value)
         header.put(PmtilesCompression.None.value)
         header.put(PmtilesTileType.Mvt.value)
+        header.put(0)
+        header.put(15)
         file.writeBytes(header.array() + metadata)
     }
 

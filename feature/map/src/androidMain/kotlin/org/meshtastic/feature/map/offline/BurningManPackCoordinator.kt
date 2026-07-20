@@ -100,10 +100,15 @@ class BurningManPackCoordinator(
     val selectedPack: StateFlow<SelectedBurningManPack?> = _selectedPack.asStateFlow()
 
     /** Restores the persisted pack only when it still passes the same validation used by reconciliation. */
-    suspend fun restoreValidatedSelection(): SelectedBurningManPack? =
-        stateMutex.withLock {
-            store.load()?.let(::validatedSelection).also { selected -> _selectedPack.value = selected }
+    suspend fun restoreValidatedSelection(): SelectedBurningManPack? = stateMutex.withLock {
+        val record = store.load()
+        val selected = record?.takeUnless { it.userSuppressed }?.let(::validatedSelection)
+        if (record != null && !record.userSuppressed && selected == null) {
+            destination.delete()
+            store.save(null)
         }
+        selected.also { _selectedPack.value = it }
+    }
 
     suspend fun reconcile(now: Instant, lastAuthorizedLocation: PackLocation?): SelectedBurningManPack? =
         stateMutex.withLock { reconcileLocked(now, lastAuthorizedLocation) }
@@ -151,7 +156,7 @@ class BurningManPackCoordinator(
     private suspend fun install(now: Instant): SelectedBurningManPack? = runCatching {
             val downloadedPack = downloader.download(BOUNDS, destination)
             val reader = PmtilesV3Reader(destination)
-            require(reader.header.tileType == PmtilesTileType.Mvt) { "Burning Man pack is not vector MVT" }
+            validatePack(reader)
             val replicationTimestamp = requireNotNull(reader.metadata[REPLICATION_TIME_KEY]) {
                 "Burning Man pack has no replication timestamp"
             }
@@ -187,7 +192,7 @@ class BurningManPackCoordinator(
             require(record.packId == PACK_ID) { "Burning Man pack identifier does not match" }
             require(destination.isFile) { "Burning Man pack is missing" }
             val reader = PmtilesV3Reader(destination)
-            require(reader.header.tileType == PmtilesTileType.Mvt) { "Burning Man pack is not vector MVT" }
+            validatePack(reader)
             require(reader.metadata[REPLICATION_TIME_KEY] == record.replicationTimestamp) {
                 "Burning Man pack replication timestamp does not match"
             }
@@ -198,8 +203,13 @@ class BurningManPackCoordinator(
             packId = packId,
             sourceBuild = sourceBuild,
             installedAt = installedAt,
-            userSuppressed = userSuppressed,
-        )
+        userSuppressed = userSuppressed,
+    )
+
+    private fun validatePack(reader: PmtilesV3Reader) {
+        require(reader.header.tileType == PmtilesTileType.Mvt) { "Burning Man pack is not vector MVT" }
+        require(reader.header.maxZoom == MAX_ZOOM) { "Burning Man pack does not include zoom $MAX_ZOOM" }
+    }
 
     private val destination: File
         get() = File(filesDirectory, "offline/$PACK_ID.pmtiles")
