@@ -79,12 +79,41 @@ class ProtomapsRegionDownloaderTest {
         val destination = File(directory, "region.pmtiles")
 
         try {
-            ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+            ProtomapsRegionDownloader(
+                archiveResolver = resolver,
+                rangeClient = fakeClient,
+                utcDate = { today },
+                maxZoom = 15,
+            )
                 .download(bounds = BURNING_MAN_BOUNDS, destination = destination)
 
             val header = PmtilesV3Reader(destination).header
             assertEquals(15, header.maxZoom)
             assertTrue(header.rootDirectoryLength <= MAX_ROOT_DIRECTORY_BYTES)
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `keeps default bounded extraction at z13`() = runTest {
+        val today = LocalDate(2026, 9, 2)
+        val resolver = ProtomapsArchiveResolver { date -> "https://example.test/$date.pmtiles" }
+        val fakeClient =
+            FakeRangeClient(
+                mapOf(
+                    resolver.urlFor(today) to
+                        FakeArchive(statusCode = 206, bytes = vectorPmtiles(maxZoom = 15, runLength = Int.MAX_VALUE)),
+                ),
+            )
+        val directory = Files.createTempDirectory("protomaps-region-test").toFile()
+        val destination = File(directory, "region.pmtiles")
+
+        try {
+            ProtomapsRegionDownloader(archiveResolver = resolver, rangeClient = fakeClient, utcDate = { today })
+                .download(bounds = BURNING_MAN_BOUNDS, destination = destination)
+
+            assertEquals(13, PmtilesV3Reader(destination).header.maxZoom)
         } finally {
             directory.deleteRecursively()
         }

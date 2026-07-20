@@ -91,7 +91,9 @@ class BurningManPackCoordinator(
     private val filesDirectory: File,
     private val store: BurningManPackStore,
     private val downloader: BurningManPackDownloader =
-        BurningManPackDownloader { bounds, destination -> ProtomapsRegionDownloader().download(bounds, destination) },
+        BurningManPackDownloader { bounds, destination ->
+            ProtomapsRegionDownloader(maxZoom = MAX_ZOOM).download(bounds, destination)
+        },
 ) {
     private val stateMutex = Mutex()
     private val _selectedPack = MutableStateFlow<SelectedBurningManPack?>(null)
@@ -198,6 +200,7 @@ class BurningManPackCoordinator(
 
     private companion object {
         const val PACK_ID = "burning-man-2026"
+        const val MAX_ZOOM = 15
         val BOUNDS =
             GeoBounds(
                 minLon = -119.287957,

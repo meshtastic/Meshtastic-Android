@@ -259,7 +259,7 @@ class ProtomapsRegionDownloader(
     private companion object {
         const val BUILD_LOOKBACK_DAYS = 16
         const val MIN_ZOOM = 0
-        const val MAX_ZOOM = 15
+        const val MAX_ZOOM = 13
         const val MAX_TILES = 600_000
         const val MAX_ROOT_DIRECTORY_SIZE = 16 * 1024
         const val MAX_DIRECTORY_DEPTH = 4
