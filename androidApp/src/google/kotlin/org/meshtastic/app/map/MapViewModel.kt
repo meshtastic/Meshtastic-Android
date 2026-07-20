@@ -55,9 +55,8 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.feature.map.offline.BurningManPackCoordinator
+import org.meshtastic.feature.map.offline.BurningManPackRuntime
 import org.meshtastic.feature.map.offline.SelectedBurningManPack
-import org.meshtastic.feature.map.offline.SharedPreferencesBurningManPackStore
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -101,13 +100,9 @@ class MapViewModel(
     radioConfigRepository,
     notificationPrefs,
 ) {
-    private val burningManPackCoordinator =
-        BurningManPackCoordinator(
-            filesDirectory = application.filesDir,
-            store = SharedPreferencesBurningManPackStore(application),
-        )
+    private val burningManPackRuntime = BurningManPackRuntime.forContext(application)
 
-    val selectedBurningManPack: StateFlow<SelectedBurningManPack?> = burningManPackCoordinator.selectedPack
+    val selectedBurningManPack: StateFlow<SelectedBurningManPack?> = burningManPackRuntime.coordinator.selectedPack
 
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
@@ -379,7 +374,7 @@ class MapViewModel(
             loadPersistedMapType()
         }
 
-        viewModelScope.launch { burningManPackCoordinator.restoreValidatedSelection() }
+        viewModelScope.launch { burningManPackRuntime.restoreSelection() }
 
         selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
