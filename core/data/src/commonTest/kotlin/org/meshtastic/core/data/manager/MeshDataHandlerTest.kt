@@ -32,6 +32,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -74,6 +75,7 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.proto.Waypoint
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -942,5 +944,130 @@ class MeshDataHandlerTest {
         verifySuspend {
             serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), isSilent = false)
         }
+    }
+
+    // --- Waypoint persisted-owner enforcement ---
+    //
+    // A locked waypoint (locked_to != 0) may only be modified by the node it is locked to. The inbound-payload check
+    // alone (locked_to == from) cannot enforce this: a non-owner can still replay an existing id with locked_to = 0
+    // (unlock) or their own num (takeover). handleWaypoint additionally consults the currently-stored owner.
+
+    private fun waypointPacket(txId: Int, from: Int, waypoint: Waypoint): MeshPacket {
+        val payload = waypoint.encode().toByteString()
+        val packet =
+            MeshPacket(id = txId, from = from, decoded = Data(portnum = PortNum.WAYPOINT_APP, payload = payload))
+        val dataPacket =
+            DataPacket(
+                id = txId,
+                from = NodeAddress.numToDefaultId(from),
+                to = NodeAddress.ID_BROADCAST,
+                bytes = payload,
+                dataType = PortNum.WAYPOINT_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        return packet
+    }
+
+    /** Persist a single stored waypoint (via the getWaypoints firehose) so handleWaypoint can read its owner. */
+    private fun storeWaypoint(id: Int, lockedTo: Int) {
+        val stored =
+            DataPacket(to = NodeAddress.ID_BROADCAST, channel = 0, waypoint = Waypoint(id = id, locked_to = lockedTo))
+        every { packetRepository.getWaypoints() } returns flowOf(listOf(stored))
+    }
+
+    private fun stubWaypointPersistDependencies(txId: Int) {
+        everySuspend { packetRepository.findPacketsWithId(txId) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+    }
+
+    @Test
+    fun `non-owner unlock replay of a locked waypoint is dropped`() = testScope.runTest {
+        storeWaypoint(id = 42, lockedTo = 111)
+        // Mallory (999) replays waypoint 42 with locked_to = 0 (unlock). The inbound check passes, so only the
+        // stored-owner check can drop it.
+        val packet = waypointPacket(txId = 500, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        stubWaypointPersistDependencies(500)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `non-owner takeover of a locked waypoint is dropped`() = testScope.runTest {
+        storeWaypoint(id = 42, lockedTo = 111)
+        // Mallory (999) locks waypoint 42 to herself. The inbound check passes (locked_to == from), so only the
+        // stored-owner check can catch this.
+        val packet = waypointPacket(txId = 501, from = 999, waypoint = Waypoint(id = 42, locked_to = 999))
+        stubWaypointPersistDependencies(501)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `owner unlock of their own locked waypoint is accepted`() = testScope.runTest {
+        storeWaypoint(id = 42, lockedTo = 111)
+        val packet = waypointPacket(txId = 502, from = 111, waypoint = Waypoint(id = 42, locked_to = 0))
+        stubWaypointPersistDependencies(502)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `owner edit of their own locked waypoint is accepted`() = testScope.runTest {
+        storeWaypoint(id = 42, lockedTo = 111)
+        val packet = waypointPacket(txId = 503, from = 111, waypoint = Waypoint(id = 42, locked_to = 111))
+        stubWaypointPersistDependencies(503)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `new waypoint from a non-owner is accepted when none is stored`() = testScope.runTest {
+        // Nothing persisted yet: getWaypoints() emits an empty list (as Room does). A creation, not a hijack.
+        every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        val packet = waypointPacket(txId = 504, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        stubWaypointPersistDependencies(504)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `non-owner update to an unlocked waypoint is accepted`() = testScope.runTest {
+        storeWaypoint(id = 42, lockedTo = 0)
+        val packet = waypointPacket(txId = 505, from = 999, waypoint = Waypoint(id = 42, locked_to = 0))
+        stubWaypointPersistDependencies(505)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `waypoint locked to someone other than the sender is dropped`() = testScope.runTest {
+        // Pre-existing inbound-payload rule: a node can only lock a waypoint to itself. Nothing stored here — the
+        // payload itself is invalid, so it is rejected before any repository read.
+        val packet = waypointPacket(txId = 506, from = 999, waypoint = Waypoint(id = 42, locked_to = 111))
+        stubWaypointPersistDependencies(506)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
     }
 }
