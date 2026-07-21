@@ -9,8 +9,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* Align NFC contact import and share dialogs with Design Standards v1.4 by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/6332
+#### 🖥️ Desktop
+* Add firmware update notice by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6309
+* fix: make NotificationManager.dispatch await the platform send by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6326
 #### 🛠️ Fixes
 * fix: label channel share FAB "Import/Export" and announce Close when expanded by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6303
+* fix: normalize F-Droid QR camera frames by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6319
+* fix: preserve add mode in legacy channel URLs by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6320
+* fix: align channel QR share contract by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6325
+* fix: keep cached data flowing when api.meshtastic.org is down by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6335
+* Fix literal backslashes in strings with escaped apostrophes by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/6336
 #### 📝 Other Changes
 * refactor(map): adopt maps-compose 8.4.0 stock clustering, drop custom renderer workaround by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6301
 * refactor(map): migrate custom overlays to the maps-utils 5.0 data layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6304
@@ -192,6 +202,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @coderabbitai[bot] made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6180
 * @madeofstown made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6210
 * @joeyleake made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6218
+* @sashko made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6315
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
