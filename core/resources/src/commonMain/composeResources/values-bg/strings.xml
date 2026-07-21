@@ -263,6 +263,8 @@
     <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Изход</string>
+    <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
+    <string name="desktop_update_available_message">Meshtastic Desktop %1$s е готов за изтегляне.</string>
     <string name="desktop_update_available_title">Налична е актуализация на приложението</string>
     <string name="desktop_update_download">Изтегляне на актуализация %1$s</string>
     <string name="details">Подробности</string>
@@ -335,6 +337,7 @@
     <string name="doc_section_user">Ръководство за потребители</string>
     <string name="doc_title_app_functions">Функции на приложението</string>
     <string name="doc_title_connections">Връзки</string>
+    <string name="doc_title_debug_logs">Журнали за отстраняване на грешки</string>
     <string name="doc_title_desktop">Настолно приложение</string>
     <string name="doc_title_discovery">Откриване</string>
     <string name="doc_title_firmware">Актуализации на фърмуера</string>
@@ -414,7 +417,9 @@
     <!-- FIRMWARE -->
     <string name="firmware">Фърмуер</string>
     <string name="firmware_edition">Версия на фърмуера</string>
+    <string name="firmware_event_ended_button">Актуализиране на фърмуера</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
+    <string name="firmware_recovery_button">Възобновяване на актуализацията на фърмуера</string>
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
     <string name="firmware_update_almost_there">Почти е готово...</string>
     <string name="firmware_update_alpha">Алфа</string>
@@ -447,6 +452,7 @@
     <string name="firmware_update_no_device">Няма свързано устройство</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
     <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
+    <string name="firmware_update_open">Отваряне на актуализациите на фърмуера</string>
     <string name="firmware_update_ota_failed">OTA актуализацията не е успешна: %1$s</string>
     <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
     <string name="firmware_update_release_notes">Бележки за изданието</string>
@@ -478,6 +484,10 @@
     <string name="flip_screen">Обръщане на екрана</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Удебелен</string>
+    <string name="format_code">Код</string>
+    <string name="format_italic">Наклонен</string>
+    <string name="format_link">Връзка</string>
     <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>
@@ -486,6 +496,11 @@
     <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Генериране на QR код</string>
     <!-- GEOFENCE -->
+    <string name="geofence_box_use_view">Използване на текущия изглед</string>
+    <string name="geofence_edit_area">Редактиране на областта</string>
+    <string name="geofence_favorites_only">Само любими</string>
+    <string name="geofence_remove_area">Премахване на областта</string>
+    <string name="geofence_set_area">Задаване на област на картата</string>
     <string name="get_started">Започнете</string>
     <string name="good">Добър</string>
     <!-- GPIO -->
@@ -519,12 +534,17 @@
     <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Импортиране на конфигурацията</string>
+    <string name="import_export_label">Импорт/Експорт</string>
     <string name="import_known_shared_contact_text">Предупреждение: Този контакт е известен, импортирането ще презапише предишната информация за контакта.</string>
     <string name="import_label">Импортиране</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
     <string name="incoming_messages">Входящи съобщения</string>
     <string name="indoor_air_quality_iaq">Качество на въздуха на закрито (IAQ)</string>
     <string name="info">Информация</string>
+    <string name="insert">Вмъкване</string>
+    <string name="insert_link_message">Въведете URL за избрания текст</string>
+    <string name="insert_link_title">Вмъкване на връзка</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Текущия инсталиран</string>
     <string name="internal">Вътрешно</string>
     <string name="interval_always_on">Винаги включен</string>
