@@ -119,7 +119,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }
 
-    override fun dispatch(notification: Notification): Boolean {
+    override suspend fun dispatch(notification: Notification): Boolean {
         ensureChannelsInitialized()
         val channelId = notification.category.channelConfig().id
         if (!canPostNotifications(channelId)) return false

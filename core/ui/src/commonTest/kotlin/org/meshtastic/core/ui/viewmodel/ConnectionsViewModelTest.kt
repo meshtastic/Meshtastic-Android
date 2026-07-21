@@ -69,7 +69,7 @@ class ConnectionsViewModelTest {
     private var notificationsCanBeScheduled = true
     private val notificationManager =
         object : NotificationManager {
-            override fun dispatch(notification: Notification): Boolean {
+            override suspend fun dispatch(notification: Notification): Boolean {
                 if (notificationsCanBeScheduled) dispatchedNotifications += notification
                 return notificationsCanBeScheduled
             }

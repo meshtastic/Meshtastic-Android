@@ -21,6 +21,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -66,7 +67,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch removes legacy node channel and creates canonical node channel`() {
+    fun `dispatch removes legacy node channel and creates canonical node channel`() = runTest {
         createChannel("NodeEvent")
 
         val manager = AndroidNotificationManager(context)
@@ -77,7 +78,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch routes node event notifications to canonical new nodes channel`() {
+    fun `dispatch routes node event notifications to canonical new nodes channel`() = runTest {
         val manager = AndroidNotificationManager(context)
 
         manager.dispatch(Notification(title = "Node", message = "Seen", category = Notification.Category.NodeEvent))
@@ -87,7 +88,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch reports false when its notification channel is disabled`() {
+    fun `dispatch reports false when its notification channel is disabled`() = runTest {
         createChannel(NotificationChannels.NEW_NODES, NotificationManager.IMPORTANCE_NONE)
         val manager = AndroidNotificationManager(context)
 
@@ -120,7 +121,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch routes all categories to canonical channels`() {
+    fun `dispatch routes all categories to canonical channels`() = runTest {
         val manager = AndroidNotificationManager(context)
 
         assertDispatchesToChannel(manager, Notification.Category.Message, NotificationChannels.MESSAGES)
@@ -131,7 +132,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch attaches deep-link PendingIntent when deepLinkUri is set`() {
+    fun `dispatch attaches deep-link PendingIntent when deepLinkUri is set`() = runTest {
         registerStubMainActivity()
         val manager = AndroidNotificationManager(context)
         val deepLink = "meshtastic://meshtastic/nodes/1234"
@@ -157,7 +158,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch leaves contentIntent unset when deepLinkUri is null`() {
+    fun `dispatch leaves contentIntent unset when deepLinkUri is null`() = runTest {
         val manager = AndroidNotificationManager(context)
 
         manager.dispatch(Notification(title = "Plain", message = "No tap", category = Notification.Category.NodeEvent))
@@ -167,7 +168,7 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `dispatch uses provided notification id as system id`() {
+    fun `dispatch uses provided notification id as system id`() = runTest {
         val manager = AndroidNotificationManager(context)
         val explicitId = 4242
 
@@ -186,7 +187,7 @@ class AndroidNotificationManagerTest {
         assertEquals(0, shadowOf(systemNotificationManager).allNotifications.size)
     }
 
-    private fun assertDispatchesToChannel(
+    private suspend fun assertDispatchesToChannel(
         manager: AndroidNotificationManager,
         category: Notification.Category,
         expectedChannelId: String,
