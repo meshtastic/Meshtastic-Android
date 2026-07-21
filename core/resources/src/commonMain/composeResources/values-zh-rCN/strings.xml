@@ -1812,6 +1812,7 @@
     <string name="wind_gust">阵风</string>
     <string name="wind_lull">微风</string>
     <string name="wind_speed">风速</string>
+    <!-- WRITE -->
     <string name="write_nfc">写入 NFC 标签</string>
     <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
     <string name="write_nfc_success">数据已成功写入标签</string>

@@ -239,5 +239,6 @@
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresa</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Vi</string>
 </resources>

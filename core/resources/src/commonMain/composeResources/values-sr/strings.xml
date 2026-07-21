@@ -522,5 +522,6 @@
     <string name="wifi_qr_code_scan">Скенирај ВајФај QR код</string>
     <!-- WIND -->
     <string name="wind_speed">Брзина ветра</string>
+    <!-- WRITE -->
     <string name="you">Ti</string>
 </resources>

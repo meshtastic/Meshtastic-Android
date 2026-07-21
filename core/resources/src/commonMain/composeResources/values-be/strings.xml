@@ -307,5 +307,6 @@
     <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Вы</string>
 </resources>

@@ -218,5 +218,6 @@
     <string name="waypoint_received">התקבל נקודת ציון: %1$s</string>
     <!-- WIFI -->
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">אתה</string>
 </resources>

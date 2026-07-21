@@ -37,6 +37,8 @@
     <string name="action_select_network">Изберете мрежа</string>
     <string name="action_send_reply">Изпращане на отговор</string>
     <string name="action_show_message_status">Показване на статуса на съобщението</string>
+    <string name="action_toggle_translation">Превключване между оригинален и преведен текст</string>
+    <string name="action_translate_message">Превод на съобщението</string>
     <string name="actions">Действия</string>
     <!-- ADD -->
     <string name="add">Добавяне</string>
@@ -82,6 +84,7 @@
     <string name="audio_config">Конфигуриране на аудиото</string>
     <string name="available_pins">Налични пинове</string>
     <string name="back">Назад</string>
+    <string name="backup_keys_confirmation">Запазва публичните и частните ключове в защитено, криптирано хранилище на това устройство.</string>
     <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
     <string name="bandwidth">Широчина на честотната лента</string>
@@ -95,6 +98,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Налични Bluetooth устройства</string>
     <string name="bluetooth_config">Конфигуриране на Bluetooth</string>
+    <string name="bluetooth_disabled">Bluetooth е изключен. Включете го, за да сканирате за устройства наблизо.</string>
     <string name="bluetooth_enabled">Bluetooth е активиран</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
     <string name="bluetooth_feature_config_description">Управлявайте безжично настройките и каналите на вашето устройство.</string>
@@ -239,6 +243,7 @@
     <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_store_logs_title">Съхраняване на mesh мрежови журнали</string>
     <string name="debug_tab_packets">Пакети</string>
+    <string name="deep_link_connect_title">Свързване с това устройство?</string>
     <string name="default_">По подразбиране</string>
     <!-- DELETE -->
     <string name="delete">Изтриване</string>
@@ -258,6 +263,8 @@
     <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Изход</string>
+    <string name="desktop_update_available_title">Налична е актуализация на приложението</string>
+    <string name="desktop_update_download">Изтегляне на актуализация %1$s</string>
     <string name="details">Подробности</string>
     <!-- DEVICE -->
     <string name="device">Устройство</string>
@@ -1206,5 +1213,6 @@
     <string name="wind_direction">Посока на вятъра</string>
     <string name="wind_gust">Порив на вятъра</string>
     <string name="wind_speed">Скорост на вятъра</string>
+    <!-- WRITE -->
     <string name="you">Вие</string>
 </resources>
