@@ -511,5 +511,6 @@
     <string name="wifi_qr_code_scan">Skenuj WiFi QR kód</string>
     <!-- WIND -->
     <string name="wind">Vietor</string>
+    <!-- WRITE -->
     <string name="you">Vy</string>
 </resources>

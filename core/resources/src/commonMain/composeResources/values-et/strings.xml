@@ -1763,6 +1763,7 @@
     <string name="wind_gust">Tuuleiil</string>
     <string name="wind_lull">Tuulevaikus</string>
     <string name="wind_speed">Tuule kiirus</string>
+    <!-- WRITE -->
     <string name="write_nfc">Kirjuta NFC sildile</string>
     <string name="write_nfc_failed">Sildile ei õnnestunud kirjutada. Kasuta kirjutatavat, tühja NFC silti ja hoia seda paigal.</string>
     <string name="write_nfc_success">Kirjutatud sildile</string>

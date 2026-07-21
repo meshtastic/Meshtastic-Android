@@ -309,5 +309,6 @@
     <string name="wifi_qr_code_error">Neteisingas WiFi prisijungimo QR kodo formatas</string>
     <string name="wifi_qr_code_scan">Nuskenuoti WiFi QR kodą</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Tu</string>
 </resources>

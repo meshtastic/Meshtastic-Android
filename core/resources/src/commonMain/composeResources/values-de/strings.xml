@@ -1529,5 +1529,6 @@
     <string name="wind_gust">Windböen</string>
     <string name="wind_lull">Windstille</string>
     <string name="wind_speed">Windgeschwindigkeit</string>
+    <!-- WRITE -->
     <string name="you">Du</string>
 </resources>

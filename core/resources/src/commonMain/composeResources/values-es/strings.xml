@@ -933,5 +933,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="wifi_rssi_threshold_defaults_to_80">Umbral mínimo de RSSI de WiFi (por defecto es -80)</string>
     <!-- WIND -->
     <string name="wind">Viento</string>
+    <!-- WRITE -->
     <string name="you">Usted</string>
 </resources>

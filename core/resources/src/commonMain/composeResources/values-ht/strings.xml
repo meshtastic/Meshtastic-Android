@@ -289,5 +289,6 @@
     <string name="wifi_qr_code_error">Fòma QR Kòd Kredi WiFi Invalid</string>
     <string name="wifi_qr_code_scan">Skan QR Kòd WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Ou</string>
 </resources>

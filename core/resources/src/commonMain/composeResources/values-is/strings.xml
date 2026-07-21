@@ -199,5 +199,6 @@
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Tala</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Þú</string>
 </resources>

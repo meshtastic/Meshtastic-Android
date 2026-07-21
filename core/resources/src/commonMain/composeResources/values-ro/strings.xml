@@ -1250,5 +1250,6 @@
     <string name="wind_gust">Viteza rafale</string>
     <string name="wind_lull">Vânt critic</string>
     <string name="wind_speed">Viteza vântului</string>
+    <!-- WRITE -->
     <string name="you">Tu</string>
 </resources>

@@ -312,5 +312,6 @@
     <string name="wifi_qr_code_error">Ugyldig WiFi legitimasjon QR-kode format</string>
     <string name="wifi_qr_code_scan">Skann WiFi QR-kode</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Deg</string>
 </resources>

@@ -1342,5 +1342,6 @@
     <string name="wind_gust">Порив вітру</string>
     <string name="wind_lull">Затишшя вітру</string>
     <string name="wind_speed">Швидкість вітру</string>
+    <!-- WRITE -->
     <string name="you">Ви</string>
 </resources>

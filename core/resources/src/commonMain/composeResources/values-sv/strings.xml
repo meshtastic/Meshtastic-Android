@@ -1215,5 +1215,6 @@
     <string name="wifi_qr_code_scan">Skanna WiFi QR-kod</string>
     <!-- WIND -->
     <string name="wind">Vind</string>
+    <!-- WRITE -->
     <string name="you">Du</string>
 </resources>

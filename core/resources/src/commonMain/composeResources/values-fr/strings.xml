@@ -1454,5 +1454,6 @@
     <string name="wind_gust">Rafales de vent</string>
     <string name="wind_lull">Vent à la traîne</string>
     <string name="wind_speed">Vitesse du vent</string>
+    <!-- WRITE -->
     <string name="you">Vous</string>
 </resources>
