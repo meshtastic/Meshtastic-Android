@@ -27,6 +27,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
 import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
@@ -52,8 +53,16 @@ open class FirmwareReleaseRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : FirmwareReleaseRepository {
 
-    /** Single-flight guard so concurrent collectors share one network refresh. */
-    private val refreshMutex = Mutex()
+    /** Serializes Room writes so the bundled-seed apply can't race a network refresh and regress fresher data. */
+    private val writeMutex = Mutex()
+
+    /** API release-list refresh shared by the stable and alpha flows (node detail collects both together). */
+    private val releaseRefresher =
+        SingleFlightRefresher(dispatchers.io, "FirmwareReleaseRepository") { fetchAndPersistReleases() }
+
+    /** Nightly lives on meshtastic.github.io, not in the API's release list, so it refreshes on its own flight. */
+    private val nightlyRefresher =
+        SingleFlightRefresher(dispatchers.io, "FirmwareReleaseRepository.nightly") { fetchAndPersistNightly() }
 
     /** Serializes target-manifest downloads and preserves successful results for the selected release URL. */
     private val manifestMutex = Mutex()
@@ -106,7 +115,13 @@ open class FirmwareReleaseRepositoryImpl(
         },
         // Nightly lives on meshtastic.github.io, not in the API's release list, so it refreshes on its own
         // path — regular (locked) users never hit the nightly URL because only unlocked UI collects that flow.
-        fetch = { if (releaseType == FirmwareReleaseType.NIGHTLY) refreshNightly() else singleFlightRefresh() },
+        fetch = {
+            if (releaseType == FirmwareReleaseType.NIGHTLY) {
+                nightlyRefresher.refresh()
+            } else {
+                releaseRefresher.refresh()
+            }
+        },
         context = dispatchers.default,
         // No collector blocks on the fetch (cache is emitted first), so let the HttpClient's own
         // timeout/retry policy bound it — api.meshtastic.org routinely takes 20-60s to serve this list,
@@ -143,8 +158,8 @@ open class FirmwareReleaseRepositoryImpl(
         if (bundleDecodeFailed) return // don't retry the bundled asset on every collection once it has failed
 
         // seedMutex guards only the decode + snapshot cache; the DB apply runs outside it (so concurrent
-        // collectors don't block on a Room write or on refreshMutex) and under refreshMutex (so it can't
-        // race singleFlightRefresh and overwrite fresher data that just arrived from the API).
+        // collectors don't block on a Room write or on writeMutex) and under writeMutex (so it can't
+        // race a network refresh and overwrite fresher data that just arrived from the API).
         val bundled =
             seedMutex.withLock {
                 // Decode the bundled JSON once per process; the asset never changes between launches.
@@ -165,7 +180,7 @@ open class FirmwareReleaseRepositoryImpl(
             } ?: return
 
         safeCatching {
-            refreshMutex.withLock {
+            writeMutex.withLock {
                 val toApply =
                     listOf(FirmwareReleaseType.STABLE to bundled.stable, FirmwareReleaseType.ALPHA to bundled.alpha)
                         .filter { (type, releases) -> isBundleNewerFor(type, releases) }
@@ -186,14 +201,14 @@ open class FirmwareReleaseRepositoryImpl(
         return cachedNewest == null || bundledNewest > cachedNewest
     }
 
-    private suspend fun singleFlightRefresh() {
-        refreshMutex.withLock {
-            Logger.d { "FirmwareReleaseRepository: fetching from remote API" }
-            val releases = remoteDataSource.getFirmwareReleases().releases
-            if (releases.stable.isEmpty() && releases.alpha.isEmpty()) {
-                Logger.w { "FirmwareReleaseRepository: remote returned no releases; leaving cache untouched" }
-            } else {
-                // Replace rather than upsert so releases pulled or reclassified upstream don't linger as "latest".
+    private suspend fun fetchAndPersistReleases() {
+        Logger.d { "FirmwareReleaseRepository: fetching from remote API" }
+        val releases = remoteDataSource.getFirmwareReleases().releases
+        if (releases.stable.isEmpty() && releases.alpha.isEmpty()) {
+            Logger.w { "FirmwareReleaseRepository: remote returned no releases; leaving cache untouched" }
+        } else {
+            // Replace rather than upsert so releases pulled or reclassified upstream don't linger as "latest".
+            writeMutex.withLock {
                 localDataSource.replaceFirmwareReleases(
                     mapOf(FirmwareReleaseType.STABLE to releases.stable, FirmwareReleaseType.ALPHA to releases.alpha),
                 )
@@ -201,12 +216,12 @@ open class FirmwareReleaseRepositoryImpl(
         }
     }
 
-    private suspend fun refreshNightly() {
-        refreshMutex.withLock {
-            Logger.d { "FirmwareReleaseRepository: fetching nightly index" }
-            // A 404 (nothing currently published) returns null and clears any stale nightly row; transport and
-            // server errors throw before the write and leave the cache untouched.
-            val nightly = remoteDataSource.getNightlyFirmware()?.asFirmwareRelease()
+    private suspend fun fetchAndPersistNightly() {
+        Logger.d { "FirmwareReleaseRepository: fetching nightly index" }
+        // A 404 (nothing currently published) returns null and clears any stale nightly row; transport and
+        // server errors throw before the write and leave the cache untouched.
+        val nightly = remoteDataSource.getNightlyFirmware()?.asFirmwareRelease()
+        writeMutex.withLock {
             localDataSource.replaceFirmwareReleases(mapOf(FirmwareReleaseType.NIGHTLY to listOfNotNull(nightly)))
         }
     }

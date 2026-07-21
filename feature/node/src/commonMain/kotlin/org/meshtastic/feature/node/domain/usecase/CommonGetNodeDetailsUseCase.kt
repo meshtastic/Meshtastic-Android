@@ -145,8 +145,10 @@ constructor(
                     .map { it?.firmware_edition }
                     .distinctUntilChanged()
                     .onStart { emit(null) },
-                firmwareReleaseRepository.stableRelease,
-                firmwareReleaseRepository.alphaRelease,
+                // Placeholders keep the first UI emission from waiting on the firmware cache/refresh pipeline —
+                // real values land via re-emission once the repository produces them.
+                firmwareReleaseRepository.stableRelease.onStart { emit(null) },
+                firmwareReleaseRepository.alphaRelease.onStart { emit(null) },
                 nodeRequestActions.lastTracerouteTime,
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
             ) { edition, stable, alpha, trTime, niTime ->

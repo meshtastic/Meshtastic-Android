@@ -16,9 +16,14 @@
  */
 package org.meshtastic.core.data.repository
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
 import okio.Buffer
 import okio.Source
@@ -53,12 +58,20 @@ class FirmwareReleaseRepositoryImplTest {
         var nightlyUnreachable = false
         var manifest: FirmwareReleaseManifest? = null
         var manifestCalls = 0
+        var firmwareCalls = 0
+
+        /** When set, [getFirmwareReleases] hangs until completed — simulates a slow/unreachable API. */
+        var responseGate: CompletableDeferred<Unit>? = null
 
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
 
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
 
-        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = response
+        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases {
+            firmwareCalls++
+            responseGate?.await()
+            return response
+        }
 
         override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest {
             manifestCalls++
@@ -316,6 +329,53 @@ class FirmwareReleaseRepositoryImplTest {
         dao.insert(FirmwareReleaseEntity(id = "v2.8.0.f52e2ea", releaseType = FirmwareReleaseType.NIGHTLY))
 
         assertEquals("v2.8.0.f52e2ea", repository.nightlyRelease.toList().first()?.id)
+    }
+
+    @Test
+    fun cachedEmissionIsNotBlockedByAnotherFlowsInFlightRefresh() = runBlocking {
+        // Regression for the api.meshtastic.org outage of 2026-07: the stable flow's refresh held a lock for the
+        // full request+retry window (minutes), wedging the alpha flow's *cached* emission behind it — and with it
+        // the node detail screen, which combines both flows into its first UI state.
+        dao.insert(staleRow("v2.7.26.54e0d8d", FirmwareReleaseType.STABLE))
+        dao.insert(staleRow("v2.7.27.abc1234", FirmwareReleaseType.ALPHA))
+        val gate = CompletableDeferred<Unit>()
+        api.responseGate = gate
+        api.response = NetworkFirmwareReleases()
+
+        val stableCollector = launch { repository.stableRelease.collect {} }
+        withTimeout(2_000) { while (api.firmwareCalls == 0) yield() } // stable's refresh is now hanging on the API
+
+        val alphaCached = withTimeout(2_000) { repository.alphaRelease.first() }
+        assertEquals("v2.7.27.abc1234", alphaCached?.id, "alpha cache emits while the stable refresh is in flight")
+
+        gate.complete(Unit)
+        stableCollector.join()
+    }
+
+    @Test
+    fun concurrentCollectorsShareOneNetworkRefresh() = runBlocking {
+        dao.insert(staleRow("v2.7.26.54e0d8d", FirmwareReleaseType.STABLE))
+        dao.insert(staleRow("v2.7.27.abc1234", FirmwareReleaseType.ALPHA))
+        val gate = CompletableDeferred<Unit>()
+        api.responseGate = gate
+        // The response refreshes BOTH channels, so whichever collector reaches its fetch decision second either
+        // joins the in-flight refresh (refresh still hanging on [gate]) or finds its rows already fresh (refresh
+        // completed) — one network call in both interleavings.
+        api.response =
+            NetworkFirmwareReleases(
+                releases =
+                Releases(stable = listOf(release("v2.7.28.def5678")), alpha = listOf(release("v2.7.29.fedcba9"))),
+            )
+
+        val stableCollector = launch { repository.stableRelease.collect {} }
+        val alphaCollector = launch { repository.alphaRelease.collect {} }
+        withTimeout(2_000) { while (api.firmwareCalls == 0) yield() }
+
+        gate.complete(Unit)
+        stableCollector.join()
+        alphaCollector.join()
+
+        assertEquals(1, api.firmwareCalls, "stable and alpha collectors share one refresh")
     }
 
     @Test
