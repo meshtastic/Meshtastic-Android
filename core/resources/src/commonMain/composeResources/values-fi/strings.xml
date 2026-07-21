@@ -1817,6 +1817,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Kirjoita NFC-tunnisteeseen</string>
     <string name="write_nfc_failed">Tunnisteeseen kirjoittaminen epäonnistui. Käytä tyhjää, kirjoitettavaa NFC-tunnistetta ja pidä sitä paikallaan.</string>
+    <string name="write_nfc_subtext">Kirjoittaminen tallentaa tämän jakolinkin fyysiselle NFC-tunnisteelle. Kuka tahansa voi avata linkin napauttamalla tunnistetta puhelimellaan.</string>
     <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>
     <string name="write_nfc_text">Pidä kirjoitettavaa NFC-tunnistetta puhelimesi takapuolta vasten.</string>
     <string name="you">Sinä</string>

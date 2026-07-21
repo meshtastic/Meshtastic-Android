@@ -653,8 +653,17 @@
     <string name="mark_as_read">Маркиране като прочетено</string>
     <string name="max">Макс</string>
     <!-- MESH -->
+    <string name="mesh_beacon_interval_error">Минимум %1$d секунди</string>
+    <string name="mesh_beacon_listen">Слушане за маяци</string>
+    <string name="mesh_beacon_offer_add">Добавяне на канал</string>
+    <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
     <string name="mesh_beacon_offer_dismiss">Отхвърляне</string>
+    <string name="mesh_beacon_offer_region">Регион: %1$s</string>
+    <string name="mesh_beacon_offer_signal">Сигнал: %1$s / %2$s</string>
     <string name="mesh_beacon_preset_none">Няма</string>
+    <string name="mesh_beacon_target">Цел %1$d</string>
+    <string name="mesh_beacon_target_add">Добавяне на цел</string>
+    <string name="mesh_beacon_target_remove">Премахване на целта</string>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
     <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <!-- MESHTASTIC -->
@@ -672,10 +681,18 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="message_routing_error_no_channel">Няма избран канал</string>
+    <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
+    <string name="message_routing_error_too_large">Съобщението е твърде голямо за изпращане</string>
     <string name="message_status_delivered">Доставено до mesh</string>
+    <string name="message_status_enroute">Изпраща се...</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
+    <string name="message_status_recipient_delivered">Доставено на получателя</string>
     <string name="message_status_sfpp_routing"></string>
     <string name="message_status_unknown">Неизвестно</string>
+    <string name="message_translated_label">Преведено</string>
     <string name="messages">Съобщения</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
@@ -693,6 +710,7 @@
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
     <string name="mqtt_probe_success_with_info">Достъпен (%1$s)</string>
+    <string name="mqtt_proxy_local">MQTT прокси на този телефон</string>
     <string name="mqtt_status_connected">Свързано</string>
     <string name="mqtt_status_connecting">Свързване…</string>
     <string name="mqtt_status_disconnected">Прекъсната връзка</string>
@@ -1013,6 +1031,8 @@
     <string name="security_icon_insecure_precise_only">Несигурен канал, прецизно местоположение</string>
     <string name="security_icon_secure">Сигурно</string>
     <string name="security_icon_warning_precise_mqtt">Предупреждение: Несигурно, точно местоположение &amp; MQTT Uplink</string>
+    <string name="security_signed_message_info">Проверено с ключа на подателя.</string>
+    <string name="security_signed_node">Подписан възел</string>
     <string name="select">Изберете</string>
     <string name="select_all">Избери всички</string>
     <string name="selected">Избрани</string>
