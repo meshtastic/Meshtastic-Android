@@ -67,6 +67,41 @@ class DatabaseManagerReadTest : DatabaseManagerTestFixture() {
     }
 
     @Test
+    fun closeWaitsForBoundedReadBeforeClosingItsCapturedPool() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val captured = manager.currentDb.value
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+
+        val read = async {
+            manager.withReadDb { database ->
+                assertTrue(database === captured)
+                started.complete(Unit)
+                release.await()
+                database.nodeInfoDao().getUnknownNodes()
+            }
+        }
+
+        started.await()
+        val closeJob = async { manager.close() }
+        runCurrent()
+
+        assertFalse(closeJob.isCompleted, "shutdown must wait for the admitted bounded read")
+        assertFalse(
+            captured in manager.closedDatabases,
+            "the captured pool must stay open while the read is suspended",
+        )
+        assertFalse(manager.debugAcceptingWrites())
+        assertFailsWith<IllegalStateException> { manager.withReadDb { emptyList<Nothing>() } }
+
+        release.complete(Unit)
+        assertTrue(read.await().isEmpty())
+        closeJob.await()
+
+        assertEquals(1, manager.closedDatabases.count { it === captured })
+    }
+
+    @Test
     fun boundedReadPropagatesFailureWithoutReplay() = runTest(testDispatcher) {
         var invocationCount = 0
 

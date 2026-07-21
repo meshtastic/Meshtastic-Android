@@ -36,7 +36,10 @@ interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */
     val currentDb: StateFlow<MeshtasticDatabase>
 
-    /** Execute one bounded read against the synchronously published current database without writer admission. */
+    /**
+     * Execute one bounded read against the synchronously published current database without writer admission. The read
+     * is tracked through orderly shutdown and fails with [IllegalStateException] if admission starts after shutdown.
+     */
     suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T
 
     /** Execute [block] against the current database, returning `null` if no database is available. */

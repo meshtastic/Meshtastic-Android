@@ -111,11 +111,11 @@ open class DatabaseManager(
     private val deferredEvictions = mutableSetOf<MeshtasticDatabase>()
     private var shutdownWriterDrain: CompletableDeferred<Unit>? = null
 
-    // Admitted manager-operation tokens (one per serialized associateDevice/switch/recovery/eviction/cleanup that
-    // takes the manager [mutex]). Guarded by [writerTrackerMutex]. [close] arms [managerOperationDrain] and bound-waits
-    // for this set to empty BEFORE acquiring [mutex] for its ownership snapshot — otherwise an admitted operation that
-    // holds [mutex] indefinitely (e.g. a stalled merge) pins shutdown forever despite the writer-drain bound already
-    // in place. New operations are rejected at admission once lifecycleState != OPEN.
+    // Admitted manager-operation tokens. Serialized associateDevice/switch/recovery/eviction/cleanup work and
+    // bounded [withReadDb] callbacks register here before touching a manager-owned pool. Guarded by
+    // [writerTrackerMutex]. [close] arms [managerOperationDrain] and bound-waits for this set to empty BEFORE acquiring
+    // [mutex] for its ownership snapshot, so no admitted operation can resume against a closed pool. New operations are
+    // rejected at admission once lifecycleState != OPEN.
     private val activeManagerOperations = mutableSetOf<Any>()
     private var managerOperationDrain: CompletableDeferred<Unit>? = null
 
@@ -299,12 +299,12 @@ open class DatabaseManager(
     }
 
     /**
-     * Admits one serialized manager operation (anything that takes [mutex]) and drains it on completion.
+     * Admits one operation that may touch manager-owned database pools and drains it on completion.
      *
-     * Registration happens BEFORE the operation waits on [mutex] (after the lifecycle check); the token is removed in
-     * `finally` so cancellation, merge failure, and timeout all release admission. A [close] that observes a non-empty
-     * admission set arms [managerOperationDrain] and bound-waits on it before taking [mutex] for its snapshot, so a
-     * wedged admitted operation cannot pin shutdown past [WRITER_DRAIN_TIMEOUT_MS].
+     * Registration happens before the operation captures a pool or waits on [mutex] (after the lifecycle check); the
+     * token is removed in `finally` so cancellation, failure, and timeout all release admission. A [close] that
+     * observes a non-empty admission set arms [managerOperationDrain] and bound-waits on it before taking its ownership
+     * snapshot, so an admitted callback cannot resume against a closed pool.
      */
     private suspend fun <T> withManagerOperation(block: suspend () -> T): T {
         val token = Any()
@@ -893,14 +893,17 @@ open class DatabaseManager(
 
     /**
      * Executes one bounded read without writer admission or the serialized write-containment lane. Active database
-     * publication is synchronous and published pools are logically retired, so a captured instance remains valid for
-     * the lifetime of this manager. The read is never replayed automatically.
+     * publication is synchronous and published pools are logically retired, so a captured instance remains valid until
+     * the callback completes. The read is admitted into the shutdown drain, is never replayed automatically, and new
+     * reads are rejected once shutdown begins.
      */
-    override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = withContext(dispatchers.io) {
-        currentCoroutineContext().ensureActive()
-        val result = block(currentDb.value)
-        currentCoroutineContext().ensureActive()
-        result
+    override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = withManagerOperation {
+        withContext(dispatchers.io) {
+            currentCoroutineContext().ensureActive()
+            val result = block(currentDb.value)
+            currentCoroutineContext().ensureActive()
+            result
+        }
     }
 
     /**
@@ -1331,7 +1334,7 @@ open class DatabaseManager(
 
     /**
      * Establishes an orderly shutdown boundary: rejects new work, bounds manager-job cancellation, admitted
-     * serialized-operation draining, and admitted-writer draining, waits for the last serialized switch/association to
+     * manager-operation draining, and admitted-writer draining, waits for the last serialized switch/association to
      * finalize, then closes every manager-owned Room instance. If a cancelled child, admitted operation, writer, or
      * pool close cannot finish successfully, ownership is retained and physical cleanup is skipped so a later [close]
      * call can retry without losing track of live resources. Retried attempts may call Room's idempotent `close()`
@@ -1393,8 +1396,7 @@ open class DatabaseManager(
                 // out.
                 managerJobs.forEach { it.cancel() }
 
-                // Bound-wait for already-admitted serialized operations before acquiring [mutex]. New work is
-                // rejected
+                // Bound-wait for already-admitted manager operations before acquiring [mutex]. New work is rejected
                 // while CLOSING, and a timed-out attempt leaves ownership intact so a later close() can retry.
                 val operationsDrained =
                     operationsDrain?.let { drain ->
