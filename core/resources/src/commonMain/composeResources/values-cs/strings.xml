@@ -1184,6 +1184,7 @@
     <string name="wifi_rssi_threshold_defaults_to_80">Práh WiFi RSSI (výchozí hodnota -80)</string>
     <!-- WIND -->
     <string name="wind">Vítr</string>
+    <!-- WRITE -->
     <string name="write_nfc">Zapsat na NFC tag</string>
     <string name="write_nfc_failed">Nelze zapsat do tagu. Použijte zapisovatelný, prázdný NFC tag a podržte jej stabilně.</string>
     <string name="write_nfc_success">Zapsáno do tagu</string>

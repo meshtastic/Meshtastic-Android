@@ -189,22 +189,16 @@
   },
   "pullRequests": [
     {
+      "id": "11116",
+      "title": "Gate the PKI-decrypt key on signer-proven, not the opportunistic cache",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11116",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11114",
       "title": "SEN5X: Fix version parsing, VOC index reporting, and uninitialized-read hazards",
       "page_url": "https://github.com/meshtastic/firmware/pull/11114",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11092",
-      "title": "Pin admin responses to the stored peer key and request id",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11092",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11090",
-      "title": "MUI: portduino SDL support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11090",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "11081",
@@ -247,12 +241,6 @@
       "title": "Backlight: unify E-Ink backlight logic and fix ThinkNode M1 wake",
       "page_url": "https://github.com/meshtastic/firmware/pull/11061",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11050",
-      "title": "TMM extend to ephemeral 3rd tier store",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11050",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "11042",
@@ -300,12 +288,6 @@
       "id": "10962",
       "title": "Extra repeats",
       "page_url": "https://github.com/meshtastic/firmware/pull/10962",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10954",
-      "title": "Flatpak: rename Meshtastic -> MeshtasticD",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10954",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

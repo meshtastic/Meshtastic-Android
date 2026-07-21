@@ -296,5 +296,6 @@
     <string name="wifi_qr_code_error">Formati i gabuar i kodit QR të kredencialeve WiFi</string>
     <string name="wifi_qr_code_scan">Skano QR kodi WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Ju</string>
 </resources>

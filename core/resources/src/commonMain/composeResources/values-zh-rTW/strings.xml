@@ -1462,5 +1462,6 @@
     <string name="wind_gust">陣風</string>
     <string name="wind_lull">風停</string>
     <string name="wind_speed">風速</string>
+    <!-- WRITE -->
     <string name="you">你</string>
 </resources>

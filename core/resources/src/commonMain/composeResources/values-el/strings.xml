@@ -282,5 +282,6 @@
     <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
     <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Εσύ</string>
 </resources>

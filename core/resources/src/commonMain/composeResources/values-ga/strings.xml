@@ -301,5 +301,6 @@
     <string name="wifi_qr_code_error">Formáid QR cód Creidiúnachtaí WiFi neamhbhailí</string>
     <string name="wifi_qr_code_scan">Scan QR cód WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Tú</string>
 </resources>

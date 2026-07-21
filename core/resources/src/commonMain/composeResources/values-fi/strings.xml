@@ -1814,6 +1814,7 @@
     <string name="wind_gust">Tuulen puuska</string>
     <string name="wind_lull">Alin tuulen nopeus</string>
     <string name="wind_speed">Tuulen nopeus</string>
+    <!-- WRITE -->
     <string name="write_nfc">Kirjoita NFC-tunnisteeseen</string>
     <string name="write_nfc_failed">Tunnisteeseen kirjoittaminen epäonnistui. Käytä tyhjää, kirjoitettavaa NFC-tunnistetta ja pidä sitä paikallaan.</string>
     <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>

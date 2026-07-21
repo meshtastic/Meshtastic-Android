@@ -1759,6 +1759,7 @@
     <string name="wind_gust">突風</string>
     <string name="wind_lull">風の弱まり</string>
     <string name="wind_speed">風速</string>
+    <!-- WRITE -->
     <string name="write_nfc">NFC タグに書き込む</string>
     <string name="write_nfc_failed">タグに書き込めませんでした。書き込み可能な空の NFC タグを使い、動かさずに近づけてください。</string>
     <string name="write_nfc_success">タグに書き込みました</string>
