@@ -37,7 +37,7 @@ import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPrevi
 import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteToggleMatrixPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityBalancedPreview
-import org.meshtastic.feature.settings.radio.component.PacketAuthenticityCompatiblePreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityDefaultPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictConfirmationPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityUnsupportedPreview
@@ -121,8 +121,8 @@ fun ScreenshotTakTestCardResults() {
 @PreviewTest
 @PreviewLightDark
 @Composable
-fun ScreenshotPacketAuthenticityCompatible() {
-    PacketAuthenticityCompatiblePreview()
+fun ScreenshotPacketAuthenticityDefault() {
+    PacketAuthenticityDefaultPreview()
 }
 
 @PreviewTest

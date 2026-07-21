@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
@@ -89,6 +90,8 @@ data class DropDownItem<T>(
     val color: Color? = null,
     /** When false, the item is shown greyed-out and cannot be selected. */
     val enabled: Boolean = true,
+    /** Optional stable semantics tag for automated tests. */
+    val testTag: String? = null,
 )
 
 @JvmName("DropDownPreferencePairs")
@@ -177,6 +180,7 @@ fun <T> DropDownPreference(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 items.forEach { selectionOption ->
                     DropdownMenuItem(
+                        modifier = selectionOption.testTag?.let { Modifier.testTag(it) } ?: Modifier,
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (selectionOption.icon != null) {

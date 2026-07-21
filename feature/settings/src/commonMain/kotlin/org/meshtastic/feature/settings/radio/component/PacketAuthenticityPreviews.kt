@@ -25,11 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.proto.Config
 
 @PreviewLightDark
 @Composable
-fun PacketAuthenticityCompatiblePreview() {
-    PacketAuthenticitySettingPreview(PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_COMPATIBLE)
+fun PacketAuthenticityDefaultPreview() {
+    PacketAuthenticitySettingPreview(Config.SecurityConfig().packet_signature_policy)
 }
 
 @PreviewLightDark

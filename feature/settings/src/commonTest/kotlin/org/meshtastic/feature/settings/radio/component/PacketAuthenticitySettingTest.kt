@@ -20,10 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -47,15 +45,15 @@ import kotlin.test.assertNull
 @OptIn(ExperimentalTestApi::class)
 class PacketAuthenticitySettingTest {
     @Test
-    fun `protobuf default is balanced`() {
+    fun `protobuf default is compatible`() {
         assertEquals(
-            PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_BALANCED,
+            PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_COMPATIBLE,
             Config.SecurityConfig().packet_signature_policy,
         )
     }
 
     @Test
-    fun `compatible selection updates the device config field`() = runComposeUiTest {
+    fun `balanced selection updates the device config field`() = runComposeUiTest {
         var updatedConfig = Config.SecurityConfig()
         setContent {
             AppTheme {
@@ -68,10 +66,10 @@ class PacketAuthenticitySettingTest {
             }
         }
 
-        onNodeWithText(getString(Res.string.packet_authenticity_balanced)).performClick()
         onNodeWithText(getString(Res.string.packet_authenticity_compatible)).performClick()
+        onNodeWithText(getString(Res.string.packet_authenticity_balanced)).performClick()
 
-        assertEquals(PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_COMPATIBLE, updatedConfig.packet_signature_policy)
+        assertEquals(PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_BALANCED, updatedConfig.packet_signature_policy)
     }
 
     @Test
@@ -187,7 +185,7 @@ class PacketAuthenticitySettingTest {
 
         val strictLabel = getString(Res.string.packet_authenticity_strict)
         onNodeWithText(strictLabel).performClick()
-        onAllNodesWithText(strictLabel)[1].performClick()
+        onNodeWithTag(PACKET_AUTHENTICITY_STRICT_POLICY_TEST_TAG).performClick()
 
         onNodeWithText(getString(Res.string.packet_authenticity_strict_confirm)).assertDoesNotExist()
         assertEquals(PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_STRICT, selectedPolicy)

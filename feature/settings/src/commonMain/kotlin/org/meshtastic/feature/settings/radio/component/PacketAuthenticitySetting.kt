@@ -50,6 +50,7 @@ import org.meshtastic.proto.Config
 internal typealias PacketSignaturePolicy = Config.SecurityConfig.PacketSignaturePolicy
 
 internal const val PACKET_AUTHENTICITY_SELECTOR_TEST_TAG = "packet_authenticity_selector"
+internal const val PACKET_AUTHENTICITY_STRICT_POLICY_TEST_TAG = "packet_authenticity_policy_strict"
 
 @Composable
 internal fun PacketAuthenticitySetting(
@@ -80,7 +81,7 @@ internal fun PacketAuthenticitySetting(
 
     val items =
         packetSignaturePolicies.map { policy ->
-            DropDownItem(value = policy, label = stringResource(policy.labelResource()))
+            DropDownItem(value = policy, label = stringResource(policy.labelResource()), testTag = policy.testTag())
         }
     val summaryResource =
         if (supported == false) {
@@ -144,4 +145,9 @@ private fun PacketSignaturePolicy.summaryResource(): StringResource = when (this
     PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_COMPATIBLE -> Res.string.packet_authenticity_compatible_summary
     PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_BALANCED -> Res.string.packet_authenticity_balanced_summary
     PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_STRICT -> Res.string.packet_authenticity_strict_summary
+}
+
+private fun PacketSignaturePolicy.testTag(): String? = when (this) {
+    PacketSignaturePolicy.PACKET_SIGNATURE_POLICY_STRICT -> PACKET_AUTHENTICITY_STRICT_POLICY_TEST_TAG
+    else -> null
 }
