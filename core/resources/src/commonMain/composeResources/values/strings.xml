@@ -1828,7 +1828,7 @@
     <string name="wind_speed">Wind Speed</string>
     <!-- WRITE -->
     <string name="write_nfc">Write to NFC tag</string>
-    <string name="write_nfc_failed">Couldn\'t write to tag. Use a writable, empty NFC tag and hold it steady.</string>
+    <string name="write_nfc_failed">Couldn't write to tag. Use a writable, empty NFC tag and hold it steady.</string>
     <string name="write_nfc_subtext">Writing saves this share link to a physical NFC tag. Anyone can tap the tag with their phone to open it.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
