@@ -35,6 +35,7 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.destination
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.source
 import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
@@ -288,7 +289,8 @@ class MeshDataHandlerImpl(
     ) {
         val payload = packet.decoded?.payload ?: return
         val u = Waypoint.ADAPTER.decode(payload)
-        if (u.locked_to != 0 && u.locked_to != packet.from) return
+        // A locked waypoint may only be created/updated by its owner; drop it if the sender isn't allowed to modify it.
+        if (!u.isModifiableBy(packet.from)) return
         val currentSecond = nowSeconds.toInt()
         rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond, session = session)
     }
