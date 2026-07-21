@@ -1,12 +1,12 @@
 ---
-title: Units, Measurement & Locale
+title: Ühikud, mõõtühikud ja lokaat
 parent: User Guide
 nav_order: 16
 last_updated: 2026-07-08
-description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.
 ---
 
-# Units, Measurement & Locale
+# Ühikud, mõõtühikud ja lokaat
 
 Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks sinu seade on seadistatud – rakenduses pole vaja sätteid muuta.
 
@@ -14,9 +14,9 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+On Android, your measurement preferences are determined by your system **Language & Region** settings. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 
 > 💡 **Tip:** You never need to toggle units inside the app. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
@@ -57,7 +57,7 @@ The app uses natural scaling — short distances stay in meters or feet, while l
 
 ## Kiirus
 
-GPS ground speed is displayed in your locale's preferred speed unit.
+GPSi maapealne kiirus kuvatakse lokaadi eelistatud kiiruseühikus.
 
 | Sinu sätted                      | Teadmiseks |
 | -------------------------------- | ---------- |
@@ -86,7 +86,7 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 ## Units That Never Change
 
-Some units are international standards and are displayed the same way regardless of your locale:
+Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenemata lokaat:
 
 | Measurement                 | Unit                           | Why                                   |
 | --------------------------- | ------------------------------ | ------------------------------------- |
@@ -100,10 +100,10 @@ Some units are international standards and are displayed the same way regardless
 
 All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
 
-| Sätted           | What It Controls | Example                                          |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
-| **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+| Sätted               | What It Controls | Example                                          |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| **24-Hour Time**     | Kella vorming    | 14:30 vs 2:30 PM |
+| **Kuupäeva vorming** | Date ordering    | 09/05/2026 vs 05/09/2026                         |
 
 The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
 
@@ -115,7 +115,7 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 2. Change your **Region** or **Measurement units** preference
 3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
-> 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
+> 💡 **Vihje:** Kogu mõõtühikute vormindamine toimub tsentraalselt ja arvestab platvormi lokaaduga, seega püsivad ühikud kogu rakenduses ühtsed.
 
 ## Related Topics
 

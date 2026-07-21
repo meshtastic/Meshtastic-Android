@@ -131,7 +131,7 @@ The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsaf
 
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — telemeetriamooduli konfiguratsioon
-- [Units & Locale](units-and-locale) — temperature and pressure display units
+- [Ühikud ja lokaat](units-and-locale) — temperatuuri ja rõhu kuvamise ühikud
 
 ---
 

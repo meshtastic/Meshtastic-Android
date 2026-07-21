@@ -87,11 +87,11 @@ Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnak
 
 Konfi iga kanali kohta, millised suunad on aktiivsed, et kontrollida sõnumivoogu ja eetriaega.
 
-## Message Formats
+## Sõnumivormingud
 
 MQTT kasutab protobuf-sõnumivormingut:
 
-| Format       | Kirjeldus                              | Use case                   |
+| Vorming      | Kirjeldus                              | Use case                   |
 | ------------ | -------------------------------------- | -------------------------- |
 | **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
 
@@ -122,7 +122,7 @@ Understanding the layered encryption model:
 - **Kontrolli WiFit** – lüüssõlmel peab olema aktiivne internetiühendus (WiFi või Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
 - **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
 - **Tulemüür** — port 1883 (MQTT) või 8883 (MQTT+TLS) peab olema avatud. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- **DNS-i lahendamine** – kui kasutad kohandatud maakleri hostinime, veenduge, et sõlm suudab seda lahendada. Try the broker's IP address directly.
 
 ### Messages Not Bridging
 

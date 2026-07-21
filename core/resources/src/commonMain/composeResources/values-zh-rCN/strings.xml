@@ -28,6 +28,7 @@
     <string name="a11y_node_online">在线</string>
     <string name="a11y_node_role">角色 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
+    <string name="a11y_nodes_at_hop">跳数 %1$d: %2$d 节点</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">开源</string>
     <!-- ACTION -->
@@ -39,6 +40,8 @@
     <string name="action_select_network">选择网络</string>
     <string name="action_send_reply">发送回复</string>
     <string name="action_show_message_status">显示消息状态</string>
+    <string name="action_toggle_translation">原文和译文之间切换</string>
+    <string name="action_translate_message">翻译消息</string>
     <string name="actions">操作</string>
     <string name="adc_multiplier_override">ADC 倍数覆盖</string>
     <string name="adc_multiplier_override_ratio">ADC乘数修正比率</string>
@@ -109,6 +112,7 @@
     <string name="app_too_old">需要更新应用程序</string>
     <string name="app_version">版本</string>
     <string name="apply">申请</string>
+    <string name="aqi">空气质量指数</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="are_you_sure_change_default">您是否确定要改回默认频道？</string>
     <string name="audio">音频</string>
@@ -116,6 +120,7 @@
     <string name="available_pins">可用引脚</string>
     <string name="back">后退</string>
     <string name="backup_keys">备份密钥</string>
+    <string name="backup_keys_confirmation">将公钥和私钥保存到该设备的安全加密存储中。</string>
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
     <string name="bandwidth">带宽</string>
@@ -136,6 +141,7 @@
     <string name="bluetooth_feature_discovery">发现</string>
     <string name="bluetooth_feature_discovery_description">查找并识别附近的Meshtastic设备。</string>
     <string name="bluetooth_permission">蓝牙</string>
+    <string name="bluetooth_scan_missing_permission">蓝牙扫描需要权限请授予附近设备 (位置信息) 权限以查找设备。</string>
     <string name="bluetooth_scan_start_failed">蓝牙扫描无法启动请重试。</string>
     <string name="bold_heading">加粗标题</string>
     <string name="bonding_failed_permissions">配对失败请授权附近设备权限后重试。</string>
@@ -211,6 +217,8 @@
     <string name="close">关闭</string>
     <string name="close_selection">关闭选中</string>
     <string name="co2">二氧化碳</string>
+    <string name="co2_humidity">二氧化碳 湿度</string>
+    <string name="co2_temperature">二氧化碳 温度</string>
     <string name="codec_2_enabled">启用CODEC2</string>
     <string name="codec2_sample_rate">CODEC2 采样率</string>
     <string name="coding_rate">编码率</string>
@@ -323,12 +331,18 @@
     <string name="debug_store_logs_title">储存mesh日志</string>
     <string name="debug_tab_app_logs">应用日志</string>
     <string name="debug_tab_packets">数据包</string>
+    <string name="deep_link_connect_message">有一个链接正在请求此应用连接到位于 %1$s. 的设备请仅在您信任该链接来源的情况下继续操作。</string>
+    <string name="deep_link_connect_title">是否连接到该设备？</string>
+    <string name="deep_link_disconnect_message">有一个链接正在请求此应用断开与您的设备的连接请仅在您信任该链接来源的情况下继续操作。</string>
+    <string name="deep_link_disconnect_title">是否断开与该设备的连接？</string>
     <string name="default_">默认</string>
     <!-- DELETE -->
     <string name="delete">删除</string>
     <string name="delete_custom_tile_source">删除网络图层源</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
     <string name="delete_for_me">仅在我的设备中删除</string>
+    <string name="delete_key_backup">删除密钥备份</string>
+    <string name="delete_key_backup_confirmation">将删除存储在此设备上的加密密钥备份。此操作无法撤销。</string>
     <plurals name="delete_messages">
         <item quantity="other">删除消息?
 
@@ -347,6 +361,9 @@
     <string name="desktop_tray_quit">退出</string>
     <string name="desktop_tray_show">显示 Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic 桌面版</string>
+    <string name="desktop_update_available_message">Meshtastic 桌面客户端 %1$s 已准备好下载。</string>
+    <string name="desktop_update_available_title">检测到新版本</string>
+    <string name="desktop_update_download">下载更新 %1$s</string>
     <string name="details">详细信息</string>
     <string name="detection_sensor">检测传感器</string>
     <string name="detection_sensor_config">检测传感器配置</string>
@@ -393,6 +410,7 @@
     <string name="discovery_empty_history">暂无发现会话</string>
     <string name="discovery_export_report">导出报告</string>
     <string name="discovery_history">扫描历史记录</string>
+    <string name="discovery_interrupted_scan_restored">已将无线电节点恢复为出厂默认配置 (%1$s)</string>
     <string name="discovery_keep_screen_awake">保持屏幕常亮</string>
     <string name="discovery_keep_screen_awake_description">防止手机休眠模式在长时间扫描期间丢弃无线电数据包推荐开启。</string>
     <string name="discovery_local_mesh">本地网状网络发现</string>
@@ -557,6 +575,7 @@
     <string name="ethernet_config">以太网选项</string>
     <string name="ethernet_enabled">启用以太网</string>
     <string name="ethernet_ip">以太网 IP 地址：</string>
+    <string name="event_use_event_theme">使用活动主题</string>
     <string name="exchange_position">交换位置</string>
     <string name="expand_chart">展开图表</string>
     <string name="expanded">展开</string>
@@ -595,6 +614,8 @@
     <!-- FIRMWARE -->
     <string name="firmware">固件</string>
     <string name="firmware_edition">固件版本</string>
+    <string name="firmware_event_ended_banner">%1$s 活动已结束请刷回标准的 Meshtastic 固件以恢复正常功能。</string>
+    <string name="firmware_event_ended_button">更新固件</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="firmware_recovery_banner">完成更新 %1$s</string>
     <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
@@ -604,9 +625,15 @@
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_alpha">开发版本</string>
+    <string name="firmware_update_archive_missing_target">找不到 %2$s (%3$s) 没找到固件 \"%1$s\"。</string>
+    <string name="firmware_update_available">有可用的固件更新</string>
     <string name="firmware_update_battery_low">电池电量过低 (%1$d%). 请在更新前为您的设备充电。</string>
     <string name="firmware_update_checking">正在检查更新…</string>
+    <string name="firmware_update_confirm_file_button">开始刷机</string>
+    <string name="firmware_update_confirm_file_message">升级请仔细核对所选的完整文件名。只有在你确认后，刷机才会开始。</string>
+    <string name="firmware_update_confirm_file_title">确认固件文件</string>
     <string name="firmware_update_connecting_attempt">正在连接设备(尝试 %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">确认设备连接已更改。请重新选择固件文件。</string>
     <string name="firmware_update_copying">请稍候，正在复制固件……</string>
     <string name="firmware_update_currently_installed">目前已安装: %1$s</string>
     <string name="firmware_update_device">设备: %1$s</string>
@@ -628,9 +655,11 @@
     <string name="firmware_update_error">错误：%1$s</string>
     <string name="firmware_update_extracting">正在提取固件...</string>
     <string name="firmware_update_failed">更新失败</string>
+    <string name="firmware_update_filename_unavailable">无法读取所选的文件名。请选择一个具有可见文件名的本地固件文件。</string>
     <string name="firmware_update_flashing">正在刷入设备，请稍候...</string>
     <string name="firmware_update_hang_tight">稍等，我们正在处理……</string>
     <string name="firmware_update_hash_rejected">固件hash值错误。设备可能需要正确的hash配置或 bootloader更新。</string>
+    <string name="firmware_update_invalid_local_file_detail">所选的文件 \"%1$s\" 不匹配 %2$s (%3$s)。请选择适用于该目标设备的固件文件。</string>
     <string name="firmware_update_keep_device_close">请将设备靠近您的手机。</string>
     <string name="firmware_update_latest">更新到: %1$s</string>
     <string name="firmware_update_local_file">本地文件</string>
@@ -638,16 +667,27 @@
     <string name="firmware_update_method_detail">更新到%1$s</string>
     <string name="firmware_update_method_usb">USB文件传输</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">该设备无法获取固件目标信息。</string>
+    <string name="firmware_update_nightly">每日构建</string>
     <string name="firmware_update_no_device">设备未连接</string>
     <string name="firmware_update_node_info_missing">节点用户信息缺失</string>
     <string name="firmware_update_not_found_in_release">未找到 %1$s 的固件。</string>
+    <string name="firmware_update_notification_android">%1$s 已安装稳定版 %2$s 有新固件可用。准备好后请打开固件更新界面。</string>
+    <string name="firmware_update_notification_flasher">%1$s 已安装稳定版 %2$s 有可用更新。请打开 Meshtastic Flasher刷机工具来更新此硬件。</string>
+    <string name="firmware_update_open">打开固件更新界面</string>
+    <string name="firmware_update_open_flasher">打开 Meshtastic 官方网页刷机工具</string>
     <string name="firmware_update_ota_failed">OTA更新失败: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">该设备的 OTA 加载程序拒绝了请求的更新方式: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">对于 RAK WisBlock RAK4631,请使用厂商提供的串口 DFU 工具 (例如,使用提供的 bootloader .zip 文件配合 adafruit-nrfutil dfu serial 命令) .仅复制 .uf2 文件无法更新 Bootloader。</string>
     <string name="firmware_update_rebooting">正在重启到 DFU……</string>
     <string name="firmware_update_release_notes">更新日志</string>
+    <string name="firmware_update_requires_bin">%1$s 需要一个与目标设备匹配的 .bin 文件。</string>
+    <string name="firmware_update_requires_ota_zip">%1$s 需要一个与目标设备匹配的 OTA .zip 文件。</string>
+    <string name="firmware_update_requires_uf2">%1$s 需要一个与目标设备匹配的 .uf2 文件。</string>
     <string name="firmware_update_retrieval_failed">无法获取固件文件</string>
     <string name="firmware_update_retry">重试</string>
     <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存复制到您设备的 DFU 驱动器中。</string>
+    <string name="firmware_update_searching_device">正在网络上搜索 OTA 设备……</string>
     <string name="firmware_update_select_file">选择本地文件</string>
     <string name="firmware_update_slow_bootloader_hint">此设备当前的 Bootloader引导程序更新速度较慢。刷入 OTAFIX Bootloader 可以大幅提升 蓝牙更新的速度。</string>
     <string name="firmware_update_source_local">来源: 本地文件</string>
@@ -662,6 +702,7 @@
     <string name="firmware_update_unknown_hardware">未知硬件型号: %1$d</string>
     <string name="firmware_update_unknown_release">未知的网络版本</string>
     <string name="firmware_update_unsupported_transport">此设备不支持通过当前连接进行固件更新.请通过其他方式 (例如蓝牙) 连接以进行更新。</string>
+    <string name="firmware_update_unsupported_update_method">此更新方法不支持本地固件文件。</string>
     <string name="firmware_update_uploading">正在上传固件……</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="firmware_update_usb_failed">USB 更新失败</string>
@@ -678,6 +719,11 @@
     <string name="flip_screen">翻转屏幕</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <!-- FORMAT -->
+    <string name="format_bold">粗体</string>
+    <string name="format_code">验证码</string>
+    <string name="format_italic">斜体</string>
+    <string name="format_link">链接</string>
+    <string name="format_strikethrough">删除线</string>
     <string name="free_memory">可用内存</string>
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
@@ -691,6 +737,8 @@
     <string name="generate_qr_code">生成二维码</string>
     <!-- GEOFENCE -->
     <string name="geofence">地图围栏</string>
+    <string name="geofence_alerts_opt_in">当有节点经过时通知我</string>
+    <string name="geofence_alerts_opt_in_desc">当节点进入或离开此地图围栏时，获取警报通知</string>
     <string name="geofence_box_author_confirm">确认区域</string>
     <string name="geofence_box_author_hint">点击两个角来定义该区域</string>
     <string name="geofence_box_author_hint_viewport">拖动地图以框选该区域然后点击‘确认区域</string>
@@ -731,6 +779,8 @@
     <string name="hide_password">隐藏密码</string>
     <string name="history_return_max">历史记录最大返回值</string>
     <string name="history_return_window">历史记录返回窗口</string>
+    <string name="hop_histogram_empty">此窗口没有收到节点</string>
+    <string name="hop_histogram_title">每跳节点数</string>
     <string name="hop_limit">节点数</string>
     <string name="hops_away">跃点数</string>
     <string name="host">主机</string>
@@ -754,6 +804,7 @@
     <string name="ignore_remove">从忽略列表中删除 '%1$s' ？</string>
     <!-- IMPORT -->
     <string name="import_configuration">导入配置</string>
+    <string name="import_export_label">导入/导出</string>
     <string name="import_known_shared_contact_text">警告：此联系人已知，导入将覆盖之前的联系人信息。</string>
     <string name="import_label">导入</string>
     <string name="import_shared_contact">导入分享的联系人？</string>
@@ -762,6 +813,10 @@
     <string name="info">信息</string>
     <string name="input_channel_url">输入共享频道链接</string>
     <string name="input_shared_contact_url">输入共享联系人 URL</string>
+    <string name="insert">插入</string>
+    <string name="insert_link_message">为所选文本输入网址</string>
+    <string name="insert_link_title">插入链接</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">当前安装</string>
     <string name="internal">内置</string>
     <string name="interval_always_on">常亮</string>
@@ -774,6 +829,11 @@
     <string name="ipv4_mode">IPv4模式</string>
     <string name="json_output_enabled">启用JSON输出</string>
     <!-- KEY -->
+    <string name="key_backup_deleted">密钥备份已删除</string>
+    <string name="key_backup_not_found">未找到此节点的密钥备份</string>
+    <string name="key_backup_restore_failed">从备份恢复密钥失败</string>
+    <string name="key_backup_restored">已恢复密钥 - 保存到设备</string>
+    <string name="key_backup_saved">密钥已安全备份</string>
     <string name="key_verification_final_title">密钥验证完成</string>
     <string name="key_verification_request_title">密钥验证请求</string>
     <string name="key_verification_title">密钥验证</string>
@@ -786,6 +846,7 @@
     <string name="label_long_turbo">长距离 / 高速模式</string>
     <string name="label_medium_fast">中距离 / 快速模式</string>
     <string name="label_medium_slow">中距离 / 低速模式</string>
+    <string name="label_medium_turbo">中距离 - 快速模式</string>
     <string name="label_narrow_fast">Narrow - Fast</string>
     <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">短距离 / 快速模式</string>
@@ -924,18 +985,43 @@
     <string name="match_any">匹配任意 | 所有</string>
     <string name="max">最大值</string>
     <!-- MESH -->
+    <string name="mesh_beacon">Mesh 信标</string>
+    <string name="mesh_beacon_broadcast">广播一个信标</string>
+    <string name="mesh_beacon_broadcast_summary">定期向附近的节点发布网格信息</string>
+    <string name="mesh_beacon_channels_title">广播频道</string>
+    <string name="mesh_beacon_interval">广播间隔 (秒)</string>
+    <string name="mesh_beacon_interval_error">最小值 %1$d 秒</string>
     <string name="mesh_beacon_invitations_title">Mesh 活动邀请</string>
+    <string name="mesh_beacon_listen">接收广播信标</string>
+    <string name="mesh_beacon_listen_summary">搜索附近设备广播的邀请</string>
+    <string name="mesh_beacon_message">广播信标内容消息</string>
+    <string name="mesh_beacon_message_error">最大值 %1$d 字节</string>
     <string name="mesh_beacon_notification_body">附近的一个 Mesh邀请你加入</string>
     <string name="mesh_beacon_notification_title">Mesh 组网加入邀请</string>
+    <string name="mesh_beacon_offer_add">添加频道</string>
     <string name="mesh_beacon_offer_channel">频道: %1$s</string>
+    <string name="mesh_beacon_offer_channel_key">提供的频道密钥 (base64)</string>
+    <string name="mesh_beacon_offer_channel_name">提供的频道名称</string>
     <string name="mesh_beacon_offer_discover">设备发现</string>
     <string name="mesh_beacon_offer_dismiss">忽略</string>
     <string name="mesh_beacon_offer_from_unknown">来自一个未知节点</string>
     <string name="mesh_beacon_offer_join">Join</string>
     <string name="mesh_beacon_offer_preset">预设: %1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">提供的预设配置</string>
     <string name="mesh_beacon_offer_region">地区: %1$s</string>
+    <string name="mesh_beacon_offer_region_setting">提供的地区频段</string>
+    <string name="mesh_beacon_offer_signal">信号: %1$s / %2$s</string>
     <string name="mesh_beacon_offer_title">Mesh 组网邀请</string>
+    <string name="mesh_beacon_on_preset">调制预设</string>
+    <string name="mesh_beacon_on_region">发射地区</string>
+    <string name="mesh_beacon_preset_indicator">附近信标广播</string>
     <string name="mesh_beacon_preset_none">无</string>
+    <string name="mesh_beacon_send_as_node">以节点编号进行广播 (0 = 当前节点)</string>
+    <string name="mesh_beacon_target">目标节点 %1$d</string>
+    <string name="mesh_beacon_target_add">添加目标</string>
+    <string name="mesh_beacon_target_channel_index">频道索引</string>
+    <string name="mesh_beacon_target_remove">取消目标</string>
+    <string name="mesh_beacon_targets">广播目标</string>
     <string name="mesh_map_location">网格地图位置</string>
     <string name="mesh_map_location_description">在网格地图中为您的手机开启蓝色位置点。</string>
     <!-- MESHTASTIC -->
@@ -955,11 +1041,21 @@
     <string name="message_delivery_status">消息传递状态</string>
     <string name="message_device_managed">此电台由远程管理员管理。</string>
     <string name="message_input_label">信息</string>
+    <string name="message_routing_error_max_retransmit">发送至MESH失败</string>
+    <string name="message_routing_error_no_channel">未选择信道</string>
+    <string name="message_routing_error_pki_failed">无法发送加密消息</string>
+    <string name="message_routing_error_pki_send_fail_public_key">接收方密钥不可用</string>
+    <string name="message_routing_error_pki_unknown_pubkey">接收方需要你的密钥</string>
+    <string name="message_routing_error_too_large">消息太大，无法发送</string>
     <string name="message_status_delivered">已发送至网状网络</string>
+    <string name="message_status_enroute">发送中……</string>
     <string name="message_status_queued">发送队列中</string>
+    <string name="message_status_recipient_delivered">正在发送</string>
+    <string name="message_status_relayed_not_confirmed">已通过中继转发，但尚未收到接收方确认</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 链上确认</string>
     <string name="message_status_sfpp_routing">通过 SF++ 链路路由…</string>
     <string name="message_status_unknown">未知</string>
+    <string name="message_translated_label">已翻译</string>
     <string name="messages">消息</string>
     <string name="micrograms_per_cubic_meter">微克每立方米</string>
     <string name="min">最小值</string>
@@ -1294,6 +1390,8 @@
     <string name="resend">重新发送</string>
     <string name="reset">重置</string>
     <string name="reset_to_defaults">重置为默认设置</string>
+    <string name="restore_keys">恢复密钥</string>
+    <string name="restore_keys_confirmation">将备份的公钥和私钥恢复到当前节点。</string>
     <string name="retry">重试</string>
     <string name="ringtone">铃声</string>
     <string name="ringtone_file_empty">文件为空</string>
@@ -1425,8 +1523,10 @@
     <string name="show_all_key_title">加密密钥</string>
     <string name="show_iaq_legend">显示空气质量图例</string>
     <string name="show_layer">显示图层</string>
+    <string name="show_original">显示原文</string>
     <string name="show_password">显示密码</string>
     <string name="show_precision_circle">显示精度圈</string>
+    <string name="show_translation">显示翻译</string>
     <string name="show_waypoints">显示航点</string>
     <string name="shutdown">关机</string>
     <string name="shutdown_node_name">节点 (%1$s</string>
@@ -1435,7 +1535,31 @@
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
     <!-- SITE -->
+    <string name="site_planner">站点规划器</string>
+    <string name="site_planner_antenna_gain_dbi">天线增益(dBi)</string>
+    <string name="site_planner_antenna_height_meters">天线高度 (米)</string>
+    <string name="site_planner_color_scale">调色板</string>
+    <string name="site_planner_estimate">计算覆盖范围</string>
+    <string name="site_planner_estimating">正在计算覆盖范围…</string>
+    <string name="site_planner_failed">覆盖范围计算失败</string>
+    <string name="site_planner_frequency_mhz">频率 (MHz)</string>
+    <string name="site_planner_high_resolution">高精度地形数据</string>
+    <string name="site_planner_invalid_latitude">请输入 -90 到 90 之间的数值</string>
+    <string name="site_planner_invalid_longitude">请输入 -180 到 180 之间的数值</string>
+    <string name="site_planner_invalid_positive">必须大于 0</string>
+    <string name="site_planner_invalid_rx_sensitivity">请输入 -150 到 -30 dBm 之间的数值</string>
+    <string name="site_planner_max_range_km">最大通信距离 (公里)</string>
+    <string name="site_planner_rx_height_meters">接收机高度 (米)</string>
+    <string name="site_planner_rx_sensitivity_dbm">接收灵敏度 (dBm)</string>
     <string name="site_planner_section_display">显示</string>
+    <string name="site_planner_section_receiver">接收机</string>
+    <string name="site_planner_section_simulation">模拟选项</string>
+    <string name="site_planner_section_transmitter">站点 / 发射机</string>
+    <string name="site_planner_subtitle">估计发射机的射频RF覆盖范围</string>
+    <string name="site_planner_tx_power_watts">发射功率（瓦特）</string>
+    <string name="site_planner_use_current_location">使用当前位置</string>
+    <string name="site_planner_use_map_center">使用地图中心点坐标</string>
+    <string name="site_planner_use_node_location">使用当前节点的位置</string>
     <string name="skip">跳过</string>
     <string name="slot">槽位</string>
     <string name="smart_position">智能位置</string>
@@ -1557,7 +1681,14 @@
     <string name="traffic_management_rate_limit_window">速度限制窗口 (秒)</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
     <string name="traffic_management_unknown_packet_threshold">未知包阈值</string>
+    <string name="translate">翻译</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">翻译消息需要下载语言模型 (约 %1$d MB)。</string>
+    <string name="translation_download_title">下载翻译模型？</string>
+    <string name="translation_downloading">正在下载翻译模型…</string>
+    <string name="translation_failed">无法翻译消息</string>
+    <string name="translation_model_download_failed">翻译模型下载失败</string>
+    <string name="translation_not_required">该消息已经是您所使用的语言</string>
     <string name="transmit_over_lora">通过 LoRa 传输</string>
     <!-- TRANSPORT -->
     <string name="transport">传输方式</string>

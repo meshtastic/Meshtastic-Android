@@ -189,22 +189,76 @@
   },
   "pullRequests": [
     {
+      "id": "11114",
+      "title": "SEN5X: Fix version parsing, VOC index reporting, and uninitialized-read hazards",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11114",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "11092",
+      "title": "Pin admin responses to the stored peer key and request id",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11092",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11090",
+      "title": "MUI: portduino SDL support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11090",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11081",
+      "title": "Update actions/setup-python action to v7",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11081",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11069",
+      "title": "Add HM330x PM Sensor",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11069",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11067",
+      "title": "Add Waveshare ESP32-C3-Zero DIY variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11067",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "11066",
+      "title": "Update Adafruit INA219 to v2",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11066",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11064",
+      "title": "Update SensorLib to v0.4.1",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11064",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11063",
+      "title": "Update python to v3.14.6",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11063",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11061",
+      "title": "Backlight: unify E-Ink backlight logic and fix ThinkNode M1 wake",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11061",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "11050",
+      "title": "TMM extend to ephemeral 3rd tier store",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11050",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11042",
       "title": "meshnology-w10: define HAS_SPI_TFT so the TFT screen initializes again",
       "page_url": "https://github.com/meshtastic/firmware/pull/11042",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11031",
-      "title": "Add native Windows build of meshtasticd",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11031",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11025",
-      "title": "Stop accelerometer thread when double-tap/wake-on-motion disabled at runtime",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11025",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "11015",
@@ -237,6 +291,12 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "10967",
+      "title": "feat(security): enforce packet authenticity policies",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10967",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10962",
       "title": "Extra repeats",
       "page_url": "https://github.com/meshtastic/firmware/pull/10962",
@@ -246,24 +306,6 @@
       "id": "10954",
       "title": "Flatpak: rename Meshtastic -> MeshtasticD",
       "page_url": "https://github.com/meshtastic/firmware/pull/10954",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10949",
-      "title": "Make Safe File actually safe",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10949",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10947",
-      "title": "Fixed pin state setup when SX126X_ANT_SW is defined",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10947",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10935",
-      "title": "Fix size report stale baseline",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10935",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

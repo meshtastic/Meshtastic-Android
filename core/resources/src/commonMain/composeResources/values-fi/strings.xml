@@ -626,6 +626,7 @@
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_archive_missing_target">Laiteohjelmistoa kohteelle %2$s (%3$s) ei löytynyt arkistosta \"%1$s\".</string>
+    <string name="firmware_update_available">Laiteohjelmiston päivitys saatavilla</string>
     <string name="firmware_update_battery_low">Akun varaus liian alhainen (%1$d%). Lataa laite ennen päivitystä.</string>
     <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
     <string name="firmware_update_confirm_file_button">Aloita päivitys</string>
@@ -665,6 +666,10 @@
     <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
     <string name="firmware_update_node_info_missing">Laitteen käyttäjätiedot puuttuvat.</string>
     <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
+    <string name="firmware_update_notification_android">%1$s on asennettu. Vakaa versio %2$s on saatavilla. Avaa laiteohjelmiston päivitykset, kun olet valmis päivittämään.</string>
+    <string name="firmware_update_notification_flasher">%1$s on asennettu. Vakaa versio %2$s on saatavilla. Avaa Meshtastic Flasher päivittääksesi tämän laitteen laiteohjelmiston.</string>
+    <string name="firmware_update_open">Avaa laiteohjelmistopäivitykset</string>
+    <string name="firmware_update_open_flasher">Avaa Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -laitteelle valmistajan sarjamuotoista DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial toimitetun bootloader .zip -tiedoston kanssa). Pelkän .uf2-tiedoston kopiointi ei päivitä bootloaderia.</string>

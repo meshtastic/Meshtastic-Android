@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-06-30T00:00:00Z",
+  "generatedAt": "2026-07-18T00:00:00Z",
   "source": "bundled",
   "editions": [
     {
@@ -81,6 +81,57 @@
         "title": "Meshtastic Firmware 2.7.26.004b486",
         "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/opensauce2026/firmware-2.7.26.004b486.zip",
         "releaseNotes": "## Welcome to Open Sauce 2026! 🔧\n\nThis firmware has been customized for Open Sauce with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the Open Sauce mode.\n\n**Happy meshing from San Mateo!**"
+      }
+    },
+    {
+      "edition": "FAB",
+      "displayName": "FAB26 Boston",
+      "welcomeMessage": "Welcome to FAB26 Boston! 🛠️",
+      "tag": "FAB26",
+      "eventStart": "2026-07-27",
+      "eventEnd": "2026-07-31",
+      "timeZone": "America/New_York",
+      "location": "MIT, Cambridge, Massachusetts, USA",
+      "iconUrl": "https://api.meshtastic.org/resource/eventFirmware/fab26.png",
+      "accentColor": "#13293D",
+      "domain": "fab.meshtastic.org",
+      "links": [
+        {
+          "label": "Event Website",
+          "url": "https://fab26.fabevent.org"
+        },
+        {
+          "label": "Fab Foundation",
+          "url": "https://fabfoundation.org"
+        }
+      ],
+      "theme": {
+        "name": "Reimagine the Future",
+        "tagline": "Celebrating 25 years of the Fab Lab Network and reimagining the next 25.",
+        "colors": {
+          "primary": "#13293D",
+          "secondary": "#BF2620",
+          "accent": "#EAB14B"
+        },
+        "palette": [
+          "#13293D",
+          "#BF2620",
+          "#F6F2E8",
+          "#EAB14B",
+          "#D3CABA"
+        ],
+        "fonts": {
+          "heading": "Montserrat",
+          "body": "Montserrat"
+        }
+      },
+      "firmware": {
+        "slug": "fab26",
+        "version": "2.7.27.d250d89",
+        "id": "v2.7.27.d250d89",
+        "title": "Meshtastic Firmware 2.7.27.d250d89",
+        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/fab26/firmware-2.7.27.d250d89.zip",
+        "releaseNotes": "## Welcome to FAB26 Boston! 🛠️\n\nThis firmware has been customized for FAB26 Boston with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the FAB26 mode.\n\n**Happy meshing from Boston!**"
       }
     },
     {

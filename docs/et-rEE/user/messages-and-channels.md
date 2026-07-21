@@ -124,7 +124,7 @@ You can search the full history of any conversation directly from the chat scree
 
 Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
 
-### Text Formatting
+### Teksti vormindamine
 
 Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
 
@@ -136,9 +136,9 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 | Inline code   | `` `code` ``                   | monospace `code`     |
 | Link          | `[label](https://example.com)` | a tappable **label** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
 
-> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
+> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
 
 ### Mentions
 

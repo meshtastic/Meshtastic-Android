@@ -90,7 +90,7 @@ Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, 
 
 Meshtastic toetab kahte TAK sõnumivormingut, mis valitakse ühendatud raadio püsivara põhjal automaatselt – käsitsi konfigureerimist pole vaja:
 
-| Format                           | Compatibility                                           | Features                                                                                                                                                                                                           |
+| Vorming                          | Compatibility                                           | Features                                                                                                                                                                                                           |
 | -------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | V1 (Legacy)   | Püsivara 2.7.x ja vanem | Bare protobuf encoding on port 72. Supports position sharing (PLI) and chat (GeoChat) only — shapes, markers, routes, and other typed CoT events are dropped |
 | V2 (praegune) | Püsivara 2.8.0+         | Compact, zstd-compressed encoding on port 78. Adds shapes, markers, routes, aircraft, casevac, emergency, and task CoT types on top of everything V1 supports                                      |

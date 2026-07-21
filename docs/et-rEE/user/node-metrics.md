@@ -171,6 +171,6 @@ The position tab shows location data for nodes that share GPS:
 - [Telemeetria & Sensorid](telemetry-and-sensors) — toetatud andurid ja seadistus
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
 - [Avasta](Discovery) — traceroute'i üksikasjad ja naabri teave
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [Ühikud ja lokaat](units-and-locale) — temperatuuri, kauguse ja kiiruse kuvamise ühikud
 
 ---

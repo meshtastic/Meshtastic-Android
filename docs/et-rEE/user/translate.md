@@ -44,7 +44,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 Kui teie keelt Crowdinis veel pole:
 
-1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut locale.
+1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut lokaati.
 2. Hooldaja lisab keele Crowdinile ja seadistab faili `crowdin.yml`.
 3. Pärast lisamist saad kohe tõlkima hakata.
 
@@ -80,9 +80,9 @@ docs/
 └── ...
 ```
 
-Locale folders use the Android resource convention `{lang}-r{REGION}` (e.g. `fr-rFR`, `de-rDE`, `ja-rJP`), matching the `values-*` directories used for app strings.
+Lokaadikaustad kasutavad Androidi ressursikonventsiooni `{lang}-r{REGION}` (nt `fr-rFR`, `de-rDE`, `ja-rJP`), mis vastab rakenduste stringide jaoks kasutatavatele `values-*` kataloogidele.
 
-The app automatically selects the correct locale based on your device's **Language & Region** settings.
+Rakendus valib automaatselt õige lokaadi seadme **Keele ja piirkonna** sätete põhjal.
 
 ---
 

@@ -20,7 +20,7 @@ The widget displays the **connected radio's** current local stats:
 
 - **Aku** – raadio aku tase või _Toitel_, kui see töötab välise toiteallikaga
 - **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
-- **AirUtil** — eetriaega (kui suurt osa töötsüklist teie raadio edastab)
+- **AirUtil** — eetriaega (kui suurt osa töötsüklist raadio edastab)
 - **Traffic** — packets transmitted / received, and duplicates seen
 - **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
 

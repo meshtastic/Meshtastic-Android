@@ -356,6 +356,9 @@
     <string name="desktop_tray_quit">Sule</string>
     <string name="desktop_tray_show">Näita Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic töölaud</string>
+    <string name="desktop_update_available_message">Meshtastic töölaud %1$s on allalaadimiseks valmis.</string>
+    <string name="desktop_update_available_title">Rakenduse värskendus on saadaval</string>
+    <string name="desktop_update_download">Lae alla värskendus %1$s</string>
     <string name="details">Üksikasjad</string>
     <string name="detection_sensor">Tuvastusandur</string>
     <string name="detection_sensor_config">Tuvastusanduri sätted</string>
@@ -488,7 +491,7 @@
     <string name="doc_keywords_firmware">püsivara,värskendus,ota,püsivarauuendus,versioon,taastamine</string>
     <string name="doc_keywords_help">abi,dokumentatsioon,dokumendid,chirpy,assistent,otsing,võrguühenduseta</string>
     <string name="doc_keywords_map">kaart,teekonnapunkt,gps,asukoht,marker</string>
-    <string name="doc_keywords_measurement">vormindaja,mõõdik,arv,lokaat,temperatuur,teisendus,api</string>
+    <string name="doc_keywords_measurement">vormindaja,mõõdik,arv,asukoht,temperatuur,teisendus,api</string>
     <string name="doc_keywords_messages">sõnum,kanal,krüpteerimine,otseülekanne,levitamine,kiirvestlus</string>
     <string name="doc_keywords_mqtt">mqtt,maakler,internet,sild,üleslink,allalink</string>
     <string name="doc_keywords_node_metrics">mõõdikud,telemeetria,signaal,snr,rssi,aku,traceroute</string>
@@ -500,7 +503,7 @@
     <string name="doc_keywords_tak">tak,atak,kursorsihtmärgil,meeskonnateadlikkus</string>
     <string name="doc_keywords_telemetry">telemeetria,andur,temperatuur,niiskus,rõhk,võimsus</string>
     <string name="doc_keywords_translate">tõlkimine,rahvahulk,lokaliseerimine,keel,i18n,panusta</string>
-    <string name="doc_keywords_units">ühikud,lokaal,meetriline,imperial,temperatuur,vahemaa</string>
+    <string name="doc_keywords_units">ühikud,lokaat,meetriline,imperial,temperatuur,vahemaa</string>
     <string name="doc_keywords_widget">vidin,avakuva,kohalik statistika,vaade,aku,kasutus</string>
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
@@ -526,7 +529,7 @@
     <string name="doc_title_tak">TAK integratsioon</string>
     <string name="doc_title_telemetry">Telemeetria &amp; Sensorid</string>
     <string name="doc_title_translate">Tõlgi rakendus</string>
-    <string name="doc_title_units">Ühikud &amp; Asukoht</string>
+    <string name="doc_title_units">Ühikud &amp; lokaat</string>
     <string name="doc_title_widget">Avakuva vidin</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Ära selle seadme puhul enam kuva</string>
@@ -651,6 +654,7 @@
     <string name="firmware_update_method_usb">USB failiedastus</string>
     <string name="firmware_update_method_wifi">Üle WiFi</string>
     <string name="firmware_update_missing_target">Selle seadme püsivara teave pole saadaval.</string>
+    <string name="firmware_update_nightly">Öösiti</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
     <string name="firmware_update_node_info_missing">Sõlmel puudub kasutajateave.</string>
     <string name="firmware_update_not_found_in_release">Selles versioonis ei leitud püsivara %1$s'le.</string>
@@ -697,6 +701,11 @@
     <string name="flip_screen">Keera ekraani</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Paks</string>
+    <string name="format_code">Code</string>
+    <string name="format_italic">Italic</string>
+    <string name="format_link">Link</string>
+    <string name="format_strikethrough">Läbikriipsutus</string>
     <string name="free_memory">Vaba mälumaht</string>
     <string name="free_memory_description">Saadaolev süsteemimälu baitides</string>
     <string name="freq">Sagedus</string>
@@ -785,6 +794,8 @@
     <string name="info">Informatsioon</string>
     <string name="input_channel_url">Sisesta jagatud kanalite URL</string>
     <string name="input_shared_contact_url">Sisesta jagatud kontakti URL</string>
+    <string name="insert_link_message">Sisesta valitud teksti URL</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Paigaldatud</string>
     <string name="internal">Sisemine</string>
     <string name="interval_always_on">Alati sees</string>
@@ -1496,7 +1507,12 @@
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
     <!-- SITE -->
+    <string name="site_planner_invalid_latitude">Sisesta −90 kuni 90</string>
+    <string name="site_planner_invalid_longitude">Sisesta −180 to 180</string>
+    <string name="site_planner_invalid_rx_sensitivity">Sisesta −150 to −30 dBm</string>
+    <string name="site_planner_max_range_km">Maks leviulatus (km)</string>
     <string name="site_planner_section_display">Ekraan</string>
+    <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>

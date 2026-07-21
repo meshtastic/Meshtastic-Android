@@ -18,13 +18,13 @@ aliases:
 
 Настройки модулей используют макет на основе карточек с переключателями, выпадающими списками, текстовыми полями и ползунками:
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![Переключатель](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![Выпадающий список](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![Текстовое поле](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![Настройки расположения карточек](../../assets/screenshots/settings_titled_card.png)
 
 ## Конфигурация модуля
 
@@ -34,12 +34,12 @@ aliases:
 
 | Настройка        | Описание                                                                 |
 | ---------------- | ------------------------------------------------------------------------ |
-| Включено         | Toggle MQTT bridge                                                       |
+| Включено         | Переключить MQTT мост                                                    |
 | Сервер           | MQTT broker address                                                      |
 | Имя пользователя | Имя пользователя для аутентификации                                      |
 | Пароль           | Пароль аутентификации                                                    |
 | Шифрование       | Encrypt MQTT payloads                                                    |
-| ~~JSON Output~~  | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
+| ~~Вывод JSON~~   | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
 | TLS              | Use secure connection                                                    |
 | Корневая тема    | Base MQTT topic path                                                     |
 | Отчет карты      | Publish position for public map                                          |
@@ -64,17 +64,17 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 
 | Настройка                                 | Описание                    |
 | ----------------------------------------- | --------------------------- |
-| Включено                                  | Activate notifications      |
+| Включено                                  | Включить уведомления        |
 | Включить уведомление о входящем сообщении | Notify on incoming messages |
 | Зуммер при уведомлении                    | Use buzzer for messages     |
 | Alert Message Vibra                       | Use vibration for messages  |
 | Уведомлять при 🔔                         | Notify on bell character    |
-| Output (GPIO)          | Pin for notification output |
+| Вывод (GPIO)           | Pin for notification output |
 | Активный выход                            | High or Low active          |
-| Duration (ms)          | Notification length         |
-| Use I2S as Buzzer                         | Use I2S audio output        |
+| Длительность (мс)      | Notification length         |
+| Использовать I2S как буззер               | Использовать аудиовывод I2S |
 
-### Store & Forward Module
+### Модуль Store & Forward
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
