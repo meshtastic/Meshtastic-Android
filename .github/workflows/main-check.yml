@@ -52,7 +52,7 @@ jobs:
       GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # git rev-list --count needs full history for the versionCode
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}

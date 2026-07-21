@@ -38,7 +38,7 @@ jobs:
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Delete Failed or Cancelled Tag
