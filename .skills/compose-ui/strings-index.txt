@@ -606,6 +606,7 @@ firmware_too_old
 firmware_update_almost_there
 firmware_update_alpha
 firmware_update_archive_missing_target
+firmware_update_available
 firmware_update_battery_low
 firmware_update_checking
 firmware_update_confirm_file_button
@@ -645,6 +646,10 @@ firmware_update_nightly
 firmware_update_no_device
 firmware_update_node_info_missing
 firmware_update_not_found_in_release
+firmware_update_notification_android
+firmware_update_notification_flasher
+firmware_update_open
+firmware_update_open_flasher
 firmware_update_ota_failed
 firmware_update_ota_unsupported_reason
 firmware_update_rak4631_bootloader_hint
@@ -1776,8 +1781,10 @@ wind_direction
 wind_gust
 wind_lull
 wind_speed
+### WRITE ###
 write_nfc
 write_nfc_failed
+write_nfc_subtext
 write_nfc_success
 write_nfc_text
 you

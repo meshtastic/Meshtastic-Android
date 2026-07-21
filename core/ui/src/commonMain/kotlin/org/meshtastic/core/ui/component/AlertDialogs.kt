@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -54,6 +55,7 @@ import org.meshtastic.core.ui.util.annotatedStringFromHtml
  * @param titleRes The title string resource of the dialog.
  * @param message Optional plain text message.
  * @param messageRes Optional string resource message.
+ * @param messageColor Optional color for the plain text message; [Color.Unspecified] uses the default text color.
  * @param html Optional HTML formatted message.
  * @param icon Optional leading icon.
  * @param text Optional custom composable content for the body.
@@ -75,6 +77,7 @@ fun MeshtasticDialog(
     titleRes: StringResource? = null,
     message: String? = null,
     messageRes: StringResource? = null,
+    messageColor: Color = Color.Unspecified,
     html: String? = null,
     icon: ImageVector? = null,
     text: @Composable (() -> Unit)? = null,
@@ -149,7 +152,7 @@ fun MeshtasticDialog(
                 } else if (htmlAnnotated != null) {
                     Text(text = htmlAnnotated)
                 } else if (messageText != null) {
-                    Text(text = messageText)
+                    Text(text = messageText, color = messageColor)
                 }
 
                 if (choices.isNotEmpty()) {

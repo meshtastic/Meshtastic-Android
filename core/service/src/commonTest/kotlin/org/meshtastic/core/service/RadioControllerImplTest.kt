@@ -393,13 +393,42 @@ class RadioControllerImplTest {
     @Test
     fun importContactSendsAdminAndUpdatesNodeManager() = runTest {
         val controller = createController()
-        // A QR-scanned contact arrives with manually_verified = false (proto default).
+        // A scanned contact arrives with manually_verified = false (proto default).
         val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
+
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
 
         controller.importContact(contact)
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-        // Importing is an act of manual verification, so the node is recorded as verified.
+        // The verification state encoded by the sharer is honored as-is, not forced to true.
+        assertEquals(false, sentMessage?.add_contact?.manually_verified)
+        verify { nodeManager.handleReceivedUser(42, any(), any(), false) }
+    }
+
+    @Test
+    fun importContactPreservesEncodedVerificationState() = runTest {
+        val controller = createController()
+        // A contact shared as already verified stays verified on import.
+        val contact =
+            SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"), manually_verified = true)
+
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.importContact(contact)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        assertEquals(true, sentMessage?.add_contact?.manually_verified)
         verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
     }
 
