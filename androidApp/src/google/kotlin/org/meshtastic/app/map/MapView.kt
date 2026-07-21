@@ -125,6 +125,8 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.metersIn
@@ -715,6 +717,7 @@ fun MapView(
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
                     displayUnits = displayUnits,
+                    myNodeNum = myNodeNum,
                     onSend = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
@@ -727,7 +730,9 @@ fun MapView(
                         editingWaypoint = null
                     },
                     onDelete = { wpToDelete ->
-                        if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
+                        // Broadcast the removal (expire=1) only for waypoints we're allowed to modify mesh-wide
+                        // (unlocked, or locked to us); otherwise just drop our local copy below.
+                        if (wpToDelete.isModifiableBy(myNodeNum) && isConnected && wpToDelete.id != 0) {
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
@@ -754,7 +759,7 @@ fun MapView(
                     // Unlocked foreign geofences can still be edited/re-broadcast (only while connected, since editing
                     // means re-sending); locked ones stay read-only.
                     onEdit =
-                    if (waypoint.locked_to == 0 && isConnected) {
+                    if (!waypoint.isLocked && isConnected) {
                         {
                             geofenceInfoWaypoint = null
                             editingWaypoint = waypoint
