@@ -34,6 +34,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
 import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -63,10 +64,13 @@ class DeviceLinkRepositoryImpl(
     /** Serializes seeding and network refreshes so concurrent collectors don't duplicate writes. */
     private val writeMutex = Mutex()
 
-    /** Single-flights stale-triggered refreshes so concurrent collectors don't start duplicate fetches. */
-    private val refreshMutex = Mutex()
-
     @Volatile private var lastRefreshMillis = 0L
+
+    /** Single-flights stale-triggered refreshes; the TTL is re-checked inside so late joiners don't re-fetch. */
+    private val staleRefresher =
+        SingleFlightRefresher(dispatchers.io, "DeviceLinkRepository") {
+            if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile()
+        }
 
     override suspend fun ensureImported() {
         ensureSeeded()
@@ -134,10 +138,10 @@ class DeviceLinkRepositoryImpl(
         }
     }
 
-    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS] and single-flighted via [refreshMutex]. */
+    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS] and single-flighted via [staleRefresher]. */
     private suspend fun refreshIfStale() {
         if (nowMillis - lastRefreshMillis <= CACHE_EXPIRATION_TIME_MS) return
-        refreshMutex.withLock { if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile() }
+        staleRefresher.refresh()
     }
 
     /**

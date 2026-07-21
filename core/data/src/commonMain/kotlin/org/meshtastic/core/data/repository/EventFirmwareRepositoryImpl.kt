@@ -17,14 +17,9 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
@@ -32,6 +27,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -69,22 +65,24 @@ class EventFirmwareRepositoryImpl(
     // longer active. The cooldown caps retries while offline without waiting the full CACHE_EXPIRATION_TIME_MS.
     @Volatile private var lastAttemptMillis = 0L
 
-    /** Guards [inFlightRefresh] so concurrent callers share one network fetch. */
-    private val refreshGuard = Mutex()
-
-    private var inFlightRefresh: Deferred<Unit>? = null
-
-    // This @Single lives for the entire app lifetime, so the SupervisorJob is never cancelled. The refresh runs
-    // here so a caller that stops waiting can't abort the shared fetch — api.meshtastic.org has been measured
-    // taking 20-60s, and the fetch should still land in the DB for the next lookup.
-    private val refreshScope = CoroutineScope(dispatchers.io + SupervisorJob())
+    /** Shared refresh; a caller that stops waiting can't abort it, and the fetch still lands in the DB. */
+    private val refresher =
+        SingleFlightRefresher(dispatchers.io, "EventFirmwareRepository") {
+            lastAttemptMillis = nowMillis
+            val editions = remoteDataSource.getEventFirmware().editions
+            if (editions.isNotEmpty()) {
+                localDataSource.upsertAll(editions.map { it.asEntity() })
+                localDataSource.deleteNotIn(editions.map { it.edition })
+                lastRefreshMillis = nowMillis
+            }
+        }
 
     override suspend fun getEdition(editionName: String): EventFirmwareEdition? = withContext(dispatchers.io) {
         ensureSeeded()
         val stale = nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS
         val retryCooldownElapsed = nowMillis - lastAttemptMillis > REFRESH_RETRY_COOLDOWN_MS
         if (stale && retryCooldownElapsed) {
-            singleFlightRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+            refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
         }
         localDataSource.getByEdition(editionName)?.asExternalModel()
     }
@@ -100,36 +98,6 @@ class EventFirmwareRepositoryImpl(
                 }
                     .onFailure { e -> Logger.w(e) { "EventFirmwareRepository: failed to seed from bundled JSON" } }
             }
-        }
-    }
-
-    /**
-     * Starts (or joins) a single shared refresh running in [refreshScope]. The caller waits at most [maxWaitMs] before
-     * falling back to cached data; the refresh itself always runs to completion, bounded only by the HttpClient's own
-     * timeout/retry policy.
-     */
-    private suspend fun singleFlightRefresh(maxWaitMs: Long) {
-        val refresh =
-            refreshGuard.withLock {
-                inFlightRefresh?.takeIf { it.isActive }
-                    ?: refreshScope
-                        .async {
-                            lastAttemptMillis = nowMillis
-                            safeCatching {
-                                val editions = remoteDataSource.getEventFirmware().editions
-                                if (editions.isNotEmpty()) {
-                                    localDataSource.upsertAll(editions.map { it.asEntity() })
-                                    localDataSource.deleteNotIn(editions.map { it.edition })
-                                    lastRefreshMillis = nowMillis
-                                }
-                            }
-                                .onFailure { e -> Logger.w(e) { "EventFirmwareRepository: network refresh failed" } }
-                            Unit
-                        }
-                        .also { inFlightRefresh = it }
-            }
-        if (withTimeoutOrNull(maxWaitMs) { refresh.join() } == null) {
-            Logger.w { "EventFirmwareRepository: refresh still in flight after ${maxWaitMs}ms; using cached data" }
         }
     }
 
