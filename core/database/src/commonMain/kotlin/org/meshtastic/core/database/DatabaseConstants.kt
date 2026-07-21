@@ -39,6 +39,9 @@ object DatabaseConstants {
     const val DEVICE_DB_FOR_PREFIX: String = "device_db_for:"
     const val NODE_DB_FOR_PREFIX: String = "node_db_for:"
     const val ADDR_DB_FOR_PREFIX: String = "addr_db_for:"
+    const val PENDING_SOURCE_DB_FOR_PREFIX: String = "pending_source_db_for:"
+    const val PENDING_DESTINATION_DB_FOR_PREFIX: String = "pending_destination_db_for:"
+    const val RETIRED_DB_NAMES_KEY: String = "retired_db_names"
 
     // Display/truncation and hash sizing for DB names
     const val DB_NAME_HASH_LEN: Int = 10
@@ -48,6 +51,12 @@ object DatabaseConstants {
     // Address anonymization sizing
     const val ADDRESS_ANON_SHORT_LEN: Int = 4
     const val ADDRESS_ANON_EDGE_LEN: Int = 2
+
+    /**
+     * SQLite's default maximum number of host parameters (bind variables) per statement. Used to chunk IN-clause
+     * queries.
+     */
+    const val SQLITE_MAX_BIND_PARAMETERS: Int = 999
 }
 
 fun shortSha1(s: String): String = s.encodeUtf8().sha1().hex().take(DatabaseConstants.DB_NAME_HASH_LEN)
@@ -84,12 +93,16 @@ fun anonymizeDbName(name: String): String =
         ) + "…"
     }
 
-/** Compute which DBs to evict using LRU policy. */
+/**
+ * Computes which databases to evict using LRU policy. [protectedDbNames] remain counted toward [limit] but can never be
+ * selected, so the returned list may intentionally leave the cache over limit while recovery evidence is retained.
+ */
 internal fun selectEvictionVictims(
     dbNames: List<String>,
     activeDbName: String,
     limit: Int,
     lastUsedMsByDb: Map<String, Long>,
+    protectedDbNames: Set<String> = emptySet(),
 ): List<String> {
     val deviceDbNames =
         dbNames.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
@@ -97,7 +110,7 @@ internal fun selectEvictionVictims(
         if (limit < 1 || deviceDbNames.size <= limit) {
             emptyList()
         } else {
-            val candidates = deviceDbNames.filter { it != activeDbName }
+            val candidates = deviceDbNames.filter { it != activeDbName && it !in protectedDbNames }
             if (candidates.isEmpty()) {
                 emptyList()
             } else {

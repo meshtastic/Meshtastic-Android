@@ -34,6 +34,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -135,11 +136,16 @@ open class MeshUtilApplication :
     }
 
     override fun onTerminate() {
-        // Shutdown managers (useful for Robolectric tests)
-        get<DatabaseManager>().close()
+        // Shutdown managers (useful for Robolectric tests).
+        // Non-blocking: cancelAndJoin inside runBlocking on the main thread can deadlock
+        // if any active coroutine is dispatching to Dispatchers.Main.
         applicationScope.cancel()
-        super.onTerminate()
-        org.koin.core.context.stopKoin()
+        try {
+            runBlocking { get<DatabaseManager>().close() }
+        } finally {
+            super.onTerminate()
+            org.koin.core.context.stopKoin()
+        }
     }
 
     private fun scheduleMeshLogCleanup() {

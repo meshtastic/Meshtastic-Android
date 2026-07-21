@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -27,6 +28,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -36,6 +38,8 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
@@ -57,6 +61,7 @@ class MeshConfigFlowManagerImpl(
     private val commandSender: CommandSender,
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val notificationPrefs: NotificationPrefs,
+    private val radioInterfaceService: RadioInterfaceService,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
     private val wantConfigDelay = 100L
@@ -83,6 +88,7 @@ class MeshConfigFlowManagerImpl(
          * the Stage 2 request; keep those packets so the later node-list phase can still make progress.
          */
         data class ReceivingConfig(
+            val session: RadioSessionContext,
             val rawMyNodeInfo: ProtoMyNodeInfo,
             val metadata: DeviceMetadata? = null,
             val earlyNodes: List<NodeInfo> = emptyList(),
@@ -94,14 +100,40 @@ class MeshConfigFlowManagerImpl(
          * [myNodeInfo] was committed at the Stage 1→2 transition. [nodes] accumulates [NodeInfo] packets until
          * `config_complete_id` arrives.
          */
-        data class ReceivingNodeInfo(val myNodeInfo: SharedMyNodeInfo, val nodes: List<NodeInfo> = emptyList()) :
-            HandshakeState()
+        data class ReceivingNodeInfo(
+            val session: RadioSessionContext,
+            val myNodeInfo: SharedMyNodeInfo,
+            val nodes: List<NodeInfo> = emptyList(),
+        ) : HandshakeState()
 
         /** Both stages finished. The app is fully connected. */
-        data class Complete(val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
+        data class Complete(val session: RadioSessionContext, val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
     }
 
     private val handshakeState = atomic<HandshakeState>(HandshakeState.Idle)
+
+    private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
+        radioInterfaceService.runIfSessionActive(session, block)
+
+    private suspend fun runWhileForSession(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
+        radioInterfaceService.runWhileSessionActive(session, block)
+
+    private fun isActiveSession(session: RadioSessionContext): Boolean = radioInterfaceService.isSessionActive(session)
+
+    private fun HandshakeState.belongsTo(session: RadioSessionContext): Boolean = when (this) {
+        HandshakeState.Idle -> false
+        is HandshakeState.ReceivingConfig -> this.session == session
+        is HandshakeState.ReceivingNodeInfo -> this.session == session
+        is HandshakeState.Complete -> this.session == session
+    }
+
+    /** Privacy-safe state label for diagnostics; handshake payloads contain transport and device identifiers. */
+    private fun HandshakeState.diagnosticName(): String = when (this) {
+        HandshakeState.Idle -> "Idle"
+        is HandshakeState.ReceivingConfig -> "ReceivingConfig"
+        is HandshakeState.ReceivingNodeInfo -> "ReceivingNodeInfo"
+        is HandshakeState.Complete -> "Complete"
+    }
 
     override val newNodeCount: Int
         get() =
@@ -111,30 +143,47 @@ class MeshConfigFlowManagerImpl(
                 else -> 0
             }
 
-    override fun handleConfigComplete(configCompleteId: Int) {
+    override fun handleConfigComplete(configCompleteId: Int, session: RadioSessionContext): Boolean {
+        var handled = false
+        val admitted = runForSession(session) { handled = handleConfigCompleteActive(configCompleteId, session) }
+        if (!admitted) {
+            Logger.d { "Discarding config_complete from stale transport session gen=${session.generation}" }
+        }
+        return admitted && handled
+    }
+
+    private fun handleConfigCompleteActive(configCompleteId: Int, session: RadioSessionContext): Boolean {
         val state = handshakeState.value
-        when (configCompleteId) {
+        return when (configCompleteId) {
             HandshakeConstants.CONFIG_NONCE -> {
-                if (state !is HandshakeState.ReceivingConfig) {
-                    Logger.w { "Ignoring Stage 1 config_complete in state=$state" }
-                    return
+                if (state !is HandshakeState.ReceivingConfig || !state.belongsTo(session)) {
+                    Logger.w { "Ignoring Stage 1 config_complete in state=${state.diagnosticName()}" }
+                    false
+                } else {
+                    handleConfigOnlyComplete(state)
+                    true
                 }
-                handleConfigOnlyComplete(state)
             }
 
             HandshakeConstants.NODE_INFO_NONCE -> {
-                if (state !is HandshakeState.ReceivingNodeInfo) {
-                    Logger.w { "Ignoring Stage 2 config_complete in state=$state" }
-                    return
+                if (state !is HandshakeState.ReceivingNodeInfo || !state.belongsTo(session)) {
+                    Logger.w { "Ignoring Stage 2 config_complete in state=${state.diagnosticName()}" }
+                    false
+                } else {
+                    handleNodeInfoComplete(state)
+                    true
                 }
-                handleNodeInfoComplete(state)
             }
 
-            else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
+            else -> {
+                Logger.w { "Config complete id mismatch: $configCompleteId" }
+                false
+            }
         }
     }
 
     private fun handleConfigOnlyComplete(state: HandshakeState.ReceivingConfig) {
+        val session = state.session
         Logger.i { "Config-only complete (Stage 1)" }
 
         val finalizedInfo = buildMyNodeInfo(state.rawMyNodeInfo, state.metadata)
@@ -143,7 +192,7 @@ class MeshConfigFlowManagerImpl(
             handshakeState.value = HandshakeState.Idle
             scope.handledLaunch {
                 delay(wantConfigDelay)
-                connectionManager.value.startConfigOnly()
+                runForSession(session) { connectionManager.value.startConfigOnly() }
             }
             return
         }
@@ -160,31 +209,40 @@ class MeshConfigFlowManagerImpl(
             }
         }
 
-        handshakeState.value = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo, nodes = state.earlyNodes)
+        handshakeState.value =
+            HandshakeState.ReceivingNodeInfo(
+                session = state.session,
+                myNodeInfo = finalizedInfo,
+                nodes = state.earlyNodes,
+            )
         Logger.i { "myNodeInfo committed" }
         connectionManager.value.onRadioConfigLoaded()
         serviceStateWriter.setConnectionProgress("Loading node list")
 
         scope.handledLaunch {
             delay(wantConfigDelay)
-            heartbeatSender.sendHeartbeat("inter-stage")
+            val heartbeatSent = runWhileForSession(session) { heartbeatSender.sendHeartbeat("inter-stage") }
+            if (!heartbeatSent) return@handledLaunch
             delay(wantConfigDelay)
-            Logger.i { "Requesting NodeInfo (Stage 2)" }
-            connectionManager.value.startNodeInfoOnly()
+            runForSession(session) {
+                Logger.i { "Requesting NodeInfo (Stage 2)" }
+                connectionManager.value.startNodeInfoOnly()
+            }
         }
         connectionManager.value.onHandshakeProgress()
     }
 
     private fun handleNodeInfoComplete(state: HandshakeState.ReceivingNodeInfo) {
+        val session = state.session
         Logger.i { "NodeInfo complete (Stage 2)" }
 
         val info = state.myNodeInfo
 
         // Transition state immediately (synchronously) to prevent duplicate handling.
-        // The async work below (DB writes, broadcasts) proceeds without the guard.
+        // The async work below rechecks the originating transport session before publishing results.
         // Because nodes is now immutable, no snapshot is needed — state.nodes IS the snapshot.
         // Any stall-guard retry that re-enters handleNodeInfo will see Complete state and be ignored.
-        handshakeState.value = HandshakeState.Complete(myNodeInfo = info)
+        handshakeState.value = HandshakeState.Complete(session = state.session, myNodeInfo = info)
 
         // Cancel the transport-aware fast-recovery watchdog SYNCHRONOUSLY, before the async DB
         // install work below is launched. The firmware handshake has already completed at this
@@ -194,44 +252,7 @@ class MeshConfigFlowManagerImpl(
         // NodeDB side-effect set, but it runs only after the DB install block finishes.
         connectionManager.value.onHandshakeComplete()
 
-        val entities =
-            state.nodes.mapNotNull { nodeInfo ->
-                nodeManager.installNodeInfo(nodeInfo)
-                nodeManager.nodeDBbyNodeNum[nodeInfo.num]
-                    ?: run {
-                        Logger.w { "Node ${nodeInfo.num} missing from DB after installNodeInfo; skipping" }
-                        null
-                    }
-            }
-
-        scope.handledLaunch {
-            try {
-                val removedNums = nodeRepository.installConfig(info, entities)
-                if (removedNums.isNotEmpty()) {
-                    // Identity migration dropped stale rows (e.g. the device renumbered after a firmware
-                    // 2.8 upgrade); evict them from the in-memory index so lookups can't resurrect them.
-                    Logger.i { "Config install migrated ${removedNums.size} stale node identit(y/ies)" }
-                    removedNums.forEach(nodeManager::removeByNodenum)
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.e(e) { "Post-handshake NodeDB install failed; restarting transport to recover" }
-                nodeManager.setNodeDbReady(false)
-                nodeManager.setAllowNodeDbWrites(false)
-                connectionManager.value.recoverPostHandshakeFailure()
-                return@handledLaunch
-            }
-
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setAllowNodeDbWrites(true)
-            serviceStateWriter.setConnectionState(ConnectionState.Connected)
-
-            safeCatching { analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown") }
-                .onFailure { e -> Logger.w(e) { "Failed to set post-handshake analytics attributes" } }
-            safeCatching { connectionManager.value.onNodeDbReady() }
-                .onFailure { e -> Logger.e(e) { "Post-connected onNodeDbReady side effects failed" } }
-        }
+        scope.handledLaunch { finishNodeInfoInstall(state) }
         // Note: onHandshakeProgress() is intentionally NOT called here. By this point the
         // handshake has reached HandshakeState.Complete and the synchronous onHandshakeComplete()
         // call above has already cancelled the watchdog. Re-arming via onHandshakeProgress()
@@ -239,84 +260,200 @@ class MeshConfigFlowManagerImpl(
         // sites cover all genuine progress.
     }
 
-    override fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
-        Logger.i { "MyNodeInfo received" }
+    private suspend fun finishNodeInfoInstall(state: HandshakeState.ReceivingNodeInfo) {
+        val session = state.session
+        try {
+            val admitted = runWhileForSession(session) { installAndPublishNodeDatabase(state) }
+            if (!admitted) Logger.d { "Discarding stale post-handshake install and publication" }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            val recovered =
+                runForSession(session) {
+                    Logger.e(e) { "Post-handshake NodeDB install failed; restarting transport to recover" }
+                    nodeManager.setNodeDbReady(false)
+                    nodeManager.setAllowNodeDbWrites(false)
+                    connectionManager.value.recoverPostHandshakeFailure()
+                }
+            if (!recovered) Logger.d { "Discarding stale post-handshake recovery" }
+        }
+    }
 
-        // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
-        handshakeState.value = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
-        // Device id before node num: RadioControllerImpl gates its DB association on a non-null num,
-        // so ordering this way guarantees the association never fires with a stale device id.
+    @Suppress("ReturnCount")
+    private suspend fun installAndPublishNodeDatabase(state: HandshakeState.ReceivingNodeInfo) {
+        val session = state.session
+        val info = state.myNodeInfo
+        val entities = mutableListOf<Node>()
+        state.nodes.forEach { nodeInfo ->
+            nodeManager.installNodeInfo(nodeInfo)
+            if (!isActiveSession(session)) return
+            nodeManager.nodeDBbyNodeNum[nodeInfo.num]?.let(entities::add)
+                ?: Logger.w { "Node ${nodeInfo.num} missing after installNodeInfo; skipping" }
+        }
+        if (!isActiveSession(session)) return
+
+        val removedNums = nodeRepository.installConfig(info, entities)
+        if (!isActiveSession(session)) return
+        if (removedNums.isNotEmpty()) {
+            Logger.i { "Config install migrated ${removedNums.size} stale node identit(y/ies)" }
+            removedNums.forEach(nodeManager::removeByNodenum)
+        }
+
+        val published =
+            runForSession(session) {
+                nodeManager.setNodeDbReady(true)
+                nodeManager.setAllowNodeDbWrites(true)
+                serviceStateWriter.setConnectionState(ConnectionState.Connected)
+            }
+        if (!published) return
+
+        safeCatching { analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown") }
+            .onFailure { e -> Logger.w(e) { "Failed to set post-handshake analytics attributes" } }
+        if (!isActiveSession(session)) return
+        safeCatching { connectionManager.value.onNodeDbReady() }
+            .onFailure { e -> Logger.e(e) { "Post-connected onNodeDbReady side effects failed" } }
+    }
+
+    override fun handleMyInfo(myInfo: ProtoMyNodeInfo, session: RadioSessionContext) {
         // Hex, not utf8: device_id is raw hardware bytes, and a lossy decode could collapse two
-        // distinct devices into the same id.
-        nodeManager.setMyDeviceId(myInfo.device_id.hex().takeIf { it.isNotBlank() })
-        nodeManager.setMyNodeNum(myInfo.my_node_num)
-        nodeManager.setFirmwareEdition(myInfo.firmware_edition)
-        applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
+        // distinct devices into the same id. Decode before admission, then publish every synchronous handshake
+        // mutation under the transport's revocation lock.
+        val deviceId = myInfo.device_id.hex().takeIf { it.isNotBlank() }
+        var clearGeneration: Long? = null
+        val admitted =
+            radioInterfaceService.runIfSessionActive(session) {
+                Logger.i { "MyNodeInfo received" }
+                handshakeState.value = HandshakeState.ReceivingConfig(session = session, rawMyNodeInfo = myInfo)
+                nodeManager.setMyDeviceId(deviceId)
+                nodeManager.setMyNodeNum(myInfo.my_node_num)
+                nodeManager.publishConnectionIdentity(
+                    sessionGeneration = session.generation,
+                    address = session.address,
+                    nodeNum = myInfo.my_node_num,
+                    deviceId = deviceId,
+                )
+                Logger.d {
+                    "[DeviceAssociation] fresh-identity node=${myInfo.my_node_num} " +
+                        "deviceIdPresent=${deviceId != null}"
+                }
+                nodeManager.setFirmwareEdition(myInfo.firmware_edition)
+                applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
 
-        // Bump the generation so that a pending clear from a prior (interrupted) handshake
-        // will see a stale snapshot and skip its writes, preventing it from wiping config
-        // that was saved by this (newer) handshake's incoming packets.
-        val gen = handshakeGeneration.incrementAndGet()
-
-        // Clear persisted radio config so the new handshake starts from a clean slate.
-        // DataStore serializes its own writes, so the clear will precede subsequent
-        // setLocalConfig / updateChannelSettings calls dispatched by later packets in this
-        // session (handleFromRadio processes packets sequentially, so later dispatches always
-        // occur after this one returns).
-        scope.handledLaunch {
-            if (handshakeGeneration.value != gen) return@handledLaunch // Stale handshake; skip.
-            radioConfigRepository.clearChannelSet()
-            radioConfigRepository.clearLocalConfig()
-            radioConfigRepository.clearLocalModuleConfig()
-            radioConfigRepository.clearDeviceUIConfig()
-            radioConfigRepository.clearFileManifest()
-            radioConfigRepository.clearLoraRegionPresetMap()
-        }
-        connectionManager.value.onHandshakeProgress()
-    }
-
-    override fun handleLocalMetadata(metadata: DeviceMetadata) {
-        Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
-        val state = handshakeState.value
-        if (state is HandshakeState.ReceivingConfig) {
-            handshakeState.value = state.copy(metadata = metadata)
-            // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
-            // but the DB write does not need to wait until then.
-            if (metadata != DeviceMetadata()) {
-                scope.handledLaunch { nodeRepository.insertMetadata(state.rawMyNodeInfo.my_node_num, metadata) }
-            }
-            connectionManager.value.onHandshakeProgress()
-        } else {
-            Logger.w { "Ignoring metadata outside Stage 1 (state=$state)" }
-        }
-    }
-
-    override fun handleNodeInfo(info: NodeInfo) {
-        val state = handshakeState.value
-        when (state) {
-            is HandshakeState.ReceivingConfig -> {
-                Logger.d { "Buffering NodeInfo received during Stage 1" }
-                handshakeState.value = state.copy(earlyNodes = state.earlyNodes.withNodeInfo(info))
+                // Bump the generation so a pending clear from an interrupted handshake cannot wipe config saved by
+                // this newer session. The async clear also rechecks transport authority before touching persistence.
+                clearGeneration = handshakeGeneration.incrementAndGet()
                 connectionManager.value.onHandshakeProgress()
             }
+        if (!admitted) {
+            Logger.d { "[DeviceAssociation] discard stale MyNodeInfo gen=${session.generation}" }
+            return
+        }
 
-            is HandshakeState.ReceivingNodeInfo -> {
-                handshakeState.value = state.copy(nodes = state.nodes.withNodeInfo(info))
-                connectionManager.value.onHandshakeProgress()
+        val gen = checkNotNull(clearGeneration)
+        // Queue on the serialized session-operation lane before returning to the FIFO frame consumer. Without
+        // UNDISPATCHED, a later config frame can queue its persistence first and then be erased by this reset.
+        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+            runWhileForSession(session) {
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearChannelSet()
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearLocalConfig()
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearLocalModuleConfig()
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearDeviceUIConfig()
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearFileManifest()
+                if (handshakeGeneration.value != gen) return@runWhileForSession
+                radioConfigRepository.clearLoraRegionPresetMap()
             }
-
-            else -> Logger.w { "Ignoring NodeInfo outside active handshake (state=$state)" }
         }
     }
 
-    override fun handleFileInfo(info: FileInfo) {
-        Logger.d { "FileInfo received: ${info.file_name} (${info.size_bytes} bytes)" }
-        scope.handledLaunch { radioConfigRepository.addFileInfo(info) }
-        connectionManager.value.onHandshakeProgress()
+    override fun handleLocalMetadata(metadata: DeviceMetadata, session: RadioSessionContext): Boolean {
+        var handled = false
+        var metadataNodeNum: Int? = null
+        val admitted =
+            runForSession(session) {
+                Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
+                val state = handshakeState.value
+                if (state is HandshakeState.ReceivingConfig && state.belongsTo(session)) {
+                    handled = true
+                    handshakeState.value = state.copy(metadata = metadata)
+                    // Persist the metadata immediately, but never let a queued old-session write target the next
+                    // session's selected database.
+                    if (metadata != DeviceMetadata()) {
+                        metadataNodeNum = state.rawMyNodeInfo.my_node_num
+                    }
+                    connectionManager.value.onHandshakeProgress()
+                } else {
+                    Logger.w {
+                        "Ignoring metadata outside the owning Stage 1 session (state=${state.diagnosticName()})"
+                    }
+                }
+            }
+        metadataNodeNum?.let { nodeNum ->
+            scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+                runWhileForSession(session) { nodeRepository.insertMetadata(nodeNum, metadata) }
+            }
+        }
+        if (!admitted) Logger.d { "Discarding metadata from stale transport session" }
+        return admitted && handled
     }
 
-    override fun triggerWantConfig() {
-        connectionManager.value.startConfigOnly()
+    override fun handleNodeInfo(info: NodeInfo, session: RadioSessionContext): Boolean {
+        var handled = false
+        val admitted =
+            runForSession(session) {
+                val state = handshakeState.value
+                when (state) {
+                    is HandshakeState.ReceivingConfig -> {
+                        if (state.belongsTo(session)) {
+                            handled = true
+                            Logger.d { "Buffering NodeInfo received during Stage 1" }
+                            handshakeState.value = state.copy(earlyNodes = state.earlyNodes.withNodeInfo(info))
+                            connectionManager.value.onHandshakeProgress()
+                        } else {
+                            Logger.w { "Ignoring NodeInfo from a session that does not own Stage 1" }
+                        }
+                    }
+
+                    is HandshakeState.ReceivingNodeInfo -> {
+                        if (state.belongsTo(session)) {
+                            handled = true
+                            handshakeState.value = state.copy(nodes = state.nodes.withNodeInfo(info))
+                            connectionManager.value.onHandshakeProgress()
+                        } else {
+                            Logger.w { "Ignoring NodeInfo from a session that does not own Stage 2" }
+                        }
+                    }
+
+                    else -> Logger.w { "Ignoring NodeInfo outside active handshake (state=${state.diagnosticName()})" }
+                }
+            }
+        if (!admitted) Logger.d { "Discarding NodeInfo from stale transport session" }
+        return admitted && handled
+    }
+
+    override fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean {
+        val admitted =
+            runForSession(session) {
+                Logger.d { "FileInfo received: ${info.file_name} (${info.size_bytes} bytes)" }
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+                runWhileForSession(session) { radioConfigRepository.addFileInfo(info) }
+            }
+        }
+        if (!admitted) Logger.d { "Discarding FileInfo from stale transport session" }
+        return admitted
+    }
+
+    override fun triggerWantConfig(session: RadioSessionContext): Boolean {
+        val admitted = runForSession(session) { connectionManager.value.startConfigOnly() }
+        if (!admitted) Logger.d { "Discarding reboot handshake trigger from stale transport session" }
+        return admitted
     }
 
     /**

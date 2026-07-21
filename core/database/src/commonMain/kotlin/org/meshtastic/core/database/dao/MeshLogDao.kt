@@ -20,11 +20,24 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Transaction
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.database.DatabaseConstants.SQLITE_MAX_BIND_PARAMETERS
 import org.meshtastic.core.database.entity.MeshLog
 
 @Dao
+@Suppress("TooManyFunctions")
 interface MeshLogDao {
+
+    companion object {
+        /** Shared SQL for querying logs by from_num and port_num, used by both Flow and snapshot variants. */
+        private const val LOGS_FROM_QUERY =
+            """
+            SELECT * FROM log
+            WHERE from_num = :fromNum AND (:portNum = -1 OR port_num = :portNum)
+            ORDER BY received_date DESC LIMIT :maxItem
+            """
+    }
 
     @Query("SELECT * FROM log ORDER BY received_date DESC LIMIT :maxItem")
     fun getAllLogs(maxItem: Int): Flow<List<MeshLog>>
@@ -37,13 +50,7 @@ interface MeshLogDao {
      *
      * @param portNum If -1, returns all logs regardless of port. If 0, returns logs with port 0.
      */
-    @Query(
-        """
-        SELECT * FROM log 
-        WHERE from_num = :fromNum AND (:portNum = -1 OR port_num = :portNum)
-        ORDER BY received_date DESC LIMIT :maxItem
-        """,
-    )
+    @Query(LOGS_FROM_QUERY)
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
     @Insert suspend fun insert(log: MeshLog)
@@ -72,4 +79,50 @@ interface MeshLogDao {
 
     @Query("DELETE FROM log WHERE received_date < :cutoffTimestamp")
     suspend fun deleteOlderThan(cutoffTimestamp: Long)
+
+    /**
+     * Suspend snapshot variant of [getLogsFrom] for one-shot reads (no Flow observer overhead). Used when a caller
+     * needs to read-then-process-then-delete in two steps — the selection requires Kotlin parsing so it stays outside
+     * the delete transaction, but the delete itself is atomic (see [deleteLogsByUuidAtomic]).
+     */
+    @Query(LOGS_FROM_QUERY)
+    suspend fun getLogsSnapshot(fromNum: Int, portNum: Int, maxItem: Int): List<MeshLog>
+
+    /**
+     * Returns one deterministic keyset page for bounded snapshot processing. [beforeReceivedDate] and [beforeUuid]
+     * identify the last row of the previous page; null values start from the newest row.
+     */
+    @Query(
+        """
+        SELECT * FROM log
+        WHERE from_num = :fromNum
+          AND (:portNum = -1 OR port_num = :portNum)
+          AND (
+            :beforeReceivedDate IS NULL
+            OR received_date < :beforeReceivedDate
+            OR (received_date = :beforeReceivedDate AND uuid < :beforeUuid)
+          )
+        ORDER BY received_date DESC, uuid DESC
+        LIMIT :pageSize
+        """,
+    )
+    suspend fun getLogsSnapshotPage(
+        fromNum: Int,
+        portNum: Int,
+        beforeReceivedDate: Long?,
+        beforeUuid: String?,
+        pageSize: Int,
+    ): List<MeshLog>
+
+    /**
+     * Atomically deletes all logs matching [uuids], chunking internally to stay under SQLite's bind-parameter limit.
+     * The entire batch is all-or-nothing: a failure rolls back every chunk.
+     */
+    @Transaction
+    suspend fun deleteLogsByUuidAtomic(uuids: List<String>) {
+        if (uuids.isEmpty()) return
+        for (chunk in uuids.chunked(SQLITE_MAX_BIND_PARAMETERS)) {
+            deleteLogsByUuid(chunk)
+        }
+    }
 }

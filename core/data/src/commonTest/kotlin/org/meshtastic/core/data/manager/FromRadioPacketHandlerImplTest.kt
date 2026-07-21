@@ -17,10 +17,15 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -28,6 +33,9 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.core.testing.FakeLockdownCoordinator
@@ -42,6 +50,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.XModem
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,11 +69,35 @@ class FromRadioPacketHandlerImplTest {
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
     private val lockdownCoordinator = FakeLockdownCoordinator()
     private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
+    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
+    private val sessionLease =
+        object : RadioSessionLease {
+            override val session: RadioSessionContext = this@FromRadioPacketHandlerImplTest.session
+
+            override fun isCurrent(): Boolean = true
+        }
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
     @BeforeTest
     fun setup() {
+        every { radioInterfaceService.runIfSessionActive(session, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as () -> Unit
+                block()
+                true
+            }
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as suspend (RadioSessionLease) -> Unit
+                block(sessionLease)
+                true
+            }
+        every { configFlowManager.handleNodeInfo(any(), any()) } returns true
+        every { configFlowManager.handleConfigComplete(any(), any()) } returns true
         handler =
             FromRadioPacketHandlerImpl(
                 serviceRepository,
@@ -76,17 +109,20 @@ class FromRadioPacketHandlerImplTest {
                 notificationManager,
                 lockdownCoordinator,
                 firmwareUpdateStatusRepository,
+                radioInterfaceService,
             )
     }
+
+    private fun handle(proto: FromRadio) = handler.handleFromRadio(proto, session)
 
     @Test
     fun `handleFromRadio routes MY_INFO to configFlowManager`() {
         val myInfo = MyNodeInfo(my_node_num = 1234)
         val proto = FromRadio(my_info = myInfo)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configFlowManager.handleMyInfo(myInfo) }
+        verify { configFlowManager.handleMyInfo(myInfo, session) }
     }
 
     @Test
@@ -94,9 +130,9 @@ class FromRadioPacketHandlerImplTest {
         val metadata = DeviceMetadata(firmware_version = "v1.0")
         val proto = FromRadio(metadata = metadata)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configFlowManager.handleLocalMetadata(metadata) }
+        verify { configFlowManager.handleLocalMetadata(metadata, session) }
     }
 
     @Test
@@ -106,9 +142,9 @@ class FromRadioPacketHandlerImplTest {
 
         every { configFlowManager.newNodeCount } returns 1
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configFlowManager.handleNodeInfo(nodeInfo) }
+        verify { configFlowManager.handleNodeInfo(nodeInfo, session) }
         verify { serviceRepository.setConnectionProgress("Nodes (1)") }
     }
 
@@ -117,10 +153,77 @@ class FromRadioPacketHandlerImplTest {
         val nonce = 69420
         val proto = FromRadio(config_complete_id = nonce)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configFlowManager.handleConfigComplete(nonce) }
+        verify { configFlowManager.handleConfigComplete(nonce, session) }
         assertTrue(lockdownCoordinator.configCompleteCalled)
+    }
+
+    @Test
+    fun `stale NODE_INFO does not update connection progress`() {
+        val nodeInfo = ProtoNodeInfo(num = 1234)
+        every { configFlowManager.handleNodeInfo(nodeInfo, session) } returns false
+
+        handle(FromRadio(node_info = nodeInfo))
+
+        verify { configFlowManager.handleNodeInfo(nodeInfo, session) }
+        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
+    }
+
+    @Test
+    fun `stale CONFIG_COMPLETE does not notify lockdown coordinator`() {
+        val nonce = 69420
+        every { configFlowManager.handleConfigComplete(nonce, session) } returns false
+
+        handle(FromRadio(config_complete_id = nonce))
+
+        verify { configFlowManager.handleConfigComplete(nonce, session) }
+        assertFalse(lockdownCoordinator.configCompleteCalled)
+    }
+
+    @Test
+    fun `revoked session skips node progress after handler returns`() {
+        val nodeInfo = ProtoNodeInfo(num = 1234)
+        var active = true
+        every { configFlowManager.handleNodeInfo(nodeInfo, session) } calls
+            {
+                active = false
+                true
+            }
+        every { radioInterfaceService.runIfSessionActive(session, any()) } calls
+            {
+                if (!active) {
+                    false
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    val block = it.args[1] as () -> Unit
+                    block()
+                    true
+                }
+            }
+
+        handle(FromRadio(node_info = nodeInfo))
+
+        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
+    }
+
+    @Test
+    fun `revoked session skips direct packet-dispatch branches`() {
+        every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
+        val proxyMessage = MqttClientProxyMessage(topic = "test/topic")
+        val queueStatus = QueueStatus(free = 10)
+        val xmodemPacket = XModem()
+        val lockdownStatus = LockdownStatus(state = LockdownStatus.State.LOCKED)
+
+        handle(FromRadio(mqttClientProxyMessage = proxyMessage))
+        handle(FromRadio(queueStatus = queueStatus))
+        handle(FromRadio(xmodemPacket = xmodemPacket))
+        handle(FromRadio(lockdown_status = lockdownStatus))
+
+        verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
+        verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
+        verify(mode = VerifyMode.exactly(0)) { xmodemManager.handleIncomingXModem(any()) }
+        assertEquals(null, lockdownCoordinator.lastStatus)
     }
 
     @Test
@@ -128,7 +231,7 @@ class FromRadioPacketHandlerImplTest {
         val lockdownStatus = LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "token_missing")
         val proto = FromRadio(lockdown_status = lockdownStatus)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
         assertEquals(lockdownStatus, lockdownCoordinator.lastStatus)
     }
@@ -138,7 +241,7 @@ class FromRadioPacketHandlerImplTest {
         val queueStatus = QueueStatus(free = 10)
         val proto = FromRadio(queueStatus = queueStatus)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
         verify { packetHandler.handleQueueStatus(queueStatus) }
     }
@@ -148,9 +251,9 @@ class FromRadioPacketHandlerImplTest {
         val config = Config(lora = Config.LoRaConfig(use_preset = true))
         val proto = FromRadio(config = config)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configHandler.handleDeviceConfig(config) }
+        verify { configHandler.handleDeviceConfig(config, session) }
     }
 
     @Test
@@ -158,9 +261,9 @@ class FromRadioPacketHandlerImplTest {
         val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
         val proto = FromRadio(moduleConfig = moduleConfig)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configHandler.handleModuleConfig(moduleConfig) }
+        verify { configHandler.handleModuleConfig(moduleConfig, session) }
     }
 
     @Test
@@ -168,9 +271,9 @@ class FromRadioPacketHandlerImplTest {
         val channel = Channel(index = 0)
         val proto = FromRadio(channel = channel)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configHandler.handleChannel(channel) }
+        verify { configHandler.handleChannel(channel, session) }
     }
 
     @Test
@@ -178,9 +281,9 @@ class FromRadioPacketHandlerImplTest {
         val map = LoRaRegionPresetMap()
         val proto = FromRadio(region_presets = map)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
-        verify { configHandler.handleRegionPresets(map) }
+        verify { configHandler.handleRegionPresets(map, session) }
     }
 
     @Test
@@ -188,7 +291,7 @@ class FromRadioPacketHandlerImplTest {
         val proxyMsg = MqttClientProxyMessage(topic = "test/topic")
         val proto = FromRadio(mqttClientProxyMessage = proxyMsg)
 
-        handler.handleFromRadio(proto)
+        handle(proto)
 
         verify { mqttManager.handleMqttProxyMessage(proxyMsg) }
     }
@@ -201,12 +304,34 @@ class FromRadioPacketHandlerImplTest {
         // Note: getString() from Compose Resources requires Skiko native lib which
         // is not available in headless JVM tests. We test the parts that don't trigger it.
         try {
-            handler.handleFromRadio(proto)
+            handle(proto)
         } catch (_: Throwable) {
             // Expected: Skiko can't load in headless JVM/native
         }
 
         verify { serviceRepository.setClientNotification(notification) }
+    }
+
+    @Test
+    fun `stale client notification is discarded before publication`() {
+        val notification = ClientNotification(message = "stale")
+        every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
+
+        handle(FromRadio(clientNotification = notification))
+
+        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
+    fun `client alert is skipped when the session retires after publication`() {
+        val notification = ClientNotification(message = "retired")
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+
+        handle(FromRadio(clientNotification = notification))
+
+        verify { serviceRepository.setClientNotification(notification) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
     }
 
     @Test

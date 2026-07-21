@@ -39,6 +39,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -222,6 +223,43 @@ class DatabaseMergerTest {
             dest.discoveryDao().getDiscoveredNodes(presets.first().id).size,
             "node appended under rewired preset id",
         )
+    }
+
+    @Test
+    fun staleAssociationAtCommitRollsBackEntireMerge() = runTest {
+        source.nodeInfoDao().setMyNodeInfo(myNode())
+        source.packetDao().insert(textPacket("0!broadcast", "must-not-commit", time = 200))
+
+        var authorityChecks = 0
+        assertFailsWith<StaleAssociationException> {
+            DatabaseMerger.merge(
+                source = source,
+                dest = dest,
+                sourceName = sourceName,
+                isAssociationActive = { authorityChecks++ == 0 },
+            )
+        }
+
+        assertEquals(2, authorityChecks, "authority is revalidated immediately before commit")
+        assertTrue(dest.packetDao().getAllPacketsSnapshot().isEmpty(), "stale merge writes must roll back")
+        assertTrue(!dest.mergeMarkerDao().isMerged(sourceName), "stale merge marker must roll back")
+    }
+
+    @Test
+    fun alreadyMergedPathRechecksAssociationAuthority() = runTest {
+        DatabaseMerger.merge(source, dest, sourceName)
+        var authorityChecks = 0
+
+        assertFailsWith<StaleAssociationException> {
+            DatabaseMerger.merge(
+                source = source,
+                dest = dest,
+                sourceName = sourceName,
+                isAssociationActive = { authorityChecks++ == 0 },
+            )
+        }
+
+        assertEquals(2, authorityChecks, "already-merged path must revalidate authority before returning")
     }
 
     /**

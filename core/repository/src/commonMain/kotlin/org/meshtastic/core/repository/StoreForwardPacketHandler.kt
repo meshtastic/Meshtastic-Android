@@ -28,12 +28,17 @@ interface StoreForwardPacketHandler {
      * @param dataPacket The decoded data packet.
      * @param myNodeNum The local node number.
      */
-    fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int)
+    fun handleStoreAndForward(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext? = null,
+    )
 
     /**
      * Handles a Store Forward++ packet.
      *
      * @param packet The received mesh packet.
      */
-    fun handleStoreForwardPlusPlus(packet: MeshPacket)
+    fun handleStoreForwardPlusPlus(packet: MeshPacket, session: RadioSessionContext? = null)
 }

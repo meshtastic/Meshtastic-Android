@@ -28,15 +28,17 @@ import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.database.DatabaseConstants.SQLITE_MAX_BIND_PARAMETERS
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.ChannelSettings
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 @Dao
 interface PacketDao {
 
@@ -574,6 +576,167 @@ interface PacketDao {
 
     @Query("UPDATE packet SET show_translated = :show WHERE uuid = :uuid")
     suspend fun setShowTranslated(uuid: Long, show: Boolean)
+
+    // region ── Atomic read-modify-write transactions ──
+
+    /**
+     * Atomically updates the last-read message pointer for [contact], preserving the monotonic-timestamp guard: if
+     * [lastReadTimestamp] is not newer than the stored value, the method is a no-op. Creates the contact-settings row
+     * if absent. Uses INSERT OR IGNORE + conditional UPDATE instead of a read-then-@Upsert so the existing row's
+     * unrelated columns (muteUntil, filteringDisabled) are preserved without a Kotlin-side read-modify-write.
+     */
+    @Transaction
+    suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) {
+        insertContactSettingsIgnore(listOf(ContactSettings(contact_key = contact)))
+        updateLastReadMessageIfNewer(contact, messageUuid, lastReadTimestamp)
+    }
+
+    /**
+     * Conditional UPDATE that only writes newer timestamps. Callers must ensure the contact-settings row exists (e.g.
+     * via [insertContactSettingsIgnore]) before calling this inside the same transaction.
+     *
+     * Returns the affected row count (1 = updated, 0 = no-op) for testability; callers outside tests typically ignore
+     * it.
+     */
+    @Query(
+        """
+        UPDATE contact_settings
+        SET last_read_message_uuid = :messageUuid,
+            last_read_message_timestamp = :lastReadTimestamp
+        WHERE contact_key = :contact
+          AND (
+              last_read_message_timestamp IS NULL
+              OR last_read_message_timestamp < :lastReadTimestamp
+          )
+        """,
+    )
+    suspend fun updateLastReadMessageIfNewer(contact: String, messageUuid: Long, lastReadTimestamp: Long): Int
+
+    /**
+     * Atomically finds a packet by identity key (id + from + to) and updates its data, optionally stamping
+     * [routingError] when it is non-negative. Mirrors the existing [updateMessageStatus] / [updateMessageId] pattern.
+     */
+    @Transaction
+    suspend fun updatePacketByKey(data: DataPacket, routingError: Int) {
+        findPacketsWithId(data.id)
+            .filter { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
+            .forEach { existing ->
+                val updated =
+                    if (routingError >= 0) {
+                        existing.copy(data = data, routingError = routingError)
+                    } else {
+                        existing.copy(data = data)
+                    }
+                update(updated)
+            }
+    }
+
+    /**
+     * Atomically finds reactions by [replacement]'s packetId + userId + emoji and updates every ownership-scoped copy,
+     * borrowing [myNodeNum][ReactionEntity.myNodeNum] from each existing row. No-op if no match is found.
+     */
+    @Transaction
+    suspend fun updateReactionByKey(replacement: ReactionEntity) {
+        findReactionsWithId(replacement.packetId)
+            .filter { it.userId == replacement.userId && it.emoji == replacement.emoji }
+            .forEach { existing ->
+                // myNodeNum is part of the composite PK and must come from each existing row.
+                update(replacement.copy(myNodeNum = existing.myNodeNum))
+            }
+    }
+
+    // ── SFPP helpers: shared no-downgrade guard + timestamp resolution used by both applySFPPStatus and
+    //     applySFPPStatusByHash. Extracted so a future status-guard change only touches one predicate.
+    private fun MessageStatus.isDowngradeFrom(current: MessageStatus?) =
+        current == MessageStatus.SFPP_CONFIRMED && this == MessageStatus.SFPP_ROUTING
+
+    private fun resolveNewTime(rxTime: Long, fallback: Long) = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else fallback
+
+    /**
+     * Atomically applies an SFPP delivery-status transition to every packet and reaction matching [packetId] + address
+     * ([from]/[to]). Preserves the no-downgrade invariant: an item already
+     * [SFPP_CONFIRMED][MessageStatus.SFPP_CONFIRMED] is not regressed to [SFPP_ROUTING][MessageStatus.SFPP_ROUTING].
+     * All updates land in one transaction so a packet and its reactions cannot end up in inconsistent delivery states.
+     */
+    @Suppress("CyclomaticComplexMethod", "LongParameterList")
+    @Transaction
+    suspend fun applySFPPStatus(
+        packetId: Int,
+        from: Int,
+        to: Int,
+        hash: ByteString,
+        status: MessageStatus,
+        rxTime: Long,
+        myNodeNum: Int?,
+    ) {
+        val packets = findPacketsWithId(packetId)
+        val reactions = findReactionsWithId(packetId)
+        val fromId = NodeAddress.numToDefaultId(from)
+        val isFromLocalNode = myNodeNum != null && from == myNodeNum
+        val toId =
+            if (to == 0 || to == NodeAddress.NODENUM_BROADCAST) {
+                NodeAddress.ID_BROADCAST
+            } else {
+                NodeAddress.numToDefaultId(to)
+            }
+
+        packets.forEach { packet ->
+            val fromMatches =
+                packet.data.from == fromId || (isFromLocalNode && packet.data.from == NodeAddress.ID_LOCAL)
+            if (fromMatches && packet.data.to == toId) {
+                if (status.isDowngradeFrom(packet.data.status)) return@forEach
+                val newTime = resolveNewTime(rxTime, packet.received_time)
+                val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+                update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+            }
+        }
+
+        reactions.forEach { reaction ->
+            val fromMatches = reaction.userId == fromId || (isFromLocalNode && reaction.userId == NodeAddress.ID_LOCAL)
+            if (fromMatches && (reaction.to == null || reaction.to == toId)) {
+                if (status.isDowngradeFrom(reaction.status)) return@forEach
+                val newTime = resolveNewTime(rxTime, reaction.timestamp)
+                update(reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime))
+            }
+        }
+    }
+
+    /**
+     * Atomically applies an SFPP delivery-status transition to the single packet and single reaction matching [hash]
+     * (8-byte prefix). Same no-downgrade invariant as [applySFPPStatus]. Both updates land in one transaction.
+     */
+    @Transaction
+    suspend fun applySFPPStatusByHash(hash: ByteString, status: MessageStatus, rxTime: Long) {
+        findPacketBySfppHash(hash)?.let { packet ->
+            if (status.isDowngradeFrom(packet.data.status)) return@let
+            val newTime = resolveNewTime(rxTime, packet.received_time)
+            val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+            update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+        }
+        findReactionBySfppHash(hash)?.let { reaction ->
+            if (status.isDowngradeFrom(reaction.status)) return@let
+            val newTime = resolveNewTime(rxTime, reaction.timestamp)
+            update(reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime))
+        }
+    }
+
+    /**
+     * Atomically deletes all messages (and their reactions) for the given [uuidList], chunking internally to stay under
+     * SQLite's bind-parameter limit. The entire batch is all-or-nothing: a failure rolls back every chunk.
+     */
+    @Transaction
+    suspend fun deleteMessagesAtomic(uuidList: List<Long>) {
+        if (uuidList.isEmpty()) return
+        for (chunk in uuidList.chunked(SQLITE_MAX_BIND_PARAMETERS)) {
+            deleteMessages(chunk)
+        }
+    }
+
+    // endregion
+
+    companion object {
+        private const val MILLIS_PER_SECOND = 1000L
+    }
 
     // region ── FTS5 Search ──
 

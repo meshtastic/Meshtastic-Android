@@ -17,7 +17,9 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -29,6 +31,8 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -44,6 +48,7 @@ class MeshConfigHandlerImpl(
     private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
+    private val radioInterfaceService: RadioInterfaceService,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigHandler {
 
@@ -58,51 +63,112 @@ class MeshConfigHandlerImpl(
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }
 
-    override fun handleDeviceConfig(config: Config) {
-        Logger.d { "Device config received: ${config.summarize()}" }
-        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        serviceStateWriter.setConnectionProgress("Device config received")
-        connectionManager.value.onHandshakeProgress()
-    }
+    private fun runForSession(session: RadioSessionContext, block: () -> Unit): Boolean =
+        radioInterfaceService.runIfSessionActive(session, block)
 
-    override fun handleModuleConfig(config: ModuleConfig) {
-        Logger.d { "Module config received: ${config.summarize()}" }
-        scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        serviceStateWriter.setConnectionProgress("Module config received")
+    private suspend fun runWhileForSession(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
+        radioInterfaceService.runWhileSessionActive(session, block)
 
-        config.statusmessage?.let { sm ->
-            nodeManager.myNodeNum.value?.let { num -> nodeManager.updateNodeStatus(num, sm.node_status) }
+    override fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean {
+        val admitted =
+            runForSession(session) {
+                Logger.d { "Device config received: ${config.summarize()}" }
+                serviceStateWriter.setConnectionProgress("Device config received")
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            launchPersistenceForSession(session) { radioConfigRepository.setLocalConfig(config) }
         }
-        connectionManager.value.onHandshakeProgress()
+        if (!admitted) Logger.d { "Discarding device config from stale transport session" }
+        return admitted
     }
 
-    override fun handleChannel(channel: Channel) {
-        // We always want to save channel settings we receive from the radio
-        scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
-
-        // Update status message if we have node info, otherwise use a generic one
-        val mi = nodeManager.getMyNodeInfo()
-        val index = channel.index
-        if (mi != null) {
-            serviceStateWriter.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
-        } else {
-            serviceStateWriter.setConnectionProgress("Channels (${index + 1})")
+    override fun handleModuleConfig(config: ModuleConfig, session: RadioSessionContext): Boolean {
+        var statusUpdate: Pair<Int, String?>? = null
+        val admitted =
+            runForSession(session) {
+                statusUpdate =
+                    config.statusmessage?.let { status ->
+                        nodeManager.myNodeNum.value?.let { nodeNum -> nodeNum to status.node_status }
+                    }
+                Logger.d { "Module config received: ${config.summarize()}" }
+                serviceStateWriter.setConnectionProgress("Module config received")
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            launchPersistenceForSession(session) {
+                radioConfigRepository.setLocalModuleConfig(config)
+                statusUpdate?.let { (nodeNum, status) ->
+                    try {
+                        nodeManager.updateNodeStatusAndPersist(nodeNum, status)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        Logger.w(e) { "Node status persistence failed after module config was persisted" }
+                    }
+                }
+            }
         }
-        connectionManager.value.onHandshakeProgress()
+        if (!admitted) Logger.d { "Discarding module config from stale transport session" }
+        return admitted
     }
 
-    override fun handleDeviceUIConfig(config: DeviceUIConfig) {
-        Logger.d { "DeviceUI config received" }
-        scope.handledLaunch { radioConfigRepository.setDeviceUIConfig(config) }
-        // deviceuiConfig arrives during Stage 1 immediately after my_info. It proves the transport
-        // is alive, so surface it as handshake progress — without this, a long gap before the next
-        // meaningful packet could falsely trip the fast-path watchdog on TCP/USB.
-        connectionManager.value.onHandshakeProgress()
+    override fun handleChannel(channel: Channel, session: RadioSessionContext): Boolean {
+        val admitted =
+            runForSession(session) {
+                // Update status message if we have node info, otherwise use a generic one.
+                val mi = nodeManager.getMyNodeInfo()
+                val index = channel.index
+                if (mi != null) {
+                    serviceStateWriter.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
+                } else {
+                    serviceStateWriter.setConnectionProgress("Channels (${index + 1})")
+                }
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            // We always want to save channel settings we receive from the radio.
+            launchPersistenceForSession(session) { radioConfigRepository.updateChannelSettings(channel) }
+        }
+        if (!admitted) Logger.d { "Discarding channel config from stale transport session" }
+        return admitted
     }
 
-    override fun handleRegionPresets(map: LoRaRegionPresetMap) {
-        Logger.d { "Region presets received (${map.region_groups.size} regions, ${map.groups.size} groups)" }
-        scope.handledLaunch { radioConfigRepository.setLoraRegionPresetMap(map) }
+    override fun handleDeviceUIConfig(config: DeviceUIConfig, session: RadioSessionContext): Boolean {
+        val admitted =
+            runForSession(session) {
+                Logger.d { "DeviceUI config received" }
+                // deviceuiConfig arrives during Stage 1 immediately after my_info. It proves the transport
+                // is alive, so surface it as handshake progress — without this, a long gap before the next
+                // meaningful packet could falsely trip the fast-path watchdog on TCP/USB.
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            launchPersistenceForSession(session) { radioConfigRepository.setDeviceUIConfig(config) }
+        }
+        if (!admitted) Logger.d { "Discarding DeviceUI config from stale transport session" }
+        return admitted
+    }
+
+    override fun handleRegionPresets(map: LoRaRegionPresetMap, session: RadioSessionContext): Boolean {
+        val admitted =
+            runForSession(session) {
+                Logger.d { "Region presets received (${map.region_groups.size} regions, ${map.groups.size} groups)" }
+                connectionManager.value.onHandshakeProgress()
+            }
+        if (admitted) {
+            launchPersistenceForSession(session) { radioConfigRepository.setLoraRegionPresetMap(map) }
+        }
+        if (!admitted) Logger.d { "Discarding region presets from stale transport session" }
+        return admitted
+    }
+
+    /**
+     * Queues handshake persistence on the serialized session-operation lane before the FIFO consumer admits the next
+     * packet.
+     */
+    private fun launchPersistenceForSession(session: RadioSessionContext, block: suspend () -> Unit) {
+        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) { runWhileForSession(session, block) }
     }
 }
 

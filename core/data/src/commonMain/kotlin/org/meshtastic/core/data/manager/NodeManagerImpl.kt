@@ -23,7 +23,10 @@ import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -33,10 +36,13 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
@@ -47,6 +53,7 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import kotlinx.coroutines.flow.update as updateStateFlow
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -56,8 +63,15 @@ import org.meshtastic.proto.Position as ProtoPosition
 class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
     private val notificationManager: NotificationManager,
+    private val radioInterfaceService: RadioInterfaceService,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeManager {
+
+    // Fixed stripes bound mutex lifetime while preserving same-node ordering; hash collisions only reduce parallelism.
+    private val nodePersistenceLanes = List(NODE_PERSISTENCE_LANE_COUNT) { Mutex() }
+
+    private fun persistenceLane(nodeNum: Int): Mutex =
+        nodePersistenceLanes[(nodeNum.toLong() and Int.MAX_VALUE.toLong()).toInt() % nodePersistenceLanes.size]
 
     // Two indices over the same node set: byNum is the canonical store (mesh-level identifier), byId is a secondary
     // O(1) lookup for the user-facing hex string. Both are held in a single atomic ref so updates are observed
@@ -130,6 +144,23 @@ class NodeManagerImpl(
         myDeviceId.value = id
     }
 
+    private val _connectionIdentity = MutableStateFlow<ConnectionIdentity?>(null)
+    override val connectionIdentity: StateFlow<ConnectionIdentity?> = _connectionIdentity
+
+    override fun clearConnectionIdentity() {
+        _connectionIdentity.value = null
+    }
+
+    override fun clearStaleConnectionIdentity(activeSessionGeneration: Long) {
+        _connectionIdentity.updateStateFlow { identity ->
+            identity?.takeIf { it.sessionGeneration == activeSessionGeneration }
+        }
+    }
+
+    override fun publishConnectionIdentity(sessionGeneration: Long, address: String, nodeNum: Int, deviceId: String?) {
+        _connectionIdentity.value = ConnectionIdentity(sessionGeneration, address, nodeNum, deviceId)
+    }
+
     override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
 
     override fun setFirmwareEdition(edition: FirmwareEdition?) {
@@ -137,10 +168,15 @@ class NodeManagerImpl(
     }
 
     companion object {
+        private const val NODE_PERSISTENCE_LANE_COUNT = 64
+
         private const val TIME_MS_TO_S = 1000L
     }
 
     override fun loadCachedNodeDB() {
+        // NOTE: this method intentionally does NOT touch _connectionIdentity. The connection-session identity is
+        // only populated by a fresh MyNodeInfo handshake (see publishConnectionIdentity); restoring it from cache
+        // would re-introduce the stale-identity association bug across transport switches.
         scope.handledLaunch {
             val nodes = nodeRepository.nodeDBbyNum.first()
             nodeIndex.value = NodeIndex.fromByNum(nodes)
@@ -157,6 +193,7 @@ class NodeManagerImpl(
         myNodeNum.value = null
         myDeviceId.value = null
         firmwareEdition.value = null
+        _connectionIdentity.value = null
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
@@ -203,30 +240,72 @@ class NodeManagerImpl(
             Node(num = n, user = defaultUser, channel = channel)
         }
 
-    override fun updateNode(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
-        // Perform read + transform inside update{} to ensure atomicity.
-        // Without this, concurrent calls for the same nodeNum could read the same snapshot
-        // and the last writer would silently overwrite the other's changes.
-        var next: Node? = null
-        nodeIndex.update { index ->
-            val current = index.byNum[nodeNum] ?: getOrCreateNode(nodeNum, channel)
-            val transformed = transform(current)
-            next = transformed
-            index.put(nodeNum, transformed)
-        }
-        val result = next ?: return
+    private data class NodeStateChange(val previous: Node, val next: Node)
 
-        if (result.user.id.isNotEmpty() && isNodeDbReady.value) {
-            scope.handledLaunch { nodeRepository.upsert(result) }
+    private fun updateNodeState(nodeNum: Int, channel: Int, transform: (Node) -> Node): NodeStateChange {
+        // Compute the transform against one immutable snapshot and publish it with CAS. The transform may be retried,
+        // so it must remain side-effect free; callers perform notifications or other effects only after this returns.
+        while (true) {
+            val index = nodeIndex.value
+            val current = index.byNum[nodeNum] ?: getOrCreateNode(nodeNum, channel)
+            val next = transform(current)
+            if (nodeIndex.compareAndSet(index, index.put(nodeNum, next))) {
+                return NodeStateChange(previous = current, next = next)
+            }
         }
     }
 
-    override fun handleReceivedUser(fromNum: Int, p: User, channel: Int, manuallyVerified: Boolean) {
-        updateNode(fromNum) { node ->
-            val newNode = (node.isUnknownUser && p.hw_model != HardwareModel.UNSET)
-            val shouldPreserve = shouldPreserveExistingUser(node.user, p)
+    private fun shouldPersist(node: Node): Boolean =
+        node.user.id.isNotEmpty() && isNodeDbReady.value && allowNodeDbWrites.value
 
-            val next =
+    private fun updateNodeAndSchedulePersistence(
+        nodeNum: Int,
+        channel: Int,
+        session: RadioSessionContext? = null,
+        transform: (Node) -> Node,
+    ): NodeStateChange = updateNodeState(nodeNum, channel, transform).also { change ->
+        if (shouldPersist(change.next)) {
+            radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(nodeNum) }
+        }
+    }
+
+    override fun updateNode(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
+        updateNodeAndSchedulePersistence(nodeNum, channel, transform = transform)
+    }
+
+    override fun updateNodeForSession(
+        nodeNum: Int,
+        session: RadioSessionContext,
+        channel: Int,
+        transform: (Node) -> Node,
+    ) {
+        updateNodeAndSchedulePersistence(nodeNum, channel, session, transform)
+    }
+
+    override suspend fun updateNodeAndPersist(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
+        val result = updateNodeState(nodeNum, channel, transform).next
+        if (shouldPersist(result)) persistLatestNode(nodeNum)
+    }
+
+    /**
+     * Serializes persistence per node and reads the latest in-memory value inside that lane. A delayed earlier update
+     * therefore cannot overwrite a newer state after its repository write resumes.
+     */
+    private suspend fun persistLatestNode(nodeNum: Int) = persistenceLane(nodeNum).withLock {
+        val latest = nodeIndex.value.byNum[nodeNum] ?: return@withLock
+        if (shouldPersist(latest)) nodeRepository.upsert(latest)
+    }
+
+    override fun handleReceivedUser(
+        fromNum: Int,
+        p: User,
+        channel: Int,
+        manuallyVerified: Boolean,
+        session: RadioSessionContext?,
+    ) {
+        val change =
+            updateNodeAndSchedulePersistence(fromNum, channel, session) { node ->
+                val shouldPreserve = shouldPreserveExistingUser(node.user, p)
                 if (shouldPreserve) {
                     node.copy(channel = channel, manuallyVerified = manuallyVerified)
                 } else {
@@ -239,27 +318,37 @@ class NodeManagerImpl(
                         manuallyVerified = manuallyVerified,
                     )
                 }
-            if (newNode && !shouldPreserve) {
-                scope.handledLaunch {
-                    notificationManager.dispatch(
-                        Notification(
-                            title = getStringSuspend(Res.string.new_node_seen, next.user.short_name),
-                            message = next.user.long_name,
-                            category = Notification.Category.NodeEvent,
-                            id = next.num,
-                            // Path format must stay in sync with DEEP_LINK_BASE_URI + DeepLinkRouter
-                            // in core/navigation (avoided as a Gradle dep here to keep core/data free
-                            // of Compose Navigation libs).
-                            deepLinkUri = "meshtastic://meshtastic/nodes/${next.num}",
-                        ),
-                    )
-                }
             }
-            next
+        val shouldNotify =
+            change.previous.isUnknownUser &&
+                p.hw_model != HardwareModel.UNSET &&
+                !shouldPreserveExistingUser(change.previous.user, p)
+        if (shouldNotify) {
+            val node = change.next
+            radioInterfaceService.launchSessionWork(scope, session) {
+                notificationManager.dispatch(
+                    Notification(
+                        title = getStringSuspend(Res.string.new_node_seen, node.user.short_name),
+                        message = node.user.long_name,
+                        category = Notification.Category.NodeEvent,
+                        id = node.num,
+                        // Path format must stay in sync with DEEP_LINK_BASE_URI + DeepLinkRouter
+                        // in core/navigation (avoided as a Gradle dep here to keep core/data free
+                        // of Compose Navigation libs).
+                        deepLinkUri = "meshtastic://meshtastic/nodes/${node.num}",
+                    ),
+                )
+            }
         }
     }
 
-    override fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long) {
+    override fun handleReceivedPosition(
+        fromNum: Int,
+        myNodeNum: Int,
+        p: ProtoPosition,
+        defaultTime: Long,
+        session: RadioSessionContext?,
+    ) {
         val isZeroPos = (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0
         @Suppress("ComplexCondition")
         if (myNodeNum == fromNum && isZeroPos && p.sats_in_view == 0 && p.time == 0) {
@@ -267,7 +356,7 @@ class NodeManagerImpl(
             return
         }
 
-        updateNode(fromNum) { node ->
+        updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { node ->
             val rawPosTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
             val posTime = clampTimestampToNow(rawPosTime)
             val newLastHeard = maxOf(node.lastHeard, posTime)
@@ -302,57 +391,65 @@ class NodeManagerImpl(
         }
     }
 
-    override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount) {
-        updateNode(fromNum) { it.copy(paxcounter = p) }
+    override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount, session: RadioSessionContext?) {
+        updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { it.copy(paxcounter = p) }
     }
 
-    override fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
-        updateNodeStatus(fromNum, s.status)
-    }
-
-    override fun updateNodeStatus(nodeNum: Int, status: String?) {
-        updateNode(nodeNum) { it.copy(nodeStatus = status?.takeIf { s -> s.isNotEmpty() }) }
-    }
-
-    override fun installNodeInfo(info: ProtoNodeInfo) {
-        updateNode(info.num) { node ->
-            var next = node
-            val user = info.user
-            if (user != null) {
-                if (shouldPreserveExistingUser(node.user, user)) {
-                    // keep existing names
-                } else {
-                    var newUser =
-                        user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
-                    if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
-                        newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
-                    }
-                    next = next.copy(user = newUser, publicKey = newUser.public_key)
-                }
-            }
-            val position = info.position
-            if (position != null) {
-                val clampedPos = position.copy(time = clampTimestampToNow(position.time))
-                next = next.copy(position = clampedPos)
-            }
-            next =
-                next.copy(
-                    lastHeard = clampTimestampToNow(info.last_heard),
-                    deviceMetrics = info.device_metrics ?: next.deviceMetrics,
-                    channel = info.channel,
-                    viaMqtt = info.via_mqtt,
-                    hopsAway = info.hops_away ?: -1,
-                    isFavorite = info.is_favorite,
-                    isIgnored = info.is_ignored,
-                    isMuted = info.is_muted,
-                    signsPackets = info.has_xeddsa_signed,
-                )
-            next
+    override fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage, session: RadioSessionContext?) {
+        updateNodeAndSchedulePersistence(fromNum, channel = 0, session = session) { node ->
+            applyNodeStatus(node, s.status)
         }
     }
 
-    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
-        scope.handledLaunch { nodeRepository.insertMetadata(nodeNum, metadata) }
+    override fun updateNodeStatus(nodeNum: Int, status: String?) {
+        updateNode(nodeNum) { node -> applyNodeStatus(node, status) }
+    }
+
+    override suspend fun updateNodeStatusAndPersist(nodeNum: Int, status: String?) {
+        updateNodeAndPersist(nodeNum) { node -> applyNodeStatus(node, status) }
+    }
+
+    private fun applyNodeStatus(node: Node, status: String?): Node =
+        node.copy(nodeStatus = status?.takeIf { it.isNotEmpty() })
+
+    override fun installNodeInfo(info: ProtoNodeInfo) {
+        // Stage-2 configuration installation persists the full node snapshot through NodeRepository.installConfig.
+        // Keep this primitive in-memory so that handshake installation does not issue one redundant write per node.
+        updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info) }
+    }
+
+    override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
+        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info) }
+    }
+
+    private fun applyNodeInfo(node: Node, info: ProtoNodeInfo): Node {
+        var next = node
+        val user = info.user
+        if (user != null && !shouldPreserveExistingUser(node.user, user)) {
+            var newUser = user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
+            if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
+                newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
+            }
+            next = next.copy(user = newUser, publicKey = newUser.public_key)
+        }
+        info.position?.let { position ->
+            next = next.copy(position = position.copy(time = clampTimestampToNow(position.time)))
+        }
+        return next.copy(
+            lastHeard = clampTimestampToNow(info.last_heard),
+            deviceMetrics = info.device_metrics ?: next.deviceMetrics,
+            channel = info.channel,
+            viaMqtt = info.via_mqtt,
+            hopsAway = info.hops_away ?: -1,
+            isFavorite = info.is_favorite,
+            isIgnored = info.is_ignored,
+            isMuted = info.is_muted,
+            signsPackets = info.has_xeddsa_signed,
+        )
+    }
+
+    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata, session: RadioSessionContext?) {
+        radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.insertMetadata(nodeNum, metadata) }
     }
 
     private fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean {

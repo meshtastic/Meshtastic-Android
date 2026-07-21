@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import okio.ByteString
@@ -24,6 +25,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -47,6 +49,7 @@ class AdminPacketHandlerImplTest {
     private lateinit var handler: AdminPacketHandlerImpl
 
     private val myNodeNum = 12345
+    private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
 
     @BeforeTest
     fun setUp() {
@@ -64,6 +67,8 @@ class AdminPacketHandlerImplTest {
         return MeshPacket(from = from, decoded = Data(portnum = PortNum.ADMIN_APP, payload = payload))
     }
 
+    private fun handle(packet: MeshPacket) = handler.handleAdminMessage(packet, myNodeNum, session)
+
     // ---------- Session passkey ----------
 
     @Test
@@ -72,7 +77,7 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(session_passkey = passkey)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
         verify { sessionManager.recordSession(myNodeNum, passkey) }
     }
@@ -82,7 +87,7 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(session_passkey = ByteString.EMPTY)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
         // recordSession should NOT be called for empty passkey
     }
 
@@ -94,9 +99,9 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_config_response = config)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { configHandler.handleDeviceConfig(config) }
+        verify { configHandler.handleDeviceConfig(config, session) }
     }
 
     @Test
@@ -105,7 +110,7 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_config_response = config)
         val packet = makePacket(99999, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
         // configHandler.handleDeviceConfig should NOT be called
     }
 
@@ -117,9 +122,9 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_module_config_response = moduleConfig)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { configHandler.handleModuleConfig(moduleConfig) }
+        verify { configHandler.handleModuleConfig(moduleConfig, session) }
     }
 
     @Test
@@ -129,9 +134,9 @@ class AdminPacketHandlerImplTest {
         val remoteNode = 99999
         val packet = makePacket(remoteNode, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { nodeManager.updateNodeStatus(remoteNode, "Battery Low") }
+        verify { nodeManager.updateNodeForSession(remoteNode, session, channel = 0, transform = any()) }
     }
 
     @Test
@@ -140,8 +145,8 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_module_config_response = moduleConfig)
         val packet = makePacket(99999, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
-        // No crash, no updateNodeStatus call
+        handle(packet)
+        // No crash, no session-bound node update
     }
 
     // ---------- get_channel_response ----------
@@ -152,9 +157,9 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_channel_response = channel)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { configHandler.handleChannel(channel) }
+        verify { configHandler.handleChannel(channel, session) }
     }
 
     @Test
@@ -163,7 +168,7 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_channel_response = channel)
         val packet = makePacket(99999, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
         // configHandler.handleChannel should NOT be called
     }
 
@@ -175,9 +180,9 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(get_device_metadata_response = metadata)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { configFlowManager.handleLocalMetadata(metadata) }
+        verify { configFlowManager.handleLocalMetadata(metadata, session) }
     }
 
     @Test
@@ -187,9 +192,9 @@ class AdminPacketHandlerImplTest {
         val remoteNode = 99999
         val packet = makePacket(remoteNode, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
-        verify { nodeManager.insertMetadata(remoteNode, metadata) }
+        verify { nodeManager.insertMetadata(remoteNode, metadata, session) }
     }
 
     // ---------- Edge cases ----------
@@ -197,7 +202,7 @@ class AdminPacketHandlerImplTest {
     @Test
     fun `packet with null decoded payload is ignored`() {
         val packet = MeshPacket(from = myNodeNum, decoded = null)
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
         // No crash
     }
 
@@ -205,7 +210,7 @@ class AdminPacketHandlerImplTest {
     fun `packet with empty payload bytes is ignored`() {
         val packet =
             MeshPacket(from = myNodeNum, decoded = Data(portnum = PortNum.ADMIN_APP, payload = ByteString.EMPTY))
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
         // No crash — decodes as default AdminMessage with no fields set
     }
 
@@ -216,9 +221,9 @@ class AdminPacketHandlerImplTest {
         val adminMsg = AdminMessage(session_passkey = passkey, get_config_response = config)
         val packet = makePacket(myNodeNum, adminMsg)
 
-        handler.handleAdminMessage(packet, myNodeNum)
+        handle(packet)
 
         verify { sessionManager.recordSession(myNodeNum, passkey) }
-        verify { configHandler.handleDeviceConfig(config) }
+        verify { configHandler.handleDeviceConfig(config, session) }
     }
 }

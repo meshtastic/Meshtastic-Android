@@ -24,6 +24,54 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 
+/** A lifecycle lease held by one already-admitted operation for [session]. */
+interface RadioSessionLease {
+    val session: RadioSessionContext
+
+    /** True until this admitted operation releases the session and rollover may complete. */
+    fun isCurrent(): Boolean
+}
+
+/** Owns admission and revocation for work bound to one transport session. */
+interface RadioSessionAuthority {
+    /**
+     * The transport session that still owns lifecycle completion, or null after teardown drains every admitted
+     * operation. Implementations close admission before teardown, so [isSessionActive] and the run helpers reject new
+     * work immediately even while this flow temporarily retains the draining session.
+     */
+    val activeSession: StateFlow<RadioSessionContext?>
+
+    /**
+     * Returns whether [session] still owns transport admission. Implementations must make this reflect the admission
+     * gate, not only [activeSession], because the draining session may remain published after new work is rejected.
+     */
+    fun isSessionActive(session: RadioSessionContext): Boolean
+
+    /**
+     * Runs [block] only while [session] owns transport admission. Implementations must make the admission check and
+     * synchronous side effect atomic with teardown.
+     */
+    fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean
+
+    /**
+     * Acquires a lifecycle lease for suspend [block]. Once admitted, teardown closes admission to later work and waits
+     * for this block to finish before publishing session completion or starting a replacement transport. [block] may
+     * use [RadioSessionLease.isCurrent] for transaction-bound checks that must remain valid through commit even after
+     * teardown has closed new admission. Implementations must acquire and release the lease through the same admission
+     * state used by teardown; comparing only [activeSession] cannot satisfy the draining contract. Callers must keep
+     * the block bounded and must not invoke transport lifecycle methods from inside it.
+     */
+    suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
+
+    /**
+     * Runs [block] while holding the same lifecycle lease, without exposing the lease token. Implementations may
+     * serialize this convenience path to preserve handshake ordering; independently deferred work should use
+     * [runWithSessionLease] so it can acquire its own lease before its parent operation returns.
+     */
+    suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
+        runWithSessionLease(session) { block() }
+}
+
 /**
  * Interface for the low-level radio interface that handles raw byte communication.
  *
@@ -39,7 +87,9 @@ import org.meshtastic.core.model.MeshActivity
  *
  * @see ServiceRepository.connectionState
  */
-interface RadioInterfaceService : RadioTransportCallback {
+interface RadioInterfaceService :
+    RadioTransportCallback,
+    RadioSessionAuthority {
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 
@@ -65,17 +115,24 @@ interface RadioInterfaceService : RadioTransportCallback {
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 
+    /**
+     * Monotonically increasing generation bumped on every transport start (including same-address reconnect). Consumers
+     * use this to discard state retained from a previous transport instance. Stub implementations that never start a
+     * real transport expose a constant zero flow.
+     */
+    val sessionGeneration: StateFlow<Long>
+
     /** Whether we are currently using a mock transport. */
     fun isMockTransport(): Boolean
 
     /**
-     * Flow of raw data received from the radio.
+     * Flow of raw data received from the radio, bound to the transport session that admitted each frame.
      *
      * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware
      * handshake (initial config packet ordering) depends on strict FIFO delivery. Implementations MUST guarantee
      * ordering; do not swap in a [SharedFlow] without preserving order.
      */
-    val receivedData: Flow<ByteArray>
+    val receivedData: Flow<ReceivedRadioFrame>
 
     /** Flow of radio activity events. */
     val meshActivity: Flow<MeshActivity>

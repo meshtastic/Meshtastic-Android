@@ -32,6 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
@@ -43,17 +44,25 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
+import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MyNodeInfo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MeshServiceOrchestratorTest {
+
+    private companion object {
+        const val DEFAULT_ADDRESS = "x:AA:BB:CC:DD:EE:FF"
+    }
 
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
@@ -77,13 +86,17 @@ class MeshServiceOrchestratorTest {
 
     /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
     private fun createOrchestrator(
-        receivedData: MutableSharedFlow<ByteArray> = MutableSharedFlow(),
+        receivedData: MutableSharedFlow<ReceivedRadioFrame> = MutableSharedFlow(),
         connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
         connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected),
         // A valid default address lets every start() proceed through the new
         // wait-for-valid-address -> DB switch -> connect ordering without per-test boilerplate.
         // Tests that need a different initial address (or no address) override it explicitly.
-        currentDeviceAddressFlow: MutableStateFlow<String?> = MutableStateFlow<String?>("x:AA:BB:CC:DD:EE:FF"),
+        currentDeviceAddressFlow: MutableStateFlow<String?> = MutableStateFlow<String?>(DEFAULT_ADDRESS),
+        sessionGeneration: MutableStateFlow<Long> = MutableStateFlow(0L),
+        activeSession: MutableStateFlow<RadioSessionContext?> =
+            MutableStateFlow(currentDeviceAddressFlow.value?.let { RadioSessionContext(sessionGeneration.value, it) }),
+        isSessionActive: (RadioSessionContext) -> Boolean = { activeSession.value == it },
         takEnabledFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
         takRunningFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
     ): MeshServiceOrchestrator {
@@ -91,6 +104,12 @@ class MeshServiceOrchestratorTest {
         every { radioInterfaceService.connectionError } returns connectionError
         every { radioInterfaceService.connectionState } returns connectionState
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
+        every { radioInterfaceService.sessionGeneration } returns sessionGeneration
+        every { radioInterfaceService.activeSession } returns activeSession
+        every { radioInterfaceService.isSessionActive(any()) } calls
+            {
+                isSessionActive(it.args[0] as RadioSessionContext)
+            }
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
@@ -121,6 +140,11 @@ class MeshServiceOrchestratorTest {
             dispatchers = dispatchers,
         )
     }
+
+    private fun frame(
+        bytes: ByteArray,
+        session: RadioSessionContext = RadioSessionContext(generation = 0L, address = DEFAULT_ADDRESS),
+    ) = ReceivedRadioFrame(bytes.toByteString(), session)
 
     @Test
     fun testStartWiresComponents() {
@@ -240,26 +264,81 @@ class MeshServiceOrchestratorTest {
      */
     @Test
     fun testFromRadioCollectorsTornDownOnStopAndRestartedCleanlyOnStart() {
-        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val receivedData = MutableSharedFlow<ReceivedRadioFrame>(extraBufferCapacity = 8)
         val orchestrator = createOrchestrator(receivedData = receivedData)
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
 
         orchestrator.start()
-        val packet1 = byteArrayOf(1, 2, 3)
+        val packet1 = frame(byteArrayOf(1, 2, 3))
         receivedData.tryEmit(packet1)
         verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet1, null) }
 
         orchestrator.stop()
-        val packet2 = byteArrayOf(4, 5, 6)
+        val packet2 = frame(byteArrayOf(4, 5, 6))
         receivedData.tryEmit(packet2)
         // After stop(), the collector must be gone - the handler should not be invoked for packet2.
         verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(packet2, null) }
 
         orchestrator.start()
-        val packet3 = byteArrayOf(7, 8, 9)
+        val packet3 = frame(byteArrayOf(7, 8, 9))
         receivedData.tryEmit(packet3)
         // After restart, a single fresh collector must process packet3 exactly once (not twice).
         verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet3, null) }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun frameIsDiscardedAfterAdmissionClosesEvenWhileLifecycleTokenIsDraining() {
+        val receivedData = MutableSharedFlow<ReceivedRadioFrame>(extraBufferCapacity = 1)
+        val session = RadioSessionContext(generation = 1L, address = DEFAULT_ADDRESS)
+        val activeSession = MutableStateFlow<RadioSessionContext?>(session)
+        var admissionOpen = true
+        val orchestrator =
+            createOrchestrator(
+                receivedData = receivedData,
+                sessionGeneration = MutableStateFlow(1L),
+                activeSession = activeSession,
+                isSessionActive = { admissionOpen && activeSession.value == it },
+            )
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        val frame = frame(byteArrayOf(1, 2, 3), session)
+
+        orchestrator.start()
+        admissionOpen = false
+        receivedData.tryEmit(frame)
+
+        verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(frame, null) }
+        assertEquals(session, activeSession.value, "the lifecycle token may remain published while leases drain")
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun queuedMyNodeInfoFromOldSessionIsDiscardedAfterSameAddressReconnect() {
+        val receivedData = MutableSharedFlow<ReceivedRadioFrame>(extraBufferCapacity = 2)
+        val activeGeneration = MutableStateFlow(1L)
+        val activeSession =
+            MutableStateFlow<RadioSessionContext?>(RadioSessionContext(generation = 1L, address = DEFAULT_ADDRESS))
+        val orchestrator =
+            createOrchestrator(
+                receivedData = receivedData,
+                sessionGeneration = activeGeneration,
+                activeSession = activeSession,
+            )
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        val payload = FromRadio(my_info = MyNodeInfo(my_node_num = 42)).encode()
+        val staleFrame = frame(payload, RadioSessionContext(generation = 1L, address = DEFAULT_ADDRESS))
+        val freshFrame = frame(payload, RadioSessionContext(generation = 2L, address = DEFAULT_ADDRESS))
+
+        orchestrator.start()
+        activeGeneration.value = 2L
+        activeSession.value = RadioSessionContext(generation = 2L, address = DEFAULT_ADDRESS)
+        receivedData.tryEmit(staleFrame)
+        verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(staleFrame, null) }
+
+        receivedData.tryEmit(freshFrame)
+        verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(freshFrame, null) }
 
         orchestrator.stop()
     }
@@ -289,7 +368,7 @@ class MeshServiceOrchestratorTest {
     /** Additional regression: after many start/stop cycles, collectors must not accumulate. */
     @Test
     fun testRepeatedStartStopDoesNotAccumulateCollectors() {
-        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val receivedData = MutableSharedFlow<ReceivedRadioFrame>(extraBufferCapacity = 8)
         val orchestrator = createOrchestrator(receivedData = receivedData)
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
 
@@ -299,7 +378,7 @@ class MeshServiceOrchestratorTest {
         }
 
         orchestrator.start()
-        val packet = byteArrayOf(42)
+        val packet = frame(byteArrayOf(42))
         receivedData.tryEmit(packet)
 
         // Despite six total start() calls, only the most recent collector is live.
@@ -350,7 +429,7 @@ class MeshServiceOrchestratorTest {
      */
     @Test
     fun testConnectedWhileStoppedDoesNotRestartWithoutExplicitStart() {
-        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val receivedData = MutableSharedFlow<ReceivedRadioFrame>(extraBufferCapacity = 8)
         val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
         val orchestrator = createOrchestrator(receivedData = receivedData, connectionState = connectionState)
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
@@ -363,7 +442,7 @@ class MeshServiceOrchestratorTest {
         assertFalse(orchestrator.isRunning)
 
         // No collector may have been attached: a packet emitted now is unhandled.
-        val packet = byteArrayOf(7, 7, 7)
+        val packet = frame(byteArrayOf(7, 7, 7))
         receivedData.tryEmit(packet)
         verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(packet, null) }
 

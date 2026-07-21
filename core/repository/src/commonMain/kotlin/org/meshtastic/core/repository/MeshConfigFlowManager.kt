@@ -23,14 +23,14 @@ import org.meshtastic.proto.NodeInfo
 
 /** Interface for managing the configuration flow, including local node info and metadata. */
 interface MeshConfigFlowManager {
-    /** Handles received local node information. */
-    fun handleMyInfo(myInfo: MyNodeInfo)
+    /** Handles local node information admitted by [session]. */
+    fun handleMyInfo(myInfo: MyNodeInfo, session: RadioSessionContext)
 
-    /** Handles received local device metadata. */
-    fun handleLocalMetadata(metadata: DeviceMetadata)
+    /** Handles received local device metadata admitted by [session]. */
+    fun handleLocalMetadata(metadata: DeviceMetadata, session: RadioSessionContext): Boolean
 
-    /** Handles received node information. */
-    fun handleNodeInfo(info: NodeInfo)
+    /** Handles received node information admitted by [session]. */
+    fun handleNodeInfo(info: NodeInfo, session: RadioSessionContext): Boolean
 
     /**
      * Handles a [FileInfo] packet received during STATE_SEND_FILEMANIFEST.
@@ -38,14 +38,14 @@ interface MeshConfigFlowManager {
      * Each packet describes one file available on the device. Accumulated into [RadioConfigRepository.fileManifestFlow]
      * and cleared at the start of each new handshake.
      */
-    fun handleFileInfo(info: FileInfo)
+    fun handleFileInfo(info: FileInfo, session: RadioSessionContext): Boolean
 
     /** Returns the number of nodes received in the current stage. */
     val newNodeCount: Int
 
-    /** Handles the completion of a configuration stage. */
-    fun handleConfigComplete(configCompleteId: Int)
+    /** Handles the completion of a configuration stage admitted by [session]. */
+    fun handleConfigComplete(configCompleteId: Int, session: RadioSessionContext): Boolean
 
-    /** Triggers a request for the full device configuration. */
-    fun triggerWantConfig()
+    /** Triggers a request for the full device configuration when [session] still owns admission. */
+    fun triggerWantConfig(session: RadioSessionContext): Boolean
 }

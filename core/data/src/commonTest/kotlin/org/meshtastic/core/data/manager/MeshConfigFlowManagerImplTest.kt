@@ -26,8 +26,12 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -46,6 +50,8 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
@@ -55,6 +61,8 @@ import org.meshtastic.proto.NodeInfo
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,6 +84,7 @@ class MeshConfigFlowManagerImplTest {
     private val commandSender = mock<CommandSender>(MockMode.autofill)
     private val packetHandler = mock<PacketHandler>(MockMode.autofill)
     private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
+    private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -83,6 +92,8 @@ class MeshConfigFlowManagerImplTest {
     private lateinit var manager: MeshConfigFlowManagerImpl
 
     private val myNodeNum = 12345
+    private val activeSession = RadioSessionContext(generation = 0L, address = "tcp:test-node")
+    private val activeSessionFlow = MutableStateFlow<RadioSessionContext?>(activeSession)
 
     private val protoMyNodeInfo =
         ProtoMyNodeInfo(
@@ -101,6 +112,38 @@ class MeshConfigFlowManagerImplTest {
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        activeSessionFlow.value = activeSession
+        every { radioInterfaceService.activeSession } returns activeSessionFlow
+        every { radioInterfaceService.isSessionActive(any()) } calls
+            {
+                activeSessionFlow.value == it.args[0] as RadioSessionContext
+            }
+        every { radioInterfaceService.runIfSessionActive(any(), any()) } calls
+            {
+                val session = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as () -> Unit
+                if (activeSessionFlow.value == session) {
+                    block()
+                    true
+                } else {
+                    false
+                }
+            }
+        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any()) } calls
+            {
+                val session = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend () -> Unit)
+                if (activeSessionFlow.value == session) {
+                    block()
+                    true
+                } else {
+                    false
+                }
+            }
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
         every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
         // autofill returns null for List<Int>, which would NPE the non-null return; individual
@@ -118,18 +161,41 @@ class MeshConfigFlowManagerImplTest {
                 commandSender = commandSender,
                 heartbeatSender = DataLayerHeartbeatSender(packetHandler),
                 notificationPrefs = notificationPrefs,
+                radioInterfaceService = radioInterfaceService,
                 scope = testScope,
             )
     }
+
+    private fun handleMyInfo(myInfo: ProtoMyNodeInfo) = manager.handleMyInfo(myInfo, activeSession)
+
+    private fun MeshConfigFlowManagerImpl.handleLocalMetadata(metadata: DeviceMetadata): Boolean =
+        handleLocalMetadata(metadata, activeSession)
+
+    private fun MeshConfigFlowManagerImpl.handleNodeInfo(info: NodeInfo): Boolean = handleNodeInfo(info, activeSession)
+
+    private fun MeshConfigFlowManagerImpl.handleFileInfo(info: FileInfo): Boolean = handleFileInfo(info, activeSession)
+
+    private fun MeshConfigFlowManagerImpl.handleConfigComplete(configCompleteId: Int): Boolean =
+        handleConfigComplete(configCompleteId, activeSession)
+
+    private fun MeshConfigFlowManagerImpl.triggerWantConfig(): Boolean = triggerWantConfig(activeSession)
 
     // ---------- handleMyInfo ----------
 
     @Test
     fun `handleMyInfo transitions to ReceivingConfig and sets myNodeNum`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         verify { nodeManager.setMyNodeNum(myNodeNum) }
+        verify {
+            nodeManager.publishConnectionIdentity(
+                sessionGeneration = 0L,
+                address = "tcp:test-node",
+                nodeNum = myNodeNum,
+                deviceId = "746573742d646576696365",
+            )
+        }
     }
 
     @Test
@@ -137,7 +203,7 @@ class MeshConfigFlowManagerImplTest {
         // device_id is raw hardware bytes, not text: a lossy utf8 decode would collapse distinct
         // ids into the same replacement-character string. 0xFF bytes are invalid UTF-8 on purpose.
         val rawId = byteArrayOf(0xFF.toByte(), 0x00, 0xA1.toByte(), 0xB2.toByte()).toByteString()
-        manager.handleMyInfo(protoMyNodeInfo.copy(device_id = rawId))
+        handleMyInfo(protoMyNodeInfo.copy(device_id = rawId))
         advanceUntilIdle()
 
         verify { nodeManager.setMyDeviceId("ff00a1b2") }
@@ -145,18 +211,136 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleMyInfo reports an absent device_id as null`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo.copy(device_id = okio.ByteString.EMPTY))
+        handleMyInfo(protoMyNodeInfo.copy(device_id = okio.ByteString.EMPTY))
         advanceUntilIdle()
 
         verify { nodeManager.setMyDeviceId(null) }
     }
 
     @Test
+    fun `handleMyInfo without a selected address does not publish session identity`() = testScope.runTest {
+        activeSessionFlow.value = null
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyDeviceId(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `queued MyNodeInfo from an old generation is discarded`() = testScope.runTest {
+        activeSessionFlow.value = activeSession.copy(generation = activeSession.generation + 1)
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `stale session cannot mutate handshake identity or metadata`() = testScope.runTest {
+        activeSessionFlow.value = activeSession.copy(generation = activeSession.generation + 1)
+
+        handleMyInfo(protoMyNodeInfo)
+        manager.handleLocalMetadata(metadata, activeSession)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyDeviceId(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeRepository.insertMetadata(any(), any()) }
+    }
+
+    @Test
+    fun `new active session cannot advance handshake state owned by prior session`() = testScope.runTest {
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        val nextSession = activeSession.copy(generation = activeSession.generation + 1)
+        activeSessionFlow.value = nextSession
+
+        assertFalse(manager.handleLocalMetadata(metadata, nextSession))
+        assertFalse(manager.handleNodeInfo(NodeInfo(num = 100), nextSession))
+        assertFalse(manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE, nextSession))
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeRepository.insertMetadata(any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { connectionManager.onRadioConfigLoaded() }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.installNodeInfo(any()) }
+    }
+
+    @Test
     fun `handleMyInfo clears persisted radio config`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.clearChannelSet() }
+        verifySuspend { radioConfigRepository.clearLocalConfig() }
+        verifySuspend { radioConfigRepository.clearLocalModuleConfig() }
+        verifySuspend { radioConfigRepository.clearDeviceUIConfig() }
+        verifySuspend { radioConfigRepository.clearFileManifest() }
+        verifySuspend { radioConfigRepository.clearLoraRegionPresetMap() }
+    }
+
+    @Test
+    fun `handleMyInfo admits config clearing before returning to the frame consumer`() = testScope.runTest {
+        handleMyInfo(protoMyNodeInfo)
+
+        verifySuspend { radioConfigRepository.clearChannelSet() }
+    }
+
+    @Test
+    fun `config reset holds the session lane until every clear completes`() = testScope.runTest {
+        val sessionLane = Mutex()
+        everySuspend { radioInterfaceService.runWhileSessionActive(activeSession, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend () -> Unit)
+                sessionLane.withLock { block() }
+                true
+            }
+        val firstClearStarted = CompletableDeferred<Unit>()
+        val releaseFirstClear = CompletableDeferred<Unit>()
+        everySuspend { radioConfigRepository.clearChannelSet() } calls
+            {
+                firstClearStarted.complete(Unit)
+                releaseFirstClear.await()
+            }
+
+        handleMyInfo(protoMyNodeInfo)
+        firstClearStarted.await()
+
+        val completedClears = mutableSetOf<String>()
+        everySuspend { radioConfigRepository.clearLocalConfig() } calls { completedClears += "config" }
+        everySuspend { radioConfigRepository.clearLocalModuleConfig() } calls { completedClears += "module" }
+        everySuspend { radioConfigRepository.clearDeviceUIConfig() } calls { completedClears += "device-ui" }
+        everySuspend { radioConfigRepository.clearFileManifest() } calls { completedClears += "manifest" }
+        everySuspend { radioConfigRepository.clearLoraRegionPresetMap() } calls
+            {
+                completedClears += "lora-presets"
+            }
+
+        val laterPersistenceStarted = CompletableDeferred<Unit>()
+        val laterPersistence = launch {
+            radioInterfaceService.runWhileSessionActive(activeSession) {
+                assertEquals(
+                    setOf("config", "module", "device-ui", "manifest", "lora-presets"),
+                    completedClears,
+                    "Later persistence must not enter until every config clear finishes",
+                )
+                laterPersistenceStarted.complete(Unit)
+            }
+        }
+        runCurrent()
+        assertFalse(laterPersistenceStarted.isCompleted)
+
+        releaseFirstClear.complete(Unit)
+        advanceUntilIdle()
+        laterPersistence.join()
+
+        assertTrue(laterPersistenceStarted.isCompleted)
         verifySuspend { radioConfigRepository.clearLocalConfig() }
         verifySuspend { radioConfigRepository.clearLocalModuleConfig() }
         verifySuspend { radioConfigRepository.clearDeviceUIConfig() }
@@ -168,7 +352,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleLocalMetadata persists metadata when in ReceivingConfig state`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         manager.handleLocalMetadata(metadata)
@@ -179,7 +363,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleLocalMetadata skips empty metadata`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         // Default/empty DeviceMetadata should not trigger insertMetadata
@@ -202,7 +386,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Stage 1 complete builds MyNodeInfo and transitions to ReceivingNodeInfo`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -223,7 +407,7 @@ class MeshConfigFlowManagerImplTest {
                 sentPackets.add(call.arg(0))
             }
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -246,7 +430,7 @@ class MeshConfigFlowManagerImplTest {
     fun `Stage 1 complete with old firmware logs warning but continues handshake`() = testScope.runTest {
         val oldMetadata =
             DeviceMetadata(firmware_version = "2.3.0", hw_model = HardwareModel.HELTEC_V3, hasWifi = false)
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(oldMetadata)
         advanceUntilIdle()
@@ -262,7 +446,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Stage 1 complete without metadata still succeeds with null firmware version`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         // No metadata provided
@@ -274,7 +458,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Stage 1 complete updates progress for node list loading`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -296,7 +480,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Duplicate Stage 1 config_complete does not re-trigger`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -316,7 +500,7 @@ class MeshConfigFlowManagerImplTest {
     @Test
     fun `handleNodeInfo accumulates nodes during Stage 2`() = testScope.runTest {
         // Transition to Stage 2
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -336,7 +520,7 @@ class MeshConfigFlowManagerImplTest {
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         manager.handleNodeInfo(NodeInfo(num = 100))
@@ -365,12 +549,66 @@ class MeshConfigFlowManagerImplTest {
     // ---------- handleConfigComplete Stage 2 ----------
 
     @Test
+    fun `active session completes metadata node info and both handshake stages`() = testScope.runTest {
+        val nodeInfo = NodeInfo(num = 100)
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = nodeInfo.num)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(nodeInfo.num to testNode)
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        assertTrue(manager.handleLocalMetadata(metadata, activeSession))
+        advanceUntilIdle()
+        assertTrue(manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE, activeSession))
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        assertTrue(manager.handleNodeInfo(nodeInfo, activeSession))
+        assertTrue(manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE, activeSession))
+        advanceUntilIdle()
+
+        verifySuspend { nodeRepository.insertMetadata(myNodeNum, metadata) }
+        verify { nodeManager.installNodeInfo(nodeInfo) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.installNodeInfoAndPersist(any()) }
+        verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.installConfig(any(), any()) }
+        verify { nodeManager.setNodeDbReady(true) }
+        verify { nodeManager.setAllowNodeDbWrites(true) }
+        verifySuspend { connectionManager.onNodeDbReady() }
+    }
+
+    @Test
+    fun `session revocation during Stage 2 stops remaining persistence and publication`() = testScope.runTest {
+        val firstNode = NodeInfo(num = 100)
+        val secondNode = NodeInfo(num = 200)
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = firstNode.num)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(firstNode.num to testNode)
+        every { nodeManager.installNodeInfo(any()) } calls { activeSessionFlow.value = null }
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        assertTrue(manager.handleLocalMetadata(metadata, activeSession))
+        advanceUntilIdle()
+        assertTrue(manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE, activeSession))
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        assertTrue(manager.handleNodeInfo(firstNode, activeSession))
+        assertTrue(manager.handleNodeInfo(secondNode, activeSession))
+        assertTrue(manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE, activeSession))
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { nodeManager.installNodeInfo(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeRepository.installConfig(any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setNodeDbReady(true) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.setAllowNodeDbWrites(true) }
+        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { connectionManager.onNodeDbReady() }
+    }
+
+    @Test
     fun `Stage 2 complete processes nodes and sets Connected state`() = testScope.runTest {
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
 
         // Full handshake: MyInfo -> metadata -> Stage 1 complete -> nodes -> Stage 2 complete
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -397,7 +635,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Stage 2 complete with no nodes still transitions to Connected`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -418,7 +656,7 @@ class MeshConfigFlowManagerImplTest {
         every { analytics.setDeviceAttributes(any(), any()) } calls { throw IllegalStateException("analytics") }
         everySuspend { connectionManager.onNodeDbReady() } calls { throw IllegalStateException("side effects") }
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -442,7 +680,7 @@ class MeshConfigFlowManagerImplTest {
     fun `Stage 2 complete disconnects when NodeDB install fails`() = testScope.runTest {
         everySuspend { nodeRepository.installConfig(any(), any()) } calls { throw IllegalStateException("room") }
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -504,7 +742,7 @@ class MeshConfigFlowManagerImplTest {
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
 
         // Stage 0: Idle -> handleMyInfo
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         verify { nodeManager.setMyNodeNum(myNodeNum) }
 
@@ -538,14 +776,14 @@ class MeshConfigFlowManagerImplTest {
     @Test
     fun `handleMyInfo resets stale handshake state`() = testScope.runTest {
         // Start first handshake
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
 
         // Before Stage 1 completes, a new handleMyInfo arrives (device rebooted)
         val newMyInfo = protoMyNodeInfo.copy(my_node_num = 99999)
-        manager.handleMyInfo(newMyInfo)
+        handleMyInfo(newMyInfo)
         advanceUntilIdle()
 
         verify { nodeManager.setMyNodeNum(99999) }
@@ -558,7 +796,7 @@ class MeshConfigFlowManagerImplTest {
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
 
         val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
-        manager.handleMyInfo(eventMyInfo)
+        handleMyInfo(eventMyInfo)
         advanceUntilIdle()
 
         verify { notificationPrefs.setNodeEventsEnabled(false) }
@@ -570,7 +808,7 @@ class MeshConfigFlowManagerImplTest {
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
 
         val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
-        manager.handleMyInfo(eventMyInfo)
+        handleMyInfo(eventMyInfo)
         advanceUntilIdle()
 
         verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
@@ -580,7 +818,7 @@ class MeshConfigFlowManagerImplTest {
     fun `handleMyInfo re-enables node notifications when vanilla firmware reconnects`() = testScope.runTest {
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         verify { notificationPrefs.setNodeEventsEnabled(true) }
@@ -591,7 +829,7 @@ class MeshConfigFlowManagerImplTest {
     fun `handleMyInfo does not touch prefs for vanilla when not previously auto-disabled`() = testScope.runTest {
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
@@ -602,7 +840,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleMyInfo calls onHandshakeProgress`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
         verify { connectionManager.onHandshakeProgress() }
@@ -610,7 +848,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleLocalMetadata in ReceivingConfig calls onHandshakeProgress`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -639,7 +877,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleNodeInfo during Stage 1 calls onHandshakeProgress`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleNodeInfo(NodeInfo(num = 100))
 
@@ -649,7 +887,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleNodeInfo during Stage 2 calls onHandshakeProgress`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -667,7 +905,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `Stage 1 complete calls onHandshakeProgress`() = testScope.runTest {
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -699,7 +937,7 @@ class MeshConfigFlowManagerImplTest {
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -727,7 +965,7 @@ class MeshConfigFlowManagerImplTest {
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
@@ -766,7 +1004,7 @@ class MeshConfigFlowManagerImplTest {
                 emptyList()
             }
 
-        manager.handleMyInfo(protoMyNodeInfo)
+        handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()

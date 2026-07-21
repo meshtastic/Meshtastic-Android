@@ -36,13 +36,24 @@ import org.meshtastic.core.database.entity.MergeMarkerEntity
  * remapping is needed there; autoincrement-keyed rows (packets, discovery) are re-inserted with fresh ids to avoid
  * collisions.
  */
+internal class StaleAssociationException : Exception("Transport session no longer authorizes database association")
+
 object DatabaseMerger {
 
     /**
      * Folds [source] into [dest], skipping the work if [sourceName] was already merged into [dest]. [sourceName] is the
      * source database's file name — the stable key under which the merge is recorded (see [MergeMarkerEntity]).
+     *
+     * The caller owns the transport-session lifecycle lease through this method's return. That lease makes transaction
+     * commit and session rollover mutually exclusive; [isAssociationActive] remains a defensive check for authority
+     * lost before the merge entered its commit phase.
      */
-    suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase, sourceName: String) {
+    suspend fun merge(
+        source: MeshtasticDatabase,
+        dest: MeshtasticDatabase,
+        sourceName: String,
+        isAssociationActive: () -> Boolean = { true },
+    ) {
         // All destination writes run in a single transaction so a crash or exception mid-merge rolls
         // back cleanly instead of leaving `dest` half-merged. The merge marker is written inside that
         // same transaction, so it commits atomically with the copied rows: on a retried merge (e.g. a
@@ -54,7 +65,9 @@ object DatabaseMerger {
         var skipped = false
         dest.useWriterConnection { transactor ->
             transactor.immediateTransaction {
+                ensureAssociationActive(isAssociationActive)
                 if (dest.mergeMarkerDao().isMerged(sourceName)) {
+                    ensureAssociationActive(isAssociationActive)
                     skipped = true
                     return@immediateTransaction
                 }
@@ -69,6 +82,11 @@ object DatabaseMerger {
                 mergeTraceroutePositions(source, dest)
                 mergeDiscovery(source, dest)
                 dest.mergeMarkerDao().insertMarker(MergeMarkerEntity(sourceDbName = sourceName, mergedAt = nowMillis))
+                // Keep the defensive authority check as the final transaction statement. The caller-held lifecycle
+                // lease prevents rollover until commit returns; this check still rolls back if authority was lost
+                // before
+                // the transaction entered the lease-protected commit phase.
+                ensureAssociationActive(isAssociationActive)
             }
         }
         if (skipped) {
@@ -76,6 +94,10 @@ object DatabaseMerger {
         } else {
             Logger.i { "Merged $packets packets across transports into unified node DB" }
         }
+    }
+
+    private fun ensureAssociationActive(isAssociationActive: () -> Boolean) {
+        if (!isAssociationActive()) throw StaleAssociationException()
     }
 
     /**
