@@ -189,6 +189,30 @@
   },
   "pullRequests": [
     {
+      "id": "11130",
+      "title": "Run native PlatformIO tests by area for readable failures",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11130",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11128",
+      "title": "keyverification: handle response allocation failure",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11128",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11126",
+      "title": "mesh: suppress relayed broadcast responses",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11126",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11121",
+      "title": "MUI: portduino SDL support for Linux/Windows",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11121",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11116",
       "title": "Gate the PKI-decrypt key on signer-proven, not the opportunistic cache",
       "page_url": "https://github.com/meshtastic/firmware/pull/11116",
@@ -253,42 +277,6 @@
       "title": "feat: add driver for MCP23017",
       "page_url": "https://github.com/meshtastic/firmware/pull/11015",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11009",
-      "title": "Nz region sf16 preset",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11009",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10984",
-      "title": "Draft: Restore XEdDSA material in keygen-excluded identity loads",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10984",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10972",
-      "title": "Authorize signed plaintext remote admin in licensed mode",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10972",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10969",
-      "title": "Sign plaintext packets in licensed mode",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10969",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10967",
-      "title": "feat(security): enforce packet authenticity policies",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10967",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10962",
-      "title": "Extra repeats",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10962",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
