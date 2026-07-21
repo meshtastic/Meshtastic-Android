@@ -66,7 +66,7 @@ maps-compose = "8.4.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
-mlkit-genai-prompt = "1.0.0-beta3"
+mlkit-genai-prompt = "1.0.0-beta4"
 mlkit-language-id = "17.0.6"
 mlkit-translate = "17.0.3"
 
