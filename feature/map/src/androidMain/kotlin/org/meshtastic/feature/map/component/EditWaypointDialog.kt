@@ -229,7 +229,10 @@ fun EditWaypointDialog(
                             checked = waypointInput.isLocked,
                             // Lock to our own node so we (and only we) can later edit or remove it; unlock clears the
                             // owner. locked_to must be a real node number — a placeholder locks the waypoint to a
-                            // phantom node and blocks even the creator (see #6343).
+                            // phantom node and blocks even the creator (see #6343). Disabled until our node number is
+                            // known, since without it we can't lock a waypoint to ourselves (the toggle would silently
+                            // stay unlocked).
+                            enabled = myNodeNum != null,
                             onCheckedChange = { locked ->
                                 waypointInput = waypointInput.copy(locked_to = if (locked) myNodeNum ?: 0 else 0)
                             },
