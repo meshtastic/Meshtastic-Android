@@ -74,7 +74,7 @@ jobs:
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -113,7 +113,7 @@ jobs:
       USER_FRACTION: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
 
@@ -156,7 +156,7 @@ jobs:
       actions: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -348,7 +348,7 @@ jobs:
     needs: [ update-github-release ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
 

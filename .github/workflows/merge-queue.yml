@@ -56,7 +56,7 @@ jobs:
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 1
       - name: Diff merge group against its base
