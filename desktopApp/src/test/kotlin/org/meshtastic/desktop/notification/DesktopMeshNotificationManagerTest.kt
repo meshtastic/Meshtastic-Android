@@ -16,10 +16,9 @@
  */
 package org.meshtastic.desktop.notification
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import kotlin.test.Test
@@ -43,12 +42,11 @@ class DesktopMeshNotificationManagerTest {
     }
 
     @Test
-    fun `showAlertNotification dispatches on the injected scope`() {
+    fun `showAlertNotification dispatches on the injected scope`() = runTest(UnconfinedTestDispatcher()) {
         val notificationManager = FakeNotificationManager()
-        // UnconfinedTestDispatcher runs the launched dispatch eagerly, so the fire-and-forget bridge is observable
-        // synchronously — no virtual-time advance needed.
-        val scope = CoroutineScope(UnconfinedTestDispatcher())
-        val manager = DesktopMeshNotificationManager(notificationManager, scope = scope)
+        // backgroundScope inherits the UnconfinedTestDispatcher, so the launched dispatch runs eagerly and is
+        // observable synchronously — no virtual-time advance or manual teardown needed.
+        val manager = DesktopMeshNotificationManager(notificationManager, scope = backgroundScope)
 
         manager.showAlertNotification(contactKey = "contact-1", name = "Alert", alert = "Something happened")
 
@@ -57,7 +55,5 @@ class DesktopMeshNotificationManagerTest {
         assertEquals("Something happened", dispatched.message)
         assertEquals(Notification.Category.Alert, dispatched.category)
         assertEquals("contact-1", dispatched.contactKey)
-
-        scope.cancel()
     }
 }
