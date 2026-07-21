@@ -116,11 +116,10 @@ internal class MessagingControllerImpl(
             Logger.w { "importContact rejected: missing node_num or user (node_num=${contact.node_num})" }
             return
         }
-        // Importing a contact (e.g. scanning their QR code) is itself an act of manual verification,
-        // so mark it verified regardless of the incoming flag.
-        val verifiedContact = contact.copy(manually_verified = true)
-        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = verifiedContact) }
-        nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = true)
+        // Cross-platform policy: honor the verification state encoded by the sharer as-is
+        // (see meshtastic/design standards/audits/nfc-alignment-audit.md).
+        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = contact) }
+        nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = contact.manually_verified)
     }
 
     private companion object {

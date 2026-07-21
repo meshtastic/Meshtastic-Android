@@ -49,11 +49,13 @@ import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.qr_code
 import org.meshtastic.core.resources.write_nfc
 import org.meshtastic.core.resources.write_nfc_failed
+import org.meshtastic.core.resources.write_nfc_subtext
 import org.meshtastic.core.resources.write_nfc_success
 import org.meshtastic.core.resources.write_nfc_text
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nfc
+import org.meshtastic.core.ui.theme.SemanticColors
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.SetScreenBrightness
@@ -102,6 +104,7 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
             onDismiss = { writeSucceeded = null },
             titleRes = Res.string.write_nfc,
             messageRes = if (success) Res.string.write_nfc_success else Res.string.write_nfc_failed,
+            messageColor = if (success) SemanticColors.Success else MaterialTheme.colorScheme.error,
             onConfirm = { writeSucceeded = null },
             confirmTextRes = Res.string.okay,
         )
@@ -151,6 +154,15 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
                     ) {
                         Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
                     }
+                }
+
+                if (nfcSupported) {
+                    Text(
+                        text = stringResource(Res.string.write_nfc_subtext),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         },
