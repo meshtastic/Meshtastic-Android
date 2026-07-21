@@ -628,6 +628,7 @@
     <string name="firmware_update_almost_there">Почти готово...</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_archive_missing_target">Прошивка для %2$s (%3$s) не найдена в разделе \"%1$s\".</string>
+    <string name="firmware_update_available">Доступно обновление прошивки</string>
     <string name="firmware_update_battery_low">Слишком низкий заряд (%1$d%). Пожалуйста, зарядите устройство перед обновлением.</string>
     <string name="firmware_update_checking">Проверка обновлений...</string>
     <string name="firmware_update_confirm_file_button">Начать прошивку</string>
@@ -667,6 +668,10 @@
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
     <string name="firmware_update_node_info_missing">Отсутствует информация о пользователе ноды.</string>
     <string name="firmware_update_not_found_in_release">Не удалось найти в релизе прошивку для %1$s.</string>
+    <string name="firmware_update_notification_android">%1$s установлена. Стабильный выпуск %2$s доступен. Открой обновления прошивки, когда будешь готов.</string>
+    <string name="firmware_update_notification_flasher">%1$s установлена. Стабильный выпуск %2$s доступен. Открой Meshtastic Flasher для обновления этого оборудования.</string>
+    <string name="firmware_update_open">Открыть обновления прошивки</string>
+    <string name="firmware_update_open_flasher">Открыть флешер Meshtastic</string>
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 используйте фирменный серийный инструмент DFU (например, adafruit-nrfutil dfu serial с предоставленным zip-файлом загрузчика). Простое копирование файла .uf2 не обновит загрузчик.</string>

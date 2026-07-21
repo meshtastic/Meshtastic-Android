@@ -14,16 +14,16 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 
 ## Quick Links
 
-| Guide                                                       | Kirjeldus                                                   |
-| ----------------------------------------------------------- | ----------------------------------------------------------- |
-| [Getting Started](user/onboarding)                          | Connect your first radio and send a message                 |
-| [Sõnumid ja kanalid](user/messages-and-channels)            | Kanali levitamine, otseteated, reaktsioonid ja krüptimine   |
-| [Nodes](user/nodes)                                         | Understanding the mesh network node list                    |
-| [Signal Meter](user/signal-meter)                           | How the LoRa signal quality meter works                     |
-| [Units & Locale](user/units-and-locale) | How temperatures, distances, and times adapt to your region |
-| [Desktop App](user/desktop)                                 | Linux, macOS, and Windows desktop usage                     |
-| [Architecture](developer/architecture)                      | App architecture overview for contributors                  |
-| [Contributing](developer/contributing)                      | Branch naming, PR workflow, and verification commands       |
+| Guide                                            | Kirjeldus                                                   |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| [Getting Started](user/onboarding)               | Connect your first radio and send a message                 |
+| [Sõnumid ja kanalid](user/messages-and-channels) | Kanali levitamine, otseteated, reaktsioonid ja krüptimine   |
+| [Nodes](user/nodes)                              | Understanding the mesh network node list                    |
+| [Signal Meter](user/signal-meter)                | How the LoRa signal quality meter works                     |
+| [Ühikud ja lokaat](user/units-and-locale)        | How temperatures, distances, and times adapt to your region |
+| [Desktop App](user/desktop)                      | Linux, macOS, and Windows desktop usage                     |
+| [Architecture](developer/architecture)           | App architecture overview for contributors                  |
+| [Contributing](developer/contributing)           | Branch naming, PR workflow, and verification commands       |
 
 ---
 
