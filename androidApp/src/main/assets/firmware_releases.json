@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11131",
+      "title": "Limit NodeInfo discovery replies to direct neighbors",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11131",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11130",
       "title": "Run native PlatformIO tests by area for readable failures",
       "page_url": "https://github.com/meshtastic/firmware/pull/11130",
@@ -210,6 +216,12 @@
       "id": "11121",
       "title": "MUI: portduino SDL support for Linux/Windows",
       "page_url": "https://github.com/meshtastic/firmware/pull/11121",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11117",
+      "title": "Nailed native test numbers so PRs don't forget to increment",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11117",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
