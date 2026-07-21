@@ -95,18 +95,20 @@ open class DatabaseManager(
 
     @Volatile private var lifecycleState = LifecycleState.OPEN
 
-    // Per-source write barrier for merges. `withDb` deliberately does NOT take [mutex] (hot path), so a merge under
-    // [mutex] must still drain any in-flight writer that captured the source DB before folding it away — otherwise a
-    // late-committing write is lost when the source is retired. This dedicated lock (never held across a drain await,
-    // so it can't deadlock the merge) tracks live `withDb` blocks per captured DB instance and the writer-admission
-    // gate. The gate is armed at the start of an association attempt: while it is pending, [beginWrite] blocks new
-    // writers instead of letting them capture a DB, so a new `withDb` can never write to `source` once it is being
-    // retired, nor land on `dest` before the merge commits. The gate completes with `source` if the attempt aborts
+    // Per-database bounded-access tracking and per-source write barrier for merges. `withDb` deliberately does NOT
+    // take [mutex] (hot path), so a merge under [mutex] must still drain any in-flight writer that captured the source
+    // DB before folding it away — otherwise a late-committing write is lost when the source is retired. This
+    // dedicated lock (never held across a drain await, so it can't deadlock the merge) tracks live bounded reads and
+    // `withDb` blocks per captured DB instance, plus the writer-admission gate. The gate is armed at the start of an
+    // association attempt: while it is pending, [beginWrite] blocks new writers instead of letting them capture a
+    // DB, so a new `withDb` can never write to `source` once it is being retired, nor land on `dest` before the merge
+    // commits. The gate completes with `source` if the attempt aborts
     // (drain timeout, cancellation, or pre-commit merge failure) and with `dest` once the merge commits — source is
     // never restored after the merge commits. The lock is released before any suspend (drain await, gate await, Room
     // work, merge work, or DataStore work), so it can't deadlock any of them.
     private val writerTrackerMutex = Mutex()
     private val activeWriters = mutableMapOf<MeshtasticDatabase, Int>()
+    private val activeReaders = mutableMapOf<MeshtasticDatabase, Int>()
     private val drainWaiters = mutableMapOf<MeshtasticDatabase, MutableList<CompletableDeferred<Unit>>>()
     private val deferredEvictions = mutableSetOf<MeshtasticDatabase>()
     private var shutdownWriterDrain: CompletableDeferred<Unit>? = null
@@ -893,18 +895,50 @@ open class DatabaseManager(
 
     /**
      * Executes one bounded read without writer admission or the serialized write-containment lane. Active database
-     * publication is synchronous and published pools are logically retired, so a captured instance remains valid until
-     * the callback completes. The read is admitted into the shutdown drain, is never replayed automatically, and new
-     * reads are rejected once shutdown begins.
+     * publication is synchronous and the captured pool is registered against eviction until the callback completes. The
+     * read is also admitted into the shutdown drain, is never replayed automatically, and new reads are rejected once
+     * shutdown begins.
      */
     override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = withManagerOperation {
-        withContext(dispatchers.io) {
-            currentCoroutineContext().ensureActive()
-            val result = block(currentDb.value)
-            currentCoroutineContext().ensureActive()
-            result
+        val database = beginRead()
+        try {
+            withContext(dispatchers.io) {
+                currentCoroutineContext().ensureActive()
+                val result = block(database)
+                currentCoroutineContext().ensureActive()
+                result
+            }
+        } finally {
+            withContext(NonCancellable) { endRead(database) }
         }
     }
+
+    /** Captures and registers the currently published pool so eviction cannot close it while the callback is active. */
+    private suspend fun beginRead(): MeshtasticDatabase = writerTrackerMutex.withLock {
+        checkOpen()
+        _currentDb.value.also { database -> activeReaders[database] = (activeReaders[database] ?: 0) + 1 }
+    }
+
+    /** Releases a bounded reader and retries an eviction that was deferred while the captured pool was in use. */
+    private suspend fun endRead(database: MeshtasticDatabase) {
+        val retryEviction =
+            writerTrackerMutex.withLock {
+                val remaining = (activeReaders[database] ?: 1) - 1
+                if (remaining <= 0) {
+                    activeReaders.remove(database)
+                } else {
+                    activeReaders[database] = remaining
+                }
+                !hasActiveDatabaseAccessLocked(database) && deferredEvictions.remove(database)
+            }
+        if (retryEviction && lifecycleState == LifecycleState.OPEN) {
+            launchManagerWork(dispatchers.io) { enforceCacheLimit() }
+        }
+    }
+
+    /** Caller must hold [writerTrackerMutex]. */
+    private fun hasActiveDatabaseAccessLocked(database: MeshtasticDatabase): Boolean =
+        (activeWriters[database] ?: 0) > 0 || (activeReaders[database] ?: 0) > 0
 
     /**
      * Atomically snapshots the canonical active DB (held by [_currentDb], which initializes lazily to the default DB)
@@ -962,7 +996,7 @@ open class DatabaseManager(
                     activeWriters[db] = remaining
                 }
                 if (activeWriters.isEmpty()) shutdownWriterDrain?.complete(Unit)
-                drained && deferredEvictions.remove(db)
+                !hasActiveDatabaseAccessLocked(db) && deferredEvictions.remove(db)
             }
         if (retryEviction && lifecycleState == LifecycleState.OPEN) {
             launchManagerWork(dispatchers.io) { enforceCacheLimit() }
@@ -990,6 +1024,12 @@ open class DatabaseManager(
      */
     internal suspend fun debugWriterCounts(): Pair<Int, Int> =
         writerTrackerMutex.withLock { activeWriters.values.sum() to drainWaiters.values.sumOf { it.size } }
+
+    internal suspend fun debugReaderCount(database: MeshtasticDatabase? = null): Int = writerTrackerMutex.withLock {
+        if (database == null) activeReaders.values.sum() else activeReaders[database] ?: 0
+    }
+
+    internal suspend fun debugEnforceCacheLimit() = enforceCacheLimit()
 
     /** Test-only visibility for asserting an association did not leak writer admission. */
     internal suspend fun debugWriterGateArmed(): Boolean = writerTrackerMutex.withLock { writerGate != null }
@@ -1182,7 +1222,7 @@ open class DatabaseManager(
         }
     }
 
-    private fun listExistingDbNames(): List<String> {
+    protected open fun listExistingDbNames(): List<String> {
         val dir = getDatabaseDirectory()
         val fs = getFileSystem()
         if (!fs.exists(dir)) return emptyList()
@@ -1233,7 +1273,7 @@ open class DatabaseManager(
                 writerTrackerMutex.withLock {
                     victims.filter { name ->
                         val cached = dbCache[name]
-                        if (cached != null && (activeWriters[cached] ?: 0) > 0) {
+                        if (cached != null && hasActiveDatabaseAccessLocked(cached)) {
                             deferredEvictions.add(cached)
                             false
                         } else {
@@ -1509,6 +1549,7 @@ open class DatabaseManager(
                     deferredEvictions.clear()
                     drainWaiters.clear()
                     activeWriters.clear()
+                    activeReaders.clear()
                     activeManagerOperations.clear()
                     writerGate?.completeExceptionally(IllegalStateException("DatabaseManager is closing or closed"))
                     writerGate = null

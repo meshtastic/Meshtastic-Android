@@ -16,8 +16,12 @@
  */
 package org.meshtastic.core.database
 
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -102,6 +106,43 @@ class DatabaseManagerReadTest : DatabaseManagerTestFixture() {
     }
 
     @Test
+    fun evictionWaitsForBoundedReadOnSwitchedAwayPool() = runTest(testDispatcher) {
+        val firstName = buildDbName("addrA")
+        val secondName = buildDbName("addrB")
+        manager.switchActiveDatabase("addrA")
+        val captured = manager.currentDb.value
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+
+        val read = async {
+            manager.withReadDb { database ->
+                assertTrue(database === captured)
+                started.complete(Unit)
+                release.await()
+                database
+            }
+        }
+
+        started.await()
+        assertEquals(1, manager.debugReaderCount(captured))
+        manager.switchActiveDatabase("addrB")
+        manager.existingDbNamesForTest = listOf(firstName, secondName)
+        armableDs.edit { it[intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)] = 1 }
+        manager.cacheLimit.first { it == 1 }
+        manager.debugEnforceCacheLimit()
+
+        assertFalse(captured in manager.closedDatabases, "eviction must defer while the captured pool has a reader")
+
+        release.complete(Unit)
+        assertTrue(read.await() === captured)
+        runCurrent()
+
+        assertEquals(0, manager.debugReaderCount(captured))
+        assertEquals(1, manager.closedDatabases.count { it === captured })
+        assertTrue(firstName in manager.deletedDatabaseNames)
+    }
+
+    @Test
     fun boundedReadPropagatesFailureWithoutReplay() = runTest(testDispatcher) {
         var invocationCount = 0
 
@@ -115,6 +156,7 @@ class DatabaseManagerReadTest : DatabaseManagerTestFixture() {
 
         assertEquals("read failed", failure.message)
         assertEquals(1, invocationCount)
+        assertEquals(0, manager.debugReaderCount())
         assertEquals(0 to 0, manager.debugWriterCounts())
         assertFalse(manager.debugWriterGateArmed())
     }
