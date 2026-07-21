@@ -21,6 +21,7 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -33,6 +34,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.destination
+import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.isModifiableBy
@@ -291,8 +293,33 @@ class MeshDataHandlerImpl(
         val u = Waypoint.ADAPTER.decode(payload)
         // A locked waypoint may only be created/updated by its owner; drop it if the sender isn't allowed to modify it.
         if (!u.isModifiableBy(packet.from)) return
-        val currentSecond = nowSeconds.toInt()
-        rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond, session = session)
+        val updateNotification = u.expire > nowSeconds.toInt()
+        radioInterfaceService.launchSessionWork(scope, session) {
+            // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.
+            // The inbound check above only validates the incoming payload, so without this a non-owner could hijack a
+            // stored locked waypoint by replaying its id with locked_to = 0 (unlock) or their own num (takeover). The
+            // read and the write share this one lease so the check sees a committed snapshot (see [persistDataPacket]).
+            if (!storedWaypointModifiableBy(u.id, packet.from)) return@launchSessionWork
+            persistDataPacket(dataPacket, myNodeNum, updateNotification)
+        }
+    }
+
+    /**
+     * Whether an inbound waypoint update from [from] may modify the currently-stored waypoint with [waypointId]. A new
+     * waypoint (nothing stored) or an unlocked stored waypoint is always modifiable; a locked stored waypoint is
+     * modifiable only by the node it is locked to — this deliberately rejects inbound unlock (`locked_to = 0`) attempts
+     * from anyone else.
+     *
+     * [PacketRepository.getWaypoints] is a row-per-transmission firehose, so it is collapsed via
+     * [activeWaypointPackets] (newest-per-id, expired dropped) — the same normalisation the map UI and geofence engine
+     * use, so the three cannot drift. Waypoint packets are infrequent, so this one-shot read per waypoint is not hot.
+     */
+    private suspend fun storedWaypointModifiableBy(waypointId: Int, from: Int): Boolean {
+        // firstOrNull().orEmpty(): getWaypoints() is a hot repository flow that always emits (an empty list when there
+        // are none), but tolerate a flow that completes without emitting rather than throwing on the inbound path.
+        val active = packetRepository.value.getWaypoints().firstOrNull().orEmpty().activeWaypointPackets(nowSeconds)
+        val stored = active[waypointId]?.waypoint
+        return stored == null || stored.isModifiableBy(from)
     }
 
     private fun handleTextMessage(
@@ -405,6 +432,18 @@ class MeshDataHandlerImpl(
         session: RadioSessionContext?,
     ) {
         if (dataPacket.dataType !in rememberDataType) return
+        radioInterfaceService.launchSessionWork(scope, session) {
+            persistDataPacket(dataPacket, myNodeNum, updateNotification)
+        }
+    }
+
+    /**
+     * Deduplicates, filters, persists, and (when appropriate) notifies for a single [dataPacket]. Runs inside a session
+     * lease — callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
+     * packet's [DataPacket.dataType] is one of [rememberDataType]. Split out from [rememberDataPacket] so the waypoint
+     * path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
+     */
+    private suspend fun persistDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         val fromLocal = dataPacket.isFromLocal(myNodeNum)
         val toBroadcast = dataPacket.isBroadcast
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
@@ -412,33 +451,24 @@ class MeshDataHandlerImpl(
         // contactKey: unique contact key filter (channel)+(nodeId)
         val contactKey = "${dataPacket.channel}$contactId"
 
-        radioInterfaceService.launchSessionWork(scope, session) {
-            packetRepository.value.apply {
-                // Check for duplicates before inserting
-                val existingPackets = findPacketsWithId(dataPacket.id)
-                if (existingPackets.isNotEmpty()) {
-                    Logger.d {
-                        "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
-                            "to=${dataPacket.to} contactKey=$contactKey" +
-                            " (already have ${existingPackets.size} packet(s))"
-                    }
-                    return@launchSessionWork
+        packetRepository.value.apply {
+            // Check for duplicates before inserting
+            val existingPackets = findPacketsWithId(dataPacket.id)
+            if (existingPackets.isNotEmpty()) {
+                Logger.d {
+                    "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
+                        "to=${dataPacket.to} contactKey=$contactKey" +
+                        " (already have ${existingPackets.size} packet(s))"
                 }
+                return
+            }
 
-                // Check if message should be filtered
-                val isFiltered = shouldFilterMessage(dataPacket, contactKey)
+            // Check if message should be filtered
+            val isFiltered = shouldFilterMessage(dataPacket, contactKey)
 
-                insert(
-                    dataPacket,
-                    myNodeNum,
-                    contactKey,
-                    nowMillis,
-                    read = fromLocal || isFiltered,
-                    filtered = isFiltered,
-                )
-                if (!isFiltered) {
-                    handlePacketNotification(dataPacket, contactKey, updateNotification)
-                }
+            insert(dataPacket, myNodeNum, contactKey, nowMillis, read = fromLocal || isFiltered, filtered = isFiltered)
+            if (!isFiltered) {
+                handlePacketNotification(dataPacket, contactKey, updateNotification)
             }
         }
     }
