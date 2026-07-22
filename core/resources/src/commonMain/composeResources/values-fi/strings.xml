@@ -625,7 +625,7 @@
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>
-    <string name="firmware_update_archive_missing_target">Laiteohjelmistoa kohteelle %2$s (%3$s) ei löytynyt arkistosta \"%1$s\".</string>
+    <string name="firmware_update_archive_missing_target">Laiteohjelmistoa kohteelle %2$s (%3$s) ei löytynyt arkistosta "%1$s".</string>
     <string name="firmware_update_available">Laiteohjelmiston päivitys saatavilla</string>
     <string name="firmware_update_battery_low">Akun varaus liian alhainen (%1$d%). Lataa laite ennen päivitystä.</string>
     <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
@@ -653,7 +653,7 @@
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_hang_tight">Odota, prosessi on käynnissä...</string>
     <string name="firmware_update_hash_rejected">Laiteohjelmiston tarkistussumma hylättiin. Laite saattaa vaatia tiivisteen alustamisen tai käynnistyslataimen päivityksen.</string>
-    <string name="firmware_update_invalid_local_file_detail">Valittu tiedosto \"%1$s\" ei vastaa kohdetta %2$s (%3$s). Valitse tälle kohteelle tarkoitettu laiteohjelmistotiedosto.</string>
+    <string name="firmware_update_invalid_local_file_detail">Valittu tiedosto "%1$s" ei vastaa kohdetta %2$s (%3$s). Valitse tälle kohteelle tarkoitettu laiteohjelmistotiedosto.</string>
     <string name="firmware_update_keep_device_close">Pidä laitteesi lähellä puhelinta.</string>
     <string name="firmware_update_latest">Päivitä versioon %1$s</string>
     <string name="firmware_update_local_file">Paikallinen tiedosto</string>
@@ -1242,6 +1242,18 @@
     <string name="override_frequency_mhz">Taajuuden ohitus</string>
     <string name="pa_fan_disabled">PA tuuletin pois käytöstä</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">Pakettien aitous</string>
+    <string name="packet_authenticity_balanced">Tasapainoinen – Suosi todennettuja paketteja</string>
+    <string name="packet_authenticity_balanced_summary">Suositeltu. Hylkää allekirjoittamattomat tason alentamisyritykset radioilta, joiden tiedetään allekirjoittavan paketit.</string>
+    <string name="packet_authenticity_compatible">Yhteensopiva – Hyväksy allekirjoittamattomat paketit</string>
+    <string name="packet_authenticity_compatible_summary">Todenna paketit aina kun mahdollista, mutta hyväksy myös allekirjoittamaton liikenne parhaan yhteensopivuuden varmistamiseksi.</string>
+    <string name="packet_authenticity_level">Suojaustaso</string>
+    <string name="packet_authenticity_strict">Tiukka – Vaadi pakettien todentamista</string>
+    <string name="packet_authenticity_strict_confirm">Ota tiukka tila käyttöön</string>
+    <string name="packet_authenticity_strict_confirmation">Tiukka tila ohittaa kaikki etäverkon paketit, joita ei ole todennettu kryptografisesti. Vanhemmat laiteohjelmistot, lisensoidut tai ilman PKI-avaimia toimivat HAM-radiot sekä ylikokoiset paketit eivät välttämättä enää toimi. PKI-todennetut suoraviestit ovat edelleen käytettävissä.</string>
+    <string name="packet_authenticity_strict_summary">Näytä ja käsittele vain kryptografisesti todennetut mesh-paketit. Vanhemmat radiot ja ylikokoiset paketit eivät välttämättä enää toimi.</string>
+    <string name="packet_authenticity_strict_title">Otetaanko tiukka tila käyttöön?</string>
+    <string name="packet_authenticity_unsupported">Tämä yhdistetty laite ei tue pakettien allekirjoitusten vahvistamista.</string>
     <string name="pairing_mode">Paritustila</string>
     <string name="password">Salasana</string>
     <!-- PAX -->
@@ -1257,7 +1269,7 @@
     <string name="paxcounter_config">PAX-laskurin asetukset</string>
     <string name="paxcounter_enabled">PAX-laskuri käytössä</string>
     <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>
-    <string name="permission_missing_31">Meshtastic tarvitsee \"lähistön laitteet\" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
+    <string name="permission_missing_31">Meshtastic tarvitsee "lähistön laitteet" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="phone_location">Puhelimen sijainti</string>
     <string name="phone_location_description">Meshtastic hyödyntää puhelimen sijaintia tarjotakseen erilaisia toimintoja. Voit muuttaa sijaintioikeuksia koska tahansa asetuksista.</string>
     <string name="play">Aloita</string>
@@ -1416,7 +1428,7 @@
     <string name="role_tracker_desc">Lähettää GPS-sijaintitiedot ensisijaisesti.</string>
     <string name="root_topic">Palvelimen osoite (root topic)</string>
     <string name="rotary_encoder_1_enabled">Kiertovalitsin #1 käytössä</string>
-    <string name="router_role_confirmation_text">Olen lukenut &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
+    <string name="router_role_confirmation_text">Olen lukenut &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
     <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>

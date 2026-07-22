@@ -197,7 +197,7 @@
     <string name="critical_alert">Avvisi critici</string>
     <string name="critical_alerts">Avvisi critici</string>
     <string name="critical_alerts_dnd_request_text">Per assicurarti di ricevere avvisi critici, come i messaggi SOS
-        , anche quando il dispositivo è in modalità \"Non disturbare\", è necessario concedere il permesso speciale
+        , anche quando il dispositivo è in modalità "Non disturbare", è necessario concedere il permesso speciale
         . Si prega di abilitarlo dalle impostazioni di notifica.
     </string>
     <string name="current">Attuale</string>
@@ -353,7 +353,7 @@
     <string name="firmware_update_checking">Verifica aggiornamenti in corso...</string>
     <string name="firmware_update_currently_installed">Versione Installata: %1$s</string>
     <string name="firmware_update_device">Dispositivo: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dice: \"Tieni la tua scala a portata di mano!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dice: "Tieni la tua scala a portata di mano!"</string>
     <string name="firmware_update_disclaimer_text">Sta per essere caricato un nuovo firmware sul dispositivo. Questo processo comporta dei rischi.\n\n• Assicurarsi che il dispositivo sia carico.\n• Tenere il dispositivo vicino al telefono.\n• Non chiudere l'app durante l'aggiornamento.\n\nVerificare di aver selezionato il firmware corretto per il dispositivo.</string>
     <string name="firmware_update_disclaimer_title">Avvertenza Aggiornamento</string>
     <string name="firmware_update_disconnect_warning">Nota: Questa procedura scollegherà temporaneamente il dispositivo durante l'aggiornamento.</string>
@@ -713,7 +713,7 @@
     <string name="paxcounter_config">Configurazione Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter abilitato</string>
     <string name="periodic_position_broadcast">Trasmissione periodica della posizione</string>
-    <string name="permission_missing_31">Meshtastic ha bisogno dei permessi \"Dispositivi nelle vicinanze\" abilitati per trovare e connettersi ai dispositivi tramite Bluetooth. È possibile disabilitare quando non è in uso.</string>
+    <string name="permission_missing_31">Meshtastic ha bisogno dei permessi "Dispositivi nelle vicinanze" abilitati per trovare e connettersi ai dispositivi tramite Bluetooth. È possibile disabilitare quando non è in uso.</string>
     <string name="phone_location">Posizione del telefono</string>
     <string name="phone_location_description">Meshtastic utilizza la posizione del telefono per abilitare molte funzionalità. È possibile aggiornare i permessi riguardo la posizione in qualsiasi momento dalle impostazioni.</string>
     <string name="play">Riproduci</string>

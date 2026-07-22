@@ -1362,7 +1362,7 @@
     <string name="role_tracker_desc">GPSの位置情報パケットを優先してブロードキャストします。</string>
     <string name="root_topic">ルート トピック</string>
     <string name="rotary_encoder_1_enabled">ロータリーエンコーダ #1 を有効化</string>
-    <string name="router_role_confirmation_text">&lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
+    <string name="router_role_confirmation_text">&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">セッション鍵が不正です</string>
     <string name="routing_error_admin_public_key_unauthorized">許可されていない公開鍵</string>

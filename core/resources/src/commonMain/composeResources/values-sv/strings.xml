@@ -233,7 +233,7 @@
     <string name="critical_alert">Kritiskt larm!</string>
     <string name="critical_alerts">Kritiska larm</string>
     <string name="critical_alerts_dnd_request_text">För att försäkra dig om att du får kritiska larm, till exempel
-        SOS-meddelanden, även när din enhet är i läget \"Stör ej\", måste du ge särskild
+        SOS-meddelanden, även när din enhet är i läget "Stör ej", måste du ge särskild
         -behörighet. Vänligen aktivera detta i aviseringsinställningarna.
     </string>
     <string name="current">Ström</string>
@@ -412,7 +412,7 @@
     <string name="firmware_update_connecting_attempt">Ansluter till enhet (försök %1$d/%2$d)...</string>
     <string name="firmware_update_currently_installed">Installerad version: %1$s</string>
     <string name="firmware_update_device">Enhet: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy säger: \"Håll i dig!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy säger: "Håll i dig!"</string>
     <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
     <string name="firmware_update_do_not_close">Stäng inte appen.</string>
     <string name="firmware_update_done">Klart</string>
@@ -800,7 +800,7 @@
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
     <string name="periodic_position_broadcast">Periodisk positionssändning</string>
-    <string name="permission_missing_31">Meshtastic behöver \"Närliggande enheter\"-behörigheter aktiverade för att hitta och ansluta till enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
+    <string name="permission_missing_31">Meshtastic behöver "Närliggande enheter"-behörigheter aktiverade för att hitta och ansluta till enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
     <string name="phone_location">Telefonens plats</string>
     <string name="phone_location_description">Meshtastic använder telefonens plats för att aktivera ett antal funktioner. Du kan uppdatera dina platsbehörigheter när som helst från inställningar.</string>
     <string name="play">Spela upp</string>

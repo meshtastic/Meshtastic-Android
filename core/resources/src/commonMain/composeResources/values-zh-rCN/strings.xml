@@ -625,7 +625,7 @@
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_alpha">开发版本</string>
-    <string name="firmware_update_archive_missing_target">找不到 %2$s (%3$s) 没找到固件 \"%1$s\"。</string>
+    <string name="firmware_update_archive_missing_target">找不到 %2$s (%3$s) 没找到固件 "%1$s"。</string>
     <string name="firmware_update_available">有可用的固件更新</string>
     <string name="firmware_update_battery_low">电池电量过低 (%1$d%). 请在更新前为您的设备充电。</string>
     <string name="firmware_update_checking">正在检查更新…</string>
@@ -659,7 +659,7 @@
     <string name="firmware_update_flashing">正在刷入设备，请稍候...</string>
     <string name="firmware_update_hang_tight">稍等，我们正在处理……</string>
     <string name="firmware_update_hash_rejected">固件hash值错误。设备可能需要正确的hash配置或 bootloader更新。</string>
-    <string name="firmware_update_invalid_local_file_detail">所选的文件 \"%1$s\" 不匹配 %2$s (%3$s)。请选择适用于该目标设备的固件文件。</string>
+    <string name="firmware_update_invalid_local_file_detail">所选的文件 "%1$s" 不匹配 %2$s (%3$s)。请选择适用于该目标设备的固件文件。</string>
     <string name="firmware_update_keep_device_close">请将设备靠近您的手机。</string>
     <string name="firmware_update_latest">更新到: %1$s</string>
     <string name="firmware_update_local_file">本地文件</string>
@@ -1415,7 +1415,7 @@
     <string name="role_tracker_desc">定位模式 - 用于作为 GPS 跟踪器。从该设备发送的定位数据包优先级较高，每两分钟广播一次。智能位置广播默认为关闭。</string>
     <string name="root_topic">根主题</string>
     <string name="rotary_encoder_1_enabled">启用旋转编码器 #1 </string>
-    <string name="router_role_confirmation_text">我已经阅读了 &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;选择合适的设备角色&lt;/a&gt;。</string>
+    <string name="router_role_confirmation_text">我已经阅读了 &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;选择合适的设备角色&lt;/a&gt;。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">会话密钥错误</string>
     <string name="routing_error_admin_public_key_unauthorized">未授权的公钥</string>

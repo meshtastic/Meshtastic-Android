@@ -618,7 +618,7 @@
     <string name="firmware_too_old">Püsivara värskendus on vajalik.</string>
     <string name="firmware_update_almost_there">Kohe lõpetan...</string>
     <string name="firmware_update_alpha">Alfa</string>
-    <string name="firmware_update_archive_missing_target">Püsivara %2$s (%3$s) jaoks, ei leitud \"%1$s\".</string>
+    <string name="firmware_update_archive_missing_target">Püsivara %2$s (%3$s) jaoks, ei leitud "%1$s".</string>
     <string name="firmware_update_battery_low">Aku liiga tühi (%1$d%). Palun lae seade enne uuendamist.</string>
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_confirm_file_button">Alusta püsivarauuendust</string>
@@ -629,7 +629,7 @@
     <string name="firmware_update_copying">Löö patsu! Oota veidi, püsivara laetakse...</string>
     <string name="firmware_update_currently_installed">Praegu paigaldatud: %1$s</string>
     <string name="firmware_update_device">Seade: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy ütleb: \"Hoia oma redel käepärast!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy ütleb: "Hoia oma redel käepärast!"</string>
     <string name="firmware_update_disclaimer_text">Oled paigaldamas oma seadmesse uut püsivara. See protsess on ohtlik.\n\n• Veendu, et seade on laetud.\n• Hoia seadet telefoni lähedal.\n• Ära sulge rakendust värskendamise ajal.\n\nKontrolli, et oled oma riistvara jaoks valinud õige püsivara.</string>
     <string name="firmware_update_disclaimer_title">Värskenduse hoiatus</string>
     <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt seadme ühenduse värskendamise ajal.</string>
@@ -645,7 +645,7 @@
     <string name="firmware_update_flashing">Seadme värskendamine, palun oota...</string>
     <string name="firmware_update_hang_tight">Pea vastu, me töötame selle kallal...</string>
     <string name="firmware_update_hash_rejected">Püsivara räsi tagasi lükatud. Seade võib vajada räsi kontrollimist või alglaaduri värskendamist.</string>
-    <string name="firmware_update_invalid_local_file_detail">Valitud fail \"%1$s\" ei vasta failile %2$s (%3$s). Vali selle sihtmärgi jaoks püsivara fail.</string>
+    <string name="firmware_update_invalid_local_file_detail">Valitud fail "%1$s" ei vasta failile %2$s (%3$s). Vali selle sihtmärgi jaoks püsivara fail.</string>
     <string name="firmware_update_keep_device_close">Hoia seade telefoni lähedal.</string>
     <string name="firmware_update_latest">Uuenda: %1$s' le</string>
     <string name="firmware_update_local_file">Lokaalne</string>
@@ -1390,7 +1390,7 @@
     <string name="role_tracker_desc">Esmajärjekorras edastatakse GPS asukoha pakette.</string>
     <string name="root_topic">Juurteema</string>
     <string name="rotary_encoder_1_enabled">Pöördvalik #1 lubatud</string>
-    <string name="router_role_confirmation_text">Olen lugenud &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;Seadme rolli dokumenti&lt;/a&gt; ja blogi postitust &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt; Kuidas valida seadmele õige roll&lt;/a&gt;.</string>
+    <string name="router_role_confirmation_text">Olen lugenud &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Seadme rolli dokumenti&lt;/a&gt; ja blogi postitust &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; Kuidas valida seadmele õige roll&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Vigane sessiooni võti</string>
     <string name="routing_error_admin_public_key_unauthorized">Avalik võti autoriseerimata</string>

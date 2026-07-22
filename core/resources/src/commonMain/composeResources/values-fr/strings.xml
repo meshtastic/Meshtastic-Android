@@ -281,7 +281,7 @@
     <string name="create_your_own_networks">Créez votre propre réseau</string>
     <string name="critical_alert">Alerte Critique !</string>
     <string name="critical_alerts">Alertes critiques</string>
-    <string name="critical_alerts_dnd_request_text">Pour assurer la réception des alertes critiques, comme les messages de SOS, même lorsque votre périphérique est en mode \"Ne pas déranger\", vous devez donner les droits spéciaux. Activez cela dans les paramètres de notifications    </string>
+    <string name="critical_alerts_dnd_request_text">Pour assurer la réception des alertes critiques, comme les messages de SOS, même lorsque votre périphérique est en mode "Ne pas déranger", vous devez donner les droits spéciaux. Activez cela dans les paramètres de notifications    </string>
     <string name="current">Actif</string>
     <string name="currently">Actuellement :</string>
     <string name="date">Date</string>
@@ -967,7 +967,7 @@
     <string name="paxcounter_config">Configuration du Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activé</string>
     <string name="periodic_position_broadcast">Diffusion périodique de position</string>
-    <string name="permission_missing_31">Meshtastic a besoin des autorisations \"Périphériques à proximité\" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n'est pas utilisée.</string>
+    <string name="permission_missing_31">Meshtastic a besoin des autorisations "Périphériques à proximité" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n'est pas utilisée.</string>
     <string name="phone_location">Localisation du téléphone</string>
     <string name="phone_location_description">Meshtastic utilise la localisation de votre téléphone pour activer un certain nombre de fonctionnalités. Vous pouvez mettre à jour vos autorisations de localisation à tout moment à partir des paramètres.</string>
     <string name="play">Lancer</string>
@@ -1120,7 +1120,7 @@
     <string name="role_tracker_desc">Transmet les paquets de positions GPS en priorité.</string>
     <string name="root_topic">Sujet principal</string>
     <string name="rotary_encoder_1_enabled">Encodeur rotatif #1 activé</string>
-    <string name="router_role_confirmation_text">J'ai lu la &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
+    <string name="router_role_confirmation_text">J'ai lu la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Mauvaise clé de session</string>
     <string name="routing_error_admin_public_key_unauthorized">Clé publique non autorisée</string>

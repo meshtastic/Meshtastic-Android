@@ -1113,7 +1113,7 @@
     <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="root_topic">根話題</string>
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>
-    <string name="router_role_confirmation_text">我已閱讀&lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
+    <string name="router_role_confirmation_text">我已閱讀&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">無效的會話金鑰</string>
     <string name="routing_error_admin_public_key_unauthorized">無法識別公鑰</string>

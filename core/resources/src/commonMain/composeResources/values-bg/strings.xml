@@ -429,7 +429,7 @@
     <string name="firmware_update_copying">High-five! Чакай, копирам фърмуера...</string>
     <string name="firmware_update_currently_installed">Текущия инсталиран: %1$s</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Чирпи казва, \"Keep your ladder handy!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Чирпи казва, "Keep your ladder handy!"</string>
     <string name="firmware_update_disclaimer_text">Ще инсталирате нов фърмуер на устройството си. Този процес носи рискове.\n\n• Уверете се, че устройството ви е заредено.\n• Дръжте устройството близо до телефона си.\n• Не затваряйте приложението по време на актуализацията.\n\nУверете се, че сте избрали правилния фърмуер за вашия хардуер.</string>
     <string name="firmware_update_disclaimer_title">Предупреждение за актуализация</string>
     <string name="firmware_update_disconnect_warning">Забележка: Това временно ще прекъсне връзката с устройството ви по време на актуализацията.</string>
@@ -603,7 +603,7 @@
         <item quantity="one">%1$d ден</item>
         <item quantity="other">%1$d дни</item>
     </plurals>
-    <string name="log_retention_days_summary">Изберете колко дълго да се съхраняват журналите. Изберете \"Никога\", за да се съхраняват всички журнали.</string>
+    <string name="log_retention_days_summary">Изберете колко дълго да се съхраняват журналите. Изберете "Никога", за да се съхраняват всички журнали.</string>
     <plurals name="log_retention_hours">
         <item quantity="one">%1$d час</item>
         <item quantity="other">%1$d часа</item>
@@ -854,7 +854,7 @@
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
-    <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за \"Устройства наблизо\", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
+    <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
     <plurals name="plurals_hours">

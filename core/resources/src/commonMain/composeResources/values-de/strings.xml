@@ -244,7 +244,7 @@
     <string name="config_display_screen_on_secs_summary">Wie lange die Anzeige eingeschaltet bleibt, nachdem die Benutzertaste gedrückt oder Nachrichten empfangen wurden.</string>
     <string name="config_display_units_summary">Einheiten die angezeigt werden.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Erfordert, dass Ihr Gerät über einen Beschleunigungsmesser verfügt.</string>
-    <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn \"0\", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
+    <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn "0", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
     <string name="config_lora_hop_limit_summary">Legt die maximale Sprungweite fest. Der Standardwert ist 3. Eine Erhöhung der Sprungweite erhöht auch die Überlastung und sollte daher mit Vorsicht verwendet werden. Nachrichten mit Sprungweite 0 erhalten keine Bestätigung.</string>
     <string name="config_lora_modem_preset_summary">Verfügbare Modemvoreinstellungen, Standard ist LongFast.</string>
     <string name="config_lora_region_summary">Die Region, in der Sie das Funkgerät benutzen.</string>
@@ -285,7 +285,7 @@
     <string name="critical_alert">Kritischer Fehler!</string>
     <string name="critical_alerts">Kritische Warnungen</string>
     <string name="critical_alerts_dnd_request_text">Um sicherzustellen, dass Sie kritische Benachrichtigungen wie
-        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im \"Nicht stören\" Modus ist, müssen Sie eine spezielle
+        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im "Nicht stören" Modus ist, müssen Sie eine spezielle
         Berechtigung erteilen. Bitte aktivieren Sie dies in den Benachrichtigungseinstellungen.
     </string>
     <string name="current">Strom</string>
@@ -1177,7 +1177,7 @@
     <string name="role_tracker_desc">GPS Standortnachricht mit Priorität gesendet.</string>
     <string name="root_topic">Hauptthema</string>
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>
-    <string name="router_role_confirmation_text">Ich habe die &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
+    <string name="router_role_confirmation_text">Ich habe die &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
     <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>

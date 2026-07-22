@@ -627,7 +627,7 @@
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_update_almost_there">Почти готово...</string>
     <string name="firmware_update_alpha">Альфа</string>
-    <string name="firmware_update_archive_missing_target">Прошивка для %2$s (%3$s) не найдена в разделе \"%1$s\".</string>
+    <string name="firmware_update_archive_missing_target">Прошивка для %2$s (%3$s) не найдена в разделе "%1$s".</string>
     <string name="firmware_update_available">Доступно обновление прошивки</string>
     <string name="firmware_update_battery_low">Слишком низкий заряд (%1$d%). Пожалуйста, зарядите устройство перед обновлением.</string>
     <string name="firmware_update_checking">Проверка обновлений...</string>
@@ -639,7 +639,7 @@
     <string name="firmware_update_copying">Дай пять! Подожди, идет копирование прошивки...</string>
     <string name="firmware_update_currently_installed">Текущая версия: %1$s</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Щебетун говорит: \"Держите лестницу под рукой!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Щебетун говорит: "Держите лестницу под рукой!"</string>
     <string name="firmware_update_disclaimer_text">Вы собираетесь прошить ваше устройство. Этот процесс сопряжен с риском.\n\n• Убедитесь, что устройство заряжено.\n• Держите устройство рядом с телефоном.\n• Не закрывайте приложение во время обновления.\n\nУдостоверьтесь, что вы выбрали подходящую прошивку для вашего устройства.</string>
     <string name="firmware_update_disclaimer_title">Предупреждения об обновлении</string>
     <string name="firmware_update_disconnect_warning">Примечание: Во время обновления устройство временно отключится.</string>
@@ -655,7 +655,7 @@
     <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
     <string name="firmware_update_hang_tight">Держитесь крепче, работаем...</string>
     <string name="firmware_update_hash_rejected">Хэш прошивки отклонен. Устройство может потребовать подготовки хэша или обновления загрузчика.</string>
-    <string name="firmware_update_invalid_local_file_detail">Выбранный файл \"%1$s\" не соответствует %2$s (%3$s). Выберите файл прошивки для этой цели.</string>
+    <string name="firmware_update_invalid_local_file_detail">Выбранный файл "%1$s" не соответствует %2$s (%3$s). Выберите файл прошивки для этой цели.</string>
     <string name="firmware_update_keep_device_close">Держите устройство поближе к телефону.</string>
     <string name="firmware_update_latest">Обновить до: %1$s</string>
     <string name="firmware_update_local_file">Локальный файл</string>
@@ -1429,7 +1429,7 @@
     <string name="role_tracker_desc">Транслирует пакеты местоположения GPS в приоритетном порядке.</string>
     <string name="root_topic">Корневая тема</string>
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
-    <string name="router_role_confirmation_text">Я прочитал &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
+    <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Неверный ключ сессии</string>
     <string name="routing_error_admin_public_key_unauthorized">Публичный ключ не авторизован</string>
