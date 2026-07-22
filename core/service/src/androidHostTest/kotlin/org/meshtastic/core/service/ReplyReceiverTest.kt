@@ -89,14 +89,16 @@ class ReplyReceiverTest {
     }
 
     @Test
-    fun `reply goes through SendMessageUseCase and marks conversation read`() {
+    fun `reply goes through SendMessageUseCase, marks read, and refreshes the notification in place`() {
         val contactKey = "0!12345678"
 
         ReplyReceiver().onReceive(ApplicationProvider.getApplicationContext(), replyIntent(contactKey, "hello back"))
 
         verifySuspend { sendMessageUseCase.invoke("hello back", contactKey, null) }
         verifySuspend { packetRepository.clearUnreadCount(contactKey, any()) }
-        verify { notificationManager.cancelMessageNotification(contactKey) }
+        // The conversation is re-posted with the sent reply (MessagingStyle confirmation flow), not dismissed.
+        verifySuspend { notificationManager.refreshConversationAfterReply(contactKey) }
+        verify(mode = VerifyMode.exactly(0)) { notificationManager.cancelMessageNotification(any()) }
     }
 
     @Test

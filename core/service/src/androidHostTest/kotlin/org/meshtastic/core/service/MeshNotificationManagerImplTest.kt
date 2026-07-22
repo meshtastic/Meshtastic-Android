@@ -59,6 +59,8 @@ class MeshNotificationManagerImplTest {
                 context = context,
                 packetRepository = lazy<PacketRepository> { error("Not used in this test") },
                 nodeRepository = lazy<NodeRepository> { error("Not used in this test") },
+                conversationShortcutPublisher = lazy { error("Not used in this test") },
+                radioConfigRepository = lazy { error("Not used in this test") },
             )
 
         notifications.initChannels()

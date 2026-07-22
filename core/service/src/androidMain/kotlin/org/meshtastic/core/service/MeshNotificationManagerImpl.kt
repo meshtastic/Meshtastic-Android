@@ -24,16 +24,13 @@ import android.app.TaskStackBuilder
 import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.LocusIdCompat
 import androidx.core.content.getSystemService
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
@@ -41,6 +38,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -50,6 +48,7 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.R.raw
@@ -96,6 +95,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -110,6 +110,8 @@ class MeshNotificationManagerImpl(
     private val context: Context,
     private val packetRepository: Lazy<PacketRepository>,
     private val nodeRepository: Lazy<NodeRepository>,
+    private val conversationShortcutPublisher: Lazy<ConversationShortcutPublisher>,
+    private val radioConfigRepository: Lazy<RadioConfigRepository>,
 ) : MeshNotificationManager {
 
     private val notificationManager =
@@ -117,18 +119,44 @@ class MeshNotificationManagerImpl(
 
     companion object {
         const val MAX_BATTERY_LEVEL = 100
-        private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
+
+        // Meshtastic brand accent (Green 500, see .skills/design-standards) — used as the notification accent color
+        // (small-icon tint) and the notification LED color.
+        private val NOTIFICATION_COLOR = 0xFF67EA94.toInt()
         private const val MAX_HISTORY_MESSAGES = 10
         private const val MIN_CONTEXT_MESSAGES = 3
         private const val SNIPPET_LENGTH = 30
         private const val GROUP_KEY_MESSAGES = "org.meshtastic.app.GROUP_MESSAGES"
         private const val SUMMARY_ID = 1
-        private const val PERSON_ICON_SIZE = 128
-        private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
         private const val STATS_UPDATE_MINUTES = 15
         private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
         private const val BULLET = "• "
+
+        // Notification tags namespace the numeric IDs per notification type. Without them every type shares one
+        // integer ID space, so unrelated notifications can clobber each other (e.g. a node whose num == 101 would
+        // overwrite the foreground-service notification, or num == 1 the group summary). notify()/cancel() must use
+        // the same (tag, id) pair.
+        private const val TAG_MESSAGE = "message"
+        private const val TAG_MESSAGE_SUMMARY = "message_summary"
+        private const val TAG_WAYPOINT = "waypoint"
+        private const val TAG_ALERT = "alert"
+        private const val TAG_NEW_NODE = "new_node"
+        private const val TAG_LOW_BATTERY = "low_battery"
+        private const val TAG_CLIENT = "client"
     }
+
+    /**
+     * Caches generated avatar icons keyed by (person id + short name + colors) so a conversation rebuild does not
+     * re-rasterize an avatar bitmap for every message on every update. Bounded by the number of distinct nodes seen;
+     * entries are cheap and colors/names rarely change.
+     */
+    private val personIconCache = ConcurrentHashMap<String, IconCompat>()
+
+    /** Circular, node-colored avatar holding the sender's full short name (e.g. "2c3d"), not just its first letter. */
+    private fun cachedPersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
+        personIconCache.getOrPut("$key|$shortName|$backgroundColor|$foregroundColor") {
+            PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = false)
+        }
 
     /**
      * Sealed class to define the properties of each notification channel. This centralizes channel configuration and
@@ -237,7 +265,7 @@ class MeshNotificationManagerImpl(
         val channelName = getString(type.channelNameRes)
         val channel =
             NotificationChannel(type.channelId, channelName, type.importance).apply {
-                lightColor = NOTIFICATION_LIGHT_COLOR
+                lightColor = NOTIFICATION_COLOR
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC // Default, can be overridden
 
                 // Type-specific configurations
@@ -385,7 +413,7 @@ class MeshNotificationManagerImpl(
         channelName: String?,
         isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
+        showConversationNotification(contactKey, isBroadcast, channelName, conversationName = name, isSilent = isSilent)
     }
 
     override suspend fun updateReactionNotification(
@@ -396,7 +424,7 @@ class MeshNotificationManagerImpl(
         channelName: String?,
         isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
+        showConversationNotification(contactKey, isBroadcast, channelName, conversationName = name, isSilent = isSilent)
     }
 
     override suspend fun updateWaypointNotification(
@@ -407,15 +435,21 @@ class MeshNotificationManagerImpl(
         isSilent: Boolean,
     ) {
         val notification = createWaypointNotification(name, message, waypointId, isSilent)
-        notificationManager.notify(contactKey.hashCode(), notification)
+        notificationManager.notify(TAG_WAYPOINT, contactKey.hashCode(), notification)
     }
 
     private suspend fun showConversationNotification(
         contactKey: String,
         isBroadcast: Boolean,
         channelName: String?,
+        conversationName: String,
         isSilent: Boolean = false,
     ) {
+        // Publish (or refresh) a long-lived conversation shortcut before the notification references it, so Android can
+        // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel name
+        // labels a broadcast conversation; a direct message is labelled by the other participant's name.
+        conversationShortcutPublisher.value.ensureConversationShortcut(contactKey, channelName ?: conversationName)
+
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val history =
             packetRepository.value
@@ -446,20 +480,27 @@ class MeshNotificationManagerImpl(
                 history = displayHistory,
                 isSilent = isSilent,
             )
-        notificationManager.notify(contactKey.hashCode(), notification)
+        notificationManager.notify(TAG_MESSAGE, contactKey.hashCode(), notification)
         showGroupSummary()
     }
 
-    private fun showGroupSummary() {
+    private fun showGroupSummary(justCancelledId: Int? = null) {
+        // Exclude the summary itself by its group-summary flag rather than by id, so a conversation whose
+        // contactKey.hashCode() happens to equal SUMMARY_ID is still counted as an active conversation.
+        // Also exclude a conversation we just cancelled: activeNotifications does not reflect a cancel() issued
+        // moments earlier, so without this the summary would be rebuilt from stale state and orphaned in the shade
+        // (and Android Auto) after the last message is dismissed via reply / mark-as-read.
         val activeNotifications =
             notificationManager.activeNotifications.filter {
-                it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
+                it.notification.group == GROUP_KEY_MESSAGES &&
+                    (it.notification.flags and Notification.FLAG_GROUP_SUMMARY) == 0 &&
+                    !(it.tag == TAG_MESSAGE && it.id == justCancelledId)
             }
 
         // No conversations left — drop the summary too, otherwise it lingers in Android Auto after the
         // last message notification is cancelled (e.g. on reply / mark-as-read).
         if (activeNotifications.isEmpty()) {
-            notificationManager.cancel(SUMMARY_ID)
+            notificationManager.cancel(TAG_MESSAGE_SUMMARY, SUMMARY_ID)
             return
         }
 
@@ -469,7 +510,11 @@ class MeshNotificationManagerImpl(
             Person.Builder()
                 .setName(meName)
                 .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+                .apply {
+                    ourNode?.let {
+                        setIcon(cachedPersonIcon(it.user.id, it.user.short_name, it.colors.second, it.colors.first))
+                    }
+                }
                 .build()
 
         val messagingStyle =
@@ -496,44 +541,74 @@ class MeshNotificationManagerImpl(
                 .setStyle(messagingStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
+                // Only the child conversation notifications alert; without this the summary (posted on a HIGH channel)
+                // can buzz a second time for every message.
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
                 .setAutoCancel(true)
                 .build()
 
-        notificationManager.notify(SUMMARY_ID, summaryNotification)
+        notificationManager.notify(TAG_MESSAGE_SUMMARY, SUMMARY_ID, summaryNotification)
     }
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         val notification = createAlertNotification(contactKey, name, alert)
         // Use a consistent, unique ID for each alert source.
-        notificationManager.notify(name.hashCode(), notification)
+        notificationManager.notify(TAG_ALERT, name.hashCode(), notification)
     }
 
     override fun showNewNodeSeenNotification(node: Node) {
         val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name, node.num)
-        notificationManager.notify(node.num, notification)
+        notificationManager.notify(TAG_NEW_NODE, node.num, notification)
     }
 
     override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
         val notification = createLowBatteryNotification(node, isRemote)
-        notificationManager.notify(node.num, notification)
+        notificationManager.notify(TAG_LOW_BATTERY, node.num, notification)
     }
 
     override fun showClientNotification(clientNotification: ClientNotification) {
         val notification =
             createClientNotification(getString(Res.string.client_notification), clientNotification.message)
-        notificationManager.notify(clientNotification.toString().hashCode(), notification)
+        notificationManager.notify(TAG_CLIENT, clientNotification.toString().hashCode(), notification)
     }
 
     override fun cancelMessageNotification(contactKey: String) {
-        notificationManager.cancel(contactKey.hashCode())
+        val id = contactKey.hashCode()
+        notificationManager.cancel(TAG_MESSAGE, id)
         // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
-        showGroupSummary()
+        // Pass the id we just cancelled so a stale activeNotifications snapshot doesn't keep the summary alive.
+        showGroupSummary(justCancelledId = id)
     }
 
-    override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
+    /**
+     * Re-posts the conversation silently after an inline reply, so the notification updates in place with the sent
+     * reply appended (the read context becomes historic, the reply is the visible latest message) instead of
+     * disappearing. Re-posting under the same (tag, id) is also what resolves the RemoteInput spinner.
+     */
+    override suspend fun refreshConversationAfterReply(contactKey: String) {
+        val isBroadcast = contactKey.contains(NodeAddress.ID_BROADCAST)
+        val conversationName: String
+        var channelName: String? = null
+        if (isBroadcast) {
+            // Resolve the effective channel name (an empty primary shows its modem-preset name, e.g. "LongFast").
+            val channelSet = radioConfigRepository.value.channelSetFlow.first()
+            val lora = channelSet.lora_config ?: Channel.default.loraConfig
+            val index = contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull()
+            channelName = index?.let { channelSet.settings.getOrNull(it) }?.let { Channel(it, lora).name }
+            conversationName = channelName ?: contactKey
+        } else {
+            // DM contactKey is "<channelIndex><userId>" where userId starts at the '!'.
+            val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
+            val peer = nodeRepository.value.nodeDBbyNum.value.values.find { it.user.id == userId }
+            conversationName = peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: contactKey
+        }
+        showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
+    }
+
+    override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(TAG_LOW_BATTERY, node.num)
 
     override fun clearClientNotification(notification: ClientNotification) =
-        notificationManager.cancel(notification.toString().hashCode())
+        notificationManager.cancel(TAG_CLIENT, notification.toString().hashCode())
 
     // endregion
 
@@ -544,6 +619,9 @@ class MeshNotificationManagerImpl(
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setOngoing(true)
+                // Android 12+ may defer FGS notifications ~10s; show immediately so the user watching a
+                // "Connecting…" state gets feedback right away.
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                 .setContentTitle(name)
                 .setShowWhen(true)
 
@@ -585,7 +663,11 @@ class MeshNotificationManagerImpl(
             Person.Builder()
                 .setName(meName)
                 .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+                .apply {
+                    ourNode?.let {
+                        setIcon(cachedPersonIcon(it.user.id, it.user.short_name, it.colors.second, it.colors.first))
+                    }
+                }
                 .build()
 
         val style =
@@ -593,13 +675,29 @@ class MeshNotificationManagerImpl(
                 .setGroupConversation(channelName != null)
                 .setConversationTitle(channelName)
 
-        history.forEach { msg ->
+        // Already-read messages are added as *historic* context rather than as new content: MessagingStyle keeps them
+        // available to accessibility services and Android Auto/Wear for conversation context without re-presenting them
+        // as freshly-arrived messages. Unread messages (and reactions, which are themselves new events) are the actual
+        // alerting content. When every message in the window is read (e.g. a reaction arrived on a read message) the
+        // most recent one is kept as a normal message so the notification still has alerting content to show.
+        val anyUnread = history.any { !it.read }
+        val lastIndex = history.lastIndex
+        history.forEachIndexed { index, msg ->
             // Use the node attached to the message directly to ensure correct identification
             val person =
                 Person.Builder()
                     .setName(msg.node.user.long_name)
                     .setKey(msg.node.user.id)
-                    .setIcon(createPersonIcon(msg.node.user.short_name, msg.node.colors.second, msg.node.colors.first))
+                    // Favorite nodes feed the system's conversation-priority ranking (shade ordering, suggestions).
+                    .setImportant(msg.node.isFavorite)
+                    .setIcon(
+                        cachedPersonIcon(
+                            msg.node.user.id,
+                            msg.node.user.short_name,
+                            msg.node.colors.second,
+                            msg.node.colors.first,
+                        ),
+                    )
                     .build()
 
             val text =
@@ -607,7 +705,11 @@ class MeshNotificationManagerImpl(
                     "↩️ \"${original.node.user.short_name}: ${original.text.take(SNIPPET_LENGTH)}...\": ${msg.text}"
                 } ?: msg.text
 
-            style.addMessage(text, msg.receivedTime, person)
+            if (msg.read && (anyUnread || index != lastIndex)) {
+                style.addHistoricMessage(NotificationCompat.MessagingStyle.Message(text, msg.receivedTime, person))
+            } else {
+                style.addMessage(text, msg.receivedTime, person)
+            }
 
             // Add reactions as separate "messages" in history if they exist
             msg.emojis.forEach { reaction ->
@@ -617,7 +719,8 @@ class MeshNotificationManagerImpl(
                         .setName(reaction.user.long_name)
                         .setKey(reaction.user.id)
                         .setIcon(
-                            createPersonIcon(
+                            cachedPersonIcon(
+                                reaction.user.id,
                                 reaction.user.short_name,
                                 reactorNode.colors.second,
                                 reactorNode.colors.first,
@@ -635,6 +738,9 @@ class MeshNotificationManagerImpl(
 
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
+            // Link to the conversation shortcut so this is treated as a Conversation notification (Android 11+).
+            .setShortcutId(contactKey)
+            .setLocusId(LocusIdCompat(contactKey))
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
@@ -868,36 +974,9 @@ class MeshNotificationManagerImpl(
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)
-            .setColor(NOTIFICATION_LIGHT_COLOR)
+            .setColor(NOTIFICATION_COLOR)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(contentIntent ?: openAppIntent)
-    }
-
-    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
-        val bitmap = createBitmap(PERSON_ICON_SIZE, PERSON_ICON_SIZE)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-        // Draw background circle
-        paint.color = backgroundColor
-        canvas.drawCircle(PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, paint)
-
-        // Draw initials
-        paint.color = foregroundColor
-        paint.textSize = PERSON_ICON_SIZE * PERSON_ICON_TEXT_SIZE_RATIO
-        paint.textAlign = Paint.Align.CENTER
-        val initial =
-            if (name.isNotEmpty()) {
-                val codePoint = name.codePointAt(0)
-                String(Character.toChars(codePoint)).uppercase()
-            } else {
-                "?"
-            }
-        val xPos = canvas.width / 2f
-        val yPos = (canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f)
-        canvas.drawText(initial, xPos, yPos, paint)
-
-        return IconCompat.createWithBitmap(bitmap)
     }
 
     // endregion
