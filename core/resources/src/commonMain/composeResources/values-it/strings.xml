@@ -712,7 +712,7 @@
     <string name="paxcounter_config">Configurazione Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter abilitato</string>
     <string name="periodic_position_broadcast">Trasmissione periodica della posizione</string>
-    <string name="permission_missing_31">Meshtastic ha bisogno dei permessi \"Dispositivi nelle vicinanze\" abilitati per trovare e connettersi ai dispositivi tramite Bluetooth. È possibile disabilitare quando non è in uso.</string>
+    <string name="permission_missing_31">Meshtastic ha bisogno dei permessi "Dispositivi nelle vicinanze" abilitati per trovare e connettersi ai dispositivi tramite Bluetooth. È possibile disabilitare quando non è in uso.</string>
     <string name="phone_location">Posizione del telefono</string>
     <string name="phone_location_description">Meshtastic utilizza la posizione del telefono per abilitare molte funzionalità. È possibile aggiornare i permessi riguardo la posizione in qualsiasi momento dalle impostazioni.</string>
     <string name="play">Riproduci</string>
