@@ -136,10 +136,6 @@ fun MetricValueRow(color: Color, text: String, modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         MetricIndicator(color)
         Spacer(Modifier.width(4.dp))
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        )
+        Text(text = text, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelLarge)
     }
 }

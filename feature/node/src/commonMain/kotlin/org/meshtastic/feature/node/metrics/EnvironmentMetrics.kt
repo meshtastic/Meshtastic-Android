@@ -148,7 +148,7 @@ private fun TemperatureDisplay(
                 Text(
                     text = formatString(textFormat, stringResource(Res.string.temperature), temperature),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -176,7 +176,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                             Res.string.humidity,
                         )} ${MetricFormatter.percent(humidity, decimalPlaces = 2)}",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(vertical = 0.dp),
                     )
                 }
@@ -189,7 +189,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     Text(
                         text = MetricFormatter.pressure(pressure, decimalPlaces = 2),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(vertical = 0.dp),
                     )
                 }
@@ -223,7 +223,7 @@ private fun SoilMetricsDisplay(
                                 soilMoistureValue,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            style = MaterialTheme.typography.labelLarge,
                         )
                     }
                 }
@@ -241,7 +241,7 @@ private fun SoilMetricsDisplay(
                                 soilTemperature,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            style = MaterialTheme.typography.labelLarge,
                         )
                     }
                 }
@@ -265,7 +265,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     Text(
                         text = formatString("%s %.0f lx", stringResource(Res.string.lux), luxValue),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -277,7 +277,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     Text(
                         text = formatString("%s %.0f UVlx", stringResource(Res.string.uv_lux), uvLuxValue),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -297,7 +297,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                 Text(
                     text = "${stringResource(Res.string.voltage)} ${MetricFormatter.voltage(voltage)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
             if (hasCurrent) {
@@ -308,7 +308,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                         Res.string.current,
                     )} ${MetricFormatter.current(currentValue, decimalPlaces = 2)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -329,7 +329,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                     Text(
                         text = stringResource(Res.string.iaq),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     Spacer(Modifier.width(4.dp))
                     IndoorAirQuality(iaq = iaqValue, displayMode = IaqDisplayMode.Dot)
@@ -342,7 +342,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                     Text(
                         text = formatString("%s %.2f Ohm", stringResource(Res.string.gas_resistance), gasResistance),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -361,7 +361,7 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
                     Text(
                         text = formatString("%s %.2f µR/h", stringResource(Res.string.radiation), radiation),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -408,7 +408,7 @@ private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, is
             Text(
                 text = dirText,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
@@ -429,7 +429,7 @@ private fun WindGustLullRow(
                     MetricFormatter.windSpeed(envMetrics.wind_gust!!, isImperial)
                 }",
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
         if (hasLull) {
@@ -439,7 +439,7 @@ private fun WindGustLullRow(
                     MetricFormatter.windSpeed(envMetrics.wind_lull!!, isImperial)
                 }",
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
@@ -459,7 +459,7 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
                         Res.string.rainfall_1h,
                     )} ${MetricFormatter.rainfall(envMetrics.rainfall_1h!!, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
             if (has24h) {
@@ -469,7 +469,7 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
                         Res.string.rainfall_24h,
                     )} ${MetricFormatter.rainfall(envMetrics.rainfall_24h!!, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -503,7 +503,7 @@ private fun OneWireTemperatureDisplay(
             Text(
                 text = formatString(textFormat, stringResource(Res.string.one_wire_temperature), idx + 1, temp),
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

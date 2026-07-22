@@ -102,7 +102,7 @@ fun PositionCard(
                 Text(
                     text = "${stringResource(Res.string.sats)}: ${position.sats_in_view}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
 
@@ -140,7 +140,7 @@ fun PositionCard(
                             formatString("%.0f", (position.ground_track ?: 0) * HEADING_DEG)
                         }\u00B0",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
