@@ -19,6 +19,7 @@ package org.meshtastic.core.prefs.map
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -34,9 +35,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
 
 @Single
+@Suppress("TooManyFunctions")
 class MapPrefsImpl(
     @Named("MapDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
@@ -117,6 +120,25 @@ class MapPrefsImpl(
     override suspend fun awaitNetworkMapLayers(): Set<String> =
         dataStore.data.map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }.first()
 
+    override fun setCameraPosition(position: MapCameraPosition) {
+        scope.launch {
+            dataStore.edit {
+                it[KEY_CAMERA_LATITUDE] = position.latitude
+                it[KEY_CAMERA_LONGITUDE] = position.longitude
+                it[KEY_CAMERA_ZOOM] = position.zoom
+            }
+        }
+    }
+
+    override suspend fun awaitCameraPosition(): MapCameraPosition? = dataStore.data
+        .map { preferences ->
+            val latitude = preferences[KEY_CAMERA_LATITUDE] ?: return@map null
+            val longitude = preferences[KEY_CAMERA_LONGITUDE] ?: return@map null
+            val zoom = preferences[KEY_CAMERA_ZOOM] ?: return@map null
+            MapCameraPosition(latitude, longitude, zoom)
+        }
+        .first()
+
     companion object {
         val KEY_MAP_STYLE_PREF = intPreferencesKey("map_style_id")
         val KEY_SHOW_ONLY_FAVORITES_PREF = booleanPreferencesKey("show_only_favorites")
@@ -126,5 +148,8 @@ class MapPrefsImpl(
         val KEY_LAST_HEARD_TRACK_FILTER_PREF = longPreferencesKey("last_heard_track_filter")
         val KEY_HIDDEN_LAYER_URLS_PREF = stringSetPreferencesKey("hidden_layer_urls")
         val KEY_NETWORK_MAP_LAYERS_PREF = stringSetPreferencesKey("network_map_layers")
+        val KEY_CAMERA_LATITUDE = doublePreferencesKey("camera_latitude")
+        val KEY_CAMERA_LONGITUDE = doublePreferencesKey("camera_longitude")
+        val KEY_CAMERA_ZOOM = doublePreferencesKey("camera_zoom")
     }
 }

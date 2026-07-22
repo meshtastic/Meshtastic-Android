@@ -159,6 +159,7 @@ import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -187,6 +188,13 @@ import org.meshtastic.proto.BoundingBox as ProtoBoundingBox
  * !is GeofenceOverlayPolygon }`) so persistent waypoint geofences are not wiped.
  */
 private class GeofenceOverlayPolygon : Polygon()
+
+private const val INITIAL_MAP_ZOOM = 1.5
+
+private fun MapView.saveCameraPosition(viewModel: MapViewModel) {
+    val center = mapCenter
+    viewModel.saveCameraPosition(center.latitude, center.longitude, zoomLevelDouble)
+}
 
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
@@ -299,18 +307,34 @@ fun MapView(
         }
     }
 
-    val initialCameraView = remember {
-        val nodes = mapViewModel.nodes.value
-        val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
-        BoundingBox.fromGeoPoints(geoPoints)
-    }
+    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
+    val initialCameraState by mapViewModel.initialCameraState.collectAsStateWithLifecycle()
+    if (initialCameraState is InitialCameraState.Loading) return
+    val initialCameraPosition = (initialCameraState as InitialCameraState.Ready).position
     val map =
         rememberMapViewWithLifecycle(
             applicationId = mapViewModel.applicationId,
-            box = initialCameraView,
+            zoomLevel = initialCameraPosition?.zoom ?: INITIAL_MAP_ZOOM,
+            mapCenter = initialCameraPosition?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0),
             tileSource = loadOnlineTileSourceBase(),
         )
+    var hasAppliedInitialNodeBounds by remember { mutableStateOf(initialCameraPosition != null) }
+
+    LaunchedEffect(nodes, hasAppliedInitialNodeBounds) {
+        val nodePoints = nodes.filter { it.validPosition != null }.map { GeoPoint(it.latitude, it.longitude) }
+        if (!hasAppliedInitialNodeBounds && nodePoints.isNotEmpty()) {
+            map.post {
+                if (nodePoints.size == 1) {
+                    map.controller.setCenter(nodePoints.first())
+                    map.controller.setZoom(WAYPOINT_ZOOM)
+                } else {
+                    map.zoomToBoundingBox(BoundingBox.fromGeoPoints(nodePoints), false)
+                }
+                map.saveCameraPosition(mapViewModel)
+            }
+            hasAppliedInitialNodeBounds = true
+        }
+    }
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -403,7 +427,6 @@ fun MapView(
         }
     }
 
-    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
     val myId by mapViewModel.myId.collectAsStateWithLifecycle()
@@ -643,9 +666,27 @@ fun MapView(
         invalidate()
     }
 
+    val cameraSaveListener =
+        remember(mapViewModel) {
+            DelayedMapListener(
+                object : MapListener {
+                    override fun onScroll(event: ScrollEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+
+                    override fun onZoom(event: ZoomEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+                },
+            )
+        }
+
     val boxOverlayListener =
         object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
+                cameraSaveListener.onScroll(event)
                 when {
                     downloadRegionBoundingBox != null -> event.source.generateBoxOverlay()
                     geofenceBoxDraft != null -> event.source.generateGeofenceBoxOverlay()
@@ -653,7 +694,10 @@ fun MapView(
                 return true
             }
 
-            override fun onZoom(event: ZoomEvent): Boolean = false
+            override fun onZoom(event: ZoomEvent): Boolean {
+                cameraSaveListener.onZoom(event)
+                return false
+            }
         }
 
     fun startDownload() {
