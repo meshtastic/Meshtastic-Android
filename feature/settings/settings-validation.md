@@ -391,7 +391,7 @@ refresh) and writes via `AdminMessage.setModuleConfig`. Flag edits are read-modi
 | `broadcast_message` | String | maxSize: 100 bytes | — |
 | `broadcast_interval_secs` | Integer | Must be ≥ 3600 when broadcast enabled | Save is blocked while invalid; not validated when broadcast is off |
 | `broadcast_offer_channel.name` | String | maxSize: 11 bytes (proto max_size: 12) | Blank name drops the offered channel on save (text-only beacon) |
-| `broadcast_offer_channel.psk` | Base64 | Must decode as Base64 | Invalid input is ignored |
+| `broadcast_offer_channel.psk` | Base64 | Must decode as Base64 | Field shows an error while invalid; the value is only committed once it decodes (confirming while invalid reverts to the last valid value) |
 | `broadcast_offer_region` | Enum | Dropdown: `RegionCode` entries | — |
 | `broadcast_offer_preset` | Enum | Dropdown: `ModemPreset` entries | Defaults to `LONG_FAST` |
 | `broadcast_targets` | Target list | Rows added/removed via buttons | Per row: `region` dropdown, `preset` dropdown, `channel_index` signed integer input. Non-empty list supersedes the `broadcast_on_*` scalars |

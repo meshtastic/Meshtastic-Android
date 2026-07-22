@@ -122,7 +122,7 @@ Route: `ConnectionsRoute.Connections`
 
 ### Key Dependencies
 
-```
+```text
 feature:connections
   ├── core:ble, core:network       (transports)
   ├── core:common, core:data, core:database, core:datastore, core:di

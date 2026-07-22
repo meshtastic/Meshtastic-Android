@@ -121,7 +121,7 @@ It also observes `stateProvider.state` itself (debounced 500 ms, ignoring timest
 
 ### Key Dependencies
 
-```
+```text
 feature:widget (Android only)
   ├── core:common, core:model, core:resources, core:repository
   ├── androidx.glance.appwidget, glance.material3, glance.preview, glance.appwidget.preview

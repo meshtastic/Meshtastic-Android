@@ -11,8 +11,8 @@ Manages the state of the chat screen, including loading messages from the databa
 ### 2. `QuickChat`
 A simplified chat interface for quickly sending and receiving messages without entering the full message screen.
 
-### 3. Homoglyph handling
-Uses `HomoglyphCharacterStringTransformer` (from `:core:common`) to detect and transform homoglyphs (visually similar characters from different scripts) to prevent phishing and impersonation attacks.
+### 3. Homoglyph substitution (payload-size optimization)
+Uses `HomoglyphCharacterStringTransformer` (from `:core:common`) to optionally replace national-alphabet characters with visually identical Latin homoglyphs (e.g. Cyrillic "А" → Latin "A") on outgoing text. This is a preference-gated byte-size optimization — such characters encode smaller in UTF-8, fitting roughly 140-145 characters per message instead of ~115-120. It is not a security or anti-phishing feature.
 
 ## Features
 - **Channel Chat**: Group communication on public or private channels.

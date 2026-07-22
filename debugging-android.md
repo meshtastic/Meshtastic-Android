@@ -17,13 +17,13 @@ Say yes and also click the checkbox to always allow your PC access.
 
 * Long press on the meshtastic app and choose "force stop", to ensure that we are starting from scratch for this log (it will make it easier to understand it)
 * If you have a Mac or Linux type:
-```
+```bash
 adb shell 'logcat --pid=$(pidof -s com.geeksville.mesh)' | tee newlogfile.txt
 ```
 
 * If you have a PC, type this in PowerShell:
-```
-adb shell "logcat --pid=$(pidof -s com.geeksville.mesh)" | Tee-Object newlogfile.txt
+```powershell
+adb shell 'logcat --pid=$(pidof -s com.geeksville.mesh)' | Tee-Object newlogfile.txt
 ```
 
 Note: the package name above is for release builds. If you are running a debug or snapshot build, use `com.geeksville.mesh.google.debug` or `com.geeksville.mesh.fdroid.debug` instead.
@@ -31,7 +31,7 @@ Note: the package name above is for release builds. If you are running a debug o
 This will capture a bunch of logging information as you use the app.  Please go through the app to the part that was giving you troubles (No device listed on the settings screen etc).  And then press
 ctrl-c in the adb window to stop logging.  Please open a github [issue](https://github.com/meshtastic/Meshtastic-Android/issues) describing the problem and attach the log file.  We'll get back to you with what we find (possibly with some extra questions).
 
-```
+```text
 kevinh@kevin-server:~/development$ adb shell 'logcat --pid=$(pidof -s com.geeksville.mesh)' | 
 --------- beginning of main
 03-07 17:10:05.669 13452 13452 W ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@fbf5fa0

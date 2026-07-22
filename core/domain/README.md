@@ -84,7 +84,7 @@ Streams all mesh log packets to a CSV `BufferedSink`. Columns: date, time, from,
 
 ## Dependency Graph
 
-```
+```text
 core:domain
   ├── core:repository              (use-case interfaces & contracts)
   ├── core:model                   (domain models)
@@ -94,6 +94,8 @@ core:domain
   ├── core:datastore
   └── core:resources
 ```
+
+The generated Mermaid graph below renders project-module edges only — external Maven artifacts such as `org.meshtastic:protobufs` are not shown, and dashed edges are test-only (e.g. `:core:testing`).
 
 ## DI
 

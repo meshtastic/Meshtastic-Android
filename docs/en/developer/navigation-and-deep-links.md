@@ -62,10 +62,10 @@ prefixes declared in the manifest intent-filter (`/share`, `/connections`, `/map
 `adb shell am start -a android.intent.action.VIEW -d "meshtastic://meshtastic/{path}"` is the fastest way to
 trigger any route below from a shell or automation script without touching the UI.
 
-**Source of truth:** the always-current list of segments lives in the `when` block in
-[`DeepLinkRouter.route()`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
-(the class-level KDoc above it is illustrative, not exhaustive)
-and as executable spec in
+**Source of truth:** the always-current list of segments lives in
+[`DeepLinkRouter`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
+— the `route()` `when` block plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`);
+the class-level KDoc is illustrative, not exhaustive. It also exists as executable spec in
 [`DeepLinkRouterTest.kt`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
 The table below is a snapshot for quick reference — check those two files if it looks out of date.
 
