@@ -43,7 +43,11 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.proto.ChannelSet
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Single owner of the dynamic conversation shortcuts that link Meshtastic conversations to their notifications.
@@ -68,6 +72,13 @@ class ConversationShortcutPublisher(
 ) {
 
     private var observeJob: Job? = null
+
+    /**
+     * On-demand shortcut ids published ahead of the observed contacts snapshot (a brand-new conversation's first
+     * notification). Protected from pruning until a snapshot includes them, so [publishShortcuts] can't sever a live
+     * notification's shortcut link during the window before the flow catches up.
+     */
+    private val pendingOnDemandIds = ConcurrentHashMap.newKeySet<String>()
 
     fun startObserving(scope: CoroutineScope) {
         observeJob?.cancel()
@@ -134,7 +145,12 @@ class ConversationShortcutPublisher(
 
         try {
             val currentKeys = shortcuts.map { it.id }.toSet()
-            val stale = ShortcutManagerCompat.getDynamicShortcuts(context).map { it.id }.filter { it !in currentKeys }
+            // The snapshot now covers these conversations; normal pruning applies to them from here on.
+            pendingOnDemandIds.removeAll(currentKeys)
+            val stale =
+                ShortcutManagerCompat.getDynamicShortcuts(context)
+                    .map { it.id }
+                    .filter { it !in currentKeys && it !in pendingOnDemandIds }
             if (stale.isNotEmpty()) {
                 ShortcutManagerCompat.removeDynamicShortcuts(context, stale)
             }
@@ -151,12 +167,14 @@ class ConversationShortcutPublisher(
 
     private fun buildDmShortcut(dm: Conversation.Dm, rank: Int): ShortcutInfoCompat? {
         val node = nodeRepository.nodeDBbyNum.value.values.find { it.user.id == dm.userId }
-        // shortLabel is the compact 4-char short name; longLabel the full node name. Fall back sensibly when a name is
-        // missing so the shortcut is never blank.
+        // shortLabel is the compact 4-char short name; longLabel the full node name. Fall back to a localized generic
+        // name when node metadata is missing: the raw contactKey is a user-traceable identifier and must stay confined
+        // to internal ids and deep-link metadata (privacy-first convention).
         val shortName = node?.user?.short_name?.takeIf { it.isNotBlank() }
         val longName = node?.user?.long_name?.takeIf { it.isNotBlank() }
-        val shortLabel = shortName ?: longName ?: dm.contactKey
-        val longLabel = longName ?: shortName ?: dm.contactKey
+        val fallbackName by lazy { getString(Res.string.unknown_username) }
+        val shortLabel = shortName ?: longName ?: fallbackName
+        val longLabel = longName ?: shortName ?: fallbackName
 
         // A node-colored pill avatar showing the short name identifies the person and matches the in-app node chip.
         // Set it on the shortcut itself (not just the Person) so launchers/Android Auto render it instead of a generic
@@ -189,8 +207,9 @@ class ConversationShortcutPublisher(
     }
 
     private fun buildChannelShortcut(channel: Conversation.Channel, rank: Int): ShortcutInfoCompat {
-        // channel.name is already the effective name (preset-derived for an empty primary), so no placeholder here.
-        val channelName = channel.name.ifEmpty { "Channel ${channel.index}" }
+        // channel.name is the effective name and never empty: Channel.name resolves an empty settings.name to the
+        // modem-preset display name (or "Custom" for non-preset configs), so no fallback placeholder is needed.
+        val channelName = channel.name
         // A black rounded-square badge with the channel number visually separates channels from the node-colored DM
         // pills.
         val icon = channelIcon(channel.index)
@@ -228,6 +247,8 @@ class ConversationShortcutPublisher(
      * emission).
      */
     fun ensureConversationShortcut(contactKey: String, displayName: String) {
+        // Protect this conversation from the observer's pruning until a contacts snapshot includes it.
+        pendingOnDemandIds += contactKey
         val alreadyPublished = ShortcutManagerCompat.getDynamicShortcuts(context).any { it.id == contactKey }
         if (alreadyPublished) return
         // Match the styling the observer will republish so there is no generic-head flash: rounded channel badge with

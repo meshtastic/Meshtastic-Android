@@ -53,6 +53,7 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -87,6 +88,7 @@ import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
 import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
@@ -602,12 +604,14 @@ class MeshNotificationManagerImpl(
             val lora = channelSet.lora_config ?: Channel.default.loraConfig
             val index = contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull()
             channelName = index?.let { channelSet.settings.getOrNull(it) }?.let { Channel(it, lora).name }
-            conversationName = channelName ?: contactKey
+            // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
+            conversationName = channelName ?: getString(Res.string.channel)
         } else {
             // DM contactKey is "<channelIndex><userId>" where userId starts at the '!'.
             val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
             val peer = nodeRepository.value.nodeDBbyNum.value.values.find { it.user.id == userId }
-            conversationName = peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: contactKey
+            conversationName =
+                peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: getString(Res.string.unknown_username)
         }
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }

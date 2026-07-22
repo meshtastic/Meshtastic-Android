@@ -125,8 +125,9 @@ class ConversationShortcutPublisherTest {
 
     @Test
     fun `stale shortcuts are removed when no longer part of the conversation set`() = runTest {
-        // Simulate a leftover shortcut from a previous device/channel config.
-        publisher.ensureConversationShortcut("9^all", "Old Channel")
+        // Simulate a leftover shortcut from a previous session (raw push: the in-memory on-demand protection does not
+        // survive a process restart, so the observer owns its cleanup).
+        pushRawShortcut("9^all", "Old Channel")
         assertTrue(shortcutManager.dynamicShortcuts.any { it.id == "9^all" })
 
         every { packetRepository.getContacts() } returns flowOf(emptyMap())
@@ -136,5 +137,30 @@ class ConversationShortcutPublisherTest {
 
         assertNull(shortcutManager.dynamicShortcuts.find { it.id == "9^all" }, "stale shortcut should be pruned")
         assertTrue(shortcutManager.dynamicShortcuts.any { it.id == "0^all" }, "current channels are published")
+    }
+
+    @Test
+    fun `on-demand shortcuts survive pruning until a snapshot includes their conversation`() = runTest {
+        // A brand-new conversation's first notification publishes its shortcut before the contacts flow emits it.
+        publisher.ensureConversationShortcut("0!000000ff", "New Peer")
+
+        every { packetRepository.getContacts() } returns flowOf(emptyMap())
+
+        publisher.startObserving(this)
+        advanceUntilIdle()
+
+        assertTrue(
+            shortcutManager.dynamicShortcuts.any { it.id == "0!000000ff" },
+            "pending on-demand shortcut must not be pruned before the snapshot catches up",
+        )
+    }
+
+    private fun pushRawShortcut(id: String, label: String) {
+        val shortcut =
+            androidx.core.content.pm.ShortcutInfoCompat.Builder(context, id)
+                .setShortLabel(label)
+                .setIntent(android.content.Intent(android.content.Intent.ACTION_VIEW))
+                .build()
+        androidx.core.content.pm.ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
     }
 }
