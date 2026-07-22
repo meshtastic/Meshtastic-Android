@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,7 +78,6 @@ import org.meshtastic.core.ui.component.NODE_TINT_NORMAL
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
-import org.meshtastic.core.ui.component.StatusSurface
 import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.nodeBorderStroke
 import org.meshtastic.core.ui.component.nodeTintedContainer
@@ -329,21 +327,16 @@ fun MessageItem(
                     if (!message.fromLocal) {
                         // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
                         if (message.xeddsaSigned) {
-                            // Solo icon → equal padding so the pill renders as a circle.
-                            StatusSurface(contentPadding = PaddingValues(3.dp)) {
-                                Icon(
-                                    imageVector = MeshtasticIcons.ShieldCheck,
-                                    contentDescription = stringResource(Res.string.security_signed_verified),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.StatusGreen,
-                                )
-                            }
+                            Icon(
+                                imageVector = MeshtasticIcons.ShieldCheck,
+                                contentDescription = stringResource(Res.string.security_signed_verified),
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.StatusGreen,
+                            )
                         }
                         if (message.hopsAway == 0 && !message.viaMqtt) {
-                            StatusSurface {
-                                Snr(message.snr)
-                                Rssi(message.rssi)
-                            }
+                            Snr(message.snr)
+                            Rssi(message.rssi)
                         } else {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,

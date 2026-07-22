@@ -356,14 +356,12 @@ private fun CompactHealthRow(
             val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
             add(
                 @Composable {
-                    StatusSurface {
-                        IconInfo(
-                            icon = vectorResource(quality.icon),
-                            contentDescription = stringResource(quality.nameRes),
-                            contentColor = quality.color.invoke(),
-                            text = stringResource(quality.nameRes),
-                        )
-                    }
+                    IconInfo(
+                        icon = vectorResource(quality.icon),
+                        contentDescription = stringResource(quality.nameRes),
+                        contentColor = quality.color.invoke(),
+                        text = stringResource(quality.nameRes),
+                    )
                 },
             )
         }

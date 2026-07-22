@@ -284,8 +284,8 @@ private fun NodeBatteryPositionRow(
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
-    // The signal pill bundles SNR + RSSI + quality into one scrim-backed chip (legibility, see StatusSurface). It's
-    // wider than a 1/3 grid cell, so it renders on its own line at natural width; the short metrics flow in the grid.
+    // The signal pill bundles SNR + RSSI + quality into one row. It's wider than a 1/3 grid cell, so it renders on
+    // its own line at natural width; the short metrics flow in the grid.
     var signalChip: (@Composable () -> Unit)? = null
     val items =
         buildList<@Composable () -> Unit> {
@@ -316,10 +316,10 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     val showRssi = thatNode.rssi < 0
                     if (showSnr || showRssi) {
                         signalChip = {
-                            // Full-width pill: SNR left, RSSI center, quality right — the pre-scrim spread, now
-                            // scrimmed.
-                            StatusSurface(
+                            // Full-width row: SNR left, RSSI center, quality right.
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 if (showSnr) Snr(thatNode.snr)
@@ -448,29 +448,27 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
 }
 
 /**
- * [LastHeardInfo] backed by a scrim chip and tinted StatusGreen when [online] — the legible "online" affordance —
- * rendered plain otherwise. Shared by the complete and compact node rows.
+ * [LastHeardInfo] tinted StatusGreen when [online] — the "online" affordance — rendered plain otherwise. Shared by the
+ * complete and compact node rows.
  */
 @Composable
 internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor: Color, relative: Boolean = true) {
-    if (online) {
-        StatusSurface {
-            LastHeardInfo(
-                lastHeard = lastHeard,
-                showLabel = false,
-                relative = relative,
-                contentColor = MaterialTheme.colorScheme.StatusGreen,
-            )
-        }
-    } else {
-        LastHeardInfo(lastHeard = lastHeard, showLabel = false, relative = relative, contentColor = contentColor)
-    }
+    LastHeardInfo(
+        lastHeard = lastHeard,
+        showLabel = false,
+        relative = relative,
+        contentColor = if (online) MaterialTheme.colorScheme.StatusGreen else contentColor,
+    )
 }
 
-/** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
+/** Key status (always status-colored) + the signed-node shield. */
 @Composable
 fun NodeSecurityIcons(thatNode: Node, modifier: Modifier = Modifier, iconSize: Dp = 20.dp) {
-    StatusSurface(modifier = modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         if (thatNode.signsPackets) {
             NodeSignedStatusIcon(modifier = Modifier.size(iconSize))
         }
