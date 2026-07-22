@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.model.ConnectionState
@@ -74,6 +75,8 @@ class NodeItemDistanceUnitsTest {
 
         onNodeWithText(metricDistance).assertDoesNotExist()
         onNodeWithText(imperialDistance).assertIsDisplayed()
+        onNodeWithContentDescription(metricDistance, substring = true).assertDoesNotExist()
+        onNodeWithContentDescription(imperialDistance, substring = true).assertIsDisplayed()
     }
 
     private fun node(num: Int, latitudeI: Int, longitudeI: Int): Node = Node(
