@@ -231,12 +231,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11117",
-      "title": "Nailed native test numbers so PRs don't forget to increment",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11117",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11114",
       "title": "SEN5X: Fix version parsing, VOC index reporting, and uninitialized-read hazards",
       "page_url": "https://github.com/meshtastic/firmware/pull/11114",
@@ -288,12 +282,6 @@
       "id": "11042",
       "title": "meshnology-w10: define HAS_SPI_TFT so the TFT screen initializes again",
       "page_url": "https://github.com/meshtastic/firmware/pull/11042",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11015",
-      "title": "feat: add driver for MCP23017",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11015",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
