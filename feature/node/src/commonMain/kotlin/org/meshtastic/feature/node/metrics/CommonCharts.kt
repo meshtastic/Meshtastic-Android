@@ -174,7 +174,7 @@ fun Legend(
                     Text(
                         text = label,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        style = MaterialTheme.typography.labelSmall,
                     )
                 }
             }

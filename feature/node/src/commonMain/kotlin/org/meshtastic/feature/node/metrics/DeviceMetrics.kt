@@ -475,7 +475,7 @@ private fun DeviceMetricsCard(
                     text =
                     formatString(labelValueTemplate, uptimeLabel, formatUptime(deviceMetrics?.uptime_seconds ?: 0)),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
