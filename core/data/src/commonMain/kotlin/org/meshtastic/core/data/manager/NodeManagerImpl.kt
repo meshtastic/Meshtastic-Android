@@ -531,11 +531,11 @@ class NodeManagerImpl(
                 before.copy(
                     index = transition.after,
                     retiredNodeNums =
-                        transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
-                            ?: before.retiredNodeNums,
+                    transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
+                        ?: before.retiredNodeNums,
                     retiredKeyHints =
-                        transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
-                            ?: before.retiredKeyHints,
+                    transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
+                        ?: before.retiredKeyHints,
                     revision = before.revision + 1,
                 )
             if (nodeState.compareAndSet(before, after)) {
