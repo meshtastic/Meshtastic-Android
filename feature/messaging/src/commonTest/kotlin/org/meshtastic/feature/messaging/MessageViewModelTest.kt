@@ -56,6 +56,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class MessageViewModelTest {
 
@@ -139,6 +140,45 @@ class MessageViewModelTest {
     }
 
     @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
+
+    @Test
+    fun testDraftPersistenceDebouncesRapidEdits() = runTest {
+        viewModel.setDraftMessage("a")
+        testDispatcher.scheduler.runCurrent()
+        testDispatcher.scheduler.advanceTimeBy(100L)
+
+        viewModel.setDraftMessage("ab")
+        testDispatcher.scheduler.runCurrent()
+        testDispatcher.scheduler.advanceTimeBy(100L)
+
+        viewModel.setDraftMessage("abc")
+        testDispatcher.scheduler.runCurrent()
+
+        assertEquals("abc", viewModel.draftMessage.value)
+        assertNull(savedStateHandle.get<String>("draftMessage"))
+
+        testDispatcher.scheduler.advanceTimeBy(299L)
+        testDispatcher.scheduler.runCurrent()
+        assertNull(savedStateHandle.get<String>("draftMessage"))
+
+        testDispatcher.scheduler.advanceTimeBy(1L)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals("abc", savedStateHandle.get<String>("draftMessage"))
+    }
+
+    @Test
+    fun testClearDraftCancelsPendingPersistenceAndClearsImmediately() = runTest {
+        viewModel.setDraftMessage("pending")
+        testDispatcher.scheduler.runCurrent()
+
+        viewModel.clearDraftMessage()
+        assertEquals("", viewModel.draftMessage.value)
+        assertEquals("", savedStateHandle.get<String>("draftMessage"))
+
+        testDispatcher.scheduler.advanceTimeBy(300L)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals("", savedStateHandle.get<String>("draftMessage"))
+    }
 
     @Test
     fun testSetTitle() = runTest {

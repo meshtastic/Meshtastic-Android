@@ -34,6 +34,7 @@ kotlin {
 
             implementation(libs.androidx.paging.common)
             implementation(libs.androidx.paging.compose)
+            implementation(libs.kotlinx.collections.immutable)
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
             implementation(libs.jetbrains.compose.material3.adaptive)

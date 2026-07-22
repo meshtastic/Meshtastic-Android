@@ -22,6 +22,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
@@ -108,13 +111,28 @@ class MessageViewModel(
     private val _draftMessage = MutableStateFlow(savedStateHandle.get<String>("draftMessage") ?: "")
     val draftMessage: StateFlow<String> = _draftMessage.asStateFlow()
 
+    private var pendingDraftPersistence: Job? = null
+
+    /**
+     * Updates the in-memory draft immediately. The durable [SavedStateHandle] write is debounced by
+     * [DRAFT_PERSISTENCE_DELAY_MS] — rapid edits cancel the prior pending flush, so only the trailing value persists.
+     * On process death within the debounce window the last ≤[DRAFT_PERSISTENCE_DELAY_MS] of typing is not durably
+     * saved; this is a conscious trade-off to avoid per-keystroke jank.
+     */
     fun setDraftMessage(text: String) {
         _draftMessage.value = text
-        savedStateHandle["draftMessage"] = text
+        pendingDraftPersistence?.cancel()
+        pendingDraftPersistence =
+            viewModelScope.launch {
+                delay(DRAFT_PERSISTENCE_DELAY_MS)
+                savedStateHandle["draftMessage"] = text
+            }
     }
 
     fun clearDraftMessage() {
         _draftMessage.value = ""
+        pendingDraftPersistence?.cancel()
+        pendingDraftPersistence = null
         savedStateHandle["draftMessage"] = ""
     }
 
@@ -413,5 +431,6 @@ class MessageViewModel(
     companion object {
         private const val SEARCH_DEBOUNCE_MS = 300L
         private const val MIN_SEARCH_LENGTH = 2
+        private const val DRAFT_PERSISTENCE_DELAY_MS = 300L
     }
 }
