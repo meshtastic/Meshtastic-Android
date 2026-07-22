@@ -29,7 +29,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and Serial transports (one is active at a time):
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
 ![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
