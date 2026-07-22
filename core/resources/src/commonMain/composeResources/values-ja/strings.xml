@@ -1191,6 +1191,7 @@
     <string name="override_duty_cycle">デューティサイクルを上書き</string>
     <string name="override_frequency_mhz">周波数の上書き</string>
     <string name="pa_fan_disabled">PAファン無効</string>
+    <!-- PACKET -->
     <string name="pairing_mode">ペアリングモード</string>
     <string name="password">パスワード</string>
     <!-- PAX -->

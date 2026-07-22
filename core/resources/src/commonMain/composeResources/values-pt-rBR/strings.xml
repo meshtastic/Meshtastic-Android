@@ -474,6 +474,7 @@
     <string name="override_console_serial_port">Substituir porta série do console</string>
     <string name="override_duty_cycle">Ignorar ciclo de trabalho</string>
     <string name="pa_fan_disabled">Ventilador do PA desativado</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Modo de pareamento</string>
     <string name="password">Senha</string>
     <!-- PAX -->

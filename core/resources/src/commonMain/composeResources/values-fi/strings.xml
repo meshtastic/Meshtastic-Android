@@ -1241,6 +1241,7 @@
     <string name="override_duty_cycle">Ohita käyttöaste (Duty Cycle)</string>
     <string name="override_frequency_mhz">Taajuuden ohitus</string>
     <string name="pa_fan_disabled">PA tuuletin pois käytöstä</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Paritustila</string>
     <string name="password">Salasana</string>
     <!-- PAX -->

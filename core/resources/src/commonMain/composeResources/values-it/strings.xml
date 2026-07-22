@@ -703,6 +703,7 @@
     <string name="override_duty_cycle">Ignora limite di Duty Cycle</string>
     <string name="override_frequency_mhz">Sovrascrivi Frequenza</string>
     <string name="pa_fan_disabled">Ventola PA disabilitata</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Modalità abbinamento</string>
     <string name="password">Password</string>
     <!-- PAX -->

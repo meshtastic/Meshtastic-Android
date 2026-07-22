@@ -880,6 +880,7 @@
     <string name="override_duty_cycle">Ігнорувати обмеження завантаженості каналу</string>
     <string name="override_frequency_mhz">Перевизначити частоту</string>
     <string name="pa_fan_disabled">Вентилятор вимкнений</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Режим створення пари</string>
     <string name="password">Пароль</string>
     <!-- PAX -->

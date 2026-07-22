@@ -1004,6 +1004,7 @@
     <string name="override_duty_cycle">Duty-Cycle überschreiben</string>
     <string name="override_frequency_mhz">Frequenz überschreiben</string>
     <string name="pa_fan_disabled">PA Fan deaktiviert</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Kopplungsmodus</string>
     <string name="password">Passwort</string>
     <!-- PAX -->

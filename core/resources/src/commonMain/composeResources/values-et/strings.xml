@@ -1217,6 +1217,7 @@
     <string name="override_duty_cycle">Töötsükli tühistamine</string>
     <string name="override_frequency_mhz">Tühista sagedus</string>
     <string name="pa_fan_disabled">PA ventilaator keelatud</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Sidumine</string>
     <string name="password">Parool</string>
     <!-- PAX -->

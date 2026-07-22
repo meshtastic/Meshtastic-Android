@@ -948,6 +948,7 @@
     <string name="override_duty_cycle">覆蓋工作週期/佔空比</string>
     <string name="override_frequency_mhz">手動設定頻率</string>
     <string name="pa_fan_disabled">停用PA風扇</string>
+    <!-- PACKET -->
     <string name="pairing_mode">配對模式</string>
     <string name="password">密碼</string>
     <!-- PAX -->

@@ -610,6 +610,7 @@
     <string name="override_duty_cycle">Duty Cycle felülbírálása</string>
     <string name="override_frequency_mhz">Frekvencia felülbírálása</string>
     <string name="pa_fan_disabled">PA ventilátor letiltva</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Párosítási mód</string>
     <string name="password">Jelszó</string>
     <!-- PAX -->

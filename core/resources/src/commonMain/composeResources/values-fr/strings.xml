@@ -951,6 +951,7 @@
     <string name="override_duty_cycle">Autoriser le dépassement du temps d'émission autorisé par heure</string>
     <string name="override_frequency_mhz">Remplacer la fréquence</string>
     <string name="pa_fan_disabled">Ventilateur PA désactivé</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Mode d'appariement</string>
     <string name="password">Mot de passe</string>
     <!-- PAX -->

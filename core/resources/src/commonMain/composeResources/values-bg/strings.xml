@@ -838,6 +838,7 @@
     <string name="open_wifi_settings">Отваряне на настройките на Wi-Fi</string>
     <string name="options">Опции</string>
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <string name="pairing_mode">Режим на сдвояване</string>
     <string name="password">Парола</string>
     <!-- PAX -->

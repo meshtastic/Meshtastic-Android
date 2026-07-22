@@ -792,6 +792,7 @@
     <string name="override_duty_cycle">Suprascrie ciclul de obligații</string>
     <string name="override_frequency_mhz">Suprascriere frecvență</string>
     <string name="pa_fan_disabled">Ventilator PA dezactivat</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Mod împerechere</string>
     <string name="password">Parolă</string>
     <!-- PAX -->
