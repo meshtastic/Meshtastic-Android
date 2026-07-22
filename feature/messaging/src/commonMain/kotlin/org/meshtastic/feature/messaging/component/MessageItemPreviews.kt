@@ -258,6 +258,80 @@ fun MessageItemStatusStatesPreview() {
     }
 }
 
+/**
+ * A full conversation block: a received same-sender run followed by a sent run. Pins the grouped treatment — header
+ * only at the start of each run, 4dp flattened facing corners within a run, full rounding on the outer edges.
+ */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageItemGroupedRunPreview() {
+    val ourNode = NodePreviewParameterProvider().mickeyMouse
+    val minnie = NodePreviewParameterProvider().minnieMouse
+    val base =
+        Message(
+            text = "Trailhead in 10",
+            time = "09:12",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 5.5f,
+            rssi = 88,
+            hopsAway = 0,
+            uuid = 30L,
+            receivedTime = nowMillis,
+            node = minnie,
+            read = true,
+            routingError = 0,
+            packetId = 7001,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+        )
+    val run =
+        listOf(
+            base,
+            base.copy(text = "Parking lot is full, use the overflow", time = "09:13", uuid = 31L, packetId = 7002),
+            base.copy(text = "Bring water", time = "09:14", uuid = 32L, packetId = 7003),
+            base.copy(
+                text = "Copy that",
+                time = "09:15",
+                fromLocal = true,
+                node = ourNode,
+                uuid = 33L,
+                packetId = 7004,
+            ),
+            base.copy(
+                text = "Omw",
+                time = "09:16",
+                fromLocal = true,
+                status = MessageStatus.ENROUTE,
+                node = ourNode,
+                uuid = 34L,
+                packetId = 7005,
+            ),
+        )
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
+            run.forEachIndexed { index, msg ->
+                val prevSame = index > 0 && run[index - 1].fromLocal == msg.fromLocal
+                val nextSame = index < run.lastIndex && run[index + 1].fromLocal == msg.fromLocal
+                MessageItem(
+                    message = msg,
+                    node = msg.node,
+                    ourNode = ourNode,
+                    selected = false,
+                    showUserName = !prevSame,
+                    hasSamePrev = prevSame,
+                    hasSameNext = nextSame,
+                )
+            }
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {
