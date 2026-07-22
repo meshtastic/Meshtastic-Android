@@ -47,24 +47,27 @@ sealed interface SettingsRoute : Route {
 
 ### URI Format
 
-Both forms resolve through the same `DeepLinkRouter`:
+Both forms resolve through the same `DeepLinkRouter`, so any path below works with either scheme:
 
 ```text
 meshtastic://meshtastic/{path}
 https://meshtastic.org/{path}       # App Link, android:autoVerify — also opens in-app on a real device/adb
 ```
 
-The `meshtastic://` scheme accepts every path below. The `https://` App Link only covers the path
-prefixes declared in the manifest intent-filter (`/share`, `/connections`, `/map`, `/messages`,
-`/quickchat`, `/nodes`, `/settings`, `/channels`, `/firmware`) — notably `/wifi-provision` and
-`/discovery` currently resolve only via the custom scheme.
-
 `adb shell am start -a android.intent.action.VIEW -d "meshtastic://meshtastic/{path}"` is the fastest way to
 trigger any route below from a shell or automation script without touching the UI.
 
-**Source of truth:** the always-current list of segments lives in
+For the `https` form to open in-app, each top-level path segment must also be declared as an
+`android:pathPrefix` in the `android:autoVerify` intent-filter in `androidApp/src/main/AndroidManifest.xml` —
+otherwise the link opens in the browser. Adding a new top-level route therefore takes three steps: add the
+segment to `DeepLinkRouter.topLevelPathSegments` (the router refuses to dispatch segments outside that set),
+add its `when` branch in `DeepLinkRouter.route()`, and add the matching `pathPrefix` to the manifest.
+`DeepLinkManifestConsistencyTest` (androidApp unit tests) checks the manifest against the set, so a missing
+manifest entry fails CI.
+
+**Source of truth:** the always-current list of top-level segments is `topLevelPathSegments` in
 [`DeepLinkRouter`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
-— the `route()` `when` block plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`);
+— sub-paths live in the `route()` `when` block plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`);
 the class-level KDoc is illustrative, not exhaustive. It also exists as executable spec in
 [`DeepLinkRouterTest.kt`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
 The table below is a snapshot for quick reference — check those two files if it looks out of date.

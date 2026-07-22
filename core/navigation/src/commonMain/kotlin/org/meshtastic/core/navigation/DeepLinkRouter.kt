@@ -43,6 +43,35 @@ import org.meshtastic.core.common.util.CommonUri
  */
 object DeepLinkRouter {
     /**
+     * Canonical set of top-level path segments this router dispatches on. [route] refuses segments outside this set, so
+     * a new `when` branch stays dead (and its feature tests fail) until its segment is added here. Every entry must
+     * also be declared as an `android:pathPrefix` in the https App Links intent-filter in
+     * `androidApp/src/main/AndroidManifest.xml` — DeepLinkManifestConsistencyTest (androidApp unit tests) enforces that
+     * directly from this set.
+     */
+    val topLevelPathSegments: Set<String> =
+        setOf(
+            "share",
+            "messages",
+            "quickchat",
+            "connections",
+            "discovery",
+            "map",
+            "nodes",
+            "settings",
+            "channels",
+            "firmware",
+            "wifi-provision",
+        )
+
+    /**
+     * Legacy import path segments (`/e/` = channel set, `/v/` = shared contact, matched case-insensitively). These are
+     * handled by the `dispatchMeshtasticUri` fallback rather than this router, so [route] returns null for them without
+     * logging a warning.
+     */
+    private val legacyImportSegments = setOf("e", "v")
+
+    /**
      * Synthesizes a backstack list from an incoming Meshtastic URI.
      *
      * @param uri The incoming OS intent URI (e.g. "meshtastic://meshtastic/share?message=hello")
@@ -50,12 +79,16 @@ object DeepLinkRouter {
      */
     fun route(uri: CommonUri): List<NavKey>? {
         val pathSegments = uri.pathSegments.filter { it.isNotBlank() }
+        val firstSegment = pathSegments.firstOrNull()?.lowercase()
 
-        if (pathSegments.isEmpty()) {
+        if (firstSegment !in topLevelPathSegments) {
+            // /e/ and /v/ are channel-set/contact import links, not navigation routes: returning null here lets
+            // callers fall back to dispatchMeshtasticUri (see UIViewModel.handleDeepLink), so don't warn on them.
+            if (firstSegment != null && firstSegment !in legacyImportSegments) {
+                Logger.w { "Unrecognized deep link segment: $firstSegment" }
+            }
             return null
         }
-
-        val firstSegment = pathSegments[0].lowercase()
 
         return when (firstSegment) {
             "share",
@@ -79,10 +112,8 @@ object DeepLinkRouter {
 
             "wifi-provision" -> routeWifiProvision(uri)
 
-            else -> {
-                Logger.w { "Unrecognized deep link segment: $firstSegment" }
-                null
-            }
+            // Unreachable: gated on topLevelPathSegments above.
+            else -> null
         }
     }
 
