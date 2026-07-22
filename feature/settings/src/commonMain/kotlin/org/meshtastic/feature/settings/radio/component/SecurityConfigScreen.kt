@@ -120,6 +120,14 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         },
     ) {
         item {
+            PacketAuthenticitySetting(
+                selectedPolicy = formState.value.packet_signature_policy,
+                connected = state.connected,
+                supported = state.metadata?.has_xeddsa,
+                onPolicyChange = { policy -> formState.value = formState.value.copy(packet_signature_policy = policy) },
+            )
+        }
+        item {
             TitledCard(title = stringResource(Res.string.direct_message_key)) {
                 EditBase64Preference(
                     title = stringResource(Res.string.public_key),
