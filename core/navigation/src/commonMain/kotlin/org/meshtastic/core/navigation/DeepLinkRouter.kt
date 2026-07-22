@@ -65,6 +65,13 @@ object DeepLinkRouter {
         )
 
     /**
+     * Legacy import path segments (`/e/` = channel set, `/v/` = shared contact, matched case-insensitively). These are
+     * handled by the `dispatchMeshtasticUri` fallback rather than this router, so [route] returns null for them without
+     * logging a warning.
+     */
+    private val legacyImportSegments = setOf("e", "v")
+
+    /**
      * Synthesizes a backstack list from an incoming Meshtastic URI.
      *
      * @param uri The incoming OS intent URI (e.g. "meshtastic://meshtastic/share?message=hello")
@@ -75,7 +82,11 @@ object DeepLinkRouter {
         val firstSegment = pathSegments.firstOrNull()?.lowercase()
 
         if (firstSegment !in topLevelPathSegments) {
-            firstSegment?.let { Logger.w { "Unrecognized deep link segment: $it" } }
+            // /e/ and /v/ are channel-set/contact import links, not navigation routes: returning null here lets
+            // callers fall back to dispatchMeshtasticUri (see UIViewModel.handleDeepLink), so don't warn on them.
+            if (firstSegment != null && firstSegment !in legacyImportSegments) {
+                Logger.w { "Unrecognized deep link segment: $firstSegment" }
+            }
             return null
         }
 
