@@ -407,6 +407,7 @@
     <string name="override_console_serial_port">Konsol seri portunu geçersiz kıl</string>
     <string name="override_duty_cycle">Görev Döngüsünü Geçersiz Kıl</string>
     <string name="pa_fan_disabled">PA fanı devre dışı</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Eşleştirme Modu</string>
     <string name="password">Şifre</string>
     <!-- PAX -->

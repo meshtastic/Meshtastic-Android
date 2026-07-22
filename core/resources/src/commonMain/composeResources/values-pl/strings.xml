@@ -573,6 +573,7 @@
     <string name="output_led_gpio">Wyjście LED (GPIO)</string>
     <string name="output_vibra_gpio">Wyjście silnika wibracyjnego (GPIO)</string>
     <string name="override_duty_cycle">Nadpisz cykl pracy</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Tryb parowania</string>
     <string name="password">Hasło</string>
     <!-- PAX -->

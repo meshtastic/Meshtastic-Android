@@ -1244,6 +1244,7 @@
     <string name="override_duty_cycle">覆盖占空比</string>
     <string name="override_frequency_mhz">频率覆盖</string>
     <string name="pa_fan_disabled">PA风扇已禁用</string>
+    <!-- PACKET -->
     <string name="pairing_mode">配对模式</string>
     <string name="password">密码</string>
     <!-- PAX -->

@@ -391,6 +391,7 @@
     <string name="output_vibra_gpio">진동 출력 (GPIO)</string>
     <string name="override_duty_cycle">Duty Cycle 무시</string>
     <string name="pa_fan_disabled">PA fan 비활성화됨</string>
+    <!-- PACKET -->
     <string name="pairing_mode">페어링 모드</string>
     <string name="password">비밀번호</string>
     <!-- PAX -->

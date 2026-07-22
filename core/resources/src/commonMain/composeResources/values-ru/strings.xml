@@ -1246,6 +1246,7 @@
     <string name="override_duty_cycle">Переопределить рабочий цикл</string>
     <string name="override_frequency_mhz">Переопределить частоту</string>
     <string name="pa_fan_disabled">PA вентилятор выключен</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Режим сопряжения</string>
     <string name="password">Пароль</string>
     <!-- PAX -->

@@ -381,6 +381,7 @@
     <string name="output_vibra_gpio">Vibra de saída (GPIO)</string>
     <string name="override_console_serial_port">Substituir porta série do console</string>
     <string name="override_duty_cycle">Ignorar ciclo de trabalho</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Modo de emparelhamento</string>
     <string name="password">Palavra-passe</string>
     <!-- PAX -->

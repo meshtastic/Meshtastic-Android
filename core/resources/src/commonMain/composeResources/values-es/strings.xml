@@ -609,6 +609,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="override_duty_cycle">Sobreescribir el Tiempo de Trabajo</string>
     <string name="override_frequency_mhz">Sobreescribir frecuencia</string>
     <string name="pa_fan_disabled">Ventilador del Amplificador apagado</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Modo de emparejamiento</string>
     <string name="password">Contraseña</string>
     <!-- PAX -->

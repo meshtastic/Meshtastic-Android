@@ -306,6 +306,7 @@
     <string name="output_duration_milliseconds">Output duur (milliseconden)</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>
     <string name="override_duty_cycle">Overschrijf Duty Cycle</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Koppelmodus</string>
     <string name="password">Wachtwoord</string>
     <!-- PAX -->

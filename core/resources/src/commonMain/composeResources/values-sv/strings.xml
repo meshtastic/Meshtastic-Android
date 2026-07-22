@@ -784,6 +784,7 @@
     <string name="overflow_menu">Överflödsmeny</string>
     <string name="override_duty_cycle">Ersätt gräns för driftsperiod</string>
     <string name="override_frequency_mhz">Åsidosätt </string>
+    <!-- PACKET -->
     <string name="pairing_mode">Parkopplingsläge</string>
     <string name="password">Lösenord</string>
     <!-- PAX -->

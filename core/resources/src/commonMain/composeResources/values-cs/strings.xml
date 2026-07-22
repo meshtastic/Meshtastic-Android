@@ -802,6 +802,7 @@
     <string name="override_console_serial_port">Přepsat sériový port komunikace</string>
     <string name="override_duty_cycle">Přepsat pracovní cyklus</string>
     <string name="override_frequency_mhz">Ruční nastavení frekvence</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Režim párování</string>
     <string name="password">Heslo</string>
     <!-- PAX -->
