@@ -442,7 +442,7 @@
     <string name="firmware_update_connecting_attempt">Підключення до пристрою (спроба %1$d/%2$d)...</string>
     <string name="firmware_update_currently_installed">Наразі встановлено: %1$s</string>
     <string name="firmware_update_device">Пристрій: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: \"Тримайся напоготові!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: "Тримайся напоготові!"</string>
     <string name="firmware_update_disclaimer_text">Ви збираєтеся встановити нову прошивку на свій пристрій. Цей процес несе ризики.\n\n• Переконайтеся, що ваш пристрій заряджений.\n• Тримайте пристрій поруч із телефоном.\n• Не закривайте програму під час оновлення.\n\nПереконайтеся, що ви вибрали правильну прошивку для вашого обладнання.</string>
     <string name="firmware_update_disclaimer_title">Попередження про оновлення</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
@@ -484,7 +484,7 @@
     <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_uploading">Завантаження прошивки...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s зазвичай постачається із завантажувачем, який не підтримує оновлення OTA. Вам може знадобитися завантажувач з можливістю оновлень OTA через USB перед прошиванням OTA.</string>
-    <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні \"Зберегти як\", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
+    <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні "Зберегти як", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_usb_instruction_title">Оберіть USB DFU накопичувач</string>
     <string name="firmware_update_validating">Перевірка прошивки...</string>
     <string name="firmware_update_verification_failed">Час очікування підтвердження минув. Пристрій не під'єднався вчасно.</string>

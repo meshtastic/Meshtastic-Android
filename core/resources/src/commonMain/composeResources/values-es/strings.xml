@@ -447,7 +447,7 @@ Rango de Valores 0 - 500.</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
     <string name="lux">Lux</string>
     <string name="manage_map_layers">Administrar capas de mapa</string>
-    <string name="managed_mode">Modo \"ya terminado de configurar\"</string>
+    <string name="managed_mode">Modo "ya terminado de configurar"</string>
     <string name="manual_position_request">Requerir solicitud manual de posición</string>
     <!-- MAP -->
     <string name="map">Mapa Mesh</string>
@@ -617,7 +617,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="paxcounter_config">Configuración del Contador de Paquetes</string>
     <string name="paxcounter_enabled">Activar el Contador de Paquetes</string>
     <string name="periodic_position_broadcast">Transmisión periódica de posición</string>
-    <string name="permission_missing_31">Meshtastic necesita activar los permisos \"Dispositivos cercanos\" para encontrar y conectarse a dispositivos mediante Bluetooth. Puede desactivar cuando no esté en uso.</string>
+    <string name="permission_missing_31">Meshtastic necesita activar los permisos "Dispositivos cercanos" para encontrar y conectarse a dispositivos mediante Bluetooth. Puede desactivar cuando no esté en uso.</string>
     <string name="phone_location">Ubicación del teléfono</string>
     <string name="phone_location_description">Meshtastic utiliza la ubicación de tu teléfono para habilitar varias características. Puedes actualizar los permisos de ubicación en cualquier momento desde la configuración.</string>
     <plurals name="plurals_hours">

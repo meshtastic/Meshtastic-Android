@@ -212,7 +212,7 @@
     <string name="critical_alert">Alertă critică!</string>
     <string name="critical_alerts">Alerte critice</string>
     <string name="critical_alerts_dnd_request_text">Pentru a te asigura că primești alerte critice, cum ar fi mesajele
-        SOS, chiar și atunci când dispozitivul este în modul \"Nu deranja\" trebuie să acorzi permisiunea specială
+        SOS, chiar și atunci când dispozitivul este în modul "Nu deranja" trebuie să acorzi permisiunea specială
         . Vă rugăm să activați acest lucru în setările notificărilor.
     </string>
     <string name="current">Actual</string>
@@ -393,7 +393,7 @@
     <string name="firmware_update_copying">High-cinci! Așteptați, copiere firmware-ul...</string>
     <string name="firmware_update_currently_installed">Instalat în prezent: %1$s</string>
     <string name="firmware_update_device">Dispozitiv: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy spune, \"Ţineţi-vă scara la îndemână!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy spune, "Ţineţi-vă scara la îndemână!"</string>
     <string name="firmware_update_disclaimer_text">Sunteți pe cale să instalați firmware-ul nou pe dispozitiv. Acest proces poartă riscuri.\n\n• Asigurați-vă că aparatul este încărcat.\n• Țineți dispozitivul aproape de telefon.\n• Nu închideți aplicația în timpul actualizării.\n\nVerificați că ați selectat firmware-ul corect pentru hardware-ul dumneavoastră.</string>
     <string name="firmware_update_disclaimer_title">Avertisment actualizare</string>
     <string name="firmware_update_disconnect_warning">Notă: Aceasta va deconecta temporar dispozitivul dumneavoastră în timpul actualizării.</string>

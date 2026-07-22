@@ -410,7 +410,7 @@
     <string name="firmware_update_connecting_attempt">Připojování k zařízení (pokus %1$d/%2$d)...</string>
     <string name="firmware_update_currently_installed">Aktuálně instalováno: %1$s</string>
     <string name="firmware_update_device">Zařízení: %1$s</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy říká: \"Žebřík měj vždycky po ruce!\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy říká: "Žebřík měj vždycky po ruce!"</string>
     <string name="firmware_update_disclaimer_text">Chystáte se nahrát do zařízení nový firmware. Tento proces s sebou nese určitá rizika.\n\n• Ujistěte se, že je zařízení nabité.\n• Udržujte zařízení blízko telefonu.\n• Během aktualizace neukončujte aplikaci.\n\nOvěřte, zda jste vybrali správný firmware pro váš hardware.</string>
     <string name="firmware_update_disclaimer_title">Upozornění aktualizace</string>
     <string name="firmware_update_disconnect_warning">Poznámka: Během aktualizace dojde dočasně k odpojení vašeho zařízení.</string>

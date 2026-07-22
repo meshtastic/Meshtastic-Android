@@ -198,9 +198,9 @@
     <string name="reboot">Rekòmanse</string>
     <!-- REBROADCAST -->
     <string name="rebroadcast_mode_all_desc">Rebroadcast nenpòt mesaj obsève, si li te sou kanal prive nou oswa soti nan yon lòt mesh ak menm paramèt lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm \"ALL\" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman \"ALL\".</string>
+    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm "ALL" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman "ALL".</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou \"LOCAL ONLY\", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
+    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou "LOCAL ONLY", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
     <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="region_frequency_plan">Rejyon</string>

@@ -129,7 +129,7 @@
     <string name="critical_alert">Alerta Crítico!</string>
     <string name="critical_alerts">Alertas críticos</string>
     <string name="critical_alerts_dnd_request_text">Para garantir que você receba alertas críticos, como mensagens de
-        SOS, mesmo quando o seu dispositivo estiver no modo \"Não Perturbe\", você precisa conceder
+        SOS, mesmo quando o seu dispositivo estiver no modo "Não Perturbe", você precisa conceder
         permissão especial. Por favor, habilite isso nas configurações de notificação.
     </string>
     <string name="current">Atual</string>
@@ -482,7 +482,7 @@
     <string name="paxcounter">Medidor de Fluxo de Pessoas</string>
     <string name="paxcounter_config">Configuração do Contador de Pessoas</string>
     <string name="paxcounter_enabled">Contador de Pessoas ativado</string>
-    <string name="permission_missing_31">Meshtastic precisa das permissões de \"Dispositivos próximos\" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
+    <string name="permission_missing_31">Meshtastic precisa das permissões de "Dispositivos próximos" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
     <string name="phone_location">Localização do Telefone</string>
     <string name="phone_location_description">Meshtastic usa a localização do seu telefone para habilitar vários recursos. Você pode atualizar as permissões de localização a qualquer momento a partir das configurações.</string>
     <!-- POSITION -->

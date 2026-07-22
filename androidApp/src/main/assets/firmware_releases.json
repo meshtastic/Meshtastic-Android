@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11142",
+      "title": "Shared e-ink hardware layer: foundation for target-by-target migration off GxEPD2",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11142",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11138",
       "title": "feat(lr2021): enable LR2021 LoRa radio support on native/portduino",
       "page_url": "https://github.com/meshtastic/firmware/pull/11138",

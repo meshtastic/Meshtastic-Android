@@ -578,7 +578,7 @@
     <string name="password">Hasło</string>
     <!-- PAX -->
     <string name="paxcounter">Paxcounter</string>
-    <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia \"Urządzenia w pobliżu\" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
+    <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia "Urządzenia w pobliżu" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
     <string name="phone_location">Lokalizacja telefonu</string>
     <string name="play">Odtwórz</string>
     <plurals name="plurals_hours">
@@ -663,7 +663,7 @@
     <!-- ROLE -->
     <string name="role">Rola urządzenia</string>
     <string name="role_client_desc">Urządzenie samodzielne lub sparowane z aplikacją.</string>
-    <string name="role_client_hidden_desc"> Used for nodes that \"only speak when spoken to\" Turns all of the routine broadcasts but allows for ad-hoc communication. Still rebroadcasts, but with local only rebroadcast mode (known meshes only). Can be used for private operation or to dramatically reduce airtime / power consumption.</string>
+    <string name="role_client_hidden_desc"> Used for nodes that "only speak when spoken to" Turns all of the routine broadcasts but allows for ad-hoc communication. Still rebroadcasts, but with local only rebroadcast mode (known meshes only). Can be used for private operation or to dramatically reduce airtime / power consumption.</string>
     <string name="role_client_mute_desc">Wyciszenie klienta - To samo, co klient, z wyjątkiem pakietów, które nie przeskakują przez ten węzeł, nie przyczynia się do routingu pakietów dla siatki.</string>
     <string name="role_lost_and_found_desc">Nadaje regularnie lokalizację jako wiadomości do głównego kanału, aby pomóc w odzyskaniu urządzenia.</string>
     <string name="role_repeater_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów z minimalnym narzutem. Niewidoczny na liście węzłów.</string>

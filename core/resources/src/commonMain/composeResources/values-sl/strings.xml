@@ -55,7 +55,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Obravnavaj dvojni pritisk na podprtih merilnikih pospeška kot pritisk uporabnika.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>
     <string name="config_device_transmitOverLora_summary">Izbira ali je treba naš NeighborInfo poleg pošiljanja v MQTT in PhoneAPI posredovati tudi prek LoRa. Ni na voljo na kanalu s privzetim ključem in imenom.</string>
-    <string name="connected_sleeping">Povezan z radiem, vendar radio \"spi\"</string>
+    <string name="connected_sleeping">Povezan z radiem, vendar radio "spi"</string>
     <string name="copy">Kopiraj</string>
     <!-- DEBUG -->
     <string name="debug_panel">Plošča za odpravljanje napak</string>
@@ -74,7 +74,7 @@
     <string name="description">Opis</string>
     <!-- DESKTOP -->
     <!-- DEVICE -->
-    <string name="device_sleeping">Naprava je v \"spanju\"</string>
+    <string name="device_sleeping">Naprava je v "spanju"</string>
     <string name="direct_message">Direktno sporočilo</string>
     <string name="disconnected">Prekinjeno</string>
     <!-- DISCOVERY -->
