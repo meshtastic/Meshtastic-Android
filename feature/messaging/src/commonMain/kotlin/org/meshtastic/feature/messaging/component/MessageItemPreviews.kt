@@ -34,6 +34,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.messaging.isSameGroup
 import org.meshtastic.proto.Routing
 
 @Suppress("PreviewPublic")
@@ -258,9 +259,13 @@ fun MessageItemStatusStatesPreview() {
     }
 }
 
+private const val PREVIEW_MINUTE_MILLIS = 60_000L
+
 /**
- * A full conversation block: a received same-sender run followed by a sent run. Pins the grouped treatment — header
- * only at the start of each run, 4dp flattened facing corners within a run, full rounding on the outer edges.
+ * A full conversation: a received same-sender run, the SAME sender returning after a >10-minute gap (which must start a
+ * new block with its own header), then a sent run. Grouping is computed with the real [isSameGroup] rule, so this pins
+ * the grouped treatment end to end — header only at the start of each block, 4dp flattened facing corners within a
+ * block, full rounding on the outer edges.
  */
 @Suppress("PreviewPublic")
 @PreviewLightDark
@@ -268,6 +273,7 @@ fun MessageItemStatusStatesPreview() {
 fun MessageItemGroupedRunPreview() {
     val ourNode = NodePreviewParameterProvider().mickeyMouse
     val minnie = NodePreviewParameterProvider().minnieMouse
+    val t0 = nowMillis
     val base =
         Message(
             text = "Trailhead in 10",
@@ -278,7 +284,7 @@ fun MessageItemGroupedRunPreview() {
             rssi = 88,
             hopsAway = 0,
             uuid = 30L,
-            receivedTime = nowMillis,
+            receivedTime = t0,
             node = minnie,
             read = true,
             routingError = 0,
@@ -290,24 +296,46 @@ fun MessageItemGroupedRunPreview() {
     val run =
         listOf(
             base,
-            base.copy(text = "Parking lot is full, use the overflow", time = "09:13", uuid = 31L, packetId = 7002),
-            base.copy(text = "Bring water", time = "09:14", uuid = 32L, packetId = 7003),
             base.copy(
-                text = "Copy that",
-                time = "09:15",
-                fromLocal = true,
-                node = ourNode,
+                text = "Parking lot is full, use the overflow",
+                time = "09:13",
+                receivedTime = t0 + 1 * PREVIEW_MINUTE_MILLIS,
+                uuid = 31L,
+                packetId = 7002,
+            ),
+            base.copy(
+                text = "Bring water",
+                time = "09:14",
+                receivedTime = t0 + 2 * PREVIEW_MINUTE_MILLIS,
+                uuid = 32L,
+                packetId = 7003,
+            ),
+            // Same sender, but 33 minutes later — past the grouping window, so this starts a new block.
+            base.copy(
+                text = "Still waiting at the junction",
+                time = "09:47",
+                receivedTime = t0 + 35 * PREVIEW_MINUTE_MILLIS,
                 uuid = 33L,
                 packetId = 7004,
             ),
             base.copy(
+                text = "Copy that",
+                time = "09:48",
+                fromLocal = true,
+                node = ourNode,
+                receivedTime = t0 + 36 * PREVIEW_MINUTE_MILLIS,
+                uuid = 34L,
+                packetId = 7005,
+            ),
+            base.copy(
                 text = "Omw",
-                time = "09:16",
+                time = "09:49",
                 fromLocal = true,
                 status = MessageStatus.ENROUTE,
                 node = ourNode,
-                uuid = 34L,
-                packetId = 7005,
+                receivedTime = t0 + 37 * PREVIEW_MINUTE_MILLIS,
+                uuid = 35L,
+                packetId = 7006,
             ),
         )
     AppTheme {
@@ -316,8 +344,8 @@ fun MessageItemGroupedRunPreview() {
             Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
         ) {
             run.forEachIndexed { index, msg ->
-                val prevSame = index > 0 && run[index - 1].fromLocal == msg.fromLocal
-                val nextSame = index < run.lastIndex && run[index + 1].fromLocal == msg.fromLocal
+                val prevSame = index > 0 && isSameGroup(run[index - 1], msg)
+                val nextSame = index < run.lastIndex && isSameGroup(msg, run[index + 1])
                 MessageItem(
                     message = msg,
                     node = msg.node,

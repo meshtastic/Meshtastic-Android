@@ -70,9 +70,9 @@ private const val HEX_RADIX = 16
  * Messages merge into one visual group only when they are from the same sender AND close in time. The group header
  * carries the run's only timestamp, so a run must never span messages minutes apart from what the header shows.
  */
-private const val GROUPING_WINDOW_MILLIS = 10 * 60 * 1000L
+internal const val GROUPING_WINDOW_MILLIS = 10 * 60 * 1000L
 
-private fun isSameGroup(older: Message, newer: Message): Boolean = older.fromLocal == newer.fromLocal &&
+internal fun isSameGroup(older: Message, newer: Message): Boolean = older.fromLocal == newer.fromLocal &&
     (newer.fromLocal || older.node.num == newer.node.num) &&
     abs(newer.receivedTime - older.receivedTime) <= GROUPING_WINDOW_MILLIS
 
