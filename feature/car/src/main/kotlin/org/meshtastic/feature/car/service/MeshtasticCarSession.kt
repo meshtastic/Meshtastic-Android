@@ -22,10 +22,6 @@ import androidx.car.app.Screen
 import androidx.car.app.Session
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.feature.car.alerts.EmergencyHandler
@@ -39,13 +35,10 @@ class MeshtasticCarSession :
     private val crashlyticsCarTagger: CrashlyticsCarTagger by inject()
     private val stateCoordinator: CarStateCoordinator by inject()
     private val emergencyHandler: EmergencyHandler by inject()
-    private val conversationShortcutManager: ConversationShortcutManager by inject()
-    private val sessionScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onCreateScreen(intent: Intent): Screen {
         crashlyticsCarTagger.setCarSession(true)
         stateCoordinator.start()
-        conversationShortcutManager.startObserving(sessionScope)
         emergencyHandler.startCollecting(stateCoordinator.emergencyAlerts)
 
         lifecycle.addObserver(
@@ -68,8 +61,6 @@ class MeshtasticCarSession :
     }
 
     private fun destroy() {
-        conversationShortcutManager.stopObserving()
-        sessionScope.cancel()
         emergencyHandler.stopCollecting()
         stateCoordinator.destroy()
         crashlyticsCarTagger.setCarSession(false)

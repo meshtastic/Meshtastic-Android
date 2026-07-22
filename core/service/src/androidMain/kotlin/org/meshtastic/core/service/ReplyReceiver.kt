@@ -21,12 +21,14 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -37,7 +39,8 @@ import org.meshtastic.core.repository.usecase.SendMessageUseCase
  *
  * This receiver is triggered when a user replies to a message directly from a notification. It extracts the reply text
  * and the contact key from the intent, sends the message through [SendMessageUseCase] — so notification replies get the
- * same pipeline as in-app sends (history save, durable queue, transforms) — and then cancels the notification.
+ * same pipeline as in-app sends (history save, durable queue, transforms) — and then refreshes the conversation
+ * notification so the sent reply appears in place (falling back to dismissal if the send or refresh fails).
  */
 class ReplyReceiver :
     BroadcastReceiver(),
@@ -74,17 +77,29 @@ class ReplyReceiver :
         val pendingResult: PendingResult? = goAsync()
         scope.launch {
             try {
-                // Send first so the reply isn't lost; then dismiss. The cancel can't break the send.
+                // Send first so the reply isn't lost; the notification update can't break the send.
                 sendMessageUseCase(message, contactKey)
                 // Replying implies the conversation has been read — mark it so, like the mark-as-read action.
                 // Android Auto keys notification dismissal off read state, not just cancel().
                 packetRepository.clearUnreadCount(contactKey, nowMillis)
                 Logger.i(tag = TAG) { "reply sent + marked read" }
+                // Re-post the conversation silently with the sent reply appended — the MessagingStyle confirmation
+                // flow. This resolves the RemoteInput spinner with visible feedback instead of the notification
+                // vanishing. Fall back to dismissal so the spinner never hangs if the refresh itself fails.
+                safeCatching { meshServiceNotifications.refreshConversationAfterReply(contactKey) }
+                    .onFailure {
+                        Logger.e(tag = TAG, throwable = it) { "refresh after reply failed" }
+                        safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                    }
+            } catch (e: CancellationException) {
+                // Preserve structured concurrency — never treat cancellation as a failed send.
+                throw e
             } catch (e: Exception) {
                 Logger.e(tag = TAG, throwable = e) { "reply send failed" }
-            } finally {
-                runCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                // The send failed; dismiss so the RemoteInput spinner resolves rather than hanging forever.
+                safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
                     .onFailure { Logger.e(tag = TAG, throwable = it) { "cancel notification failed" } }
+            } finally {
                 pendingResult?.finish()
             }
         }

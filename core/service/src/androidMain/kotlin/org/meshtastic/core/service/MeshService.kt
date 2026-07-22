@@ -66,6 +66,8 @@ class MeshService : Service() {
 
     private val orchestrator: MeshServiceOrchestrator by inject()
 
+    private val conversationShortcutPublisher: ConversationShortcutPublisher by inject()
+
     private var isServiceInitialized = false
 
     /**
@@ -116,6 +118,10 @@ class MeshService : Service() {
             stopSelf()
             return
         }
+
+        // Keep conversation shortcuts published for the whole service lifetime (not only during an Android Auto
+        // session) so message notifications can link to them and get Conversations-section treatment on phones.
+        conversationShortcutPublisher.startObserving(serviceScope)
     }
 
     @Suppress("ReturnCount")
@@ -265,6 +271,7 @@ class MeshService : Service() {
 
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
+        conversationShortcutPublisher.stopObserving()
         addressWaitJob?.cancel()
         addressWaitJob = null
         serviceScope.cancel()
