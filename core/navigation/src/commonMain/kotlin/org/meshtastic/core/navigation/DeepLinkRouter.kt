@@ -57,6 +57,8 @@ object DeepLinkRouter {
 
         val firstSegment = pathSegments[0].lowercase()
 
+        // New top-level segments must also be declared as a pathPrefix in the https App Links intent-filter in
+        // androidApp/src/main/AndroidManifest.xml (enforced by DeepLinkManifestConsistencyTest in androidApp).
         return when (firstSegment) {
             "share",
             "messages",

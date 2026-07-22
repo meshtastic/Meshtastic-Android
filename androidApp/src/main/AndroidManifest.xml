@@ -263,6 +263,8 @@
                 <data android:pathPrefix="/settings" />
                 <data android:pathPrefix="/channels" />
                 <data android:pathPrefix="/firmware" />
+                <data android:pathPrefix="/wifi-provision" />
+                <data android:pathPrefix="/discovery" />
             </intent-filter>
 
             <intent-filter>
