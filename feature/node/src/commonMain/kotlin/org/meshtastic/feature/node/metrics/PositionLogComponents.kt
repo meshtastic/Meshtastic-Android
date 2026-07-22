@@ -40,6 +40,7 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
+import org.meshtastic.core.model.util.kmhToSpeedString
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -48,7 +49,6 @@ import org.meshtastic.core.resources.heading
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.sats
-import org.meshtastic.core.resources.speed_kmh
 import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
@@ -122,7 +122,7 @@ fun PositionCard(
                         Spacer(Modifier.width(12.dp))
                         MetricValueRow(
                             color = GraphColors.Gold,
-                            text = stringResource(Res.string.speed_kmh, position.ground_speed ?: 0),
+                            text = (position.ground_speed ?: 0).kmhToSpeedString(displayUnits),
                         )
                     }
                 }

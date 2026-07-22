@@ -90,6 +90,14 @@ fun Float.toSpeedString(system: DisplayUnits): String = if (system == DisplayUni
     formatString("%.0f mph", this * 2.23694f)
 }
 
+/** Formats a speed already expressed in km/h (e.g. protobuf `Position.ground_speed`) for [system]. */
+@Suppress("MagicNumber")
+fun Int.kmhToSpeedString(system: DisplayUnits): String = if (system == DisplayUnits.IMPERIAL) {
+    formatString("%.0f mph", this * 0.621371f)
+} else {
+    formatString("%.0f km/h", this.toFloat())
+}
+
 @Suppress("MagicNumber")
 fun Float.toSmallDistanceString(system: DisplayUnits): String = if (system == DisplayUnits.IMPERIAL) {
     formatString("%.2f in", this / 25.4f)
