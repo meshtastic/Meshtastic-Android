@@ -88,6 +88,25 @@ Tuloksista saatavilla olevat lisätoiminnot:
 
 ---
 
+## Verkkokutsu
+
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+
+Configure it under **Settings → Module Config → Mesh Beacon**:
+
+- **Listen for beacons** — receive invitations broadcast by other nodes.
+- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+
+- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
+- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Dismiss** — ignore the invitation.
+
+Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+
+---
+
 ## Manuaalinen haku
 
 Alla olevat työkalut ovat käytettävissä milloin tahansa radiolistasta ja radion tietonäkymistä. Käytä niitä yksittäisten reittien tutkimiseen ja topologian muodostamiseen, joko osana skannausta tai sen sijaan.
@@ -169,7 +188,7 @@ Radiolista on itsessään tehokas hakutyökalu, kun käytät sen suodatus- ja la
 
 ### Infrastruktuurin tarkistus
 
-- Poista käytöstä **Ohita infrastruktuurilaitteet** nähdäksesi Router-, Repeater-, Router Late- ja Client Base -radiot.
+- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - Tarkista niiden signaalin laatu ja viimeksi kuultu -ajat varmistaaksesi, että infrastruktuuriradiot ovat kunnossa.
 
 Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.

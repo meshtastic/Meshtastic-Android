@@ -29,9 +29,9 @@ Meshtastic 支援多種傳輸方式，以便您的手機或電腦與無線電節
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-您可使用頂部的篩選標籤，依傳輸類型篩選裝置：
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 提示：若裝置未顯示，請確認已授予藍牙與位置權限，且該無線電裝置尚未連接至其他裝置。
 
@@ -77,7 +77,7 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
+2. On the Connect screen, select **Network** in the transport selector.
 3. Choose the radio one of two ways:
    - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
    - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).

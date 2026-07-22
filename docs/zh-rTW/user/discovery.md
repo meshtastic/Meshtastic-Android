@@ -88,6 +88,25 @@ Additional features available from the results:
 
 ---
 
+## Mesh Beacon
+
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+
+Configure it under **Settings → Module Config → Mesh Beacon**:
+
+- **Listen for beacons** — receive invitations broadcast by other nodes.
+- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+
+- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
+- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Dismiss** — ignore the invitation.
+
+Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+
+---
+
 ## Manual Exploration
 
 The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
@@ -169,7 +188,7 @@ The tools below are available at any time from the node list and node detail scr
 
 ### 基礎架構稽核
 
-- 停用「排除基礎架構」，可顯示路由器、中繼器、延遲路由器及用戶端基地節點。
+- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - 檢查其訊號品質與最後收到訊號的時間，以確認基礎架構節點運作正常。
 
 請參閱〔節點〕(nodes) 以了解完整的篩選與排序選項說明。

@@ -51,11 +51,11 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 ### Local TAK Server
 
-Rakendus saab käitada ka **kohalikku TAK serverit**, nii et samas seadmes või võrgus olevad ATAK/iTAK-kliendid saavad otseühenduse luua ilma kaug-TAK serverita. Open **Settings → Module Config → TAK → TAK Server**:
+The app can also run a **local TAK server** so ATAK/iTAK on the **same device** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open **Settings → Module Config → TAK → TAK Server**:
 
 ![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts a local TLS server on port **8089** for ATAK/iTAK connections.
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
 - **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
 
 ## TAK Roles
@@ -129,7 +129,7 @@ Kui on seadistatud:
 - [Seaded — moodulid ja admin](settings-module-admin) — TAK mooduli konf
 - [Sõlmed](nodes) — TAK ja TAK jälgimisseade rollid sõlmede loendis
 - [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin juhend](https://meshtastic.org/docs/software/integrations/atak-plugin) — üksikasjalik ATAK seadistamine aadressil meshtastic.org
+- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
 
 ---
 

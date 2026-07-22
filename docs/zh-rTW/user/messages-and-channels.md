@@ -179,6 +179,7 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 ### 訊息限制
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - 速率限制：mesh 網路會執行無線電佔用時間公平性管制；大量訊息可能會被節流
 - 傳遞：若未收到確認回應，訊息將自動重試
 

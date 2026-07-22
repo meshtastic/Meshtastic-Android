@@ -241,7 +241,7 @@ Avaa **Paketit**- ja **Sovelluslokit**-välilehdet diagnostiikkatietojen tarkast
 
 - [Asetukset — Radio ja käyttäjä](settings-radio-user) — radion ja käyttäjäprofiilin keskeiset asetukset
 - [Moduulien määritysviite](https://meshtastic.org/docs/configuration/module) — yksityiskohtainen moduulidokumentaatio meshtastic.org-sivustolla
-- [Moduulien määritysviite](https://meshtastic.org/docs/configuration/module) — yksityiskohtainen moduulidokumentaatio meshtastic.org-sivustolla
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

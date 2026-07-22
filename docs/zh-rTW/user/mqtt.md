@@ -52,6 +52,12 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 | TLS         | 與代理伺服器的安全連線                     | 已停用                                                 |
 | 地圖回報        | 將位置回報至公開地圖                      | 已停用                                                 |
 
+### MQTT Proxy on This Phone
+
+If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+
 ### 預設 Meshtastic 代理伺服器
 
 社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。

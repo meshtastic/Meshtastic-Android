@@ -97,6 +97,6 @@ Rakendus valib automaatselt õige lokaadi seadme **Keele ja piirkonna** sätete 
 
 ## Questions?
 
-Kui on küsimusi konkreetse stringi konteksti kohta või vajad abi alustamisel, ava arutelu lehel [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions).
+If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
 
 Tänan teid Meshtasticu haardeala laiendamise eest!

@@ -147,15 +147,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### 安全性設定
 
-| 設定                        | 描述說明                                                                       |
-| ------------------------- | -------------------------------------------------------------------------- |
-| 公鑰                        | Your node's public key (read-only)                      |
-| 管理金鑰                      | Key for remote administration                                              |
-| 私鑰                        | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| 除錯日誌                      | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| 管理模式                      | Restrict non-admin channel changes                                         |
+| 設定                        | 描述說明                                                                                                                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公鑰                        | Your node's public key (read-only)                                                                                                                                                          |
+| 管理金鑰                      | Key for remote administration                                                                                                                                                                                  |
+| 私鑰                        | Your node's private key (handle securely)                                                                                                                                                   |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| 除錯日誌                      | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| 管理模式                      | Restrict non-admin channel changes                                                                                                                                                                             |
+| 備份金鑰                      | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

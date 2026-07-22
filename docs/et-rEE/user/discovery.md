@@ -88,6 +88,25 @@ Additional features available from the results:
 
 ---
 
+## Kärgvõrgu majakas
+
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+
+Configure it under **Settings → Module Config → Mesh Beacon**:
+
+- **Listen for beacons** — receive invitations broadcast by other nodes.
+- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+
+- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
+- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Dismiss** — ignore the invitation.
+
+Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+
+---
+
 ## Manual Exploration
 
 The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
@@ -169,7 +188,7 @@ Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja
 
 ### Infrastructure Audit
 
-- Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
+- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
 
 See [Nodes](nodes) for full details on filtering and sorting options.

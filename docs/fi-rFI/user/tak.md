@@ -51,11 +51,11 @@ TAK-moduuli mahdollistaa Meshtastic-radioille:
 
 ### Paikallinen TAK-palvelin
 
-Sovellus voi toimia myös **paikallisena TAK-palvelimena**, jolloin samalla laitteella tai samassa verkossa olevat ATAK-/iTAK-asiakkaat voivat muodostaa yhteyden suoraan ilman etä-TAK-palvelinta. Avaa **Asetukset → Moduuliasetukset → TAK → TAK-palvelin**:
+The app can also run a **local TAK server** so ATAK/iTAK on the **same device** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Avaa **Asetukset → Moduuliasetukset → TAK → TAK-palvelin**:
 
 ![Paikallisen TAK-palvelimen asetukset, joissa näkyvät käyttöönotto ja vientitoiminto](../../assets/screenshots/tak_server_enabled.png)
 
-- **Ota paikallinen TAK-palvelin käyttöön** — käynnistää paikallisen TLS-palvelimen portissa **8089** ATAK-/iTAK-yhteyksiä varten.
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
 - **Vie TAK-tietopaketti** — luo `.zip`-tietopaketin, jonka ATAK/iTAK voi tuoda muodostaakseen yhteyden tähän palvelimeen.
 
 ## TAK-roolit
@@ -129,7 +129,7 @@ Kun asetukset on määritetty:
 - [Asetukset — Moduulit ja ylläpito](settings-module-admin) — TAK-moduulin asetukset
 - [Radiot](nodes) — TAK- ja TAK Tracker -roolit radiolistassa
 - [Kartta ja reittipisteet](map-and-waypoints) — radioiden sijainnit kartalla
-- [ATAK-lisäosan opas](https://meshtastic.org/docs/software/integrations/atak-plugin) — yksityiskohtainen ATAK-asennus meshtastic.org -sivustolla
+- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
 
 ---
 

@@ -179,6 +179,7 @@ Viestit jonotetaan ja lähetetään prioriteetin mukaan:
 ### Viestirajoitukset
 
 - **Enimmäispituus:** 200 tavua (noin 200 merkkiä ASCII-tekstille)
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
 - **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 

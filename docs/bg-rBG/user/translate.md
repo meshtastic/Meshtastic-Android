@@ -97,6 +97,6 @@ The app automatically selects the correct locale based on your device's **Langua
 
 ## Questions?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) page.
+If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
 
 Благодарим ви, че помогнахте за разширяването на обхвата на Meshtastic!

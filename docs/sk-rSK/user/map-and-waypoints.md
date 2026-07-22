@@ -53,6 +53,8 @@ Waypoints are shared geographic points of interest that all mesh members can see
 3. Choose an icon/emoji for the waypoint.
 4. Tap **Send** to share with the mesh.
 
+Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+
 ### Waypoint Properties
 
 | Property   | Popis                                                   |
@@ -116,9 +118,8 @@ Configure position behavior in **Settings → Position**.
 
 ## Map Sources
 
-The app supports multiple map tile sources:
+The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- OpenStreetMap (default)
 - Satellite imagery (where available)
 - Offline tiles (download map areas for offline use)
 

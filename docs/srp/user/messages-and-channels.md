@@ -179,6 +179,7 @@ Messages are queued and transmitted based on priority:
 ### Message Limits
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
 - **Delivery:** Messages are retried automatically if no acknowledgment is received
 

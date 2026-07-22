@@ -241,7 +241,7 @@ ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携
 
 - [設定：無線機とユーザー](settings-radio-user)：基本の無線機とユーザープロファイルの設定
 - [モジュール設定リファレンス](https://meshtastic.org/docs/configuration/module)：meshtastic.org にある詳細なモジュールのドキュメント
-- [FAQ](https://meshtastic.org/docs/about/faq)：meshtastic.org のよくある質問
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

@@ -103,14 +103,14 @@ Type in the search field to filter nodes by name or short name. Filter uueneb re
 
 ### Filter Toggles
 
-| Filtreeri                  | Kirjeldus                                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 2 hours                                                  |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                        |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
+| Filtreeri                  | Kirjeldus                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| **Only online**            | Show only nodes heard within the last 2 hours                                        |
+| **Only direct**            | Show only nodes with direct (non-relayed) connections             |
+| **Include unknown**        | Show nodes that haven't sent user info yet                                           |
+| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
+| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                              |
+| **Show ignored**           | Show nodes you've previously dismissed or muted                                      |
 
 ### Sort Options
 
