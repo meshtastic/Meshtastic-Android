@@ -482,7 +482,14 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // FlowRow(SpaceBetween): the relays stat wraps to its own line when the traffic label is too long,
+            // instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text =
                     stringResource(
@@ -506,7 +513,14 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // FlowRow(SpaceBetween): the uptime stat wraps to its own line when the nodes label is too long,
+            // instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text =
                     stringResource(

@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -444,8 +445,15 @@ private fun DeviceMetricsCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            /* Channel Utilization and Air Utilization Tx */
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            /* Channel Utilization / Air Utilization Tx, and Uptime */
+            // FlowRow(SpaceBetween) so the uptime stays pinned right when it fits and drops onto its own line when the
+            // (localized) labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (deviceMetrics?.channel_utilization != null) {
                         MetricValueRow(
