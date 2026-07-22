@@ -315,7 +315,7 @@ fun MessageItem(
                 onNavigateToOriginalMessage = onNavigateToOriginalMessage,
             )
 
-            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                 if (searchQuery.isNotEmpty()) {
                     HighlightedText(
                         text = message.text,
@@ -356,6 +356,12 @@ fun MessageItem(
                                     tint = MaterialTheme.colorScheme.StatusGreen,
                                 )
                             }
+                            TransportIcon(
+                                transport = message.transportMechanism,
+                                viaMqtt = message.viaMqtt,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                             if (message.hopsAway == 0 && !message.viaMqtt) {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
@@ -372,12 +378,6 @@ fun MessageItem(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            TransportIcon(
-                                transport = message.transportMechanism,
-                                viaMqtt = message.viaMqtt,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
                         }
                     }
                     if (containsBel) {
