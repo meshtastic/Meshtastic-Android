@@ -106,7 +106,9 @@ fun NodeItem(
             Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
         }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode, system) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
@@ -133,7 +135,7 @@ fun NodeItem(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, a11yStrings, modemPreset) {
+        remember(thatNode, distance, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = originalLongName,
                 isOnline = thatNode.isOnline,

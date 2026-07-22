@@ -122,7 +122,9 @@ fun NodeItemCompact(
             Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
         }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode, system) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
     val unmessageable =
         remember(thatNode) {
@@ -143,7 +145,7 @@ fun NodeItemCompact(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, lastHeardIsRelative, a11yStrings, modemPreset) {
+        remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = longName,
                 isOnline = thatNode.isOnline,
