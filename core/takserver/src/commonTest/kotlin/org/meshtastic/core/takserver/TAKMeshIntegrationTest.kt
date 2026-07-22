@@ -286,6 +286,9 @@ class TAKMeshIntegrationTest {
         override val myId: StateFlow<String?> = MutableStateFlow(null)
         override val localStats: StateFlow<LocalStats> = MutableStateFlow(LocalStats())
         override val nodeDBbyNum: StateFlow<Map<Int, Node>> = MutableStateFlow(emptyMap())
+
+        override suspend fun getNodeDbSnapshot(): Map<Int, Node> = nodeDBbyNum.value
+
         override val onlineNodeCount: Flow<Int> = MutableStateFlow(0)
         override val totalNodeCount: Flow<Int> = MutableStateFlow(0)
 

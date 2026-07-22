@@ -627,6 +627,37 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `Stage 2 applies trusted migrations before readiness and replay`() = testScope.runTest {
+        val retiredNum = 456
+        val callOrder = mutableListOf<String>()
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls
+            {
+                callOrder.add("installConfig")
+                listOf(retiredNum)
+            }
+        every { nodeManager.applyTrustedIdentityMigrations(any()) } calls { callOrder.add("applyMigrations") }
+        every { nodeManager.setNodeDbReady(true) } calls { callOrder.add("nodeDbReady") }
+        every { nodeManager.setAllowNodeDbWrites(true) } calls { callOrder.add("writesReady") }
+        everySuspend { connectionManager.onNodeDbReady() } calls { callOrder.add("replayReady") }
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("installConfig", "applyMigrations", "nodeDbReady", "writesReady", "replayReady"),
+            callOrder,
+        )
+        verify { nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum)) }
+    }
+
+    @Test
     fun `Stage 2 complete id ignored when not in ReceivingNodeInfo state`() = testScope.runTest {
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()

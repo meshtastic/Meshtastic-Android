@@ -257,6 +257,28 @@ interface NodeInfoDao {
             >,
         >
 
+    /**
+     * One-shot snapshot of every node row in the CURRENTLY SELECTED database (not the process-wide stateIn cache). Used
+     * by session-safe cache loads (see NodeManagerImpl.loadCachedNodeDB) so a transport switch can't deliver a stale
+     * pre-switch map.
+     */
+    @Query(
+        """
+        SELECT * FROM nodes
+        ORDER BY CASE
+            WHEN num = (SELECT myNodeNum FROM my_node LIMIT 1) THEN 0
+            ELSE 1
+        END,
+        last_heard DESC
+        """,
+    )
+    @Transaction
+    suspend fun nodeDBbyNumSnapshot(): Map<
+        @MapColumn(columnName = "num")
+        Int,
+        NodeWithRelations,
+        >
+
     @Query(
         """
     WITH OurNode AS (

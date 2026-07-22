@@ -19,6 +19,7 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -55,6 +56,7 @@ class NodeManagerConnectionIdentityTest {
 
     @BeforeTest
     fun setUp() {
+        everySuspend { nodeRepository.getNodeDbSnapshot() } returns emptyMap()
         nodeManager = NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope)
     }
 

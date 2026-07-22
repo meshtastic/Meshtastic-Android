@@ -37,4 +37,11 @@ interface NodeInfoReadDataSource {
     suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity>
 
     suspend fun getUnknownNodes(): List<NodeEntity>
+
+    /**
+     * One-shot snapshot of every node row in the currently selected database. Bypasses the process-wide
+     * [nodeDBbyNumFlow] cache so callers see the live DB state at invocation time rather than a `stateIn` value that
+     * may belong to a previous transport.
+     */
+    suspend fun getNodeDbSnapshot(): Map<Int, NodeWithRelations>
 }

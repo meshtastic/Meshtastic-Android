@@ -296,7 +296,7 @@ class MeshConfigFlowManagerImpl(
         if (!isActiveSession(session)) return
         if (removedNums.isNotEmpty()) {
             Logger.i { "Config install migrated ${removedNums.size} stale node identit(y/ies)" }
-            removedNums.forEach(nodeManager::removeByNodenum)
+            nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
 
         val published =

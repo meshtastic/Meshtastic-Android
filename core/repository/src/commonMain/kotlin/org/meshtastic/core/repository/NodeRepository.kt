@@ -122,6 +122,13 @@ interface NodeRepository {
     suspend fun getUnknownNodes(): List<Node>
 
     /**
+     * One-shot snapshot of every node in the CURRENTLY SELECTED database (not the process-wide [nodeDBbyNum] `stateIn`
+     * cache, which can briefly retain the previous transport's map after a switch). Used by session-safe cache loads
+     * that need to read the live DB at invocation time.
+     */
+    suspend fun getNodeDbSnapshot(): Map<Int, Node>
+
+    /**
      * Deletes all nodes from the database.
      *
      * @param preserveFavorites If true, nodes marked as favorite will not be deleted.
