@@ -67,6 +67,68 @@ class MessageComposerBehaviorTest {
     }
 
     @Test
+    fun `live markdown spans are returned in source order`() {
+        val source = "`code` before **bold**"
+        val spans = liveInlineMarkdownStyleRanges(source).map { span -> source.substring(span.range) to span.style }
+
+        assertEquals(listOf("code" to InlineStyle.Code, "bold" to InlineStyle.Bold), spans)
+    }
+
+    @Test
+    fun `live markdown parser ignores style delimiters inside code spans`() {
+        val source = "`**not bold** *not italic* ~~not strike~~`"
+        val spans = liveInlineMarkdownStyleRanges(source).map { span -> source.substring(span.range) to span.style }
+
+        assertEquals(listOf("**not bold** *not italic* ~~not strike~~" to InlineStyle.Code), spans)
+    }
+
+    @Test
+    fun `live markdown parser preserves style surrounding code spans`() {
+        val source = "**before `code` after**"
+        val spans = liveInlineMarkdownStyleRanges(source).map { span -> source.substring(span.range) to span.style }
+
+        assertEquals(listOf("before `code` after" to InlineStyle.Bold, "code" to InlineStyle.Code), spans)
+    }
+
+    @Test
+    fun `mention replacement remaps later markdown span`() {
+        val source = "@!aabbccdd **bold**"
+        val candidate = MentionCandidate(id = "!aabbccdd", longName = "A", shortName = "A")
+        val plan = mentionOutputPlan(source, mapOf(candidate.id to candidate))
+
+        assertEquals(listOf(MentionReplacement(0..9, "@A")), plan.replacements)
+        assertEquals(listOf(LiveStyleSpan(5..8, InlineStyle.Bold)), plan.styleSpans)
+    }
+
+    @Test
+    fun `multiple mention replacements accumulate offsets before later markdown`() {
+        val source = "@!aabbccdd and @!11223344 then `code`"
+        val alpha = MentionCandidate(id = "!aabbccdd", longName = "A", shortName = "A")
+        val bravo = MentionCandidate(id = "!11223344", longName = "Long Bravo", shortName = "B")
+        val plan = mentionOutputPlan(source, mapOf(alpha.id to alpha, bravo.id to bravo))
+
+        assertEquals(listOf(LiveStyleSpan(25..28, InlineStyle.Code)), plan.styleSpans)
+    }
+
+    @Test
+    fun `markdown surrounding mention expands to friendly display name`() {
+        val source = "**@!aabbccdd**"
+        val candidate = MentionCandidate(id = "!aabbccdd", longName = "Alpha", shortName = "A")
+        val plan = mentionOutputPlan(source, mapOf(candidate.id to candidate))
+
+        assertEquals(listOf(LiveStyleSpan(2..7, InlineStyle.Bold)), plan.styleSpans)
+    }
+
+    @Test
+    fun `friendly mention delimiters do not introduce markdown styling`() {
+        val source = "@!aabbccdd plain"
+        val candidate = MentionCandidate(id = "!aabbccdd", longName = "**Alpha**", shortName = "A")
+        val plan = mentionOutputPlan(source, mapOf(candidate.id to candidate))
+
+        assertTrue(plan.styleSpans.isEmpty())
+    }
+
+    @Test
     fun `bold delimiters are not double counted as italic`() {
         val spans = liveInlineMarkdownStyleRanges("**bold**")
 

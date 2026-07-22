@@ -585,15 +585,88 @@ internal data class LiveStyleSpan(val range: IntRange, val style: InlineStyle)
  */
 internal fun liveInlineMarkdownStyleRanges(source: String): List<LiveStyleSpan> {
     if (!source.any { it in LIVE_STYLE_DELIMITER_SET }) return emptyList()
-    return buildList {
-        LIVE_BOLD.findAll(source).forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Bold)) }
-        LIVE_ITALIC.findAll(source).forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Italic)) }
-        LIVE_STRIKE.findAll(source).forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Strikethrough)) }
-        LIVE_CODE.findAll(source).forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Code)) }
+    val codeMatches = LIVE_CODE.findAll(source).toList()
+    // Returns true when either delimiter boundary of this match falls inside a code span. Markdown entirely inside
+    // code, or malformed markdown crossing a code boundary, must not add styling. A code span nested inside outer
+    // emphasis is still allowed, so outer bold text can retain both its bold span and an inner code span.
+    val isBlockedByCodeSpan: (MatchResult) -> Boolean = { match ->
+        codeMatches.any { codeMatch -> match.range.first in codeMatch.range || match.range.last in codeMatch.range }
     }
+    return buildList {
+        LIVE_BOLD.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Bold))
+        }
+        LIVE_ITALIC.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Italic))
+        }
+        LIVE_STRIKE.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Strikethrough))
+        }
+        codeMatches.forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Code)) }
+    }
+        .sortedWith(compareBy<LiveStyleSpan>({ it.range.first }, { it.range.last }, { it.style.ordinal }))
 }
 
 private val LIVE_STYLE_DELIMITER_SET = setOf('*', '~', '`')
+
+internal data class MentionReplacement(val range: IntRange, val text: String)
+
+internal data class MentionOutputPlan(val replacements: List<MentionReplacement>, val styleSpans: List<LiveStyleSpan>)
+
+/**
+ * Builds presentation edits from the immutable source buffer. Markdown is parsed before friendly-name replacement so
+ * display names containing `*`, `~`, or backticks cannot introduce formatting that was not present in the stored text.
+ */
+internal fun mentionOutputPlan(source: String, candidatesById: Map<String, MentionCandidate>): MentionOutputPlan {
+    val replacements =
+        MENTION_TOKEN_REGEX.findAll(source)
+            .mapNotNull { match ->
+                val candidate = candidatesById[match.groupValues[1]] ?: return@mapNotNull null
+                MentionReplacement(match.range, "@" + candidate.longName.ifEmpty { candidate.shortName })
+            }
+            .toList()
+    val styleSpans = remapStyleSpans(liveInlineMarkdownStyleRanges(source), replacements)
+    return MentionOutputPlan(replacements, styleSpans)
+}
+
+/** Remaps source-buffer style ranges through non-overlapping mention replacements. */
+internal fun remapStyleSpans(spans: List<LiveStyleSpan>, replacements: List<MentionReplacement>): List<LiveStyleSpan> {
+    if (spans.isEmpty() || replacements.isEmpty()) return spans
+    val sortedReplacements = replacements.sortedBy { it.range.first }
+    return spans.mapNotNull { span ->
+        val start = remapBoundary(span.range.first, sortedReplacements, preferReplacementEnd = false)
+        val endExclusive = remapBoundary(span.range.last + 1, sortedReplacements, preferReplacementEnd = true)
+        if (start >= endExclusive) null else span.copy(range = start until endExclusive)
+    }
+}
+
+private fun remapBoundary(
+    sourceOffset: Int,
+    replacements: List<MentionReplacement>,
+    preferReplacementEnd: Boolean,
+): Int {
+    var delta = 0
+    var mappedOffset: Int? = null
+    val iterator = replacements.iterator()
+    while (iterator.hasNext() && mappedOffset == null) {
+        val replacement = iterator.next()
+        val sourceStart = replacement.range.first
+        val sourceEndExclusive = replacement.range.last + 1
+        mappedOffset =
+            when {
+                sourceOffset <= sourceStart -> sourceOffset + delta
+
+                sourceOffset < sourceEndExclusive ->
+                    sourceStart + delta + if (preferReplacementEnd) replacement.text.length else 0
+
+                else -> {
+                    delta += replacement.text.length - (sourceEndExclusive - sourceStart)
+                    null
+                }
+            }
+    }
+    return mappedOffset ?: sourceOffset + delta
+}
 
 /**
  * Displays `@!<hex>` tokens as `@FriendlyName` and applies live inline-markdown styling (bold/italic/strikethrough/
@@ -601,21 +674,18 @@ private val LIVE_STYLE_DELIMITER_SET = setOf('*', '~', '`')
  * and the raw markdown delimiters, so the bytes sent are unchanged.
  */
 @OptIn(ExperimentalFoundationApi::class)
-private fun mentionOutputTransformation(nodesById: Map<String, MentionCandidate>) = OutputTransformation {
+private fun mentionOutputTransformation(candidatesById: Map<String, MentionCandidate>) = OutputTransformation {
     val source = toString()
     // Fast path: plain text with no mention tokens or markdown delimiters — skip all scanning.
     val hasMention = source.indexOf('@') >= 0
     val needsStyle = hasMention || source.any { it in LIVE_STYLE_DELIMITER_SET }
     if (!needsStyle) return@OutputTransformation
 
-    for (match in MENTION_TOKEN_REGEX.findAll(source).toList().asReversed()) {
-        val candidate = nodesById[match.groupValues[1]] ?: continue
-        replace(match.range.first, match.range.last + 1, "@" + candidate.longName.ifEmpty { candidate.shortName })
+    val plan = mentionOutputPlan(source, candidatesById)
+    for (replacement in plan.replacements.asReversed()) {
+        replace(replacement.range.first, replacement.range.last + 1, replacement.text)
     }
-    // Rescan the post-replacement buffer — mention replacements may have changed text length,
-    // so the original source offsets are no longer valid.
-    val postMentions = toString()
-    for (span in liveInlineMarkdownStyleRanges(postMentions)) {
+    for (span in plan.styleSpans) {
         val spanStyle =
             when (span.style) {
                 InlineStyle.Bold -> SpanStyle(fontWeight = FontWeight.Bold)
