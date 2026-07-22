@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
@@ -63,6 +64,7 @@ class ConversationShortcutPublisher(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val dispatchers: CoroutineDispatchers,
 ) {
 
     private var observeJob: Job? = null
@@ -70,7 +72,9 @@ class ConversationShortcutPublisher(
     fun startObserving(scope: CoroutineScope) {
         observeJob?.cancel()
         observeJob =
-            scope.launch {
+            // The caller's scope may be Main-bound (MeshService); shortcut publishing does ShortcutManager IPC and
+            // rasterizes avatar bitmaps on every recency-affecting DB change, so keep it off the Main thread.
+            scope.launch(dispatchers.io) {
                 // Combine the message DB (recency + DM peers) with the channel config (names). Ranking both by
                 // last-activity time lets launchers / Android Auto surface the *recently active* conversations first
                 // (the shortcut display cap is small), instead of an arbitrary slice of stale channels.
@@ -252,9 +256,10 @@ class ConversationShortcutPublisher(
         try {
             ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
         } catch (e: IllegalArgumentException) {
-            Logger.e(tag = TAG, throwable = e) { "Failed to publish on-demand shortcut $contactKey" }
+            // Don't log the contactKey: node/channel identifiers are user-traceable (privacy-first convention).
+            Logger.e(tag = TAG, throwable = e) { "Failed to publish on-demand shortcut" }
         } catch (e: IllegalStateException) {
-            Logger.e(tag = TAG, throwable = e) { "Failed to publish on-demand shortcut $contactKey" }
+            Logger.e(tag = TAG, throwable = e) { "Failed to publish on-demand shortcut" }
         }
     }
 

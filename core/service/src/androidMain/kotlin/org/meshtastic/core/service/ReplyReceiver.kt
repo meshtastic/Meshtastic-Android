@@ -21,12 +21,14 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -84,15 +86,18 @@ class ReplyReceiver :
                 // Re-post the conversation silently with the sent reply appended — the MessagingStyle confirmation
                 // flow. This resolves the RemoteInput spinner with visible feedback instead of the notification
                 // vanishing. Fall back to dismissal so the spinner never hangs if the refresh itself fails.
-                runCatching { meshServiceNotifications.refreshConversationAfterReply(contactKey) }
+                safeCatching { meshServiceNotifications.refreshConversationAfterReply(contactKey) }
                     .onFailure {
                         Logger.e(tag = TAG, throwable = it) { "refresh after reply failed" }
-                        runCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                        safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
                     }
+            } catch (e: CancellationException) {
+                // Preserve structured concurrency — never treat cancellation as a failed send.
+                throw e
             } catch (e: Exception) {
                 Logger.e(tag = TAG, throwable = e) { "reply send failed" }
                 // The send failed; dismiss so the RemoteInput spinner resolves rather than hanging forever.
-                runCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
                     .onFailure { Logger.e(tag = TAG, throwable = it) { "cancel notification failed" } }
             } finally {
                 pendingResult?.finish()

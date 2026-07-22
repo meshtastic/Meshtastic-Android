@@ -24,6 +24,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -31,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
@@ -61,9 +63,15 @@ class ConversationShortcutPublisherTest {
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val dispatchers =
+        CoroutineDispatchers(
+            io = Dispatchers.Unconfined,
+            main = Dispatchers.Unconfined,
+            default = Dispatchers.Unconfined,
+        )
 
     private val publisher =
-        ConversationShortcutPublisher(context, nodeRepository, packetRepository, radioConfigRepository)
+        ConversationShortcutPublisher(context, nodeRepository, packetRepository, radioConfigRepository, dispatchers)
 
     @Before
     fun setUp() {

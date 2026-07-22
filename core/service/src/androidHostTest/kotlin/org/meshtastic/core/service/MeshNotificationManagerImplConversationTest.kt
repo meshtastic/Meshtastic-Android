@@ -27,12 +27,14 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MyNodeInfo
@@ -74,7 +76,17 @@ class MeshNotificationManagerImplConversationTest {
             nodeRepository = lazy { nodeRepository },
             conversationShortcutPublisher =
             lazy {
-                ConversationShortcutPublisher(context, nodeRepository, packetRepository, radioConfigRepository)
+                ConversationShortcutPublisher(
+                    context,
+                    nodeRepository,
+                    packetRepository,
+                    radioConfigRepository,
+                    CoroutineDispatchers(
+                        io = Dispatchers.Unconfined,
+                        main = Dispatchers.Unconfined,
+                        default = Dispatchers.Unconfined,
+                    ),
+                )
             },
             radioConfigRepository = lazy { radioConfigRepository },
         )
@@ -211,5 +223,11 @@ class MeshNotificationManagerImplConversationTest {
         val posted = activeByTag("message").single().notification
         // A DM is not a group conversation, so no conversation title is set.
         assertNull(posted.extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE))
+        // The on-demand shortcut published for the notification carries the peer's resolved name.
+        val shortcut =
+            context.getSystemService(android.content.pm.ShortcutManager::class.java)!!.dynamicShortcuts.single {
+                it.id == "0!00000007"
+            }
+        assertEquals("Hawk Ridge", shortcut.shortLabel)
     }
 }
