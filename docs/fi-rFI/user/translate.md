@@ -97,6 +97,6 @@ Sovellus valitsee automaattisesti oikean kielialueen laitteen **Kieli & alue** -
 
 ## Kysyttävää?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+Jos sinulla on kysyttävää tietyn merkkijonon asiayhteydestä tai tarvitset apua alkuun pääsemisessä, avaa keskustelu [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) -sivulla.
 
 Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!

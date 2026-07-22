@@ -84,7 +84,7 @@ Työpöytäsovellus käyttää samaa Compose Multiplatform -käyttöliittymää,
 
 ### Pikanäppäimet
 
-Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
+Pikanäppäimissä käytetään macOS:ssä **⌘**-näppäintä (Command) ja Windowsissa sekä Linuxissa **Ctrl**-näppäintä. (Super-/Windows-näppäimelle ei ole määritetty toimintoa.)
 
 | Pikanäppäin  | Toiminto                    |
 | ------------ | --------------------------- |
