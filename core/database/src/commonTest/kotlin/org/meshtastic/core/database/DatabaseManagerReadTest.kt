@@ -20,6 +20,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -140,6 +141,179 @@ class DatabaseManagerReadTest : DatabaseManagerTestFixture() {
         assertEquals(0, manager.debugReaderCount(captured))
         assertEquals(1, manager.closedDatabases.count { it === captured })
         assertTrue(firstName in manager.deletedDatabaseNames)
+    }
+
+    @Test
+    fun boundedReadDuringAssociationUsesSourceWithoutWaitingForWriterGate() = runTest(testDispatcher) {
+        val (destination, source) = setupTwoDatabases()
+        val mergeStarted = CompletableDeferred<Unit>()
+        val releaseMerge = CompletableDeferred<Unit>()
+        val readStarted = CompletableDeferred<Unit>()
+        val releaseRead = CompletableDeferred<Unit>()
+
+        manager.beforeMerge = { actualSource, actualDestination, _ ->
+            assertTrue(actualSource === source)
+            assertTrue(actualDestination === destination)
+            assertTrue(manager.debugWriterGateArmed())
+            mergeStarted.complete(Unit)
+            releaseMerge.await()
+        }
+
+        val association = async { manager.associateCurrentDevice(nodeNum = 123, deviceId = "deadbeefdeadbeef") }
+        mergeStarted.await()
+
+        val read = async {
+            manager.withReadDb { database ->
+                assertTrue(database === source)
+                readStarted.complete(Unit)
+                releaseRead.await()
+                database.nodeInfoDao().getUnknownNodes()
+            }
+        }
+
+        readStarted.await()
+        assertEquals(1, manager.debugReaderCount(source))
+        assertTrue(manager.debugWriterGateArmed())
+
+        releaseMerge.complete(Unit)
+        association.await()
+
+        assertTrue(manager.currentDb.value === destination)
+        assertFalse(source in manager.closedDatabases, "logical retirement must not close an admitted read pool")
+
+        releaseRead.complete(Unit)
+        assertTrue(read.await().isEmpty())
+        assertEquals(0, manager.debugReaderCount(source))
+    }
+
+    @Test
+    fun cancellingBoundedReadReleasesRefcountAndRetriesDeferredEviction() = runTest(testDispatcher) {
+        val firstName = buildDbName("addrA")
+        val secondName = buildDbName("addrB")
+        manager.switchActiveDatabase("addrA")
+        val captured = manager.currentDb.value
+        val started = CompletableDeferred<Unit>()
+        val neverRelease = CompletableDeferred<Unit>()
+
+        val read = async {
+            manager.withReadDb { database ->
+                assertTrue(database === captured)
+                started.complete(Unit)
+                neverRelease.await()
+            }
+        }
+
+        started.await()
+        manager.switchActiveDatabase("addrB")
+        manager.existingDbNamesForTest = listOf(firstName, secondName)
+        armableDs.edit { it[intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)] = 1 }
+        manager.cacheLimit.first { it == 1 }
+        manager.debugEnforceCacheLimit()
+
+        assertEquals(1, manager.debugReaderCount(captured))
+        assertFalse(captured in manager.closedDatabases)
+
+        read.cancelAndJoin()
+        runCurrent()
+
+        assertEquals(0, manager.debugReaderCount(captured))
+        assertEquals(1, manager.closedDatabases.count { it === captured })
+        assertTrue(firstName in manager.deletedDatabaseNames)
+    }
+
+    @Test
+    fun concurrentBoundedReadersKeepPoolUntilFinalReaderReleases() = runTest(testDispatcher) {
+        val firstName = buildDbName("addrA")
+        val secondName = buildDbName("addrB")
+        manager.switchActiveDatabase("addrA")
+        val captured = manager.currentDb.value
+        val firstStarted = CompletableDeferred<Unit>()
+        val secondStarted = CompletableDeferred<Unit>()
+        val releaseFirst = CompletableDeferred<Unit>()
+        val releaseSecond = CompletableDeferred<Unit>()
+
+        val firstRead = async {
+            manager.withReadDb { database ->
+                assertTrue(database === captured)
+                firstStarted.complete(Unit)
+                releaseFirst.await()
+                database
+            }
+        }
+        val secondRead = async {
+            manager.withReadDb { database ->
+                assertTrue(database === captured)
+                secondStarted.complete(Unit)
+                releaseSecond.await()
+                database
+            }
+        }
+
+        firstStarted.await()
+        secondStarted.await()
+        assertEquals(2, manager.debugReaderCount(captured))
+
+        manager.switchActiveDatabase("addrB")
+        manager.existingDbNamesForTest = listOf(firstName, secondName)
+        armableDs.edit { it[intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)] = 1 }
+        manager.cacheLimit.first { it == 1 }
+        manager.debugEnforceCacheLimit()
+
+        releaseFirst.complete(Unit)
+        assertTrue(firstRead.await() === captured)
+        runCurrent()
+
+        assertEquals(1, manager.debugReaderCount(captured))
+        assertFalse(captured in manager.closedDatabases, "one remaining reader must keep the pool open")
+
+        releaseSecond.complete(Unit)
+        assertTrue(secondRead.await() === captured)
+        runCurrent()
+
+        assertEquals(0, manager.debugReaderCount(captured))
+        assertEquals(1, manager.closedDatabases.count { it === captured })
+        assertTrue(firstName in manager.deletedDatabaseNames)
+    }
+
+    @Test
+    fun evictionSelectionPreventsVictimFromAcquiringNewReader() = runTest(testDispatcher) {
+        val victimName = buildDbName("addrA")
+        val activeName = buildDbName("addrB")
+        manager.switchActiveDatabase("addrA")
+        val victim = manager.currentDb.value
+        manager.switchActiveDatabase("addrB")
+        manager.existingDbNamesForTest = listOf(victimName, activeName)
+        armableDs.edit { it[intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)] = 1 }
+        manager.cacheLimit.first { it == 1 }
+
+        val victimSelected = CompletableDeferred<Unit>()
+        val releaseEviction = CompletableDeferred<Unit>()
+        manager.beforeCloseCached = { dbName ->
+            if (dbName == victimName) {
+                victimSelected.complete(Unit)
+                releaseEviction.await()
+            }
+        }
+
+        val eviction = async { manager.debugEnforceCacheLimit() }
+        victimSelected.await()
+
+        val reacquire = async {
+            manager.switchActiveDatabase("addrA")
+            manager.withReadDb { it }
+        }
+        runCurrent()
+
+        assertFalse(reacquire.isCompleted, "switching back to the selected victim must wait for eviction")
+        assertEquals(0, manager.debugReaderCount(victim))
+
+        releaseEviction.complete(Unit)
+        eviction.await()
+        val reopened = reacquire.await()
+
+        assertEquals(1, manager.closedDatabases.count { it === victim })
+        assertTrue(reopened !== victim, "a later read must use a newly opened pool, not the evicted victim")
+        assertEquals(0, manager.debugReaderCount(victim))
     }
 
     @Test
