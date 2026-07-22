@@ -114,6 +114,12 @@ jobs:
       - uses: actions/checkout@v7
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
+      # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
+      # backslash written before a quote renders literally in the UI (PR #6357).
+      # Guards the English source strings; locale mirrors are cleaned upstream by
+      # the Crowdin post-export processor.
+      - name: Check for escaped quotes in base string resources
+        run: python3 scripts/check-string-escapes.py
       # Flathub/AppStream needs a <release> entry for the version being shipped; a stale
       # <releases> block degrades (or fails) the Flathub listing. Fails the PR that bumps
       # VERSION_NAME_BASE until the matching entry is added.
