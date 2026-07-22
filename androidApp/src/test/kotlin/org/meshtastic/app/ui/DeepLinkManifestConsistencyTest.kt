@@ -32,33 +32,18 @@ import kotlin.test.fail
  *
  * Every top-level path segment routed by [DeepLinkRouter.route] must be declared as an `android:pathPrefix` in that
  * filter — otherwise `https://meshtastic.org/{path}` links open in the browser instead of the app, even though the
- * `meshtastic://` scheme works. When adding a new top-level segment to the router, add it to the manifest and to
- * [topLevelSegments] here.
+ * `meshtastic://` scheme works. The segments come straight from [DeepLinkRouter.topLevelPathSegments], the set
+ * [DeepLinkRouter.route] gates its dispatch on, so a new router segment fails here until the manifest declares it.
  */
 class DeepLinkManifestConsistencyTest {
 
-    /** Top-level path segments handled by the `when` block in [DeepLinkRouter.route]. */
-    private val topLevelSegments =
-        listOf(
-            "share",
-            "messages",
-            "quickchat",
-            "connections",
-            "discovery",
-            "map",
-            "nodes",
-            "settings",
-            "channels",
-            "firmware",
-            "wifi-provision",
-        )
-
     @Test
-    fun `every listed segment is actually routed by DeepLinkRouter`() {
-        topLevelSegments.forEach { segment ->
+    fun `every canonical segment is actually routed by DeepLinkRouter`() {
+        DeepLinkRouter.topLevelPathSegments.forEach { segment ->
             assertNotNull(
                 DeepLinkRouter.route(CommonUri.parse("https://meshtastic.org/$segment")),
-                "DeepLinkRouter no longer routes /$segment — remove it from this test and the manifest",
+                "DeepLinkRouter.topLevelPathSegments lists /$segment but route() has no branch for it — " +
+                    "add the branch or remove the segment from the set and the manifest",
             )
         }
     }
@@ -66,7 +51,7 @@ class DeepLinkManifestConsistencyTest {
     @Test
     fun `app links intent filter declares a pathPrefix for every routed segment`() {
         val prefixes = appLinkPathPrefixes()
-        topLevelSegments.forEach { segment ->
+        DeepLinkRouter.topLevelPathSegments.forEach { segment ->
             assertTrue(
                 "/$segment" in prefixes,
                 "AndroidManifest.xml autoVerify filter is missing <data android:pathPrefix=\"/$segment\" /> — " +
@@ -78,7 +63,16 @@ class DeepLinkManifestConsistencyTest {
     /** Collects the pathPrefix values of the autoVerify (App Links) intent-filter for meshtastic.org. */
     private fun appLinkPathPrefixes(): Set<String> {
         val manifest = manifestFile()
-        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(manifest)
+        val factory =
+            DocumentBuilderFactory.newInstance().apply {
+                // Harden against XXE even though we only parse our own manifest.
+                setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+                setFeature("http://xml.org/sax/features/external-general-entities", false)
+                setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+                isXIncludeAware = false
+                isExpandEntityReferences = false
+            }
+        val document = factory.newDocumentBuilder().parse(manifest)
         val filters = document.getElementsByTagName("intent-filter")
         val prefixes = mutableSetOf<String>()
         for (i in 0 until filters.length) {

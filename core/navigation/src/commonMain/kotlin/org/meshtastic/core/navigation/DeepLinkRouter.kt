@@ -43,6 +43,28 @@ import org.meshtastic.core.common.util.CommonUri
  */
 object DeepLinkRouter {
     /**
+     * Canonical set of top-level path segments this router dispatches on. [route] refuses segments outside this set, so
+     * a new `when` branch stays dead (and its feature tests fail) until its segment is added here. Every entry must
+     * also be declared as an `android:pathPrefix` in the https App Links intent-filter in
+     * `androidApp/src/main/AndroidManifest.xml` — DeepLinkManifestConsistencyTest (androidApp unit tests) enforces that
+     * directly from this set.
+     */
+    val topLevelPathSegments: Set<String> =
+        setOf(
+            "share",
+            "messages",
+            "quickchat",
+            "connections",
+            "discovery",
+            "map",
+            "nodes",
+            "settings",
+            "channels",
+            "firmware",
+            "wifi-provision",
+        )
+
+    /**
      * Synthesizes a backstack list from an incoming Meshtastic URI.
      *
      * @param uri The incoming OS intent URI (e.g. "meshtastic://meshtastic/share?message=hello")
@@ -50,15 +72,13 @@ object DeepLinkRouter {
      */
     fun route(uri: CommonUri): List<NavKey>? {
         val pathSegments = uri.pathSegments.filter { it.isNotBlank() }
+        val firstSegment = pathSegments.firstOrNull()?.lowercase()
 
-        if (pathSegments.isEmpty()) {
+        if (firstSegment !in topLevelPathSegments) {
+            firstSegment?.let { Logger.w { "Unrecognized deep link segment: $it" } }
             return null
         }
 
-        val firstSegment = pathSegments[0].lowercase()
-
-        // New top-level segments must also be declared as a pathPrefix in the https App Links intent-filter in
-        // androidApp/src/main/AndroidManifest.xml (enforced by DeepLinkManifestConsistencyTest in androidApp).
         return when (firstSegment) {
             "share",
             "messages",
@@ -81,10 +101,8 @@ object DeepLinkRouter {
 
             "wifi-provision" -> routeWifiProvision(uri)
 
-            else -> {
-                Logger.w { "Unrecognized deep link segment: $firstSegment" }
-                null
-            }
+            // Unreachable: gated on topLevelPathSegments above.
+            else -> null
         }
     }
 
