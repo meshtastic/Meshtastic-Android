@@ -159,6 +159,7 @@ import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -665,10 +666,27 @@ fun MapView(
         invalidate()
     }
 
+    val cameraSaveListener =
+        remember(mapViewModel) {
+            DelayedMapListener(
+                object : MapListener {
+                    override fun onScroll(event: ScrollEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+
+                    override fun onZoom(event: ZoomEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+                },
+            )
+        }
+
     val boxOverlayListener =
         object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
-                event.source.saveCameraPosition(mapViewModel)
+                cameraSaveListener.onScroll(event)
                 when {
                     downloadRegionBoundingBox != null -> event.source.generateBoxOverlay()
                     geofenceBoxDraft != null -> event.source.generateGeofenceBoxOverlay()
@@ -677,7 +695,7 @@ fun MapView(
             }
 
             override fun onZoom(event: ZoomEvent): Boolean {
-                event.source.saveCameraPosition(mapViewModel)
+                cameraSaveListener.onZoom(event)
                 return false
             }
         }

@@ -45,12 +45,12 @@ interface GoogleMapsPrefs {
 
     fun setSelectedCustomTileUrl(value: String?)
 
-    val cameraPosition: Flow<MapCameraPosition?>
+    val cameraPosition: Flow<GoogleCameraPosition?>
 
-    fun setCameraPosition(value: MapCameraPosition)
+    fun setCameraPosition(value: GoogleCameraPosition)
 }
 
-data class MapCameraPosition(
+data class GoogleCameraPosition(
     val targetLat: Double,
     val targetLng: Double,
     val zoom: Float,
@@ -97,11 +97,11 @@ class GoogleMapsPrefsImpl(
         }
     }
 
-    override val cameraPosition: Flow<MapCameraPosition?> =
+    override val cameraPosition: Flow<GoogleCameraPosition?> =
         dataStore.data.map { preferences ->
             val latitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LAT_PREF) ?: return@map null
             val longitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LNG_PREF) ?: return@map null
-            MapCameraPosition(
+            GoogleCameraPosition(
                 targetLat = latitude,
                 targetLng = longitude,
                 zoom = preferences[KEY_CAMERA_ZOOM_PREF] ?: 7f,
@@ -110,7 +110,7 @@ class GoogleMapsPrefsImpl(
             )
         }
 
-    override fun setCameraPosition(value: MapCameraPosition) {
+    override fun setCameraPosition(value: GoogleCameraPosition) {
         scope.launch {
             dataStore.edit { preferences ->
                 preferences[KEY_CAMERA_TARGET_LAT_PREF] = value.targetLat
@@ -122,6 +122,8 @@ class GoogleMapsPrefsImpl(
         }
     }
 
+    // Coordinates were previously written as Float values. Reading the same preference name through the legacy
+    // floatPreferencesKey after ClassCastException preserves saved cameras for existing installs during migration.
     private fun Preferences.getCameraCoordinate(key: Preferences.Key<Double>): Double? = try {
         this[key]
     } catch (_: ClassCastException) {

@@ -70,7 +70,7 @@ class GoogleMapsPrefsTest {
     @Test
     fun `camera position is saved and restored atomically`() = testScope.runTest {
         val cameraPosition =
-            MapCameraPosition(targetLat = 0.0, targetLng = -90.25, zoom = 13.5f, tilt = 20f, bearing = 125f)
+            GoogleCameraPosition(targetLat = 0.0, targetLng = -90.25, zoom = 13.5f, tilt = 20f, bearing = 125f)
 
         prefs.setCameraPosition(cameraPosition)
 

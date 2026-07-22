@@ -40,8 +40,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
+import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
-import org.meshtastic.app.map.prefs.map.MapCameraPosition
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
@@ -473,9 +473,9 @@ class MapViewModel(
     override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 }
 
-private fun MapCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
+private fun GoogleCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
 
-private fun CameraPosition.toMapCameraPosition() = MapCameraPosition(
+private fun CameraPosition.toMapCameraPosition() = GoogleCameraPosition(
     targetLat = target.latitude,
     targetLng = target.longitude,
     zoom = zoom,
