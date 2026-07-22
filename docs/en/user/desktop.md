@@ -84,17 +84,17 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 ### Keyboard Shortcuts
 
-All shortcuts use the **Meta** key — that's ⌘ (Command) on macOS and the Super / Windows key on Linux and Windows. (`Ctrl` is not bound.)
+Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
 
 | Shortcut | Action |
 |----------|--------|
-| **Meta+Q** | Quit the application |
-| **Meta+,** | Open Settings |
-| **Meta+1** | Switch to Messages tab |
-| **Meta+2** | Switch to Nodes tab |
-| **Meta+3** | Switch to Map tab |
-| **Meta+4** | Switch to Connect tab |
-| **Meta+/** | Open About |
+| **⌘/Ctrl+Q** | Quit the application |
+| **⌘/Ctrl+,** | Open Settings |
+| **⌘/Ctrl+1** | Switch to Messages tab |
+| **⌘/Ctrl+2** | Switch to Nodes tab |
+| **⌘/Ctrl+3** | Switch to Map tab |
+| **⌘/Ctrl+4** | Switch to Connect tab |
+| **⌘/Ctrl+/** | Open About |
 
 ### Window & System Tray
 

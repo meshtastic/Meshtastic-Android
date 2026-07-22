@@ -26,6 +26,8 @@ src/commonMain/kotlin/org/meshtastic/feature/docs/
 ├── data/
 │   ├── DocBundleLoader.kt           ← interface + DefaultDocBundleLoader
 │   └── KeywordSearchEngine.kt       ← TF-IDF keyword search
+├── di/
+│   └── FeatureDocsModule.kt         ← Koin module
 ├── model/
 │   └── DocModels.kt                 ← DocSection, DocPage, DocBundle, DocSearchResult, ...
 ├── navigation/
@@ -40,6 +42,7 @@ src/commonMain/kotlin/org/meshtastic/feature/docs/
     ├── DocsPageRouteScreen.kt       ← detail pane
     ├── DocsSearchBar.kt
     ├── ChirpyAssistantSheet.kt      ← AI assistant bottom sheet
+    ├── ChirpyFab.kt                 ← floating action button that opens Chirpy
     ├── ComposeResourceImageTransformer.kt
     ├── DocPageIconResolver.kt
     └── DocsPreviews.kt
@@ -75,6 +78,7 @@ data class DocPage(
 ```kotlin
 interface AIDocAssistant {
     suspend fun isSupported(): Boolean
+    val modelStatus: StateFlow<ModelReadiness>
     suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
     fun answerStream(question: String, currentPageId: String? = null): Flow<AIDocAssistantResult>
     fun resetSession()
@@ -105,7 +109,7 @@ Two custom tasks keep bundled docs in sync:
 
 | Task | Description |
 |---|---|
-| `syncDocsToComposeResources` | Copies `docs/en/user/**/*.md`, `docs/en/developer/**/*.md`, and `docs/screenshots/**/*.png` into `src/commonMain/composeResources/files/docs/`. Runs automatically before resource generation. |
+| `syncDocsToComposeResources` | Copies `docs/en/user/**/*.md` and `docs/en/developer/**/*.md` into `src/commonMain/composeResources/files/docs/`, plus `docs/assets/screenshots/**/*.png` into `.../files/docs/assets/screenshots/`. Runs automatically before resource generation. |
 | `syncTranslatedDocsToComposeResources` | Copies Crowdin-translated locales from `docs/{locale}/user/**/*.md` into `src/commonMain/composeResources/files/{locale}/docs/` using CMP qualifier format (e.g. `pt-rBR`). |
 
 These tasks run automatically — no manual invocation is required during normal development.
@@ -123,6 +127,8 @@ The `docsEntries()` extension uses Material3 adaptive `ListDetailSceneStrategy` 
 
 ## Dependency Graph
 
+### Key Dependencies
+
 ```
 feature:docs
   ├── core:common, core:navigation, core:resources, core:ui, core:di
@@ -131,8 +137,6 @@ feature:docs
   ├── compose.material3.adaptive, compose.material3.adaptive.navigation3
   └── kotlinx.collections.immutable
 ```
-
-## Dependency Graph
 
 <!--region graph-->
 ```mermaid

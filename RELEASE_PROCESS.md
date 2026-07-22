@@ -8,16 +8,16 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 
 -   **Trigger:** To start a new release or promote an existing one, a developer manually runs the workflow from the GitHub Actions tab.
 -   **Inputs:** The workflow requires the following inputs:
-    1.  `version`: The base version number you are releasing (e.g., `2.7.0`).
+    1.  `base_version`: The base version number you are releasing (e.g., `2.8.0`).
     2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
-    3.  `build_desktop`: Whether to build and attach Desktop native installers (default: `false`).
+    3.  `dry_run`: If `true`, calculates the tag but does not push it or start the release (default: `false`).
 -   **Automation:** The workflow handles everything automatically:
     -   **Syncs Assets:** Fetches the latest firmware/hardware lists, protobuf definitions, and translations (Crowdin).
     -   **Generates Changelog:** Creates a clean changelog from commits since the last production release and commits it to the repo.
     -   **Updates Config:** Automatically bumps the `VERSION_NAME_BASE` in `config.properties`.
     -   **Verifies & Tags:** Runs lint checks, builds the app, and *only* tags the release if successful.
     -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
-    -   **Deploys Desktop** *(when enabled)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) on a matrix of runners and attaches them to the GitHub Release.
+    -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
 -   **Changelog:** Release notes are auto-generated from PR labels. Ensure PRs are labeled correctly to maintain an accurate changelog.
 
 ## Release Steps
@@ -27,44 +27,43 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 1.  Navigate to the **Actions** tab in the GitHub repository.
 2.  Select the **`Create or Promote Release`** workflow.
 3.  Click the **"Run workflow"** dropdown.
-4.  Enter the base `version` (e.g., `2.7.0`).
+4.  Enter the `base_version` (e.g., `2.8.0`).
 5.  Select the `internal` channel.
-6.  Check **`build_desktop`** if you want Desktop installers included in this release.
-7.  Click **"Run workflow"**.
+6.  Click **"Run workflow"**. (Tip: enable `dry_run` first to preview the tag that would be created without pushing anything.)
 
 The workflow will:
 1.  **Create a new commit** on the current branch containing updated assets, translations, and the new changelog.
-2.  **Tag** that commit with an incremental internal tag (e.g., `v2.7.0-internal.1`).
+2.  **Tag** that commit with an incremental internal tag (e.g., `v2.8.0-internal.1`).
 3.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
-4.  **Build Desktop** *(if enabled)* native installers on macOS, Windows, and Linux runners.
+4.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
 5.  Publish a **draft** pre-release on GitHub with all artifacts attached.
 
 ### 2. Promote to the Next Channel
 
 Once an internal build has been verified, you can promote it to a wider audience.
 
-1.  Run the **`Create or Promote Release`** workflow again with the same base `version`.
+1.  Run the **`Create or Promote Release`** workflow again with the same `base_version`.
 2.  Select the next channel in the sequence (e.g., `closed`, then `open`).
-3.  The workflow will create a new incremental tag for that channel (e.g., `v2.7.0-closed.1`) and create a **published** pre-release on GitHub.
+3.  The workflow will create a new incremental tag for that channel (e.g., `v2.8.0-closed.1`) and create a **published** pre-release on GitHub.
 
 ### 3. Promote to Production
 
 After testing is complete on all pre-release channels, you can create the final public release.
 
 1.  Run the **`Create or Promote Release`** workflow one last time.
-2.  Use the same base `version`.
+2.  Use the same `base_version`.
 3.  Select the `production` channel.
-4.  The workflow will create a clean version tag (e.g., `v2.7.0`) and create a **published, stable** (non-prerelease) release on GitHub.
+4.  The workflow will create a clean version tag (e.g., `v2.8.0`) and create a **published, stable** (non-prerelease) release on GitHub.
 
 ### 4. Post-Release
 
 1.  **Verify Android:** Check the Google Play Console to ensure the build is available on the correct track.
-2.  **Verify Desktop** *(if built)*: Download and smoke-test at least one installer (DMG, MSI, or AppImage) from the GitHub Release.
+2.  **Verify Desktop:** Download and smoke-test at least one installer (DMG, MSI, or AppImage) from the GitHub Release.
 3.  **Merge:** Merge the release branch (if one was used for stabilization) back into `main`.
 
 ## Desktop Release Details
 
-Desktop native installers are built as part of the main release pipeline when `build_desktop` is enabled. There is no separate promotion flow for Desktop — installers are built once during the `internal` release and attached to the GitHub Release alongside Android artifacts.
+Desktop native installers are built automatically as part of every `internal` release. There is no separate promotion flow for Desktop — installers are built once during the `internal` release and attached to the GitHub Release alongside Android artifacts; promotions to later channels reuse them.
 
 ### Artifacts Produced
 
@@ -94,7 +93,7 @@ Desktop uses the same version resolution chain as Android — both read `VERSION
 
 ### Flatpak
 
-Flatpak packaging is maintained externally at [vidplace7/org.meshtastic.MeshtasticDesktop](https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop). It builds `:desktop:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling.
+Flatpak packaging is maintained externally at [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop). It builds `:desktopApp:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling. The offline-build sources it consumes are captured in-repo by `scripts/verify-flatpak/` (see its README).
 
 ## Build Attestations & Provenance
 

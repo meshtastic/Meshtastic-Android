@@ -9,13 +9,14 @@ The `:feature:intro` module provides the onboarding experience for new users. It
 ## Key Components
 
 ### 1. `AppIntroductionScreen`
-Orchestrates the multi-step onboarding process.
+Orchestrates the multi-step onboarding process. The flow opens with `WelcomeScreen`, then steps through the permission screens below.
 
 ### 2. Permission Screens
 Dedicated screens for explaining and requesting specific permissions:
 - `LocationScreen`: Necessary for mapping and BLE scanning (on older Android versions).
 - `BluetoothScreen`: Necessary for connecting to radios.
 - `NotificationsScreen`: Necessary for foreground service and message alerts.
+- `CriticalAlertsScreen`: Necessary for emergency alerts that bypass Do Not Disturb.
 
 
 ## Dependency Graph

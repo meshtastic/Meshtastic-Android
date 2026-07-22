@@ -8,7 +8,7 @@ Guidelines and commands for verifying code changes locally and understanding the
 Run in a single invocation for routine changes to ensure code formatting, analysis, and basic compilation:
 
 ```bash
-./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
+./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
 ```
 
 > **Why no `clean`?** Incremental builds are safe and significantly faster. Only use `clean` when debugging stale cache issues.
@@ -19,7 +19,7 @@ Run in a single invocation for routine changes to ensure code formatting, analys
 > `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP plugin.
 > Conversely, `allTests` does **not** cover pure-Android modules (`:androidApp`, `:core:barcode`, etc.), which is why both `test` and `allTests` are needed.
 
-*Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
+*Note: If testing Compose UI on the JVM (Robolectric), pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 ### SharedFlow + backgroundScope in `runTest`
 
@@ -99,7 +99,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
+   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`androidApp`, `desktopApp`, `core:barcode`).
    Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).

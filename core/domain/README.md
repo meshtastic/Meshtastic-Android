@@ -10,10 +10,10 @@ The `:core:domain` module is the **business-logic layer** of the KMP architectur
 
 - Orchestrate radio configuration reads/writes (config, module config, channels, owner, position)
 - Manage remote-admin session lifecycle (per-node passkey negotiation)
-- Application settings toggles (theme, locale, analytics, notifications, location sharing)
-- Data export (CSV mesh log, profile `.zip`, security config)
-- Profile and config import/install
-- Node database maintenance (clean, reset, selective purge)
+- Process radio admin responses and manage mesh log settings
+- Data export (CSV mesh log, profile `.zip`)
+- Profile and security-config import/install
+- Node database maintenance (clean, reset, selective purge) and OTA capability checks
 
 ## Source Structure
 
@@ -31,21 +31,13 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── CleanNodeDatabaseUseCase.kt
         ├── ExportDataUseCase.kt
         ├── ExportProfileUseCase.kt
-        ├── ExportSecurityConfigUseCase.kt
         ├── ImportProfileUseCase.kt
+        ├── ImportSecurityConfigUseCase.kt
         ├── InstallProfileUseCase.kt
         ├── IsOtaCapableUseCase.kt
         ├── ProcessRadioResponseUseCase.kt
         ├── RadioConfigUseCase.kt
-        ├── SetAppIntroCompletedUseCase.kt
-        ├── SetDatabaseCacheLimitUseCase.kt
-        ├── SetLocaleUseCase.kt
-        ├── SetMeshLogSettingsUseCase.kt
-        ├── SetNotificationSettingsUseCase.kt
-        ├── SetProvideLocationUseCase.kt
-        ├── SetThemeUseCase.kt
-        ├── ToggleAnalyticsUseCase.kt
-        └── ToggleHomoglyphEncodingUseCase.kt
+        └── SetMeshLogSettingsUseCase.kt
 ```
 
 ## Notable APIs
@@ -94,9 +86,9 @@ Streams all mesh log packets to a CSV `BufferedSink`. Columns: date, time, from,
 
 ```
 core:domain
-  ├── core:repository   (use-case interfaces & contracts)
-  ├── core:model        (domain models)
-  ├── core:proto        (Meshtastic protobuf types)
+  ├── core:repository              (use-case interfaces & contracts)
+  ├── core:model                   (domain models)
+  ├── org.meshtastic:protobufs     (Meshtastic protobuf types, Maven)
   ├── core:common
   ├── core:database
   ├── core:datastore

@@ -1,17 +1,20 @@
 # `:feature:map`
 
 ## Overview
-The `:feature:map` module provides the mapping interface for the application. Map rendering is decomposed into three focused `CompositionLocal` provider contracts, each with per-flavor implementations in `:androidApp`.
+The `:feature:map` module provides the mapping interface for the application. Map rendering is decomposed into four focused provider contracts, each with per-flavor implementations in `:androidApp`.
 
 ## Architecture
 
 ### Provider Contracts (in `core:ui/commonMain`)
 
+`MapViewProvider` is a named interface (exposed via `LocalMapViewProvider`); the other three are `CompositionLocal`s in `core/ui/.../util/`.
+
 | Contract | Purpose | Implementations |
 |---|---|---|
 | `MapViewProvider` | Main map (nodes, waypoints, controls) | `GoogleMapViewProvider`, `FdroidMapViewProvider` |
-| `NodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreen`) | Google: `NodeTrackMap` → `MapView(GoogleMapMode.NodeTrack)`, F-Droid: `NodeTrackMap` → `NodeTrackOsmMap` |
-| `TracerouteMapProvider` | Traceroute route visualization | Google: `TracerouteMap` → `MapView(GoogleMapMode.Traceroute)`, F-Droid: `TracerouteMap` → `TracerouteOsmMap` |
+| `LocalNodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreens.kt`, `feature:node`) | Google: `NodeTrackMap` → `MapView(GoogleMapMode.NodeTrack)`, F-Droid: `NodeTrackMap` → `NodeTrackOsmMap` |
+| `LocalTracerouteMapProvider` | Traceroute route visualization | Google: `TracerouteMap` → `MapView(GoogleMapMode.Traceroute)`, F-Droid: `TracerouteMap` → `TracerouteOsmMap` |
+| `LocalDiscoveryMapProvider` | Embedded discovery-scan map (node markers + topology polylines, `feature:discovery`) | Google: `DiscoveryMap` → `DiscoveryGoogleMap`, F-Droid: `DiscoveryMap` → `DiscoveryOsmMap` |
 
 All providers are injected via `CompositionLocal` in `MainActivity.kt` and consumed by feature modules without direct dependency on Google Maps or osmdroid.
 
@@ -34,7 +37,7 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 ## Features
 - **Live Node Tracking**: Real-time position updates for nodes on the mesh.
 - **Waypoints**: Create and share points of interest.
-- **Per-Node Track Overlay**: Embedded map in `PositionLogScreen` showing a node's GPS track history.
+- **Per-Node Track Overlay**: Embedded map in `PositionLogScreens.kt` (`feature:node`) showing a node's GPS track history.
 - **Traceroute Visualization**: Dedicated map view showing route segments between mesh nodes.
 - **Offline Maps**: Support for pre-downloaded map tiles (via `osmdroid`).
 

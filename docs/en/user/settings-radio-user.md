@@ -156,6 +156,10 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Debug Log | Output live debug logging over serial/bluetooth | 
 | Serial Enabled | Enable serial console access (moved from Device Config) |
 | Managed Mode | Restrict non-admin channel changes |
+| Backup Keys | Save an encrypted backup of the node's keys on this device (Android only) |
+| Restore Keys | Write the backed-up keys back to the node (available once a backup exists) |
+| Delete Key Backup | Remove the stored key backup from this device |
+| Protection Level | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

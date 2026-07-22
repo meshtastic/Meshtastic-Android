@@ -127,7 +127,7 @@ Once configured:
 - [Settings — Modules & Admin](settings-module-admin) — TAK module configuration
 - [Nodes](nodes) — TAK and TAK Tracker roles in the node list
 - [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/atak-plugin) — detailed ATAK setup on meshtastic.org
+- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
 
 ---
 

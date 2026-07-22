@@ -31,9 +31,9 @@ A wrapper around Kable's `Scanner` to provide a consistent and easy-to-use API f
 ### 4. `BleRetry`
 A utility for executing BLE operations with retry logic, essential for handling the inherent unreliability of wireless communication.
 
-## Integration in `app`
+## Integration
 
-The `:core:ble` module is used by `BleRadioInterface` in the main application module to implement the `RadioTransport` interface for Bluetooth devices.
+The `:core:ble` module is used by `BleRadioTransport` in [`:core:network`](../network/README.md) to implement the `RadioTransport` contract for Bluetooth devices.
 
 ## Usage
 
@@ -41,7 +41,7 @@ Dependencies are managed via the version catalog (`libs.versions.toml`).
 
 ```toml
 [versions]
-kable = "0.42.0"
+kable = "0.44.2"
 
 [libraries]
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }

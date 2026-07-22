@@ -42,6 +42,7 @@ configuration settings screen. Constraints are sourced from two layers:
   - [Status Message](#status-message-moduleconfigstatusmessageconfig)
   - [Traffic Management](#traffic-management-moduleconfigtrafficmanagementconfig)
   - [TAK](#tak-moduleconfigtakconfig)
+  - [Mesh Beacon](#mesh-beacon-moduleconfigmeshbeaconconfig)
 - [Channel Config](#channel-config)
 - [Interval Configurations](#interval-configurations)
 - [UI Component Validation](#ui-component-validation)
@@ -375,6 +376,29 @@ configuration settings screen. Constraints are sourced from two layers:
 |-------|------|------------|-------|
 | `team` | Enum | Dropdown with custom colors/labels | Only shown when device role is `TAK` or `TAK_TRACKER` |
 | `role` | Enum | Dropdown with custom labels | Only shown when device role is `TAK` or `TAK_TRACKER` |
+
+### Mesh Beacon (`ModuleConfig.MeshBeaconConfig`)
+
+Gated behind the `supportsMeshBeacon` capability. There is no `AdminMessage.ModuleConfigType`
+value for this module, so the editor reads from the connect-time config sync (no per-module
+refresh) and writes via `AdminMessage.setModuleConfig`. Flag edits are read-modify-write so
+`FLAG_LEGACY_SPLIT` and any unknown bits survive.
+
+| Field | Type | Validation | Notes |
+|-------|------|------------|-------|
+| `flags` (`FLAG_LISTEN_ENABLED`) | Boolean | Toggle | Bit flag; listen for beacon invitations |
+| `flags` (`FLAG_BROADCAST_ENABLED`) | Boolean | Toggle | Bit flag; enables interval validation below |
+| `broadcast_message` | String | maxSize: 100 bytes | — |
+| `broadcast_interval_secs` | Integer | Must be ≥ 3600 when broadcast enabled | Save is blocked while invalid; not validated when broadcast is off |
+| `broadcast_offer_channel.name` | String | maxSize: 11 bytes (proto max_size: 12) | Blank name drops the offered channel on save (text-only beacon) |
+| `broadcast_offer_channel.psk` | Base64 | Must decode as Base64 | Invalid input is ignored |
+| `broadcast_offer_region` | Enum | Dropdown: `RegionCode` entries | — |
+| `broadcast_offer_preset` | Enum | Dropdown: `ModemPreset` entries | Defaults to `LONG_FAST` |
+| `broadcast_targets` | Target list | Rows added/removed via buttons | Per row: `region` dropdown, `preset` dropdown, `channel_index` signed integer input. Non-empty list supersedes the `broadcast_on_*` scalars |
+| `broadcast_on_region` | Enum | Dropdown: `RegionCode` entries | Visible only when `broadcast_targets` is empty |
+| `broadcast_on_preset` | Enum | Dropdown: `ModemPreset` entries | Visible only when `broadcast_targets` is empty; defaults to `LONG_FAST` |
+| `broadcast_send_as_node` | Integer | Signed integer input | Node number to send as; always visible |
+| `broadcast_on_channel` | — | Not editable | Preserved verbatim through the save round-trip; superseded by the targets list |
 
 ---
 

@@ -33,7 +33,7 @@ A step-by-step workflow for implementing a new feature in the Meshtastic-Android
 ### 6. Verify Locally
 - Run the baseline checks (see `testing-ci` skill):
   ```bash
-  ./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
+  ./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
   ```
 - If the feature adds a new reflection-heavy dependency, add keep rules to **both** `androidApp/proguard-rules.pro` and `desktopApp/proguard-rules.pro`, then verify release builds:
   ```bash

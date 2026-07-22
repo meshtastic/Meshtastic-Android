@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor). It also provides the shared radio transport layer (`TCPInterface`, `SerialTransport`, `BleRadioInterface`).
+The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor). It also provides the shared radio transport layer (`TcpTransport`/`TcpRadioTransport`, `SerialTransport`, `BleRadioTransport`).
 
 ## Key Components
 
@@ -13,11 +13,12 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 - **`DeviceHardwareRemoteDataSource`**: Fetches definitions for supported Meshtastic hardware devices.
 
 ### 3. Shared Transports
-- **`TCPInterface`**: Multiplatform TCP transport.
+- **`TcpTransport`** (`transport/`) + **`TcpRadioTransport`** (`radio/`): Multiplatform TCP transport and its `RadioTransport` adapter.
 - **`SerialTransport`**: JVM-shared USB/Serial transport powered by jSerialComm.
+- **`BleRadioTransport`** (`radio/`): The `RadioTransport` implementation for Bluetooth devices.
 - **`BaseRadioTransportFactory`**: Common factory for instantiating the KMP transports.
 
-> **BLE transport** lives in [`:core:ble`](../ble/README.md), not here. `BaseRadioTransportFactory` delegates to it when an address with the `x` prefix is resolved.
+> **BLE:** the `RadioTransport` implementation (`BleRadioTransport`) lives **here** in `radio/`; it delegates to the lower-level Kable connection primitives (`BleConnection`, `BleScanner`, `BluetoothRepository`, …) provided by [`:core:ble`](../ble/README.md). `BaseRadioTransportFactory` instantiates it when an address with the `x` (or `!`) prefix is resolved.
 
 
 ## Dependency Graph

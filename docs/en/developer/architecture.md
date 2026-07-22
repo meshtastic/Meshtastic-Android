@@ -12,7 +12,7 @@ aliases:
 
 # Architecture
 
-The Meshtastic Android/Desktop/iOS application follows a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries.
+The Meshtastic Android and Desktop apps follow a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries (iOS is currently a compile-only validation target — there is no shipping iOS app yet).
 
 ## Layer Overview
 
