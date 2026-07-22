@@ -8,7 +8,7 @@ aliases:
   - app-functions
   - system-ai
   - gemini
-  - assistant-functions
+  - assistant
 ---
 
 # アプリ機能

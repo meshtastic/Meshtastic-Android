@@ -147,15 +147,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Turva sätted
 
-| Setting                 | Kirjeldus                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| Avalik võti             | Your node's public key (read-only)                                 |
-| Administraatori võti    | Kaughalduse võti                                                                      |
-| Salajane võti           | Your node's private key (handle securely)                          |
-| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud |
-| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                             |
-| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)  |
-| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                          |
+| Setting                 | Kirjeldus                                                                                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Avalik võti             | Your node's public key (read-only)                                                                                                                                                          |
+| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                               |
+| Salajane võti           | Your node's private key (handle securely)                                                                                                                                                   |
+| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                          |
+| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                      |
+| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                           |
+| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                   |
+| Taastevõtmed            | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys            | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Kustuta taastevõtmed    | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level        | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 

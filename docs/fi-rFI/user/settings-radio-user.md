@@ -147,15 +147,19 @@ Modeemiesiasetus määrittää tärkeimmän kompromissin **kantaman** ja **tiedo
 
 ### Turvallisuusasetukset
 
-| Asetus                      | Kuvaus                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| Julkinen avain              | Radiosi julkinen avain (vain luku)                           |
-| Ylläpitäjän avain           | Avain etähallintaa varten                                                       |
-| Yksityinen avain            | Radiosi yksityinen avain (käsittele turvallisesti)           |
-| ~~Ylläpitokanava käytössä~~ | ⚠️ Poistettu — määritetään nyt automaattisesti, kun ylläpitoavain asetetaan     |
-| Virheenkorjausloki          | Tulosta reaaliaikainen virheenkorjausloki sarjaportin tai bluetoothin kautta    |
-| Sarjaportti käytössä        | Ota sarjakonsoliyhteys käyttöön (siirretty laiteasetuksista) |
-| Hallintatila                | Rajoita muutokset muihin kuin ylläpitokanaviin                                  |
+| Asetus                      | Kuvaus                                                                                                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Julkinen avain              | Radiosi julkinen avain (vain luku)                                                                                                                                                          |
+| Ylläpitäjän avain           | Avain etähallintaa varten                                                                                                                                                                                      |
+| Yksityinen avain            | Radiosi yksityinen avain (käsittele turvallisesti)                                                                                                                                          |
+| ~~Ylläpitokanava käytössä~~ | ⚠️ Poistettu — määritetään nyt automaattisesti, kun ylläpitoavain asetetaan                                                                                                                                    |
+| Virheenkorjausloki          | Tulosta reaaliaikainen virheenkorjausloki sarjaportin tai bluetoothin kautta                                                                                                                                   |
+| Sarjaportti käytössä        | Ota sarjakonsoliyhteys käyttöön (siirretty laiteasetuksista)                                                                                                                                |
+| Hallintatila                | Rajoita muutokset muihin kuin ylläpitokanaviin                                                                                                                                                                 |
+| Varmuuskopioi avaimet       | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Palauta avaimet             | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Poista avaimen varmuuskopio | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level            | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Salasanakenttä](../../assets/screenshots/settings_password_field.png)
 

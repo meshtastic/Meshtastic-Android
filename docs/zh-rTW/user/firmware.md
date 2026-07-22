@@ -120,7 +120,7 @@ Once the update succeeds:
 - 〔連線〕(connections)——韌體更新後重新連線
 - (https://meshtastic.org/docs/getting-started/flashing-firmware) — meshtastic.org 上的完整韌體燒錄操作說明
 - 〔支援的裝置〕(https://meshtastic.org/docs/hardware/devices) https://meshtastic.org/docs/hardware/devices — 依裝置查詢韌體相容性
-- [FAQ](https://meshtastic.org/docs/about/faq) — meshtastic.org 上的常見問題
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

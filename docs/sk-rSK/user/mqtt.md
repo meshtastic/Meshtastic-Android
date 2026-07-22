@@ -52,6 +52,12 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 | TLS                | Secure connection to broker                                                                   | Disabled                                            |
 | Map Reporting      | Report position to public map                                                                 | Disabled                                            |
 
+### MQTT Proxy on This Phone
+
+If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+
 ### Default Meshtastic Broker
 
 The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.

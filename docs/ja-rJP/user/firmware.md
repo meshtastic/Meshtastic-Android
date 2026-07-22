@@ -120,7 +120,7 @@ Android ユーザーにとって最も一般的な更新方法です：
 - [コネクション](connections)：ファームウェア更新後の再接続
 - [ファームウェア書き込みガイド](https://meshtastic.org/docs/getting-started/flashing-firmware)：meshtastic.org にあるファームウェア書き込みの完全な手順
 - [対応デバイス](https://meshtastic.org/docs/hardware/devices)：デバイスごとのファームウェア互換性を確認
-- [FAQ](https://meshtastic.org/docs/about/faq)：meshtastic.org のよくある質問
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

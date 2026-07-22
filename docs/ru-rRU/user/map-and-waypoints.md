@@ -53,6 +53,8 @@ aliases:
 3. Выберите значок/эмодзи для путевой точки.
 4. Нажмите **"Отправить"**, чтобы поделиться с mesh-сетью.
 
+Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+
 ### Свойства путевой точки
 
 | Свойство        | Описание                                                                 |
@@ -116,9 +118,8 @@ aliases:
 
 ## Источники карт
 
-Приложение поддерживает несколько источников плиток карт:
+The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- OpenStreetMap (по умолчанию)
 - Спутниковый снимки (где доступно)
 - Офлайн-плитки (загружайте области карт для использования офлайн)
 

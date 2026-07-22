@@ -120,7 +120,7 @@ The app may show warnings when:
 - [Connections](connections) — reconnecting after a firmware update
 - [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

@@ -179,6 +179,7 @@ When composing, focus the message field and type at least three characters to re
 ### メッセージの制限
 
 - **最大長：** 200 バイト（ASCII テキストで約 200 文字）
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - **レート制限：** メッシュは電波利用時間の公平性を確保するため、大量のメッセージは制限されることがあります
 - **配信：** 受信確認がない場合、メッセージは自動的に再送されます
 

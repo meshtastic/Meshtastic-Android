@@ -120,7 +120,7 @@ aliases:
 - [Подключения](connections) — восстановление соединения после обновления прошивки
 - [Руководство по прошивке](https://meshtastic.org/docs/getting-started/flashing-firmware)— полное пошаговое руководство по полной прошивке на meshtastic.org
 - [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — проверьте совместимость прошивки с устройством
-- [Часто задаваемые вопросы](https://meshtastic.org/docs/about/faq) — распространённые вопросы на meshtastic.org
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

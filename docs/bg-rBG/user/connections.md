@@ -29,9 +29,9 @@ Bluetooth Low Energy е методът за свързване по подраз
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
 
@@ -77,7 +77,7 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
+2. On the Connect screen, select **Network** in the transport selector.
 3. Choose the radio one of two ways:
    - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
    - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).

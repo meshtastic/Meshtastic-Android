@@ -29,9 +29,9 @@ Sinihamba madal voolutarve on Androidi vaike- ja levinuim ühendusviis.
 
 ![Sinihamba seadmete otsimine, leitud raadio on loendis](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Vihje:** Kui sinu seadet ei kuvata, kontrolli, kas sinihamba ​​ja asukoha load on antud ning et raadio poleks juba teise seadmega ühendatud.
 
@@ -77,7 +77,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
+2. On the Connect screen, select **Network** in the transport selector.
 3. Choose the radio one of two ways:
    - **Võrguseadmete otsimine** – lülita see sisse, et automaatselt avastada raadioid, mis reklaamivad end kohalikus võrgus (mDNS / `_meshtastic._tcp`). Leitud seadmed kuvatakse loendis; ühenduse loomiseks puuduta neist ühte.
    - **Lisa seade käsitsi…** — Sisesta raadio IP-aadress (või hostinimi) ja port (vaikimisi: 4403).

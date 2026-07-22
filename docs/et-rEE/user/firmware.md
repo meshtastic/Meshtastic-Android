@@ -120,7 +120,7 @@ The app may show warnings when:
 - [Ühendused](connections) — ühenduse loomine pärast püsivara värskendamist
 - [Püsivara uuendamise juhend](https://meshtastic.org/docs/getting-started/flashing-firmware) — täielik püsivara uuendamise juhend meshtastic.org lehel
 - [Toetatud seadmed](https://meshtastic.org/docs/hardware/devices) — ühilduvate raadiote täielik loetelu on leitav aadressilt meshtastic.org
-- [KKK](https://meshtastic.org/docs/about/faq) — meshtastic.org levinud küsimused
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

@@ -179,6 +179,7 @@ Meshtastic поддерживает два режима связи: **вещан
 ### Ограничения сообщений
 
 - **Максимальная длина**: 200 байт (примерно 200 символов для текста в ASCII)
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - **Ограничение скорости**: Mesh-сеть обеспечивает справедливое распределение эфирного времени; большой объем сообщений может быть ограничен
 - **Доставка**: Сообщения автоматически повторяются при отсутствии подтверждения
 

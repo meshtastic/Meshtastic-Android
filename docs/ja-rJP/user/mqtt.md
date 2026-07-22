@@ -52,6 +52,12 @@ MQTT モジュールは、ノードを MQTT サーバーに接続し、次のこ
 | TLS         | サーバーへのセキュアな接続                                             | 無効                                                  |
 | マップ報告       | 公開マップに位置を報告                                               | 無効                                                  |
 
+### MQTT Proxy on This Phone
+
+If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+
 ### デフォルトの Meshtastic サーバー
 
 コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。 これは一般的な利用やテストを目的としています。

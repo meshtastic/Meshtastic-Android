@@ -238,7 +238,7 @@
     },
     {
       "id": "11114",
-      "title": "SEN5X: Fix version parsing, VOC index reporting, and uninitialized-read hazards",
+      "title": "SEN5X: fix version parsing, VOC index reporting, and read-buffer handling",
       "page_url": "https://github.com/meshtastic/firmware/pull/11114",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
@@ -282,12 +282,6 @@
       "id": "11061",
       "title": "Backlight: unify E-Ink backlight logic and fix ThinkNode M1 wake",
       "page_url": "https://github.com/meshtastic/firmware/pull/11061",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11042",
-      "title": "meshnology-w10: define HAS_SPI_TFT so the TFT screen initializes again",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11042",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

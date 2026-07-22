@@ -147,15 +147,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Nastavení zabezpečení
 
-| Nastavení                 | Popis                                                                      |
-| ------------------------- | -------------------------------------------------------------------------- |
-| Veřejný klíč              | Your node's public key (read-only)                      |
-| Administrátorský klíč     | Key for remote administration                                              |
-| Soukromý klíč             | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| Debug Log                 | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| Řízený režim              | Restrict non-admin channel changes                                         |
+| Nastavení                 | Popis                                                                                                                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Veřejný klíč              | Your node's public key (read-only)                                                                                                                                                          |
+| Administrátorský klíč     | Key for remote administration                                                                                                                                                                                  |
+| Soukromý klíč             | Your node's private key (handle securely)                                                                                                                                                   |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| Řízený režim              | Restrict non-admin channel changes                                                                                                                                                                             |
+| Záloha klíčů              | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Obnovit klíče             | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Smazat zálohu klíče       | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

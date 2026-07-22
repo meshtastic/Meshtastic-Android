@@ -53,6 +53,8 @@ aliases:
 3. ウェイポイントのアイコン／絵文字を選びます。
 4. 「**送信**」をタップしてメッシュに共有します。
 
+Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+
 ### ウェイポイントのプロパティ
 
 | プロパティ  | 説明                          |
@@ -116,9 +118,8 @@ aliases:
 
 ## マップソース
 
-アプリは複数のマップタイルソースに対応しています：
+The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- OpenStreetMap（デフォルト）
 - 衛星画像（利用可能な場合）
 - オフラインタイル（オフラインで使うためにマップのエリアをダウンロード）
 

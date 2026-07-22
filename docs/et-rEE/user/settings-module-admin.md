@@ -241,7 +241,7 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
-- [KKK](https://meshtastic.org/docs/about/faq) — meshtastic.org levinud küsimused
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

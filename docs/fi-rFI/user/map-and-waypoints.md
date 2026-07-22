@@ -53,6 +53,8 @@ Reittipisteet ovat jaettuja maantieteellisiä kiinnostavia kohteita, jotka kaikk
 3. Valitse reittipisteelle kuvake tai emoji.
 4. Napauta **Lähetä** jakaaksesi sen verkkoon.
 
+Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+
 ### Reittipisteen ominaisuudet
 
 | Ominaisuus      | Kuvaus                                                                  |
@@ -116,9 +118,8 @@ Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
 
 ## Karttalähteet
 
-Sovellus tukee useita karttatiililähteitä:
+The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- OpenStreetMap (oletus)
 - Satelliittikuvat (jos saatavilla)
 - Offline-kartat (lataa alueet offline-käyttöä varten)
 

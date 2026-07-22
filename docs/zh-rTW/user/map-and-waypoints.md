@@ -53,6 +53,8 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 3. 為航點選擇圖示或表情符號。
 4. 點選「傳送」以分享至 mesh 網路。
 
+Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+
 ### 航點屬性
 
 | 屬性       | 描述說明                                                    |
@@ -116,9 +118,8 @@ Tap the layers icon on the map to open **Manage Map Layers**, where you can impo
 
 ## 地圖來源
 
-應用程式支援多種地圖圖磚來源：
+The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- OpenStreetMap（預設）
 - 衛星影像（視可用性而定）
 - 離線圖磚（下載地圖區域以供離線使用）
 

@@ -88,6 +88,25 @@ aliases:
 
 ---
 
+## Маяк сети
+
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+
+Configure it under **Settings → Module Config → Mesh Beacon**:
+
+- **Listen for beacons** — receive invitations broadcast by other nodes.
+- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+
+- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
+- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Dismiss** — ignore the invitation.
+
+Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+
+---
+
 ## Ручное исследование
 
 Приведённые ниже инструменты доступны в любое время из списка нод и с экранов сведений ноде. Используйте их для исследования конкретных путей и построения картины топологии — вместе с полным сканированием или вместо него.
@@ -169,7 +188,7 @@ aliases:
 
 ### Аудит инфраструктуры
 
-- Отключите **"Исключить инфраструктуру"**, чтобы увидеть ноды Router, Repeater, Router Late и Client Base.
+- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - Проверьте качество их сигнала и время последнего приёма, чтобы убедиться, что твои ноды инфраструктуры работают исправно.
 
 См. раздел [Ноды](Nodes) для получения полной информации о параметрах фильтрации и сортировки.

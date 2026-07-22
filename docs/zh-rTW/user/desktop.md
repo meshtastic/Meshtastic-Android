@@ -84,17 +84,17 @@ Meshtastic 桌面版應用程式透過 Kotlin Multiplatform 與 Android 版共�
 
 ### 鍵盤快速鍵
 
-All shortcuts use the **Meta** key — that's ⌘ (Command) on macOS and the Super / Windows key on Linux and Windows. (`Ctrl` is not bound.)
+Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
 
-| 快速鍵        | 動作         |
-| ---------- | ---------- |
-| **Meta+Q** | 結束應用程式     |
-| **Meta+,** | 開啟設定       |
-| **Meta+1** | 切換至訊息頁籤    |
-| **Meta+2** | 切換至節點頁籤    |
-| **Meta+3** | 切換至地圖頁籤    |
-| **Meta+4** | 切換至連線頁籤    |
-| **Meta+/** | Open About |
+| 快速鍵          | 動作         |
+| ------------ | ---------- |
+| **⌘/Ctrl+Q** | 結束應用程式     |
+| **⌘/Ctrl+,** | 開啟設定       |
+| **⌘/Ctrl+1** | 切換至訊息頁籤    |
+| **⌘/Ctrl+2** | 切換至節點頁籤    |
+| **⌘/Ctrl+3** | 切換至地圖頁籤    |
+| **⌘/Ctrl+4** | 切換至連線頁籤    |
+| **⌘/Ctrl+/** | Open About |
 
 ### 視窗與系統匣
 
