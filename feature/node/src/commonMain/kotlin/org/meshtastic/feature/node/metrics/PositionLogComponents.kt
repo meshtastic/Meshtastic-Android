@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,10 +83,13 @@ fun PositionCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             /* Coordinates */
-            Row(
+            // FlowRow(SpaceBetween) so "Sats" stays pinned right when it fits and drops onto its own line when the
+            // (localized) coordinate labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricValueRow(color = GraphColors.Blue, text = "${stringResource(Res.string.latitude)}: $latitude")
@@ -105,10 +109,13 @@ fun PositionCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             /* Alt, Speed, Heading */
-            Row(
+            // FlowRow(SpaceBetween) so "Heading" stays pinned right when it fits and drops onto its own line when the
+            // (localized) labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricValueRow(
