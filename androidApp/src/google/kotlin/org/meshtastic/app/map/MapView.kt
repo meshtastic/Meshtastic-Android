@@ -81,7 +81,6 @@ import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
@@ -121,6 +120,7 @@ import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.offline.BurningManGoogleTileProvider
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
@@ -282,6 +282,7 @@ fun MapView(
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
+    val selectedBurningManPack by mapViewModel.selectedBurningManPack.collectAsStateWithLifecycle()
 
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
@@ -290,6 +291,10 @@ fun MapView(
     // Main mode persists camera; NodeTrack/Traceroute use ephemeral state with auto-centering.
     val cameraPositionState =
         if (mode is GoogleMapMode.Main) mapViewModel.cameraPositionState else rememberCameraPositionState()
+    val burningManTileProvider =
+        remember(selectedBurningManPack?.file) {
+            selectedBurningManPack?.file?.let { file -> runCatching { BurningManGoogleTileProvider(file) }.getOrNull() }
+        }
 
     if (mode is GoogleMapMode.Main) {
         LaunchedEffect(cameraPositionState.isMoving) {
@@ -552,7 +557,20 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) MapType.NONE else selectedGoogleMapType
+    val burningManTileProviderForCamera =
+        burningManTileProvider?.takeIf { tileProvider ->
+            tileProvider.covers(
+                latitude = cameraPositionState.position.target.latitude,
+                longitude = cameraPositionState.position.target.longitude,
+            )
+        }
+    val burningManPackCoversCamera = burningManTileProviderForCamera != null
+    val tileLayerSelection =
+        googleMapTileLayerSelection(
+            selectedMapType = selectedGoogleMapType,
+            hasCustomTileSource = currentCustomTileProviderUrl != null,
+            burningManPackCoversCamera = burningManPackCoversCamera,
+        )
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -588,7 +606,7 @@ fun MapView(
             ),
             properties =
             MapProperties(
-                mapType = effectiveGoogleMapType,
+                mapType = tileLayerSelection.mapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
             onMapClick = { latLng ->
@@ -621,15 +639,24 @@ fun MapView(
                 }
             },
         ) {
+            // The validated local pack is active only while the camera remains inside its coverage boundary.
+            key(selectedBurningManPack?.file, burningManPackCoversCamera) {
+                burningManTileProviderForCamera?.let { tileProvider ->
+                    TileOverlay(tileProvider = tileProvider, fadeIn = false, transparency = 0f, zIndex = -2f)
+                }
+            }
+
             // Custom tile overlay (all modes)
-            key(currentCustomTileProviderUrl) {
-                currentCustomTileProviderUrl?.let { url ->
-                    val config =
-                        mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
-                            it.urlTemplate == url || it.localUri == url
+            key(currentCustomTileProviderUrl, tileLayerSelection.attachCustomTileSource) {
+                if (tileLayerSelection.attachCustomTileSource) {
+                    currentCustomTileProviderUrl?.let { url ->
+                        val config =
+                            mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
+                                it.urlTemplate == url || it.localUri == url
+                            }
+                        mapViewModel.getTileProvider(config)?.let { tileProvider ->
+                            TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
-                    mapViewModel.getTileProvider(config)?.let { tileProvider ->
-                        TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
                 }
             }

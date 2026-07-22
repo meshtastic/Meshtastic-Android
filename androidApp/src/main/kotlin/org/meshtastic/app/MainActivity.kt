@@ -18,9 +18,13 @@ package org.meshtastic.app
 
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.usb.UsbManager
+import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
@@ -102,8 +106,13 @@ import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.map.offline.BurningManPackRuntime
+import org.meshtastic.feature.map.offline.PackLocation
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.TracerouteMapScreen
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
@@ -181,6 +190,11 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         MeshService.startService(this)
+        lifecycleScope.launch {
+            BurningManPackRuntime.forContext(applicationContext)
+                .coordinator
+                .reconcile(Clock.System.now(), applicationContext.existingAuthorizedLocation())
+        }
     }
 
     override fun onResume() {
@@ -389,4 +403,20 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
     }
+}
+
+/** Returns only an already-authorized, fresh system location; this never requests permission or updates. */
+@Suppress("ReturnCount")
+private fun Context.existingAuthorizedLocation(now: Instant = Clock.System.now()): PackLocation? {
+    val hasLocationPermission =
+        checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    if (!hasLocationPermission) return null
+    val locationManager = getSystemService(LocationManager::class.java) ?: return null
+    val location =
+        listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.PASSIVE_PROVIDER)
+            .mapNotNull { provider -> runCatching { locationManager.getLastKnownLocation(provider) }.getOrNull() }
+            .maxByOrNull(Location::getTime) ?: return null
+    val timestamp = Instant.fromEpochMilliseconds(location.time)
+    return PackLocation(location.latitude, location.longitude, timestamp).takeIf { it.timestamp in now - 24.hours..now }
 }
