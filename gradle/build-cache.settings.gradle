@@ -21,17 +21,13 @@ def getMeshProperty(String key) {
 
     def currentDir = settingsDir
     while (currentDir != null) {
-        def localFile = new File(currentDir, "local.properties")
-        if (localFile.exists()) {
-            def props = new Properties()
-            localFile.withInputStream { props.load(it) }
-            if (props.containsKey(key)) return props.getProperty(key)
-        }
-        def configFile = new File(currentDir, "config.properties")
-        if (configFile.exists()) {
-            def props = new Properties()
-            configFile.withInputStream { props.load(it) }
-            if (props.containsKey(key)) return props.getProperty(key)
+        for (name in ["local.properties", "config.properties", "secrets.properties"]) {
+            def file = new File(currentDir, name)
+            if (file.exists()) {
+                def props = new Properties()
+                file.withInputStream { props.load(it) }
+                if (props.containsKey(key)) return props.getProperty(key)
+            }
         }
         currentDir = currentDir.parentFile
     }

@@ -94,6 +94,12 @@ internal fun Project.configureTestOptions() {
             }
         maxHeapSize = "2g"
 
+        // Keep forked test JVMs headless: Robolectric/Compose tests otherwise initialize
+        // AWT on macOS, spawning a Dock icon per fork and stealing window focus.
+        // apple.awt.UIElement covers anything that flips headless back off.
+        systemProperty("java.awt.headless", "true")
+        jvmArgs("-Dapple.awt.UIElement=true")
+
         // JUnit Jupiter parallel execution within each Gradle fork.
         // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use
         // Dispatchers.setMain() — a JVM-global singleton that races when classes execute
