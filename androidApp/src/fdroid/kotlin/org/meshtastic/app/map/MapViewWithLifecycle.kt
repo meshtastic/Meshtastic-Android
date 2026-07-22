@@ -130,7 +130,11 @@ internal fun rememberMapViewWithLifecycle(
 
         lifecycle.addObserver(observer)
 
-        onDispose { lifecycle.removeObserver(observer) }
+        onDispose {
+            savedCenter = mapView.projection.currentCenter
+            savedZoom = mapView.zoomLevelDouble
+            lifecycle.removeObserver(observer)
+        }
     }
     return mapView
 }

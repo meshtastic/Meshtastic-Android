@@ -38,10 +38,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
+import org.meshtastic.app.map.prefs.map.MapCameraPosition
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
@@ -65,14 +65,11 @@ import kotlin.uuid.Uuid
 
 private const val TILE_SIZE = 256
 
-@Serializable
-data class MapCameraPosition(
-    val targetLat: Double,
-    val targetLng: Double,
-    val zoom: Float,
-    val tilt: Float,
-    val bearing: Float,
-)
+enum class CameraInitialization {
+    Loading,
+    FitNodes,
+    Restored,
+}
 
 @Suppress("TooManyFunctions", "LongParameterList")
 @KoinViewModel
@@ -129,23 +126,10 @@ class MapViewModel(
         }
     }
 
-    private val targetLatLng =
-        googleMapsPrefs.cameraTargetLat.value
-            .takeIf { it != 0.0 }
-            ?.let { lat -> googleMapsPrefs.cameraTargetLng.value.takeIf { it != 0.0 }?.let { lng -> LatLng(lat, lng) } }
-            ?: ourNodeInfo.value?.position?.toLatLng()
-            ?: LatLng(0.0, 0.0)
+    val cameraPositionState = CameraPositionState(CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 7f))
 
-    val cameraPositionState =
-        CameraPositionState(
-            position =
-            CameraPosition(
-                targetLatLng,
-                googleMapsPrefs.cameraZoom.value,
-                googleMapsPrefs.cameraTilt.value,
-                googleMapsPrefs.cameraBearing.value,
-            ),
-        )
+    private val _cameraInitialization = MutableStateFlow(CameraInitialization.Loading)
+    val cameraInitialization: StateFlow<CameraInitialization> = _cameraInitialization.asStateFlow()
 
     val theme: StateFlow<Int> = uiPrefs.theme
 
@@ -364,6 +348,16 @@ class MapViewModel(
 
     init {
         viewModelScope.launch {
+            val savedCamera = googleMapsPrefs.cameraPosition.first()
+            if (savedCamera == null) {
+                _cameraInitialization.value = CameraInitialization.FitNodes
+            } else {
+                cameraPositionState.position = savedCamera.toCameraPosition()
+                _cameraInitialization.value = CameraInitialization.Restored
+            }
+        }
+
+        viewModelScope.launch {
             customTileProviderRepository.getCustomTileProviders().first()
             loadPersistedMapType()
         }
@@ -381,13 +375,13 @@ class MapViewModel(
     }
 
     fun saveCameraPosition(cameraPosition: CameraPosition) {
-        viewModelScope.launch {
-            googleMapsPrefs.setCameraTargetLat(cameraPosition.target.latitude)
-            googleMapsPrefs.setCameraTargetLng(cameraPosition.target.longitude)
-            googleMapsPrefs.setCameraZoom(cameraPosition.zoom)
-            googleMapsPrefs.setCameraTilt(cameraPosition.tilt)
-            googleMapsPrefs.setCameraBearing(cameraPosition.bearing)
-        }
+        if (_cameraInitialization.value != CameraInitialization.Restored) return
+        googleMapsPrefs.setCameraPosition(cameraPosition.toMapCameraPosition())
+    }
+
+    fun onInitialNodeBoundsApplied() {
+        _cameraInitialization.value = CameraInitialization.Restored
+        saveCameraPosition(cameraPositionState.position)
     }
 
     private fun loadPersistedMapType() {
@@ -478,3 +472,13 @@ class MapViewModel(
 
     override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 }
+
+private fun MapCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
+
+private fun CameraPosition.toMapCameraPosition() = MapCameraPosition(
+    targetLat = target.latitude,
+    targetLng = target.longitude,
+    zoom = zoom,
+    tilt = tilt,
+    bearing = bearing,
+)

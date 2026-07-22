@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.maps.android.compose.MapType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -44,26 +45,18 @@ interface GoogleMapsPrefs {
 
     fun setSelectedCustomTileUrl(value: String?)
 
-    val cameraTargetLat: StateFlow<Double>
+    val cameraPosition: Flow<MapCameraPosition?>
 
-    fun setCameraTargetLat(value: Double)
-
-    val cameraTargetLng: StateFlow<Double>
-
-    fun setCameraTargetLng(value: Double)
-
-    val cameraZoom: StateFlow<Float>
-
-    fun setCameraZoom(value: Float)
-
-    val cameraTilt: StateFlow<Float>
-
-    fun setCameraTilt(value: Float)
-
-    val cameraBearing: StateFlow<Float>
-
-    fun setCameraBearing(value: Float)
+    fun setCameraPosition(value: MapCameraPosition)
 }
+
+data class MapCameraPosition(
+    val targetLat: Double,
+    val targetLng: Double,
+    val zoom: Float,
+    val tilt: Float,
+    val bearing: Float,
+)
 
 @Single
 class GoogleMapsPrefsImpl(
@@ -104,55 +97,35 @@ class GoogleMapsPrefsImpl(
         }
     }
 
-    override val cameraTargetLat: StateFlow<Double> =
-        dataStore.data
-            .map {
-                try {
-                    it[KEY_CAMERA_TARGET_LAT_PREF] ?: 0.0
-                } catch (_: ClassCastException) {
-                    it[floatPreferencesKey(KEY_CAMERA_TARGET_LAT_PREF.name)]?.toDouble() ?: 0.0
-                }
+    override val cameraPosition: Flow<MapCameraPosition?> =
+        dataStore.data.map { preferences ->
+            val latitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LAT_PREF) ?: return@map null
+            val longitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LNG_PREF) ?: return@map null
+            MapCameraPosition(
+                targetLat = latitude,
+                targetLng = longitude,
+                zoom = preferences[KEY_CAMERA_ZOOM_PREF] ?: 7f,
+                tilt = preferences[KEY_CAMERA_TILT_PREF] ?: 0f,
+                bearing = preferences[KEY_CAMERA_BEARING_PREF] ?: 0f,
+            )
+        }
+
+    override fun setCameraPosition(value: MapCameraPosition) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[KEY_CAMERA_TARGET_LAT_PREF] = value.targetLat
+                preferences[KEY_CAMERA_TARGET_LNG_PREF] = value.targetLng
+                preferences[KEY_CAMERA_ZOOM_PREF] = value.zoom
+                preferences[KEY_CAMERA_TILT_PREF] = value.tilt
+                preferences[KEY_CAMERA_BEARING_PREF] = value.bearing
             }
-            .stateIn(scope, SharingStarted.Eagerly, 0.0)
-
-    override fun setCameraTargetLat(value: Double) {
-        scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LAT_PREF] = value } }
+        }
     }
 
-    override val cameraTargetLng: StateFlow<Double> =
-        dataStore.data
-            .map {
-                try {
-                    it[KEY_CAMERA_TARGET_LNG_PREF] ?: 0.0
-                } catch (_: ClassCastException) {
-                    it[floatPreferencesKey(KEY_CAMERA_TARGET_LNG_PREF.name)]?.toDouble() ?: 0.0
-                }
-            }
-            .stateIn(scope, SharingStarted.Eagerly, 0.0)
-
-    override fun setCameraTargetLng(value: Double) {
-        scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LNG_PREF] = value } }
-    }
-
-    override val cameraZoom: StateFlow<Float> =
-        dataStore.data.map { it[KEY_CAMERA_ZOOM_PREF] ?: 7f }.stateIn(scope, SharingStarted.Eagerly, 7f)
-
-    override fun setCameraZoom(value: Float) {
-        scope.launch { dataStore.edit { it[KEY_CAMERA_ZOOM_PREF] = value } }
-    }
-
-    override val cameraTilt: StateFlow<Float> =
-        dataStore.data.map { it[KEY_CAMERA_TILT_PREF] ?: 0f }.stateIn(scope, SharingStarted.Eagerly, 0f)
-
-    override fun setCameraTilt(value: Float) {
-        scope.launch { dataStore.edit { it[KEY_CAMERA_TILT_PREF] = value } }
-    }
-
-    override val cameraBearing: StateFlow<Float> =
-        dataStore.data.map { it[KEY_CAMERA_BEARING_PREF] ?: 0f }.stateIn(scope, SharingStarted.Eagerly, 0f)
-
-    override fun setCameraBearing(value: Float) {
-        scope.launch { dataStore.edit { it[KEY_CAMERA_BEARING_PREF] = value } }
+    private fun Preferences.getCameraCoordinate(key: Preferences.Key<Double>): Double? = try {
+        this[key]
+    } catch (_: ClassCastException) {
+        this[floatPreferencesKey(key.name)]?.toDouble()
     }
 
     companion object {

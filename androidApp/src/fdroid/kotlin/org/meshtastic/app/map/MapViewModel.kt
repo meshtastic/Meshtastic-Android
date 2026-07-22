@@ -18,13 +18,16 @@ package org.meshtastic.app.map
 
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -55,6 +58,19 @@ class MapViewModel(
     radioConfigRepository,
     notificationPrefs,
 ) {
+
+    private val mutableInitialCameraState = MutableStateFlow<InitialCameraState>(InitialCameraState.Loading)
+    internal val initialCameraState: StateFlow<InitialCameraState> = mutableInitialCameraState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            mutableInitialCameraState.value = InitialCameraState.Ready(mapPrefs.awaitCameraPosition())
+        }
+    }
+
+    internal fun saveCameraPosition(latitude: Double, longitude: Double, zoom: Double) {
+        mapPrefs.setCameraPosition(MapCameraPosition(latitude, longitude, zoom))
+    }
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
@@ -105,4 +121,10 @@ class MapViewModel(
     fun consumeSitePlannerRequest() {
         pendingSitePlannerNodeNum.value = null
     }
+}
+
+internal sealed interface InitialCameraState {
+    data object Loading : InitialCameraState
+
+    data class Ready(val position: MapCameraPosition?) : InitialCameraState
 }

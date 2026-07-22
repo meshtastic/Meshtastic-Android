@@ -290,10 +290,12 @@ fun MapView(
     // Main mode persists camera; NodeTrack/Traceroute use ephemeral state with auto-centering.
     val cameraPositionState =
         if (mode is GoogleMapMode.Main) mapViewModel.cameraPositionState else rememberCameraPositionState()
+    val cameraInitialization by mapViewModel.cameraInitialization.collectAsStateWithLifecycle()
+    var isMapLoaded by remember { mutableStateOf(false) }
 
     if (mode is GoogleMapMode.Main) {
-        LaunchedEffect(cameraPositionState.isMoving) {
-            if (!cameraPositionState.isMoving) {
+        LaunchedEffect(cameraPositionState.isMoving, cameraInitialization) {
+            if (!cameraPositionState.isMoving && cameraInitialization == CameraInitialization.Restored) {
                 mapViewModel.saveCameraPosition(cameraPositionState.position)
             }
         }
@@ -374,6 +376,27 @@ fun MapView(
                     (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
                     node.num == ourNodeInfo?.num
             }
+
+    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes) {
+        if (
+            mode is GoogleMapMode.Main &&
+            cameraInitialization == CameraInitialization.FitNodes &&
+            isMapLoaded &&
+            filteredNodes.isNotEmpty()
+        ) {
+            val points = filteredNodes.map { it.position.toLatLng() }
+            val cameraUpdate =
+                if (points.size == 1) {
+                    CameraUpdateFactory.newLatLngZoom(points.first(), 12f)
+                } else {
+                    val bounds = LatLngBounds.builder()
+                    points.forEach(bounds::include)
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 80)
+                }
+            cameraPositionState.move(cameraUpdate)
+            mapViewModel.onInitialNodeBoundsApplied()
+        }
+    }
 
     val myNodeNum = mapViewModel.myNodeNum
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -591,6 +614,7 @@ fun MapView(
                 mapType = effectiveGoogleMapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
+            onMapLoaded = { isMapLoaded = true },
             onMapClick = { latLng ->
                 if (isMainMode && boxAuthoringDraft != null) {
                     val first = boxAuthoringFirstCorner

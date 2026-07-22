@@ -188,6 +188,13 @@ import org.meshtastic.proto.BoundingBox as ProtoBoundingBox
  */
 private class GeofenceOverlayPolygon : Polygon()
 
+private const val INITIAL_MAP_ZOOM = 1.5
+
+private fun MapView.saveCameraPosition(viewModel: MapViewModel) {
+    val center = mapCenter
+    viewModel.saveCameraPosition(center.latitude, center.longitude, zoomLevelDouble)
+}
+
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
@@ -299,18 +306,34 @@ fun MapView(
         }
     }
 
-    val initialCameraView = remember {
-        val nodes = mapViewModel.nodes.value
-        val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
-        BoundingBox.fromGeoPoints(geoPoints)
-    }
+    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
+    val initialCameraState by mapViewModel.initialCameraState.collectAsStateWithLifecycle()
+    if (initialCameraState is InitialCameraState.Loading) return
+    val initialCameraPosition = (initialCameraState as InitialCameraState.Ready).position
     val map =
         rememberMapViewWithLifecycle(
             applicationId = mapViewModel.applicationId,
-            box = initialCameraView,
+            zoomLevel = initialCameraPosition?.zoom ?: INITIAL_MAP_ZOOM,
+            mapCenter = initialCameraPosition?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0),
             tileSource = loadOnlineTileSourceBase(),
         )
+    var hasAppliedInitialNodeBounds by remember { mutableStateOf(initialCameraPosition != null) }
+
+    LaunchedEffect(nodes, hasAppliedInitialNodeBounds) {
+        val nodePoints = nodes.filter { it.validPosition != null }.map { GeoPoint(it.latitude, it.longitude) }
+        if (!hasAppliedInitialNodeBounds && nodePoints.isNotEmpty()) {
+            map.post {
+                if (nodePoints.size == 1) {
+                    map.controller.setCenter(nodePoints.first())
+                    map.controller.setZoom(WAYPOINT_ZOOM)
+                } else {
+                    map.zoomToBoundingBox(BoundingBox.fromGeoPoints(nodePoints), false)
+                }
+                map.saveCameraPosition(mapViewModel)
+            }
+            hasAppliedInitialNodeBounds = true
+        }
+    }
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -403,7 +426,6 @@ fun MapView(
         }
     }
 
-    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
     val myId by mapViewModel.myId.collectAsStateWithLifecycle()
@@ -646,6 +668,7 @@ fun MapView(
     val boxOverlayListener =
         object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
+                event.source.saveCameraPosition(mapViewModel)
                 when {
                     downloadRegionBoundingBox != null -> event.source.generateBoxOverlay()
                     geofenceBoxDraft != null -> event.source.generateGeofenceBoxOverlay()
@@ -653,7 +676,10 @@ fun MapView(
                 return true
             }
 
-            override fun onZoom(event: ZoomEvent): Boolean = false
+            override fun onZoom(event: ZoomEvent): Boolean {
+                event.source.saveCameraPosition(mapViewModel)
+                return false
+            }
         }
 
     fun startDownload() {
