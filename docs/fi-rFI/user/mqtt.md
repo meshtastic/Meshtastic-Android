@@ -52,11 +52,11 @@ Internet-yhteydellinen gateway-radio (WiFi tai Ethernet) julkaisee mesh-viestit 
 | TLS               | Yhteyden suojaaminen välityspalvelimeen                                                               | Ei käytössä                                         |
 | Karttaraportointi | Sijainnin julkaisu julkiselle kartalle                                                                | Ei käytössä                                         |
 
-### MQTT Proxy on This Phone
+### MQTT-välityspalvelin tässä puhelimessa
 
-If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+Jos radiollasi ei ole omaa internetyhteyttä, se voi käyttää yhdistettyä puhelinta MQTT-yhdyskäytävänään. Ota käyttöön **MQTT** ja **Proxy to client enabled** moduulin asetuksista, jolloin sovellus välittää MQTT-liikenteen radion ja välityspalvelimen välillä puhelimen internetyhteyden kautta.
 
-The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+MQTT-asetusten yläreunassa oleva **MQTT-välityspalvelin tässä puhelimessa** -kytkin näyttää, onko tämä välitys käytössä, ja sen avulla voit poistaa sen käytöstä (tai käynnistää sen uudelleen) heti ilman, että laitteen MQTT-asetuksia tarvitsee muokata ja tallentaa uudelleen.
 
 ### Oletus Meshtastic-välityspalvelin
 

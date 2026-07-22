@@ -103,14 +103,14 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 ### Suodatusvalinnat
 
-| Suodatus                              | Kuvaus                                                                               |
-| ------------------------------------- | ------------------------------------------------------------------------------------ |
-| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                       |
-| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)   |
-| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                      |
-| **Ohita infrastruktuurilaitteet**     | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
-| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                   |
-| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                            |
+| Suodatus                              | Kuvaus                                                                              |
+| ------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                      |
+| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)  |
+| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                     |
+| **Ohita infrastruktuurilaitteet**     | Piilota infrastruktuuriroolit (Router, Router Late, Client Base) |
+| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                  |
+| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                           |
 
 ### Lajitteluvaihtoehdot
 

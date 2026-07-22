@@ -29,9 +29,9 @@ Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 
 ![Bluetooth-laitteiden haku, jossa löytynyt radio näkyy luettelossa](../../assets/screenshots/connections_bluetooth_scan.png)
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+Vaihda bluetooth-, verkko- ja USB-yhteyksien välillä käyttämällä yhteyskortin alapuolella olevaa yhteysvalitsinta (vain yksi yhteystapa voi olla aktiivinen kerrallaan):
 
-![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+![Yhteysvalitsin](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Vinkki:** Jos laitteesi ei näy, varmista että Bluetooth ja sijaintiluvat on myönnetty ja että radio ei ole jo yhdistettynä toiseen laitteeseen.
 
@@ -77,7 +77,7 @@ Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa
 ### Yhdistäminen verkon kautta
 
 1. Varmista, että radio on samassa lähiverkossa kuin puhelimesi tai tietokoneesi.
-2. On the Connect screen, select **Network** in the transport selector.
+2. Valitse yhdistä-näytössä yhteysvalitsimesta **Verkko**.
 3. Valitse radio jommallakummalla seuraavista tavoista:
    - **Hae verkkolaitteita** — ota tämä käyttöön, jotta lähiverkossa itsensä ilmoittavat radiot löytyvät automaattisesti (mDNS / `_meshtastic._tcp`). Löydetyt laitteet näkyvät luettelossa; yhdistä napauttamalla haluamaasi laitetta.
    - **Lisää laite manuaalisesti** — anna radion IP-osoite (tai isäntänimi) ja portti (oletus: `4403`).

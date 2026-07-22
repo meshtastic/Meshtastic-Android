@@ -120,7 +120,7 @@ Sovellus voi näyttää varoituksia, kun:
 - [Yhteydet](connections) — yhdistetään uudelleen laiteohjelmiston päivityksen jälkeen
 - [Laiteohjelmiston päivitysopas](https://meshtastic.org/docs/getting-started/flashing-firmware) — täydellinen firmware-päivityksen ohjeistus meshtastic.org -sivustolla
 - [Tuetut laitteet](https://meshtastic.org/docs/hardware/devices) — tarkista firmware-yhteensopivuus laitekohtaisesti
-- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
+- [UKK](https://meshtastic.org/docs/faq/) – usein kysytyt kysymykset meshtastic.org -sivustolla
 
 ---
 
