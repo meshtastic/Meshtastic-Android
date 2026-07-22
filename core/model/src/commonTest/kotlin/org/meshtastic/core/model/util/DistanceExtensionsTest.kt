@@ -16,9 +16,9 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 
 class DistanceExtensionsTest {
 
