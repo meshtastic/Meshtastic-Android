@@ -1832,6 +1832,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Записать в NFC-метку</string>
     <string name="write_nfc_failed">Не удалось записать в метку. Используй пустую NFC-метку, которую можно записывать, и держи её неподвижно.</string>
+    <string name="write_nfc_subtext">Запись сохраняет эту ссылку для общего доступа на физический NFC-тег. Любой может коснуться тега своим телефоном, чтобы открыть его.</string>
     <string name="write_nfc_success">Написано для метки</string>
     <string name="write_nfc_text">Поднеси записываемую NFC-метку к задней части своего телефона.</string>
     <string name="you">Вы</string>

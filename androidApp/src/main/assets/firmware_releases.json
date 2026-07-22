@@ -189,21 +189,21 @@
   },
   "pullRequests": [
     {
+      "id": "11138",
+      "title": "feat(lr2021): enable LR2021 LoRa radio support on native/portduino",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11138",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "11133",
+      "title": "fix(ScanI2C): fetch the SE050 probe response with requestFrom()",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11133",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11131",
       "title": "Limit NodeInfo discovery replies to direct neighbors",
       "page_url": "https://github.com/meshtastic/firmware/pull/11131",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11130",
-      "title": "Run native PlatformIO tests by area for readable failures",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11130",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11128",
-      "title": "keyverification: handle response allocation failure",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11128",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -213,21 +213,27 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "11123",
+      "title": "fix(gps): PA1010D stuck at 0 satellites because 5-constellation config command fails",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11123",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11121",
       "title": "MUI: portduino SDL support for Linux/Windows",
       "page_url": "https://github.com/meshtastic/firmware/pull/11121",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11117",
-      "title": "Nailed native test numbers so PRs don't forget to increment",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11117",
+      "id": "11119",
+      "title": "TMM & Warmstore key source naming",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11119",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11116",
-      "title": "Gate the PKI-decrypt key on signer-proven, not the opportunistic cache",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11116",
+      "id": "11117",
+      "title": "Nailed native test numbers so PRs don't forget to increment",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11117",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
