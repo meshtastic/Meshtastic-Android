@@ -75,6 +75,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.systemTimeZone
 import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
+import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
@@ -117,6 +118,7 @@ import kotlin.time.Duration.Companion.hours
 fun EditWaypointDialog(
     waypoint: Waypoint,
     displayUnits: DisplayUnits,
+    myNodeNum: Int?,
     onSend: (Waypoint) -> Unit,
     onDelete: (Waypoint) -> Unit,
     onDismissRequest: () -> Unit,
@@ -224,8 +226,16 @@ fun EditWaypointDialog(
                             Text(stringResource(Res.string.locked))
                         }
                         Switch(
-                            checked = waypointInput.locked_to != 0,
-                            onCheckedChange = { waypointInput = waypointInput.copy(locked_to = if (it) 1 else 0) },
+                            checked = waypointInput.isLocked,
+                            // Lock to our own node so we (and only we) can later edit or remove it; unlock clears the
+                            // owner. locked_to must be a real node number — a placeholder locks the waypoint to a
+                            // phantom node and blocks even the creator (see #6343). Disabled until our node number is
+                            // known, since without it we can't lock a waypoint to ourselves (the toggle would silently
+                            // stay unlocked).
+                            enabled = myNodeNum != null,
+                            onCheckedChange = { locked ->
+                                waypointInput = waypointInput.copy(locked_to = if (locked) myNodeNum ?: 0 else 0)
+                            },
                         )
                     }
                     Spacer(modifier = Modifier.size(8.dp))
