@@ -62,8 +62,19 @@ import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
 import org.meshtastic.feature.messaging.component.UnreadMessagesDivider
+import kotlin.math.abs
 
 private const val HEX_RADIX = 16
+
+/**
+ * Messages merge into one visual group only when they are from the same sender AND close in time. The group header
+ * carries the run's only timestamp, so a run must never span messages minutes apart from what the header shows.
+ */
+private const val GROUPING_WINDOW_MILLIS = 10 * 60 * 1000L
+
+private fun isSameGroup(older: Message, newer: Message): Boolean = older.fromLocal == newer.fromLocal &&
+    (newer.fromLocal || older.node.num == newer.node.num) &&
+    abs(newer.receivedTime - older.receivedTime) <= GROUPING_WINDOW_MILLIS
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
@@ -222,20 +233,10 @@ private fun MessageListPagedContent(
                 val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
 
                 val hasSamePrev =
-                    if (message != null && visuallyPrevMessage != null) {
-                        visuallyPrevMessage.fromLocal == message.fromLocal &&
-                            (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
-                    } else {
-                        false
-                    }
+                    message != null && visuallyPrevMessage != null && isSameGroup(visuallyPrevMessage, message)
 
                 val hasSameNext =
-                    if (message != null && visuallyNextMessage != null) {
-                        visuallyNextMessage.fromLocal == message.fromLocal &&
-                            (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
-                    } else {
-                        false
-                    }
+                    message != null && visuallyNextMessage != null && isSameGroup(message, visuallyNextMessage)
 
                 if (message != null) {
                     val isFirstUnread = state.hasUnreadMessages && unreadDividerIndex == index

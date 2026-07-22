@@ -20,16 +20,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -128,12 +128,13 @@ fun MessageItem(
     modifier =
     modifier
         .fillMaxWidth()
+        // Wider gap between sender groups, tight spacing within a group, so runs read as one unit.
         .padding(
             top =
-            if (showUserName) {
-                6.dp
+            if (hasSamePrev) {
+                2.dp
             } else {
-                1.dp
+                10.dp
             },
         ),
 ) {
@@ -229,13 +230,13 @@ fun MessageItem(
     val metadataStyle = MaterialTheme.typography.labelSmall
     val messageShape =
         getMessageBubbleShape(
-            cornerRadius = 8.dp,
+            cornerRadius = 18.dp,
             isSender = message.fromLocal,
             hasSamePrev = hasSamePrev,
             hasSameNext = hasSameNext,
         )
     val messageModifier =
-        Modifier.padding(horizontal = 8.dp)
+        Modifier.padding(horizontal = 12.dp)
             .then(
                 if (containsBel) {
                     Modifier.border(2.dp, color = MessageItemColors.Red, shape = messageShape)
@@ -245,28 +246,45 @@ fun MessageItem(
             )
     val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
     val messageA11yText = stringResource(Res.string.a11y_message_from, senderName, bodyText)
-    if (showUserName && !message.fromLocal) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            NodeChip(node = node, onClick = onClickChip, modifier = Modifier.height(28.dp))
+    // Timestamp lives in the group header (Google Chat pattern) rather than inside every bubble; grouping is
+    // time-windowed upstream, so the header time is always close to every message in the run.
+    if (showUserName) {
+        if (message.fromLocal) {
             Text(
-                text = node.user.long_name,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.labelMedium,
+                text = message.time,
+                modifier = Modifier.align(Alignment.End).padding(end = 12.dp, bottom = 2.dp),
+                style = metadataStyle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        } else {
+            Row(
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                NodeChip(node = node, onClick = onClickChip, modifier = Modifier.height(28.dp))
+                Text(
+                    text = node.user.long_name,
+                    modifier = Modifier.weight(1f, fill = false),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(text = message.time, style = metadataStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
     Surface(
         modifier =
         Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
+            // Reserve space on the opposite side and cap the width so bubbles never span the
+            // whole screen (keeps sender sides scannable on phones and wide layouts alike).
             .padding(
-                start = if (!message.fromLocal) 0.dp else 24.dp,
-                end = if (message.fromLocal) 0.dp else 24.dp,
+                start = if (!message.fromLocal) 0.dp else 36.dp,
+                end = if (message.fromLocal) 0.dp else 36.dp,
             )
+            .widthIn(max = 480.dp)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = {
@@ -295,7 +313,7 @@ fun MessageItem(
                 onNavigateToOriginalMessage = onNavigateToOriginalMessage,
             )
 
-            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
                 if (searchQuery.isNotEmpty()) {
                     HighlightedText(
                         text = message.text,
@@ -320,57 +338,54 @@ fun MessageItem(
                 }
 
                 Row(
-                    modifier = Modifier,
+                    modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     if (!message.fromLocal) {
-                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                        if (message.xeddsaSigned) {
-                            Icon(
-                                imageVector = MeshtasticIcons.ShieldCheck,
-                                contentDescription = stringResource(Res.string.security_signed_verified),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.StatusGreen,
-                            )
-                        }
-                        if (message.hopsAway == 0 && !message.viaMqtt) {
-                            Snr(message.snr)
-                            Rssi(message.rssi)
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
+                        // All mesh diagnostics (signature, signal or hops, transport) grouped in one compact run.
+                        DiagnosticsRow {
+                            // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                            if (message.xeddsaSigned) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.ShieldCheck,
+                                    contentDescription = stringResource(Res.string.security_signed_verified),
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.StatusGreen,
+                                )
+                            }
+                            if (message.hopsAway == 0 && !message.viaMqtt) {
+                                Snr(message.snr)
+                                Rssi(message.rssi)
+                            } else {
                                 Icon(
                                     imageVector = MeshtasticIcons.HopCount,
                                     contentDescription = null,
                                     modifier = Modifier.size(14.dp),
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 Text(
                                     text = if (message.hopsAway >= 0) message.hopsAway.toString() else "?",
                                     style = metadataStyle,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
+                            TransportIcon(
+                                transport = message.transportMechanism,
+                                viaMqtt = message.viaMqtt,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
-                        TransportIcon(
-                            transport = message.transportMechanism,
-                            viaMqtt = message.viaMqtt,
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.White,
-                        )
                     }
                     if (containsBel) {
-                        Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))
+                        Text(text = "\uD83D\uDD14")
                     }
                     if (message.filtered) {
                         Text(
                             text = stringResource(Res.string.filter_message_label),
                             style = metadataStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
                     if (showsTranslation) {
@@ -378,24 +393,17 @@ fun MessageItem(
                             text = stringResource(Res.string.message_translated_label),
                             style = metadataStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
                     if (message.fromLocal) {
-                        val status = message.status ?: MessageStatus.UNKNOWN
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                            MessageStatusLabel(
-                                status = status,
-                                text = stringResource(statusString.second),
-                                metadataStyle = metadataStyle,
-                                isWarning = isDirectImplicitAck,
-                                onStatusClick = onStatusClick,
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        MessageStatusLabel(
+                            status = message.status ?: MessageStatus.UNKNOWN,
+                            text = stringResource(statusString.second),
+                            metadataStyle = metadataStyle,
+                            isWarning = isDirectImplicitAck,
+                            onStatusClick = onStatusClick,
+                        )
                     }
-                    Text(modifier = Modifier.padding(start = 16.dp), text = message.time, style = metadataStyle)
                 }
             }
         }
@@ -405,8 +413,9 @@ fun MessageItem(
         modifier =
         Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
             .padding(
-                start = if (!message.fromLocal) 0.dp else 24.dp,
-                end = if (message.fromLocal) 0.dp else 24.dp,
+                top = 2.dp,
+                start = if (!message.fromLocal) 12.dp else 48.dp,
+                end = if (message.fromLocal) 12.dp else 48.dp,
             ),
         reactions = if (message.fromLocal) emojis.reversed() else emojis,
         myId = ourNode.user.id,
@@ -418,6 +427,17 @@ fun MessageItem(
 private enum class ActiveSheet {
     Actions,
     Emoji,
+}
+
+/** Row grouping a received message's mesh diagnostics (signature, signal or hops, transport). */
+@Composable
+private fun DiagnosticsRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        content = content,
+    )
 }
 
 @Composable
@@ -496,7 +516,7 @@ private fun OriginalMessageSnippet(
             shape = RectangleShape,
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
