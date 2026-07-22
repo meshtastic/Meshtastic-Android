@@ -63,6 +63,7 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.action_show_message_status
@@ -184,6 +185,7 @@ fun MessageItem(
                         } else {
                             null
                         },
+                        timestamp = getShortDateTime(message.receivedTime),
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
                         translationRowState = translationRowStateFor(message, translationAvailable),
