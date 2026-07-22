@@ -1,5 +1,5 @@
 ---
-title: Telemetry & Sensors
+title: Телеметрия и датчики
 parent: Руководство пользователя
 nav_order: 9
 last_updated: 2026-05-13
@@ -11,7 +11,7 @@ aliases:
   - power-metrics
 ---
 
-# Telemetry & Sensors
+# Телеметрия и датчики
 
 Meshtastic nodes can collect and share sensor data across the mesh network.
 
@@ -19,14 +19,14 @@ Meshtastic nodes can collect and share sensor data across the mesh network.
 
 Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.
 
-## Device Telemetry
+## Телеметрия устройства
 
 All Meshtastic nodes report basic device telemetry:
 
-| Metric               | Описание                       | Typical Range                                                      |
+| Метрика              | Описание                       | Typical Range                                                      |
 | -------------------- | ------------------------------ | ------------------------------------------------------------------ |
 | Battery Level        | Charge percentage              | 0–100%                                                             |
-| Напряжение           | Battery voltage                | 3.0–4.2V (LiPo) |
+| Напряжение           | Напряжение батареи             | 3.0–4.2V (LiPo) |
 | Использование канала | % of airtime used locally      | 0–100%                                                             |
 | Air Utilization TX   | % of airtime used by this node | 0–100%                                                             |
 | Аптайм               | Seconds since last boot        | Varies                                                             |

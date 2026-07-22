@@ -124,7 +124,7 @@
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
     <string name="bandwidth">带宽</string>
-    <string name="baro_pressure">Baro</string>
+    <string name="baro_pressure">气压计</string>
     <string name="battery">电池</string>
     <string name="battery_ina_2xx_i2c_address">电池INA_2XX I2C 地址</string>
     <string name="ble_devices">蓝牙设备</string>
@@ -1815,6 +1815,7 @@
     <!-- WRITE -->
     <string name="write_nfc">写入 NFC 标签</string>
     <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
+    <string name="write_nfc_subtext">写入后，此共享链接将保存到实体 NFC 标签中。任何人都可以使用手机轻触该标签以打开链接。</string>
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
     <string name="you">你</string>
