@@ -30,6 +30,7 @@ class DistanceExtensionsTest {
     @Test
     fun `kmhIn converts to mph for imperial`() {
         assertEquals(31, 50.kmhIn(DisplayUnits.IMPERIAL))
+        assertEquals(50, 80.kmhIn(DisplayUnits.IMPERIAL))
     }
 
     @Test
