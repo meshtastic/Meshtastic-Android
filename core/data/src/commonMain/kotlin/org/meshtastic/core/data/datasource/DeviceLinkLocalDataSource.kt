@@ -29,7 +29,7 @@ class DeviceLinkLocalDataSource(private val dbManager: DatabaseProvider) {
     fun observeAll(): Flow<List<DeviceLinkEntity>> =
         dbManager.currentDb.flatMapLatest { db -> db.deviceLinkDao().observeAll() }
 
-    suspend fun getAll(): List<DeviceLinkEntity> = dbManager.withDb { it.deviceLinkDao().getAll() }.orEmpty()
+    suspend fun getAll(): List<DeviceLinkEntity> = dbManager.withReadDb { it.deviceLinkDao().getAll() }
 
     suspend fun upsertAll(links: List<DeviceLinkEntity>) {
         dbManager.withDb { it.deviceLinkDao().upsertAll(links) }
@@ -43,5 +43,5 @@ class DeviceLinkLocalDataSource(private val dbManager: DatabaseProvider) {
         dbManager.withDb { it.deviceLinkDao().deleteAll() }
     }
 
-    suspend fun count(): Int = dbManager.withDb { it.deviceLinkDao().count() } ?: 0
+    suspend fun count(): Int = dbManager.withReadDb { it.deviceLinkDao().count() }
 }

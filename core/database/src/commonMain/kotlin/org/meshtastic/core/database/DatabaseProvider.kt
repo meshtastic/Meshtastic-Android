@@ -26,14 +26,21 @@ import kotlinx.coroutines.flow.StateFlow
  * `currentDb.value` directly. [withDb] registers the write with the cross-transport merge drain barrier (see
  * [DatabaseManager.associateDevice]) so a merge can't snapshot a database while the write is still in flight and lose
  * it when that database is retired. The callback is never replayed automatically after it starts: callers that need
- * retries must make that policy explicit at a higher layer where idempotency is known. Direct `currentDb.value` is fine
- * for one-shot *reads* (a torn read against a just-retired DB is recoverable and reads don't need drain visibility),
- * and `currentDb` itself is the right latch for Flow/Paging factories, which must re-latch on DB switch and must stay
- * out of [withDb]'s containment lane.
+ * retries must make that policy explicit at a higher layer where idempotency is known.
+ *
+ * One-shot DAO *reads* use [withReadDb]. They stay out of writer admission and the serialized containment lane; the
+ * logical-retirement guarantee in [DatabaseManager] keeps a captured published pool alive for the process lifetime.
+ * [currentDb] itself remains the right latch for Flow/Paging factories, which must re-latch on database switches.
  */
 interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */
     val currentDb: StateFlow<MeshtasticDatabase>
+
+    /**
+     * Execute one bounded read against the synchronously published current database without writer admission. The read
+     * is tracked through orderly shutdown and fails with [IllegalStateException] if admission starts after shutdown.
+     */
+    suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T
 
     /** Execute [block] against the current database, returning `null` if no database is available. */
     suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T?

@@ -185,8 +185,12 @@ abstract class DatabaseManagerTestFixture {
         var markerVerification: (suspend (MeshtasticDatabase, String) -> Boolean)? = null
         var backfillStarted: CompletableDeferred<MeshtasticDatabase>? = null
         var backfillRelease: CompletableDeferred<Unit>? = null
+        var beforeCloseCached: suspend (String) -> Unit = {}
         val backfillDatabases = mutableListOf<MeshtasticDatabase>()
         val deletedDatabaseNames = mutableListOf<String>()
+        var existingDbNamesForTest: List<String>? = null
+
+        override fun listExistingDbNames(): List<String> = existingDbNamesForTest ?: super.listExistingDbNames()
 
         override suspend fun mergeDatabases(
             source: MeshtasticDatabase,
@@ -207,6 +211,11 @@ abstract class DatabaseManagerTestFixture {
             backfillDatabases += db
             backfillStarted?.complete(db)
             backfillRelease?.await()
+        }
+
+        override suspend fun closeCachedDatabase(dbName: String) {
+            beforeCloseCached(dbName)
+            super.closeCachedDatabase(dbName)
         }
 
         override fun deleteDatabaseFiles(dbName: String) {

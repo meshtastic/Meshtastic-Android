@@ -91,6 +91,8 @@ class SwitchingDiscoveryDaoTest {
         private val _currentDb = MutableStateFlow(db)
         override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
 
+        override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(_currentDb.value)
+
         override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = block(_currentDb.value)
 
         fun switchTo(db: MeshtasticDatabase) {
