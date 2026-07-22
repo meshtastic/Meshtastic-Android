@@ -53,7 +53,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Test Placement:** New Compose UI tests must go in `commonTest` using `runComposeUiTest {}` from `androidx.compose.ui.test.v2` (not the deprecated v1 `androidx.compose.ui.test` package) + `kotlin.test.Test`. Do not add `androidTest` (instrumented) tests.
 - [ ] **Shared Test Utilities:** Test fakes, doubles, and utilities should be placed in `core:testing`.
 - [ ] **Libraries:** Verify usage of `Turbine` for Flow testing, `Kotest` for property-based testing, and `Mokkery` for mocking.
-- [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent Java 21 / SDK 35 compatibility issues.
+- [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent SDK 35 compatibility issues.
 
 ### 8. ProGuard / R8 Rules
 - [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `androidApp/proguard-rules.pro` (R8) and `desktopApp/proguard-rules.pro` (ProGuard). The two files must stay aligned.

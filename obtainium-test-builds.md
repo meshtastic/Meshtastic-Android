@@ -42,7 +42,7 @@ does **not** apply to it.
 ## Setup
 
 1. Install Obtainium ([GitHub releases](https://github.com/ImranR98/Obtainium/releases)
-   or [F-Droid / IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/dev.imranr.obtainium.fdroid)).
+   or [F-Droid / IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/dev.imranr.obtainium)).
 2. Tap **Add App**.
 3. **App Source URL:**
    ```

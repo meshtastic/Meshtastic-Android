@@ -20,11 +20,11 @@ A Composable function (in `main/`) that provides camera permission handling, a f
 
 ```
 src/
-├── main/     BarcodeScannerProvider.kt (shared UI)
-├── google/   BarcodeAnalyzerFactory.kt (ML Kit decoder)
-├── fdroid/   BarcodeAnalyzerFactory.kt (ZXing decoder)
-├── test/     Unit tests
-└── androidTest/ Instrumented tests
+├── main/        BarcodeScannerProvider.kt (shared UI), SingleScanResultGate.kt
+├── google/      BarcodeAnalyzerFactory.kt (ML Kit decoder)
+├── fdroid/      BarcodeAnalyzerFactory.kt (ZXing decoder)
+├── test/        Unit tests
+└── testFdroid/  fdroid-flavor unit tests
 ```
 
 ## Usage

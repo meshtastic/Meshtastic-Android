@@ -127,6 +127,12 @@ Located in `build-logic/convention/src/main/kotlin/`:
 
 # Desktop run
 ./gradlew :desktopApp:run
+
+# Desktop native installers for the current OS (DMG / MSI+EXE / DEB+RPM+AppImage)
+./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
+
+# API reference (Dokka HTML → build/dokka/html)
+./gradlew dokkaGeneratePublicationHtml
 ```
 
 ## Version Catalog Highlights

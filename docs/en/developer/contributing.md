@@ -11,7 +11,7 @@ aliases:
 
 # Contributing
 
-Guidelines for contributing to the Meshtastic Android/Desktop/iOS project.
+Guidelines for contributing to the Meshtastic Android/Desktop project (a KMP codebase that also compiles for iOS).
 
 ## Branch Naming
 

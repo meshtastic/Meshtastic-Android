@@ -110,7 +110,7 @@ Android and JVM subclasses override `requestBonding(entry)` and `requestPermissi
 
 ```kotlin
 // Registration (in androidApp / desktopApp nav graph)
-fun EntryProviderScope<NavKey>.connectionsGraph(backStack: BackStack<NavKey>) {
+fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
     // Registers ConnectionsRoute.Connections entry
     // Injects ScannerViewModel + RadioConfigViewModel via Koin
 }
@@ -120,17 +120,18 @@ Route: `ConnectionsRoute.Connections`
 
 ## Dependency Graph
 
-```
+### Key Dependencies
+
+```text
 feature:connections
   ├── core:ble, core:network       (transports)
-  ├── core:data, core:database, core:datastore, core:di
+  ├── core:common, core:data, core:database, core:datastore, core:di
   ├── core:domain, core:model, core:navigation
-  ├── core:prefs, core:proto, core:resources, core:service, core:ui
+  ├── core:prefs, core:resources, core:service, core:ui
+  ├── org.meshtastic:protobufs     (Maven artifact)
   ├── feature:settings             (RadioConfigViewModel)
   └── usb-serial-android           (Android only)
 ```
-
-## Dependency Graph
 
 <!--region graph-->
 ```mermaid

@@ -24,7 +24,7 @@ Past runs of this agent have silently edited/reverted files to make builds pass 
 
 ## How to run
 - Run exactly the task(s) the caller specified. Do not add `clean` unless asked.
-- KMP test gotcha: KMP modules use `:module:allTests`; pure-Android/JVM modules (`app`, `core:api`, `core:barcode`) use `:module:testFdroidDebugUnitTest`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
+- KMP test gotcha: KMP modules use `:module:allTests`; pure-Android/JVM modules (`androidApp`, `core:barcode`) use `:module:testFdroidDebugUnitTest`; `:desktopApp` uses plain `test`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
 - If the build fails to *configure* (vs. a test failure), say so explicitly — that's a different problem.
 - Prefer `--console=plain`. It's fine to pipe through filters to find failures, but you must still inspect enough to report accurately.
 

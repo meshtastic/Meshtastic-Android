@@ -123,11 +123,11 @@ org.meshtastic.proto.User.toCoTMessage(position, team, role, battery): CoTMessag
 ```
 core:takserver
   ├── api → core:repository     (exported)
-  ├── core:common, core:di, core:model, core:proto
+  ├── core:common, core:di, core:model, org.meshtastic:protobufs (Maven)
   ├── okio, kotlinx.serialization.json
   ├── xmlutil-core, xmlutil-serialization
   ├── ktor-client-core, ktor-network   (TCP socket)
-  └── zstd-jni (jvmAndroid/jvm), kotlinx.datetime
+  └── kotlinx.datetime, kermit         (zstd rides on the SDK's transitive kzstd)
 ```
 
 ## Local TAK Server Feature
@@ -136,26 +136,22 @@ The Local TAK Server can be enabled from the app's Settings screen. When running
 
 ## TAKPacket-SDK consumer & version-bump playbook
 
-This module consumes the external [TAKPacket-SDK](https://github.com/meshtastic/TAKPacket-SDK) (`org.meshtastic:takpacket-sdk-jvm`) for the V2 wire format. The SDK does CoT-XML ↔ `TAKPacketV2` ↔ zstd-compressed bytes; it owns the dictionaries and the schema.
+This module consumes the external [TAKPacket-SDK](https://github.com/meshtastic/TAKPacket-SDK) (`org.meshtastic:takpacket-sdk`, KMP since 0.7.0; pinned as `takpacket-sdk` in `gradle/libs.versions.toml`, currently 0.8.0) for the V2 wire format. The SDK does CoT-XML ↔ `TAKPacketV2` ↔ zstd-compressed bytes; it owns the dictionaries and the schema. The `TAKPacketV2` proto types themselves come from the `org.meshtastic:protobufs` Maven artifact (pinned as `meshtastic-protobufs`, api()-exported by `:core:model`).
 
 **Two V2 wire paths — keep both in mind when the SDK changes:**
 
-- **Path A (primary, SDK-delegated):** `TakSdkCompressor` / `TakV2Compressor` call the SDK's `CotXmlParser` / `CotXmlBuilder` / `TakCompressor`. This path is insulated from proto field renames *as long as* the SDK artifact and the proto submodule are bumped together.
-- **Path B (fallback, Android-local Wire proto):** `TAKPacketV2Conversion.kt` builds and reads the Wire-generated `TAKPacketV2` **directly** (used on the SDK-failure send fallback and as the iOS receive stub). It references proto fields by name, so it **breaks at compile time** on any schema change and must be updated in lockstep.
-
-**The proto submodule (`core/proto/src/main/proto`) must track the SDK's proto.** It is the same `meshtastic/protobufs` repo the SDK generates from. `:core:proto`'s `build.gradle.kts` prunes the atak messages owned by the SDK's own Wire codegen.
+- **Path A (primary, SDK-delegated):** `TakSdkCompressor` / `TakV2Compressor` call the SDK's parser/builder/compressor. This path is insulated from proto field renames *as long as* the SDK and `meshtastic-protobufs` versions are bumped together.
+- **Path B (fallback):** `TAKPacketV2Conversion.kt` builds and reads the Wire-generated `TAKPacketV2` **directly** (SDK-failure send fallback; iOS receive stub). It references proto fields by name, so it **breaks at compile time** on any schema change and must be updated in lockstep.
 
 **When bumping to a new (wire-breaking) SDK version:**
-1. `gradle/libs.versions.toml` → `takpacket-sdk = "<new>"`.
-2. Bump the `core/proto/src/main/proto` submodule to the matching protobufs commit (push it upstream first, then `git -C core/proto/src/main/proto checkout <sha>` and commit the gitlink). For *local* testing before the protobufs commit is pushed, syncing just `meshtastic/atak.proto`'s content works (Wire regenerates from the working tree).
-3. **Keep `core/proto/build.gradle.kts`'s `prune(...)` list complete.** The SDK jar ships its own Wire codegen of `org.meshtastic.proto.*` for the WHOLE atak.proto, so `:core:proto` must `prune()` EVERY atak message/enum the SDK ships — otherwise both define the same class and the release **R8 build fails** with `Type org.meshtastic.proto.X is defined multiple times` (it compiles + passes `jvmTest` fine; only R8/dexing catches it). When the schema gains a message (e.g. `Marti` in v0.3.2 — which was missed and broke R8), add a matching `prune("meshtastic.X")` line (+ one per nested proto type — prune does NOT cascade). Verify with: `unzip -l <sdk jar> | grep org/meshtastic/proto/` vs the prune list. (Exception: types the SDK does NOT ship — e.g. `Team`, `MemberRole` — must stay UNpruned, or the bridge loses them.)
-4. Update **Path B** (`TAKPacketV2Conversion.kt`) and the **bridge** (`TakV2Compressor.kt`) for any renamed/removed/added wire fields.
-5. Test against the local SDK: publish it (`cd TAKPacket-SDK/kotlin && ./gradlew publishToMavenLocal`), then `./gradlew :core:takserver:jvmTest -PuseMavenLocal` (needs **JDK 21**; `-PuseMavenLocal` is gated in `settings.gradle.kts`). Against a *published* version, drop `-PuseMavenLocal` and add `--refresh-dependencies` to pull from Maven Central.
-6. Verify the release R8 build (`./gradlew :androidApp:minifyFdroidReleaseWithR8`) — catches prune-list gaps (above) AND confirms the `zstd-jni:…@aar` native lib survives minification (`core/takserver/build.gradle.kts` wires the `@aar` for androidMain, plain jar + `xpp3` for jvmMain).
+1. `gradle/libs.versions.toml` → bump `takpacket-sdk` (and, if the schema moved, `meshtastic-protobufs` to the matching protobufs release).
+2. **Leave `:core:model`'s exclude block intact** (`core/model/build.gradle.kts`): the SDK still declares a transitive, older `org.meshtastic:protobufs` pin, so `:core:model` api()-exports the SDK with `exclude(group = "org.meshtastic", module = "protobufs" / "protobufs-jvm" / "protobufs-android")` — that keeps the app's single protobufs version authoritative and prevents duplicate-class / proto-ABI breakage. (The `.toString()` string-notation there is load-bearing: catalog dependencies are immutable, so `exclude {}` only works on the string copy.)
+3. Update **Path B** (`TAKPacketV2Conversion.kt`) and the **bridge** (`TakV2Compressor.kt`) for any renamed/removed/added wire fields.
+4. Test: `./gradlew :core:takserver:allTests :core:takserver:compileKotlinJvm` (full KMP validation; `:core:takserver:jvmTest` works as a faster focused check) — against a locally published SDK add `-PuseMavenLocal` (gated in `settings.gradle.kts`); against a published version add `--refresh-dependencies` instead.
 
-**v0.4.0 wire facts (so you don't re-introduce phantom changes):** PLI is **implicit** — the `bool pli` oneof arm was removed; a packet with no payload variant + an `a-f-*` cot type is a PLI. `DrawnShape` vertices are two packed `repeated sint32` columns (`vertex_lat_deltas` / `vertex_lon_deltas`, deltas from the envelope point), not `repeated CotGeoPoint`. **`course` stays `deg×100`, `uid` stays a string, `stale_seconds` stays tag 16** — these were evaluated and deliberately NOT changed; do not "fix" the ×100 scaling in `TAKPacketV2Conversion.kt`.
+**Wire facts (don't re-introduce phantom changes):** PLI is **implicit** — no payload variant + an `a-f-*` cot type is a PLI. `DrawnShape` vertices are two packed `repeated sint32` delta columns. **`course` stays `deg×100`, `uid` stays a string, `stale_seconds` stays tag 16** — deliberate; do not "fix" them in `TAKPacketV2Conversion.kt`.
 
-**Debug "Send Test CoTs":** `TakMeshTestRunner` sends the bundled `tak_test_fixtures/*.xml` through the SDK path (parse → strip → compress → send). `taktalk_sanity.xml` is intentionally first. The fixtures need no edits across SDK wire breaks because they ride the SDK path; they ARE the regression surface (drawing_* exercise packed vertices, pli_* exercise implicit PLI).
+**Debug "Send Test CoTs":** `TakMeshTestRunner` sends the bundled `tak_test_fixtures/*.xml` through the SDK path (parse → strip → compress → send). They ride the SDK path, so they need no edits across wire breaks — they ARE the regression surface.
 
 ## Dependency Graph
 

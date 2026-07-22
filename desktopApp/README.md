@@ -67,20 +67,19 @@ The module depends on the JVM variants of KMP modules:
 
 **Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to platform-native senders; the app falls back to Compose `TrayState` notifications only if native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
-**Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
+**Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPrefs.locale` (`Main.kt` injects `org.meshtastic.core.repository.UiPrefs`). `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
 
 ## Key Files
 
 | File | Purpose |
 |---|---|
 | `Main.kt` | App entry point — Koin bootstrap, Compose Desktop window, theme + locale application |
-| `DemoScenario.kt` | Offline demo data for testing without a connected device |
 | `ui/DesktopMainScreen.kt` | Navigation 3 shell — `NavigationRail` + `NavDisplay` |
 | `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB, and BLE transports |
-| `notification/DesktopMeshServiceNotifications.kt` | Real implementation of notification triggers for Desktop |
+| `notification/DesktopMeshNotificationManager.kt` | Desktop `MeshNotificationManager` — converts mesh events into `Notification`s and dispatches them |
+| `notification/NativeNotificationSender.kt` | Native-sender contract, implemented by `MacOSNotificationSender` / `WindowsNotificationSender` / `LinuxNotificationSender` |
 | `DesktopNotificationManager.kt` | Bridge between repository notifications and Compose `TrayState` |
-| `radio/DesktopMeshServiceController.kt` | Mesh service lifecycle — orchestrates `want_config` handshake chain |
 | `radio/DesktopMessageQueue.kt` | Message queue for outbound mesh packets |
 | `di/DesktopKoinModule.kt` | Koin module with stub implementations |
 | `di/DesktopPlatformModule.kt` | Platform-specific Koin bindings |
@@ -90,7 +89,7 @@ The module depends on the JVM variants of KMP modules:
 
 | Module | What's Tested |
 |---|---|
-| `core:common` | `Base64Factory`, `NumberFormatter`, `UrlUtils`, `DateFormatter`, `CommonUri` |
+| `core:common` | `NumberFormatter`, `UrlUtils`, `DateFormatter`, `CommonUri` |
 | `core:model` | `DeviceVersion`, `Capabilities`, `SfppHasher`, `platformRandomBytes`, `getShortDateTime`, `Channel.getRandomKey` |
 | `core:ui` | Shared Compose components compile and render on Desktop |
 | Build graph | All core modules compile and link without Android SDK |
@@ -105,10 +104,10 @@ The module depends on the JVM variants of KMP modules:
 - [x] Wire `feature:messaging` composables into the nav graph (contacts list with shared ViewModel)
 - [x] Add JetBrains Material 3 Adaptive `ListDetailPaneScaffold` to node and messaging screens
 - [x] Implement TCP transport (`DesktopRadioTransportFactory`) with auto-reconnect and backoff retry
-- [x] Implement mesh service controller (`DesktopMeshServiceController`) with full `want_config` handshake
+- [x] Implement mesh service lifecycle with full `want_config` handshake (lives in shared `:core:service` — `SharedRadioInterfaceService` / `MeshServiceOrchestrator`)
 - [x] Create connections screen using shared `feature:connections` with dynamic transport detection
 - [x] Replace 5 placeholder config screens with real desktop implementations (Device, Position, Network, Security, ExtNotification)
-- [x] Add desktop language picker backed by shared `UiPreferencesDataSource.locale` with live translation updates
+- [x] Add desktop language picker backed by shared `UiPrefs.locale` with live translation updates
 - [x] Wire remaining `feature:*` composables (map) into the nav graph
 - [x] Move remaining node detail and message composables from `androidMain` to `commonMain`
 - [x] Add serial/USB transport for direct radio connection on Desktop

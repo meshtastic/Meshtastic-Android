@@ -170,25 +170,7 @@ the primary contract.
 
 ## Existing Specs
 
-| ID | Feature | Status | FRs | Tasks |
-|----|---------|--------|-----|-------|
-| 001 | Local Mesh Discovery | Not Started | 38 | 50 |
-| 002 | Node List Layout | Not Started | 28 | 47 |
-| 003 | App Documentation | Not Started | 37 | 90 |
-| 004 | Messaging & Contacts | Migrated | 18 | 30 |
-| 005 | Device Connections | Migrated | 14 | 38 |
-| 006 | Firmware Update (OTA) | Migrated | 18 | 61 |
-| 007 | Node Detail & Metrics | Migrated | 18 | 46 |
-| 008 | Radio & App Settings | Migrated | 20 | 78 |
-| 009 | Map View | Migrated | 14 | 23 |
-| 010 | Onboarding | Migrated | 10 | 19 |
-| 011 | WiFi Provisioning | Migrated | 14 | 25 |
-| 012 | Core Data Layer | Migrated | 14 | 30 |
-| 013 | Core BLE | Migrated | 12 | 21 |
-| 014 | Core Network | Migrated | 16 | 26 |
-| 015 | Core Database | Migrated | 14 | 19 |
-| 016 | Core Service | Migrated | 14 | 24 |
-| 017 | Core Model | Migrated | 10 | 22 |
+Specs live in `specs/`, one directory per feature (`<YYYYMMDD-HHMMSS>-<slug>`; two legacy dirs use `NNN-<slug>` numbering). List that directory for the live inventory — each spec's `spec.md` / `tasks.md` records its own scope and status.
 
 ## Related Skills
 

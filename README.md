@@ -17,13 +17,14 @@ If you have questions or feedback please [Join our discussion forum](https://git
 
 ## Features
 
-Highlights from the latest release:
+Highlights from the 2.8.0 release:
 
-- **Full-text message search** across your conversation history.
-- **Mesh network discovery** to surface nodes and channels around you.
-- **Android Auto** support for hands-free use while driving (`google` flavor).
+- **Mesh network discovery** to surface nodes and channels around you, with **Mesh Beacon** invitations for joining nearby meshes.
+- **Waypoint geofences** — draw zones on the map and get alerts when nodes cross them.
+- **Secure key backup** — encrypted backup, restore, and delete for your device security keys.
+- **NFC sharing** — write shared contacts and channels to NFC tags.
+- **XEdDSA packet signing** indicators in the node and messaging UI.
 - **Air-quality telemetry** — PM1.0, PM2.5, PM10, and CO₂ readings from supported sensors.
-- **Device hardware links** via [msh.to](https://msh.to) for quick access to hardware details.
 - **App Functions / system-AI integration** so on-device assistants can trigger common workflows.
 
 ## Get Meshtastic
@@ -50,7 +51,7 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ### Desktop
 
-**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak package is maintained at [vidplace7/org.meshtastic.MeshtasticDesktop](https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop).
+**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak is available on [Flathub](https://flathub.org/apps/org.meshtastic.MeshtasticDesktop) (packaging repo: [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop)).
 
 ## Documentation
 
@@ -112,6 +113,7 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/common](core/common/README.md) | Common utilities |
 | [core/di](core/di/README.md) | Koin DI modules |
 | [core/testing](core/testing/README.md) | Shared test fakes & utilities |
+| [core/konsist](core/konsist/README.md) | Konsist architecture-rule tests (KMP boundary guards) |
 | [core/nfc](core/nfc/README.md) | NFC support |
 | [core/prefs](core/prefs/README.md) | Legacy preference helpers |
 | [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
@@ -123,10 +125,10 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
 | [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
 | [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
-| [feature/discovery](feature/discovery) | Mesh network discovery |
+| [feature/discovery](feature/discovery/README.md) | Mesh network discovery (scanner, AI summaries, Mesh Beacon) |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
-| [feature/car](feature/car) | Android Auto integration (Car App Library, `google` flavor) |
+| [feature/car](feature/car/README.md) | Android Auto integration (Car App Library, `google` flavor) |
 | [baselineprofile](baselineprofile/README.md) | Macrobenchmark Baseline Profile generation for `:androidApp` |
 
 ## Translations
@@ -135,7 +137,7 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 ## Integration
 
-The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
+The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a loopback-only TLS (mTLS) server on port 8089 so ATAK on the same device can connect directly and route its traffic over the mesh.
 
 ## Building the Android App
 > [!WARNING]
@@ -143,9 +145,10 @@ The app includes a built-in **Local TAK Server** feature that can be enabled in 
 
 https://meshtastic.org/docs/development/android/
 
-Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) `MAPS_API_KEY` in `local.properties` in order to use Google Maps.
+Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) as `MAPS_API_KEY` in `secrets.properties` (repo root — create the file if it doesn't exist) in order to use Google Maps. Without it, `secrets.defaults.properties` supplies a placeholder so the build still succeeds, but map tiles will not load.
 e.g.
 ```properties
+# secrets.properties
 MAPS_API_KEY=your_google_maps_api_key_here
 ```
 
@@ -158,4 +161,4 @@ For details on our release process, see the [RELEASE_PROCESS.md](RELEASE_PROCESS
 
 ![Alt](https://repobeats.axiom.co/api/embed/1d75239069a6d671fe0b8f80b2e1bf590a98f0eb.svg "Repobeats analytics image")
 
-Copyright 2025, Meshtastic LLC. GPL-3.0 license
+Copyright 2025-2026, Meshtastic LLC. GPL-3.0 license
