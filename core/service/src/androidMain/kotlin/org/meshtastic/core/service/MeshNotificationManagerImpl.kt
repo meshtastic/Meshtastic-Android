@@ -523,15 +523,22 @@ class MeshNotificationManagerImpl(
                 .setConversationTitle(getString(Res.string.meshtastic_app_name))
 
         activeNotifications.forEach { sbn ->
-            val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-            val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
-            val postTime = sbn.postTime
-
-            if (senderTitle != null && messageText != null) {
-                // For the summary, we're creating a generic Person for the sender from the active notification's title.
-                // We don't have the original Person object or its colors/ID, so we're just using the name.
-                val senderPerson = Person.Builder().setName(senderTitle).build()
-                messagingStyle.addMessage(messageText, postTime, senderPerson)
+            // Prefer the child's real MessagingStyle: its latest message carries the actual sender (Person, icon) and
+            // timestamp, so the summary line reads "Hawk Ridge: …" rather than the conversation title.
+            val latest =
+                NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
+                    ?.messages
+                    ?.lastOrNull()
+            if (latest?.text != null) {
+                val senderPerson = latest.person ?: Person.Builder().setName(getString(Res.string.you)).build()
+                messagingStyle.addMessage(latest.text, latest.timestamp, senderPerson)
+            } else {
+                // Fallback for children without an extractable style: rebuild a generic line from the extras.
+                val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+                if (senderTitle != null && messageText != null) {
+                    messagingStyle.addMessage(messageText, sbn.postTime, Person.Builder().setName(senderTitle).build())
+                }
             }
         }
 

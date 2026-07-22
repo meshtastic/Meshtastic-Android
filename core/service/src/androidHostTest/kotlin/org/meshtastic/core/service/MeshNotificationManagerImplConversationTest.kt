@@ -182,6 +182,13 @@ class MeshNotificationManagerImplConversationTest {
 
         val summary = activeByTag("message_summary").single().notification
         assertEquals(Notification.GROUP_ALERT_CHILDREN, summary.groupAlertBehavior)
+        // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender.
+        val summaryLatest =
+            androidx.core.app.NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary)
+                ?.messages
+                ?.lastOrNull()
+        assertEquals("hello", summaryLatest?.text?.toString())
+        assertEquals("Hawk Ridge", summaryLatest?.person?.name?.toString())
 
         manager.cancelMessageNotification("0^all")
 
