@@ -289,12 +289,6 @@
       "title": "meshnology-w10: define HAS_SPI_TFT so the TFT screen initializes again",
       "page_url": "https://github.com/meshtastic/firmware/pull/11042",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11015",
-      "title": "feat: add driver for MCP23017",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11015",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
