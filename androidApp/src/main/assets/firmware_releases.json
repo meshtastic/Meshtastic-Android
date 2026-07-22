@@ -231,12 +231,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11117",
-      "title": "Nailed native test numbers so PRs don't forget to increment",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11117",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11114",
       "title": "SEN5X: Fix version parsing, VOC index reporting, and uninitialized-read hazards",
       "page_url": "https://github.com/meshtastic/firmware/pull/11114",
