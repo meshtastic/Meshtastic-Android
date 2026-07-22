@@ -22,7 +22,28 @@ import org.gradle.kotlin.dsl.project
 import org.jetbrains.dokka.gradle.DokkaExtension
 import java.net.URI
 
+/**
+ * Patched jackson-core forced onto Dokka's classpaths.
+ *
+ * Dokka 2.x pulls jackson-core transitively (dokka-core -> jackson-dataformat-xml / -module-kotlin),
+ * and the 2.15.x line it selects is vulnerable to GHSA-r7wm-3cxj-wff9 (async-parser `maxNumberLength`
+ * bypass, CWE-770). Dokka is a build-time-only documentation tool, so this never ships in the app, but
+ * pinning the patched line keeps the resolved dependency graph clean and closes the Dependabot alert.
+ * 2.18.8 is the first patched release and the closest maintenance line to Dokka's transitive 2.15.3.
+ */
+private const val PATCHED_JACKSON_CORE = "com.fasterxml.jackson.core:jackson-core:2.18.8"
+
+/** Force [PATCHED_JACKSON_CORE] on every Dokka configuration of this project (no-op elsewhere). */
+private fun Project.pinPatchedJacksonOnDokkaClasspaths() {
+    configurations.configureEach {
+        if (name.contains("dokka", ignoreCase = true)) {
+            resolutionStrategy.force(PATCHED_JACKSON_CORE)
+        }
+    }
+}
+
 fun Project.configureDokka() {
+    pinPatchedJacksonOnDokkaClasspaths()
     extensions.configure<DokkaExtension> {
         // Use the full project path as the module name to ensure uniqueness
         moduleName.set(project.path.removePrefix(":").replace(":", "-").ifEmpty { project.name })
@@ -67,6 +88,7 @@ fun Project.configureDokka() {
  * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
  */
 fun Project.configureDokkaAggregation(subprojectPaths: List<String>) {
+    pinPatchedJacksonOnDokkaClasspaths()
     extensions.configure<DokkaExtension> {
         moduleName.set("Meshtastic App")
         dokkaPublications.configureEach { suppressInheritedMembers.set(true) }
