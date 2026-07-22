@@ -23,18 +23,18 @@ import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 class DistanceExtensionsTest {
 
     @Test
-    fun `kmhToSpeedString formats metric as-is`() {
-        assertEquals("50 km/h", 50.kmhToSpeedString(DisplayUnits.METRIC))
+    fun `kmhIn returns value unchanged for metric`() {
+        assertEquals(50, 50.kmhIn(DisplayUnits.METRIC))
     }
 
     @Test
-    fun `kmhToSpeedString converts to mph for imperial`() {
-        assertEquals("31 mph", 50.kmhToSpeedString(DisplayUnits.IMPERIAL))
+    fun `kmhIn converts to mph for imperial`() {
+        assertEquals(31, 50.kmhIn(DisplayUnits.IMPERIAL))
     }
 
     @Test
-    fun `kmhToSpeedString handles zero`() {
-        assertEquals("0 km/h", 0.kmhToSpeedString(DisplayUnits.METRIC))
-        assertEquals("0 mph", 0.kmhToSpeedString(DisplayUnits.IMPERIAL))
+    fun `kmhIn handles zero`() {
+        assertEquals(0, 0.kmhIn(DisplayUnits.METRIC))
+        assertEquals(0, 0.kmhIn(DisplayUnits.IMPERIAL))
     }
 }

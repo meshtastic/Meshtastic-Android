@@ -1592,6 +1592,7 @@
     <string name="soil_temperature">Soil Temp</string>
     <string name="speed">Speed</string>
     <string name="speed_kmh">%1$d Km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="spread_factor">Spread Factor</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">State broadcast (seconds)</string>
