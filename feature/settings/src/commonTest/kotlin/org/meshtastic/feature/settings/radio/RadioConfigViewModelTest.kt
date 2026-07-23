@@ -746,6 +746,68 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `NODEDB_RESET marks an expected local restart`() = runTest {
+        // Firmware reboots after a nodedb reset, so a local reset must open the restart window (like FACTORY_RESET)
+        // or the ensuing transport drop surfaces as a surprise disconnect instead of "restarting".
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
+
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any(), any()) } returns 42
+
+        viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
+        packetFlow.emit(MeshPacket())
+        advanceUntilIdle()
+
+        verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any(), any()) }
+        assertTrue(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `manual channel batch is not completed as success by a stale restart window`() = runTest {
+        // A prior local MAY_RESTART save opened the 90s restart window, but the node never actually rebooted (stayed
+        // Connected, so onConnected never re-fired to close it early). A manual channel batch shares the save shape
+        // (empty route + Loading); a transient drop inside the stale window must not flip the incomplete batch to
+        // success and silently misreport a partial channel write.
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+
+        val connectionFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns connectionFlow
+        viewModel = createViewModel()
+        runCurrent()
+
+        nodeRestartTracker.expectRestart()
+
+        // Enqueue a manual channel batch and leave its first write awaiting an ack (no packet emitted).
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(77)
+                77
+            }
+        viewModel.updateChannels(listOf(ChannelSettings(name = "New")), listOf(ChannelSettings(name = "Old")))
+        runCurrent()
+
+        assertTrue(nodeRestartTracker.restartExpected.value)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        // Transient transport drop inside the stale restart window.
+        connectionFlow.value = ConnectionState.Disconnected
+        runCurrent()
+
+        assertFalse(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+    }
+
+    @Test
     fun `setPreserveFavorites updates state`() = runTest {
         viewModel.radioConfigState.test {
             assertEquals(false, awaitItem().nodeDbResetPreserveFavorites)

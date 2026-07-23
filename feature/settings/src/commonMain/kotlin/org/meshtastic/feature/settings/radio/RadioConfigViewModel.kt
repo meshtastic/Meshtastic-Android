@@ -625,6 +625,9 @@ open class RadioConfigViewModel(
             AdminRoute.NODEDB_RESET.name ->
                 safeLaunch(tag = "nodedbReset") {
                     val isLocal = (destNum == myNodeNum)
+                    // Firmware reboots after a nodedb reset, so a local reset drops the transport just like a
+                    // factory reset — mark it expected so the UI shows "restarting" instead of a surprise disconnect.
+                    if (isLocal) nodeRestartTracker.expectRestart()
                     adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal, ::registerRequestId)
                 }
         }
@@ -854,6 +857,15 @@ open class RadioConfigViewModel(
         removeRequestIds(batchRequestIds)
     }
 
+    /**
+     * True while a manual channel batch is in flight — from enqueue through the ack-wait that outlives
+     * [finishManualChannelBatch]. [manualChannelBatchEnqueueing] alone only covers the enqueue phase, so pending batch
+     * request ids are the authoritative signal that a batch (not a reboot-applying save) owns the current Loading
+     * state.
+     */
+    private fun manualChannelBatchInFlight(): Boolean =
+        manualChannelBatchEnqueueing || manualChannelBatchRequestIds.isNotEmpty()
+
     private fun completeSetRequestOrProgressBatch() {
         if (manualChannelBatchEnqueueing) {
             incrementCompleted()
@@ -870,6 +882,10 @@ open class RadioConfigViewModel(
      */
     private fun completeRestartingSaveIfPending() {
         if (!nodeRestartTracker.restartExpected.value) return
+        // A manual channel batch shares the save shape (empty route + Loading) but never reboots the node; a stale
+        // restart window must not flip an in-flight batch to success. The batch stays in flight through its ack-wait,
+        // past finishManualChannelBatch, so key off its pending request ids — not just the enqueue flag.
+        if (manualChannelBatchInFlight()) return
         val state = radioConfigState.value
         if (state.responseState is ResponseState.Loading && state.route.isEmpty()) {
             clearRequestIds()
@@ -928,11 +944,19 @@ open class RadioConfigViewModel(
             safeLaunch(tag = "requestTimeout") {
                 delay(requestTimeout)
                 if (requestIds.value.contains(packetId)) {
+                    // Capture batch membership before removeRequestId drops the last id and empties the batch set.
+                    val timedOutBatchRequest = packetId in manualChannelBatchRequestIds
                     removeRequestId(packetId)
                     if (requestIds.value.isEmpty()) {
                         // A save that reboots the node races the reboot against its ACK; a timeout here during an
                         // expected restart means the reboot won — treat it as the restarting-success, not an error.
-                        if (nodeRestartTracker.restartExpected.value && radioConfigState.value.route.isEmpty()) {
+                        // A manual channel batch never reboots, so exclude it even inside a stale restart window.
+                        if (
+                            nodeRestartTracker.restartExpected.value &&
+                            !timedOutBatchRequest &&
+                            !manualChannelBatchInFlight() &&
+                            radioConfigState.value.route.isEmpty()
+                        ) {
                             setResponseStateSuccess()
                         } else {
                             sendError(Res.string.timeout)
