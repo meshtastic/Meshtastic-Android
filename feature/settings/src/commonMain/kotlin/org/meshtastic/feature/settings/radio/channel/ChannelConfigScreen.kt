@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +92,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             maxChannels = viewModel.maxChannels,
             firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
             enabled = state.connected,
+            isFetching = state.responseState is ResponseState.Loading,
             onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
         )
 
@@ -112,6 +114,7 @@ private fun ChannelConfigScreen(
     maxChannels: Int = 8,
     firmwareVersion: String,
     enabled: Boolean,
+    isFetching: Boolean = false,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
@@ -128,6 +131,18 @@ private fun ChannelConfigScreen(
         rememberSaveable(saver = channelPskEditStatesSaver) {
             List(settingsListInput.size) { ChannelPskEditState() }.toMutableStateList()
         }
+
+    // A remote channel fetch streams channels in one response at a time AFTER the editor first composes
+    // (composition starts as soon as channel 0 lands), so the one-shot seed above goes stale and the list
+    // would only show the channels present at seed time (#6317 — the footer Cancel's replaceWith was the
+    // accidental workaround). Adopt the authoritative list while the fetch is in flight: the loading
+    // overlay blocks input during the fetch, so there are no user edits to clobber.
+    LaunchedEffect(settingsList, isFetching) {
+        if (isFetching) {
+            settingsListInput.replaceWith(settingsList)
+            pskEditStatesInput.replaceAll(settingsList.size, ChannelPskEditState())
+        }
+    }
 
     val listState = rememberLazyListState()
     val dragDropState =
