@@ -118,7 +118,7 @@ class BleRadioTransportTest {
     fun `onDisconnect is called after DEFAULT_FAILURE_THRESHOLD consecutive failures`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
-        scanner.emitDevice(device) // targeted scan resolves immediately; this test covers reconnect timing
+        scanner.emitDevice(device) // bounded scan resolves immediately; this test covers reconnect timing
 
         // Make every connectAndAwait call throw so each iteration counts as one failure.
         connection.connectException = RadioNotConnectedException("simulated failure")
@@ -234,8 +234,8 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
         try {
-            // 3s settle + 2s targeted + 5s escalated scan = 10s before bonded fallback.
-            advanceTimeBy(11_000)
+            // 3s settle + one 5s bounded scan before bonded fallback.
+            advanceTimeBy(9_000)
 
             assertEquals(1, connection.connectAndAwaitCalls, "Must use bounded bonded fallback after fresh scans miss")
             assertEquals("Bonded Device", connection.device?.name)

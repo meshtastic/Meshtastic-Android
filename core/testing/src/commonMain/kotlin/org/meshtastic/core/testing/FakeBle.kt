@@ -216,6 +216,10 @@ class FakeBleService : BleService {
 
     val writes = mutableListOf<FakeBleWrite>()
 
+    /** Counts every write invocation, including attempts that fail before they can be recorded in [writes]. */
+    var writeAttempts: Int = 0
+        private set
+
     /** When non-null, [write] throws this exception on every call until explicitly cleared. */
     var writeException: Exception? = null
 
@@ -298,6 +302,7 @@ class FakeBleService : BleService {
     override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType = BleWriteType.WITH_RESPONSE
 
     override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+        writeAttempts++
         writeException?.let { ex -> throw ex }
         availableCharacteristics += characteristic.uuid
         writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)

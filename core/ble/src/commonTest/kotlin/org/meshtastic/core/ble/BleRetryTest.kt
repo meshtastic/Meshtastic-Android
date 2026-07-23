@@ -18,11 +18,14 @@ package org.meshtastic.core.ble
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
+import kotlin.test.assertSame
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRetryTest {
@@ -65,9 +68,50 @@ class BleRetryTest {
                 }
             }
 
-        assertTrue(ex is RuntimeException)
         assertEquals("Persistent error", ex.message)
         assertEquals(3, attempts)
+    }
+
+    @Test
+    fun retryBleOperation_stops_after_failure_when_retry_authority_is_revoked() = runTest {
+        val expected = IllegalStateException("session replaced")
+        var retryActive = true
+        var attempts = 0
+
+        val actual =
+            assertFailsWith<IllegalStateException> {
+                retryBleOperation(count = 3, delayMs = 10L, retryWhile = { retryActive }) {
+                    attempts++
+                    retryActive = false
+                    throw expected
+                }
+            }
+
+        assertSame(expected, actual)
+        assertEquals(1, attempts)
+    }
+
+    @Test
+    fun retryBleOperation_rechecks_authority_after_backoff_before_retrying() = runTest {
+        val expected = IllegalStateException("session replaced during backoff")
+        var retryActive = true
+        var attempts = 0
+        val result = async {
+            runCatching {
+                retryBleOperation(count = 3, delayMs = 10L, retryWhile = { retryActive }) {
+                    attempts++
+                    throw expected
+                }
+            }
+        }
+
+        runCurrent()
+        assertEquals(1, attempts)
+        retryActive = false
+        advanceUntilIdle()
+
+        assertSame(expected, result.await().exceptionOrNull())
+        assertEquals(1, attempts)
     }
 
     @Test

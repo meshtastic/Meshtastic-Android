@@ -125,6 +125,7 @@ bluetooth_feature_discovery_description
 bluetooth_permission
 bluetooth_scan_missing_permission
 bluetooth_scan_start_failed
+bluetooth_scan_too_frequent
 bold_heading
 bonding_failed_permissions
 bonding_failed_retry

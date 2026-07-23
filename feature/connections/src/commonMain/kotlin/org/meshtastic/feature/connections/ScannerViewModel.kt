@@ -61,6 +61,8 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_scan_missing_permission
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
+import org.meshtastic.core.resources.bluetooth_scan_too_frequent
+import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -73,6 +75,14 @@ import kotlin.time.Duration.Companion.seconds
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
+
+private fun effectiveBleScanRetryCooldown(retryAfter: Duration?): Duration =
+    maxOf(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN, retryAfter ?: Duration.ZERO)
+
+private fun Duration.roundedUpWholeSeconds(): Long {
+    val completeSeconds = inWholeSeconds
+    return completeSeconds + if (this > completeSeconds.seconds) 1 else 0
+}
 
 /**
  * Platform-neutral ViewModel that drives the Connections screen: device discovery (BLE/USB/TCP), scan state, current
@@ -393,29 +403,49 @@ open class ScannerViewModel(
         scanJob = null
         _isBleScanning.value = false
         uiPrefs.setBleAutoScan(false)
-        startBleScanRetryCooldown()
+        val retryCooldown = effectiveBleScanRetryCooldown(exception.retryAfter)
+        startBleScanRetryCooldown(retryCooldown)
 
         Logger.w(exception) {
             "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
         }
-        val messageRes =
-            when (exception.reason) {
-                BleScanStartFailureReason.MissingScanPermission -> Res.string.bluetooth_scan_missing_permission
-                BleScanStartFailureReason.ApplicationRegistrationFailed -> Res.string.bluetooth_scan_start_failed
-            }
+        val retryCooldownSeconds = retryCooldown.roundedUpWholeSeconds()
         val errorMessage =
-            safeCatchingAll { getStringSuspend(messageRes) }.getOrDefault(BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK)
+            safeCatchingAll {
+                when (exception.reason) {
+                    BleScanStartFailureReason.MissingScanPermission ->
+                        getStringSuspend(Res.string.bluetooth_scan_missing_permission)
+
+                    BleScanStartFailureReason.ApplicationRegistrationFailed ->
+                        getStringSuspend(Res.string.bluetooth_scan_start_failed)
+
+                    BleScanStartFailureReason.ScanningTooFrequently ->
+                        getPluralStringSuspend(
+                            Res.plurals.bluetooth_scan_too_frequent,
+                            retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                            retryCooldownSeconds,
+                        )
+                }
+            }
+                .getOrDefault(
+                    if (exception.reason == BleScanStartFailureReason.ScanningTooFrequently) {
+                        val unit = if (retryCooldownSeconds == 1L) "second" else "seconds"
+                        "Bluetooth scan limit reached. Try again in $retryCooldownSeconds $unit."
+                    } else {
+                        BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK
+                    },
+                )
         serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
     }
 
-    private fun startBleScanRetryCooldown() {
+    private fun startBleScanRetryCooldown(cooldown: Duration) {
         val generation = ++scanStartFailureCooldownGeneration
         scanStartFailureCooldownActive.value = true
         scanStartFailureCooldownJob?.cancel()
         scanStartFailureCooldownJob =
             viewModelScope.launch {
                 try {
-                    delay(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN)
+                    delay(cooldown)
                 } finally {
                     if (scanStartFailureCooldownGeneration == generation) {
                         scanStartFailureCooldownActive.value = false

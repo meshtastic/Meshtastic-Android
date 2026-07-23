@@ -67,6 +67,34 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan reserves one platform start before collecting advertisements`() = runTest {
+        val reservationEvent = "scan-start-reserved"
+        val collectionEvent = "advertisements-collected"
+        val events = mutableListOf<String>()
+        val scanner =
+            TestKableBleScanner(
+                scanResults = flow { events += collectionEvent },
+                scanStartLimiter = BleScanStartLimiter { events += reservationEvent },
+            )
+
+        scanner.scan(timeout = 1.seconds).toList()
+
+        assertEquals(1, events.count { it == reservationEvent })
+        assertEquals(listOf(reservationEvent, collectionEvent), events)
+    }
+
+    @Test
+    fun `expired timeout does not reserve a platform start`() = runTest {
+        var reservations = 0
+        val scanner =
+            TestKableBleScanner(scanResults = emptyFlow(), scanStartLimiter = BleScanStartLimiter { reservations += 1 })
+
+        scanner.scan(timeout = 0.seconds).toList()
+
+        assertEquals(0, reservations)
+    }
+
+    @Test
     fun `timeout terminates scan`() = runTest {
         var cancelled = false
         val scanner =
@@ -146,6 +174,16 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan wraps Android scanning too frequently failure`() = runTest {
+        val message = "Failed. App is scanning too frequently"
+        val scanner = TestKableBleScanner(scanResults = flow { throw IllegalStateException(message) })
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.ScanningTooFrequently, failure.reason)
+    }
+
+    @Test
     fun `scan wraps missing scan permission failure`() = runTest {
         val message = "Missing required android.permission.ACCESS_COARSE_LOCATION for scanning"
         val scanner = TestKableBleScanner(scanResults = flow { throw IllegalStateException(message) })
@@ -165,10 +203,14 @@ class KableBleConnectionTest {
         assertEquals("Unexpected scanner state", failure.message)
     }
 
-    private class TestKableBleScanner(private val scanResults: Flow<KableScanResult>) :
-        KableBleScanner(BleLoggingConfig.Release) {
+    private class TestKableBleScanner(
+        private val scanResults: Flow<KableScanResult>,
+        private val scanStartLimiter: BleScanStartLimiter = NoOpBleScanStartLimiter,
+    ) : KableBleScanner(BleLoggingConfig.Release) {
         var lastFilter: KableScanFilter? = null
             private set
+
+        override suspend fun reserveScanStart() = scanStartLimiter.reserveStart()
 
         override fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {
             lastFilter = filter

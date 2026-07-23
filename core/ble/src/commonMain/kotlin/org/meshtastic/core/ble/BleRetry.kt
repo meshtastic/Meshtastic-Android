@@ -38,24 +38,32 @@ private const val BACKOFF_FACTOR = 2.0
  * @param count Total attempt count (default 3).
  * @param delayMs Initial delay before the first retry. Subsequent delays grow exponentially.
  * @param tag Tag for log prefixes.
+ * @param retryWhile Checked after a failed attempt and again before each retry. Returning false rethrows the latest
+ *   failure immediately without logging or waiting, which lets callers revoke retries when the operation's session is
+ *   no longer current. The initial attempt always runs.
  * @param block The operation to perform.
  * @return The result of the operation.
  * @throws Exception If the operation fails after all attempts. [CancellationException] is always re-thrown immediately.
  */
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "ThrowsCount")
 suspend fun <T> retryBleOperation(
     count: Int = 3,
     delayMs: Long = 250L,
     tag: String = "BLE",
+    retryWhile: () -> Boolean = { true },
     block: suspend () -> T,
 ): T {
     var currentAttempt = 0
+    var lastFailure: Exception? = null
     while (true) {
+        lastFailure?.let { if (!retryWhile()) throw it }
         try {
             return block()
         } catch (e: CancellationException) {
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            lastFailure = e
+            if (!retryWhile()) throw e
             currentAttempt++
             if (currentAttempt >= count) {
                 Logger.w(e) { "[$tag] BLE operation failed after $count attempts, giving up" }
