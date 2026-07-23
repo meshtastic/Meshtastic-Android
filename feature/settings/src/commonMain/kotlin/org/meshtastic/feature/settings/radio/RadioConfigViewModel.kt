@@ -392,12 +392,11 @@ open class RadioConfigViewModel(
             _radioConfigState.update { it.copy(userConfig = user) }
             // The form's long-name field carries the callsign while licensed (iOS parity).
             // When meshtastic/protobufs#941 ships, add long_name here.
-            val packetId =
-                radioConfigUseCase.setHamMode(
-                    destNum,
-                    HamParameters(call_sign = user.long_name, short_name = user.short_name),
-                )
-            registerRequestId(packetId)
+            radioConfigUseCase.setHamMode(
+                destNum,
+                HamParameters(call_sign = user.long_name, short_name = user.short_name),
+                onRequestId = ::registerRequestId,
+            )
         }
     }
 
@@ -409,8 +408,7 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
-            val packetId = radioConfigUseCase.setOwner(destNum, user)
-            registerRequestId(packetId)
+            radioConfigUseCase.setOwner(destNum, user, onRequestId = ::registerRequestId)
         }
     }
 
@@ -434,7 +432,9 @@ open class RadioConfigViewModel(
                         updatePlan = updatePlan,
                         currentSettings = current,
                         finalSettings = new,
-                        writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
+                        writeChannel = { channel, onRequestId ->
+                            radioConfigUseCase.setRemoteChannel(destNum, channel, onRequestId)
+                        },
                         registerRequestId = { packetId ->
                             batchRequestIds.add(packetId)
                             registerManualChannelBatchRequestId(packetId)
@@ -513,8 +513,7 @@ open class RadioConfigViewModel(
                     ),
                 )
             }
-            val packetId = radioConfigUseCase.setConfig(destNum, config)
-            registerRequestId(packetId)
+            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerRequestId)
         }
     }
 
@@ -545,8 +544,7 @@ open class RadioConfigViewModel(
                     ),
                 )
             }
-            val packetId = radioConfigUseCase.setModuleConfig(destNum, config)
-            registerRequestId(packetId)
+            radioConfigUseCase.setModuleConfig(destNum, config, onRequestId = ::registerRequestId)
         }
     }
 
@@ -570,16 +568,10 @@ open class RadioConfigViewModel(
 
         when (route) {
             AdminRoute.SET_TIME.name ->
-                safeLaunch(tag = "setTime") {
-                    val packetId = adminActionsUseCase.setTime(destNum)
-                    registerRequestId(packetId)
-                }
+                safeLaunch(tag = "setTime") { adminActionsUseCase.setTime(destNum, onRequestId = ::registerRequestId) }
 
             AdminRoute.REBOOT.name ->
-                safeLaunch(tag = "reboot") {
-                    val packetId = adminActionsUseCase.reboot(destNum)
-                    registerRequestId(packetId)
-                }
+                safeLaunch(tag = "reboot") { adminActionsUseCase.reboot(destNum, onRequestId = ::registerRequestId) }
 
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
@@ -587,8 +579,7 @@ open class RadioConfigViewModel(
                         sendError(Res.string.cant_shutdown)
                     } else {
                         safeLaunch(tag = "shutdown") {
-                            val packetId = adminActionsUseCase.shutdown(destNum)
-                            registerRequestId(packetId)
+                            adminActionsUseCase.shutdown(destNum, onRequestId = ::registerRequestId)
                         }
                     }
                 }
@@ -596,15 +587,13 @@ open class RadioConfigViewModel(
             AdminRoute.FACTORY_RESET.name ->
                 safeLaunch(tag = "factoryReset") {
                     val isLocal = (destNum == myNodeNum)
-                    val packetId = adminActionsUseCase.factoryReset(destNum, isLocal)
-                    registerRequestId(packetId)
+                    adminActionsUseCase.factoryReset(destNum, isLocal, onRequestId = ::registerRequestId)
                 }
 
             AdminRoute.NODEDB_RESET.name ->
                 safeLaunch(tag = "nodedbReset") {
                     val isLocal = (destNum == myNodeNum)
-                    val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal)
-                    registerRequestId(packetId)
+                    adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal, ::registerRequestId)
                 }
         }
     }
@@ -731,19 +720,18 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER ->
-                safeLaunch(tag = "getOwner") {
-                    val packetId = radioConfigUseCase.getOwner(destNum)
-                    registerRequestId(packetId)
-                }
+                safeLaunch(tag = "getOwner") { radioConfigUseCase.getOwner(destNum, onRequestId = ::registerRequestId) }
 
             ConfigRoute.CHANNELS -> {
                 safeLaunch(tag = "getChannel0") {
-                    val packetId = radioConfigUseCase.getChannel(destNum, 0)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
                 }
                 safeLaunch(tag = "getLoraConfig") {
-                    val packetId = radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(
+                        destNum,
+                        AdminMessage.ConfigType.LORA_CONFIG.value,
+                        onRequestId = ::registerRequestId,
+                    )
                 }
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
@@ -751,9 +739,11 @@ open class RadioConfigViewModel(
 
             is AdminRoute -> {
                 safeLaunch(tag = "getSessionKeyConfig") {
-                    val packetId =
-                        radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(
+                        destNum,
+                        AdminMessage.ConfigType.SESSIONKEY_CONFIG.value,
+                        onRequestId = ::registerRequestId,
+                    )
                 }
                 setResponseStateTotal(2)
             }
@@ -761,38 +751,32 @@ open class RadioConfigViewModel(
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {
                     safeLaunch(tag = "getChannel0ForLora") {
-                        val packetId = radioConfigUseCase.getChannel(destNum, 0)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
                     }
                 }
                 if (route == ConfigRoute.NETWORK) {
                     safeLaunch(tag = "getConnectionStatus") {
-                        val packetId = radioConfigUseCase.getDeviceConnectionStatus(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 safeLaunch(tag = "getConfig") {
-                    val packetId = radioConfigUseCase.getConfig(destNum, route.type)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(destNum, route.type, onRequestId = ::registerRequestId)
                 }
             }
 
             is ModuleRoute -> {
                 if (route == ModuleRoute.CANNED_MESSAGE) {
                     safeLaunch(tag = "getCannedMessages") {
-                        val packetId = radioConfigUseCase.getCannedMessages(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getCannedMessages(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 if (route == ModuleRoute.EXT_NOTIFICATION) {
                     safeLaunch(tag = "getRingtone") {
-                        val packetId = radioConfigUseCase.getRingtone(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 safeLaunch(tag = "getModuleConfig") {
-                    val packetId = radioConfigUseCase.getModuleConfig(destNum, route.type)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerRequestId)
                 }
             }
         }
@@ -986,8 +970,7 @@ open class RadioConfigViewModel(
                     if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                         // Not done yet, request next channel
                         safeLaunch(tag = "getNextChannel") {
-                            val packetId = radioConfigUseCase.getChannel(destNum, index + 1)
-                            registerRequestId(packetId)
+                            radioConfigUseCase.getChannel(destNum, index + 1, onRequestId = ::registerRequestId)
                         }
                     }
                 } else {
@@ -1076,13 +1059,20 @@ open class RadioConfigViewModel(
         }
 
         val requestId = packet.decoded?.request_id ?: return
-        removeRequestId(requestId)
+        // Defer the removal so a chain continuation launched above (e.g. the next getChannel of a
+        // sequential channel fetch) registers its request id first — launches run FIFO on the main
+        // dispatcher, and registration is the continuation's first act before its send. Removing inline
+        // would observe a momentarily-empty request set in the gap between chained requests and tear the
+        // whole flow down (clearPacketResponse), stranding the rest of the chain.
+        safeLaunch(tag = "completePacketResponse") {
+            removeRequestId(requestId)
 
-        if (requestIds.value.isEmpty()) {
-            if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
-                clearPacketResponse()
-            } else if (route.isEmpty()) {
-                completeSetRequestOrProgressBatch()
+            if (requestIds.value.isEmpty()) {
+                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                    clearPacketResponse()
+                } else if (route.isEmpty()) {
+                    completeSetRequestOrProgressBatch()
+                }
             }
         }
     }
@@ -1099,7 +1089,7 @@ internal suspend fun applyManualChannelUpdatePlan(
     updatePlan: List<Channel>,
     currentSettings: List<ChannelSettings>,
     finalSettings: List<ChannelSettings>,
-    writeChannel: suspend (Channel) -> Int,
+    writeChannel: suspend (Channel, onRequestId: (Int) -> Unit) -> Int,
     registerRequestId: (Int) -> Unit,
     onInterrupted: suspend (InterruptedManualChannelUpdate) -> Unit = {},
     writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
@@ -1111,9 +1101,12 @@ internal suspend fun applyManualChannelUpdatePlan(
     var updateComplete = false
     try {
         for ((index, channel) in updatePlan.withIndex()) {
-            val packetId = writeChannel(channel)
-            packetIds.add(packetId)
-            registerRequestId(packetId)
+            // Register before the write is issued: the local loopback response/ACK can arrive
+            // before the suspending send returns, so post-hoc registration would drop it.
+            writeChannel(channel) { packetId ->
+                packetIds.add(packetId)
+                registerRequestId(packetId)
+            }
             appliedSettings.applyManualChannelWrite(channel)
             appliedWriteCount++
             if (index < updatePlan.lastIndex) {
