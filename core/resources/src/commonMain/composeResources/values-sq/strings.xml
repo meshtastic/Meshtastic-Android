@@ -252,6 +252,7 @@
     <string name="routing_error_timeout">Koha e skaduar</string>
     <string name="routing_error_too_large">Paketa shumë e madhe</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
+    <!-- SAVE -->
     <string name="save">Ruaj</string>
     <string name="save_changes">Ruaj</string>
     <!-- SCAN -->

@@ -512,6 +512,7 @@
     <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
     <string name="rsyslog_server">rsyslog sunucusu</string>
     <string name="sats">Uydular</string>
+    <!-- SAVE -->
     <string name="save">Kaydet</string>
     <string name="save_changes">Kaydet</string>
     <string name="save_csv_in_storage_esp32_only">.CSV'yi depolamada kaydet (sadece ESP32)</string>

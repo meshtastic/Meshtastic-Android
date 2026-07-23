@@ -201,6 +201,7 @@
     <string name="routing_error_no_response">Nema odgovora</string>
     <string name="routing_error_none">Potvrđeno</string>
     <string name="routing_error_too_large">Paket je prevelik</string>
+    <!-- SAVE -->
     <string name="save">Spremi</string>
     <string name="save_changes">Spremi</string>
     <!-- SCAN -->

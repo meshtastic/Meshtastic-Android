@@ -1386,6 +1386,7 @@
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="rsyslog_server">rsyslogサーバー</string>
     <string name="sats">GPS衛星</string>
+    <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_changes">保存</string>
     <string name="save_csv_in_storage_esp32_only">ストレージにCSVファイルを保存(ESP32のみ)</string>

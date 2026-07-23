@@ -1137,6 +1137,7 @@
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="rsyslog_server">rsyslog伺服器</string>
     <string name="sats">衛星數</string>
+    <!-- SAVE -->
     <string name="save">儲存</string>
     <string name="save_changes">儲存</string>
     <string name="save_csv_in_storage_esp32_only">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>

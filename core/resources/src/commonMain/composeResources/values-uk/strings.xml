@@ -1075,6 +1075,7 @@
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="rsyslog_server">rsyslog-сервер</string>
     <string name="sats">Супутники</string>
+    <!-- SAVE -->
     <string name="save">Зберегти</string>
     <string name="save_changes">Зберегти</string>
     <string name="save_csv_in_storage_esp32_only">Зберегти .CSV у сховищі (лише ESP32)</string>

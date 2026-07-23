@@ -248,6 +248,7 @@
     <string name="routing_error_timeout">Am tráth</string>
     <string name="routing_error_too_large">Pacáiste ró-mhór</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
+    <!-- SAVE -->
     <string name="save">Sábháil</string>
     <string name="save_changes">Sábháil</string>
     <!-- SCAN -->

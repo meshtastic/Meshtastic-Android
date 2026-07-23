@@ -197,6 +197,7 @@
     <string name="routing_error_not_authorized">Non autorizado</string>
     <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
     <string name="routing_error_pki_unknown_pubkey">Chave pública descoñecida</string>
+    <!-- SAVE -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>
     <!-- SCAN -->

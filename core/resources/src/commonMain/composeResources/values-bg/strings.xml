@@ -1000,6 +1000,7 @@
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="rsyslog_server">rsyslog сървър</string>
     <string name="sats">Сат</string>
+    <!-- SAVE -->
     <string name="save">Запис</string>
     <string name="save_changes">Запис</string>
     <string name="save_csv_in_storage_esp32_only">Запазване на .CSV в хранилище (само за ESP32)</string>

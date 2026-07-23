@@ -753,6 +753,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
     <string name="sats">Satélites</string>
+    <!-- SAVE -->
     <string name="save">Guardar</string>
     <string name="save_changes">Guardar</string>
     <string name="save_csv_in_storage_esp32_only">Guardar el .CSV en el almacenamiento (Esp32)</string>

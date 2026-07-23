@@ -696,6 +696,7 @@
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="rsyslog_server">Serwer rsyslog</string>
+    <!-- SAVE -->
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz</string>
     <string name="save_rangetest">Eksportuj pakiety zasięgu</string>

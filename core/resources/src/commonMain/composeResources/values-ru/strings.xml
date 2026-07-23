@@ -1465,6 +1465,7 @@
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="rsyslog_server">Сервер rsyslog</string>
     <string name="sats">Количество спутников</string>
+    <!-- SAVE -->
     <string name="save">Сохранить</string>
     <string name="save_changes">Сохранить</string>
     <string name="save_csv_in_storage_esp32_only">Сохранить .CSV в хранилище (только ESP32)</string>

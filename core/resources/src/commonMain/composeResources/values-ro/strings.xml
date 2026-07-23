@@ -965,6 +965,7 @@
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="rsyslog_server">server rsyslog</string>
     <string name="sats">Sateliți</string>
+    <!-- SAVE -->
     <string name="save">Salvează</string>
     <string name="save_changes">Salvează</string>
     <string name="save_csv_in_storage_esp32_only">Salvați .CSV doar în memorie (ESP32)</string>

@@ -1414,6 +1414,7 @@
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Sateliit</string>
+    <!-- SAVE -->
     <string name="save">Salvesta</string>
     <string name="save_changes">Salvesta</string>
     <string name="save_csv_in_storage_esp32_only">Salvesta .CSV faili (ainult ESP32)</string>

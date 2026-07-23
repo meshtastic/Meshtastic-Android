@@ -427,6 +427,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator jačine primljenog signala RSSI, merenje koje se koristi za određivanje nivoa snage koji antena prima. Viša vrednost RSSI generalno ukazuje na jaču i stabilniju vezu.</string>
     <string name="sats">Сателита</string>
+    <!-- SAVE -->
     <string name="save">Сачувај</string>
     <string name="save_changes">Сачувај</string>
     <!-- SCAN -->

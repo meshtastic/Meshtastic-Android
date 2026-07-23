@@ -245,6 +245,7 @@
     <string name="routing_error_timeout">Tan pase</string>
     <string name="routing_error_too_large">Pake twò gwo</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
+    <!-- SAVE -->
     <string name="save">Sove</string>
     <string name="save_changes">Sove</string>
     <!-- SCAN -->

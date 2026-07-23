@@ -977,6 +977,7 @@
     <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Satelitů</string>
+    <!-- SAVE -->
     <string name="save">Uložit</string>
     <string name="save_changes">Uložit</string>
     <string name="save_csv_in_storage_esp32_only">Uložit .CSV do úložiště (pouze ESP32)</string>

@@ -754,6 +754,7 @@
     <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="rsyslog_server">rsyslog szerver</string>
     <string name="sats">Műholdak</string>
+    <!-- SAVE -->
     <string name="save">Mentés</string>
     <string name="save_changes">Mentés</string>
     <string name="save_csv_in_storage_esp32_only">.CSV mentése a tárhelyre (csak ESP32)</string>
