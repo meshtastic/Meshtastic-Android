@@ -174,7 +174,10 @@ class PacketHandlerImpl(
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
         val (success, isFull, requestId) =
             with(queueStatus) { Triple(res == 0 || res == ERRNO_SHOULD_RELEASE, free == 0, mesh_packet_id) }
-        if (success && isFull) return
+        // Only the plain res==0 "queue accepted, now full" echo is skipped here. ERRNO_SHOULD_RELEASE denotes a
+        // synchronous local-loopback delivery that still needs its queueResponse completed, even when free==0, or it
+        // would hang until TIMEOUT.
+        if (queueStatus.res == 0 && isFull) return
 
         scope.launch {
             responseMutex.withLock {

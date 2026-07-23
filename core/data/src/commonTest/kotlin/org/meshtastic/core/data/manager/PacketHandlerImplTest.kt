@@ -135,6 +135,22 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `handleQueueStatus completes ERRNO_SHOULD_RELEASE even when queue is full`() = runTest(testDispatcher) {
+        // Regression: a self-addressed local-loopback delivery (res=35) can coincide with a full TX queue (free=0).
+        // The success+full early return must not swallow it, or the response hangs until TIMEOUT (the very stall
+        // this fix targets). Only the plain res=0 "accepted, now full" echo should be skipped.
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 792)) }
+        testScheduler.runCurrent()
+
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 792, res = 35, free = 0))
+        testScheduler.runCurrent()
+
+        assertTrue(result.await())
+    }
+
+    @Test
     fun `handleQueueStatus treats other nonzero res as failure`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
