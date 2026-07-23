@@ -201,6 +201,12 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "11144",
+      "title": "Add userpref for the packet signature policy default",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11144",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11142",
       "title": "Shared e-ink hardware layer: foundation for target-by-target migration off GxEPD2",
       "page_url": "https://github.com/meshtastic/firmware/pull/11142",
@@ -282,12 +288,6 @@
       "id": "11064",
       "title": "Update SensorLib to v0.4.1",
       "page_url": "https://github.com/meshtastic/firmware/pull/11064",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11063",
-      "title": "Update python to v3.14.6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11063",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
