@@ -254,6 +254,7 @@
     <string name="debug_search_clear">Vymazat hledání</string>
     <string name="debug_store_logs_summary">Vypněte, pokud nechcete ukládat mesh logy na disk</string>
     <string name="debug_store_logs_title">Uložit protokoly sítě</string>
+    <string name="debug_tab_app_logs">Protokoly aplikace</string>
     <string name="debug_tab_packets">Pakety</string>
     <string name="default_">Výchozí</string>
     <!-- DELETE -->
@@ -479,6 +480,8 @@
     <string name="generate_input_event_on_press">Vytvořit vstupní akci při stisku Press</string>
     <string name="generate_qr_code">Vytvořit QR kód</string>
     <!-- GEOFENCE -->
+    <string name="geofence_remove_area">Smazat oblast</string>
+    <string name="geofence_set_area">Nastavit oblast na mapě</string>
     <string name="get_started">Začněte hned</string>
     <string name="good">Silný</string>
     <!-- GPIO -->
@@ -565,7 +568,7 @@
     <string name="local_stats_traffic">Provoz: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$s%% | AirTX: %2$s%</string>
+    <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="location_sharing">Sdílení polohy</string>
     <!-- LOCKDOWN -->

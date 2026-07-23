@@ -1247,6 +1247,18 @@
     <string name="override_frequency_mhz">Переопределить частоту</string>
     <string name="pa_fan_disabled">PA вентилятор выключен</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">Подлинность пакета</string>
+    <string name="packet_authenticity_balanced">Сбалансировано — предпочтительно аутентифицировать</string>
+    <string name="packet_authenticity_balanced_summary">Рекомендуется. Отклонять неподписанные попытки понижения от нод, которые, как известно, подписывают.</string>
+    <string name="packet_authenticity_compatible">Совместимо — принять не подписано</string>
+    <string name="packet_authenticity_compatible_summary">Аутентифицировать пакеты по возможности, но принимать неподписанный трафик для максимальной совместимости.</string>
+    <string name="packet_authenticity_level">Уровень защиты</string>
+    <string name="packet_authenticity_strict">Строгий — требуется аутентификация</string>
+    <string name="packet_authenticity_strict_confirm">Включить строгий</string>
+    <string name="packet_authenticity_strict_confirmation">Строгий игнорирует любые удалённые mesh-пакеты, которые не прошли криптографическую аутентификацию. Более старая прошивка, лицензированные устройства или ноды Ham без PKI-ключей и слишком большие пакеты могут перестать работать. Прямые сообщения с PKI-аутентификацией остаются доступными.</string>
+    <string name="packet_authenticity_strict_summary">Показывать и обрабатывать только криптографически аутентифицированные mesh-пакеты. Старые ноды и слишком большие пакеты могут исчезнуть.</string>
+    <string name="packet_authenticity_strict_title">Включить строгую аутентификацию?</string>
+    <string name="packet_authenticity_unsupported">Это подключенное устройство не поддерживает верификацию подписи пакетов.</string>
     <string name="pairing_mode">Режим сопряжения</string>
     <string name="password">Пароль</string>
     <!-- PAX -->
@@ -1584,6 +1596,7 @@
     <string name="soil_temperature">Темп почвы</string>
     <string name="speed">Скорость</string>
     <string name="speed_kmh">%1$d км/ч</string>
+    <string name="speed_mph">%1$d миль/ч</string>
     <string name="spread_factor">Коэффициент распространения</string>
     <string name="ssid">Название сети</string>
     <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>

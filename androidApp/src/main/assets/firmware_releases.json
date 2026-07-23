@@ -285,10 +285,10 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11063",
-      "title": "Update python to v3.14.6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11063",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+      "id": "11061",
+      "title": "Backlight: unify E-Ink backlight logic and fix ThinkNode M1 wake",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11061",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
