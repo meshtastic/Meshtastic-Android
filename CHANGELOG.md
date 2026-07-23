@@ -10,6 +10,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🛠️ Fixes
+* fix(settings): stop dropping admin config responses (0% stall, missing remote channels) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6391
+
+### Internal (v2.8.0-internal.32)
+Changes since [`v2.8.0-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.1):
+
+#### 🛠️ Fixes
 * fix(messaging): reduce composer recomposition and typing jank by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6318
 * fix(ble): harden reconnect sessions and Android scan lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6384
 
