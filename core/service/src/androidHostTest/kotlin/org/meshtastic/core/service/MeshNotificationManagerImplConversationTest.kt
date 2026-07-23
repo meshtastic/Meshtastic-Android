@@ -27,10 +27,14 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,6 +72,7 @@ class MeshNotificationManagerImplConversationTest {
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val notificationScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
     private val manager =
         MeshNotificationManagerImpl(
@@ -89,6 +94,7 @@ class MeshNotificationManagerImplConversationTest {
                 )
             },
             radioConfigRepository = lazy { radioConfigRepository },
+            scope = notificationScope,
         )
 
     @Before
@@ -107,6 +113,11 @@ class MeshNotificationManagerImplConversationTest {
                 ),
             )
         manager.initChannels()
+    }
+
+    @After
+    fun tearDown() {
+        notificationScope.cancel()
     }
 
     /** Newest-first message history, mirroring the repository's ordering. */

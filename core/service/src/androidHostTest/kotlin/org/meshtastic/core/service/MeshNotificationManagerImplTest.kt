@@ -16,18 +16,40 @@
  */
 package org.meshtastic.core.service
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.getString
+import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.Telemetry
 import org.robolectric.annotation.Config
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -37,32 +59,27 @@ class MeshNotificationManagerImplTest {
 
     private lateinit var context: Context
     private lateinit var systemNotificationManager: NotificationManager
+    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
 
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         systemNotificationManager = context.getSystemService(NotificationManager::class.java)!!
+        systemNotificationManager.cancelAll()
         clearManagedChannels()
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeInfo?>(null)
     }
 
     @After
     fun tearDown() {
+        systemNotificationManager.cancelAll()
         clearManagedChannels()
     }
 
     @Test
-    fun `initChannels removes legacy categories and creates canonical channels`() {
+    fun `initChannels removes legacy categories and creates canonical channels`() = runWithRenderScope { renderScope ->
         NotificationChannels.LEGACY_CATEGORY_IDS.forEach(::createChannel)
-
-        val notifications =
-            MeshNotificationManagerImpl(
-                context = context,
-                packetRepository = lazy<PacketRepository> { error("Not used in this test") },
-                nodeRepository = lazy<NodeRepository> { error("Not used in this test") },
-                conversationShortcutPublisher = lazy { error("Not used in this test") },
-                radioConfigRepository = lazy { error("Not used in this test") },
-            )
-
+        val notifications = createManager(renderScope)
         notifications.initChannels()
 
         NotificationChannels.LEGACY_CATEGORY_IDS.forEach { legacyId ->
@@ -86,6 +103,66 @@ class MeshNotificationManagerImplTest {
             assertNotNull(systemNotificationManager.getNotificationChannel(channelId))
         }
     }
+
+    @Test
+    fun `initial foreground notification uses an immediate Android label fallback`() =
+        runWithRenderScope { renderScope ->
+            val notification = createManager(renderScope).getServiceNotification()
+            val title = notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
+            val expected = context.applicationInfo.loadLabel(context.packageManager).toString()
+
+            assertEquals(expected, title)
+        }
+
+    @Test
+    fun `service state rendering is deferred from the caller`() = runWithRenderScope { renderScope ->
+        val notifications = createManager(renderScope)
+        notifications.initChannels()
+
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
+
+        assertNull(activeServiceNotification())
+        advanceUntilIdle()
+        assertNotNull(activeServiceNotification())
+    }
+
+    @Test
+    fun `newer service state cancels a pending render`() = runWithRenderScope { renderScope ->
+        val notifications = createManager(renderScope)
+        notifications.initChannels()
+
+        notifications.updateServiceStateNotification(ConnectionState.Connecting, populatedTelemetry())
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
+
+        advanceUntilIdle()
+        val title =
+            activeServiceNotification()?.notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
+        assertEquals(getString(Res.string.disconnected), title)
+    }
+
+    private fun runWithRenderScope(block: suspend TestScope.(CoroutineScope) -> Unit) = runTest {
+        val renderScope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
+        try {
+            block(renderScope)
+        } finally {
+            renderScope.cancel()
+        }
+    }
+
+    private fun createManager(scope: CoroutineScope) = MeshNotificationManagerImpl(
+        context = context,
+        packetRepository = lazy<PacketRepository> { error("Not used in this test") },
+        nodeRepository = lazy { nodeRepository },
+        conversationShortcutPublisher = lazy { error("Not used in this test") },
+        radioConfigRepository = lazy { error("Not used in this test") },
+        scope = scope,
+    )
+
+    private fun populatedTelemetry() =
+        Telemetry(local_stats = LocalStats(uptime_seconds = 1, num_online_nodes = 1, num_total_nodes = 1))
+
+    private fun activeServiceNotification() =
+        systemNotificationManager.activeNotifications.singleOrNull { it.id == SERVICE_NOTIFY_ID }
 
     private fun createChannel(id: String) {
         systemNotificationManager.createNotificationChannel(

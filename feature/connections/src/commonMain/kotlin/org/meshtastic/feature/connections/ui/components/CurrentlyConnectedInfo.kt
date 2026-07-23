@@ -42,7 +42,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.disconnect
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -138,9 +143,9 @@ private fun CurrentlyConnectedInfoPreview() {
             ),
             text =
             CurrentlyConnectedText(
-                unknownLabel = "Unknown",
-                rssiLabel = "RSSI",
-                disconnectLabel = "Disconnect",
+                unknownLabel = stringResource(Res.string.unknown),
+                rssiLabel = stringResource(Res.string.rssi),
+                disconnectLabel = stringResource(Res.string.disconnect),
                 firmwareVersion = null,
             ),
             onNavigateToNodeDetails = {},
