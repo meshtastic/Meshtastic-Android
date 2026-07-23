@@ -68,6 +68,7 @@ import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
@@ -159,6 +160,7 @@ open class RadioConfigViewModel(
     private val lockdownCoordinator: LockdownCoordinator,
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
+    private val nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
@@ -346,6 +348,17 @@ open class RadioConfigViewModel(
         }
             .launchIn(viewModelScope)
 
+        // A reboot-applying save can't survive the reboot it triggers: the node drops the transport before the
+        // routing ACK arrives, so the save dialog would otherwise sit at 0% until the 30s request timeout and then
+        // surface a spurious "Timeout" error. The disconnect during an expected-restart window IS the confirmation
+        // the save was persisted (firmware only reboots after saveChanges writes to disk), so resolve the pending
+        // save to the restarting-success the moment the transport drops.
+        serviceRepository.connectionState
+            .map { it == ConnectionState.Connected }
+            .distinctUntilChanged()
+            .onEach { connected -> if (!connected) completeRestartingSaveIfPending() }
+            .launchIn(viewModelScope)
+
         Logger.d { "RadioConfigViewModel created" }
     }
 
@@ -354,6 +367,18 @@ open class RadioConfigViewModel(
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
+
+    /**
+     * Opens the expected-restart window when a save/action is about to make the LOCALLY CONNECTED node reboot (firmware
+     * applies most config sections with a reboot a few seconds after the ack). A remote node's reboot doesn't drop our
+     * transport, so remote destinations never open the window. Called at send time because module saves disable
+     * Bluetooth on the device immediately — before the save is even acked.
+     */
+    private fun expectRestartIfLocal(behavior: RebootBehavior) {
+        if (behavior == RebootBehavior.NEVER) return
+        val dest = destNum ?: destNode.value?.num ?: return
+        if (dest == myNodeNum) nodeRestartTracker.expectRestart()
+    }
 
     val maxChannels
         get() = myNodeInfo.value?.maxChannels ?: 8
@@ -392,12 +417,12 @@ open class RadioConfigViewModel(
             _radioConfigState.update { it.copy(userConfig = user) }
             // The form's long-name field carries the callsign while licensed (iOS parity).
             // When meshtastic/protobufs#941 ships, add long_name here.
-            val packetId =
-                radioConfigUseCase.setHamMode(
-                    destNum,
-                    HamParameters(call_sign = user.long_name, short_name = user.short_name),
-                )
-            registerRequestId(packetId)
+            expectRestartIfLocal(RebootBehavior.ALWAYS)
+            radioConfigUseCase.setHamMode(
+                destNum,
+                HamParameters(call_sign = user.long_name, short_name = user.short_name),
+                onRequestId = ::registerRequestId,
+            )
         }
     }
 
@@ -409,8 +434,7 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
-            val packetId = radioConfigUseCase.setOwner(destNum, user)
-            registerRequestId(packetId)
+            radioConfigUseCase.setOwner(destNum, user, onRequestId = ::registerRequestId)
         }
     }
 
@@ -434,7 +458,9 @@ open class RadioConfigViewModel(
                         updatePlan = updatePlan,
                         currentSettings = current,
                         finalSettings = new,
-                        writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
+                        writeChannel = { channel, onRequestId ->
+                            radioConfigUseCase.setRemoteChannel(destNum, channel, onRequestId)
+                        },
                         registerRequestId = { packetId ->
                             batchRequestIds.add(packetId)
                             registerManualChannelBatchRequestId(packetId)
@@ -513,8 +539,8 @@ open class RadioConfigViewModel(
                     ),
                 )
             }
-            val packetId = radioConfigUseCase.setConfig(destNum, config)
-            registerRequestId(packetId)
+            expectRestartIfLocal(config.saveRebootBehavior())
+            radioConfigUseCase.setConfig(destNum, config, onRequestId = ::registerRequestId)
         }
     }
 
@@ -545,8 +571,8 @@ open class RadioConfigViewModel(
                     ),
                 )
             }
-            val packetId = radioConfigUseCase.setModuleConfig(destNum, config)
-            registerRequestId(packetId)
+            expectRestartIfLocal(config.saveRebootBehavior())
+            radioConfigUseCase.setModuleConfig(destNum, config, onRequestId = ::registerRequestId)
         }
     }
 
@@ -570,15 +596,12 @@ open class RadioConfigViewModel(
 
         when (route) {
             AdminRoute.SET_TIME.name ->
-                safeLaunch(tag = "setTime") {
-                    val packetId = adminActionsUseCase.setTime(destNum)
-                    registerRequestId(packetId)
-                }
+                safeLaunch(tag = "setTime") { adminActionsUseCase.setTime(destNum, onRequestId = ::registerRequestId) }
 
             AdminRoute.REBOOT.name ->
                 safeLaunch(tag = "reboot") {
-                    val packetId = adminActionsUseCase.reboot(destNum)
-                    registerRequestId(packetId)
+                    expectRestartIfLocal(RebootBehavior.ALWAYS)
+                    adminActionsUseCase.reboot(destNum, onRequestId = ::registerRequestId)
                 }
 
             AdminRoute.SHUTDOWN.name ->
@@ -587,8 +610,7 @@ open class RadioConfigViewModel(
                         sendError(Res.string.cant_shutdown)
                     } else {
                         safeLaunch(tag = "shutdown") {
-                            val packetId = adminActionsUseCase.shutdown(destNum)
-                            registerRequestId(packetId)
+                            adminActionsUseCase.shutdown(destNum, onRequestId = ::registerRequestId)
                         }
                     }
                 }
@@ -596,15 +618,17 @@ open class RadioConfigViewModel(
             AdminRoute.FACTORY_RESET.name ->
                 safeLaunch(tag = "factoryReset") {
                     val isLocal = (destNum == myNodeNum)
-                    val packetId = adminActionsUseCase.factoryReset(destNum, isLocal)
-                    registerRequestId(packetId)
+                    if (isLocal) nodeRestartTracker.expectRestart()
+                    adminActionsUseCase.factoryReset(destNum, isLocal, onRequestId = ::registerRequestId)
                 }
 
             AdminRoute.NODEDB_RESET.name ->
                 safeLaunch(tag = "nodedbReset") {
                     val isLocal = (destNum == myNodeNum)
-                    val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal)
-                    registerRequestId(packetId)
+                    // Firmware reboots after a nodedb reset, so a local reset drops the transport just like a
+                    // factory reset — mark it expected so the UI shows "restarting" instead of a surprise disconnect.
+                    if (isLocal) nodeRestartTracker.expectRestart()
+                    adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal, ::registerRequestId)
                 }
         }
     }
@@ -731,19 +755,18 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER ->
-                safeLaunch(tag = "getOwner") {
-                    val packetId = radioConfigUseCase.getOwner(destNum)
-                    registerRequestId(packetId)
-                }
+                safeLaunch(tag = "getOwner") { radioConfigUseCase.getOwner(destNum, onRequestId = ::registerRequestId) }
 
             ConfigRoute.CHANNELS -> {
                 safeLaunch(tag = "getChannel0") {
-                    val packetId = radioConfigUseCase.getChannel(destNum, 0)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
                 }
                 safeLaunch(tag = "getLoraConfig") {
-                    val packetId = radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(
+                        destNum,
+                        AdminMessage.ConfigType.LORA_CONFIG.value,
+                        onRequestId = ::registerRequestId,
+                    )
                 }
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
@@ -751,9 +774,11 @@ open class RadioConfigViewModel(
 
             is AdminRoute -> {
                 safeLaunch(tag = "getSessionKeyConfig") {
-                    val packetId =
-                        radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(
+                        destNum,
+                        AdminMessage.ConfigType.SESSIONKEY_CONFIG.value,
+                        onRequestId = ::registerRequestId,
+                    )
                 }
                 setResponseStateTotal(2)
             }
@@ -761,38 +786,32 @@ open class RadioConfigViewModel(
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {
                     safeLaunch(tag = "getChannel0ForLora") {
-                        val packetId = radioConfigUseCase.getChannel(destNum, 0)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
                     }
                 }
                 if (route == ConfigRoute.NETWORK) {
                     safeLaunch(tag = "getConnectionStatus") {
-                        val packetId = radioConfigUseCase.getDeviceConnectionStatus(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 safeLaunch(tag = "getConfig") {
-                    val packetId = radioConfigUseCase.getConfig(destNum, route.type)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getConfig(destNum, route.type, onRequestId = ::registerRequestId)
                 }
             }
 
             is ModuleRoute -> {
                 if (route == ModuleRoute.CANNED_MESSAGE) {
                     safeLaunch(tag = "getCannedMessages") {
-                        val packetId = radioConfigUseCase.getCannedMessages(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getCannedMessages(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 if (route == ModuleRoute.EXT_NOTIFICATION) {
                     safeLaunch(tag = "getRingtone") {
-                        val packetId = radioConfigUseCase.getRingtone(destNum)
-                        registerRequestId(packetId)
+                        radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerRequestId)
                     }
                 }
                 safeLaunch(tag = "getModuleConfig") {
-                    val packetId = radioConfigUseCase.getModuleConfig(destNum, route.type)
-                    registerRequestId(packetId)
+                    radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerRequestId)
                 }
             }
         }
@@ -838,10 +857,38 @@ open class RadioConfigViewModel(
         removeRequestIds(batchRequestIds)
     }
 
+    /**
+     * True while a manual channel batch is in flight — from enqueue through the ack-wait that outlives
+     * [finishManualChannelBatch]. [manualChannelBatchEnqueueing] alone only covers the enqueue phase, so pending batch
+     * request ids are the authoritative signal that a batch (not a reboot-applying save) owns the current Loading
+     * state.
+     */
+    private fun manualChannelBatchInFlight(): Boolean =
+        manualChannelBatchEnqueueing || manualChannelBatchRequestIds.isNotEmpty()
+
     private fun completeSetRequestOrProgressBatch() {
         if (manualChannelBatchEnqueueing) {
             incrementCompleted()
         } else {
+            setResponseStateSuccess()
+        }
+    }
+
+    /**
+     * Resolves a pending SAVE response to success ("node is restarting") when a restart is expected. Called on the
+     * transport-drop edge (the reboot) and as the request-timeout backstop. Scoped to saves (route is empty; gets keep
+     * their route set) and gated on [NodeRestartTracker.restartExpected] so a genuine unexpected disconnect still
+     * surfaces normally. Clears request ids first so the pending 30s timeout can't later flip success back to error.
+     */
+    private fun completeRestartingSaveIfPending() {
+        if (!nodeRestartTracker.restartExpected.value) return
+        // A manual channel batch shares the save shape (empty route + Loading) but never reboots the node; a stale
+        // restart window must not flip an in-flight batch to success. The batch stays in flight through its ack-wait,
+        // past finishManualChannelBatch, so key off its pending request ids — not just the enqueue flag.
+        if (manualChannelBatchInFlight()) return
+        val state = radioConfigState.value
+        if (state.responseState is ResponseState.Loading && state.route.isEmpty()) {
+            clearRequestIds()
             setResponseStateSuccess()
         }
     }
@@ -897,9 +944,23 @@ open class RadioConfigViewModel(
             safeLaunch(tag = "requestTimeout") {
                 delay(requestTimeout)
                 if (requestIds.value.contains(packetId)) {
+                    // Capture batch membership before removeRequestId drops the last id and empties the batch set.
+                    val timedOutBatchRequest = packetId in manualChannelBatchRequestIds
                     removeRequestId(packetId)
                     if (requestIds.value.isEmpty()) {
-                        sendError(Res.string.timeout)
+                        // A save that reboots the node races the reboot against its ACK; a timeout here during an
+                        // expected restart means the reboot won — treat it as the restarting-success, not an error.
+                        // A manual channel batch never reboots, so exclude it even inside a stale restart window.
+                        if (
+                            nodeRestartTracker.restartExpected.value &&
+                            !timedOutBatchRequest &&
+                            !manualChannelBatchInFlight() &&
+                            radioConfigState.value.route.isEmpty()
+                        ) {
+                            setResponseStateSuccess()
+                        } else {
+                            sendError(Res.string.timeout)
+                        }
                     }
                 }
             }
@@ -986,8 +1047,7 @@ open class RadioConfigViewModel(
                     if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                         // Not done yet, request next channel
                         safeLaunch(tag = "getNextChannel") {
-                            val packetId = radioConfigUseCase.getChannel(destNum, index + 1)
-                            registerRequestId(packetId)
+                            radioConfigUseCase.getChannel(destNum, index + 1, onRequestId = ::registerRequestId)
                         }
                     }
                 } else {
@@ -1076,13 +1136,20 @@ open class RadioConfigViewModel(
         }
 
         val requestId = packet.decoded?.request_id ?: return
-        removeRequestId(requestId)
+        // Defer the removal so a chain continuation launched above (e.g. the next getChannel of a
+        // sequential channel fetch) registers its request id first — launches run FIFO on the main
+        // dispatcher, and registration is the continuation's first act before its send. Removing inline
+        // would observe a momentarily-empty request set in the gap between chained requests and tear the
+        // whole flow down (clearPacketResponse), stranding the rest of the chain.
+        safeLaunch(tag = "completePacketResponse") {
+            removeRequestId(requestId)
 
-        if (requestIds.value.isEmpty()) {
-            if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
-                clearPacketResponse()
-            } else if (route.isEmpty()) {
-                completeSetRequestOrProgressBatch()
+            if (requestIds.value.isEmpty()) {
+                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                    clearPacketResponse()
+                } else if (route.isEmpty()) {
+                    completeSetRequestOrProgressBatch()
+                }
             }
         }
     }
@@ -1099,7 +1166,7 @@ internal suspend fun applyManualChannelUpdatePlan(
     updatePlan: List<Channel>,
     currentSettings: List<ChannelSettings>,
     finalSettings: List<ChannelSettings>,
-    writeChannel: suspend (Channel) -> Int,
+    writeChannel: suspend (Channel, onRequestId: (Int) -> Unit) -> Int,
     registerRequestId: (Int) -> Unit,
     onInterrupted: suspend (InterruptedManualChannelUpdate) -> Unit = {},
     writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
@@ -1111,9 +1178,12 @@ internal suspend fun applyManualChannelUpdatePlan(
     var updateComplete = false
     try {
         for ((index, channel) in updatePlan.withIndex()) {
-            val packetId = writeChannel(channel)
-            packetIds.add(packetId)
-            registerRequestId(packetId)
+            // Register before the write is issued: the local loopback response/ACK can arrive
+            // before the suspending send returns, so post-hoc registration would drop it.
+            writeChannel(channel) { packetId ->
+                packetIds.add(packetId)
+                registerRequestId(packetId)
+            }
             appliedSettings.applyManualChannelWrite(channel)
             appliedWriteCount++
             if (index < updatePlan.lastIndex) {
@@ -1152,3 +1222,16 @@ private fun HashSet<Int>.withoutPacketId(packetId: Int): HashSet<Int> = HashSet(
 
 private fun HashSet<Int>.withoutPacketIds(packetIds: Set<Int>): HashSet<Int> =
     HashSet(this).apply { removeAll(packetIds) }
+
+/**
+ * Coarse mirror of firmware `AdminModule::handleSetConfig`'s reboot decision for the section being saved. Sections with
+ * field-level carve-outs map to [RebootBehavior.MAY_RESTART]; see [RebootBehavior] for why this stays coarse.
+ */
+internal fun Config.saveRebootBehavior(): RebootBehavior = when {
+    position != null || network != null || bluetooth != null || security != null -> RebootBehavior.ALWAYS
+    else -> RebootBehavior.MAY_RESTART
+}
+
+/** Firmware `AdminModule::handleSetModuleConfig` reboots for every module section except status message. */
+internal fun ModuleConfig.saveRebootBehavior(): RebootBehavior =
+    if (statusmessage != null) RebootBehavior.NEVER else RebootBehavior.ALWAYS

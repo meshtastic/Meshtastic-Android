@@ -18,6 +18,7 @@ package org.meshtastic.core.domain.usecase.settings
 
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
@@ -36,6 +37,25 @@ class RadioConfigUseCaseTest {
     fun setUp() {
         radioController = FakeRadioController()
         useCase = RadioConfigUseCase(radioController)
+    }
+
+    @Test
+    fun `getConfig invokes onRequestId with the packet id before issuing the send`() = runTest {
+        // Guards against the response/registration race: for the locally connected node the firmware
+        // (2.8+) delivers the admin response before the QueueStatus ack that completes the send, so a
+        // caller registering the request id only after the send returns would drop the response.
+        val events = mutableListOf<String>()
+        val recordingController =
+            object : RadioController by radioController {
+                override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+                    events.add("send:$packetId")
+                }
+            }
+        val orderedUseCase = RadioConfigUseCase(recordingController)
+
+        val packetId = orderedUseCase.getConfig(1234, 5) { events.add("registered:$it") }
+
+        assertEquals(listOf("registered:$packetId", "send:$packetId"), events)
     }
 
     @Test

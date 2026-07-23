@@ -66,6 +66,15 @@ class PacketHandlerImpl(
 
     companion object {
         private val TIMEOUT = 5.seconds
+
+        /**
+         * Firmware-internal `ErrorCode` (MeshTypes.h `ERRNO_SHOULD_RELEASE`) leaked into `QueueStatus.res`: "no error,
+         * but the packet should still be released". Firmware 2.8+ returns it for self-addressed packets, which are
+         * delivered through the synchronous local loopback instead of the TX queue — a success. Note it numerically
+         * collides with `Routing.Error.PKI_UNKNOWN_PUBKEY` (35); `QueueStatus.res` carries ErrorCode semantics, not
+         * Routing.Error.
+         */
+        private const val ERRNO_SHOULD_RELEASE = 35
     }
 
     private var queueJob: Job? = null
@@ -163,8 +172,12 @@ class PacketHandlerImpl(
 
     override fun handleQueueStatus(queueStatus: QueueStatus) {
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
-        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
-        if (success && isFull) return
+        val (success, isFull, requestId) =
+            with(queueStatus) { Triple(res == 0 || res == ERRNO_SHOULD_RELEASE, free == 0, mesh_packet_id) }
+        // Only the plain res==0 "queue accepted, now full" echo is skipped here. ERRNO_SHOULD_RELEASE denotes a
+        // synchronous local-loopback delivery that still needs its queueResponse completed, even when free==0, or it
+        // would hang until TIMEOUT.
+        if (queueStatus.res == 0 && isFull) return
 
         scope.launch {
             responseMutex.withLock {

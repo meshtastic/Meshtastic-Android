@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -94,6 +95,7 @@ class MeshConnectionManagerImpl(
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val lockdownCoordinator: LockdownCoordinator,
     @Named("ServiceScope") private val scope: CoroutineScope,
+    private val nodeRestartTracker: NodeRestartTracker,
 ) : MeshConnectionManager {
     /**
      * Serializes [onConnectionChanged] to prevent TOCTOU races when multiple coroutines emit state transitions
@@ -139,6 +141,11 @@ class MeshConnectionManagerImpl(
 
         // Ensure notification title and content stay in sync with state changes
         serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
+        // An expected node restart ends when the post-reboot config handshake completes.
+        serviceRepository.connectionState
+            .onEach { if (it == ConnectionState.Connected) nodeRestartTracker.onConnected() }
+            .launchIn(scope)
 
         scope.launch {
             try {
@@ -623,10 +630,16 @@ class MeshConnectionManagerImpl(
     }
 
     override fun updateStatusNotification(telemetry: Telemetry?) {
-        serviceNotifications.updateServiceStateNotification(
-            serviceRepository.connectionState.value,
-            telemetry = telemetry,
-        )
+        val state = serviceRepository.connectionState.value
+        // During an expected node restart the disconnect is transient; keep the persistent notification on the
+        // connecting presentation instead of flashing "disconnected".
+        val presented =
+            if (state == ConnectionState.Disconnected && nodeRestartTracker.restartExpected.value) {
+                ConnectionState.Connecting
+            } else {
+                state
+            }
+        serviceNotifications.updateServiceStateNotification(presented, telemetry = telemetry)
     }
 
     companion object {

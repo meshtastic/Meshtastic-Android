@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -166,6 +167,7 @@ class MeshConnectionManagerImplTest {
         DataLayerHeartbeatSender(packetHandler),
         lockdownCoordinator,
         scope,
+        NodeRestartTracker(scope),
     )
 
     private fun restartTransportCallCounter(): () -> Int {

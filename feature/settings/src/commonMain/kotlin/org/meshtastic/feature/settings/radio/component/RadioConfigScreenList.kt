@@ -38,9 +38,11 @@ import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discard_changes
+import org.meshtastic.core.resources.save_and_restart
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 
 @Suppress("LongMethod")
@@ -54,6 +56,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     enabled: Boolean,
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
+    rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
     actions: @Composable () -> Unit = {},
     additionalDirtyCheck: () -> Boolean = { false },
     onDiscard: () -> Unit = {},
@@ -99,7 +102,12 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                                 configState.reset()
                                 onDiscard()
                             },
-                            positiveText = stringResource(Res.string.save_changes),
+                            positiveText =
+                            if (rebootBehavior == RebootBehavior.ALWAYS) {
+                                stringResource(Res.string.save_and_restart)
+                            } else {
+                                stringResource(Res.string.save_changes)
+                            },
                             onPositiveClicked = {
                                 focusManager.clearFocus()
                                 onSave(configState.value)
@@ -113,7 +121,11 @@ fun <T : Message<T, *>> RadioConfigScreenList(
         LoadingOverlay(state = responseState)
 
         if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
-            PacketResponseStateDialog(state = responseState, onDismiss = onDismissPacketResponse)
+            PacketResponseStateDialog(
+                state = responseState,
+                onDismiss = onDismissPacketResponse,
+                rebootBehavior = rebootBehavior,
+            )
         }
     }
 }

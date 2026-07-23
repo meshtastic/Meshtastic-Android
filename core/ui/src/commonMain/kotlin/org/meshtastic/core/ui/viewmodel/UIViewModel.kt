@@ -56,6 +56,7 @@ import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
@@ -96,7 +97,11 @@ class UIViewModel(
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
     val snackbarManager: SnackbarManager,
+    nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
+
+    /** True while the connected node is expected to be mid-restart (reboot-applying config save or reboot command). */
+    val nodeRestartExpected: StateFlow<Boolean> = nodeRestartTracker.restartExpected
 
     private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()

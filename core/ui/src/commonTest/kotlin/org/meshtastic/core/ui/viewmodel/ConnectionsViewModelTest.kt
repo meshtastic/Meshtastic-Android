@@ -21,8 +21,10 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -33,6 +35,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareUpdateDestination
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -60,6 +63,7 @@ class ConnectionsViewModelTest {
     private lateinit var viewModel: ConnectionsViewModel
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val serviceRepository = FakeServiceRepository()
+    private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
     private val nodeRepository = FakeNodeRepository()
     private val uiPrefs = FakeUiPrefs()
     private val deviceHardwareRepository = FakeDeviceHardwareRepository()
@@ -94,6 +98,7 @@ class ConnectionsViewModelTest {
                 radioConfigRepository = radioConfigRepository,
                 serviceRepository = serviceRepository,
                 nodeRepository = nodeRepository,
+                nodeRestartTracker = nodeRestartTracker,
                 uiPrefs = uiPrefs,
                 deviceHardwareRepository = deviceHardwareRepository,
                 firmwareReleaseRepository = firmwareReleaseRepository,

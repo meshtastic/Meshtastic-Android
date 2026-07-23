@@ -26,6 +26,7 @@ import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
@@ -41,6 +42,10 @@ class CoreRepositoryModule {
 
     @Single
     fun provideFirmwareUpdateStatusRepository(): FirmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
+
+    @Single
+    fun provideNodeRestartTracker(@Provided applicationScope: ApplicationCoroutineScope): NodeRestartTracker =
+        NodeRestartTracker(applicationScope)
 
     @Single
     fun provideSendMessageUseCase(
