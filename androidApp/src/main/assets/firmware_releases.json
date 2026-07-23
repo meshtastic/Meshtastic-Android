@@ -277,18 +277,6 @@
       "title": "Add Waveshare ESP32-C3-Zero DIY variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/11067",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11066",
-      "title": "Update Adafruit INA219 to v2",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11066",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11064",
-      "title": "Update SensorLib to v0.4.1",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11064",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
