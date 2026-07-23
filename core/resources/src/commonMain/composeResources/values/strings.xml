@@ -273,6 +273,7 @@
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don't use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
+    <string name="config_saved_restarting">The node is restarting and will be briefly unreachable.</string>
     <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
@@ -1182,6 +1183,7 @@
     <string name="node_list_help_title">Node List Help</string>
     <string name="node_list_long_click_label">Node options</string>
     <string name="node_number">Node Number</string>
+    <string name="node_restarting">Restarting…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>
     <string name="node_sort_channel">Channel</string>
@@ -1465,7 +1467,9 @@
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
     <string name="sats">Sats</string>
+    <!-- SAVE -->
     <string name="save">Save</string>
+    <string name="save_and_restart">Save &amp; restart</string>
     <string name="save_changes">Save</string>
     <string name="save_csv_in_storage_esp32_only">Save .CSV in storage (ESP32 only)</string>
     <string name="save_rangetest">Export rangetest packets</string>

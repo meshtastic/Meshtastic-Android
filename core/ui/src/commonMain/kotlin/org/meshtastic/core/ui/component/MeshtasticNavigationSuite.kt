@@ -47,10 +47,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodesRoute
@@ -60,6 +62,7 @@ import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.node_restarting
 import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -78,6 +81,7 @@ fun MeshtasticNavigationSuite(
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
+    val nodeRestartExpected by uiViewModel.nodeRestartExpected.collectAsStateWithLifecycle()
     val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
@@ -103,9 +107,10 @@ fun MeshtasticNavigationSuite(
                             destination = destination,
                             isSelected = isSelected,
                             connectionState = connectionState,
+                            nodeRestartExpected = nodeRestartExpected,
                             unreadMessageCount = unreadMessageCount,
                             selectedDevice = selectedDevice,
-                            uiViewModel = uiViewModel,
+                            meshActivityFlow = uiViewModel.meshActivity,
                         )
                     },
                     label =
@@ -178,9 +183,19 @@ private fun NavigationIconContent(
     connectionState: ConnectionState,
     unreadMessageCount: Int,
     selectedDevice: String?,
-    uiViewModel: UIViewModel,
+    meshActivityFlow: Flow<MeshActivity>,
+    nodeRestartExpected: Boolean = false,
 ) {
     val isConnectionsRoute = destination == TopLevelDestination.Connect
+    // An expected node restart (reboot-applying config save) presents as an in-progress state, not a scary
+    // red disconnect: the icon borrows the Connecting treatment and the tooltip says "Restarting".
+    val restarting = nodeRestartExpected && connectionState != ConnectionState.Connected
+    val presentedState =
+        if (restarting && connectionState == ConnectionState.Disconnected) {
+            ConnectionState.Connecting
+        } else {
+            connectionState
+        }
 
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
@@ -188,12 +203,7 @@ private fun NavigationIconContent(
             PlainTooltip {
                 Text(
                     if (isConnectionsRoute) {
-                        when (connectionState) {
-                            ConnectionState.Connected -> stringResource(Res.string.connected)
-                            ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                            ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-                            ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                        }
+                        connectionTooltipLabel(restarting, connectionState)
                     } else {
                         stringResource(destination.label)
                     },
@@ -204,9 +214,9 @@ private fun NavigationIconContent(
     ) {
         if (isConnectionsRoute) {
             AnimatedConnectionsNavIcon(
-                connectionState = connectionState,
+                connectionState = presentedState,
                 deviceType = DeviceType.fromAddress(selectedDevice ?: "NoDevice"),
-                meshActivityFlow = uiViewModel.meshActivity,
+                meshActivityFlow = meshActivityFlow,
             )
         } else {
             BadgedBox(
@@ -236,4 +246,13 @@ private fun NavigationIconContent(
             }
         }
     }
+}
+
+@Composable
+private fun connectionTooltipLabel(restarting: Boolean, connectionState: ConnectionState): String = when {
+    restarting -> stringResource(Res.string.node_restarting)
+    connectionState == ConnectionState.Connected -> stringResource(Res.string.connected)
+    connectionState == ConnectionState.Connecting -> stringResource(Res.string.connecting)
+    connectionState == ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
+    else -> stringResource(Res.string.disconnected)
 }

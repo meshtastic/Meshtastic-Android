@@ -27,8 +27,10 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +50,7 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -58,6 +61,7 @@ import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
@@ -119,6 +123,7 @@ class RadioConfigViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
+    private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -170,6 +175,7 @@ class RadioConfigViewModelTest {
         importSecurityConfigUseCase = importSecurityConfigUseCase,
         securityKeyBackupStore = securityKeyBackupStore,
         snackbarManager = snackbarManager,
+        nodeRestartTracker = nodeRestartTracker,
         installProfileUseCase = installProfileUseCase,
         radioConfigUseCase = radioConfigUseCase,
         adminActionsUseCase = adminActionsUseCase,
@@ -898,6 +904,7 @@ class RadioConfigViewModelTest {
                 importSecurityConfigUseCase = importSecurityConfigUseCase,
                 securityKeyBackupStore = securityKeyBackupStore,
                 snackbarManager = snackbarManager,
+                nodeRestartTracker = nodeRestartTracker,
                 installProfileUseCase = installProfileUseCase,
                 radioConfigUseCase = radioConfigUseCase,
                 adminActionsUseCase = adminActionsUseCase,
@@ -1286,6 +1293,68 @@ class RadioConfigViewModelTest {
         airUtilTx = 0f,
         deviceId = null,
     )
+
+    @Test
+    fun `local reboot-applying config save opens the restart window`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        runCurrent()
+
+        assertTrue(nodeRestartTracker.restartExpected.value)
+    }
+
+    @Test
+    fun `reboot-applying save resolves to restarting-success when the node drops`() = runTest {
+        // The reboot the save triggers eats the routing ACK; the transport-drop during the restart window is the
+        // real confirmation, so the save dialog must show success ("restarting") rather than a 30s timeout error.
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns connFlow
+        viewModel = createViewModel()
+        runCurrent()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(77)
+                77
+            }
+
+        nodeRestartTracker.onConnected()
+        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        // The node reboots and the transport drops.
+        connFlow.value = ConnectionState.Disconnected
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `remote config save does not open the restart window`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+        runCurrent()
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
+
+        nodeRestartTracker.onConnected()
+        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        runCurrent()
+
+        assertFalse(nodeRestartTracker.restartExpected.value)
+    }
 }
 
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */

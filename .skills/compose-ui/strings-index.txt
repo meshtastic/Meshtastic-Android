@@ -252,6 +252,7 @@ config_position_broadcast_smart_minimum_interval_secs_summary
 config_position_flags_summary
 config_position_gps_update_interval_summary
 config_power_is_power_saving_summary
+config_saved_restarting
 config_security_admin_key
 config_security_debug_log_api_enabled
 config_security_is_managed
@@ -1149,6 +1150,7 @@ node_list_help_node_details
 node_list_help_title
 node_list_long_click_label
 node_number
+node_restarting
 node_sort_alpha
 node_sort_button
 node_sort_channel
@@ -1420,7 +1422,9 @@ rssi_definition
 rsyslog_server
 sample_message
 sats
+### SAVE ###
 save
+save_and_restart
 save_changes
 save_csv_in_storage_esp32_only
 save_rangetest

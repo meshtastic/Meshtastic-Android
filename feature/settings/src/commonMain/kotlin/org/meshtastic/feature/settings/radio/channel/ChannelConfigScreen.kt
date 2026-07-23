@@ -67,6 +67,7 @@ import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
@@ -99,7 +100,11 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         LoadingOverlay(state = state.responseState)
 
         if (state.responseState is ResponseState.Success || state.responseState is ResponseState.Error) {
-            PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
+            PacketResponseStateDialog(
+                state = state.responseState,
+                onDismiss = viewModel::clearPacketResponse,
+                rebootBehavior = RebootBehavior.NEVER,
+            )
         }
     }
 }

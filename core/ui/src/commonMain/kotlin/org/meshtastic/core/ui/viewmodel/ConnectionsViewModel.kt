@@ -45,6 +45,7 @@ import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -77,6 +78,13 @@ enum class ConnectionStatus {
      */
     RECONNECTING,
 
+    /**
+     * The node is applying a change that reboots it (config save or reboot command) and the transport drop is expected.
+     * Distinct from [NOT_CONNECTED] so the UI presents an in-progress restart instead of a failure. Ends when the node
+     * finishes its post-reboot handshake or the [NodeRestartTracker] window expires.
+     */
+    RESTARTING,
+
     /** Connected with node info available. */
     CONNECTED,
 
@@ -92,6 +100,7 @@ class ConnectionsViewModel(
     radioConfigRepository: RadioConfigRepository,
     serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
+    nodeRestartTracker: NodeRestartTracker,
     private val uiPrefs: UiPrefs,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
@@ -145,18 +154,27 @@ class ConnectionsViewModel(
      * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] for the cross-track contract.
      */
     val connectionStatus: StateFlow<ConnectionStatus> =
-        combine(connectionState, regionUnset, serviceRepository.connectionProgress) { state, unset, progress ->
+        combine(
+            connectionState,
+            regionUnset,
+            serviceRepository.connectionProgress,
+            nodeRestartTracker.restartExpected,
+        ) { state, unset, progress, restartExpected ->
             when (state) {
                 is ConnectionState.Connected ->
                     if (unset) ConnectionStatus.MUST_SET_REGION else ConnectionStatus.CONNECTED
 
-                ConnectionState.Connecting -> ConnectionStatus.CONNECTING
+                // While an expected node restart is in flight, the drop and the reconnect attempts are the restart
+                // —
+                // present them as such instead of as a failure.
+                ConnectionState.Connecting ->
+                    if (restartExpected) ConnectionStatus.RESTARTING else ConnectionStatus.CONNECTING
 
                 ConnectionState.Disconnected ->
-                    if (progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT) {
-                        ConnectionStatus.RECONNECTING
-                    } else {
-                        ConnectionStatus.NOT_CONNECTED
+                    when {
+                        restartExpected -> ConnectionStatus.RESTARTING
+                        progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT -> ConnectionStatus.RECONNECTING
+                        else -> ConnectionStatus.NOT_CONNECTED
                     }
 
                 ConnectionState.DeviceSleep -> ConnectionStatus.CONNECTED_SLEEPING
