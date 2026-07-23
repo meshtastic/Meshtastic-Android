@@ -17,7 +17,9 @@
 package org.meshtastic.core.resources
 
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getPluralString as composeGetPluralString
 import org.jetbrains.compose.resources.getString as composeGetString
 
 /** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
@@ -66,4 +68,16 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
     } else {
         composeGetString(stringResource)
     }
+}
+
+/** Retrieves a plural string in a suspending manner. */
+suspend fun getPluralStringSuspend(
+    pluralStringResource: PluralStringResource,
+    quantity: Int,
+    vararg formatArgs: Any,
+): String = if (formatArgs.isNotEmpty()) {
+    @Suppress("SpreadOperator")
+    composeGetPluralString(pluralStringResource, quantity, *formatArgs)
+} else {
+    composeGetPluralString(pluralStringResource, quantity)
 }

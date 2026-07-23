@@ -55,6 +55,10 @@ private fun Advertisement.toScanResult(): KableScanResult =
 
 @Single(binds = [BleScanner::class])
 open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
+    private val scanStartLimiter = createBleScanStartLimiter()
+
+    internal open suspend fun reserveScanStart() = scanStartLimiter.reserveStart()
+
     internal open fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {
         val scanner = Scanner {
             logging { applyConfig(loggingConfig) }
@@ -74,6 +78,7 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
         // By wrapping it in a channelFlow with a timeout, we enforce the BleScanner contract cleanly.
         return channelFlow {
             withTimeoutOrNull(timeout) {
+                reserveScanStart()
                 try {
                     advertisements(filter).collect { advertisement ->
                         send(
@@ -108,6 +113,7 @@ private fun Throwable.asBleScanStartExceptionOrNull(): BleScanStartException? {
 
 private fun Throwable.scanStartFailureReasonOrNull(): BleScanStartFailureReason? = when {
     isApplicationRegistrationFailure() -> BleScanStartFailureReason.ApplicationRegistrationFailed
+    isScanningTooFrequentlyFailure() -> BleScanStartFailureReason.ScanningTooFrequently
     isMissingScanPermission() -> BleScanStartFailureReason.MissingScanPermission
     else -> null
 }
@@ -118,6 +124,12 @@ private fun Throwable.isApplicationRegistrationFailure(): Boolean = this is Ille
     message?.let { failureMessage ->
         failureMessage.contains("app cannot be registered", ignoreCase = true) ||
             failureMessage.contains("SCAN_FAILED_APPLICATION_REGISTRATION_FAILED", ignoreCase = true)
+    } == true
+
+private fun Throwable.isScanningTooFrequentlyFailure(): Boolean = this is IllegalStateException &&
+    message?.let { failureMessage ->
+        failureMessage.contains("scanning too frequently", ignoreCase = true) ||
+            failureMessage.contains("SCAN_FAILED_SCANNING_TOO_FREQUENTLY", ignoreCase = true)
     } == true
 
 // Kable's scan-permission check throws a plain IllegalStateException "Missing required <permission> for scanning"

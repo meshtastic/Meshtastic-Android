@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.ble
 
+import kotlin.time.Duration
+
 /** Known reasons a BLE discovery scan failed before Android registered the scanner. */
 enum class BleScanStartFailureReason(val androidCode: String, val description: String) {
     ApplicationRegistrationFailed(
@@ -26,8 +28,12 @@ enum class BleScanStartFailureReason(val androidCode: String, val description: S
         androidCode = "MISSING_SCAN_PERMISSION",
         description = "A runtime permission required for BLE scanning is not granted",
     ),
+    ScanningTooFrequently(
+        androidCode = "SCAN_FAILED_SCANNING_TOO_FREQUENTLY(6)",
+        description = "Android rejected a BLE scan because the app reached its scan-start quota",
+    ),
 }
 
 /** A discovery scan-start failure. No advertisements can be delivered until a future scan starts successfully. */
-class BleScanStartException(val reason: BleScanStartFailureReason, cause: Throwable) :
+class BleScanStartException(val reason: BleScanStartFailureReason, cause: Throwable, val retryAfter: Duration? = null) :
     IllegalStateException("BLE scan could not start: ${reason.androidCode}", cause)
