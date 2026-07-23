@@ -67,6 +67,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
+import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.firmware_event_ended_banner
 import org.meshtastic.core.resources.firmware_event_ended_button
 import org.meshtastic.core.resources.firmware_recovery_banner
@@ -77,10 +78,13 @@ import org.meshtastic.core.resources.firmware_update_notification_android
 import org.meshtastic.core.resources.firmware_update_notification_flasher
 import org.meshtastic.core.resources.firmware_update_open
 import org.meshtastic.core.resources.firmware_update_open_flasher
+import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_wifi_settings
+import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.set_your_region
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.resources.wifi_unavailable
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
@@ -109,6 +113,7 @@ import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
+import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -239,6 +244,23 @@ fun ConnectionsScreen(
         )
     }
 
+    // Work around CMP-6615: Android stringResource currently enters a blocking resource state. Keep these stable
+    // slots outside AnimatedContent so connection-state transitions do not re-enter resource loading while the main
+    // thread is applying an animation frame.
+    val firmwareVersion =
+        ourNode
+            ?.metadata
+            ?.firmware_version
+            ?.takeIf { it.isNotBlank() }
+            ?.let { stringResource(Res.string.firmware_version, it) }
+    val currentlyConnectedText =
+        CurrentlyConnectedText(
+            unknownLabel = stringResource(Res.string.unknown),
+            rssiLabel = stringResource(Res.string.rssi),
+            disconnectLabel = stringResource(Res.string.disconnect),
+            firmwareVersion = firmwareVersion,
+        )
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -294,6 +316,7 @@ fun ConnectionsScreen(
                                                 ourNode = ourNode,
                                                 selectedDevice = selectedDevice,
                                                 bleDevices = bleDevices,
+                                                text = currentlyConnectedText,
                                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                                 onClickDisconnect = { scanModel.disconnect() },
                                             )
@@ -550,12 +573,14 @@ private fun ConnectedDeviceContent(
     ourNode: org.meshtastic.core.model.Node?,
     selectedDevice: String,
     bleDevices: List<DeviceListEntry>,
+    text: CurrentlyConnectedText,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
 ) {
     ourNode?.let { node ->
         CurrentlyConnectedInfo(
             node = node,
+            text = text,
             bleDevice = bleDevices.find { it.fullAddress == selectedDevice } as DeviceListEntry.Ble?,
             onNavigateToNodeDetails = onNavigateToNodeDetails,
             onClickDisconnect = onClickDisconnect,

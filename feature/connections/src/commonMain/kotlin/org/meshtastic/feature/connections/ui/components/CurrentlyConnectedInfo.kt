@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,10 +42,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -58,10 +56,20 @@ import kotlin.time.Duration.Companion.seconds
 private const val RSSI_DELAY = 2
 private const val RSSI_TIMEOUT = 1
 
+/** Plain text resolved outside the animated connected-device subtree. */
+@Immutable
+data class CurrentlyConnectedText(
+    val unknownLabel: String,
+    val rssiLabel: String,
+    val disconnectLabel: String,
+    val firmwareVersion: String?,
+)
+
 @Suppress("LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
+    text: CurrentlyConnectedText,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
@@ -89,9 +97,9 @@ fun CurrentlyConnectedInfo(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
+            MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage, unknownLabel = text.unknownLabel)
             if (bleDevice != null) {
-                Rssi(rssi = rssi)
+                Rssi(rssi = rssi, label = text.rssiLabel)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -100,21 +108,18 @@ fun CurrentlyConnectedInfo(
             Column(modifier = Modifier.weight(1f, fill = true)) {
                 Text(text = node.user.long_name, style = MaterialTheme.typography.titleMediumEmphasized)
 
-                node.metadata
-                    ?.firmware_version
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { firmwareVersion ->
-                        Text(
-                            text = stringResource(Res.string.firmware_version, firmwareVersion),
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                text.firmwareVersion?.let { firmwareVersion ->
+                    Text(
+                        text = firmwareVersion,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
 
-        DisconnectButton(onClick = onClickDisconnect)
+        DisconnectButton(onClick = onClickDisconnect, label = text.disconnectLabel)
     }
 }
 
@@ -130,6 +135,13 @@ private fun CurrentlyConnectedInfoPreview() {
                 isIgnored = false,
                 paxcounter = Paxcount(ble = 10, wifi = 5),
                 environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
+            ),
+            text =
+            CurrentlyConnectedText(
+                unknownLabel = "Unknown",
+                rssiLabel = "RSSI",
+                disconnectLabel = "Disconnect",
+                firmwareVersion = null,
             ),
             onNavigateToNodeDetails = {},
             onClickDisconnect = {},

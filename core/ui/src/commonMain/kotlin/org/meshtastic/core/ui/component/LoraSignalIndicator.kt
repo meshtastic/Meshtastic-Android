@@ -174,7 +174,7 @@ fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = L
 }
 
 @Composable
-fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
+fun Rssi(rssi: Int, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
     val color: Color =
         if (rssi > RSSI_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()
@@ -185,7 +185,7 @@ fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
         }
     Text(
         modifier = modifier,
-        text = "${stringResource(Res.string.rssi)} ${MetricFormatter.rssi(rssi)}",
+        text = "$label ${MetricFormatter.rssi(rssi)}",
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )
