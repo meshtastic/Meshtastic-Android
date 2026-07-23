@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11162",
+      "title": "Enable merge queues",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11162",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11157",
       "title": "Update LovyanGFX to v1.2.26",
       "page_url": "https://github.com/meshtastic/firmware/pull/11157",
@@ -217,72 +223,6 @@
       "title": "feat(lr2021): enable LR2021 LoRa radio support on native/portduino",
       "page_url": "https://github.com/meshtastic/firmware/pull/11138",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11131",
-      "title": "Limit NodeInfo discovery replies to direct neighbors",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11131",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11126",
-      "title": "mesh: suppress relayed broadcast responses",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11126",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11123",
-      "title": "fix(gps): PA1010D stuck at 0 satellites because 5-constellation config command fails",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11123",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11121",
-      "title": "MUI: portduino SDL support for Linux/Windows",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11121",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11119",
-      "title": "TMM & Warmstore key source naming",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11119",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11114",
-      "title": "SEN5X: fix version parsing, VOC index reporting, and read-buffer handling",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11114",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11081",
-      "title": "Update actions/setup-python action to v7",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11081",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11069",
-      "title": "Add HM330x PM Sensor",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11069",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11067",
-      "title": "Add Waveshare ESP32-C3-Zero DIY variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11067",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "11066",
-      "title": "Update Adafruit INA219 to v2",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11066",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11064",
-      "title": "Update SensorLib to v0.4.1",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11064",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

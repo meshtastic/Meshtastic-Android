@@ -143,6 +143,10 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_scan_missing_permission">Bluetooth-laitteiden haku edellyttää käyttöoikeutta. Myönnä lähistön laitteet (tai sijainti) käyttöoikeus, jotta laitteita voidaan etsiä.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth-skannaus ei onnistunut. Yritä uudelleen tai ota bluetooth-yhteys uudelleen käyttöön jos ongelma jatkuu.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Bluetooth-haun enimmäismäärä on saavutettu. Yritä uudelleen %1$d sekunnin kuluttua.</item>
+        <item quantity="other">Bluetooth-haun enimmäismäärä on saavutettu. Yritä uudelleen %1$d sekunnin kuluttua.</item>
+    </plurals>
     <string name="bold_heading">Lihavoitu otsikko</string>
     <string name="bonding_failed_permissions">Pariliitos epäonnistui. Myönnä lupa lähellä olevien laitteiden käyttöön ja yritä uudelleen.</string>
     <string name="bonding_failed_retry">Paritus ei onnistunut. Yritä uudelleen.</string>
