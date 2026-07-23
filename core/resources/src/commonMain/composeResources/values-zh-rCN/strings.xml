@@ -1439,6 +1439,7 @@
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="rsyslog_server">rsyslog 服务器</string>
     <string name="sats">卫星</string>
+    <!-- SAVE -->
     <string name="save">保存</string>
     <string name="save_changes">保存</string>
     <string name="save_csv_in_storage_esp32_only">保存 CSV 到存储 (仅ESP32)</string>

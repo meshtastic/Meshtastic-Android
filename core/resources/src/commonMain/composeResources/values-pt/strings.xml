@@ -485,6 +485,7 @@
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de energia que está a ser recebido pela antena. Um valor mais elevado de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">servidor rsyslog</string>
     <string name="sats">Sats</string>
+    <!-- SAVE -->
     <string name="save">Salvar</string>
     <string name="save_changes">Salvar</string>
     <string name="save_csv_in_storage_esp32_only">Guardar .CSV no armazenamento (apenas ESP32)</string>

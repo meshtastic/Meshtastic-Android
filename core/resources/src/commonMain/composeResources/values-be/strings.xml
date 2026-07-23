@@ -253,6 +253,7 @@
     <string name="routing_error_timeout">Скончыўся час чакання</string>
     <string name="routing_error_too_large">Пакет занадта вялікі</string>
     <string name="rssi">адносная магутнасць</string>
+    <!-- SAVE -->
     <string name="save">Запісаць</string>
     <string name="save_changes">Запісаць</string>
     <!-- SCAN -->

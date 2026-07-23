@@ -1456,6 +1456,7 @@
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="rsyslog_server">rsyslog-palvelin</string>
     <string name="sats">Satelliitit</string>
+    <!-- SAVE -->
     <string name="save">Tallenna</string>
     <string name="save_changes">Tallenna</string>
     <string name="save_csv_in_storage_esp32_only">Tallenna .CSV (ESP32 ainoastaan)</string>

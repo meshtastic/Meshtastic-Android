@@ -253,6 +253,7 @@
     <string name="routing_error_timeout">Baigėsi laikas</string>
     <string name="routing_error_too_large">Paketas perdidelis</string>
     <string name="rssi">RSSI</string>
+    <!-- SAVE -->
     <string name="save">Išsaugoti</string>
     <string name="save_changes">Išsaugoti</string>
     <!-- SCAN -->

@@ -211,6 +211,7 @@
     <string name="routing_error_timeout">استغرق وقت طويل</string>
     <string name="routing_error_too_large">رسالة كبيره</string>
     <string name="rssi">مؤشر القوة النسبية</string>
+    <!-- SAVE -->
     <string name="save">حفظ</string>
     <string name="save_changes">حفظ</string>
     <!-- SCAN -->

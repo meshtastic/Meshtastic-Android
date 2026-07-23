@@ -258,6 +258,7 @@
     <string name="routing_error_too_large">Pakken er for stor</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">"Received Signal Strength Indicator", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
+    <!-- SAVE -->
     <string name="save">Lagre</string>
     <string name="save_changes">Lagre</string>
     <!-- SCAN -->

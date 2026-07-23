@@ -1201,6 +1201,7 @@
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="rsyslog_server">rsyslog Server</string>
     <string name="sats">Satelliten</string>
+    <!-- SAVE -->
     <string name="save">Speichern</string>
     <string name="save_changes">Speichern</string>
     <string name="save_csv_in_storage_esp32_only">Speichere .CSV im Speicher (nur ESP32)</string>

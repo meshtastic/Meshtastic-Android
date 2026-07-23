@@ -422,6 +422,7 @@
     <string name="routing_error_too_large">Príliš veľký paket</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
+    <!-- SAVE -->
     <string name="save">Uložiť</string>
     <string name="save_changes">Uložiť</string>
     <!-- SCAN -->

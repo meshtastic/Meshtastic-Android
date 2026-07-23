@@ -232,6 +232,7 @@
     <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
     <string name="routing_error_timeout">Temps esgotat</string>
     <string name="routing_error_too_large">Packet massa llarg</string>
+    <!-- SAVE -->
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>
     <!-- SCAN -->

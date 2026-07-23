@@ -227,6 +227,7 @@
     <string name="routing_error_no_channel">Kein Kanal</string>
     <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
+    <!-- SAVE -->
     <string name="save">Αποθήκευση</string>
     <string name="save_changes">Αποθήκευση</string>
     <!-- SCAN -->

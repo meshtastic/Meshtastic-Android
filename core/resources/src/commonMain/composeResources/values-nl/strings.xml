@@ -401,6 +401,7 @@
     <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Sats</string>
+    <!-- SAVE -->
     <string name="save">Opslaan</string>
     <string name="save_changes">Opslaan</string>
     <!-- SCAN -->
