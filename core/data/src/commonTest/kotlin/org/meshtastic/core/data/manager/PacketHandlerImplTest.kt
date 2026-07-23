@@ -26,6 +26,7 @@ import dev.mokkery.verifySuspend
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -42,7 +43,9 @@ import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class PacketHandlerImplTest {
 
@@ -114,6 +117,34 @@ class PacketHandlerImplTest {
 
         handler.handleQueueStatus(status)
         testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `handleQueueStatus treats ERRNO_SHOULD_RELEASE as success`() = runTest(testDispatcher) {
+        // Firmware 2.8+ returns ErrorCode 35 (ERRNO_SHOULD_RELEASE) for self-addressed packets delivered
+        // through the synchronous local loopback — a success, not a queue failure.
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 790)) }
+        testScheduler.runCurrent()
+
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 790, res = 35, free = 16))
+        testScheduler.runCurrent()
+
+        assertTrue(result.await())
+    }
+
+    @Test
+    fun `handleQueueStatus treats other nonzero res as failure`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 791)) }
+        testScheduler.runCurrent()
+
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 791, res = 33, free = 16))
+        testScheduler.runCurrent()
+
+        assertFalse(result.await())
     }
 
     @Test
