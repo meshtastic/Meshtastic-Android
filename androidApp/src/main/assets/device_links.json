@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-10T14:17:34.591Z",
+  "generatedAt": "2026-07-23T03:27:14.158Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3641,6 +3641,118 @@
         "SI",
         "SK"
       ]
+    },
+    {
+      "shortCode": "thinknode_m7",
+      "url": "https://msh.to/thinknode_m7",
+      "description": "ThinkNode M7",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m7"
+      ],
+      "hwModels": [
+        129
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-mesh-node-t1",
+      "url": "https://msh.to/heltec-mesh-node-t1",
+      "description": "MeshNode T1",
+      "type": "vendor",
+      "targets": [
+        "heltec-mesh-node-t1"
+      ],
+      "hwModels": [
+        133
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "m5stack-unitc6l",
+      "url": "https://msh.to/m5stack-unitc6l",
+      "description": "M5Stack Unit C6L",
+      "type": "vendor",
+      "targets": [
+        "m5stack-unitc6l"
+      ],
+      "hwModels": [
+        111
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "m5stack-cardputer-adv",
+      "url": "https://msh.to/m5stack-cardputer-adv",
+      "description": "M5Stack Cardputer Mesh Kit",
+      "type": "vendor",
+      "targets": [
+        "m5stack-cardputer-adv"
+      ],
+      "hwModels": [
+        112
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-mesh-node-t096",
+      "url": "https://msh.to/heltec-mesh-node-t096",
+      "description": "Mesh Node T096",
+      "type": "vendor",
+      "targets": [
+        "heltec-mesh-node-t096"
+      ],
+      "hwModels": [
+        127
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-beam-1w",
+      "url": "https://msh.to/t-beam-1w",
+      "description": "T-Beam 1W",
+      "type": "vendor",
+      "targets": [
+        "t-beam-1w"
+      ],
+      "hwModels": [
+        122
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-echo-plus",
+      "url": "https://msh.to/t-echo-plus",
+      "description": "T-Echo Plus",
+      "type": "vendor",
+      "targets": [
+        "t-echo-plus"
+      ],
+      "hwModels": [
+        33
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak_wismesh_tap_v2",
+      "url": "https://msh.to/rak_wismesh_tap_v2",
+      "description": "RAK WisMesh Tap V2",
+      "type": "vendor",
+      "targets": [
+        "rak_wismesh_tap_v2"
+      ],
+      "hwModels": [
+        116
+      ],
+      "marketplace": null,
+      "regions": null
     }
   ]
 }
