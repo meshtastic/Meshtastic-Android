@@ -108,6 +108,49 @@ jobs:
             fi
           fi
 
+      - name: Update device links list
+        id: device_links
+        run: |
+          device_links_file_path="androidApp/src/main/assets/device_links.json"
+          temp_device_links_file="/tmp/new_device_links.json"
+
+          echo "Fetching latest device links..."
+          http_code=$(curl -s --max-time 90 -o "$temp_device_links_file" -w '%{http_code}' https://api.meshtastic.org/resource/deviceLinks || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Device links API returned HTTP $http_code. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from device links API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_device_links_file" 2>/dev/null; then
+            echo "::warning::Device links API returned invalid JSON data. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from device links API" >> "$GITHUB_OUTPUT"
+          else
+            # This file is only the offline seed for the runtime cache, which refreshes
+            # itself from the same endpoint on a TTL. Guard against a degraded response
+            # (HTTP 200 but empty catalog) wiping the seed — mirrors the runtime, which
+            # ignores empty responses for the same reason.
+            link_count=$(jq -r 'if (.links | type) == "array" then (.links | length) else 0 end' "$temp_device_links_file" 2>/dev/null || echo 0)
+            if [ "$link_count" -eq 0 ]; then
+              echo "::warning::Device links API returned no links. Skipping to protect the bundled seed."
+              echo "status=error" >> "$GITHUB_OUTPUT"
+              echo "detail=empty links array from device links API" >> "$GITHUB_OUTPUT"
+            # Diff on `.links` only: the envelope carries a server-set `generatedAt`
+            # timestamp that changes on every response, so an hourly whole-document diff
+            # would open a churn PR even when the catalog is unchanged.
+            elif [ ! -f "$device_links_file_path" ] || ! jq --sort-keys '.links' "$temp_device_links_file" | diff -q - <(jq --sort-keys '.links' "$device_links_file_path"); then
+              echo "Changes detected in device links or local file missing. Updating $device_links_file_path."
+              # Pretty-print so the committed asset stays readable and future diffs stay
+              # minimal regardless of the API's response formatting.
+              jq . "$temp_device_links_file" > "$device_links_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in device links."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Sync with Crowdin
         uses: crowdin/github-action@v2
         with:
@@ -151,6 +194,8 @@ jobs:
           HARDWARE_DETAIL: ${{ steps.hardware.outputs.detail }}
           EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
           EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
+          DEVICE_LINKS_STATUS: ${{ steps.device_links.outputs.status }}
+          DEVICE_LINKS_DETAIL: ${{ steps.device_links.outputs.detail }}
         run: |
           firmware_status="$FIRMWARE_STATUS"
           firmware_detail="$FIRMWARE_DETAIL"
@@ -158,6 +203,8 @@ jobs:
           hardware_detail="$HARDWARE_DETAIL"
           event_firmware_status="$EVENT_FIRMWARE_STATUS"
           event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
+          device_links_status="$DEVICE_LINKS_STATUS"
+          device_links_detail="$DEVICE_LINKS_DETAIL"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -186,6 +233,14 @@ jobs:
             *)         body+=$'\n'"- ❓ \`event_firmware.json\` — unknown status." ;;
           esac
 
+          # Device links status
+          case "$device_links_status" in
+            updated)   body+=$'\n'"- ✅ \`device_links.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_links.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_links.json\` skipped — ${device_links_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_links.json\` — unknown status." ;;
+          esac
+
           # Crowdin (always attempted)
           body+=$'\n'"- Source strings were uploaded to Crowdin."
           body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
@@ -210,6 +265,7 @@ jobs:
             - Firmware releases list
             - Device hardware list
             - Event firmware metadata
+            - Device links list
             - Crowdin source string uploads
             - Crowdin translation downloads
           title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
@@ -221,6 +277,7 @@ jobs:
             androidApp/src/main/assets/firmware_releases.json
             androidApp/src/main/assets/device_hardware.json
             androidApp/src/main/assets/event_firmware.json
+            androidApp/src/main/assets/device_links.json
             fastlane/metadata/android/**
             **/strings.xml
             docs/**/*.md
