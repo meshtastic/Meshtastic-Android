@@ -16,7 +16,11 @@
  */
 package org.meshtastic.core.data.repository
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -48,9 +52,11 @@ import kotlin.test.assertTrue
 class DeviceHardwareRepositoryImplTest {
     private class FakeApiService(var response: List<NetworkDeviceHardware>) : ApiService {
         var hardwareCalls = 0
+        var responseGate: CompletableDeferred<Unit>? = null
 
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> {
             hardwareCalls += 1
+            responseGate?.await()
             return response
         }
 
@@ -75,11 +81,13 @@ class DeviceHardwareRepositoryImplTest {
 
     private class FakeDeviceLinkRepository : DeviceLinkRepository {
         var reconcileCalls = 0
+        var reconcileFailure: Throwable? = null
 
         override suspend fun ensureImported() = Unit
 
         override suspend fun reconcile() {
             reconcileCalls += 1
+            reconcileFailure?.let { throw it }
         }
 
         override suspend fun getLinksForTarget(platformioTarget: String, regionCode: String): List<DeviceLink> =
@@ -138,11 +146,33 @@ class DeviceHardwareRepositoryImplTest {
 
     @Test
     fun repeatedMissingModelUsesOneSuccessfulCatalogRefresh() = runBlocking {
-        assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow())
+        // Sequential lookups can hit cache after the first fetch and never share a flight; prove single-flight
+        // sharing by suspending the fake API response and overlapping the two lookups.
+        api.responseGate = CompletableDeferred()
+        coroutineScope {
+            val first = async { repository.getDeviceHardwareByModel(hwModel = 37) }
+            val second = async { repository.getDeviceHardwareByModel(hwModel = 37) }
+            api.responseGate!!.complete(Unit)
+            awaitAll(first, second)
+        }
+
+        assertEquals(1, api.hardwareCalls, "concurrent callers must share one fetch")
+        assertEquals(1, links.reconcileCalls, "concurrent callers must share one reconcile")
+    }
+
+    @Test
+    fun reconciliationFailureDoesNotTriggerAnotherCatalogRefresh() = runBlocking {
+        // The refresher records catalog success BEFORE calling reconcile(), so a reconcile failure must not
+        // poison the success TTL window. A subsequent missing-model lookup must NOT cause another hardware
+        // fetch, because the catalog was already recorded as fresh.
+        links.reconcileFailure = RuntimeException("reconcile boom")
         assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow())
 
-        assertEquals(1, api.hardwareCalls)
-        assertEquals(1, links.reconcileCalls)
+        links.reconcileFailure = null
+        assertNull(repository.getDeviceHardwareByModel(hwModel = 37).getOrThrow())
+
+        assertEquals(1, api.hardwareCalls, "catalog success must gate further hardware fetches")
+        assertEquals(1, links.reconcileCalls, "retry outside TTL must not retry reconcile either")
     }
 
     @Test
