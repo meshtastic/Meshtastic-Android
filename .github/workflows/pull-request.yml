@@ -76,10 +76,12 @@ jobs:
               for path in re.findall(r"-\s*'([^']+/\*\*)'", workflow)
           }
 
-          actual_module_roots = filter_paths & expected_roots
+          # Filter roots that are intentionally not Gradle module roots
+          # (CI/workflow implementation + shared build infrastructure).
+          allowed_infra_roots = {'.github', 'build-logic', 'config', 'gradle'}
 
-          missing = sorted(expected_roots - actual_module_roots)
-          unexpected = sorted(actual_module_roots - expected_roots)
+          missing = sorted(expected_roots - filter_paths)
+          unexpected = sorted(filter_paths - expected_roots - allowed_infra_roots)
 
           if missing or unexpected:
               print('check-changes filter drift detected:')
