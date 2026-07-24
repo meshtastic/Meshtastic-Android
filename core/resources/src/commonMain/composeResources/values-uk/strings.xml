@@ -1170,7 +1170,7 @@
     <string name="status_message">Статус повідомлення</string>
     <string name="status_message_config">Конфігурація статусу повідомлення</string>
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>
-    <string name="subnet">Підрегіон</string>
+    <string name="subnet">Підмережа</string>
     <string name="super_deep_sleep_duration_seconds">Тривалість глибокого сну</string>
     <string name="supported">Підтримується</string>
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>

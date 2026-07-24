@@ -558,6 +558,7 @@
     <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
+    <string name="subnet">Alt ağ</string>
     <string name="supported">Desteklenen</string>
     <!-- TAK -->
     <string name="tak_server_section">Sunucu</string>

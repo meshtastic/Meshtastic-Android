@@ -1242,7 +1242,7 @@
     <string name="store_forward">儲存 &amp; 轉發</string>
     <string name="store_forward_config">儲存 &amp; 轉發設定</string>
     <string name="store_forward_enabled">已啟用儲存 &amp; 轉發</string>
-    <string name="subnet">子網路</string>
+    <string name="subnet">子網</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>

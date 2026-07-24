@@ -1306,7 +1306,7 @@
     <string name="store_forward">Speichern &amp; Weiterleiten</string>
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
-    <string name="subnet">Subnet</string>
+    <string name="subnet">Subnetz</string>
     <string name="success">Erfolgreich</string>
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>

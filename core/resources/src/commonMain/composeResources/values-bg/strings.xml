@@ -1084,6 +1084,7 @@
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="ssid">SSID</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
+    <string name="subnet">Подмрежа</string>
     <string name="success">Успех</string>
     <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
     <string name="supported">Поддържан</string>
