@@ -1,0 +1,76 @@
+{% comment %}
+  Version switcher for the published docs site.
+
+  The site is deployed as parallel channels on gh-pages:
+    /            -> latest published release (default)
+    /main/       -> snapshot of the main branch
+    /vX.Y.Z/     -> each published release
+
+  Which channel this build belongs to is inferred from site.baseurl
+  (e.g. "/Meshtastic-Android", "/Meshtastic-Android/main",
+  "/Meshtastic-Android/v2.9.0"). The available versions are read at runtime
+  from /versions.json at the site root, which is regenerated on every deploy
+  by scripts/docs/publish-to-gh-pages.sh. When versions.json is unavailable
+  (e.g. local `jekyll serve`), the switcher stays hidden.
+{% endcomment %}
+
+<details class="language-switcher version-switcher" id="version-switcher" aria-label="Documentation version" hidden>
+  <summary class="language-switcher-btn" title="Switch documentation version">
+    🏷️ <span id="version-current"></span>
+  </summary>
+  <ul class="language-switcher-list" id="version-switcher-list"></ul>
+</details>
+
+<script>
+(function() {
+  var baseurl = '{{ site.baseurl }}';
+  var root = baseurl;
+  var channel = 'latest';
+  var match = baseurl.match(/^(.*)\/(main|v\d+\.\d+\.\d+)$/);
+  if (match) {
+    root = match[1];
+    channel = match[2];
+  }
+
+  fetch(root + '/versions.json')
+    .then(function(res) { return res.ok ? res.json() : Promise.reject(); })
+    .then(function(data) {
+      var switcher = document.getElementById('version-switcher');
+      var list = document.getElementById('version-switcher-list');
+      var current = document.getElementById('version-current');
+      if (!switcher || !list || !current) return;
+
+      // Keep the reader on the same page when switching channels; a page
+      // that doesn't exist in the target version lands on the 404 page.
+      var relativePath = location.pathname.slice(baseurl.length) + location.hash;
+
+      var entries = [];
+      if (data.latest) {
+        entries.push({ id: 'latest', label: 'latest (v' + data.latest + ')', base: root });
+      }
+      if (data.hasMain) {
+        entries.push({ id: 'main', label: 'main (snapshot)', base: root + '/main' });
+      }
+      (data.versions || []).forEach(function(v) {
+        entries.push({ id: 'v' + v, label: 'v' + v, base: root + '/v' + v });
+      });
+
+      var currentEntry = entries.filter(function(e) { return e.id === channel; })[0];
+      current.textContent = currentEntry ? currentEntry.label : channel;
+
+      var others = entries.filter(function(e) { return e.id !== channel; });
+      if (others.length === 0) return;
+
+      others.forEach(function(e) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = e.base + relativePath;
+        a.textContent = e.label;
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      switcher.hidden = false;
+    })
+    .catch(function() { /* no manifest (local build) — leave switcher hidden */ });
+})();
+</script>

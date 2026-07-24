@@ -1,5 +1,9 @@
 name: Deploy Documentation
 
+# Publishes the main-branch docs snapshot to /main/ (and refreshed Dokka to
+# /api/) on the persistent gh-pages branch. The site root (latest release)
+# and /vX.Y.Z/ folders are owned by docs-release.yml and are left untouched.
+
 on:
   push:
     branches: [main]
@@ -17,20 +21,22 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - '.github/workflows/docs-deploy.yml'
+      - 'scripts/docs/**'
 
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
+# Shares the group with docs-release.yml so gh-pages pushes serialize.
+# cancel-in-progress must stay false: a snapshot deploy must never cancel an
+# in-flight release publish (GitHub still coalesces queued runs to one).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build:
+  publish:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -53,8 +59,8 @@ jobs:
           bundler-cache: true
           working-directory: docs
 
-      - name: Generate Docs Site
-        run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
+      - name: Generate Docs Site (main channel)
+        run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=main -Pci=true
 
       # Dokka (Gradle) and Jekyll (Ruby) are independent — Dokka's output is only
       # copied in afterwards — so run them concurrently to overlap the two slowest
@@ -63,32 +69,18 @@ jobs:
         run: |
           set -euo pipefail
           BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
-            --source build/_site \
+            --source build/_site/main \
             --destination build/jekyll_site \
-            --baseurl /${{ github.event.repository.name }} &
+            --baseurl /${{ github.event.repository.name }}/main &
           jekyll_pid=$!
           ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
           wait "$jekyll_pid"
-          touch build/jekyll_site/.nojekyll
 
-      - name: Assemble Pages artifact
-        run: cp -r build/dokka/html build/jekyll_site/api  # Dokka HTML -> /api
+      - name: Stage channels
+        run: |
+          mkdir -p build/pages_staging
+          cp -r build/jekyll_site build/pages_staging/main
+          cp -r build/dokka/html build/pages_staging/api
 
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: build/jekyll_site/
-
-  deploy:
-    if: github.repository == 'meshtastic/Meshtastic-Android'
-    needs: build
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 15
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
-
+      - name: Publish to gh-pages
+        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging main api
