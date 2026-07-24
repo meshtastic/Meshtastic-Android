@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import org.meshtastic.core.navigation.MultiBackstack
@@ -30,14 +31,17 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
+import org.meshtastic.feature.settings.navigation.settingsRadioConfigViewModel
 
 /**
  * Desktop main screen — assembles the shared [MeshtasticAppShell], [MeshtasticNavigationSuite], and
  * [MeshtasticNavDisplay] with the desktop-specific [desktopNavGraph] entry provider.
  */
+@Suppress("ViewModelForwarding", "ModifierMissing")
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
     val backStack = multiBackstack.activeBackStack
+    val appViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
     Surface(modifier = Modifier.fillMaxSize()) {
         MeshtasticAppShell(
@@ -50,7 +54,17 @@ fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) 
                 uiViewModel = uiViewModel,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel, multiBackstack) }
+                val provider =
+                    entryProvider<NavKey> {
+                        desktopNavGraph(
+                            backStack = backStack,
+                            uiViewModel = uiViewModel,
+                            multiBackstack = multiBackstack,
+                            settingsRadioConfigViewModel = {
+                                settingsRadioConfigViewModel(backStack, appViewModelStoreOwner)
+                            },
+                        )
+                    }
                 MeshtasticNavDisplay(
                     multiBackstack = multiBackstack,
                     entryProvider = provider,

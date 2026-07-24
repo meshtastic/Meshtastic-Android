@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
@@ -75,34 +76,66 @@ import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
+/**
+ * Resolves the settings [RadioConfigViewModel] from the app-shell [androidx.lifecycle.ViewModelStoreOwner].
+ *
+ * Navigation 3 gives each entry its own store. Resolving this ViewModel inside every settings entry therefore destroys
+ * and recreates the same radio-config session while moving between settings menus. Resolving against the app-shell
+ * owner keeps one local or destination-keyed session for the activity/window lifetime while remaining lazy until a
+ * settings entry actually needs it.
+ */
 @Composable
-fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: Int? = null): RadioConfigViewModel {
-    val destNum =
-        destNumOverride
-            ?: remember(backStack.toList()) {
-                backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
-            }
+fun settingsRadioConfigViewModel(
+    backStack: NavBackStack<NavKey>,
+    viewModelStoreOwner: ViewModelStoreOwner,
+): RadioConfigViewModel {
+    val stackSnapshot = backStack.toList()
+    val destNum = remember(stackSnapshot) { settingsDestination(stackSnapshot) }
+    val key = destNum?.let { "settings-remote-$it" } ?: "settings-local"
+    return koinViewModel<RadioConfigViewModel>(key = key, viewModelStoreOwner = viewModelStoreOwner) {
+        parametersOf(destNum)
+    }
+}
+
+@Composable
+private fun entryScopedRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
+    val stackSnapshot = backStack.toList()
+    val destNum = remember(stackSnapshot) { settingsDestination(stackSnapshot) }
     return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) { parametersOf(destNum) }
 }
 
+internal fun settingsDestination(backStack: List<NavKey>): Int? =
+    backStack.filterIsInstance<SettingsRoute.Settings>().lastOrNull()?.destNum
+
+internal fun shouldAddSettingsRoute(current: NavKey?, route: Route): Boolean = current != route
+
+private fun NavBackStack<NavKey>.addSettingsRoute(route: Route) {
+    if (shouldAddSettingsRoute(lastOrNull(), route)) add(route)
+}
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
+fun EntryProviderScope<NavKey>.settingsGraph(
+    backStack: NavBackStack<NavKey>,
+    radioConfigViewModelProvider: @Composable () -> RadioConfigViewModel = {
+        entryScopedRadioConfigViewModel(backStack)
+    },
+) {
     entry<SettingsRoute.Settings> { args ->
         val isTabRoot = backStack.firstOrNull() == args
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
+            radioConfigViewModel = radioConfigViewModelProvider(),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
-            onNavigate = { backStack.add(it) },
+            onNavigate = backStack::addSettingsRoute,
             onBack = if (isTabRoot) null else dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
     entry<SettingsRoute.DeviceConfiguration> {
         DeviceConfigurationScreen(
-            viewModel = getRadioConfigViewModel(backStack),
+            viewModel = radioConfigViewModelProvider(),
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
-            onNavigate = { route -> backStack.add(route) },
+            onNavigate = backStack::addSettingsRoute,
         )
     }
 
@@ -110,16 +143,16 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         val settingsViewModel: SettingsViewModel = koinViewModel()
         val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
-            viewModel = getRadioConfigViewModel(backStack),
+            viewModel = radioConfigViewModelProvider(),
             hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
-            onNavigate = { route -> backStack.add(route) },
+            onNavigate = backStack::addSettingsRoute,
         )
     }
 
     entry<SettingsRoute.Administration> {
         AdministrationScreen(
-            viewModel = getRadioConfigViewModel(backStack),
+            viewModel = radioConfigViewModelProvider(),
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
@@ -130,7 +163,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ConfigRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
+        configComposable(routeInfo.route::class, routeInfo, radioConfigViewModelProvider) { viewModel ->
             when (routeInfo) {
                 ConfigRoute.USER ->
                     UserConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -166,7 +199,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ModuleRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
+        configComposable(routeInfo.route::class, routeInfo, radioConfigViewModelProvider) { viewModel ->
             when (routeInfo) {
                 ModuleRoute.MQTT ->
                     MQTTConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -274,12 +307,12 @@ expect fun SettingsMainScreen(
 /** Expect declarations for platform-specific config screens. */
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
-    backStack: NavBackStack<NavKey>,
     routeInfo: Enum<*>,
+    radioConfigViewModelProvider: @Composable () -> RadioConfigViewModel,
     content: @Composable (RadioConfigViewModel) -> Unit,
 ) {
     addEntryProvider(route) {
-        val viewModel = getRadioConfigViewModel(backStack)
+        val viewModel = radioConfigViewModelProvider()
         // Set loading state before content reads the StateFlow, ensuring
         // LoadingOverlay is visible from the very first composition frame.
         remember { viewModel.ensureLoadingForRemote().let { true } }
