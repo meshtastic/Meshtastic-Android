@@ -1,22 +1,29 @@
 name: Docs Release
 
+# Publishes release docs to the persistent gh-pages branch: the site root
+# (latest release) and a permanent /vX.Y.Z/ copy, plus refreshed Dokka at
+# /api/. The /main/ snapshot is owned by docs-deploy.yml and left untouched.
+#
+# workflow_dispatch exists for backfill: run it against a vX.Y.Z tag ref to
+# (re)publish that version without cutting a new tag.
+
 on:
   push:
     tags:
       - 'v*.*.*'
       - '!v*-*'
 
+  workflow_dispatch:
+
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  publish:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -30,6 +37,11 @@ jobs:
       - name: Extract Version
         id: version
         run: |
+          if ! [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "This workflow must run against a vX.Y.Z tag ref (got $GITHUB_REF)." >&2
+            echo "For workflow_dispatch, select the release tag under 'Use workflow from'." >&2
+            exit 1
+          fi
           TAG=${GITHUB_REF#refs/tags/v}
           echo "version=$TAG" >> $GITHUB_OUTPUT
           echo "Deploying docs for version: $TAG"
@@ -65,7 +77,7 @@ jobs:
             --source build/_site/v${{ steps.version.outputs.version }} \
             --destination build/jekyll_release \
             --baseurl /${{ github.event.repository.name }}/v${{ steps.version.outputs.version }}
-          
+
           # Move versioned source folder out of root source folder to avoid nested build issues
           mv build/_site/v${{ steps.version.outputs.version }} build/v_temp
 
@@ -75,39 +87,12 @@ jobs:
             --destination build/jekyll_root \
             --baseurl /${{ github.event.repository.name }}
 
-      - name: Assemble Pages artifact
+      - name: Stage channels
         run: |
-          # Create final site directory
-          mkdir -p build/final_site
-          
-          # Copy root compiled site
-          cp -r build/jekyll_root/* build/final_site/
-          
-          # Copy release compiled site to vX.Y.Z/
-          mkdir -p build/final_site/v${{ steps.version.outputs.version }}
-          cp -r build/jekyll_release/* build/final_site/v${{ steps.version.outputs.version }}/
-          
-          # Copy Dokka output into final_site/api/
-          cp -r build/dokka/html build/final_site/api
-          
-          # Disable GitHub Pages' own Jekyll build
-          touch build/final_site/.nojekyll
+          mkdir -p build/pages_staging
+          cp -r build/jekyll_root build/pages_staging/root
+          cp -r build/jekyll_release build/pages_staging/v${{ steps.version.outputs.version }}
+          cp -r build/dokka/html build/pages_staging/api
 
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: build/final_site/
-
-  deploy:
-    if: github.repository == 'meshtastic/Meshtastic-Android'
-    needs: build
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 15
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
-
+      - name: Publish to gh-pages
+        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging root v${{ steps.version.outputs.version }} api

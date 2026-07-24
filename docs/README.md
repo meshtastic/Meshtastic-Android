@@ -42,3 +42,23 @@ docs/
 4. At build time, the Gradle `syncTranslatedDocsToComposeResources` task bundles them into
    locale-qualified Compose Resources for the in-app reader
 5. The in-app `DocBundleLoader` tries the user's locale first, then falls back to English
+
+## Publishing & Versioning
+
+The GitHub Pages site is published to the persistent `gh-pages` branch as parallel
+channels (GitHub Pages must be configured to serve from that branch):
+
+| Path | Content | Published by |
+|------|---------|--------------|
+| `/` | Latest published release (default landing) | `docs-release.yml` on `vX.Y.Z` tags |
+| `/vX.Y.Z/` | Permanent per-release copy | `docs-release.yml` on `vX.Y.Z` tags |
+| `/main/` | Snapshot of the `main` branch | `docs-deploy.yml` on pushes to `main` |
+| `/api/` | Dokka API reference | both workflows |
+| `/versions.json` | Version manifest for the site's version switcher | regenerated on every deploy |
+
+Each deploy overlays only its own channels via `scripts/docs/publish-to-gh-pages.sh`,
+so release history accumulates instead of being wiped by the next deploy. The header
+version dropdown (`_includes/version_switcher.html`) reads `/versions.json` at runtime;
+a separate header link points to the upstream docs at meshtastic.org. To backfill a
+release (e.g. after first enabling this), run the "Docs Release" workflow manually
+against the release tag.
