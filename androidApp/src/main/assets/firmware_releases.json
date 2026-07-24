@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11191",
+      "title": "Router: defer nested local sends to avoid handleReceived re-entrancy",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11191",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11187",
       "title": "mark way fewer boards as board_level = pr",
       "page_url": "https://github.com/meshtastic/firmware/pull/11187",
@@ -228,6 +234,12 @@
       "id": "11168",
       "title": "lint: drop redundant quotes in .coderabbit.yaml",
       "page_url": "https://github.com/meshtastic/firmware/pull/11168",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11164",
+      "title": "fix(api): bound the stream drain so a full config dump can't starve the watchdog",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11164",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
