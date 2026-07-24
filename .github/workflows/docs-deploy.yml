@@ -16,9 +16,11 @@ on:
       # Docs site sources
       - 'docs/**'
       - 'feature/docs/**'
-      # Build infrastructure
+      # Build infrastructure. Module scripts are included because they can add or
+      # drop exported `api` dependencies and reshape source sets, changing the
+      # generated reference without any edit under src/.
       - 'build-logic/**'
-      - 'build.gradle.kts'
+      - '**/build.gradle.kts'
       - 'settings.gradle.kts'
       - '.github/workflows/docs-deploy.yml'
       - 'scripts/docs/**'
@@ -82,9 +84,11 @@ jobs:
               - 'core/**/src/**'
               - 'feature/**/src/**'
               - 'desktopApp/src/**'
-              # Dokka config, module list and the plugin classpath.
+              # Dokka config, module list and the plugin classpath. '**/build.gradle.kts'
+              # covers the root script as well as every module's, since a module script
+              # can change exported `api` deps or source sets with no src/ edit.
               - 'build-logic/**'
-              - 'build.gradle.kts'
+              - '**/build.gradle.kts'
               - 'settings.gradle.kts'
               - 'gradle/libs.versions.toml'
 
