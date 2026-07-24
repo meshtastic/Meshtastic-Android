@@ -25,6 +25,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update as updateStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString
@@ -50,13 +51,12 @@ import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.Position as ProtoPosition
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
-import kotlinx.coroutines.flow.update as updateStateFlow
-import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
-import org.meshtastic.proto.Position as ProtoPosition
 
 /**
  * Resolves a validated public-key correlation hint from a raw [ByteString]. Returns null unless the key is exactly
@@ -172,7 +172,7 @@ class NodeManagerImpl(
                     .sortedWith(
                         compareByDescending<Node> { isDefaultIdentityPlaceholder(it) }
                             .thenBy { it.lastHeard }
-                            .thenBy { it.num },
+                            .thenBy { it.num }
                     )
             val toDrop = evictable.take(byNum.size - maxNodes)
             return toDrop.fold(this) { index, node -> index.remove(node.num) }
@@ -209,10 +209,11 @@ class NodeManagerImpl(
         }
 
         companion object {
-            internal fun isDefaultIdentityPlaceholder(node: Node): Boolean = nodePublicKeyHint(node) == null &&
-                node.user.hw_model == HardwareModel.UNSET &&
-                node.user.id == NodeAddress.numToDefaultId(node.num) &&
-                node.user.long_name.matches(DEFAULT_NODE_NAME_REGEX)
+            internal fun isDefaultIdentityPlaceholder(node: Node): Boolean =
+                nodePublicKeyHint(node) == null &&
+                    node.user.hw_model == HardwareModel.UNSET &&
+                    node.user.id == NodeAddress.numToDefaultId(node.num) &&
+                    node.user.long_name.matches(DEFAULT_NODE_NAME_REGEX)
 
             /**
              * Selects a deterministic representative number from [candidates] sharing one user ID. If [preferredNum] is
@@ -226,11 +227,11 @@ class NodeManagerImpl(
                 if (preferredNum != null && preferredNum in candidates) return preferredNum
                 return candidates.minWithOrNull(
                     compareByDescending<Int> { num ->
-                        nodes[num]?.let { node ->
-                            nodePublicKeyHint(node) != null || node.user.hw_model != HardwareModel.UNSET
-                        } == true
-                    }
-                        .thenBy { it },
+                            nodes[num]?.let { node ->
+                                nodePublicKeyHint(node) != null || node.user.hw_model != HardwareModel.UNSET
+                            } == true
+                        }
+                        .thenBy { it }
                 )
             }
 
@@ -528,9 +529,9 @@ class NodeManagerImpl(
                 // re-applies the same retirement must preserve the original hint so same-key replay stays suppressed
                 // and a later genuinely different-keyed device can still claim the slot.
                 retiredKeyHints =
-                state.retiredKeyHints.puttingAll(
-                    committedHints.mapNotNull { (num, key) -> key?.let { num to it } }.toMap(),
-                ),
+                    state.retiredKeyHints.puttingAll(
+                        committedHints.mapNotNull { (num, key) -> key?.let { num to it } }.toMap()
+                    ),
                 revision = state.revision + 1,
             )
         }
@@ -589,11 +590,12 @@ class NodeManagerImpl(
         channel: Int,
         session: RadioSessionContext? = null,
         transform: (Node) -> Node,
-    ): NodeStateChange? = updateNodeState(nodeNum, channel, transform).also { change ->
-        if (change != null && shouldPersist(change.next)) {
-            radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(nodeNum) }
+    ): NodeStateChange? =
+        updateNodeState(nodeNum, channel, transform).also { change ->
+            if (change != null && shouldPersist(change.next)) {
+                radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(nodeNum) }
+            }
         }
-    }
 
     override fun updateNode(nodeNum: Int, channel: Int, transform: (Node) -> Node) {
         updateNodeAndSchedulePersistence(nodeNum, channel, transform = transform)
@@ -614,10 +616,11 @@ class NodeManagerImpl(
     }
 
     /** Serializes persistence per node and reads the latest in-memory value inside that lane. */
-    private suspend fun persistLatestNode(nodeNum: Int) = persistenceLane(nodeNum).withLock {
-        val latest = nodeState.value.index.byNum[nodeNum] ?: return@withLock
-        if (shouldPersist(latest)) nodeRepository.upsert(latest)
-    }
+    private suspend fun persistLatestNode(nodeNum: Int) =
+        persistenceLane(nodeNum).withLock {
+            val latest = nodeState.value.index.byNum[nodeNum] ?: return@withLock
+            if (shouldPersist(latest)) nodeRepository.upsert(latest)
+        }
 
     override fun handleReceivedUser(
         fromNum: Int,
@@ -626,7 +629,11 @@ class NodeManagerImpl(
         manuallyVerified: Boolean,
         session: RadioSessionContext?,
     ) {
-        while (true) {
+        // Pin admission and session ownership to packet arrival. A packet that loses a node-state CAS must not become a
+        // live discovery after initial sync, and a packet from a cleared session must never retry into the new one.
+        val allowNotificationAtArrival = isNodeDbReady.value
+        val arrivalSessionGeneration = sessionGeneration.value
+        while (sessionGeneration.value == arrivalSessionGeneration) {
             val before = nodeState.value
             val transition =
                 reduceReceivedUser(
@@ -637,19 +644,21 @@ class NodeManagerImpl(
                     manuallyVerified,
                     before.localNodeNum,
                     before.isRetiredAbsent(fromNum),
+                    allowNotificationAtArrival = allowNotificationAtArrival,
                     retiredKeyHint = before.retiredKeyHints[fromNum],
                 )
             receivedUserReductionHook?.invoke()
+            if (sessionGeneration.value != arrivalSessionGeneration) break
             val after =
                 before
                     .copy(
                         index = transition.after,
                         retiredNodeNums =
-                        transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
-                            ?: before.retiredNodeNums,
+                            transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
+                                ?: before.retiredNodeNums,
                         retiredKeyHints =
-                        transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
-                            ?: before.retiredKeyHints,
+                            transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
+                                ?: before.retiredKeyHints,
                         revision = before.revision + 1,
                     )
                     .withBoundedIndex(alsoKeep = fromNum)
@@ -666,6 +675,7 @@ class NodeManagerImpl(
                 return
             }
         }
+        Logger.d { "[NodeIdentity] user from=$fromNum discarded after session reset" }
     }
 
     override fun handleReceivedPosition(
@@ -849,6 +859,7 @@ class NodeManagerImpl(
         manuallyVerified: Boolean,
         myNum: Int?,
         retiredAbsent: Boolean,
+        allowNotificationAtArrival: Boolean,
         retiredKeyHint: ByteString? = null,
     ): ReceivedUserTransition {
         val resolvedKey = resolveValidatedPublicKeyHint(p.public_key)
@@ -897,16 +908,16 @@ class NodeManagerImpl(
             }
             // Different valid, unrepresented key — legitimate number reuse.
             return sameNumberUserTransition(
-                before = before,
-                fromNum = fromNum,
-                existing = createDefaultNode(fromNum, channel),
-                incoming = p,
-                channel = channel,
-                manuallyVerified = manuallyVerified,
-                persist = true,
-                allowNotification = true,
-                unretireNodeNum = fromNum,
-            )
+                    before = before,
+                    fromNum = fromNum,
+                    existing = createDefaultNode(fromNum, channel),
+                    incoming = p,
+                    channel = channel,
+                    manuallyVerified = manuallyVerified,
+                    persist = true,
+                    allowNotification = allowNotificationAtArrival,
+                    unretireNodeNum = fromNum,
+                )
                 .copy(decision = ReceivedUserDecision.RETIRED_DIFFERENT_KEY_REACTIVATED)
         }
 
@@ -1031,7 +1042,7 @@ class NodeManagerImpl(
             channel,
             manuallyVerified,
             persist = true,
-            allowNotification = true,
+            allowNotification = allowNotificationAtArrival,
         )
     }
 
@@ -1070,12 +1081,12 @@ class NodeManagerImpl(
         return Node(
             num = num,
             user =
-            User(
-                id = userId,
-                long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}",
-                short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH),
-                hw_model = HardwareModel.UNSET,
-            ),
+                User(
+                    id = userId,
+                    long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}",
+                    short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH),
+                    hw_model = HardwareModel.UNSET,
+                ),
             channel = channel,
         )
     }
@@ -1159,7 +1170,7 @@ class NodeManagerImpl(
                         category = Notification.Category.NodeEvent,
                         id = node.num,
                         deepLinkUri = "meshtastic://meshtastic/nodes/${node.num}",
-                    ),
+                    )
                 )
             }
         }
@@ -1173,12 +1184,13 @@ class NodeManagerImpl(
         getStringSuspend(Res.string.new_node_seen, shortName)
     }
 
-    /** Test seam invoked after reduction but before CAS to deterministically race a local-node-number update. */
+    /** Test seam invoked after reduction but before CAS to deterministically race a concurrent node-state update. */
     internal var receivedUserReductionHook: (() -> Unit)? = null
 
-    override fun toNodeID(nodeNum: Int): String = if (nodeNum == NodeAddress.NODENUM_BROADCAST) {
-        NodeAddress.ID_BROADCAST
-    } else {
-        nodeState.value.index.byNum[nodeNum]?.user?.id ?: NodeAddress.numToDefaultId(nodeNum)
-    }
+    override fun toNodeID(nodeNum: Int): String =
+        if (nodeNum == NodeAddress.NODENUM_BROADCAST) {
+            NodeAddress.ID_BROADCAST
+        } else {
+            nodeState.value.index.byNum[nodeNum]?.user?.id ?: NodeAddress.numToDefaultId(nodeNum)
+        }
 }
