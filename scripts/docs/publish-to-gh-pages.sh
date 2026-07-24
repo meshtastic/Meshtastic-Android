@@ -69,44 +69,10 @@ for channel in "${CHANNELS[@]}"; do
     echo "Published channel: $channel"
 done
 
-# Until the first release deploy lands, the site root has no content of its
-# own — point it at the main snapshot so the Pages URL isn't a 404.
-if [ ! -f "$SITE_DIR/index.html" ] && [ -d "$SITE_DIR/main" ]; then
-    cat > "$SITE_DIR/index.html" << 'EOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=./main/">
-  <title>Meshtastic Android Docs</title>
-</head>
-<body><a href="./main/">Redirecting to the main-branch docs…</a></body>
-</html>
-EOF
-    echo "Wrote placeholder root index.html -> main/ (no release published yet)"
-fi
-
-# Regenerate the version manifest consumed by the docs site's version
-# switcher. Latest = highest semver among published vX.Y.Z folders.
-python3 - "$SITE_DIR" << 'EOF'
-import json, os, re, sys
-
-site = sys.argv[1]
-pattern = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
-versions = sorted(
-    (m.groups() for d in os.listdir(site) if (m := pattern.match(d)) and os.path.isdir(os.path.join(site, d))),
-    key=lambda g: tuple(map(int, g)),
-    reverse=True,
-)
-manifest = {
-    "latest": ".".join(versions[0]) if versions else None,
-    "versions": [".".join(v) for v in versions],
-    "hasMain": os.path.isdir(os.path.join(site, "main")),
-}
-with open(os.path.join(site, "versions.json"), "w") as f:
-    json.dump(manifest, f, indent=2)
-print(f"versions.json: {manifest}")
-EOF
+# Regenerate the version manifest consumed by the site's version switcher, and
+# (re)write the root placeholder when no production release owns the root yet.
+# Shared with post-release-cleanup.yml so the two can never derive it differently.
+python3 "$(dirname "$0")/regenerate-versions.py" "$SITE_DIR"
 
 # Pages must serve this branch as-is; the site is already built.
 touch "$SITE_DIR/.nojekyll"

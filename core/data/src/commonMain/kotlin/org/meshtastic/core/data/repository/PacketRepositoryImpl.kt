@@ -463,7 +463,11 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                             node = node,
                             text = packet.data.text.orEmpty(),
                             fromLocal = isFromLocal,
-                            time = org.meshtastic.core.model.util.getShortDateTime(packet.data.time),
+                            meshTime = packet.data.time,
+                            time =
+                            org.meshtastic.core.model.util.getShortDateTime(
+                                packet.data.time.takeIf { it > 0 } ?: packet.received_time,
+                            ),
                             snr = packet.snr,
                             rssi = packet.rssi,
                             hopsAway = packet.hopsAway,

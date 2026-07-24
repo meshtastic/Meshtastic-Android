@@ -192,7 +192,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a

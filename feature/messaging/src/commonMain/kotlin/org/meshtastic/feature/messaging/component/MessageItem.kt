@@ -63,7 +63,6 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.action_show_message_status
@@ -185,7 +184,9 @@ fun MessageItem(
                         } else {
                             null
                         },
-                        timestamp = getShortDateTime(message.receivedTime),
+                        // Mesh time (rx_time), matching the bubble header. receivedTime is when this phone
+                        // pulled the packet off the node, which is misleading after an offline backlog sync.
+                        timestamp = message.time,
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
                         translationRowState = translationRowStateFor(message, translationAvailable),

@@ -18,6 +18,7 @@ package org.meshtastic.app
 
 import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
 import android.os.Build
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -27,6 +28,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,9 +65,13 @@ import kotlin.time.toJavaDuration
  */
 open class MeshUtilApplication :
     Application(),
-    Configuration.Provider {
+    Configuration.Provider,
+    SingletonImageLoader.Factory {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
+    override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
 
     override fun onCreate() {
         super.onCreate()
