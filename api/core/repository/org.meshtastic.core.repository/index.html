@@ -1,0 +1,1651 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.repository</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:repository/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:repository/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:repository/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:repository/androidMain" data-filter=":core:repository/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:repository/commonMain" data-filter=":core:repository/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:repository/jvmMain" data-filter=":core:repository/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-repository::org.meshtastic.core.repository////PointingToDeclaration//-1142044134">
+  <div class="breadcrumbs"><a href="../index.html">core-repository</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.repository</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-2098982101%2FClasslikes%2F-1238997634" anchor-label="AdminController" id="-2098982101%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-admin-controller/index.html"><span>Admin</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2098982101%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-admin-controller/index.html">AdminController</a></div><div class="brief "><p class="paragraph">Device configuration and control operations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-146876623%2FClasslikes%2F-1238997634" anchor-label="AdminEditScope" id="-146876623%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-admin-edit-scope/index.html"><span>Admin</span><wbr><span>Edit</span><wbr><span><span>Scope</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-146876623%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-admin-edit-scope/index.html">AdminEditScope</a></div><div class="brief "><p class="paragraph">Configuration operations valid inside an <a href="-admin-controller/edit-settings.html">AdminController.editSettings</a> transaction, scoped to a single destination node so callers don't repeat the node number or manage packet IDs. Mirrors the SDK's <code class="lang-kotlin">AdminEdit</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1017356807%2FClasslikes%2F-1238997634" anchor-label="AdminPacketHandler" id="-1017356807%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-admin-packet-handler/index.html"><span>Admin</span><wbr><span>Packet</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1017356807%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-admin-packet-handler/index.html">AdminPacketHandler</a></div><div class="brief "><p class="paragraph">Interface for handling admin messages from the mesh (config, metadata, session passkey).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-421506270%2FClasslikes%2F-1238997634" anchor-label="AnalyticsPrefs" id="-421506270%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-analytics-prefs/index.html"><span>Analytics</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-421506270%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-analytics-prefs/index.html">AnalyticsPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for analytics-related preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1602781120%2FClasslikes%2F-1238997634" anchor-label="AppFunctionsPrefs" id="-1602781120%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-functions-prefs/index.html"><span>App</span><wbr><span>Functions</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1602781120%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-app-functions-prefs/index.html">AppFunctionsPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for App Functions (system AI integration) preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2071007115%2FClasslikes%2F-1238997634" anchor-label="AppPreferences" id="-2071007115%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-preferences/index.html"><span>App</span><wbr><span><span>Preferences</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2071007115%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-app-preferences/index.html">AppPreferences</a></div><div class="brief "><p class="paragraph">Consolidated interface for all application preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1220240600%2FClasslikes%2F-1238997634" anchor-label="AppWidgetUpdater" id="-1220240600%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-widget-updater/index.html"><span>App</span><wbr><span>Widget</span><wbr><span><span>Updater</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1220240600%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-app-widget-updater/index.html">AppWidgetUpdater</a></div><div class="brief "><p class="paragraph">Interface for triggering updates to application widgets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2018026742%2FClasslikes%2F-1238997634" anchor-label="CommandSender" id="2018026742%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-command-sender/index.html"><span>Command</span><wbr><span><span>Sender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2018026742%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-command-sender/index.html">CommandSender</a></div><div class="brief "><p class="paragraph">Interface for sending commands and packets to the mesh network.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2028091120%2FClasslikes%2F-1238997634" anchor-label="ConnectionIdentity" id="2028091120%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-connection-identity/index.html"><span>Connection</span><wbr><span><span>Identity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2028091120%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-connection-identity/index.html">ConnectionIdentity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sessionGeneration<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deviceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Fresh-handshake identity for one connection session. Separate from the general <a href="-node-manager/my-node-num.html">NodeManager.myNodeNum</a>/ <a href="-node-manager/my-device-id.html">NodeManager.myDeviceId</a> StateFlows, which can retain stale cached values across transport switches. <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">address</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">nodeNum</a>, and <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">deviceId</a> are captured from one selected transport and one MyNodeInfo handshake so consumers never have to combine independently delivered address and identity flows. <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">sessionGeneration</a> is the active transport session generation at handshake time, so the association collector can discard an identity retained from a previous transport instance even if every other field is equal.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-755355342%2FClasslikes%2F-1238997634" anchor-label="ConnectionStateProvider" id="-755355342%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-connection-state-provider/index.html"><span>Connection</span><wbr><span>State</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-755355342%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-connection-state-provider/index.html">ConnectionStateProvider</a></div><div class="brief "><p class="paragraph">Read-only provider of the canonical app-level connection state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1510820879%2FClasslikes%2F-1238997634" anchor-label="CustomEmojiPrefs" id="-1510820879%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-custom-emoji-prefs/index.html"><span>Custom</span><wbr><span>Emoji</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1510820879%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-custom-emoji-prefs/index.html">CustomEmojiPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for emoji preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1145572808%2FClasslikes%2F-1238997634" anchor-label="DataPair" id="1145572808%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-data-pair/index.html"><span>Data</span><wbr><span><span>Pair</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1145572808%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-data-pair/index.html">DataPair</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>valueIn<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A key-value pair for sending properties with analytics events.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-146666076%2FClasslikes%2F-1238997634" anchor-label="DeviceHardwareRepository" id="-146666076%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-hardware-repository/index.html"><span>Device</span><wbr><span>Hardware</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-146666076%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-device-hardware-repository/index.html">DeviceHardwareRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="222627026%2FClasslikes%2F-1238997634" anchor-label="DeviceLinkRepository" id="222627026%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-link-repository/index.html"><span>Device</span><wbr><span>Link</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="222627026%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-device-link-repository/index.html">DeviceLinkRepository</a></div><div class="brief "><p class="paragraph">Provides msh.to device links resolved by the Meshtastic API (<code class="lang-kotlin">/resource/deviceLinks</code>) and cached locally. Vendor and region-filtered marketplace links are shown on the device hardware detail view, plus a full directory.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-443689609%2FClasslikes%2F-1238997634" anchor-label="DiscoveryPacketCollector" id="-443689609%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-discovery-packet-collector/index.html"><span>Discovery</span><wbr><span>Packet</span><wbr><span><span>Collector</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-443689609%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-discovery-packet-collector/index.html">DiscoveryPacketCollector</a></div><div class="brief "><p class="paragraph">Interface for collecting packets during an active discovery scan. The scan engine implements this interface and registers/unregisters with the packet handler to receive packets during dwell windows.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-564113990%2FClasslikes%2F-1238997634" anchor-label="DiscoveryPacketCollectorRegistry" id="-564113990%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-discovery-packet-collector-registry/index.html"><span>Discovery</span><wbr><span>Packet</span><wbr><span>Collector</span><wbr><span><span>Registry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-564113990%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-discovery-packet-collector-registry/index.html">DiscoveryPacketCollectorRegistry</a></div><div class="brief "><p class="paragraph">Registry for discovery packet collectors. The scan engine registers itself when a scan starts and unregisters when it stops. The packet handler checks for an active collector and forwards packets to it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1651796020%2FClasslikes%2F-1238997634" anchor-label="DiscoveryPrefs" id="-1651796020%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-discovery-prefs/index.html"><span>Discovery</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1651796020%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-discovery-prefs/index.html">DiscoveryPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for Local Mesh Discovery scan preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1147072855%2FClasslikes%2F-1238997634" anchor-label="EventFirmwareRepository" id="1147072855%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-event-firmware-repository/index.html"><span>Event</span><wbr><span>Firmware</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1147072855%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-event-firmware-repository/index.html">EventFirmwareRepository</a></div><div class="brief "><p class="paragraph">Event-firmware display metadata, seeded from the bundled <code class="lang-kotlin">event_firmware.json</code> snapshot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-371202019%2FClasslikes%2F-1238997634" anchor-label="FileService" id="-371202019%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-file-service/index.html"><span>File</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-371202019%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-file-service/index.html">FileService</a></div><div class="brief "><p class="paragraph">Abstracts file system operations (like reading from or writing to URIs) so that ViewModels can remain platform-independent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="857593982%2FClasslikes%2F-1238997634" anchor-label="FilterPrefs" id="857593982%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-filter-prefs/index.html"><span>Filter</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="857593982%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-filter-prefs/index.html">FilterPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for message filtering preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-60326560%2FClasslikes%2F-1238997634" anchor-label="FirmwareReleaseRepository" id="-60326560%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-release-repository/index.html"><span>Firmware</span><wbr><span>Release</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-60326560%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-release-repository/index.html">FirmwareReleaseRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1139460170%2FClasslikes%2F-1238997634" anchor-label="FirmwareUpdateStatus" id="-1139460170%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-status/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1139460170%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-firmware-update-status/index.html">FirmwareUpdateStatus</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>isOtaUpdateActive<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isAwaitingOtaStatus<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1238395212%2FClasslikes%2F-1238997634" anchor-label="FirmwareUpdateStatusRepository" id="1238395212%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-status-repository/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span>Status</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1238395212%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1398293019%2FClasslikes%2F-1238997634" anchor-label="FromRadioPacketHandler" id="1398293019%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-from-radio-packet-handler/index.html"><span>From</span><wbr><span>Radio</span><wbr><span>Packet</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1398293019%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-from-radio-packet-handler/index.html">FromRadioPacketHandler</a></div><div class="brief "><p class="paragraph">Interface for dispatching non-packet <span data-unresolved-link="org.meshtastic.proto/FromRadio///PointingToDeclaration/">FromRadio</span> variants to their respective handlers.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-199585516%2FClasslikes%2F-1238997634" anchor-label="HandshakeConstants" id="-199585516%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-handshake-constants/index.html"><span>Handshake</span><wbr><span><span>Constants</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-199585516%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-handshake-constants/index.html">HandshakeConstants</a></div><div class="brief "><p class="paragraph">Shared constants for the two-stage mesh handshake protocol.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1313379245%2FClasslikes%2F-1238997634" anchor-label="HistoryManager" id="-1313379245%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-history-manager/index.html"><span>History</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1313379245%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-history-manager/index.html">HistoryManager</a></div><div class="brief "><p class="paragraph">Interface for managing store-and-forward history replay requests.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-846721857%2FClasslikes%2F-1238997634" anchor-label="HomoglyphPrefs" id="-846721857%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-homoglyph-prefs/index.html"><span>Homoglyph</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-846721857%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-homoglyph-prefs/index.html">HomoglyphPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for homoglyph encoding preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-394685225%2FClasslikes%2F-1142044134" anchor-label="Location" id="-394685225%2FClasslikes%2F-1142044134" data-filterable-set=":core:repository/commonMain,:core:repository/jvmMain,:core:repository/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain,:core:repository/jvmMain,:core:repository/androidMain" data-filterable-set=":core:repository/commonMain,:core:repository/jvmMain,:core:repository/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-location/index.html"><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-394685225%2FClasslikes%2F-1142044134"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:repository/androidMain" data-filterable-set=":core:repository/androidMain" data-active="" data-toggle=":core:repository/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain" data-toggle=":core:repository/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:repository/jvmMain" data-filterable-set=":core:repository/jvmMain" data-toggle=":core:repository/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:repository/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">typealias </span><a href="-location/index.html">Location</a><span class="token operator"> = </span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">android.location.Location</a></div><div class="symbol monospace"><span class="token keyword">typealias </span><a href="-location/index.html">Location</a><span class="token operator"> = </span><a href="https://developer.android.com/reference/kotlin/android/location/Location.html">android.location.Location</a></div><div class="brief "><p class="paragraph">Android-specific location object typealias for KMP.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">class </span><a href="-location/index.html">Location</a></div><div class="brief "><p class="paragraph">Platform-independent location object for KMP.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:repository/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">class </span><a href="-location/index.html">Location</a></div><div class="brief "><p class="paragraph">JVM placeholder location type for repository smoke compilation.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1885368019%2FClasslikes%2F-1238997634" anchor-label="LocationRepository" id="-1885368019%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-location-repository/index.html"><span>Location</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1885368019%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-location-repository/index.html">LocationRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="459486166%2FClasslikes%2F-1238997634" anchor-label="LocationService" id="459486166%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-location-service/index.html"><span>Location</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="459486166%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-location-service/index.html">LocationService</a></div><div class="brief "><p class="paragraph">Abstracts high-level location requests (such as one-off current location) that may require platform-specific permission checks or hardware interactions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-16477357%2FClasslikes%2F-1238997634" anchor-label="LockdownCoordinator" id="-16477357%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-lockdown-coordinator/index.html"><span>Lockdown</span><wbr><span><span>Coordinator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-16477357%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-lockdown-coordinator/index.html">LockdownCoordinator</a></div><div class="brief "><p class="paragraph">Coordinates lockdown passphrase authentication for firmware-locked devices.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1023428204%2FClasslikes%2F-1238997634" anchor-label="LockdownPassphraseStore" id="1023428204%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-lockdown-passphrase-store/index.html"><span>Lockdown</span><wbr><span>Passphrase</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1023428204%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-lockdown-passphrase-store/index.html">LockdownPassphraseStore</a></div><div class="brief "><p class="paragraph">Encrypted per-device storage for lockdown passphrases.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1357868844%2FClasslikes%2F-1238997634" anchor-label="MapCameraPosition" id="1357868844%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-camera-position/index.html"><span>Map</span><wbr><span>Camera</span><wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1357868844%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-map-camera-position/index.html">MapCameraPosition</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="973184804%2FClasslikes%2F-1238997634" anchor-label="MapConsentPrefs" id="973184804%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-consent-prefs/index.html"><span>Map</span><wbr><span>Consent</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="973184804%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-map-consent-prefs/index.html">MapConsentPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for map consent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-410404168%2FClasslikes%2F-1238997634" anchor-label="MapPrefs" id="-410404168%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-prefs/index.html"><span>Map</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-410404168%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-map-prefs/index.html">MapPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for general map preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-81771817%2FClasslikes%2F-1238997634" anchor-label="MapTileProviderPrefs" id="-81771817%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-tile-provider-prefs/index.html"><span>Map</span><wbr><span>Tile</span><wbr><span>Provider</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-81771817%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-map-tile-provider-prefs/index.html">MapTileProviderPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for map tile provider settings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="257132887%2FClasslikes%2F-1238997634" anchor-label="MeshBeaconPrefs" id="257132887%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-beacon-prefs/index.html"><span>Mesh</span><wbr><span>Beacon</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="257132887%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-beacon-prefs/index.html">MeshBeaconPrefs</a></div><div class="brief "><p class="paragraph">Reactive persistence for received Mesh Beacon invitations. Records are opaque, self-describing strings (see <code class="lang-kotlin">MeshBeaconOffer.encode</code>) so this prefs layer stays free of proto/model types.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1252452369%2FClasslikes%2F-1238997634" anchor-label="MeshBeaconRepository" id="1252452369%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-beacon-repository/index.html"><span>Mesh</span><wbr><span>Beacon</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1252452369%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-beacon-repository/index.html">MeshBeaconRepository</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">prefs<span class="token operator">: </span><a href="-mesh-beacon-prefs/index.html">MeshBeaconPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Holds Mesh Beacon invitations received from other meshes. Beacons are advisory, zero-hop advertisements — not messages or contacts — so they live in the Discovery surface, which presents them for the user to Discover / Join / Dismiss. The list is capped and deduped in memory (the source of truth) and written through to <a href="-mesh-beacon-prefs/index.html">MeshBeaconPrefs</a> so invitations survive an app restart until the user explicitly dismisses them (Apple <code class="lang-kotlin">014-mesh-beacons</code> FR-015).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1785108538%2FClasslikes%2F-1238997634" anchor-label="MeshConfigFlowManager" id="-1785108538%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-config-flow-manager/index.html"><span>Mesh</span><wbr><span>Config</span><wbr><span>Flow</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1785108538%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-config-flow-manager/index.html">MeshConfigFlowManager</a></div><div class="brief "><p class="paragraph">Interface for managing the configuration flow, including local node info and metadata.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1537869957%2FClasslikes%2F-1238997634" anchor-label="MeshConfigHandler" id="-1537869957%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-config-handler/index.html"><span>Mesh</span><wbr><span>Config</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1537869957%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-config-handler/index.html">MeshConfigHandler</a></div><div class="brief "><p class="paragraph">Interface for handling device and module configuration updates.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1274259220%2FClasslikes%2F-1238997634" anchor-label="MeshConnectionManager" id="1274259220%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-connection-manager/index.html"><span>Mesh</span><wbr><span>Connection</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1274259220%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-connection-manager/index.html">MeshConnectionManager</a></div><div class="brief "><p class="paragraph">Interface for managing the connection lifecycle and status with the mesh radio.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1197054051%2FClasslikes%2F-1238997634" anchor-label="MeshDataHandler" id="1197054051%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-data-handler/index.html"><span>Mesh</span><wbr><span>Data</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1197054051%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-data-handler/index.html">MeshDataHandler</a></div><div class="brief "><p class="paragraph">Interface for handling incoming mesh data packets and routing them to the appropriate handlers.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1565474923%2FClasslikes%2F-1238997634" anchor-label="MeshLocationManager" id="1565474923%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-location-manager/index.html"><span>Mesh</span><wbr><span>Location</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1565474923%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-location-manager/index.html">MeshLocationManager</a></div><div class="brief "><p class="paragraph">Interface for managing the local node's location updates and reporting.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-45467469%2FClasslikes%2F-1238997634" anchor-label="MeshLogPrefs" id="-45467469%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-log-prefs/index.html"><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-45467469%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-log-prefs/index.html">MeshLogPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for mesh log preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-477924811%2FClasslikes%2F-1238997634" anchor-label="MeshLogRepository" id="-477924811%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-log-repository/index.html"><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-477924811%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-log-repository/index.html">MeshLogRepository</a></div><div class="brief "><p class="paragraph">Repository interface for managing and retrieving logs from the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1977023764%2FClasslikes%2F-1238997634" anchor-label="MeshMessageProcessor" id="1977023764%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-message-processor/index.html"><span>Mesh</span><wbr><span>Message</span><wbr><span><span>Processor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1977023764%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-message-processor/index.html">MeshMessageProcessor</a></div><div class="brief "><p class="paragraph">Interface for processing incoming radio messages and mesh packets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1659357345%2FClasslikes%2F-1238997634" anchor-label="MeshNotificationManager" id="1659357345%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-notification-manager/index.html"><span>Mesh</span><wbr><span>Notification</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1659357345%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-notification-manager/index.html">MeshNotificationManager</a></div><div class="brief "><p class="paragraph">Mesh-domain notification builder. Provides high-level operations for the message arrival, waypoint, reaction, new node, low-battery, and client notification flows specific to this app. Implementations are expected to render the platform notification themselves; the generic dispatch primitive is <a href="-notification-manager/index.html">NotificationManager</a> (which posts/cancels opaque <a href="-notification/index.html">Notification</a> records and is <i>not</i> domain-aware).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1295303309%2FClasslikes%2F-1238997634" anchor-label="MeshPrefs" id="-1295303309%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-prefs/index.html"><span>Mesh</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1295303309%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-prefs/index.html">MeshPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for mesh connection settings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-21674828%2FClasslikes%2F-1238997634" anchor-label="MeshWorkerManager" id="-21674828%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-worker-manager/index.html"><span>Mesh</span><wbr><span>Worker</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-21674828%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mesh-worker-manager/index.html">MeshWorkerManager</a></div><div class="brief "><p class="paragraph">Interface for managing background workers for mesh-related tasks.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1746902231%2FClasslikes%2F-1238997634" anchor-label="MessageFilter" id="1746902231%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-filter/index.html"><span>Message</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1746902231%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-message-filter/index.html">MessageFilter</a></div><div class="brief "><p class="paragraph">Interface for filtering messages based on user-configured filter words.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1132481378%2FClasslikes%2F-1238997634" anchor-label="MessageQueue" id="1132481378%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-queue/index.html"><span>Message</span><wbr><span><span>Queue</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1132481378%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-message-queue/index.html">MessageQueue</a></div><div class="brief "><p class="paragraph">Interface for enqueuing background work for transmitting messages. This allows the domain layer to trigger durable transmission without depending on Android-specific WorkManager.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-5185322%2FClasslikes%2F-1238997634" anchor-label="MessagingController" id="-5185322%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-messaging-controller/index.html"><span>Messaging</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-5185322%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-messaging-controller/index.html">MessagingController</a></div><div class="brief "><p class="paragraph">Messaging operations — sending data packets, reactions, and shared contacts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1426510797%2FClasslikes%2F-1238997634" anchor-label="MqttManager" id="1426510797%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mqtt-manager/index.html"><span>Mqtt</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1426510797%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-mqtt-manager/index.html">MqttManager</a></div><div class="brief "><p class="paragraph">Interface for managing MQTT proxy communication.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-732935828%2FClasslikes%2F-1238997634" anchor-label="NeighborInfoHandler" id="-732935828%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-neighbor-info-handler/index.html"><span>Neighbor</span><wbr><span>Info</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-732935828%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-neighbor-info-handler/index.html">NeighborInfoHandler</a></div><div class="brief "><p class="paragraph">Interface for handling neighbor info responses from the mesh.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1849516922%2FClasslikes%2F-1238997634" anchor-label="NeighborInfoResponseProvider" id="1849516922%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-neighbor-info-response-provider/index.html"><span>Neighbor</span><wbr><span>Info</span><wbr><span>Response</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1849516922%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-neighbor-info-response-provider/index.html">NeighborInfoResponseProvider</a></div><div class="brief "><p class="paragraph">Read-only provider of neighbor info response state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1975679698%2FClasslikes%2F-1238997634" anchor-label="NodeController" id="-1975679698%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-controller/index.html"><span>Node</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1975679698%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-node-controller/index.html">NodeController</a></div><div class="brief "><p class="paragraph">Node management operations — favorite, ignore, mute, and remove nodes.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-906738005%2FClasslikes%2F-1238997634" anchor-label="NodeManager" id="-906738005%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-manager/index.html"><span>Node</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-906738005%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-node-manager/index.html">NodeManager</a> : <a href="../../../core/model/org.meshtastic.core.model.util/-node-id-lookup/index.html">NodeIdLookup</a></div><div class="brief "><p class="paragraph">Interface for managing the in-memory node database and processing received node information.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1538298560%2FClasslikes%2F-1238997634" anchor-label="NodeRepository" id="-1538298560%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-repository/index.html"><span>Node</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1538298560%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-node-repository/index.html">NodeRepository</a></div><div class="brief "><p class="paragraph">Repository interface for managing node-related data.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1033013953%2FClasslikes%2F-1238997634" anchor-label="NodeRestartTracker" id="1033013953%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-restart-tracker/index.html"><span>Node</span><wbr><span>Restart</span><wbr><span><span>Tracker</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1033013953%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-node-restart-tracker/index.html">NodeRestartTracker</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Tracks a window in which the locally connected node is expected to restart (a config save the firmware applies with a reboot, or an explicit reboot command). While the window is open, an observed transport disconnect is the expected consequence of the restart — the UI presents "restarting" instead of the alarming disconnected state, and the foreground-service notification stays on a connecting presentation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1635942687%2FClasslikes%2F-1238997634" anchor-label="Notification" id="-1635942687%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-notification/index.html"><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1635942687%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-notification/index.html">Notification</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>title<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="-notification/-type/index.html">Notification.Type</a><span class="token operator"> = </span>Type.Info<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>category<span class="token operator">: </span><a href="-notification/-category/index.html">Notification.Category</a><span class="token operator"> = </span>Category.Message<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isSilent<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>group<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deepLinkUri<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-875296620%2FClasslikes%2F-1238997634" anchor-label="NotificationManager" id="-875296620%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-notification-manager/index.html"><span>Notification</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-875296620%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-notification-manager/index.html">NotificationManager</a></div><div class="brief "><p class="paragraph">Platform-agnostic notification dispatch primitive. Posts opaque <a href="-notification/index.html">Notification</a> records, cancels by id, or wipes all active notifications. Intended as the lowest layer of the notification stack.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1616079601%2FClasslikes%2F-1238997634" anchor-label="NotificationPrefs" id="1616079601%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-notification-prefs/index.html"><span>Notification</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1616079601%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-notification-prefs/index.html">NotificationPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for notification preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="346036980%2FClasslikes%2F-1238997634" anchor-label="PacketHandler" id="346036980%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-packet-handler/index.html"><span>Packet</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="346036980%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-packet-handler/index.html">PacketHandler</a></div><div class="brief "><p class="paragraph">Interface for handling the transmission of packets to the radio and managing the packet queue.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="929259066%2FClasslikes%2F-1238997634" anchor-label="PacketRepository" id="929259066%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-packet-repository/index.html"><span>Packet</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="929259066%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-packet-repository/index.html">PacketRepository</a></div><div class="brief "><p class="paragraph">Repository interface for managing mesh packets and message history.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1038159587%2FClasslikes%2F-1238997634" anchor-label="PlatformAnalytics" id="1038159587%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-platform-analytics/index.html"><span>Platform</span><wbr><span><span>Analytics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1038159587%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-platform-analytics/index.html">PlatformAnalytics</a></div><div class="brief "><p class="paragraph">Interface to abstract platform-specific functionalities, primarily for analytics and related services that differ between product flavors.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-220429550%2FClasslikes%2F-1238997634" anchor-label="QueryController" id="-220429550%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-query-controller/index.html"><span>Query</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-220429550%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-query-controller/index.html">QueryController</a></div><div class="brief "><p class="paragraph">Mesh query operations — position, traceroute, telemetry, user info, and metadata.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1973877585%2FClasslikes%2F-1238997634" anchor-label="QuickChatActionRepository" id="1973877585%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-quick-chat-action-repository/index.html"><span>Quick</span><wbr><span>Chat</span><wbr><span>Action</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1973877585%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-quick-chat-action-repository/index.html">QuickChatActionRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-820371217%2FClasslikes%2F-1238997634" anchor-label="RadioConfigRepository" id="-820371217%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-config-repository/index.html"><span>Radio</span><wbr><span>Config</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-820371217%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-config-repository/index.html">RadioConfigRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-113908993%2FClasslikes%2F-1238997634" anchor-label="RadioController" id="-113908993%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-controller/index.html"><span>Radio</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-113908993%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-controller/index.html">RadioController</a> : <a href="-admin-controller/index.html">AdminController</a>, <a href="-messaging-controller/index.html">MessagingController</a>, <a href="-node-controller/index.html">NodeController</a>, <a href="-query-controller/index.html">QueryController</a>, <a href="-connection-state-provider/index.html">ConnectionStateProvider</a></div><div class="brief "><p class="paragraph">Central interface for controlling the radio and mesh network.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1571458081%2FClasslikes%2F-1238997634" anchor-label="RadioInterfaceService" id="-1571458081%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-interface-service/index.html"><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1571458081%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-interface-service/index.html">RadioInterfaceService</a> : <a href="-radio-transport-callback/index.html">RadioTransportCallback</a>, <a href="-radio-session-authority/index.html">RadioSessionAuthority</a></div><div class="brief "><p class="paragraph">Interface for the low-level radio interface that handles raw byte communication.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2005875113%2FClasslikes%2F-1238997634" anchor-label="RadioPrefs" id="-2005875113%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-prefs/index.html"><span>Radio</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2005875113%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-prefs/index.html">RadioPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for radio settings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="279894766%2FClasslikes%2F-1238997634" anchor-label="RadioSessionAuthority" id="279894766%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-session-authority/index.html"><span>Radio</span><wbr><span>Session</span><wbr><span><span>Authority</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="279894766%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-session-authority/index.html">RadioSessionAuthority</a></div><div class="brief "><p class="paragraph">Owns admission and revocation for work bound to one transport session.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1734040062%2FClasslikes%2F-1238997634" anchor-label="RadioSessionContext" id="-1734040062%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-session-context/index.html"><span>Radio</span><wbr><span>Session</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1734040062%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-radio-session-context/index.html">RadioSessionContext</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>generation<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Immutable identity of the transport session that admitted an inbound radio frame.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-309052489%2FClasslikes%2F-1238997634" anchor-label="RadioSessionLease" id="-309052489%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-session-lease/index.html"><span>Radio</span><wbr><span>Session</span><wbr><span><span>Lease</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-309052489%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-session-lease/index.html">RadioSessionLease</a></div><div class="brief "><p class="paragraph">A lifecycle lease held by one already-admitted operation for <a href="-radio-session-lease/session.html">session</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1459478782%2FClasslikes%2F-1238997634" anchor-label="RadioTransport" id="1459478782%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-transport/index.html"><span>Radio</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1459478782%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-transport/index.html">RadioTransport</a></div><div class="brief "><p class="paragraph">Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the KMP-compatible replacement for the legacy Android-specific IRadioInterface.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-681276615%2FClasslikes%2F-1238997634" anchor-label="RadioTransportCallback" id="-681276615%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-transport-callback/index.html"><span>Radio</span><wbr><span>Transport</span><wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-681276615%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-transport-callback/index.html">RadioTransportCallback</a></div><div class="brief "><p class="paragraph">Narrow callback interface for transport → service communication.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1204530458%2FClasslikes%2F-1238997634" anchor-label="RadioTransportFactory" id="1204530458%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-transport-factory/index.html"><span>Radio</span><wbr><span>Transport</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1204530458%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-transport-factory/index.html">RadioTransportFactory</a></div><div class="brief "><p class="paragraph">Creates <a href="-radio-transport/index.html">RadioTransport</a> instances for specific device addresses.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-936198759%2FClasslikes%2F-1238997634" anchor-label="ReceivedRadioFrame" id="-936198759%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-received-radio-frame/index.html"><span>Received</span><wbr><span>Radio</span><wbr><span><span>Frame</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-936198759%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-received-radio-frame/index.html">ReceivedRadioFrame</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>payload<span class="token operator">: </span><span data-unresolved-link="okio/ByteString///PointingToDeclaration/">ByteString</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>session<span class="token operator">: </span><a href="-radio-session-context/index.html">RadioSessionContext</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An inbound radio payload bound to the transport session that admitted it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-823571476%2FClasslikes%2F-1238997634" anchor-label="SecurityKeyBackupStore" id="-823571476%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-security-key-backup-store/index.html"><span>Security</span><wbr><span>Key</span><wbr><span>Backup</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-823571476%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-security-key-backup-store/index.html">SecurityKeyBackupStore</a></div><div class="brief "><p class="paragraph">Encrypted per-node storage for security (public/private) key backups.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-388912937%2FClasslikes%2F-1238997634" anchor-label="ServiceRepository" id="-388912937%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-service-repository/index.html"><span>Service</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-388912937%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-service-repository/index.html">ServiceRepository</a> : <a href="-connection-state-provider/index.html">ConnectionStateProvider</a>, <a href="-traceroute-response-provider/index.html">TracerouteResponseProvider</a>, <a href="-neighbor-info-response-provider/index.html">NeighborInfoResponseProvider</a>, <a href="-service-state-writer/index.html">ServiceStateWriter</a></div><div class="brief "><p class="paragraph">Interface for managing background service state, connection status, and mesh events.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="152271261%2FClasslikes%2F-1238997634" anchor-label="ServiceStateWriter" id="152271261%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-service-state-writer/index.html"><span>Service</span><wbr><span>State</span><wbr><span><span>Writer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="152271261%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-service-state-writer/index.html">ServiceStateWriter</a></div><div class="brief "><p class="paragraph">Write-side interface for service state mutations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-763395499%2FClasslikes%2F-1238997634" anchor-label="SessionManager" id="-763395499%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-session-manager/index.html"><span>Session</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-763395499%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-session-manager/index.html">SessionManager</a></div><div class="brief "><p class="paragraph">Owns per-node remote-administration session state — the session passkey the firmware embeds in every admin response and the timestamp it was last refreshed at.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1422924415%2FClasslikes%2F-1238997634" anchor-label="StoredPassphrase" id="1422924415%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stored-passphrase/index.html"><span>Stored</span><wbr><span><span>Passphrase</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1422924415%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-stored-passphrase/index.html">StoredPassphrase</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>passphrase<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>boots<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hours<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>maxSessionSeconds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stored passphrase entry with associated TTL parameters.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2140203915%2FClasslikes%2F-1238997634" anchor-label="StoredSecurityKeys" id="-2140203915%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stored-security-keys/index.html"><span>Stored</span><wbr><span>Security</span><wbr><span><span>Keys</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2140203915%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-stored-security-keys/index.html">StoredSecurityKeys</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>publicKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>privateKeyBase64<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>timestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A public/private key pair backed up for a single node, plus when it was saved.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1377960136%2FClasslikes%2F-1238997634" anchor-label="StoreForwardPacketHandler" id="-1377960136%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-store-forward-packet-handler/index.html"><span>Store</span><wbr><span>Forward</span><wbr><span>Packet</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1377960136%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-store-forward-packet-handler/index.html">StoreForwardPacketHandler</a></div><div class="brief "><p class="paragraph">Interface for handling Store &amp; Forward (legacy) and SF++ packets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-270273158%2FClasslikes%2F-1238997634" anchor-label="TakPrefs" id="-270273158%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-tak-prefs/index.html"><span>Tak</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-270273158%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-tak-prefs/index.html">TakPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for TAK server settings.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1833167203%2FClasslikes%2F-1238997634" anchor-label="TelemetryPacketHandler" id="1833167203%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-telemetry-packet-handler/index.html"><span>Telemetry</span><wbr><span>Packet</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1833167203%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-telemetry-packet-handler/index.html">TelemetryPacketHandler</a></div><div class="brief "><p class="paragraph">Interface for handling telemetry packets from the mesh, including battery notifications.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="917342224%2FClasslikes%2F-1238997634" anchor-label="TracerouteHandler" id="917342224%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-handler/index.html"><span>Traceroute</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="917342224%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-traceroute-handler/index.html">TracerouteHandler</a></div><div class="brief "><p class="paragraph">Interface for handling traceroute responses from the mesh.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1393402538%2FClasslikes%2F-1238997634" anchor-label="TracerouteResponseProvider" id="-1393402538%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-response-provider/index.html"><span>Traceroute</span><wbr><span>Response</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1393402538%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-traceroute-response-provider/index.html">TracerouteResponseProvider</a></div><div class="brief "><p class="paragraph">Read-only provider of traceroute response state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-136159174%2FClasslikes%2F-1238997634" anchor-label="TracerouteSnapshotRepository" id="-136159174%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-snapshot-repository/index.html"><span>Traceroute</span><wbr><span>Snapshot</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-136159174%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-traceroute-snapshot-repository/index.html">TracerouteSnapshotRepository</a></div><div class="brief "><p class="paragraph">Repository interface for managing snapshots of traceroute results.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1936499629%2FClasslikes%2F-1238997634" anchor-label="TransportDisconnectReason" id="1936499629%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-transport-disconnect-reason/index.html"><span>Transport</span><wbr><span>Disconnect</span><wbr><span><span>Reason</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1936499629%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-transport-disconnect-reason/index.html">TransportDisconnectReason</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-transport-disconnect-reason/index.html">TransportDisconnectReason</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Machine-readable transport disconnect causes that need service/UI-specific handling.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2030944998%2FClasslikes%2F-1238997634" anchor-label="UiPrefs" id="-2030944998%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-prefs/index.html"><span>Ui</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2030944998%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ui-prefs/index.html">UiPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for general UI preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="341972414%2FClasslikes%2F-1238997634" anchor-label="XModemFile" id="341972414%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-x-modem-file/index.html"><span>XModem</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="341972414%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-x-modem-file/index.html">XModemFile</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>data<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A file received via an XModem transfer from the connected device.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1093150971%2FClasslikes%2F-1238997634" anchor-label="XModemManager" id="1093150971%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-x-modem-manager/index.html"><span>XModem</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1093150971%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-x-modem-manager/index.html">XModemManager</a></div><div class="brief "><p class="paragraph">Handles the XModem-CRC receive protocol for file transfers from the connected device.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1377815936%2FProperties%2F-1238997634" anchor-label="SERVICE_NOTIFY_ID" id="1377815936%2FProperties%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-r-v-i-c-e_-n-o-t-i-f-y_-i-d.html"><span>SERVICE_</span><wbr><span>NOTIFY_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1377815936%2FProperties%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-r-v-i-c-e_-n-o-t-i-f-y_-i-d.html">SERVICE_NOTIFY_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">101</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1005941983%2FFunctions%2F-1238997634" anchor-label="isBle" id="1005941983%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-ble.html"><span>is</span><wbr><span><span>Ble</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1005941983%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">.</span><a href="is-ble.html"><span class="token function">isBle</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1503915382%2FFunctions%2F-1238997634" anchor-label="isMock" id="1503915382%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-mock.html"><span>is</span><wbr><span><span>Mock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1503915382%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">.</span><a href="is-mock.html"><span class="token function">isMock</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="846433614%2FFunctions%2F-1238997634" anchor-label="isNoop" id="846433614%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-noop.html"><span>is</span><wbr><span><span>Noop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="846433614%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">.</span><a href="is-noop.html"><span class="token function">isNoop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="639568480%2FFunctions%2F-1238997634" anchor-label="isSerial" id="639568480%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-serial.html"><span>is</span><wbr><span><span>Serial</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="639568480%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">.</span><a href="is-serial.html"><span class="token function">isSerial</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="623115749%2FFunctions%2F-1238997634" anchor-label="isTcp" id="623115749%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-tcp.html"><span>is</span><wbr><span><span>Tcp</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="623115749%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">.</span><a href="is-tcp.html"><span class="token function">isTcp</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

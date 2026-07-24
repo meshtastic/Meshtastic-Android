@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de-rDE" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Translate the App</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="translate" data-locale="de-rDE">
+<pre class="markdown-content"># Translate the App
+
+Contributing translations helps make Meshtastic accessible to a wider audience. The app uses [Crowdin](https://crowdin.com/) to manage community translations for both the user interface and in-app documentation.
+
+-------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+ UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                   |
+ User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help &amp; Documentation |
+ Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
+
+&gt; ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
+
+## Adding a New Language
+
+If your language is not yet listed on Crowdin:
+
+1. Open an issue on [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) requesting the new locale.
+2. A maintainer will add the language to Crowdin and configure `crowdin.yml`.
+3. Once added, you can begin translating immediately.
+
+## Translation Guidelines
+
+- **Do not translate** technical terms like "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — these are universal.
+- **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
+- **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
+- **Test if possible.** Switch your device language and open the app to see how translations look in context.
+
+---
+
+## Questions?
+
+If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+
+Vielen Dank, dass Sie dabei geholfen haben, die Reichweite von Meshtastic zu vergrößern!
+</pre>
+</body>
+</html>

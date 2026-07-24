@@ -1,0 +1,508 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.feature.messaging.component</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:messaging/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:messaging/commonMain" data-filter=":feature:messaging/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-messaging::org.meshtastic.feature.messaging.component////PointingToDeclaration//340326585">
+  <div class="breadcrumbs"><a href="../index.html">feature-messaging</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.messaging.component</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-334366440%2FClasslikes%2F340326585" anchor-label="MessageMenuAction" id="-334366440%2FClasslikes%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-menu-action/index.html"><span>Message</span><wbr><span>Menu</span><wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-334366440%2FClasslikes%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-message-menu-action/index.html">MessageMenuAction</a></div><div class="brief "><p class="paragraph">Actions available in the message selection mode's top bar.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-58514164%2FClasslikes%2F340326585" anchor-label="TranslationRowState" id="-58514164%2FClasslikes%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-translation-row-state/index.html"><span>Translation</span><wbr><span>Row</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-58514164%2FClasslikes%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-translation-row-state/index.html">TranslationRowState</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-translation-row-state/index.html">TranslationRowState</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Which translation action row the message actions sheet shows, if any (null = row hidden).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1502409104%2FProperties%2F340326585" anchor-label="MESSAGE_CHARACTER_LIMIT_BYTES" id="-1502409104%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-e_-c-h-a-r-a-c-t-e-r_-l-i-m-i-t_-b-y-t-e-s.html"><span>MESSAGE_</span><wbr><span>CHARACTER_</span><wbr><span>LIMIT_</span><wbr><span>BYTES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1502409104%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-e_-c-h-a-r-a-c-t-e-r_-l-i-m-i-t_-b-y-t-e-s.html">MESSAGE_CHARACTER_LIMIT_BYTES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">200</span></div><div class="brief "><p class="paragraph">The maximum byte size for a message.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1777129320%2FFunctions%2F340326585" anchor-label="ActionModeTopBar" id="-1777129320%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-action-mode-top-bar.html"><span>Action</span><wbr><span>Mode</span><wbr><span>Top</span><wbr><span><span>Bar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1777129320%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-action-mode-top-bar.html"><span class="token function">ActionModeTopBar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">selectedCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">onAction<span class="token operator">: </span><span class="token punctuation">(</span><a href="-message-menu-action/index.html">MessageMenuAction</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The top app bar displayed when in message selection mode.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2126169521%2FFunctions%2F340326585" anchor-label="DeleteMessageDialog" id="2126169521%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-delete-message-dialog.html"><span>Delete</span><wbr><span>Message</span><wbr><span><span>Dialog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2126169521%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-delete-message-dialog.html"><span class="token function">DeleteMessageDialog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">count<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">onConfirm<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A dialog confirming the deletion of messages.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1176017092%2FFunctions%2F340326585" anchor-label="ellipsize" id="-1176017092%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ellipsize.html"><span><span>ellipsize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1176017092%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">.</span><a href="ellipsize.html"><span class="token function">ellipsize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxLength<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Ellipsizes a string if its length exceeds <a href="ellipsize.html">maxLength</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2029323850%2FFunctions%2F340326585" anchor-label="getMessageBubbleShape" id="2029323850%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-message-bubble-shape.html"><span>get</span><wbr><span>Message</span><wbr><span>Bubble</span><wbr><span><span>Shape</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2029323850%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-message-bubble-shape.html"><span class="token function">getMessageBubbleShape</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cornerRadius<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/unit/Dp.html">Dp</a><span class="token punctuation">, </span></span><span class="parameter ">isSender<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">hasSamePrev<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">hasSameNext<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">groupedCornerRadius<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/unit/Dp.html">Dp</a><span class="token operator"> = </span>4.dp</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/shape/CornerBasedShape.html">CornerBasedShape</a></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/shape/CornerBasedShape.html">CornerBasedShape</a> for a message bubble based on its position in a sequence.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1862364258%2FFunctions%2F340326585" anchor-label="handleQuickChatAction" id="1862364258%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-quick-chat-action.html"><span>handle</span><wbr><span>Quick</span><wbr><span>Chat</span><wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1862364258%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-quick-chat-action.html"><span class="token function">handleQuickChatAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">action<span class="token operator">: </span><a href="../../../core/database/org.meshtastic.core.database.entity/-quick-chat-action/index.html">QuickChatAction</a><span class="token punctuation">, </span></span><span class="parameter ">currentText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onUpdateText<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onSendMessage<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Handles a quick chat action, either appending its message to the current text or sending it directly.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1098432777%2FFunctions%2F340326585" anchor-label="limitBytes" id="-1098432777%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="limit-bytes.html"><span>limit</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1098432777%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">.</span><a href="limit-bytes.html"><span class="token function">limitBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Truncates a string to ensure its UTF-8 byte representation does not exceed <a href="limit-bytes.html">maxBytes</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-866699115%2FFunctions%2F340326585" anchor-label="MessageActionsContent" id="-866699115%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-actions-content.html"><span>Message</span><wbr><span>Actions</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-866699115%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-actions-content.html"><span class="token function">MessageActionsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">quickEmojis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onReply<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onReact<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onMoreReactions<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onCopy<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onSelect<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDelete<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onStatus<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">statusString<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token punctuation">, </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">timestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">xeddsaSigned<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">translationRowState<span class="token operator">: </span><a href="-translation-row-state/index.html">TranslationRowState</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onTranslate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onToggleTranslation<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1236497287%2FFunctions%2F340326585" anchor-label="MessageItem" id="-1236497287%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-item.html"><span>Message</span><wbr><span><span>Item</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1236497287%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-item.html"><span class="token function">MessageItem</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">node<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">, </span></span><span class="parameter ">ourNode<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token punctuation">, </span></span><span class="parameter ">selected<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">inSelectionMode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">onReply<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">sendReaction<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onShowReactions<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">showUserName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">emojis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">quickEmojis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf("👍", "👎", "😂", "🔥", "❤️", "😮")<span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onLongClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onDoubleClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onSelect<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onDelete<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onClickChip<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">resolveMention<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">?</span><span class="token operator"> = </span>{ null }<span class="token punctuation">, </span></span><span class="parameter ">onNavigateToOriginalMessage<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onStatusClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">hasSamePrev<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">hasSameNext<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">searchQuery<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter ">translationAvailable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isDirectMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">onTranslate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onToggleTranslation<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1724715920%2FFunctions%2F340326585" anchor-label="MessageItemGroupedRunPreview" id="-1724715920%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-item-grouped-run-preview.html"><span>Message</span><wbr><span>Item</span><wbr><span>Grouped</span><wbr><span>Run</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1724715920%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-item-grouped-run-preview.html"><span class="token function">MessageItemGroupedRunPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A full conversation: a received same-sender run, the SAME sender returning after a &gt;10-minute gap (which must start a new block with its own header), then a sent run. Grouping is computed with the real <a href="../../../feature/messaging/org.meshtastic.feature.messaging/index.html">isSameGroup</a> rule, so this pins the grouped treatment end to end — header only at the start of each block, 4dp flattened facing corners within a block, full rounding on the outer edges.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1353347438%2FFunctions%2F340326585" anchor-label="MessageItemMarkdownPreview" id="-1353347438%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-item-markdown-preview.html"><span>Message</span><wbr><span>Item</span><wbr><span>Markdown</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1353347438%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-item-markdown-preview.html"><span class="token function">MessageItemMarkdownPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-459810753%2FFunctions%2F340326585" anchor-label="MessageItemSignedPreview" id="-459810753%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-item-signed-preview.html"><span>Message</span><wbr><span>Item</span><wbr><span>Signed</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-459810753%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-item-signed-preview.html"><span class="token function">MessageItemSignedPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1603277623%2FFunctions%2F340326585" anchor-label="MessageItemStatusStatesPreview" id="1603277623%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-item-status-states-preview.html"><span>Message</span><wbr><span>Item</span><wbr><span>Status</span><wbr><span>States</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1603277623%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-item-status-states-preview.html"><span class="token function">MessageItemStatusStatesPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1875304567%2FFunctions%2F340326585" anchor-label="MessageSearchBar" id="-1875304567%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-search-bar.html"><span>Message</span><wbr><span>Search</span><wbr><span><span>Bar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1875304567%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-search-bar.html"><span class="token function">MessageSearchBar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">query<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">onQueryChange<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onClose<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">resultCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">currentIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">onPrevious<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onNext<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">M3 contextual search bar that replaces the standard MessageTopBar when search is active. Follows the M3 "find in page" pattern: back arrow + text field + "X of Y" counter + prev/next arrows + clear.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1608184805%2FFunctions%2F340326585" anchor-label="MessageSearchBarPreview" id="1608184805%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-search-bar-preview.html"><span>Message</span><wbr><span>Search</span><wbr><span>Bar</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1608184805%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-search-bar-preview.html"><span class="token function">MessageSearchBarPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1349531786%2FFunctions%2F340326585" anchor-label="MessageStatusDialog" id="1349531786%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-status-dialog.html"><span>Message</span><wbr><span>Status</span><wbr><span><span>Dialog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1349531786%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-status-dialog.html"><span class="token function">MessageStatusDialog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token punctuation">, </span></span><span class="parameter ">resendOption<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onResend<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">isDirectMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-880628618%2FFunctions%2F340326585" anchor-label="MessageStatusIcon" id="-880628618%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-status-icon.html"><span>Message</span><wbr><span>Status</span><wbr><span><span>Icon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-880628618%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-status-icon.html"><span class="token function">MessageStatusIcon</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">status<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">tint<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token operator"> = </span>Color.Unspecified<span class="token punctuation">, </span></span><span class="parameter ">includeContentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="141284650%2FFunctions%2F340326585" anchor-label="MessageTopBar" id="141284650%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-top-bar.html"><span>Message</span><wbr><span>Top</span><wbr><span><span>Bar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="141284650%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-message-top-bar.html"><span class="token function">MessageTopBar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">title<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">channelIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">mismatchKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateBack<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">channels<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">channelIndexParam<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">showQuickChat<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onToggleQuickChat<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateToQuickChatOptions<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">filteringDisabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">onToggleFilteringDisabled<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">filteredCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">showFiltered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">onToggleShowFiltered<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onNavigateToFilterSettings<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onSearchClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The default top app bar for the message screen.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-443837643%2FFunctions%2F340326585" anchor-label="QuickChatRow" id="-443837643%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-quick-chat-row.html"><span>Quick</span><wbr><span>Chat</span><wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-443837643%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-quick-chat-row.html"><span class="token function">QuickChatRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">actions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../core/database/org.meshtastic.core.database.entity/-quick-chat-action/index.html">QuickChatAction</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../core/database/org.meshtastic.core.database.entity/-quick-chat-action/index.html">QuickChatAction</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A row of quick chat action buttons.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1975439805%2FFunctions%2F340326585" anchor-label="ReactionItemPreview" id="1975439805%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-reaction-item-preview.html"><span>Reaction</span><wbr><span>Item</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1975439805%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-reaction-item-preview.html"><span class="token function">ReactionItemPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-209503437%2FFunctions%2F340326585" anchor-label="ReplySnippet" id="-209503437%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-reply-snippet.html"><span>Reply</span><wbr><span><span>Snippet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-209503437%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-reply-snippet.html"><span class="token function">ReplySnippet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">originalMessage<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">onClearReply<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">ourNode<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a snippet of the message being replied to.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2035200781%2FFunctions%2F340326585" anchor-label="ScrollToBottomFab" id="2035200781%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-scroll-to-bottom-fab.html"><span>Scroll</span><wbr><span>To</span><wbr><span>Bottom</span><wbr><span><span>Fab</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2035200781%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-scroll-to-bottom-fab.html"><span class="token function">ScrollToBottomFab</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">coroutineScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">, </span></span><span class="parameter ">listState<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/LazyListState.html">LazyListState</a><span class="token punctuation">, </span></span><span class="parameter ">unreadCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A FloatingActionButton that scrolls the message list to the bottom (most recent messages).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2022526875%2FFunctions%2F340326585" anchor-label="UnreadMessagesDivider" id="2022526875%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-unread-messages-divider.html"><span>Unread</span><wbr><span>Messages</span><wbr><span><span>Divider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2022526875%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-unread-messages-divider.html"><span class="token function">UnreadMessagesDivider</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

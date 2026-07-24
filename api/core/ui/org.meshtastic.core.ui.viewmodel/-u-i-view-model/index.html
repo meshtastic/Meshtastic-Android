@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>UIViewModel</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-ui::org.meshtastic.core.ui.viewmodel/UIViewModel///PointingToDeclaration//-920980536">
+  <div class="breadcrumbs"><a href="../../index.html">core-ui</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ui.viewmodel</a><span class="delimiter">/</span><span class="current">UIViewModel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>UIView</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">UIViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeDB<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">lockdownCoordinator<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">eventFirmwareRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-event-firmware-repository/index.html">EventFirmwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>alertManager<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-alert-manager/index.html">AlertManager</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>snackbarManager<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-snackbar-manager/index.html">SnackbarManager</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/UIViewModel.kt#L85">source</a>)</span></span></div><p class="paragraph">Shared base for the application-level ViewModel.</p><p class="paragraph">Contains all platform-independent state and actions (themes, alerts, connection state, firmware checks, traceroute, shared contacts, channel sets, unread counts, etc.).</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-2096712205%2FConstructors%2F-920980536" anchor-label="UIViewModel" id="-2096712205%2FConstructors%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-i-view-model.html"><span>UIView</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2096712205%2FConstructors%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeDB<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">lockdownCoordinator<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">eventFirmwareRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-event-firmware-repository/index.html">EventFirmwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">alertManager<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-alert-manager/index.html">AlertManager</a><span class="token punctuation">, </span></span><span class="parameter ">snackbarManager<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-snackbar-manager/index.html">SnackbarManager</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1587947944%2FClasslikes%2F-920980536" anchor-label="Companion" id="1587947944%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1587947944%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="146544392%2FProperties%2F-920980536" anchor-label="alertManager" id="146544392%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="alert-manager.html"><span>alert</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="146544392%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="alert-manager.html">alertManager</a><span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-alert-manager/index.html">AlertManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1564980575%2FProperties%2F-920980536" anchor-label="appIntroCompleted" id="-1564980575%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="app-intro-completed.html"><span>app</span><wbr><span>Intro</span><wbr><span><span>Completed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1564980575%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="app-intro-completed.html">appIntroCompleted</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="839605251%2FProperties%2F-920980536" anchor-label="clientNotification" id="839605251%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="client-notification.html"><span>client</span><wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="839605251%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="client-notification.html">clientNotification</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ClientNotification///PointingToDeclaration/">ClientNotification</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1419661422%2FProperties%2F-920980536" anchor-label="connectionState" id="1419661422%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-state.html"><span>connection</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1419661422%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="connection-state.html">connectionState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-connection-state/index.html">ConnectionState</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Canonical app-level connection state, sourced from <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/connection-state.html">ServiceRepository.connectionState</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1929954458%2FProperties%2F-920980536" anchor-label="currentDeviceAddressFlow" id="-1929954458%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-device-address-flow.html"><span>current</span><wbr><span>Device</span><wbr><span>Address</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1929954458%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-device-address-flow.html">currentDeviceAddressFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="260237141%2FProperties%2F-920980536" anchor-label="eventEdition" id="260237141%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="event-edition.html"><span>event</span><wbr><span><span>Edition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="260237141%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="event-edition.html">eventEdition</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-event-firmware-edition/index.html">EventFirmwareEdition</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1081610159%2FProperties%2F-920980536" anchor-label="eventThemeEnabled" id="1081610159%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="event-theme-enabled.html"><span>event</span><wbr><span>Theme</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1081610159%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="event-theme-enabled.html">eventThemeEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Opt-out for applying an event edition's ambient theme (accent + typeface) app-wide.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1629633342%2FProperties%2F-920980536" anchor-label="firmwareEdition" id="1629633342%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="firmware-edition.html"><span>firmware</span><wbr><span><span>Edition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1629633342%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="firmware-edition.html">firmwareEdition</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/FirmwareEdition///PointingToDeclaration/">FirmwareEdition</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="908707543%2FProperties%2F-920980536" anchor-label="latestStableFirmwareRelease" id="908707543%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="latest-stable-firmware-release.html"><span>latest</span><wbr><span>Stable</span><wbr><span>Firmware</span><wbr><span><span>Release</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="908707543%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="latest-stable-firmware-release.html">latestStableFirmwareRelease</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-device-version/index.html">DeviceVersion</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1529043613%2FProperties%2F-920980536" anchor-label="lockdownState" id="1529043613%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lockdown-state.html"><span>lockdown</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1529043613%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="lockdown-state.html">lockdownState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model.service/-lockdown-state/index.html">LockdownState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1710761689%2FProperties%2F-920980536" anchor-label="lockdownTokenInfo" id="-1710761689%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lockdown-token-info.html"><span>lockdown</span><wbr><span>Token</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1710761689%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="lockdown-token-info.html">lockdownTokenInfo</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model.service/-lockdown-token-info/index.html">LockdownTokenInfo</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-579869699%2FProperties%2F-920980536" anchor-label="meshActivity" id="-579869699%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mesh-activity.html"><span>mesh</span><wbr><span><span>Activity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-579869699%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="mesh-activity.html">meshActivity</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-activity/index.html">MeshActivity</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Emits events for mesh network send/receive activity.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-555757699%2FProperties%2F-920980536" anchor-label="myNodeInfo" id="-555757699%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="my-node-info.html"><span>my</span><wbr><span>Node</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-555757699%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="my-node-info.html">myNodeInfo</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-my-node-info/index.html">MyNodeInfo</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1930201185%2FProperties%2F-920980536" anchor-label="navigationDeepLink" id="-1930201185%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="navigation-deep-link.html"><span>navigation</span><wbr><span>Deep</span><wbr><span><span>Link</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1930201185%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="navigation-deep-link.html">navigationDeepLink</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/SharedFlow///PointingToDeclaration/">SharedFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/navigation3/runtime/NavKey.html">NavKey</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1968835432%2FProperties%2F-920980536" anchor-label="neighborInfoResponse" id="-1968835432%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="neighbor-info-response.html"><span>neighbor</span><wbr><span>Info</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1968835432%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="neighbor-info-response.html">neighborInfoResponse</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="385883004%2FProperties%2F-920980536" anchor-label="nodeRestartExpected" id="385883004%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="node-restart-expected.html"><span>node</span><wbr><span>Restart</span><wbr><span><span>Expected</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="385883004%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="node-restart-expected.html">nodeRestartExpected</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">True while the connected node is expected to be mid-restart (reboot-applying config save or reboot command).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="902372307%2FProperties%2F-920980536" anchor-label="requestChannelSet" id="902372307%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-channel-set.html"><span>request</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="902372307%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="request-channel-set.html">requestChannelSet</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-372545122%2FProperties%2F-920980536" anchor-label="scrollToTopEventFlow" id="-372545122%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="scroll-to-top-event-flow.html"><span>scroll</span><wbr><span>To</span><wbr><span>Top</span><wbr><span>Event</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372545122%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="scroll-to-top-event-flow.html">scrollToTopEventFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.ui.component/-scroll-to-top-event/index.html">ScrollToTopEvent</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-259024058%2FProperties%2F-920980536" anchor-label="sharedContactRequested" id="-259024058%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="shared-contact-requested.html"><span>shared</span><wbr><span>Contact</span><wbr><span><span>Requested</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-259024058%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="shared-contact-requested.html">sharedContactRequested</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/SharedContact///PointingToDeclaration/">SharedContact</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1506942087%2FProperties%2F-920980536" anchor-label="snackbarManager" id="-1506942087%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="snackbar-manager.html"><span>snackbar</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1506942087%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="snackbar-manager.html">snackbarManager</a><span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-snackbar-manager/index.html">SnackbarManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-204359496%2FProperties%2F-920980536" anchor-label="theme" id="-204359496%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="theme.html"><span><span>theme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204359496%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="theme.html">theme</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="464207540%2FProperties%2F-920980536" anchor-label="tracerouteResponse" id="464207540%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="traceroute-response.html"><span>traceroute</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="464207540%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="traceroute-response.html">tracerouteResponse</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model.service/-traceroute-response/index.html">TracerouteResponse</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1109502178%2FProperties%2F-920980536" anchor-label="unreadMessageCount" id="1109502178%2FProperties%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="unread-message-count.html"><span>unread</span><wbr><span>Message</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1109502178%2FProperties%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="unread-message-count.html">unreadMessageCount</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-462089743%2FFunctions%2F-920980536" anchor-label="addCloseable" id="-462089743%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2068605057%2FFunctions%2F-920980536"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-462089743%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2068605057%2FFunctions%2F-920980536"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="index.html#2093014716%2FFunctions%2F-920980536"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="724663609%2FFunctions%2F-920980536" anchor-label="clearClientNotification" id="724663609%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-client-notification.html"><span>clear</span><wbr><span>Client</span><wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="724663609%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-client-notification.html"><span class="token function">clearClientNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">notification<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ClientNotification///PointingToDeclaration/">ClientNotification</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="466476162%2FFunctions%2F-920980536" anchor-label="clearLockdownState" id="466476162%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-lockdown-state.html"><span>clear</span><wbr><span>Lockdown</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="466476162%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-lockdown-state.html"><span class="token function">clearLockdownState</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-87722221%2FFunctions%2F-920980536" anchor-label="clearNeighborInfoResponse" id="-87722221%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-neighbor-info-response.html"><span>clear</span><wbr><span>Neighbor</span><wbr><span>Info</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-87722221%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-neighbor-info-response.html"><span class="token function">clearNeighborInfoResponse</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1943761611%2FFunctions%2F-920980536" anchor-label="clearRequestChannelUrl" id="1943761611%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-request-channel-url.html"><span>clear</span><wbr><span>Request</span><wbr><span>Channel</span><wbr><span><span>Url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1943761611%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-request-channel-url.html"><span class="token function">clearRequestChannelUrl</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the pending channel set import request.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-690459903%2FFunctions%2F-920980536" anchor-label="clearSharedContactRequested" id="-690459903%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-shared-contact-requested.html"><span>clear</span><wbr><span>Shared</span><wbr><span>Contact</span><wbr><span><span>Requested</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-690459903%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-shared-contact-requested.html"><span class="token function">clearSharedContactRequested</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the pending shared contact request.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-584113169%2FFunctions%2F-920980536" anchor-label="clearTracerouteResponse" id="-584113169%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-traceroute-response.html"><span>clear</span><wbr><span>Traceroute</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-584113169%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-traceroute-response.html"><span class="token function">clearTracerouteResponse</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1337402343%2FFunctions%2F-920980536" anchor-label="dismissAlert" id="1337402343%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dismiss-alert.html"><span>dismiss</span><wbr><span><span>Alert</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1337402343%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="dismiss-alert.html"><span class="token function">dismissAlert</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="223810897%2FFunctions%2F-920980536" anchor-label="emitScrollToTopEvent" id="223810897%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="emit-scroll-to-top-event.html"><span>emit</span><wbr><span>Scroll</span><wbr><span>To</span><wbr><span>Top</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="223810897%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="emit-scroll-to-top-event.html"><span class="token function">emitScrollToTopEvent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.component/-scroll-to-top-event/index.html">ScrollToTopEvent</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102255800%2FFunctions%2F-920980536" anchor-label="getCloseable" id="1102255800%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1102255800%2FFunctions%2F-920980536"><span>get</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102255800%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#1102255800%2FFunctions%2F-920980536">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="index.html#1102255800%2FFunctions%2F-920980536"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#1102255800%2FFunctions%2F-920980536">T</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1363708380%2FFunctions%2F-920980536" anchor-label="handleDeepLink" id="1363708380%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-deep-link.html"><span>handle</span><wbr><span>Deep</span><wbr><span><span>Link</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1363708380%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="handle-deep-link.html"><span class="token function">handleDeepLink</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uri<span class="token operator">: </span><a href="../../../../core/common/org.meshtastic.core.common.util/-common-uri/index.html">CommonUri</a><span class="token punctuation">, </span></span><span class="parameter ">onInvalid<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Unified handler for all Meshtastic deep links and OS intents.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1119835360%2FFunctions%2F-920980536" anchor-label="onAppIntroCompleted" id="1119835360%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-app-intro-completed.html"><span>on</span><wbr><span>App</span><wbr><span>Intro</span><wbr><span><span>Completed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1119835360%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="on-app-intro-completed.html"><span class="token function">onAppIntroCompleted</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="753486667%2FFunctions%2F-920980536" anchor-label="sendLockdownUnlock" id="753486667%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-lockdown-unlock.html"><span>send</span><wbr><span>Lockdown</span><wbr><span><span>Unlock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="753486667%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="send-lockdown-unlock.html"><span class="token function">sendLockdownUnlock</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">passphrase<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bootTtl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_BOOT_TTL<span class="token punctuation">, </span></span><span class="parameter ">hourTtl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">maxSessionSeconds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">0</span><span class="token punctuation">, </span></span><span class="parameter ">disable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1554857918%2FFunctions%2F-920980536" anchor-label="sendLockNow" id="1554857918%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-lock-now.html"><span>send</span><wbr><span>Lock</span><wbr><span><span>Now</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1554857918%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="send-lock-now.html"><span class="token function">sendLockNow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1517670009%2FFunctions%2F-920980536" anchor-label="setDeviceAddress" id="-1517670009%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-device-address.html"><span>set</span><wbr><span>Device</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1517670009%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-device-address.html"><span class="token function">setDeviceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-210021010%2FFunctions%2F-920980536" anchor-label="setEventThemeEnabled" id="-210021010%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-event-theme-enabled.html"><span>set</span><wbr><span>Event</span><wbr><span>Theme</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-210021010%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-event-theme-enabled.html"><span class="token function">setEventThemeEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-390697822%2FFunctions%2F-920980536" anchor-label="setRequestChannelSet" id="-390697822%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-request-channel-set.html"><span>set</span><wbr><span>Request</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-390697822%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-request-channel-set.html"><span class="token function">setRequestChannelSet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1751317923%2FFunctions%2F-920980536" anchor-label="setSharedContactRequested" id="-1751317923%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-shared-contact-requested.html"><span>set</span><wbr><span>Shared</span><wbr><span>Contact</span><wbr><span><span>Requested</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1751317923%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-shared-contact-requested.html"><span class="token function">setSharedContactRequested</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/SharedContact///PointingToDeclaration/">SharedContact</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="37857232%2FFunctions%2F-920980536" anchor-label="showAlert" id="37857232%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="show-alert.html"><span>show</span><wbr><span><span>Alert</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="37857232%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="show-alert.html"><span class="token function">showAlert</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">title<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">titleRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">messageRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">composableMessage<span class="token operator">: </span><a href="../../org.meshtastic.core.ui.util/-composable-content/index.html">ComposableContent</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">html<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onConfirm<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">confirmText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">confirmTextRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">dismissText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">dismissTextRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">choices<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1612915797%2FFunctions%2F-920980536" anchor-label="showSnackbar" id="-1612915797%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="show-snackbar.html"><span>show</span><wbr><span><span>Snackbar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1612915797%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="show-snackbar.html"><span class="token function">showSnackbar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">actionLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onAction<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1382841425%2FFunctions%2F-920980536" anchor-label="tracerouteMapAvailability" id="-1382841425%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="traceroute-map-availability.html"><span>traceroute</span><wbr><span>Map</span><wbr><span><span>Availability</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1382841425%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="traceroute-map-availability.html"><span class="token function">tracerouteMapAvailability</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">forwardRoute<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">returnRoute<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-traceroute-map-availability/index.html">TracerouteMapAvailability</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

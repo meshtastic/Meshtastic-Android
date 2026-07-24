@@ -1,0 +1,295 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FirmwareUpdateActions</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/commonMain" data-filter=":feature:firmware/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware/FirmwareUpdateActions///PointingToDeclaration//-803617142">
+  <div class="breadcrumbs"><a href="../../index.html">feature-firmware</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.firmware</a><span class="delimiter">/</span><span class="current">FirmwareUpdateActions</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Actions</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">FirmwareUpdateActions</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>onReleaseTypeSelect<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../core/database/org.meshtastic.core.database.entity/-firmware-release-type/index.html">FirmwareReleaseType</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onStartUpdate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onPickFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onSaveFile<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onConfirmLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDismissLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onRetry<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onCancel<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDone<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDismissBootloaderWarning<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateActions.kt#L21">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-802682412%2FConstructors%2F-803617142" anchor-label="FirmwareUpdateActions" id="-802682412%2FConstructors%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-actions.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-802682412%2FConstructors%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">onReleaseTypeSelect<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../core/database/org.meshtastic.core.database.entity/-firmware-release-type/index.html">FirmwareReleaseType</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onStartUpdate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onPickFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onSaveFile<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onConfirmLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDismissLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onRetry<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onCancel<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDone<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onDismissBootloaderWarning<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="38814209%2FProperties%2F-803617142" anchor-label="onCancel" id="38814209%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-cancel.html"><span>on</span><wbr><span><span>Cancel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="38814209%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-cancel.html">onCancel</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-913007884%2FProperties%2F-803617142" anchor-label="onConfirmLocalFile" id="-913007884%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-confirm-local-file.html"><span>on</span><wbr><span>Confirm</span><wbr><span>Local</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-913007884%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-confirm-local-file.html">onConfirmLocalFile</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-925620370%2FProperties%2F-803617142" anchor-label="onDismissBootloaderWarning" id="-925620370%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-dismiss-bootloader-warning.html"><span>on</span><wbr><span>Dismiss</span><wbr><span>Bootloader</span><wbr><span><span>Warning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-925620370%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-dismiss-bootloader-warning.html">onDismissBootloaderWarning</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1088687042%2FProperties%2F-803617142" anchor-label="onDismissLocalFile" id="-1088687042%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-dismiss-local-file.html"><span>on</span><wbr><span>Dismiss</span><wbr><span>Local</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1088687042%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-dismiss-local-file.html">onDismissLocalFile</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1973072519%2FProperties%2F-803617142" anchor-label="onDone" id="-1973072519%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-done.html"><span>on</span><wbr><span><span>Done</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1973072519%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-done.html">onDone</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1588713186%2FProperties%2F-803617142" anchor-label="onPickFile" id="-1588713186%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-pick-file.html"><span>on</span><wbr><span>Pick</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1588713186%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-pick-file.html">onPickFile</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1161348066%2FProperties%2F-803617142" anchor-label="onReleaseTypeSelect" id="1161348066%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-release-type-select.html"><span>on</span><wbr><span>Release</span><wbr><span>Type</span><wbr><span><span>Select</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1161348066%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-release-type-select.html">onReleaseTypeSelect</a><span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../../core/database/org.meshtastic.core.database.entity/-firmware-release-type/index.html">FirmwareReleaseType</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="621672151%2FProperties%2F-803617142" anchor-label="onRetry" id="621672151%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-retry.html"><span>on</span><wbr><span><span>Retry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="621672151%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-retry.html">onRetry</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1653486914%2FProperties%2F-803617142" anchor-label="onSaveFile" id="1653486914%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-save-file.html"><span>on</span><wbr><span>Save</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1653486914%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-save-file.html">onSaveFile</a><span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="75720084%2FProperties%2F-803617142" anchor-label="onStartUpdate" id="75720084%2FProperties%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-start-update.html"><span>on</span><wbr><span>Start</span><wbr><span><span>Update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="75720084%2FProperties%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="on-start-update.html">onStartUpdate</a><span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

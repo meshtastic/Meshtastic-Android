@@ -1,0 +1,771 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>PacketRepository</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:repository/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:repository/commonMain" data-filter=":core:repository/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-repository::org.meshtastic.core.repository/PacketRepository///PointingToDeclaration//-1238997634">
+  <div class="breadcrumbs"><a href="../../index.html">core-repository</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.repository</a><span class="delimiter">/</span><span class="current">PacketRepository</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Packet</span><wbr><span><span>Repository</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">PacketRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/PacketRepository.kt#L36">source</a>)</span></span></div><p class="paragraph">Repository interface for managing mesh packets and message history.</p><p class="paragraph">This component provides methods for persisting received packets, querying message history, tracking unread counts, and managing contact-specific settings. It supports both reactive (Flow) and one-shot (suspend) queries.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1161880226%2FFunctions%2F-1238997634" anchor-label="clearAllUnreadCounts" id="-1161880226%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-all-unread-counts.html"><span>clear</span><wbr><span>All</span><wbr><span>Unread</span><wbr><span><span>Counts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1161880226%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear-all-unread-counts.html"><span class="token function">clearAllUnreadCounts</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the unread status for all messages across all conversations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="812536802%2FFunctions%2F-1238997634" anchor-label="clearPacketDB" id="812536802%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-packet-d-b.html"><span>clear</span><wbr><span>Packet</span><wbr><span><span>DB</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="812536802%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear-packet-d-b.html"><span class="token function">clearPacketDB</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears all packet and message history from the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1401740852%2FFunctions%2F-1238997634" anchor-label="clearUnreadCount" id="-1401740852%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-unread-count.html"><span>clear</span><wbr><span>Unread</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1401740852%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear-unread-count.html"><span class="token function">clearUnreadCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">timestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the unread status for messages in a conversation up to the given timestamp.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1089648305%2FFunctions%2F-1238997634" anchor-label="deleteContacts" id="1089648305%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-contacts.html"><span>delete</span><wbr><span><span>Contacts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1089648305%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete-contacts.html"><span class="token function">deleteContacts</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactList<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes all messages and settings for the given contacts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-973967165%2FFunctions%2F-1238997634" anchor-label="deleteMessages" id="-973967165%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-messages.html"><span>delete</span><wbr><span><span>Messages</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-973967165%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete-messages.html"><span class="token function">deleteMessages</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uuidList<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes messages by their database UUIDs.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2011516567%2FFunctions%2F-1238997634" anchor-label="deleteWaypoint" id="2011516567%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-waypoint.html"><span>delete</span><wbr><span><span>Waypoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2011516567%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete-waypoint.html"><span class="token function">deleteWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes a waypoint by its ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1035409568%2FFunctions%2F-1238997634" anchor-label="findPacketsWithId" id="-1035409568%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="find-packets-with-id.html"><span>find</span><wbr><span>Packets</span><wbr><span>With</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1035409568%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="find-packets-with-id.html"><span class="token function">findPacketsWithId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Finds all packets matching a specific packet ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-48800895%2FFunctions%2F-1238997634" anchor-label="findReactionsWithId" id="-48800895%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="find-reactions-with-id.html"><span>find</span><wbr><span>Reactions</span><wbr><span>With</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-48800895%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="find-reactions-with-id.html"><span class="token function">findReactionsWithId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Finds all reactions associated with a specific packet ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-135986868%2FFunctions%2F-1238997634" anchor-label="getContacts" id="-135986868%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-contacts.html"><span>get</span><wbr><span><span>Contacts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-135986868%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-contacts.html"><span class="token function">getContacts</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of all conversation contacts, keyed by their contact identifier.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="108064632%2FFunctions%2F-1238997634" anchor-label="getContactSettings" id="108064632%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-contact-settings.html"><span>get</span><wbr><span>Contact</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="108064632%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-contact-settings.html"><span class="token function">getContactSettings</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="../../../../core/model/org.meshtastic.core.model/-contact-settings/index.html">ContactSettings</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of all contact settings (e.g., mute status).</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-contact-settings.html"><span class="token function">getContactSettings</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-contact-settings/index.html">ContactSettings</a></div><div class="brief "><p class="paragraph">Returns the settings for a specific contact.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1238804889%2FFunctions%2F-1238997634" anchor-label="getContactsPaged" id="1238804889%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-contacts-paged.html"><span>get</span><wbr><span>Contacts</span><wbr><span><span>Paged</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1238804889%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-contacts-paged.html"><span class="token function">getContactsPaged</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/paging/PagingData.html">PagingData</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive paged flow of conversation contacts, each paired with its stored contact key.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1325115809%2FFunctions%2F-1238997634" anchor-label="getFilteredCount" id="1325115809%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-filtered-count.html"><span>get</span><wbr><span>Filtered</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1325115809%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-filtered-count.html"><span class="token function">getFilteredCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Returns the total count of filtered messages for a contact.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="514951023%2FFunctions%2F-1238997634" anchor-label="getFilteredCountFlow" id="514951023%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-filtered-count-flow.html"><span>get</span><wbr><span>Filtered</span><wbr><span>Count</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="514951023%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-filtered-count-flow.html"><span class="token function">getFilteredCountFlow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of the number of filtered messages for a contact.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1277430472%2FFunctions%2F-1238997634" anchor-label="getFirstUnreadMessageUuid" id="1277430472%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-first-unread-message-uuid.html"><span>get</span><wbr><span>First</span><wbr><span>Unread</span><wbr><span>Message</span><wbr><span><span>Uuid</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1277430472%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-first-unread-message-uuid.html"><span class="token function">getFirstUnreadMessageUuid</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of the UUID of the first unread message in a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1250195091%2FFunctions%2F-1238997634" anchor-label="getMessageCount" id="-1250195091%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-message-count.html"><span>get</span><wbr><span>Message</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1250195091%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-message-count.html"><span class="token function">getMessageCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Returns the total number of messages in a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-594530045%2FFunctions%2F-1238997634" anchor-label="getMessagesFrom" id="-594530045%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-messages-from.html"><span>get</span><wbr><span>Messages</span><wbr><span><span>From</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-594530045%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-messages-from.html"><span class="token function">getMessagesFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">limit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">includeFiltered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">getNode<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a reactive flow of messages for a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="593386360%2FFunctions%2F-1238997634" anchor-label="getMessagesFromPaged" id="593386360%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-messages-from-paged.html"><span>get</span><wbr><span>Messages</span><wbr><span>From</span><wbr><span><span>Paged</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="593386360%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-messages-from-paged.html"><span class="token function">getMessagesFromPaged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">getNode<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/paging/PagingData.html">PagingData</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a paged flow of messages for a conversation.</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-messages-from-paged.html"><span class="token function">getMessagesFromPaged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">includeFiltered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">getNode<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/paging/PagingData.html">PagingData</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a paged flow of messages for a conversation, with filtering options.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1671967203%2FFunctions%2F-1238997634" anchor-label="getPacketById" id="1671967203%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-packet-by-id.html"><span>get</span><wbr><span>Packet</span><wbr><span>By</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1671967203%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-packet-by-id.html"><span class="token function">getPacketById</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns a packet by its internal database ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1078064133%2FFunctions%2F-1238997634" anchor-label="getPacketByPacketId" id="-1078064133%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-packet-by-packet-id.html"><span>get</span><wbr><span>Packet</span><wbr><span>By</span><wbr><span>Packet</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1078064133%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-packet-by-packet-id.html"><span class="token function">getPacketByPacketId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns a packet by its mesh-layer packet ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1977820547%2FFunctions%2F-1238997634" anchor-label="getQueuedPackets" id="1977820547%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-queued-packets.html"><span>get</span><wbr><span>Queued</span><wbr><span><span>Packets</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1977820547%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-queued-packets.html"><span class="token function">getQueuedPackets</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns all packets currently queued for transmission.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1120221050%2FFunctions%2F-1238997634" anchor-label="getReactionByPacketId" id="1120221050%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-reaction-by-packet-id.html"><span>get</span><wbr><span>Reaction</span><wbr><span>By</span><wbr><span>Packet</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1120221050%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-reaction-by-packet-id.html"><span class="token function">getReactionByPacketId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns a reaction associated with a specific packet ID.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="91593097%2FFunctions%2F-1238997634" anchor-label="getUnreadCount" id="91593097%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-unread-count.html"><span>get</span><wbr><span>Unread</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="91593097%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-unread-count.html"><span class="token function">getUnreadCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Returns the count of unread messages in a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="627131223%2FFunctions%2F-1238997634" anchor-label="getUnreadCountFlow" id="627131223%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-unread-count-flow.html"><span>get</span><wbr><span>Unread</span><wbr><span>Count</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="627131223%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-unread-count-flow.html"><span class="token function">getUnreadCountFlow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of the unread message count in a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1480621115%2FFunctions%2F-1238997634" anchor-label="getUnreadCountTotal" id="1480621115%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-unread-count-total.html"><span>get</span><wbr><span>Unread</span><wbr><span>Count</span><wbr><span><span>Total</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1480621115%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-unread-count-total.html"><span class="token function">getUnreadCountTotal</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of the total unread message count across all conversations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1659935017%2FFunctions%2F-1238997634" anchor-label="getWaypoints" id="1659935017%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-waypoints.html"><span>get</span><wbr><span><span>Waypoints</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1659935017%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="get-waypoints.html"><span class="token function">getWaypoints</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow of all persisted waypoints (GPS locations).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="753529284%2FFunctions%2F-1238997634" anchor-label="hasUnreadMessages" id="753529284%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-unread-messages.html"><span>has</span><wbr><span>Unread</span><wbr><span><span>Messages</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="753529284%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="has-unread-messages.html"><span class="token function">hasUnreadMessages</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Reactive flow indicating whether a conversation has any unread messages.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-162045977%2FFunctions%2F-1238997634" anchor-label="insert" id="-162045977%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert.html"><span><span>insert</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-162045977%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="insert.html"><span class="token function">insert</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">receivedTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">read<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">filtered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Inserts a packet into the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2014558344%2FFunctions%2F-1238997634" anchor-label="insertReaction" id="2014558344%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-reaction.html"><span>insert</span><wbr><span><span>Reaction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2014558344%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="insert-reaction.html"><span class="token function">insertReaction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reaction<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a><span class="token punctuation">, </span></span><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists a message reaction (emoji).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-991747860%2FFunctions%2F-1238997634" anchor-label="migrateChannelsByPSK" id="-991747860%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="migrate-channels-by-p-s-k.html"><span>migrate</span><wbr><span>Channels</span><wbr><span>By</span><wbr><span><span>PSK</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-991747860%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="migrate-channels-by-p-s-k.html"><span class="token function">migrateChannelsByPSK</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">oldSettings<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSettings///PointingToDeclaration/">ChannelSettings</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">newSettings<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSettings///PointingToDeclaration/">ChannelSettings</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Migrates channel-specific message history when encryption keys change.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-800215905%2FFunctions%2F-1238997634" anchor-label="savePacket" id="-800215905%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="save-packet.html"><span>save</span><wbr><span><span>Packet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-800215905%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="save-packet.html"><span class="token function">savePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">receivedTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">read<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">filtered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists a packet in the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1835303308%2FFunctions%2F-1238997634" anchor-label="searchMessages" id="-1835303308%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="search-messages.html"><span>search</span><wbr><span><span>Messages</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1835303308%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="search-messages.html"><span class="token function">searchMessages</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">query<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">getNode<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-message/index.html">Message</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Searches message history using full-text search.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="831858733%2FFunctions%2F-1238997634" anchor-label="setContactFilteringDisabled" id="831858733%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-contact-filtering-disabled.html"><span>set</span><wbr><span>Contact</span><wbr><span>Filtering</span><wbr><span><span>Disabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="831858733%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-contact-filtering-disabled.html"><span class="token function">setContactFilteringDisabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">disabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Disables or enables message filtering for a specific contact.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-173982155%2FFunctions%2F-1238997634" anchor-label="setMessageTranslation" id="-173982155%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-message-translation.html"><span>set</span><wbr><span>Message</span><wbr><span><span>Translation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-173982155%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-message-translation.html"><span class="token function">setMessageTranslation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">translatedText<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists the on-device translation of a message and switches it to display the translation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1974938106%2FFunctions%2F-1238997634" anchor-label="setMuteUntil" id="-1974938106%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-mute-until.html"><span>set</span><wbr><span>Mute</span><wbr><span><span>Until</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1974938106%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-mute-until.html"><span class="token function">setMuteUntil</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contacts<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">until<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Mutes the given contacts until the specified timestamp.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-415428341%2FFunctions%2F-1238997634" anchor-label="setShowTranslated" id="-415428341%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-show-translated.html"><span>set</span><wbr><span>Show</span><wbr><span><span>Translated</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-415428341%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-show-translated.html"><span class="token function">setShowTranslated</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">showTranslated<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Toggles whether a translated message displays the translation or the original text.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="634473976%2FFunctions%2F-1238997634" anchor-label="update" id="634473976%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update.html"><span><span>update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="634473976%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update.html"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">routingError<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>-1</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates an existing packet in the database, optionally setting a routing error code.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2042810873%2FFunctions%2F-1238997634" anchor-label="updateFilteredBySender" id="2042810873%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-filtered-by-sender.html"><span>update</span><wbr><span>Filtered</span><wbr><span>By</span><wbr><span><span>Sender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2042810873%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-filtered-by-sender.html"><span class="token function">updateFilteredBySender</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">senderId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">filtered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Marks all messages from a specific sender as filtered or unfiltered.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-295689611%2FFunctions%2F-1238997634" anchor-label="updateLastReadMessage" id="-295689611%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-last-read-message.html"><span>update</span><wbr><span>Last</span><wbr><span>Read</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-295689611%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-last-read-message.html"><span class="token function">updateLastReadMessage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contact<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">messageUuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">lastReadTimestamp<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the identifier of the last read message in a conversation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1142866312%2FFunctions%2F-1238997634" anchor-label="updateMessageId" id="-1142866312%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-message-id.html"><span>update</span><wbr><span>Message</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1142866312%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-message-id.html"><span class="token function">updateMessageId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">d<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the identifier of a persisted packet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-401961891%2FFunctions%2F-1238997634" anchor-label="updateMessageStatus" id="-401961891%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-message-status.html"><span>update</span><wbr><span>Message</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401961891%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-message-status.html"><span class="token function">updateMessageStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">d<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">m<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the transmission status of a packet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-783367771%2FFunctions%2F-1238997634" anchor-label="updateReaction" id="-783367771%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-reaction.html"><span>update</span><wbr><span><span>Reaction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-783367771%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-reaction.html"><span class="token function">updateReaction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reaction<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates an existing reaction.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="683916149%2FFunctions%2F-1238997634" anchor-label="updateSFPPStatus" id="683916149%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-s-f-p-p-status.html"><span>update</span><wbr><span><span>SFPPStatus</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="683916149%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-s-f-p-p-status.html"><span class="token function">updateSFPPStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">from<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">to<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">hash<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a><span class="token punctuation">, </span></span><span class="parameter ">rxTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the Store-and-Forward PlusPlus (SFPP) status for packets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-136936105%2FFunctions%2F-1238997634" anchor-label="updateSFPPStatusByHash" id="-136936105%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-s-f-p-p-status-by-hash.html"><span>update</span><wbr><span>SFPPStatus</span><wbr><span>By</span><wbr><span><span>Hash</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-136936105%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-s-f-p-p-status-by-hash.html"><span class="token function">updateSFPPStatusByHash</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">hash<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a><span class="token punctuation">, </span></span><span class="parameter ">rxTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the SFPP status of packets matching the given commit hash.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

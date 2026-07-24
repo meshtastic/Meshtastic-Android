@@ -1,0 +1,475 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SwitchingDiscoveryDao</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:database/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/commonMain" data-filter=":core:database/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-database::org.meshtastic.core.database.dao/SwitchingDiscoveryDao///PointingToDeclaration//-475033937">
+  <div class="breadcrumbs"><a href="../../index.html">core-database</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.database.dao</a><span class="delimiter">/</span><span class="current">SwitchingDiscoveryDao</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Switching</span><wbr><span>Discovery</span><wbr><span><span>Dao</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SwitchingDiscoveryDao</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a></span></span><span class="token punctuation">)</span> : <a href="../-discovery-dao/index.html">DiscoveryDao</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/dao/SwitchingDiscoveryDao.kt#L42">source</a>)</span></span></div><p class="paragraph">A switch-aware <a href="../-discovery-dao/index.html">DiscoveryDao</a> that resolves the active database on every call instead of pinning the one that was current at injection time. This is what Koin hands to <code class="lang-kotlin">feature:discovery</code> consumers (ViewModels and the scan engine), which hold their DAO for their whole lifetime:</p><ul><li><p class="paragraph">Flow methods re-latch via <code class="lang-kotlin">currentDb.flatMapLatest</code>, so an open discovery screen follows a device/DB switch instead of watching the old database forever.</p></li><li><p class="paragraph">Suspend methods go through <a href="../../org.meshtastic.core.database/-database-provider/with-db.html">DatabaseProvider.withDb</a>, so writes register with the cross-transport merge drain barrier (a mid-scan merge can't snapshot-then-retire the DB underneath an in-flight session write). A callback is never replayed after it starts, so higher layers must make any retry policy explicit where idempotency is known.</p></li></ul><p class="paragraph"><code class="lang-kotlin">withDb</code> only returns null when no database is open, which <a href="../../org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a> guarantees can't happen (the default DB is the floor), so the non-null coercions below are structural, not behavioral.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-552262681%2FConstructors%2F-475033937" anchor-label="SwitchingDiscoveryDao" id="-552262681%2FConstructors%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-switching-discovery-dao.html"><span>Switching</span><wbr><span>Discovery</span><wbr><span><span>Dao</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-552262681%2FConstructors%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="659802072%2FFunctions%2F-475033937" anchor-label="deleteSession" id="659802072%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-session.html"><span>delete</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="659802072%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-session.html"><span class="token function">deleteSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-493096602%2FFunctions%2F-475033937" anchor-label="getAllSessions" id="-493096602%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-all-sessions.html"><span>get</span><wbr><span>All</span><wbr><span><span>Sessions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-493096602%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-all-sessions.html"><span class="token function">getAllSessions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-217635070%2FFunctions%2F-475033937" anchor-label="getAllSessionsSnapshot" id="-217635070%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-all-sessions-snapshot.html"><span>get</span><wbr><span>All</span><wbr><span>Sessions</span><wbr><span><span>Snapshot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-217635070%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-all-sessions-snapshot.html"><span class="token function">getAllSessionsSnapshot</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Snapshot used by DatabaseMerger to append a transport's discovery sessions to the unified DB.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-696474626%2FFunctions%2F-475033937" anchor-label="getDiscoveredNodes" id="-696474626%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-discovered-nodes.html"><span>get</span><wbr><span>Discovered</span><wbr><span><span>Nodes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-696474626%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-discovered-nodes.html"><span class="token function">getDiscoveredNodes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">presetResultId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovered-node-entity/index.html">DiscoveredNodeEntity</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1713706676%2FFunctions%2F-475033937" anchor-label="getDiscoveredNodesFlow" id="-1713706676%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-discovered-nodes-flow.html"><span>get</span><wbr><span>Discovered</span><wbr><span>Nodes</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1713706676%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-discovered-nodes-flow.html"><span class="token function">getDiscoveredNodesFlow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">presetResultId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovered-node-entity/index.html">DiscoveredNodeEntity</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1144785698%2FFunctions%2F-475033937" anchor-label="getInterruptedSession" id="1144785698%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-interrupted-session.html"><span>get</span><wbr><span>Interrupted</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1144785698%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-interrupted-session.html"><span class="token function">getInterruptedSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The most recent session left mid-scan by a prior process (crash, BLE loss, or force-quit) for <a href="../-discovery-dao/get-interrupted-session.html">deviceAddress</a> — "in_progress" if the process died before <a href="../-discovery-dao/mark-interrupted-sessions.html">markInterruptedSessions</a> ever ran, "interrupted" otherwise.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1598517422%2FFunctions%2F-475033937" anchor-label="getMaxDistance" id="1598517422%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-max-distance.html"><span>get</span><wbr><span>Max</span><wbr><span><span>Distance</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1598517422%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-max-distance.html"><span class="token function">getMaxDistance</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="444800524%2FFunctions%2F-475033937" anchor-label="getPresetResults" id="444800524%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-preset-results.html"><span>get</span><wbr><span>Preset</span><wbr><span><span>Results</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="444800524%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-preset-results.html"><span class="token function">getPresetResults</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovery-preset-result-entity/index.html">DiscoveryPresetResultEntity</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="584690778%2FFunctions%2F-475033937" anchor-label="getPresetResultsFlow" id="584690778%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-preset-results-flow.html"><span>get</span><wbr><span>Preset</span><wbr><span>Results</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="584690778%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-preset-results-flow.html"><span class="token function">getPresetResultsFlow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovery-preset-result-entity/index.html">DiscoveryPresetResultEntity</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-15299637%2FFunctions%2F-475033937" anchor-label="getSession" id="-15299637%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-session.html"><span>get</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-15299637%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-session.html"><span class="token function">getSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1871568231%2FFunctions%2F-475033937" anchor-label="getSessionFlow" id="-1871568231%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-session-flow.html"><span>get</span><wbr><span>Session</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1871568231%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-session-flow.html"><span class="token function">getSessionFlow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1762963389%2FFunctions%2F-475033937" anchor-label="getSessionWithResults" id="1762963389%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-session-with-results.html"><span>get</span><wbr><span>Session</span><wbr><span>With</span><wbr><span><span>Results</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1762963389%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-session-with-results.html"><span class="token function">getSessionWithResults</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1800808593%2FFunctions%2F-475033937" anchor-label="getUniqueNodeCount" id="1800808593%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-unique-node-count.html"><span>get</span><wbr><span>Unique</span><wbr><span>Node</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1800808593%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-unique-node-count.html"><span class="token function">getUniqueNodeCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1008922077%2FFunctions%2F-475033937" anchor-label="getUniqueNodeNums" id="-1008922077%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-unique-node-nums.html"><span>get</span><wbr><span>Unique</span><wbr><span>Node</span><wbr><span><span>Nums</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1008922077%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-unique-node-nums.html"><span class="token function">getUniqueNodeNums</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1295692646%2FFunctions%2F-475033937" anchor-label="insertDiscoveredNode" id="1295692646%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-discovered-node.html"><span>insert</span><wbr><span>Discovered</span><wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1295692646%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert-discovered-node.html"><span class="token function">insertDiscoveredNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovered-node-entity/index.html">DiscoveredNodeEntity</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1303353285%2FFunctions%2F-475033937" anchor-label="insertDiscoveredNodes" id="1303353285%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-discovered-nodes.html"><span>insert</span><wbr><span>Discovered</span><wbr><span><span>Nodes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1303353285%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert-discovered-nodes.html"><span class="token function">insertDiscoveredNodes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.core.database.entity/-discovered-node-entity/index.html">DiscoveredNodeEntity</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="356957394%2FFunctions%2F-475033937" anchor-label="insertPresetResult" id="356957394%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-preset-result.html"><span>insert</span><wbr><span>Preset</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="356957394%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert-preset-result.html"><span class="token function">insertPresetResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-preset-result-entity/index.html">DiscoveryPresetResultEntity</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1544773934%2FFunctions%2F-475033937" anchor-label="insertSession" id="1544773934%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-session.html"><span>insert</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1544773934%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert-session.html"><span class="token function">insertSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-351907494%2FFunctions%2F-475033937" anchor-label="markInterruptedSessions" id="-351907494%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mark-interrupted-sessions.html"><span>mark</span><wbr><span>Interrupted</span><wbr><span><span>Sessions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-351907494%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="mark-interrupted-sessions.html"><span class="token function">markInterruptedSessions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="956889942%2FFunctions%2F-475033937" anchor-label="updateDiscoveredNode" id="956889942%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-discovered-node.html"><span>update</span><wbr><span>Discovered</span><wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="956889942%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-discovered-node.html"><span class="token function">updateDiscoveredNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">node<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovered-node-entity/index.html">DiscoveredNodeEntity</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="467135202%2FFunctions%2F-475033937" anchor-label="updatePresetResult" id="467135202%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-preset-result.html"><span>update</span><wbr><span>Preset</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="467135202%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-preset-result.html"><span class="token function">updatePresetResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">result<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-preset-result-entity/index.html">DiscoveryPresetResultEntity</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-778837186%2FFunctions%2F-475033937" anchor-label="updateSession" id="-778837186%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-session.html"><span>update</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-778837186%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-session.html"><span class="token function">updateSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../org.meshtastic.core.database.entity/-discovery-session-entity/index.html">DiscoverySessionEntity</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

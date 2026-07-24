@@ -1,0 +1,745 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SettingsRoute</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:navigation/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:navigation/commonMain" data-filter=":core:navigation/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-navigation::org.meshtastic.core.navigation/SettingsRoute///PointingToDeclaration//-1271788216">
+  <div class="breadcrumbs"><a href="../../index.html">core-navigation</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.navigation</a><span class="delimiter">/</span><span class="current">SettingsRoute</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Settings</span><wbr><span><span>Route</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="index.html">SettingsRoute</a> : <a href="../-route/index.html">Route</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt#L94">source</a>)</span></span></div><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-settings/index.html">Settings</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-device-configuration/index.html">DeviceConfiguration</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-module-configuration/index.html">ModuleConfiguration</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-administration/index.html">Administration</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-user/index.html">User</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-channel-config/index.html">ChannelConfig</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-device/index.html">Device</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-position/index.html">Position</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-power/index.html">Power</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-network/index.html">Network</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-display/index.html">Display</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-lo-ra/index.html">LoRa</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-bluetooth/index.html">Bluetooth</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-security/index.html">Security</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-m-q-t-t/index.html">MQTT</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-serial/index.html">Serial</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-ext-notification/index.html">ExtNotification</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-store-forward/index.html">StoreForward</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-range-test/index.html">RangeTest</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-telemetry/index.html">Telemetry</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-canned-message/index.html">CannedMessage</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-audio/index.html">Audio</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-remote-hardware/index.html">RemoteHardware</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-neighbor-info/index.html">NeighborInfo</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-ambient-lighting/index.html">AmbientLighting</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-detection-sensor/index.html">DetectionSensor</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-paxcounter/index.html">Paxcounter</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-status-message/index.html">StatusMessage</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-t-a-k/index.html">TAK</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-mesh-beacon/index.html">MeshBeacon</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-clean-node-db/index.html">CleanNodeDb</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-tak-server/index.html">TakServer</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-debug-panel/index.html">DebugPanel</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-about/index.html">About</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-filter-settings/index.html">FilterSettings</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-node-list/index.html">NodeList</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-device-links/index.html">DeviceLinks</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-app-functions-settings/index.html">AppFunctionsSettings</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-help-docs/index.html">HelpDocs</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="-help-doc-page/index.html">HelpDocPage</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1820895303%2FClasslikes%2F-1271788216" anchor-label="About" id="1820895303%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-about/index.html"><span><span>About</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1820895303%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-about/index.html">About</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1363018224%2FClasslikes%2F-1271788216" anchor-label="Administration" id="1363018224%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-administration/index.html"><span><span>Administration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1363018224%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-administration/index.html">Administration</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-359088592%2FClasslikes%2F-1271788216" anchor-label="AmbientLighting" id="-359088592%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ambient-lighting/index.html"><span>Ambient</span><wbr><span><span>Lighting</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-359088592%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-ambient-lighting/index.html">AmbientLighting</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2093229903%2FClasslikes%2F-1271788216" anchor-label="AppFunctionsSettings" id="-2093229903%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-app-functions-settings/index.html"><span>App</span><wbr><span>Functions</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2093229903%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-app-functions-settings/index.html">AppFunctionsSettings</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1802495006%2FClasslikes%2F-1271788216" anchor-label="Audio" id="1802495006%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-audio/index.html"><span><span>Audio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1802495006%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-audio/index.html">Audio</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1984731450%2FClasslikes%2F-1271788216" anchor-label="Bluetooth" id="-1984731450%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bluetooth/index.html"><span><span>Bluetooth</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1984731450%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-bluetooth/index.html">Bluetooth</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1299161622%2FClasslikes%2F-1271788216" anchor-label="CannedMessage" id="-1299161622%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-canned-message/index.html"><span>Canned</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1299161622%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-canned-message/index.html">CannedMessage</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="150721967%2FClasslikes%2F-1271788216" anchor-label="ChannelConfig" id="150721967%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-channel-config/index.html"><span>Channel</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="150721967%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-channel-config/index.html">ChannelConfig</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="180040523%2FClasslikes%2F-1271788216" anchor-label="CleanNodeDb" id="180040523%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-clean-node-db/index.html"><span>Clean</span><wbr><span>Node</span><wbr><span><span>Db</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="180040523%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-clean-node-db/index.html">CleanNodeDb</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="819184829%2FClasslikes%2F-1271788216" anchor-label="DebugPanel" id="819184829%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-debug-panel/index.html"><span>Debug</span><wbr><span><span>Panel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="819184829%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-debug-panel/index.html">DebugPanel</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="142608821%2FClasslikes%2F-1271788216" anchor-label="DetectionSensor" id="142608821%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-detection-sensor/index.html"><span>Detection</span><wbr><span><span>Sensor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="142608821%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-detection-sensor/index.html">DetectionSensor</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1335179256%2FClasslikes%2F-1271788216" anchor-label="Device" id="1335179256%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device/index.html"><span><span>Device</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1335179256%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-device/index.html">Device</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="745940916%2FClasslikes%2F-1271788216" anchor-label="DeviceConfiguration" id="745940916%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-configuration/index.html"><span>Device</span><wbr><span><span>Configuration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="745940916%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-device-configuration/index.html">DeviceConfiguration</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1126979759%2FClasslikes%2F-1271788216" anchor-label="DeviceLinks" id="-1126979759%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-links/index.html"><span>Device</span><wbr><span><span>Links</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1126979759%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-device-links/index.html">DeviceLinks</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1372236814%2FClasslikes%2F-1271788216" anchor-label="Display" id="-1372236814%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-display/index.html"><span><span>Display</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1372236814%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-display/index.html">Display</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1204439224%2FClasslikes%2F-1271788216" anchor-label="ExtNotification" id="-1204439224%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ext-notification/index.html"><span>Ext</span><wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1204439224%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-ext-notification/index.html">ExtNotification</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1168253235%2FClasslikes%2F-1271788216" anchor-label="FilterSettings" id="1168253235%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-filter-settings/index.html"><span>Filter</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1168253235%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-filter-settings/index.html">FilterSettings</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1146419634%2FClasslikes%2F-1271788216" anchor-label="HelpDocPage" id="-1146419634%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-help-doc-page/index.html"><span>Help</span><wbr><span>Doc</span><wbr><span><span>Page</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1146419634%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-help-doc-page/index.html">HelpDocPage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>pageId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="568008882%2FClasslikes%2F-1271788216" anchor-label="HelpDocs" id="568008882%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-help-docs/index.html"><span>Help</span><wbr><span><span>Docs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="568008882%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-help-docs/index.html">HelpDocs</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1412541956%2FClasslikes%2F-1271788216" anchor-label="LoRa" id="-1412541956%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-lo-ra/index.html"><span>Lo</span><wbr><span><span>Ra</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1412541956%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-lo-ra/index.html">LoRa</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="800710557%2FClasslikes%2F-1271788216" anchor-label="MeshBeacon" id="800710557%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-beacon/index.html"><span>Mesh</span><wbr><span><span>Beacon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="800710557%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-mesh-beacon/index.html">MeshBeacon</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="499511114%2FClasslikes%2F-1271788216" anchor-label="ModuleConfiguration" id="499511114%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-module-configuration/index.html"><span>Module</span><wbr><span><span>Configuration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="499511114%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-module-configuration/index.html">ModuleConfiguration</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-147307958%2FClasslikes%2F-1271788216" anchor-label="MQTT" id="-147307958%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-q-t-t/index.html"><span><span>MQTT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-147307958%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-m-q-t-t/index.html">MQTT</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1844986610%2FClasslikes%2F-1271788216" anchor-label="NeighborInfo" id="-1844986610%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-neighbor-info/index.html"><span>Neighbor</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1844986610%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-neighbor-info/index.html">NeighborInfo</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1430471686%2FClasslikes%2F-1271788216" anchor-label="Network" id="1430471686%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-network/index.html"><span><span>Network</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1430471686%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-network/index.html">Network</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-190989170%2FClasslikes%2F-1271788216" anchor-label="NodeList" id="-190989170%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-list/index.html"><span>Node</span><wbr><span><span>List</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-190989170%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-node-list/index.html">NodeList</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-722787015%2FClasslikes%2F-1271788216" anchor-label="Paxcounter" id="-722787015%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-paxcounter/index.html"><span><span>Paxcounter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-722787015%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-paxcounter/index.html">Paxcounter</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1329390267%2FClasslikes%2F-1271788216" anchor-label="Position" id="-1329390267%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-position/index.html"><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1329390267%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-position/index.html">Position</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2105137615%2FClasslikes%2F-1271788216" anchor-label="Power" id="2105137615%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-power/index.html"><span><span>Power</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2105137615%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-power/index.html">Power</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1930676517%2FClasslikes%2F-1271788216" anchor-label="RangeTest" id="1930676517%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-range-test/index.html"><span>Range</span><wbr><span><span>Test</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1930676517%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-range-test/index.html">RangeTest</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1919077376%2FClasslikes%2F-1271788216" anchor-label="RemoteHardware" id="-1919077376%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-remote-hardware/index.html"><span>Remote</span><wbr><span><span>Hardware</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1919077376%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-remote-hardware/index.html">RemoteHardware</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1916761870%2FClasslikes%2F-1271788216" anchor-label="Security" id="1916761870%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-security/index.html"><span><span>Security</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1916761870%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-security/index.html">Security</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2118682138%2FClasslikes%2F-1271788216" anchor-label="Serial" id="2118682138%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-serial/index.html"><span><span>Serial</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2118682138%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-serial/index.html">Serial</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="555247499%2FClasslikes%2F-1271788216" anchor-label="Settings" id="555247499%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-settings/index.html"><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="555247499%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-settings/index.html">Settings</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>destNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="index.html">SettingsRoute</a>, <a href="../-graph/index.html">Graph</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-257048033%2FClasslikes%2F-1271788216" anchor-label="StatusMessage" id="-257048033%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-status-message/index.html"><span>Status</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-257048033%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-status-message/index.html">StatusMessage</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1004195242%2FClasslikes%2F-1271788216" anchor-label="StoreForward" id="1004195242%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-store-forward/index.html"><span>Store</span><wbr><span><span>Forward</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1004195242%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-store-forward/index.html">StoreForward</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-239404522%2FClasslikes%2F-1271788216" anchor-label="TAK" id="-239404522%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k/index.html"><span><span>TAK</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-239404522%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-t-a-k/index.html">TAK</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1638899795%2FClasslikes%2F-1271788216" anchor-label="TakServer" id="1638899795%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-tak-server/index.html"><span>Tak</span><wbr><span><span>Server</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1638899795%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-tak-server/index.html">TakServer</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1516288027%2FClasslikes%2F-1271788216" anchor-label="Telemetry" id="1516288027%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-telemetry/index.html"><span><span>Telemetry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1516288027%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-telemetry/index.html">Telemetry</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1129593699%2FClasslikes%2F-1271788216" anchor-label="User" id="1129593699%2FClasslikes%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-user/index.html"><span><span>User</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1129593699%2FClasslikes%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">object </span><a href="-user/index.html">User</a> : <a href="index.html">SettingsRoute</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-617543381%2FFunctions%2F-1271788216" anchor-label="rumViewName" id="-617543381%2FFunctions%2F-1271788216" data-filterable-set=":core:navigation/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:navigation/commonMain" data-filterable-set=":core:navigation/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../rum-view-name.html"><span>rum</span><wbr><span>View</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-617543381%2FFunctions%2F-1271788216"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:navigation/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/navigation3/runtime/NavKey.html">NavKey</a><span class="token punctuation">.</span><a href="../rum-view-name.html"><span class="token function">rumViewName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Derives the analytics view name for a navigation destination.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

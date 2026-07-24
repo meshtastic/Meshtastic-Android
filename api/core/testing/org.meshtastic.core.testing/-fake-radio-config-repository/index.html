@@ -1,0 +1,659 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FakeRadioConfigRepository</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:testing/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/commonMain" data-filter=":core:testing/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-testing::org.meshtastic.core.testing/FakeRadioConfigRepository///PointingToDeclaration//1783121280">
+  <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeRadioConfigRepository</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Fake</span><wbr><span>Radio</span><wbr><span>Config</span><wbr><span><span>Repository</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioConfigRepository</a> : <a href="../-base-fake/index.html">BaseFake</a>, <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioConfigRepository.kt#L40">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a> backed by in-memory <span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">kotlinx.coroutines.flow.MutableStateFlow</span>s.</p><p class="paragraph">All mutator methods update the underlying state flows synchronously so tests can observe changes immediately. <a href="device-profile-flow.html">deviceProfileFlow</a> is derived from <a href="local-config-flow.html">localConfigFlow</a>, <a href="module-config-flow.html">moduleConfigFlow</a>, and the current channel set.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="13015431%2FConstructors%2F1783121280" anchor-label="FakeRadioConfigRepository" id="13015431%2FConstructors%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-config-repository.html"><span>Fake</span><wbr><span>Radio</span><wbr><span>Config</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="13015431%2FConstructors%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1982589012%2FProperties%2F1783121280" anchor-label="channelSetFlow" id="1982589012%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="channel-set-flow.html"><span>channel</span><wbr><span>Set</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1982589012%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="channel-set-flow.html">channelSetFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="847661921%2FProperties%2F1783121280" anchor-label="currentChannelSet" id="847661921%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-channel-set.html"><span>current</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="847661921%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-channel-set.html">currentChannelSet</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="428219047%2FProperties%2F1783121280" anchor-label="currentDeviceProfile" id="428219047%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-device-profile.html"><span>current</span><wbr><span>Device</span><wbr><span><span>Profile</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="428219047%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-device-profile.html">currentDeviceProfile</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/DeviceProfile///PointingToDeclaration/">DeviceProfile</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2132666476%2FProperties%2F1783121280" anchor-label="currentDeviceUIConfig" id="-2132666476%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-device-u-i-config.html"><span>current</span><wbr><span>Device</span><wbr><span><span>UIConfig</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2132666476%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-device-u-i-config.html">currentDeviceUIConfig</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/DeviceUIConfig///PointingToDeclaration/">DeviceUIConfig</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="938522805%2FProperties%2F1783121280" anchor-label="currentFileManifest" id="938522805%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-file-manifest.html"><span>current</span><wbr><span>File</span><wbr><span><span>Manifest</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="938522805%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-file-manifest.html">currentFileManifest</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/FileInfo///PointingToDeclaration/">FileInfo</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1650256653%2FProperties%2F1783121280" anchor-label="currentLocalConfig" id="1650256653%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-local-config.html"><span>current</span><wbr><span>Local</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1650256653%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-local-config.html">currentLocalConfig</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LocalConfig///PointingToDeclaration/">LocalConfig</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="38770659%2FProperties%2F1783121280" anchor-label="currentLoRaRegionPresetMap" id="38770659%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-lo-ra-region-preset-map.html"><span>current</span><wbr><span>Lo</span><wbr><span>Ra</span><wbr><span>Region</span><wbr><span>Preset</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="38770659%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-lo-ra-region-preset-map.html">currentLoRaRegionPresetMap</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LoRaRegionPresetMap///PointingToDeclaration/">LoRaRegionPresetMap</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-618100462%2FProperties%2F1783121280" anchor-label="currentModuleConfig" id="-618100462%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-module-config.html"><span>current</span><wbr><span>Module</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-618100462%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-module-config.html">currentModuleConfig</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LocalModuleConfig///PointingToDeclaration/">LocalModuleConfig</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1001773064%2FProperties%2F1783121280" anchor-label="deviceProfileFlow" id="-1001773064%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="device-profile-flow.html"><span>device</span><wbr><span>Profile</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1001773064%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="device-profile-flow.html">deviceProfileFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/DeviceProfile///PointingToDeclaration/">DeviceProfile</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1440889479%2FProperties%2F1783121280" anchor-label="deviceUIConfigFlow" id="1440889479%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="device-u-i-config-flow.html"><span>device</span><wbr><span>UIConfig</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1440889479%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="device-u-i-config-flow.html">deviceUIConfigFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/DeviceUIConfig///PointingToDeclaration/">DeviceUIConfig</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1881837720%2FProperties%2F1783121280" anchor-label="fileManifestFlow" id="-1881837720%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="file-manifest-flow.html"><span>file</span><wbr><span>Manifest</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1881837720%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="file-manifest-flow.html">fileManifestFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/FileInfo///PointingToDeclaration/">FileInfo</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1968909824%2FProperties%2F1783121280" anchor-label="lastSetLocalConfig" id="-1968909824%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-set-local-config.html"><span>last</span><wbr><span>Set</span><wbr><span>Local</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1968909824%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="last-set-local-config.html">lastSetLocalConfig</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config///PointingToDeclaration/">Config</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Last <span data-unresolved-link="org.meshtastic.proto/Config///PointingToDeclaration/">Config</span> passed to <a href="set-local-config.html">setLocalConfig</a> (null until called). Tests should use <a href="set-local-config-direct.html">setLocalConfigDirect</a> to drive state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1143111553%2FProperties%2F1783121280" anchor-label="lastSetModuleConfig" id="-1143111553%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-set-module-config.html"><span>last</span><wbr><span>Set</span><wbr><span>Module</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1143111553%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="last-set-module-config.html">lastSetModuleConfig</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ModuleConfig///PointingToDeclaration/">ModuleConfig</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Last <span data-unresolved-link="org.meshtastic.proto/ModuleConfig///PointingToDeclaration/">ModuleConfig</span> passed to <a href="set-local-module-config.html">setLocalModuleConfig</a> (null until called).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1807204638%2FProperties%2F1783121280" anchor-label="localConfigFlow" id="1807204638%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="local-config-flow.html"><span>local</span><wbr><span>Config</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1807204638%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="local-config-flow.html">localConfigFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/LocalConfig///PointingToDeclaration/">LocalConfig</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1816152108%2FProperties%2F1783121280" anchor-label="loraRegionPresetMapFlow" id="-1816152108%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lora-region-preset-map-flow.html"><span>lora</span><wbr><span>Region</span><wbr><span>Preset</span><wbr><span>Map</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1816152108%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="lora-region-preset-map-flow.html">loraRegionPresetMapFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/LoRaRegionPresetMap///PointingToDeclaration/">LoRaRegionPresetMap</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="935577925%2FProperties%2F1783121280" anchor-label="moduleConfigFlow" id="935577925%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="module-config-flow.html"><span>module</span><wbr><span>Config</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="935577925%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="module-config-flow.html">moduleConfigFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/LocalModuleConfig///PointingToDeclaration/">LocalModuleConfig</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1022371093%2FFunctions%2F1783121280" anchor-label="addFileInfo" id="1022371093%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-file-info.html"><span>add</span><wbr><span>File</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1022371093%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="add-file-info.html"><span class="token function">addFileInfo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">info<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/FileInfo///PointingToDeclaration/">FileInfo</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1885677837%2FFunctions%2F1783121280" anchor-label="clearChannelSet" id="1885677837%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-channel-set.html"><span>clear</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1885677837%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-channel-set.html"><span class="token function">clearChannelSet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-746438848%2FFunctions%2F1783121280" anchor-label="clearDeviceUIConfig" id="-746438848%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-device-u-i-config.html"><span>clear</span><wbr><span>Device</span><wbr><span><span>UIConfig</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-746438848%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-device-u-i-config.html"><span class="token function">clearDeviceUIConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2039405409%2FFunctions%2F1783121280" anchor-label="clearFileManifest" id="2039405409%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-file-manifest.html"><span>clear</span><wbr><span>File</span><wbr><span><span>Manifest</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2039405409%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-file-manifest.html"><span class="token function">clearFileManifest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-530988319%2FFunctions%2F1783121280" anchor-label="clearLocalConfig" id="-530988319%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-local-config.html"><span>clear</span><wbr><span>Local</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-530988319%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-local-config.html"><span class="token function">clearLocalConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1050219093%2FFunctions%2F1783121280" anchor-label="clearLocalModuleConfig" id="1050219093%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-local-module-config.html"><span>clear</span><wbr><span>Local</span><wbr><span>Module</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1050219093%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-local-module-config.html"><span class="token function">clearLocalModuleConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-220725353%2FFunctions%2F1783121280" anchor-label="clearLoraRegionPresetMap" id="-220725353%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-lora-region-preset-map.html"><span>clear</span><wbr><span>Lora</span><wbr><span>Region</span><wbr><span>Preset</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-220725353%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="clear-lora-region-preset-map.html"><span class="token function">clearLoraRegionPresetMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-408334468%2FFunctions%2F1783121280" anchor-label="replaceAllSettings" id="-408334468%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="replace-all-settings.html"><span>replace</span><wbr><span>All</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-408334468%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="replace-all-settings.html"><span class="token function">replaceAllSettings</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">settingsList<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSettings///PointingToDeclaration/">ChannelSettings</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="166805304%2FFunctions%2F1783121280" anchor-label="reset" id="166805304%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-fake/reset.html"><span><span>reset</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="166805304%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-base-fake/reset.html"><span class="token function">reset</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resets all registered state flows and custom actions to their initial state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1402840778%2FFunctions%2F1783121280" anchor-label="setChannelSet" id="-1402840778%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-channel-set.html"><span>set</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1402840778%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-channel-set.html"><span class="token function">setChannelSet</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">channelSet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Directly sets the <span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span> (bypasses <a href="update-channel-settings.html">updateChannelSettings</a>/<a href="replace-all-settings.html">replaceAllSettings</a>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-948252078%2FFunctions%2F1783121280" anchor-label="setDeviceProfile" id="-948252078%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-device-profile.html"><span>set</span><wbr><span>Device</span><wbr><span><span>Profile</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-948252078%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-device-profile.html"><span class="token function">setDeviceProfile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">profile<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/DeviceProfile///PointingToDeclaration/">DeviceProfile</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Directly sets the combined <span data-unresolved-link="org.meshtastic.proto/DeviceProfile///PointingToDeclaration/">DeviceProfile</span> emitted by <a href="device-profile-flow.html">deviceProfileFlow</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1985159190%2FFunctions%2F1783121280" anchor-label="setDeviceUIConfig" id="1985159190%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-device-u-i-config.html"><span>set</span><wbr><span>Device</span><wbr><span><span>UIConfig</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1985159190%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="set-device-u-i-config.html"><span class="token function">setDeviceUIConfig</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/DeviceUIConfig///PointingToDeclaration/">DeviceUIConfig</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="223434901%2FFunctions%2F1783121280" anchor-label="setLocalConfig" id="223434901%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-local-config.html"><span>set</span><wbr><span>Local</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="223434901%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="set-local-config.html"><span class="token function">setLocalConfig</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config///PointingToDeclaration/">Config</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-81340939%2FFunctions%2F1783121280" anchor-label="setLocalConfigDirect" id="-81340939%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-local-config-direct.html"><span>set</span><wbr><span>Local</span><wbr><span>Config</span><wbr><span><span>Direct</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-81340939%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-local-config-direct.html"><span class="token function">setLocalConfigDirect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LocalConfig///PointingToDeclaration/">LocalConfig</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Directly sets the <span data-unresolved-link="org.meshtastic.proto/LocalConfig///PointingToDeclaration/">LocalConfig</span> without merging (preferred for test setup).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-696014891%2FFunctions%2F1783121280" anchor-label="setLocalModuleConfig" id="-696014891%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-local-module-config.html"><span>set</span><wbr><span>Local</span><wbr><span>Module</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-696014891%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="set-local-module-config.html"><span class="token function">setLocalModuleConfig</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ModuleConfig///PointingToDeclaration/">ModuleConfig</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2015219683%2FFunctions%2F1783121280" anchor-label="setLocalModuleConfigDirect" id="-2015219683%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-local-module-config-direct.html"><span>set</span><wbr><span>Local</span><wbr><span>Module</span><wbr><span>Config</span><wbr><span><span>Direct</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2015219683%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-local-module-config-direct.html"><span class="token function">setLocalModuleConfigDirect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LocalModuleConfig///PointingToDeclaration/">LocalModuleConfig</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Directly sets the <span data-unresolved-link="org.meshtastic.proto/LocalModuleConfig///PointingToDeclaration/">LocalModuleConfig</span> without merging (preferred for test setup).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1660435542%2FFunctions%2F1783121280" anchor-label="setLoraRegionPresetMap" id="-1660435542%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-lora-region-preset-map.html"><span>set</span><wbr><span>Lora</span><wbr><span>Region</span><wbr><span>Preset</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1660435542%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="set-lora-region-preset-map.html"><span class="token function">setLoraRegionPresetMap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">map<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/LoRaRegionPresetMap///PointingToDeclaration/">LoRaRegionPresetMap</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="952574830%2FFunctions%2F1783121280" anchor-label="updateChannelSettings" id="952574830%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-channel-settings.html"><span>update</span><wbr><span>Channel</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="952574830%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-channel-settings.html"><span class="token function">updateChannelSettings</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">channel<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Channel///PointingToDeclaration/">Channel</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="et-rEE" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tõlgi rakendus</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="translate" data-locale="et-rEE">
+<pre class="markdown-content"># Tõlgi rakendus
+
+Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kättesaadavaks teha. Rakendus kasutab nii kasutajaliidese kui ka rakendusesisese dokumentatsiooni kogukonna tõlgete haldamiseks [Crowdinit](https://crowdin.com/).
+
+-------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+ UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                   |
+ User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help &amp; Documentation |
+ Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
+
+&gt; ⚠️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
+
+## Lisa uus keel
+
+Kui teie keelt Crowdinis veel pole:
+
+1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut lokaati.
+2. Hooldaja lisab keele Crowdinile ja seadistab faili `crowdin.yml`.
+3. Pärast lisamist saad kohe tõlkima hakata.
+
+## Translation Guidelines
+
+- **Ära tõlgi** tehnilisi termineid nagu "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — need on universaalsed.
+- **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
+- **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
+- **Testi võimalusel.** Vaheta seadme keelt ja ava rakendus, et näha, kuidas tõlked kontekstis välja näevad.
+
+---
+
+## Questions?
+
+If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+
+Tänan teid Meshtasticu haardeala laiendamise eest!
+</pre>
+</body>
+</html>

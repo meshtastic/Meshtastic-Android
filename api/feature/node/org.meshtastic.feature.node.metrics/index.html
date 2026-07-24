@@ -1,0 +1,848 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.feature.node.metrics</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:node/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:node/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:node/androidMain" data-filter=":feature:node/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:node/commonMain" data-filter=":feature:node/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-node::org.meshtastic.feature.node.metrics////PointingToDeclaration//-1217137874">
+  <div class="breadcrumbs"><a href="../index.html">feature-node</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.node.metrics</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1646592752%2FClasslikes%2F1906246353" anchor-label="ChartStyling" id="-1646592752%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-chart-styling/index.html"><span>Chart</span><wbr><span><span>Styling</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1646592752%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-chart-styling/index.html">ChartStyling</a></div><div class="brief "><p class="paragraph">Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico charts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1727709536%2FClasslikes%2F1906246353" anchor-label="CommonCharts" id="1727709536%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-common-charts/index.html"><span>Common</span><wbr><span><span>Charts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1727709536%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-common-charts/index.html">CommonCharts</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-665582513%2FClasslikes%2F1906246353" anchor-label="Environment" id="-665582513%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-environment/index.html"><span><span>Environment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-665582513%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-environment/index.html">Environment</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-environment/index.html">Environment</a><span class="token operator">&gt; </span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1816051887%2FClasslikes%2F1906246353" anchor-label="EnvironmentGraphingData" id="-1816051887%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-environment-graphing-data/index.html"><span>Environment</span><wbr><span>Graphing</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1816051887%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-environment-graphing-data/index.html">EnvironmentGraphingData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>metrics<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>shouldPlot<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>leftMinMax<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>Pair(0f, 0f)<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>rightMinMax<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>Pair(0f, 0f)<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>times<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>Pair(0, 0)</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1393230495%2FClasslikes%2F1906246353" anchor-label="EnvironmentMetricsState" id="-1393230495%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-environment-metrics-state/index.html"><span>Environment</span><wbr><span>Metrics</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1393230495%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-environment-metrics-state/index.html">EnvironmentMetricsState</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>environmentMetrics<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1679830176%2FClasslikes%2F1906246353" anchor-label="InfoDialogData" id="-1679830176%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-info-dialog-data/index.html"><span>Info</span><wbr><span>Dialog</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1679830176%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-info-dialog-data/index.html">InfoDialogData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>titleRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>definitionRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1108653623%2FClasslikes%2F1906246353" anchor-label="LegendData" id="-1108653623%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-legend-data/index.html"><span>Legend</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1108653623%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-legend-data/index.html">LegendData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>nameRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>metricKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>labelOverride<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-751266529%2FClasslikes%2F1906246353" anchor-label="MetricsViewModel" id="-751266529%2FClasslikes%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metrics-view-model/index.html"><span>Metrics</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-751266529%2FClasslikes%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>destNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token punctuation">, </span></span><span class="parameter ">tracerouteResponseProvider<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-response-provider/index.html">TracerouteResponseProvider</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">tracerouteSnapshotRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-snapshot-repository/index.html">TracerouteSnapshotRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRequestActions<span class="token operator">: </span><a href="../org.meshtastic.feature.node.detail/-node-request-actions/index.html">NodeRequestActions</a><span class="token punctuation">, </span></span><span class="parameter ">alertManager<span class="token operator">: </span><a href="../../../core/ui/org.meshtastic.core.ui.util/-alert-manager/index.html">AlertManager</a><span class="token punctuation">, </span></span><span class="parameter ">getNodeDetailsUseCase<span class="token operator">: </span><a href="../org.meshtastic.feature.node.domain.usecase/-get-node-details-use-case/index.html">GetNodeDetailsUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">fileService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-file-service/index.html">FileService</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">ViewModel responsible for managing and graphing metrics (telemetry, signal strength, paxcount) for a specific node.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1902947258%2FProperties%2F1906246353" anchor-label="BYTES_IN_GB" id="1902947258%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-y-t-e-s_-i-n_-g-b.html"><span>BYTES_</span><wbr><span>IN_</span><wbr><span>GB</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1902947258%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-y-t-e-s_-i-n_-g-b.html">BYTES_IN_GB</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1454436030%2FProperties%2F1906246353" anchor-label="BYTES_IN_KB" id="1454436030%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-y-t-e-s_-i-n_-k-b.html"><span>BYTES_</span><wbr><span>IN_</span><wbr><span>KB</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1454436030%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-y-t-e-s_-i-n_-k-b.html">BYTES_IN_KB</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">1024.0</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-917303232%2FProperties%2F1906246353" anchor-label="BYTES_IN_MB" id="-917303232%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-y-t-e-s_-i-n_-m-b.html"><span>BYTES_</span><wbr><span>IN_</span><wbr><span>MB</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-917303232%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-y-t-e-s_-i-n_-m-b.html">BYTES_IN_MB</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1456806043%2FFunctions%2F1906246353" anchor-label="AdaptiveMetricLayout" id="-1456806043%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-adaptive-metric-layout.html"><span>Adaptive</span><wbr><span>Metric</span><wbr><span><span>Layout</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1456806043%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-adaptive-metric-layout.html"><span class="token function">AdaptiveMetricLayout</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">chartPart<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">listPart<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">isChartExpanded<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for narrow screens (phones). When <a href="-adaptive-metric-layout.html">isChartExpanded</a> is true, the card list is hidden and the chart fills the available space.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1280222984%2FFunctions%2F1906246353" anchor-label="AirQualityMetricsScreen" id="-1280222984%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-air-quality-metrics-screen.html"><span>Air</span><wbr><span>Quality</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1280222984%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-air-quality-metrics-screen.html"><span class="token function">AirQualityMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="984237317%2FFunctions%2F1906246353" anchor-label="BaseMetricScreen" id="984237317%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-base-metric-screen.html"><span>Base</span><wbr><span>Metric</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="984237317%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="-base-metric-screen.html">T</a><span class="token operator">&gt; </span><a href="-base-metric-screen.html"><span class="token function">BaseMetricScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">telemetryType<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-telemetry-type/index.html">TelemetryType</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">titleRes<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.compose.resources/StringResource///PointingToDeclaration/">StringResource</span><span class="token punctuation">, </span></span><span class="parameter ">nodeName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-base-metric-screen.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">timeProvider<span class="token operator">: </span><span class="token punctuation">(</span><a href="-base-metric-screen.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">infoData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-info-dialog-data/index.html">InfoDialogData</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">onRequestTelemetry<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onExportCsv<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">extraActions<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">chartPart<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian/VicoScrollState///PointingToDeclaration/">VicoScrollState</span><span class="token punctuation">, </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">listPart<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/LazyListState.html">LazyListState</a><span class="token punctuation">, </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">controlPart<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">bottomContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and chart-to-list synchronisation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1732274363%2FFunctions%2F1906246353" anchor-label="DeleteItem" id="-1732274363%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-delete-item.html"><span>Delete</span><wbr><span><span>Item</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1732274363%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-delete-item.html"><span class="token function">DeleteItem</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1500379692%2FFunctions%2F1906246353" anchor-label="DeviceMetricsCardPreview" id="-1500379692%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-metrics-card-preview.html"><span>Device</span><wbr><span>Metrics</span><wbr><span>Card</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1500379692%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-device-metrics-card-preview.html"><span class="token function">DeviceMetricsCardPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-623001928%2FFunctions%2F1906246353" anchor-label="DeviceMetricsScreen" id="-623001928%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-device-metrics-screen.html"><span>Device</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-623001928%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-device-metrics-screen.html"><span class="token function">DeviceMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1152638594%2FFunctions%2F1906246353" anchor-label="EnvironmentMetricsChart" id="-1152638594%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-environment-metrics-chart.html"><span>Environment</span><wbr><span>Metrics</span><wbr><span><span>Chart</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152638594%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-environment-metrics-chart.html"><span class="token function">EnvironmentMetricsChart</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">telemetries<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">graphData<span class="token operator">: </span><a href="-environment-graphing-data/index.html">EnvironmentGraphingData</a><span class="token punctuation">, </span></span><span class="parameter ">vicoScrollState<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian/VicoScrollState///PointingToDeclaration/">VicoScrollState</span><span class="token punctuation">, </span></span><span class="parameter ">selectedX<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">onPointSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-970236743%2FFunctions%2F1906246353" anchor-label="EnvironmentMetricsScreen" id="-970236743%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-environment-metrics-screen.html"><span>Environment</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-970236743%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-environment-metrics-screen.html"><span class="token function">EnvironmentMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-91360533%2FFunctions%2F1906246353" anchor-label="formatBytes" id="-91360533%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="format-bytes.html"><span>format</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-91360533%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="format-bytes.html"><span class="token function">formatBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">decimalPlaces<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-21531326%2FFunctions%2F1906246353" anchor-label="GenericMetricChart" id="-21531326%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-generic-metric-chart.html"><span>Generic</span><wbr><span>Metric</span><wbr><span><span>Chart</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-21531326%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-generic-metric-chart.html"><span class="token function">GenericMetricChart</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modelProducer<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span><span class="token punctuation">, </span></span><span class="parameter ">layers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer///PointingToDeclaration/">LineCartesianLayer</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">startAxis<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/VerticalAxis///PointingToDeclaration/">VerticalAxis</span><span class="token operator">&lt;</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/Axis.Position.Vertical.Start///PointingToDeclaration/">Axis.Position.Vertical.Start</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">endAxis<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/VerticalAxis///PointingToDeclaration/">VerticalAxis</span><span class="token operator">&lt;</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/Axis.Position.Vertical.End///PointingToDeclaration/">Axis.Position.Vertical.End</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">bottomAxis<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/HorizontalAxis///PointingToDeclaration/">HorizontalAxis</span><span class="token operator">&lt;</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/Axis.Position.Horizontal.Bottom///PointingToDeclaration/">Axis.Position.Horizontal.Bottom</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">marker<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/CartesianMarker///PointingToDeclaration/">CartesianMarker</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">decorations<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.decoration/Decoration///PointingToDeclaration/">Decoration</span><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter ">selectedX<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onPointSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">vicoScrollState<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian/VicoScrollState///PointingToDeclaration/">VicoScrollState</span><span class="token operator"> = </span>rememberVicoScrollState()</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point selection synchronization.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1524630848%2FFunctions%2F1906246353" anchor-label="HostMetricsLogScreen" id="-1524630848%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-host-metrics-log-screen.html"><span>Host</span><wbr><span>Metrics</span><wbr><span>Log</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1524630848%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-host-metrics-log-screen.html"><span class="token function">HostMetricsLogScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Full-screen host metrics log with chart and card list, built on <a href="-base-metric-screen.html">BaseMetricScreen</a>. Shows load averages and free memory over time with time-frame filtering, chart expand/collapse, and card-to-chart synchronisation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1327985008%2FFunctions%2F1906246353" anchor-label="Legend" id="1327985008%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-legend.html"><span><span>Legend</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1327985008%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-legend.html"><span class="token function">Legend</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">legendData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-legend-data/index.html">LegendData</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">hiddenSet<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptySet()<span class="token punctuation">, </span></span><span class="parameter ">onToggle<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Creates the legend that identifies the colors used for the graph.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1158073724%2FFunctions%2F1906246353" anchor-label="LegendIndicator" id="-1158073724%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-legend-indicator.html"><span>Legend</span><wbr><span><span>Indicator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1158073724%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-legend-indicator.html"><span class="token function">LegendIndicator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">isLine<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Draws a small colored line segment or circle to identify a chart series.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1379745577%2FFunctions%2F1906246353" anchor-label="LegendInfoDialog" id="-1379745577%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-legend-info-dialog.html"><span>Legend</span><wbr><span>Info</span><wbr><span><span>Dialog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1379745577%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-legend-info-dialog.html"><span class="token function">LegendInfoDialog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">infoData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-info-dialog-data/index.html">InfoDialogData</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onDismiss<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Displays a dialog with information about the legend items.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1767533536%2FFunctions%2F1906246353" anchor-label="LegendPreview" id="1767533536%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-legend-preview.html"><span>Legend</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1767533536%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-legend-preview.html"><span class="token function">LegendPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="930254589%2FFunctions%2F1906246353" anchor-label="LogLine" id="930254589%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-log-line.html"><span>Log</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="930254589%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-log-line.html"><span class="token function">LogLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="155789436%2FFunctions%2F1906246353" anchor-label="MetricChartScaffold" id="155789436%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metric-chart-scaffold.html"><span>Metric</span><wbr><span>Chart</span><wbr><span><span>Scaffold</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="155789436%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-metric-chart-scaffold.html"><span class="token function">MetricChartScaffold</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isEmpty<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">legendData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-legend-data/index.html">LegendData</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">hiddenSet<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptySet()<span class="token punctuation">, </span></span><span class="parameter ">onToggle<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Common scaffold for all metric chart composables. Provides:</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-896403444%2FFunctions%2F1906246353" anchor-label="MetricIndicator" id="-896403444%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metric-indicator.html"><span>Metric</span><wbr><span><span>Indicator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-896403444%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-metric-indicator.html"><span class="token function">MetricIndicator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1495129300%2FFunctions%2F1906246353" anchor-label="MetricLogItem" id="1495129300%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metric-log-item.html"><span>Metric</span><wbr><span>Log</span><wbr><span><span>Item</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1495129300%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-metric-log-item.html"><span class="token function">MetricLogItem</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">icon<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/vector/ImageVector.html">ImageVector</a><span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">contentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Shared metric log/list UI components used by TracerouteLog, NeighborInfoLog, HostMetricsLog, and PositionLog.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1748407811%2FFunctions%2F1906246353" anchor-label="MetricValueRow" id="-1748407811%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metric-value-row.html"><span>Metric</span><wbr><span>Value</span><wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1748407811%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-metric-value-row.html"><span class="token function">MetricValueRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A compact row displaying a colored <a href="-metric-indicator.html">MetricIndicator</a> dot/line followed by a text value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-428719110%2FFunctions%2F1906246353" anchor-label="NeighborInfoLogScreen" id="-428719110%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-neighbor-info-log-screen.html"><span>Neighbor</span><wbr><span>Info</span><wbr><span>Log</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-428719110%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-neighbor-info-log-screen.html"><span class="token function">NeighborInfoLogScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="844814290%2FFunctions%2F1906246353" anchor-label="PaxcountInfo" id="844814290%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-paxcount-info.html"><span>Paxcount</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="844814290%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-paxcount-info.html"><span class="token function">PaxcountInfo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pax<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">contentColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token operator"> = </span>MaterialTheme.colorScheme.onSurface</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-162501147%2FFunctions%2F1906246353" anchor-label="PaxMetricsItem" id="-162501147%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pax-metrics-item.html"><span>Pax</span><wbr><span>Metrics</span><wbr><span><span>Item</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-162501147%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-pax-metrics-item.html"><span class="token function">PaxMetricsItem</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">log<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token punctuation">, </span></span><span class="parameter ">pax<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Paxcount///PointingToDeclaration/">Paxcount</span><span class="token punctuation">, </span></span><span class="parameter ">isSelected<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1223454387%2FFunctions%2F1906246353" anchor-label="PaxMetricsScreen" id="-1223454387%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pax-metrics-screen.html"><span>Pax</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1223454387%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-pax-metrics-screen.html"><span class="token function">PaxMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">metricsViewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1024187928%2FFunctions%2F1906246353" anchor-label="PositionCard" id="1024187928%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-position-card.html"><span>Position</span><wbr><span><span>Card</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1024187928%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-position-card.html"><span class="token function">PositionCard</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Position///PointingToDeclaration/">Position</span><span class="token punctuation">, </span></span><span class="parameter ">displayUnits<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config.DisplayConfig.DisplayUnits///PointingToDeclaration/">Config.DisplayConfig.DisplayUnits</span><span class="token punctuation">, </span></span><span class="parameter ">isSelected<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A <a href="-selectable-metric-card.html">SelectableMetricCard</a>-based position item that matches the visual style of <a href="../../../feature/node/org.meshtastic.feature.node.metrics/index.html">DeviceMetricsCard</a>, <a href="../../../feature/node/org.meshtastic.feature.node.metrics/index.html">SignalMetricsCard</a>, and other metric cards. Replaces the previous table-row layout with a card that shows timestamp, coordinates, satellites, altitude, speed, and heading.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-392770518%2FFunctions%2F1906246353" anchor-label="PositionLogScreen" id="-392770518%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-position-log-screen.html"><span>Position</span><wbr><span>Log</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-392770518%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-position-log-screen.html"><span class="token function">PositionLogScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1591136043%2FFunctions%2F1906246353" anchor-label="PowerMetricsScreen" id="1591136043%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-power-metrics-screen.html"><span>Power</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1591136043%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-power-metrics-screen.html"><span class="token function">PowerMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="975426137%2FFunctions%2F1906246353" anchor-label="PreviewAirQualityCards" id="975426137%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-preview-air-quality-cards.html"><span>Preview</span><wbr><span>Air</span><wbr><span>Quality</span><wbr><span><span>Cards</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="975426137%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-preview-air-quality-cards.html"><span class="token function">PreviewAirQualityCards</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="277801758%2FFunctions%2F1906246353" anchor-label="PreviewEnvironmentMetricsContent" id="277801758%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-preview-environment-metrics-content.html"><span>Preview</span><wbr><span>Environment</span><wbr><span>Metrics</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="277801758%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-preview-environment-metrics-content.html"><span class="token function">PreviewEnvironmentMetricsContent</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="832255447%2FFunctions%2F1906246353" anchor-label="rememberConditionalLayer" id="832255447%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-conditional-layer.html"><span>remember</span><wbr><span>Conditional</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="832255447%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="remember-conditional-layer.html"><span class="token function">rememberConditionalLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">hasData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">lineProvider<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.LineProvider///PointingToDeclaration/">LineCartesianLayer.LineProvider</span><span class="token punctuation">, </span></span><span class="parameter ">verticalAxisPosition<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.axis/Axis.Position.Vertical///PointingToDeclaration/">Axis.Position.Vertical</span><span class="token punctuation">, </span></span><span class="parameter ">rangeProvider<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianLayerRangeProvider///PointingToDeclaration/">CartesianLayerRangeProvider</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer///PointingToDeclaration/">LineCartesianLayer</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Creates a <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer///PointingToDeclaration/">LineCartesianLayer</span> only when <a href="remember-conditional-layer.html">hasData</a> is true, returning null otherwise.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="684272307%2FFunctions%2F1906246353" anchor-label="safeNumber" id="684272307%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="safe-number.html"><span>safe</span><wbr><span><span>Number</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="684272307%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/HardwareModel///PointingToDeclaration/">HardwareModel</span><span class="token punctuation">.</span><a href="safe-number.html"><span class="token function">safeNumber</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fallbackValue<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>-1</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Safely extracts the hardware model number from a HardwareModel enum.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1513703361%2FFunctions%2F1906246353" anchor-label="SelectableMetricCard" id="1513703361%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-selectable-metric-card.html"><span>Selectable</span><wbr><span>Metric</span><wbr><span><span>Card</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1513703361%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-selectable-metric-card.html"><span class="token function">SelectableMetricCard</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isSelected<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">onClick<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A selectable <a href="https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary.html">Card</a> for metric log items. Provides consistent selection styling (primary border + primaryContainer background) and text selection support across all metric screens.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1389763195%2FFunctions%2F1906246353" anchor-label="SignalMetricsScreen" id="-1389763195%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-signal-metrics-screen.html"><span>Signal</span><wbr><span>Metrics</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1389763195%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-signal-metrics-screen.html"><span class="token function">SignalMetricsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1136233140%2FFunctions%2F1906246353" anchor-label="TimeFrameSelector" id="-1136233140%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-time-frame-selector.html"><span>Time</span><wbr><span>Frame</span><wbr><span><span>Selector</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1136233140%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-time-frame-selector.html"><span class="token function">TimeFrameSelector</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">selectedTimeFrame<span class="token operator">: </span><a href="../org.meshtastic.feature.node.model/-time-frame/index.html">TimeFrame</a><span class="token punctuation">, </span></span><span class="parameter ">availableTimeFrames<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../org.meshtastic.feature.node.model/-time-frame/index.html">TimeFrame</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">onTimeFrameSelected<span class="token operator">: </span><span class="token punctuation">(</span><a href="../org.meshtastic.feature.node.model/-time-frame/index.html">TimeFrame</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1117443539%2FFunctions%2F1906246353" anchor-label="TracerouteLogScreen" id="1117443539%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-log-screen.html"><span>Traceroute</span><wbr><span>Log</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1117443539%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-traceroute-log-screen.html"><span class="token function">TracerouteLogScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">viewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onViewOnMap<span class="token operator">: </span><span class="token punctuation">(</span>requestId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span>responseLogUuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{ _, _ -&gt; }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Full-screen traceroute log with chart and card list, built on <a href="-base-metric-screen.html">BaseMetricScreen</a>. Shows forward/return hops and round-trip duration over time. Supports time-frame filtering, chart expand/collapse, and card-to-chart synchronisation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-958599826%2FFunctions%2F1596539113" anchor-label="TracerouteMapScreen" id="-958599826%2FFunctions%2F1596539113" data-filterable-set=":feature:node/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/androidMain" data-filterable-set=":feature:node/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-map-screen.html"><span>Traceroute</span><wbr><span>Map</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-958599826%2FFunctions%2F1596539113"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:node/androidMain" data-filterable-set=":feature:node/androidMain" data-active="" data-toggle=":feature:node/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-traceroute-map-screen.html"><span class="token function">TracerouteMapScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">metricsViewModel<span class="token operator">: </span><a href="-metrics-view-model/index.html">MetricsViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">requestId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">logUuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja-rJP" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>アプリを翻訳する</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="translate" data-locale="ja-rJP">
+<pre class="markdown-content"># アプリを翻訳する
+
+翻訳への貢献は、Meshtastic をより多くの人が使えるようにするのに役立ちます。 アプリは、ユーザーインターフェースとアプリ内ドキュメントの両方のコミュニティ翻訳を管理するために [Crowdin](https://crowdin.com/) を使用しています。
+
+----------- | ------------------------------------------------------------------- | ----------------------------------- |
+ UI 文字列         | `core/resources/src/commonMain/composeResources/values/strings.xml` | ボタン、ラベル、メッセージ、およびユーザーに表示されるすべてのテキスト |
+ ユーザーガイドのページ    | `docs/en/user/*.md`                                                 | 「ヘルプとドキュメント」に表示されるアプリ内ドキュメント        |
+ Fastlane メタデータ | `fastlane/metadata/android/en-US/`                                  | アプリストアの掲載タイトル、説明、変更履歴               |
+
+&gt; ⚠️ **注意：** 開発者ガイドのページは英語のみです。 コントリビューター向けの、コード中心のドキュメントは翻訳されません。
+
+## 新しい言語を追加する
+
+自分の言語がまだ Crowdin に掲載されていない場合：
+
+1. [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) で issue を作成し、新しいロケールをリクエストします。
+2. メンテナーが Crowdin にその言語を追加し、`crowdin.yml` を設定します。
+3. 追加されたら、すぐに翻訳を始められます。
+
+## 翻訳ガイドライン
+
+- 「LoRa」「MQTT」「BLE」「TAK」「SNR」「RSSI」などの技術用語は**翻訳しないでください**。これらは共通です。
+- **プレースホルダーはそのまま保ちます。** `%1$s` や `%d` のような文字列は、実行時に値が埋め込まれます。 自分の言語の文法上必要な場合を除き、削除したり並び替えたりしないでください。
+- **トーンを合わせます。** アプリは、親しみやすく率直な語り口を使っています。 過度に堅い言葉は避けてください。
+- **可能ならテストします。** デバイスの言語を切り替えてアプリを開き、翻訳が実際の文脈でどう見えるか確認してください。
+
+---
+
+## 質問がありますか？
+
+If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+
+Meshtastic の普及にご協力いただき、ありがとうございます！
+</pre>
+</body>
+</html>

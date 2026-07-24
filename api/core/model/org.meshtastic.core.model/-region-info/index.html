@@ -1,0 +1,693 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RegionInfo</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:model/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:model/commonMain" data-filter=":core:model/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-model::org.meshtastic.core.model/RegionInfo///PointingToDeclaration//394437785">
+  <div class="breadcrumbs"><a href="../../index.html">core-model</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.model</a><span class="delimiter">/</span><span class="current">RegionInfo</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Region</span><wbr><span><span>Info</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">RegionInfo</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">RegionInfo</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/ChannelOption.kt#L111">source</a>)</span></span></div><p class="paragraph">Regulatory regions for radio usage</p><h4 class="tableheader">See also</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div></div></span></div><div><div class="title"><p class="paragraph"><a href="https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf">LoRaWAN Regional Parameters</a></p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="ENTRY">
+        <h2 class="tableheader">Entries</h2>
+        <div class="table"><a data-name="1516782584%2FClasslikes%2F394437785" anchor-label="US" id="1516782584%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s/index.html">US</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1516782584%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-u-s/index.html">US</a></div></div><div class="brief "><p class="paragraph">United States</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-315822689%2FClasslikes%2F394437785" anchor-label="EU_433" id="-315822689%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-u_433/index.html">EU_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-315822689%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-e-u_433/index.html">EU_433</a></div></div><div class="brief "><p class="paragraph">European Union 433MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2027864443%2FClasslikes%2F394437785" anchor-label="EU_868" id="-2027864443%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-u_868/index.html">EU_868</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2027864443%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-e-u_868/index.html">EU_868</a></div></div><div class="brief "><p class="paragraph">European Union 868MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1423540485%2FClasslikes%2F394437785" anchor-label="CN" id="1423540485%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-n/index.html">CN</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1423540485%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-n/index.html">CN</a></div></div><div class="brief "><p class="paragraph">China</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1057665888%2FClasslikes%2F394437785" anchor-label="JP" id="-1057665888%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-j-p/index.html">JP</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1057665888%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-j-p/index.html">JP</a></div></div><div class="brief "><p class="paragraph">Japan</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-881198309%2FClasslikes%2F394437785" anchor-label="ANZ" id="-881198309%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-n-z/index.html">ANZ</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-881198309%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-a-n-z/index.html">ANZ</a></div></div><div class="brief "><p class="paragraph">Australia / New Zealand</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1784557311%2FClasslikes%2F394437785" anchor-label="KR" id="-1784557311%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-r/index.html">KR</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1784557311%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-k-r/index.html">KR</a></div></div><div class="brief "><p class="paragraph">Korea</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="940157213%2FClasslikes%2F394437785" anchor-label="TW" id="940157213%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-w/index.html">TW</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="940157213%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-t-w/index.html">TW</a></div></div><div class="brief "><p class="paragraph">Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor. 5.8.1 in the Low-power Radio-frequency Devices Technical Regulations</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1959434461%2FClasslikes%2F394437785" anchor-label="RU" id="1959434461%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-r-u/index.html">RU</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1959434461%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-r-u/index.html">RU</a></div></div><div class="brief "><p class="paragraph">Russia Note:</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-330774465%2FClasslikes%2F394437785" anchor-label="IN" id="-330774465%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-i-n/index.html">IN</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-330774465%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-i-n/index.html">IN</a></div></div><div class="brief "><p class="paragraph">India</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="708883422%2FClasslikes%2F394437785" anchor-label="NZ_865" id="708883422%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-n-z_865/index.html">NZ_865</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="708883422%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-z_865/index.html">NZ_865</a></div></div><div class="brief "><p class="paragraph">New Zealand 865MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2051465550%2FClasslikes%2F394437785" anchor-label="TH" id="2051465550%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-h/index.html">TH</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2051465550%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-t-h/index.html">TH</a></div></div><div class="brief "><p class="paragraph">Thailand</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1146476421%2FClasslikes%2F394437785" anchor-label="UA_433" id="-1146476421%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-a_433/index.html">UA_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1146476421%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-u-a_433/index.html">UA_433</a></div></div><div class="brief "><p class="paragraph">Ukraine 433MHz 433,05-434,7 Mhz 10 mW</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-250290277%2FClasslikes%2F394437785" anchor-label="MY_433" id="-250290277%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-y_433/index.html">MY_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-250290277%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-m-y_433/index.html">MY_433</a></div></div><div class="brief "><p class="paragraph">Malaysia 433MHz 433 - 435 MHz at 100mW, no restrictions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="955801960%2FClasslikes%2F394437785" anchor-label="MY_919" id="955801960%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-y_919/index.html">MY_919</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="955801960%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-m-y_919/index.html">MY_919</a></div></div><div class="brief "><p class="paragraph">Malaysia 919MHz 919 - 923 Mhz at 500mW, no restrictions. 923 - 924 MHz at 500mW with 1% duty cycle OR frequency hopping. Frequency hopping is used for 919 - 923 MHz.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-852690327%2FClasslikes%2F394437785" anchor-label="SG_923" id="-852690327%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-g_923/index.html">SG_923</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-852690327%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-s-g_923/index.html">SG_923</a></div></div><div class="brief "><p class="paragraph">Singapore 923MHz SG_923 Band 30d: 917 - 925 MHz at 100mW, no restrictions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="519388391%2FClasslikes%2F394437785" anchor-label="PH_433" id="519388391%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-h_433/index.html">PH_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="519388391%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-h_433/index.html">PH_433</a></div></div><div class="brief "><p class="paragraph">Philippines 433MHz 433 - 434.7 MHz &lt;10 mW erp, NTC approved device required</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1192653363%2FClasslikes%2F394437785" anchor-label="PH_868" id="-1192653363%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-h_868/index.html">PH_868</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1192653363%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-h_868/index.html">PH_868</a></div></div><div class="brief "><p class="paragraph">Philippines 868MHz 868 - 869.4 MHz &lt;25 mW erp, NTC approved device required</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1700475472%2FClasslikes%2F394437785" anchor-label="PH_915" id="-1700475472%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-h_915/index.html">PH_915</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1700475472%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-h_915/index.html">PH_915</a></div></div><div class="brief "><p class="paragraph">Philippines 915MHz 915 - 918 MHz &lt;250 mW EIRP, no external antenna allowed</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1740714115%2FClasslikes%2F394437785" anchor-label="LORA_24" id="-1740714115%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-o-r-a_24/index.html">LORA_24</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1740714115%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-l-o-r-a_24/index.html">LORA_24</a></div></div><div class="brief "><p class="paragraph">2.4 GHZ WLAN Band equivalent. Only for SX128x chips.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="749386160%2FClasslikes%2F394437785" anchor-label="ANZ_433" id="749386160%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-n-z_433/index.html">ANZ_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="749386160%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-a-n-z_433/index.html">ANZ_433</a></div></div><div class="brief "><p class="paragraph">Australia / New Zealand 433MHz 433.05 - 434.79 MHz, 25mW EIRP max, No duty cycle restrictions</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-811545954%2FClasslikes%2F394437785" anchor-label="KZ_433" id="-811545954%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-z_433/index.html">KZ_433</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-811545954%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-k-z_433/index.html">KZ_433</a></div></div><div class="brief "><p class="paragraph">Kazakhstan 433MHz 433.075 - 434.775 MHz &lt;10 mW EIRP, Low Powered Devices (LPD)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="710159935%2FClasslikes%2F394437785" anchor-label="KZ_863" id="710159935%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-z_863/index.html">KZ_863</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="710159935%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-k-z_863/index.html">KZ_863</a></div></div><div class="brief "><p class="paragraph">Kazakhstan 863MHz 863 - 868 MHz &lt;25 mW EIRP, 500kHz channels allowed, must not be used at airfields</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-861721004%2FClasslikes%2F394437785" anchor-label="NP_865" id="-861721004%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-n-p_865/index.html">NP_865</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-861721004%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-p_865/index.html">NP_865</a></div></div><div class="brief "><p class="paragraph">Nepal 865Mhz 865 - 868 Mhz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="940021094%2FClasslikes%2F394437785" anchor-label="BR_902" id="940021094%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-r_902/index.html">BR_902</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="940021094%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-b-r_902/index.html">BR_902</a></div></div><div class="brief "><p class="paragraph">Brazil 902MHz 902 - 907.5 MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1514264361%2FClasslikes%2F394437785" anchor-label="UNSET" id="-1514264361%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-n-s-e-t/index.html">UNSET</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1514264361%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><a href="-u-n-s-e-t/index.html">UNSET</a></div></div><div class="brief "><p class="paragraph">This needs to be last. Same as US.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-384873077%2FClasslikes%2F394437785" anchor-label="Companion" id="-384873077%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-384873077%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1629496840%2FProperties%2F394437785" anchor-label="description" id="1629496840%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="description.html"><span><span>description</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1629496840%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="description.html">description</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">A human readable description of the region</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1659219828%2FProperties%2F394437785" anchor-label="entries" id="1659219828%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="entries.html"><span><span>entries</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1659219828%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">RegionInfo</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a representation of an immutable list of all enum entries, in the order they're declared.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="369347617%2FProperties%2F394437785" anchor-label="freqEnd" id="369347617%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="freq-end.html"><span>freq</span><wbr><span><span>End</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="369347617%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="freq-end.html">freqEnd</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a></div><div class="brief "><p class="paragraph">The ending frequency in MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1191971514%2FProperties%2F394437785" anchor-label="freqStart" id="1191971514%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="freq-start.html"><span>freq</span><wbr><span><span>Start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1191971514%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="freq-start.html">freqStart</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a></div><div class="brief "><p class="paragraph">The starting frequency in MHz</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-372974862%2FProperties%2F394437785" anchor-label="name" id="-372974862%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-telemetry-type/-p-a-x/index.html#-372974862%2FProperties%2F394437785"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372974862%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="../-telemetry-type/-p-a-x/index.html#-372974862%2FProperties%2F394437785">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-739389684%2FProperties%2F394437785" anchor-label="ordinal" id="-739389684%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-telemetry-type/-p-a-x/index.html#-739389684%2FProperties%2F394437785"><span><span>ordinal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739389684%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="../-telemetry-type/-p-a-x/index.html#-739389684%2FProperties%2F394437785">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1446010933%2FProperties%2F394437785" anchor-label="regionCode" id="1446010933%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="region-code.html"><span>region</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1446010933%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="region-code.html">regionCode</a><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config.LoRaConfig.RegionCode///PointingToDeclaration/">Config.LoRaConfig.RegionCode</span></div><div class="brief "><p class="paragraph">The region code</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1885822575%2FProperties%2F394437785" anchor-label="wideLora" id="-1885822575%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wide-lora.html"><span>wide</span><wbr><span><span>Lora</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1885822575%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="wide-lora.html">wideLora</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether the region uses wide Lora</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="744090280%2FFunctions%2F394437785" anchor-label="valueOf" id="744090280%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="value-of.html"><span>value</span><wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="744090280%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RegionInfo</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-853672524%2FFunctions%2F394437785" anchor-label="values" id="-853672524%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="values.html"><span><span>values</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-853672524%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">RegionInfo</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

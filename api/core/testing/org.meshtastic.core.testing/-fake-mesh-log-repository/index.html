@@ -1,0 +1,449 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FakeMeshLogRepository</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:testing/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/commonMain" data-filter=":core:testing/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-testing::org.meshtastic.core.testing/FakeMeshLogRepository///PointingToDeclaration//1783121280">
+  <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeMeshLogRepository</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Repository</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeMeshLogRepository</a> : <a href="../-base-fake/index.html">BaseFake</a>, <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeMeshLogRepository.kt#L31">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a> that provides in-memory log storage.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1855538925%2FConstructors%2F1783121280" anchor-label="FakeMeshLogRepository" id="-1855538925%2FConstructors%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-log-repository.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1855538925%2FConstructors%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="2072928791%2FProperties%2F1783121280" anchor-label="currentLogs" id="2072928791%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-logs.html"><span>current</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2072928791%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="current-logs.html">currentLogs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="815289132%2FProperties%2F1783121280" anchor-label="deleteAllCalled" id="815289132%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-all-called.html"><span>delete</span><wbr><span>All</span><wbr><span><span>Called</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="815289132%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="delete-all-called.html">deleteAllCalled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1797096270%2FProperties%2F1783121280" anchor-label="lastDeletedLocalStatsNodeNum" id="1797096270%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-deleted-local-stats-node-num.html"><span>last</span><wbr><span>Deleted</span><wbr><span>Local</span><wbr><span>Stats</span><wbr><span>Node</span><wbr><span><span>Num</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1797096270%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="last-deleted-local-stats-node-num.html">lastDeletedLocalStatsNodeNum</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1995383465%2FProperties%2F1783121280" anchor-label="lastDeletedOlderThan" id="1995383465%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-deleted-older-than.html"><span>last</span><wbr><span>Deleted</span><wbr><span>Older</span><wbr><span><span>Than</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1995383465%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="last-deleted-older-than.html">lastDeletedOlderThan</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1496511191%2FFunctions%2F1783121280" anchor-label="deleteAll" id="-1496511191%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-all.html"><span>delete</span><wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1496511191%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-all.html"><span class="token function">deleteAll</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1059614549%2FFunctions%2F1783121280" anchor-label="deleteLocalStatsLogs" id="-1059614549%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-local-stats-logs.html"><span>delete</span><wbr><span>Local</span><wbr><span>Stats</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1059614549%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-local-stats-logs.html"><span class="token function">deleteLocalStatsLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1201125922%2FFunctions%2F1783121280" anchor-label="deleteLog" id="-1201125922%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-log.html"><span>delete</span><wbr><span><span>Log</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1201125922%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-log.html"><span class="token function">deleteLog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1069915906%2FFunctions%2F1783121280" anchor-label="deleteLogs" id="-1069915906%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-logs.html"><span>delete</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1069915906%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-logs.html"><span class="token function">deleteLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">portNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1876536034%2FFunctions%2F1783121280" anchor-label="deleteLogsOlderThan" id="1876536034%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-logs-older-than.html"><span>delete</span><wbr><span>Logs</span><wbr><span>Older</span><wbr><span><span>Than</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1876536034%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="delete-logs-older-than.html"><span class="token function">deleteLogsOlderThan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">retentionDays<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1338328513%2FFunctions%2F1783121280" anchor-label="getAllLogs" id="-1338328513%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-all-logs.html"><span>get</span><wbr><span>All</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1338328513%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-all-logs.html"><span class="token function">getAllLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1004054225%2FFunctions%2F1783121280" anchor-label="getAllLogsInReceiveOrder" id="-1004054225%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-all-logs-in-receive-order.html"><span>get</span><wbr><span>All</span><wbr><span>Logs</span><wbr><span>In</span><wbr><span>Receive</span><wbr><span><span>Order</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004054225%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-all-logs-in-receive-order.html"><span class="token function">getAllLogsInReceiveOrder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxItem<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="971721941%2FFunctions%2F1783121280" anchor-label="getAllLogsUnbounded" id="971721941%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-all-logs-unbounded.html"><span>get</span><wbr><span>All</span><wbr><span>Logs</span><wbr><span><span>Unbounded</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="971721941%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-all-logs-unbounded.html"><span class="token function">getAllLogsUnbounded</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1030305711%2FFunctions%2F1783121280" anchor-label="getLogsFrom" id="1030305711%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-logs-from.html"><span>get</span><wbr><span>Logs</span><wbr><span><span>From</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1030305711%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-logs-from.html"><span class="token function">getLogsFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">portNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1949846570%2FFunctions%2F1783121280" anchor-label="getMeshPacketsFrom" id="-1949846570%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-mesh-packets-from.html"><span>get</span><wbr><span>Mesh</span><wbr><span>Packets</span><wbr><span><span>From</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1949846570%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-mesh-packets-from.html"><span class="token function">getMeshPacketsFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">portNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1467181043%2FFunctions%2F1783121280" anchor-label="getMyNodeInfo" id="-1467181043%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-my-node-info.html"><span>get</span><wbr><span>My</span><wbr><span>Node</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1467181043%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-my-node-info.html"><span class="token function">getMyNodeInfo</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/MyNodeInfo///PointingToDeclaration/">MyNodeInfo</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="333389694%2FFunctions%2F1783121280" anchor-label="getRequestLogs" id="333389694%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-request-logs.html"><span>get</span><wbr><span>Request</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="333389694%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-request-logs.html"><span class="token function">getRequestLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">targetNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">portNum<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/PortNum///PointingToDeclaration/">PortNum</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-951985588%2FFunctions%2F1783121280" anchor-label="getTelemetryFrom" id="-951985588%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-telemetry-from.html"><span>get</span><wbr><span>Telemetry</span><wbr><span><span>From</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-951985588%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-telemetry-from.html"><span class="token function">getTelemetryFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/Telemetry///PointingToDeclaration/">Telemetry</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1008206226%2FFunctions%2F1783121280" anchor-label="insert" id="-1008206226%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert.html"><span><span>insert</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1008206226%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="insert.html"><span class="token function">insert</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">log<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-489672976%2FFunctions%2F1783121280" anchor-label="reset" id="-489672976%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="reset.html"><span><span>reset</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-489672976%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="reset.html"><span class="token function">reset</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resets all registered state flows and custom actions to their initial state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1449321260%2FFunctions%2F1783121280" anchor-label="setLogs" id="1449321260%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-logs.html"><span>set</span><wbr><span><span>Logs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1449321260%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-logs.html"><span class="token function">setLogs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">logs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-log/index.html">MeshLog</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

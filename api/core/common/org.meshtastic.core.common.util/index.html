@@ -1,0 +1,858 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.common.util</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:common/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmAndroidMain">jvmAndroid</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/androidMain" data-filter=":core:common/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/commonMain" data-filter=":core:common/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/jvmAndroidMain" data-filter=":core:common/jvmAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                jvmAndroid
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/jvmMain" data-filter=":core:common/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-common::org.meshtastic.core.common.util////PointingToDeclaration//-1930357066">
+  <div class="breadcrumbs"><a href="../index.html">core-common</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.common.util</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="696852764%2FClasslikes%2F500554331" anchor-label="BinaryLogFile" id="696852764%2FClasslikes%2F500554331" data-filterable-set=":core:common/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-binary-log-file/index.html"><span>Binary</span><wbr><span>Log</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="696852764%2FClasslikes%2F500554331"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-binary-log-file/index.html">BinaryLogFile</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/java/io/FileOutputStream.html">FileOutputStream</a></div><div class="brief "><p class="paragraph">A specialized <a href="https://developer.android.com/reference/kotlin/java/io/FileOutputStream.html">FileOutputStream</a> that writes data to a file in the application's external files directory. Primarily used for low-level protocol debugging and packet logging.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="863878980%2FClasslikes%2F752545243" anchor-label="BuildUtils" id="863878980%2FClasslikes%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-build-utils/index.html"><span>Build</span><wbr><span><span>Utils</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="863878980%2FClasslikes%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-build-utils/index.html">BuildUtils</a></div><div class="brief "><p class="paragraph">Utility for checking build properties, such as emulator detection.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="-build-utils/index.html">BuildUtils</a></div><div class="brief "><p class="paragraph">Utility for checking build properties, such as emulator detection.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-build-utils/index.html">BuildUtils</a></div><div class="brief "><p class="paragraph">Utility for checking build properties, such as emulator detection.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2016742278%2FClasslikes%2F-2004510817" anchor-label="CommonUri" id="-2016742278%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-common-uri/index.html"><span>Common</span><wbr><span><span>Uri</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2016742278%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">typealias </span><a href="-common-uri/index.html">CommonUri</a><span class="token operator"> = </span><span data-unresolved-link="com.eygraber.uri/Uri///PointingToDeclaration/">Uri</span></div><div class="brief "><p class="paragraph">Platform-agnostic URI representation backed by <a href="https://github.com/eygraber/uri-kmp">uri-kmp</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-439813624%2FClasslikes%2F-2004510817" anchor-label="Crc32" id="-439813624%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-crc32/index.html"><span><span>Crc32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-439813624%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-crc32/index.html">Crc32</a></div><div class="brief "><p class="paragraph">CRC-32 (IEEE 802.3 / zlib): reflected polynomial 0xEDB88320, initial value and final XOR 0xFFFFFFFF.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1923151201%2FClasslikes%2F752545243" anchor-label="DateFormatter" id="-1923151201%2FClasslikes%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-date-formatter/index.html"><span>Date</span><wbr><span><span>Formatter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1923151201%2FClasslikes%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-date-formatter/index.html">DateFormatter</a></div><div class="brief "><p class="paragraph">Platform-agnostic Date formatter utility.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="-date-formatter/index.html">DateFormatter</a></div><div class="brief "><p class="paragraph">Platform-agnostic Date formatter utility.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">object </span><a href="-date-formatter/index.html">DateFormatter</a></div><div class="brief "><p class="paragraph">Platform-agnostic Date formatter utility.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-907793662%2FClasslikes%2F-2004510817" anchor-label="DeferredExecution" id="-907793662%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-deferred-execution/index.html"><span>Deferred</span><wbr><span><span>Execution</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-907793662%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-deferred-execution/index.html">DeferredExecution</a></div><div class="brief "><p class="paragraph">Sometimes when starting services we face situations where messages come in that require computation but we can't do that computation yet because we are still waiting for some long running init to complete.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-739062973%2FClasslikes%2F-2004510817" anchor-label="Exceptions" id="-739062973%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-exceptions/index.html"><span><span>Exceptions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739062973%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-exceptions/index.html">Exceptions</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1181091142%2FClasslikes%2F-2004510817" anchor-label="GPSFormat" id="-1181091142%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-g-p-s-format/index.html"><span><span>GPSFormat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1181091142%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-g-p-s-format/index.html">GPSFormat</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-471006663%2FClasslikes%2F-2004510817" anchor-label="HomoglyphCharacterStringTransformer" id="-471006663%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-homoglyph-character-string-transformer/index.html"><span>Homoglyph</span><wbr><span>Character</span><wbr><span>String</span><wbr><span><span>Transformer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-471006663%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-homoglyph-character-string-transformer/index.html">HomoglyphCharacterStringTransformer</a></div><div class="brief "><p class="paragraph">This util class allows you to optimize the binary size of the transmitted text message strings. It replaces certain characters from national alphabets with the characters from the latin alphabet that have an identical appearance (homoglyphs), for example: cyrillic "А", "С", "у" -&gt; latin "A", "C", "y", etc. According to statistics, such letters can make up about 20-25% of the total number of letters in the average text. Replacing them with Latin characters reduces the binary size of the transmitted message. The average transmitted message volume can then fit around ~140-145 characters instead of ~115-120</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1907225648%2FClasslikes%2F-2004510817" anchor-label="MeasurementSystem" id="1907225648%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-measurement-system/index.html"><span>Measurement</span><wbr><span><span>System</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1907225648%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-measurement-system/index.html">MeasurementSystem</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-measurement-system/index.html">MeasurementSystem</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Represents the system's preferred measurement system.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1818840481%2FClasslikes%2F-2004510817" anchor-label="MetricFormatter" id="1818840481%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-metric-formatter/index.html"><span>Metric</span><wbr><span><span>Formatter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1818840481%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-metric-formatter/index.html">MetricFormatter</a></div><div class="brief "><p class="paragraph">Centralized metric formatting for display strings. Eliminates duplicated <code class="lang-kotlin">formatString</code> patterns across Node, NodeItem, and metric screens.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1517449990%2FClasslikes%2F-2004510817" anchor-label="NumberFormatter" id="-1517449990%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-number-formatter/index.html"><span>Number</span><wbr><span><span>Formatter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1517449990%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-number-formatter/index.html">NumberFormatter</a></div><div class="brief "><p class="paragraph">Pure Kotlin number formatting utility — no expect/actual needed.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1725081763%2FClasslikes%2F-2004510817" anchor-label="SequentialJob" id="-1725081763%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-sequential-job/index.html"><span>Sequential</span><wbr><span><span>Job</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1725081763%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-sequential-job/index.html">SequentialJob</a></div><div class="brief "><p class="paragraph">A helper class that manages a single <span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span>. When a new job is launched, any previous job is cancelled. This is useful for ensuring that only the latest operation of a certain type is running at a time (e.g. for search or settings updates).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-281545723%2FClasslikes%2F-2004510817" anchor-label="UrlUtils" id="-281545723%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-url-utils/index.html"><span>Url</span><wbr><span><span>Utils</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-281545723%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-url-utils/index.html">UrlUtils</a></div><div class="brief "><p class="paragraph">Pure Kotlin URL encoding utility — no expect/actual needed.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1390008432%2FClasslikes%2F500554331" anchor-label="Utf8ByteLengthFilter" id="1390008432%2FClasslikes%2F500554331" data-filterable-set=":core:common/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-utf8-byte-length-filter/index.html"><span>Utf8Byte</span><wbr><span>Length</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1390008432%2FClasslikes%2F500554331"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-utf8-byte-length-filter/index.html">Utf8ByteLengthFilter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/text/InputFilter.html">InputFilter</a></div><div class="brief "><p class="paragraph">An <a href="https://developer.android.com/reference/kotlin/android/text/InputFilter.html">InputFilter</a> that constrains text length based on UTF-8 byte count instead of character count. This is particularly useful for fields that must be stored in byte-limited buffers, such as hardware configuration fields.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="599416491%2FProperties%2F-1711255750" anchor-label="ioDispatcher" id="599416491%2FProperties%2F-1711255750" data-filterable-set=":core:common/commonMain,:core:common/jvmAndroidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/jvmAndroidMain" data-filterable-set=":core:common/commonMain,:core:common/jvmAndroidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="io-dispatcher.html"><span>io</span><wbr><span><span>Dispatcher</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="599416491%2FProperties%2F-1711255750"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-active="" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain" data-toggle=":core:common/jvmAndroidMain">jvmAndroid</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="io-dispatcher.html">ioDispatcher</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div><div class="brief "><p class="paragraph">Access to the IO dispatcher in a multiplatform-safe way.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="io-dispatcher.html">ioDispatcher</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div><div class="brief "><p class="paragraph">Access to the IO dispatcher in a multiplatform-safe way.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-882468499%2FProperties%2F-2004510817" anchor-label="nowInstant" id="-882468499%2FProperties%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="now-instant.html"><span>now</span><wbr><span><span>Instant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-882468499%2FProperties%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="now-instant.html">nowInstant</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a></div><div class="brief "><p class="paragraph">Accessor for the current time as a stable <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-349452890%2FProperties%2F-2004510817" anchor-label="nowMillis" id="-349452890%2FProperties%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="now-millis.html"><span>now</span><wbr><span><span>Millis</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-349452890%2FProperties%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="now-millis.html">nowMillis</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Accessor for the current time in milliseconds.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2091302257%2FProperties%2F-2004510817" anchor-label="nowSeconds" id="-2091302257%2FProperties%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="now-seconds.html"><span>now</span><wbr><span><span>Seconds</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2091302257%2FProperties%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="now-seconds.html">nowSeconds</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Accessor for the current time in seconds.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1950627152%2FProperties%2F-2004510817" anchor-label="systemTimeZone" id="1950627152%2FProperties%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="system-time-zone.html"><span>system</span><wbr><span>Time</span><wbr><span><span>Zone</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1950627152%2FProperties%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="system-time-zone.html">systemTimeZone</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.datetime/TimeZone///PointingToDeclaration/">TimeZone</span></div><div class="brief "><p class="paragraph">Accessor for the system default time zone.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="627222207%2FFunctions%2F-2004510817" anchor-label="bearing" id="627222207%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="bearing.html"><span><span>bearing</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="627222207%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="bearing.html"><span class="token function">bearing</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lat1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lon1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lat2<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">lon2<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Computes the bearing in degrees between two points on Earth.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-57062592%2FFunctions%2F-2004510817" anchor-label="clampTimestampToNow" id="-57062592%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clamp-timestamp-to-now.html"><span>clamp</span><wbr><span>Timestamp</span><wbr><span>To</span><wbr><span><span>Now</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-57062592%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clamp-timestamp-to-now.html"><span class="token function">clampTimestampToNow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">epochSeconds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Clamps a seconds-since-epoch timestamp so it never exceeds the current wall-clock time.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="951754546%2FFunctions%2F-2004510817" anchor-label="crc32" id="951754546%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="crc32.html"><span><span>crc32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="951754546%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="okio/ByteString///PointingToDeclaration/">ByteString</span><span class="token punctuation">.</span><a href="crc32.html"><span class="token function">crc32</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-u-int/index.html">UInt</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-861328350%2FFunctions%2F752545243" anchor-label="currentLocaleCode" id="-861328350%2FFunctions%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-locale-code.html"><span>current</span><wbr><span>Locale</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-861328350%2FFunctions%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-code.html"><span class="token function">currentLocaleCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr").</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="current-locale-code.html"><span class="token function">currentLocaleCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr").</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-code.html"><span class="token function">currentLocaleCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr").</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="131236833%2FFunctions%2F752545243" anchor-label="currentLocaleQualifier" id="131236833%2FFunctions%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-locale-qualifier.html"><span>current</span><wbr><span>Locale</span><wbr><span><span>Qualifier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="131236833%2FFunctions%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-qualifier.html"><span class="token function">currentLocaleQualifier</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="current-locale-qualifier.html"><span class="token function">currentLocaleQualifier</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-locale-qualifier.html"><span class="token function">currentLocaleQualifier</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1345147336%2FFunctions%2F752545243" anchor-label="currentRegionCode" id="1345147336%2FFunctions%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-region-code.html"><span>current</span><wbr><span>Region</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1345147336%2FFunctions%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-region-code.html"><span class="token function">currentRegionCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current region as a 2-letter ISO 3166-1 alpha-2 country code (e.g. "US", "DE"), or an empty string when the region is unknown. Used to region-filter marketplace links.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="current-region-code.html"><span class="token function">currentRegionCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current region as a 2-letter ISO 3166-1 alpha-2 country code (e.g. "US", "DE"), or an empty string when the region is unknown. Used to region-filter marketplace links.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="current-region-code.html"><span class="token function">currentRegionCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Returns the device's current region as a 2-letter ISO 3166-1 alpha-2 country code (e.g. "US", "DE"), or an empty string when the region is unknown. Used to region-filter marketplace links.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-44015756%2FFunctions%2F-2004510817" anchor-label="exceptionReporter" id="-44015756%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="exception-reporter.html"><span>exception</span><wbr><span><span>Reporter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-44015756%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="exception-reporter.html"><span class="token function">exceptionReporter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">inner<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Wraps and discards exceptions, but reports them to the crash reporter before logging. Use this for operations that should not crash the process but are still unexpected.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1097401166%2FFunctions%2F-2004510817" anchor-label="extractWifiCredentials" id="-1097401166%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="extract-wifi-credentials.html"><span>extract</span><wbr><span>Wifi</span><wbr><span><span>Credentials</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1097401166%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="extract-wifi-credentials.html"><span class="token function">extractWifiCredentials</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">qrCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Extracts WIFI SSID and password from a QR code string. Expected format: WIFI:S:SSID;P:PASSWORD;;</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1207187189%2FFunctions%2F-2004510817" anchor-label="formatString" id="1207187189%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="format-string.html"><span>format</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1207187189%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="format-string.html"><span class="token function">formatString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pattern<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Pure-Kotlin multiplatform string formatting.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1291758706%2FFunctions%2F500554331" anchor-label="getParcelableExtraCompat" id="-1291758706%2FFunctions%2F500554331" data-filterable-set=":core:common/androidMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-parcelable-extra-compat.html"><span>get</span><wbr><span>Parcelable</span><wbr><span>Extra</span><wbr><span><span>Compat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1291758706%2FFunctions%2F500554331"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="get-parcelable-extra-compat.html">T</a><span class="token operator"> : </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="token operator">&gt; </span><a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a><span class="token punctuation">.</span><a href="get-parcelable-extra-compat.html"><span class="token function">getParcelableExtraCompat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="get-parcelable-extra-compat.html">T</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Retrieves a <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a> extra from an <a href="https://developer.android.com/reference/kotlin/android/content/Intent.html">Intent</a> in a backward-compatible way.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1060680814%2FFunctions%2F752545243" anchor-label="getSystemMeasurementSystem" id="-1060680814%2FFunctions%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-system-measurement-system.html"><span>get</span><wbr><span>System</span><wbr><span>Measurement</span><wbr><span><span>System</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1060680814%2FFunctions%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-system-measurement-system.html"><span class="token function">getSystemMeasurementSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-measurement-system/index.html">MeasurementSystem</a></div><div class="brief "><p class="paragraph">returns the system's preferred measurement system.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-system-measurement-system.html"><span class="token function">getSystemMeasurementSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-measurement-system/index.html">MeasurementSystem</a></div><div class="brief "><p class="paragraph">returns the system's preferred measurement system.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-system-measurement-system.html"><span class="token function">getSystemMeasurementSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-measurement-system/index.html">MeasurementSystem</a></div><div class="brief "><p class="paragraph">returns the system's preferred measurement system.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="645090060%2FFunctions%2F-2004510817" anchor-label="handledLaunch" id="645090060%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handled-launch.html"><span>handled</span><wbr><span><span>Launch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="645090060%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">.</span><a href="handled-launch.html"><span class="token function">handledLaunch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a><span class="token operator"> = </span>EmptyCoroutineContext<span class="token punctuation">, </span></span><span class="parameter ">start<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineStart///PointingToDeclaration/">CoroutineStart</span><span class="token operator"> = </span>CoroutineStart.DEFAULT<span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div><div class="brief "><p class="paragraph">Launches a new coroutine with a central <span data-unresolved-link="kotlinx.coroutines/CoroutineExceptionHandler///PointingToDeclaration/">CoroutineExceptionHandler</span> that reports errors to <a href="-exceptions/index.html">Exceptions</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="91194833%2FFunctions%2F-2004510817" anchor-label="ignoreException" id="91194833%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ignore-exception.html"><span>ignore</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="91194833%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="ignore-exception.html"><span class="token function">ignoreException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">silent<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">inner<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Wraps and discards exceptions, optionally logging them.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="656303484%2FFunctions%2F-2004510817" anchor-label="ignoreExceptionSuspend" id="656303484%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ignore-exception-suspend.html"><span>ignore</span><wbr><span>Exception</span><wbr><span><span>Suspend</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="656303484%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="ignore-exception-suspend.html"><span class="token function">ignoreExceptionSuspend</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">silent<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">inner<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Suspend-compatible variant of <a href="ignore-exception.html">ignoreException</a>. Re-throws <span data-unresolved-link="kotlinx.coroutines/CancellationException///PointingToDeclaration/">CancellationException</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1856444433%2FFunctions%2F-2004510817" anchor-label="isNoDeviceSentinel" id="1856444433%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-no-device-sentinel.html"><span>is</span><wbr><span>No</span><wbr><span>Device</span><wbr><span><span>Sentinel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1856444433%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-no-device-sentinel.html"><span class="token function">isNoDeviceSentinel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">normalized<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True iff <a href="is-no-device-sentinel.html">normalized</a> (the output of <a href="normalize-address.html">normalizeAddress</a>) is a no-device sentinel that DB naming collapses to the default database. Single source of truth for "no real device selected".</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="468376727%2FFunctions%2F752545243" anchor-label="isValidAddress" id="468376727%2FFunctions%2F752545243" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain" data-filterable-set=":core:common/commonMain,:core:common/androidMain,:core:common/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-valid-address.html"><span>is</span><wbr><span>Valid</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="468376727%2FFunctions%2F752545243"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain" data-toggle=":core:common/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-toggle=":core:common/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">.</span><a href="is-valid-address.html"><span class="token function">isValidAddress</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Validates if the given string is a valid network address (IP or domain).</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">.</span><a href="is-valid-address.html"><span class="token function">isValidAddress</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Validates if the given string is a valid network address (IP or domain).</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">.</span><a href="is-valid-address.html"><span class="token function">isValidAddress</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Validates if the given string is a valid network address (IP or domain).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1849600363%2FFunctions%2F-2004510817" anchor-label="isValidDeviceAddress" id="1849600363%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-valid-device-address.html"><span>is</span><wbr><span>Valid</span><wbr><span>Device</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1849600363%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-valid-device-address.html"><span class="token function">isValidDeviceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True iff <a href="is-valid-device-address.html">address</a> refers to a real selected device. Rejects null/blank and all legacy no-device sentinels (<code class="lang-kotlin">"n"</code>, <code class="lang-kotlin">"null"</code>, <code class="lang-kotlin">".n"</code>, <code class="lang-kotlin">"default"</code>, case-insensitive) by delegating to <a href="normalize-address.html">normalizeAddress</a> and <a href="is-no-device-sentinel.html">isNoDeviceSentinel</a>. Any input that buildDbName would collapse to <code class="lang-kotlin">DEFAULT_DB_NAME</code> is rejected here too, so the foreground-service stay-alive decision and the DB name resolution can never diverge.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1946365262%2FFunctions%2F-2004510817" anchor-label="latLongToMeter" id="1946365262%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lat-long-to-meter.html"><span>lat</span><wbr><span>Long</span><wbr><span>To</span><wbr><span><span>Meter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1946365262%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="lat-long-to-meter.html"><span class="token function">latLongToMeter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitudeA<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitudeA<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">latitudeB<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitudeB<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1378682032%2FFunctions%2F-2004510817" anchor-label="normalizeAddress" id="-1378682032%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="normalize-address.html"><span>normalize</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1378682032%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="normalize-address.html"><span class="token function">normalizeAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">addr<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Normalizes a BLE/device address to a canonical uppercase form with colons removed. Returns <code class="lang-kotlin">"DEFAULT"</code> for null, blank, or sentinel values (<code class="lang-kotlin">"N"</code>, <code class="lang-kotlin">"NULL"</code>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-860064551%2FFunctions%2F500554331" anchor-label="registerReceiverCompat" id="-860064551%2FFunctions%2F500554331" data-filterable-set=":core:common/androidMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="register-receiver-compat.html"><span>register</span><wbr><span>Receiver</span><wbr><span><span>Compat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-860064551%2FFunctions%2F500554331"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/androidMain" data-filterable-set=":core:common/androidMain" data-active="" data-toggle=":core:common/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/androidMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">.</span><a href="register-receiver-compat.html"><span class="token function">registerReceiverCompat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">receiver<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/BroadcastReceiver.html">BroadcastReceiver</a><span class="token punctuation">, </span></span><span class="parameter ">filter<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/IntentFilter.html">IntentFilter</a><span class="token punctuation">, </span></span><span class="parameter ">flag<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>ContextCompat.RECEIVER_EXPORTED</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Registers a <a href="https://developer.android.com/reference/kotlin/android/content/BroadcastReceiver.html">BroadcastReceiver</a> using <a href="https://developer.android.com/reference/kotlin/androidx/core/content/ContextCompat.html">ContextCompat</a> to ensure consistent behavior across Android versions.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-346963179%2FFunctions%2F-2004510817" anchor-label="safeCatching" id="-346963179%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="safe-catching.html"><span>safe</span><wbr><span><span>Catching</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-346963179%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="safe-catching.html">T</a><span class="token operator">&gt; </span><a href="safe-catching.html"><span class="token function">safeCatching</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="safe-catching.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-result/index.html">Result</a><span class="token operator">&lt;</span><a href="safe-catching.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Like <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/index.html">kotlin.runCatching</a>, but re-throws <span data-unresolved-link="kotlinx.coroutines/CancellationException///PointingToDeclaration/">CancellationException</span> to preserve structured concurrency. Use this instead of <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/index.html">runCatching</a> in coroutine contexts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-314138346%2FFunctions%2F-2004510817" anchor-label="safeCatching" id="-314138346%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="safe-catching.html"><span>safe</span><wbr><span><span>Catching</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-314138346%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="safe-catching.html">T</a><span class="token punctuation">, </span><a href="safe-catching.html">R</a><span class="token operator">&gt; </span><a href="safe-catching.html">T</a><span class="token punctuation">.</span><a href="safe-catching.html"><span class="token function">safeCatching</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><a href="safe-catching.html">T</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="safe-catching.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-result/index.html">Result</a><span class="token operator">&lt;</span><a href="safe-catching.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Like <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/index.html">kotlin.runCatching</a> receiver variant, but re-throws <span data-unresolved-link="kotlinx.coroutines/CancellationException///PointingToDeclaration/">CancellationException</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-726340220%2FFunctions%2F-2004510817" anchor-label="safeCatchingAll" id="-726340220%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="safe-catching-all.html"><span>safe</span><wbr><span>Catching</span><wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-726340220%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="safe-catching-all.html">T</a><span class="token operator">&gt; </span><a href="safe-catching-all.html"><span class="token function">safeCatchingAll</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="safe-catching-all.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-result/index.html">Result</a><span class="token operator">&lt;</span><a href="safe-catching-all.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Like <a href="safe-catching.html">safeCatching</a> but also catches JVM <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-error/index.html">Error</a>s (e.g. ExceptionInInitializerError raised by compose-resources' lazy skiko initialization on the desktop JVM test classpath). Still re-throws <span data-unresolved-link="kotlinx.coroutines/CancellationException///PointingToDeclaration/">CancellationException</span> so structured concurrency is preserved. Use when the block invokes code whose failure modes include static-initializer errors and the caller only needs a best-effort fallback.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1253111228%2FFunctions%2F-1509551193" anchor-label="toDate" id="-1253111228%2FFunctions%2F-1509551193" data-filterable-set=":core:common/jvmAndroidMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-date.html"><span>to</span><wbr><span><span>Date</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1253111228%2FFunctions%2F-1509551193"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/jvmAndroidMain" data-filterable-set=":core:common/jvmAndroidMain" data-active="" data-toggle=":core:common/jvmAndroidMain">jvmAndroid</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">fun </span>ERROR CLASS: Symbol not found for Instant<span class="token punctuation">.</span><a href="to-date.html"><span class="token function">toDate</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/Date.html">Date</a></div><div class="brief "><p class="paragraph">Converts this Instant to a legacy <a href="https://developer.android.com/reference/kotlin/java/util/Date.html">Date</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-87949815%2FFunctions%2F-2004510817" anchor-label="toInstant" id="-87949815%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-instant.html"><span>to</span><wbr><span><span>Instant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-87949815%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">.</span><a href="to-instant.html"><span class="token function">toInstant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a></div><div class="brief "><p class="paragraph">Converts these milliseconds to an <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

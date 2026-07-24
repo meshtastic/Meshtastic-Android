@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MetricChartScaffold</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:node/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:node/commonMain" data-filter=":feature:node/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="member" id="content" pageids="feature-node::org.meshtastic.feature.node.metrics//MetricChartScaffold/#kotlin.Boolean#kotlin.collections.List[org.meshtastic.feature.node.metrics.LegendData]#androidx.compose.ui.Modifier#kotlin.collections.Set[kotlin.Int]#kotlin.Function1[kotlin.Int,kotlin.Unit]?#kotlin.Function3[androidx.compose.foundation.layout.ColumnScope,com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer,androidx.compose.ui.Modifier,kotlin.Unit]/PointingToDeclaration//1906246353">
+  <div class="breadcrumbs"><a href="../index.html">feature-node</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.node.metrics</a><span class="delimiter">/</span><span class="current">MetricChartScaffold</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Metric</span><wbr><span>Chart</span><wbr><span><span>Scaffold</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-metric-chart-scaffold.html"><span class="token function">MetricChartScaffold</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isEmpty<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">legendData<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="-legend-data/index.html">LegendData</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">hiddenSet<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptySet()<span class="token punctuation">, </span></span><span class="parameter ">onToggle<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/BaseMetricChart.kt#L173">source</a>)</span></span></div><p class="paragraph">Common scaffold for all metric chart composables. Provides:</p><ul><li><p class="paragraph">A <a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary.html">Column</a> container with the supplied <a href="-metric-chart-scaffold.html">modifier</a></p></li><li><p class="paragraph">An empty-data guard (returns early when <a href="-metric-chart-scaffold.html">isEmpty</a> is true)</p></li><li><p class="paragraph">A remembered <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span> passed to <a href="-metric-chart-scaffold.html">content</a></p></li><li><p class="paragraph">A trailing <a href="-legend.html">Legend</a> strip</p></li></ul><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>is</span><wbr><span><span>Empty</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Whether the chart data is empty — when true, nothing is rendered.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>legend</span><wbr><span><span>Data</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Legend items shown below the chart.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>hidden</span><wbr><span><span>Set</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Indices of hidden legend items (toggleable legend).</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>on</span><wbr><span><span>Toggle</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Callback when a legend item is toggled; when null, a read-only legend is rendered.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>content</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Builder lambda receiving the <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span> and a standard <code class="lang-kotlin">Modifier.weight(1f)</code> suitable for the chart area.</p><p class="paragraph">A single <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer///PointingToDeclaration/">CartesianChartModelProducer</span> is created per scaffold instance. Vico forbids swapping the producer attached to a live <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian//CartesianChartHost/#com.patrykandpatrick.vico.compose.cartesian.CartesianChart#com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer#androidx.compose.ui.Modifier#com.patrykandpatrick.vico.compose.cartesian.VicoScrollState#com.patrykandpatrick.vico.compose.cartesian.VicoZoomState#androidx.compose.animation.core.AnimationSpec[kotlin.Float]?#androidx.compose.animation.core.AnimationSpec[kotlin.Float]?#kotlin.Function1[androidx.compose.foundation.layout.BoxScope,kotlin.Unit]/PointingToDeclaration/">CartesianChartHost</span> (it throws "A new <code class="lang-kotlin">CartesianChartModelProducer</code> was provided…"), so callers must push new data through <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.data/CartesianChartModelProducer/runTransaction/#kotlin.Function1[com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer.Transaction,kotlin.Unit]/PointingToDeclaration/">CartesianChartModelProducer.runTransaction</span> instead of recreating the producer. Keying the scaffold on external state (e.g. a selected channel) caused exactly that crash, so the previous <code class="lang-kotlin">key</code> parameter was removed.</p></div></div></div></div></div></div></div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

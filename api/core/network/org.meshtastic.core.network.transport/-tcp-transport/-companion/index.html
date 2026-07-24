@@ -1,0 +1,246 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Companion</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:network/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:network/commonMain" data-filter=":core:network/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-network::org.meshtastic.core.network.transport/TcpTransport.Companion///PointingToDeclaration//-1825752930">
+  <div class="breadcrumbs"><a href="../../../index.html">core-network</a><span class="delimiter">/</span><a href="../../index.html">org.meshtastic.core.network.transport</a><span class="delimiter">/</span><a href="../index.html">TcpTransport</a><span class="delimiter">/</span><span class="current">Companion</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Companion</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/commonMain/kotlin/org/meshtastic/core/network/transport/TcpTransport.kt#L86">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1099826943%2FProperties%2F-1825752930" anchor-label="CONNECT_TIMEOUT_MS" id="-1099826943%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-n-n-e-c-t_-t-i-m-e-o-u-t_-m-s.html"><span>CONNECT_</span><wbr><span>TIMEOUT_</span><wbr><span>MS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1099826943%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-n-n-e-c-t_-t-i-m-e-o-u-t_-m-s.html">CONNECT_TIMEOUT_MS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2066562594%2FProperties%2F-1825752930" anchor-label="MAX_BACKOFF_MILLIS" id="2066562594%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-a-x_-b-a-c-k-o-f-f_-m-i-l-l-i-s.html"><span>MAX_</span><wbr><span>BACKOFF_</span><wbr><span>MILLIS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2066562594%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-a-x_-b-a-c-k-o-f-f_-m-i-l-l-i-s.html">MAX_BACKOFF_MILLIS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1735134467%2FProperties%2F-1825752930" anchor-label="MAX_RECONNECT_RETRIES" id="-1735134467%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-a-x_-r-e-c-o-n-n-e-c-t_-r-e-t-r-i-e-s.html"><span>MAX_</span><wbr><span>RECONNECT_</span><wbr><span>RETRIES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1735134467%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-a-x_-r-e-c-o-n-n-e-c-t_-r-e-t-r-i-e-s.html">MAX_RECONNECT_RETRIES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Maximum reconnect retries. Set to <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/-companion/-m-a-x_-v-a-l-u-e.html">Int.MAX_VALUE</a> to retry indefinitely — the caller (<a href="../stop.html">TcpTransport.stop</a>) owns the cancellation lifecycle.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="940914960%2FProperties%2F-1825752930" anchor-label="MIN_BACKOFF_MILLIS" id="940914960%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-i-n_-b-a-c-k-o-f-f_-m-i-l-l-i-s.html"><span>MIN_</span><wbr><span>BACKOFF_</span><wbr><span>MILLIS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="940914960%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-i-n_-b-a-c-k-o-f-f_-m-i-l-l-i-s.html">MIN_BACKOFF_MILLIS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1384399020%2FProperties%2F-1825752930" anchor-label="SHORT_SESSION_THRESHOLD_MS" id="-1384399020%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-h-o-r-t_-s-e-s-s-i-o-n_-t-h-r-e-s-h-o-l-d_-m-s.html"><span>SHORT_</span><wbr><span>SESSION_</span><wbr><span>THRESHOLD_</span><wbr><span>MS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1384399020%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-h-o-r-t_-s-e-s-s-i-o-n_-t-h-r-e-s-h-o-l-d_-m-s.html">SHORT_SESSION_THRESHOLD_MS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated as transient firmware-side disconnects (e.g., ESP32 light sleep closing the TCP PhoneAPI session after a config dump) and do NOT reset the backoff — the growing delay gives the radio time to recover between attempts instead of hammering it at 1 Hz.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-160771520%2FProperties%2F-1825752930" anchor-label="SOCKET_RETRIES" id="-160771520%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-o-c-k-e-t_-r-e-t-r-i-e-s.html"><span>SOCKET_</span><wbr><span>RETRIES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-160771520%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-o-c-k-e-t_-r-e-t-r-i-e-s.html">SOCKET_RETRIES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">18</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2108065456%2FProperties%2F-1825752930" anchor-label="SOCKET_TIMEOUT_MS" id="-2108065456%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-o-c-k-e-t_-t-i-m-e-o-u-t_-m-s.html"><span>SOCKET_</span><wbr><span>TIMEOUT_</span><wbr><span>MS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2108065456%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-o-c-k-e-t_-t-i-m-e-o-u-t_-m-s.html">SOCKET_TIMEOUT_MS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Per-read inactivity timeout. Combined with <a href="-s-o-c-k-e-t_-r-e-t-r-i-e-s.html">SOCKET_RETRIES</a> this gives the 90s idle-disconnect window.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="276136860%2FProperties%2F-1825752930" anchor-label="TIMEOUT_LOG_INTERVAL" id="276136860%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-i-m-e-o-u-t_-l-o-g_-i-n-t-e-r-v-a-l.html"><span>TIMEOUT_</span><wbr><span>LOG_</span><wbr><span>INTERVAL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="276136860%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-i-m-e-o-u-t_-l-o-g_-i-n-t-e-r-v-a-l.html">TIMEOUT_LOG_INTERVAL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">5</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

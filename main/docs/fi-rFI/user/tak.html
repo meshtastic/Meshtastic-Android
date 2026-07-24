@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fi-rFI" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TAK-integraatio</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="tak" data-locale="fi-rFI">
+<pre class="markdown-content"># TAK-integraatio
+
+Meshtastic integroituu Team Awareness Kit (TAK) -ekosysteemiin, mahdollistaen yhteentoimivuuden Meshtastic-verkkoradioiden ja TAK-sovellusten kuten ATAK:n ja WinTAK:n välillä.
+
+## Yleiskatsaus
+
+TAK-moduuli mahdollistaa Meshtastic-radioille:
+
+- Sijaintidatan jakamisen TAK-yhteensopivassa CoT (Cursor on Target) -muodossa
+- Näkyä tiimin jäseninä TAK-karttanäkymissä
+- Vastaanottaa TAK PLI (Position Location Information) -viestejä
+
+## Asetukset
+
+### Edellytykset
+
+- ATAK (Android Team Awareness Kit) tai WinTAK asennettuna
+- Meshtastic ATAK -lisäosa asennettuna
+- TAK-moduuli käytössä Meshtastic-radiossasi
+
+### Asetukset
+
+1. Siirry kohtaan **Asetukset → Moduulin asetukset → TAK**.
+2. Ota TAK-moduuli käyttöön.
+3. Määritä TAK-tiimin/ryhmän asetukset:
+
+![Moduulin kytkin](../../assets/screenshots/settings_switch.png)
+
+ Asetus   | Kuvaus                           |
+ -------- | -------------------------------- |
+ Käytössä | Ota TAK-yhteentoimivuus käyttöön |
+ Tila     | TAK-yhteensopiva lähtötila       |
+
+### ATAK-lisäosan asennus
+
+1. Asenna Meshtastic ATAK -lisäosa lisäosien lähteestä.
+2. Avaa ATAK ja ota Meshtastic-lisäosa käyttöön.
+3. Lisäosa välittää viestejä ATAK:n ja mesh-verkkosi välillä.
+
+### Paikallinen TAK-palvelin
+
+Sovellus voi käyttää myös **paikallista TAK-palvelinta**, jolloin samalla laitteella oleva ATAK/iTAK voi muodostaa siihen suoran yhteyden ilman etäpalvelinta. Palvelin kuuntelee vain paikallisia yhteyksiä (127.0.0.1:8089) ja käyttää TLS:ää molemminpuolisella varmenteiden todentamisella. Avaa **Asetukset → Moduuliasetukset → TAK → TAK-palvelin**:
+
+![Paikallisen TAK-palvelimen asetukset, joissa näkyvät käyttöönotto ja vientitoiminto](../../assets/screenshots/tak_server_enabled.png)
+
+- **Ota paikallinen TAK-palvelin käyttöön** – käynnistää vain paikallisia yhteyksiä kuuntelevan mTLS-palvelimen portissa **8089** samalla laitteella toimivaa ATAK-/iTAK-yhteyttä varten.
+- **Vie TAK-tietopaketti** — luo `.zip`-tietopaketin, jonka ATAK/iTAK voi tuoda muodostaakseen yhteyden tähän palvelimeen.
+
+## TAK-roolit
+
+TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
+
+ Rooli           | Kuvaus                                                                                                                                                                                                                                                                                                             |
+ --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+ **TAK**         | Täysi TAK-yhteentoimivuus — lähettää ja vastaanottaa CoT-dataa, chat-viestejä ja PLI-päivityksiä. Toimii tavallisen clientin lisäksi TAK-siltana.                                                                                                                                  |
+ **TAK Tracker** | Vain sijaintitietoihin perustuva TAK-lähtö — lähettää automaattisesti PLI-dataa säännöllisin väliajoin ilman käyttäjän toimintaa. Optimoitu valvomattomiin sijaintilähettimiin (ajoneuvot, laitteet ja reittipisteet). Ei välitä chat-viestejä. |
+
+&gt; 💡 **Vinkki:** Käytä **TAK Tracker** -tilaa laitteille, joiden tarvitsee vain lähettää sijainti (esim. ajoneuvoon asennettu radio). Käytä **TAK**-tilaa laitteille, joissa käyttäjät osallistuvat aktiivisesti TAK-toimintaan.
+
+### CoT (Cursor on Target) -muoto
+
+TAK-viestit käyttävät Cursor on Target XML -muotoa — sotilaskäytössä olevaa standardia tilannetiedon jakamiseen. Meshtastic muuntaa sisäiset protobuf-viestinsä CoT-muotoon silloin, kun se välittää dataa TAK-järjestelmiin, joten manuaalista muunnosta ei tarvita.
+
+## TAK-identiteetti
+
+Kun käytät TAK-rooleja, radiosi lähettää identiteettitietoja, jotka näkyvät TAK-kartoilla:
+
+ Asetus        | Kuvaus                                                                                                                              |
+ ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+ Tiimin väri   | TAK-kartan tiimiväri (esim. sininen, punainen, syaani, vihreä)                                   |
+ Jäsenen rooli | Operatiivinen roolisi (tiimin jäsen, tiimin johtaja, esikunta, ensihoitaja, viestivastaava jne.) |
+
+Nämä asetukset näkyvät kohdassa **Asetukset → Moduulin asetukset → TAK**, kun TAK-moduuli on käytössä. TAK-kutsutunnuksesi ei ole erillinen asetus — se muodostetaan automaattisesti Meshtastic-radiosi nimestä.
+
+&gt; 💡 **Vinkki:** Tiimi- ja roolivärit ovat TAK-järjestelmän standardeja ryhmävärikoodauksia. Koordinoi TAK-tiimisi kanssa yhtenäisten tiimimääritysten käyttämiseksi.
+
+## Wire Format (V1 / V2)
+
+Meshtastic tukee kahta TAK-siirtomuotoa, jotka valitaan automaattisesti yhdistetyn radion laiteohjelmiston perusteella — manuaalisia asetuksia ei tarvita:
+
+ Muoto                                | Yhteensopivuus                                                     | Ominaisuudet                                                                                                                                                                                                                                                              |
+ ------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ V1 (vanha versio) | Laiteohjelmisto 2.7.x ja vanhemmat | Raaka protobuf-koodaus portissa 72. Tukee vain sijainnin jakamista (PLI) ja keskusteluja (GeoChat) — muodot, merkinnät, reitit ja muut tyypitetyt CoT-tapahtumat jätetään välittämättä                              |
+ V2 (nykyinen)     | Laiteohjelmisto 2.8.0+             | Pakkausmuoto käyttää zstd-pakkausta portissa 78. Tukee V1:n ominaisuuksien lisäksi myös muotoja, merkintöjä, reittejä, ilma-aluksia, lääkintäevakuointeja (CASEVAC), hätätilanteita ja tehtävätyyppisiä CoT-tapahtumia |
+
+Radio välittää edelleen vanhojen radioiden V1-paketteja myös käyttäessään itse V2:ta, joten eri laiteohjelmistoversioita käyttävät mesh-verkot toimivat keskenään.
+
+## Käyttö ATAK:n kanssa
+
+Kun asetukset on määritetty:
+
+- Meshtastic-radiot näkyvät ATAK-kartalla merkkeinä kutsutunnuksineen
+- Viestit voivat välittyä mesh-verkon ja TAK-verkon välillä
+- Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
+- TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
+
+&gt; ⚠️ **Huom:** TAK-integraatio vaatii tietyt laiteroolit ja moduuliasetukset. Tavalliset client-laitteet eivät osallistu TAK-toimintoihin automaattisesti.
+
+## Vianetsintä
+
+ Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                      |
+ -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+ Radio ei näy ATAK-kartalla                   | TAK-moduuli pois käytöstä tai väärä rooli                                                                                             | Varmista, että TAK-moduuli on käytössä ja rooli on joko TAK tai TAK Tracker                                                                   |
+ Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                              |
+ ATAK-lisäosa näyttää “yhteys katkennut”      | Bluetooth-yhteys katkennut tai lisäosa on kaatunut                                                                                    | Yhdistä Bluetooth uudelleen Meshtastic-sovelluksessa ja käynnistä ATAK-lisäosa uudelleen                                                      |
+ Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä |
+ CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                          |
+
+## Tietoturvahuomiot
+
+- TAK-data sisältää sijainti- ja kutsutunnustietoja
+- Varmista, että kanavan salaus on oikein määritetty, kun käytät TAK:ia arkaluonteisissa ympäristöissä
+- TAK-moduuli noudattaa samaa kanavasalausta kuin muut Meshtastic-viestit
+
+## Aiheeseen liittyvät aiheet
+
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — TAK-moduulin asetukset
+- [Radiot](nodes) — TAK- ja TAK Tracker -roolit radiolistassa
+- [Kartta ja reittipisteet](map-and-waypoints) — radioiden sijainnit kartalla
+- [ATAK-liitännäisen opas](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) – yksityiskohtaiset ATAK-asennusohjeet meshtastic.org -sivustolla
+
+---
+
+</pre>
+</body>
+</html>

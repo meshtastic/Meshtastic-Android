@@ -1,0 +1,484 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.takserver</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:takserver/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:takserver/jvmAndroidMain">jvmAndroid</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:takserver/commonMain" data-filter=":core:takserver/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:takserver/jvmAndroidMain" data-filter=":core:takserver/jvmAndroidMain">
+                                <span class="checkbox--icon"></span>
+                                jvmAndroid
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-takserver::org.meshtastic.core.takserver////PointingToDeclaration//-715928112">
+  <div class="breadcrumbs"><a href="../index.html">core-takserver</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.takserver</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1604330125%2FClasslikes%2F-470374703" anchor-label="BundledCertBytesProvider" id="1604330125%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-bundled-cert-bytes-provider/index.html"><span>Bundled</span><wbr><span>Cert</span><wbr><span>Bytes</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1604330125%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-bundled-cert-bytes-provider/index.html">BundledCertBytesProvider</a></div><div class="brief "><p class="paragraph">Supplies the bundled server / client PKCS#12 bytes for <a href="-t-a-k-data-package-generator/index.html">TAKDataPackageGenerator</a>. Platform implementations live in <code class="lang-kotlin">jvmAndroidMain</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-570696769%2FClasslikes%2F-470374703" anchor-label="CoTChat" id="-570696769%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-chat/index.html"><span>Co</span><wbr><span><span>TChat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-570696769%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-chat/index.html">CoTChat</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>senderCallsign<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>chatroom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"All Chat Rooms"</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-669491605%2FClasslikes%2F-470374703" anchor-label="CoTContact" id="-669491605%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-contact/index.html"><span>Co</span><wbr><span><span>TContact</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-669491605%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-contact/index.html">CoTContact</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>callsign<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>endpoint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>phone<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-609291412%2FClasslikes%2F-470374703" anchor-label="CoTGroup" id="-609291412%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-group/index.html"><span>Co</span><wbr><span><span>TGroup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-609291412%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-group/index.html">CoTGroup</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>role<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-59055004%2FClasslikes%2F-470374703" anchor-label="CoTMessage" id="-59055004%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-message/index.html"><span>Co</span><wbr><span><span>TMessage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-59055004%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-message/index.html">CoTMessage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>time<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>Clock.System.now()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>start<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>time<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>stale<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>how<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"m-g"</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hae<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>ce<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>le<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contact<span class="token operator">: </span><a href="-co-t-contact/index.html">CoTContact</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>group<span class="token operator">: </span><a href="-co-t-group/index.html">CoTGroup</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>status<span class="token operator">: </span><a href="-co-t-status/index.html">CoTStatus</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>track<span class="token operator">: </span><a href="-co-t-track/index.html">CoTTrack</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>chat<span class="token operator">: </span><a href="-co-t-chat/index.html">CoTChat</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>remarks<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>rawDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>parsedDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sourceEventXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2097299173%2FClasslikes%2F-470374703" anchor-label="CoTStatus" id="2097299173%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-status/index.html"><span>Co</span><wbr><span><span>TStatus</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2097299173%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-status/index.html">CoTStatus</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>battery<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1475119584%2FClasslikes%2F-470374703" anchor-label="CoTTrack" id="-1475119584%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-track/index.html"><span>Co</span><wbr><span><span>TTrack</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1475119584%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-co-t-track/index.html">CoTTrack</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>speed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>course<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-165271115%2FClasslikes%2F-470374703" anchor-label="CoTXmlParser" id="-165271115%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-xml-parser/index.html"><span>Co</span><wbr><span>TXml</span><wbr><span><span>Parser</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-165271115%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-co-t-xml-parser/index.html">CoTXmlParser</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">xml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1821515705%2FClasslikes%2F-470374703" anchor-label="InboundCoTMessage" id="-1821515705%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-inbound-co-t-message/index.html"><span>Inbound</span><wbr><span>Co</span><wbr><span><span>TMessage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1821515705%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-inbound-co-t-message/index.html">InboundCoTMessage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>cotMessage<span class="token operator">: </span><a href="-co-t-message/index.html">CoTMessage</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>clientInfo<span class="token operator">: </span><a href="-t-a-k-client-info/index.html">TAKClientInfo</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A CoT message received from a connected TAK client, paired with the client's identity.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-613190593%2FClasslikes%2F-470374703" anchor-label="RouteDataPackageGenerator" id="-613190593%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-route-data-package-generator/index.html"><span>Route</span><wbr><span>Data</span><wbr><span>Package</span><wbr><span><span>Generator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-613190593%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-route-data-package-generator/index.html">RouteDataPackageGenerator</a></div><div class="brief "><p class="paragraph">Converts route CoT XML (b-m-r) into ATAK-importable KML data packages.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1314754392%2FClasslikes%2F-470374703" anchor-label="TAKClientInfo" id="-1314754392%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-client-info/index.html"><span>TAKClient</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1314754392%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-t-a-k-client-info/index.html">TAKClientInfo</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>endpoint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>callsign<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>uid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>connectedAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span>Clock.System.now().toEpochMilliseconds()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="758706661%2FClasslikes%2F-470374703" anchor-label="TAKConnectionEvent" id="758706661%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-connection-event/index.html"><span>TAKConnection</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="758706661%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-t-a-k-connection-event/index.html">TAKConnectionEvent</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-729811830%2FClasslikes%2F-470374703" anchor-label="TAKDataPackageGenerator" id="-729811830%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-data-package-generator/index.html"><span>TAKData</span><wbr><span>Package</span><wbr><span><span>Generator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-729811830%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-t-a-k-data-package-generator/index.html">TAKDataPackageGenerator</a></div><div class="brief "><p class="paragraph">Generates TAK data packages (.zip) compatible with ATAK/iTAK/WinTAK import.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1410250502%2FClasslikes%2F-470374703" anchor-label="TAKMeshIntegration" id="-1410250502%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-mesh-integration/index.html"><span>TAKMesh</span><wbr><span><span>Integration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1410250502%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-t-a-k-mesh-integration/index.html">TAKMeshIntegration</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">takServerManager<span class="token operator">: </span><a href="-t-a-k-server-manager/index.html">TAKServerManager</a><span class="token punctuation">, </span></span><span class="parameter ">commandSender<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">meshConfigHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-handler/index.html">MeshConfigHandler</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Bidirectional bridge between the local TAK server and the Meshtastic mesh network.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="802414674%2FClasslikes%2F-470374703" anchor-label="TakMeshTestRunner" id="802414674%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-tak-mesh-test-runner/index.html"><span>Tak</span><wbr><span>Mesh</span><wbr><span>Test</span><wbr><span><span>Runner</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="802414674%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-tak-mesh-test-runner/index.html">TakMeshTestRunner</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">commandSender<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Debug-only test runner that sends the SDK's CoT XML test fixtures through the real TAK mesh pipeline: strip → parse → compress → send to mesh radio.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1250343843%2FClasslikes%2F-470374703" anchor-label="TAKPacketConversion" id="1250343843%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-packet-conversion/index.html"><span>TAKPacket</span><wbr><span><span>Conversion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1250343843%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-t-a-k-packet-conversion/index.html">TAKPacketConversion</a></div><div class="brief "><p class="paragraph">Legacy v1 CoT &lt;-&gt; TAKPacket conversion for firmware &lt;= 2.7.x.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1786835335%2FClasslikes%2F-470374703" anchor-label="TAKPacketV2Conversion" id="1786835335%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-packet-v2-conversion/index.html"><span>TAKPacket</span><wbr><span><span>V2Conversion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1786835335%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-t-a-k-packet-v2-conversion/index.html">TAKPacketV2Conversion</a></div><div class="brief "><p class="paragraph">Conversion between CoTMessage and TAKPacketV2 (v2 wire protocol).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="613419966%2FClasslikes%2F-470374703" anchor-label="TAKServer" id="613419966%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-server/index.html"><span><span>TAKServer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="613419966%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-t-a-k-server/index.html">TAKServer</a></div><div class="brief "><p class="paragraph">Platform-agnostic contract for the Meshtastic TAK server.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2138028311%2FClasslikes%2F-470374703" anchor-label="TAKServerManager" id="2138028311%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-a-k-server-manager/index.html"><span>TAKServer</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2138028311%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-t-a-k-server-manager/index.html">TAKServerManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="649011506%2FClasslikes%2F-470374703" anchor-label="TakTestResult" id="649011506%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-tak-test-result/index.html"><span>Tak</span><wbr><span>Test</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="649011506%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-tak-test-result/index.html">TakTestResult</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>fixtureName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>xmlBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>compressedBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>passed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Result of sending a single test fixture through the TAK mesh pipeline.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="309462875%2FFunctions%2F-715928112" anchor-label="createTAKServer" id="309462875%2FFunctions%2F-715928112" data-filterable-set=":core:takserver/commonMain,:core:takserver/jvmAndroidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain,:core:takserver/jvmAndroidMain" data-filterable-set=":core:takserver/commonMain,:core:takserver/jvmAndroidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-t-a-k-server.html"><span>create</span><wbr><span><span>TAKServer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="309462875%2FFunctions%2F-715928112"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain" data-active="" data-toggle=":core:takserver/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:takserver/jvmAndroidMain" data-filterable-set=":core:takserver/jvmAndroidMain" data-toggle=":core:takserver/jvmAndroidMain">jvmAndroid</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="create-t-a-k-server.html"><span class="token function">createTAKServer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">port<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_TAK_PORT</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-t-a-k-server/index.html">TAKServer</a></div><div class="brief "><p class="paragraph">Platform factory for <a href="-t-a-k-server/index.html">TAKServer</a>. The JVM/Android implementation lives in <code class="lang-kotlin">jvmAndroidMain</code> and uses JSSE (<code class="lang-kotlin">SSLServerSocket</code>) with the bundled <code class="lang-kotlin">server.p12</code> identity and <code class="lang-kotlin">ca.pem</code> client trust store.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/jvmAndroidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-t-a-k-server.html"><span class="token function">createTAKServer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatchers<span class="token operator">: </span>ERROR CLASS: Symbol not found for CoroutineDispatchers<span class="token punctuation">, </span></span><span class="parameter ">port<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-t-a-k-server/index.html">TAKServer</a></div><div class="brief "><p class="paragraph"><code class="lang-kotlin">actual</code> factory for the KMP <code class="lang-kotlin">expect fun createTAKServer</code> declared in <code class="lang-kotlin">commonMain</code>. Both the Desktop JVM target and the Android target share this source set, so both run the same JSSE-based TLS listener.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1486451312%2FFunctions%2F-470374703" anchor-label="toCoTMessage" id="1486451312%2FFunctions%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-co-t-message.html"><span>to</span><wbr><span>Co</span><wbr><span><span>TMessage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1486451312%2FFunctions%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/User///PointingToDeclaration/">User</span><span class="token punctuation">.</span><a href="to-co-t-message.html"><span class="token function">toCoTMessage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">position<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Position///PointingToDeclaration/">Position</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">team<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>DEFAULT_TAK_TEAM_NAME<span class="token punctuation">, </span></span><span class="parameter ">role<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>DEFAULT_TAK_ROLE_NAME<span class="token punctuation">, </span></span><span class="parameter ">battery<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_TAK_BATTERY</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-co-t-message/index.html">CoTMessage</a></div><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/Position///PointingToDeclaration/">Position</span><span class="token punctuation">.</span><a href="to-co-t-message.html"><span class="token function">toCoTMessage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">callsign<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">team<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>DEFAULT_TAK_TEAM_NAME<span class="token punctuation">, </span></span><span class="parameter ">role<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>DEFAULT_TAK_ROLE_NAME<span class="token punctuation">, </span></span><span class="parameter ">battery<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_TAK_BATTERY</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-co-t-message/index.html">CoTMessage</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1180252974%2FFunctions%2F-470374703" anchor-label="toXml" id="1180252974%2FFunctions%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-xml.html"><span>to</span><wbr><span><span>Xml</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1180252974%2FFunctions%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-co-t-message/index.html">CoTMessage</a><span class="token punctuation">.</span><a href="to-xml.html"><span class="token function">toXml</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Serialize this <a href="-co-t-message/index.html">CoTMessage</a> to a single <code class="lang-kotlin">&lt;event&gt;</code> XML element suitable for the CoT streaming TCP protocol used by ATAK / iTAK / WinTAK clients.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SwitchingChannelSetDataSource</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:data/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:data/commonMain" data-filter=":core:data/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-data::org.meshtastic.core.data.datasource/SwitchingChannelSetDataSource///PointingToDeclaration//-367135906">
+  <div class="breadcrumbs"><a href="../../index.html">core-data</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.data.datasource</a><span class="delimiter">/</span><span class="current">SwitchingChannelSetDataSource</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Switching</span><wbr><span>Channel</span><wbr><span>Set</span><wbr><span>Data</span><wbr><span><span>Source</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SwitchingChannelSetDataSource</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/data/src/commonMain/kotlin/org/meshtastic/core/data/datasource/SwitchingChannelSetDataSource.kt#L47">source</a>)</span></span></div><p class="paragraph">Per-device channel-set storage backed by the current device's Room database.</p><p class="paragraph">Replaces the former single global <code class="lang-kotlin">channel_set.pb</code> DataStore. The channel set now switches with <a href="../../../../core/database/org.meshtastic.core.database/-database-provider/current-db.html">DatabaseProvider.currentDb</a>, exactly like messages and nodes, so switching between devices can no longer render one device's conversations against another device's channels (#4623).</p><p class="paragraph">The whole <span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span> proto is stored in one row (see <a href="../../../../core/database/org.meshtastic.core.database.entity/-channel-set-entity/index.html">ChannelSetEntity</a>); mutations are read-modify-write, so they are serialized through <a href="../../../../core/data/org.meshtastic.core.data.datasource/-switching-channel-set-data-source/write-mutex.html">writeMutex</a> to preserve the atomicity the old DataStore's <code class="lang-kotlin">updateData {}</code> provided (the handshake fires overlapping <a href="update-channel-settings.html">updateChannelSettings</a> calls as it downloads channels one by one).</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="866674395%2FConstructors%2F-367135906" anchor-label="SwitchingChannelSetDataSource" id="866674395%2FConstructors%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-switching-channel-set-data-source.html"><span>Switching</span><wbr><span>Channel</span><wbr><span>Set</span><wbr><span>Data</span><wbr><span><span>Source</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="866674395%2FConstructors%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-2080531059%2FProperties%2F-367135906" anchor-label="channelSetFlow" id="-2080531059%2FProperties%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="channel-set-flow.html"><span>channel</span><wbr><span>Set</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2080531059%2FProperties%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="channel-set-flow.html">channelSetFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="483007220%2FFunctions%2F-367135906" anchor-label="clearChannelSet" id="483007220%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-channel-set.html"><span>clear</span><wbr><span>Channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="483007220%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="clear-channel-set.html"><span class="token function">clearChannelSet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-607418013%2FFunctions%2F-367135906" anchor-label="replaceAllSettings" id="-607418013%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="replace-all-settings.html"><span>replace</span><wbr><span>All</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-607418013%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="replace-all-settings.html"><span class="token function">replaceAllSettings</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">settingsList<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSettings///PointingToDeclaration/">ChannelSettings</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Replaces all <span data-unresolved-link="org.meshtastic.proto/ChannelSettings///PointingToDeclaration/">ChannelSettings</span> in a single atomic operation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1460665151%2FFunctions%2F-367135906" anchor-label="setLoraConfig" id="1460665151%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-lora-config.html"><span>set</span><wbr><span>Lora</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1460665151%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="set-lora-config.html"><span class="token function">setLoraConfig</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">config<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config.LoRaConfig///PointingToDeclaration/">Config.LoRaConfig</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1505436779%2FFunctions%2F-367135906" anchor-label="updateChannelSettings" id="-1505436779%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-channel-settings.html"><span>update</span><wbr><span>Channel</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1505436779%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="update-channel-settings.html"><span class="token function">updateChannelSettings</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">channel<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Channel///PointingToDeclaration/">Channel</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Places <a href="update-channel-settings.html">channel</a>'s settings at its index, resizing with blank channels to fill any gap (parity with legacy).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

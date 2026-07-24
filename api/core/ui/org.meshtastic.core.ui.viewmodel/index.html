@@ -1,0 +1,264 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.ui.viewmodel</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-ui::org.meshtastic.core.ui.viewmodel////PointingToDeclaration//-920980536">
+  <div class="breadcrumbs"><a href="../index.html">core-ui</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.ui.viewmodel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1629776636%2FClasslikes%2F-920980536" anchor-label="ConnectionStatus" id="1629776636%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-connection-status/index.html"><span>Connection</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1629776636%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-connection-status/index.html">ConnectionStatus</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-connection-status/index.html">ConnectionStatus</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Derived, UI-friendly summary of the device connection state. Combines <a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/connection-state.html">ServiceRepository.connectionState</a> with "region unset" and the <a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/-companion/-r-e-c-o-n-n-e-c-t-i-n-g_-p-r-o-g-r-e-s-s_-t-e-x-t.html">ServiceRepository.RECONNECTING_PROGRESS_TEXT</a> handshake-recovery signal to surface cases (MUST_SET_REGION, RECONNECTING) that otherwise need separate boolean flags in the UI layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1855317277%2FClasslikes%2F-920980536" anchor-label="ConnectionsViewModel" id="1855317277%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-connections-view-model/index.html"><span>Connections</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1855317277%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-connections-view-model/index.html">ConnectionsViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">deviceHardwareRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-419359527%2FClasslikes%2F-920980536" anchor-label="UiState" id="-419359527%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-state/index.html"><span>Ui</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-419359527%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-ui-state/index.html">UiState</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-ui-state/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Lightweight tri-state wrapper for UI data. Prefer this over bare nullable initial values when the UI needs to distinguish "still loading" from "genuinely empty."</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="234136742%2FClasslikes%2F-920980536" anchor-label="UIViewModel" id="234136742%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-i-view-model/index.html"><span>UIView</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="234136742%2FClasslikes%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-u-i-view-model/index.html">UIViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeDB<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">lockdownCoordinator<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">eventFirmwareRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-event-firmware-repository/index.html">EventFirmwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>alertManager<span class="token operator">: </span><a href="../org.meshtastic.core.ui.util/-alert-manager/index.html">AlertManager</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>snackbarManager<span class="token operator">: </span><a href="../org.meshtastic.core.ui.util/-snackbar-manager/index.html">SnackbarManager</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">Shared base for the application-level ViewModel.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-236797714%2FFunctions%2F-920980536" anchor-label="asUiState" id="-236797714%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="as-ui-state.html"><span>as</span><wbr><span>Ui</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-236797714%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">context</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></span></span><span class="token punctuation">)</span><br><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="as-ui-state.html">T</a><span class="token operator">&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="as-ui-state.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="as-ui-state.html"><span class="token function">asUiState</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stopTimeout<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/index.html">Duration</a><span class="token operator"> = </span>5.seconds</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="-ui-state/index.html">UiState</a><span class="token operator">&lt;</span><a href="as-ui-state.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Wraps this <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> into a <code class="lang-kotlin">StateFlow&lt;UiState&lt;T&gt;&gt;</code>, emitting <a href="-ui-state/-loading/index.html">UiState.Loading</a> until the first value, then <a href="-ui-state/-content/index.html">UiState.Content</a> for each emission. Upstream errors are caught and mapped to <a href="-ui-state/-error/index.html">UiState.Error</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="376245048%2FFunctions%2F-920980536" anchor-label="dataOrNull" id="376245048%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="data-or-null.html"><span>data</span><wbr><span>Or</span><wbr><span><span>Null</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="376245048%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="data-or-null.html">T</a><span class="token operator">&gt; </span><a href="-ui-state/index.html">UiState</a><span class="token operator">&lt;</span><a href="data-or-null.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="data-or-null.html"><span class="token function">dataOrNull</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="data-or-null.html">T</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns the Content data, or <code class="lang-kotlin">null</code> if this state is Loading or <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-error/index.html">Error</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-768530381%2FFunctions%2F-920980536" anchor-label="errorEventFlow" id="-768530381%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error-event-flow.html"><span>error</span><wbr><span>Event</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-768530381%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="error-event-flow.html"><span class="token function">errorEventFlow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableSharedFlow///PointingToDeclaration/">MutableSharedFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.core.resources/UiText///PointingToDeclaration/">UiText</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates and returns a <span data-unresolved-link="kotlinx.coroutines.flow/MutableSharedFlow///PointingToDeclaration/">MutableSharedFlow</span> intended for one-shot error events. Expose as <code class="lang-kotlin">Flow</code> via <span data-unresolved-link="kotlinx.coroutines.flow//asFlow/kotlin.Function0[TypeParam(bounds=[kotlin.Any?])]#/PointingToDeclaration/">kotlinx.coroutines.flow.asFlow</span> in the ViewModel (hiding hot-flow semantics), and collect in the UI to show snackbars or toasts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="946371408%2FFunctions%2F-920980536" anchor-label="safeLaunch" id="946371408%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="safe-launch.html"><span>safe</span><wbr><span><span>Launch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="946371408%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">context</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></span></span><span class="token punctuation">)</span><br><span class="token keyword">fun </span><a href="safe-launch.html"><span class="token function">safeLaunch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a><span class="token operator"> = </span>EmptyCoroutineContext<span class="token punctuation">, </span></span><span class="parameter ">errorEvents<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/MutableSharedFlow///PointingToDeclaration/">MutableSharedFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.core.resources/UiText///PointingToDeclaration/">UiText</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">tag<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div><div class="brief "><p class="paragraph">Launches a coroutine in <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/package-summary.html">viewModelScope</a> that catches all exceptions except <span data-unresolved-link="kotlinx.coroutines/CancellationException///PointingToDeclaration/">CancellationException</span>. Non-cancellation errors are logged and emitted to <a href="safe-launch.html">errorEvents</a> (if provided) for one-shot UI consumption (e.g. snackbar / toast).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-533607823%2FFunctions%2F-920980536" anchor-label="stateInWhileSubscribed" id="-533607823%2FFunctions%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="state-in-while-subscribed.html"><span>state</span><wbr><span>In</span><wbr><span>While</span><wbr><span><span>Subscribed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-533607823%2FFunctions%2F-920980536"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">context</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewModel<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></span></span><span class="token punctuation">)</span><br><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="state-in-while-subscribed.html">T</a><span class="token operator">&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="state-in-while-subscribed.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="state-in-while-subscribed.html"><span class="token function">stateInWhileSubscribed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialValue<span class="token operator">: </span><a href="state-in-while-subscribed.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">stopTimeout<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/index.html">Duration</a><span class="token operator"> = </span>5.seconds</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="state-in-while-subscribed.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Extension for converting a <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> to a <span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span> in a <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a> context.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

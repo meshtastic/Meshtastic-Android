@@ -1,0 +1,1008 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>UiPrefsImpl</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:prefs/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:prefs/commonMain" data-filter=":core:prefs/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-prefs::org.meshtastic.core.prefs.ui/UiPrefsImpl///PointingToDeclaration//752246176">
+  <div class="breadcrumbs"><a href="../../index.html">core-prefs</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.prefs.ui</a><span class="delimiter">/</span><span class="current">UiPrefsImpl</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Ui</span><wbr><span>Prefs</span><wbr><span><span>Impl</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">UiPrefsImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/UiPrefsImpl.kt#L43">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1680431522%2FConstructors%2F752246176" anchor-label="UiPrefsImpl" id="-1680431522%2FConstructors%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-ui-prefs-impl.html"><span>Ui</span><wbr><span>Prefs</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1680431522%2FConstructors%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataStore<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1260923372%2FClasslikes%2F752246176" anchor-label="Companion" id="-1260923372%2FClasslikes%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1260923372%2FClasslikes%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1084437747%2FProperties%2F752246176" anchor-label="appIntroCompleted" id="-1084437747%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="app-intro-completed.html"><span>app</span><wbr><span>Intro</span><wbr><span><span>Completed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1084437747%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="app-intro-completed.html">appIntroCompleted</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1724453018%2FProperties%2F752246176" anchor-label="bleAutoScan" id="-1724453018%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ble-auto-scan.html"><span>ble</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1724453018%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="ble-auto-scan.html">bleAutoScan</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1562152987%2FProperties%2F752246176" anchor-label="eventThemeEnabled" id="1562152987%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="event-theme-enabled.html"><span>event</span><wbr><span>Theme</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1562152987%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="event-theme-enabled.html">eventThemeEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="719138128%2FProperties%2F752246176" anchor-label="excludeInfrastructure" id="719138128%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="exclude-infrastructure.html"><span>exclude</span><wbr><span><span>Infrastructure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="719138128%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="exclude-infrastructure.html">excludeInfrastructure</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1686460817%2FProperties%2F752246176" anchor-label="excludeMqtt" id="-1686460817%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="exclude-mqtt.html"><span>exclude</span><wbr><span><span>Mqtt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1686460817%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="exclude-mqtt.html">excludeMqtt</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="448783882%2FProperties%2F752246176" anchor-label="firmwareUpdateNotificationKeys" id="448783882%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="firmware-update-notification-keys.html"><span>firmware</span><wbr><span>Update</span><wbr><span>Notification</span><wbr><span><span>Keys</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448783882%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="firmware-update-notification-keys.html">firmwareUpdateNotificationKeys</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1478369914%2FProperties%2F752246176" anchor-label="hasShownNotPairedWarning" id="-1478369914%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="has-shown-not-paired-warning.html"><span>has</span><wbr><span>Shown</span><wbr><span>Not</span><wbr><span>Paired</span><wbr><span><span>Warning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1478369914%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="has-shown-not-paired-warning.html">hasShownNotPairedWarning</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-656342933%2FProperties%2F752246176" anchor-label="includeUnknown" id="-656342933%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="include-unknown.html"><span>include</span><wbr><span><span>Unknown</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-656342933%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="include-unknown.html">includeUnknown</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1583392745%2FProperties%2F752246176" anchor-label="lastHeardIsRelative" id="-1583392745%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-heard-is-relative.html"><span>last</span><wbr><span>Heard</span><wbr><span>Is</span><wbr><span><span>Relative</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1583392745%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="last-heard-is-relative.html">lastHeardIsRelative</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="264456083%2FProperties%2F752246176" anchor-label="locale" id="264456083%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="locale.html"><span><span>locale</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="264456083%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="locale.html">locale</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1088172275%2FProperties%2F752246176" anchor-label="networkAutoScan" id="1088172275%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="network-auto-scan.html"><span>network</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1088172275%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="network-auto-scan.html">networkAutoScan</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-178962747%2FProperties%2F752246176" anchor-label="nodeListDensity" id="-178962747%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="node-list-density.html"><span>node</span><wbr><span>List</span><wbr><span><span>Density</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-178962747%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="node-list-density.html">nodeListDensity</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="312783341%2FProperties%2F752246176" anchor-label="nodeSort" id="312783341%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="node-sort.html"><span>node</span><wbr><span><span>Sort</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="312783341%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="node-sort.html">nodeSort</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1991881624%2FProperties%2F752246176" anchor-label="onlyDirect" id="1991881624%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="only-direct.html"><span>only</span><wbr><span><span>Direct</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1991881624%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="only-direct.html">onlyDirect</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2042739602%2FProperties%2F752246176" anchor-label="onlyOnline" id="-2042739602%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="only-online.html"><span>only</span><wbr><span><span>Online</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2042739602%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="only-online.html">onlyOnline</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-31955075%2FProperties%2F752246176" anchor-label="selectedConnectionTransport" id="-31955075%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="selected-connection-transport.html"><span>selected</span><wbr><span>Connection</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-31955075%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="selected-connection-transport.html">selectedConnectionTransport</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2065246362%2FProperties%2F752246176" anchor-label="shouldShowChannel" id="2065246362%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-channel.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Channel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2065246362%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-channel.html">shouldShowChannel</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2063024845%2FProperties%2F752246176" anchor-label="shouldShowHops" id="-2063024845%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-hops.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Hops</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2063024845%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-hops.html">shouldShowHops</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1019381507%2FProperties%2F752246176" anchor-label="shouldShowLastHeard" id="-1019381507%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-last-heard.html"><span>should</span><wbr><span>Show</span><wbr><span>Last</span><wbr><span><span>Heard</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1019381507%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-last-heard.html">shouldShowLastHeard</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-365735640%2FProperties%2F752246176" anchor-label="shouldShowLocation" id="-365735640%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-location.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-365735640%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-location.html">shouldShowLocation</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-264346920%2FProperties%2F752246176" anchor-label="shouldShowPower" id="-264346920%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-power.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Power</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-264346920%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-power.html">shouldShowPower</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="587258759%2FProperties%2F752246176" anchor-label="shouldShowRole" id="587258759%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-role.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Role</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="587258759%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-role.html">shouldShowRole</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1231091307%2FProperties%2F752246176" anchor-label="shouldShowSignal" id="-1231091307%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-signal.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Signal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1231091307%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-signal.html">shouldShowSignal</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-806274396%2FProperties%2F752246176" anchor-label="shouldShowTelemetry" id="-806274396%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-show-telemetry.html"><span>should</span><wbr><span>Show</span><wbr><span><span>Telemetry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-806274396%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="should-show-telemetry.html">shouldShowTelemetry</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1614831784%2FProperties%2F752246176" anchor-label="showIgnored" id="-1614831784%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="show-ignored.html"><span>show</span><wbr><span><span>Ignored</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1614831784%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="show-ignored.html">showIgnored</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1128332955%2FProperties%2F752246176" anchor-label="showQuickChat" id="-1128332955%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="show-quick-chat.html"><span>show</span><wbr><span>Quick</span><wbr><span><span>Chat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1128332955%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="show-quick-chat.html">showQuickChat</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1312979748%2FProperties%2F752246176" anchor-label="theme" id="1312979748%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="theme.html"><span><span>theme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1312979748%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="theme.html">theme</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1999895114%2FFunctions%2F752246176" anchor-label="recordFirmwareUpdateNotificationKey" id="-1999895114%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="record-firmware-update-notification-key.html"><span>record</span><wbr><span>Firmware</span><wbr><span>Update</span><wbr><span>Notification</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1999895114%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="record-firmware-update-notification-key.html"><span class="token function">recordFirmwareUpdateNotificationKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="732915188%2FFunctions%2F752246176" anchor-label="setAppIntroCompleted" id="732915188%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-app-intro-completed.html"><span>set</span><wbr><span>App</span><wbr><span>Intro</span><wbr><span><span>Completed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732915188%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-app-intro-completed.html"><span class="token function">setAppIntroCompleted</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">completed<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="580742157%2FFunctions%2F752246176" anchor-label="setBleAutoScan" id="580742157%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-ble-auto-scan.html"><span>set</span><wbr><span>Ble</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="580742157%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-ble-auto-scan.html"><span class="token function">setBleAutoScan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="301087362%2FFunctions%2F752246176" anchor-label="setEventThemeEnabled" id="301087362%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-event-theme-enabled.html"><span>set</span><wbr><span>Event</span><wbr><span>Theme</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="301087362%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-event-theme-enabled.html"><span class="token function">setEventThemeEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-399043081%2FFunctions%2F752246176" anchor-label="setExcludeInfrastructure" id="-399043081%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-exclude-infrastructure.html"><span>set</span><wbr><span>Exclude</span><wbr><span><span>Infrastructure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-399043081%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-exclude-infrastructure.html"><span class="token function">setExcludeInfrastructure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1967890262%2FFunctions%2F752246176" anchor-label="setExcludeMqtt" id="1967890262%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-exclude-mqtt.html"><span>set</span><wbr><span>Exclude</span><wbr><span><span>Mqtt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1967890262%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-exclude-mqtt.html"><span class="token function">setExcludeMqtt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-308903511%2FFunctions%2F752246176" anchor-label="setHasShownNotPairedWarning" id="-308903511%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-has-shown-not-paired-warning.html"><span>set</span><wbr><span>Has</span><wbr><span>Shown</span><wbr><span>Not</span><wbr><span>Paired</span><wbr><span><span>Warning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-308903511%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-has-shown-not-paired-warning.html"><span class="token function">setHasShownNotPairedWarning</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">shown<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="604515662%2FFunctions%2F752246176" anchor-label="setIncludeUnknown" id="604515662%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-include-unknown.html"><span>set</span><wbr><span>Include</span><wbr><span><span>Unknown</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="604515662%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-include-unknown.html"><span class="token function">setIncludeUnknown</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1415530750%2FFunctions%2F752246176" anchor-label="setLastHeardIsRelative" id="1415530750%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-last-heard-is-relative.html"><span>set</span><wbr><span>Last</span><wbr><span>Heard</span><wbr><span>Is</span><wbr><span><span>Relative</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1415530750%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-last-heard-is-relative.html"><span class="token function">setLastHeardIsRelative</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1739162035%2FFunctions%2F752246176" anchor-label="setLocale" id="1739162035%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-locale.html"><span>set</span><wbr><span><span>Locale</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1739162035%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-locale.html"><span class="token function">setLocale</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">languageTag<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1250971174%2FFunctions%2F752246176" anchor-label="setNetworkAutoScan" id="-1250971174%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-network-auto-scan.html"><span>set</span><wbr><span>Network</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1250971174%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-network-auto-scan.html"><span class="token function">setNetworkAutoScan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-257059011%2FFunctions%2F752246176" anchor-label="setNodeListDensity" id="-257059011%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-node-list-density.html"><span>set</span><wbr><span>Node</span><wbr><span>List</span><wbr><span><span>Density</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-257059011%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-node-list-density.html"><span class="token function">setNodeListDensity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="59220393%2FFunctions%2F752246176" anchor-label="setNodeSort" id="59220393%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-node-sort.html"><span>set</span><wbr><span>Node</span><wbr><span><span>Sort</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="59220393%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-node-sort.html"><span class="token function">setNodeSort</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-763728709%2FFunctions%2F752246176" anchor-label="setOnlyDirect" id="-763728709%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-only-direct.html"><span>set</span><wbr><span>Only</span><wbr><span><span>Direct</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-763728709%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-only-direct.html"><span class="token function">setOnlyDirect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-198324463%2FFunctions%2F752246176" anchor-label="setOnlyOnline" id="-198324463%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-only-online.html"><span>set</span><wbr><span>Only</span><wbr><span><span>Online</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-198324463%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-only-online.html"><span class="token function">setOnlyOnline</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1288560854%2FFunctions%2F752246176" anchor-label="setSelectedConnectionTransport" id="-1288560854%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-selected-connection-transport.html"><span>set</span><wbr><span>Selected</span><wbr><span>Connection</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1288560854%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-selected-connection-transport.html"><span class="token function">setSelectedConnectionTransport</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">type<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="188175740%2FFunctions%2F752246176" anchor-label="setShouldProvideNodeLocation" id="188175740%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-provide-node-location.html"><span>set</span><wbr><span>Should</span><wbr><span>Provide</span><wbr><span>Node</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="188175740%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-provide-node-location.html"><span class="token function">setShouldProvideNodeLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">provide<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-505509695%2FFunctions%2F752246176" anchor-label="setShouldShowChannel" id="-505509695%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-channel.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Channel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-505509695%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-channel.html"><span class="token function">setShouldShowChannel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1432480790%2FFunctions%2F752246176" anchor-label="setShouldShowHops" id="1432480790%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-hops.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Hops</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1432480790%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-hops.html"><span class="token function">setShouldShowHops</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1910955876%2FFunctions%2F752246176" anchor-label="setShouldShowLastHeard" id="1910955876%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-last-heard.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span>Last</span><wbr><span><span>Heard</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1910955876%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-last-heard.html"><span class="token function">setShouldShowLastHeard</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-470396853%2FFunctions%2F752246176" anchor-label="setShouldShowLocation" id="-470396853%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-location.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-470396853%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-location.html"><span class="token function">setShouldShowLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="837693183%2FFunctions%2F752246176" anchor-label="setShouldShowPower" id="837693183%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-power.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Power</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="837693183%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-power.html"><span class="token function">setShouldShowPower</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1405904746%2FFunctions%2F752246176" anchor-label="setShouldShowRole" id="1405904746%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-role.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Role</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1405904746%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-role.html"><span class="token function">setShouldShowRole</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="402531704%2FFunctions%2F752246176" anchor-label="setShouldShowSignal" id="402531704%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-signal.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Signal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="402531704%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-signal.html"><span class="token function">setShouldShowSignal</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-761843509%2FFunctions%2F752246176" anchor-label="setShouldShowTelemetry" id="-761843509%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-should-show-telemetry.html"><span>set</span><wbr><span>Should</span><wbr><span>Show</span><wbr><span><span>Telemetry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-761843509%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-should-show-telemetry.html"><span class="token function">setShouldShowTelemetry</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="171068543%2FFunctions%2F752246176" anchor-label="setShowIgnored" id="171068543%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-show-ignored.html"><span>set</span><wbr><span>Show</span><wbr><span><span>Ignored</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="171068543%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-show-ignored.html"><span class="token function">setShowIgnored</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1721901900%2FFunctions%2F752246176" anchor-label="setShowQuickChat" id="1721901900%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-show-quick-chat.html"><span>set</span><wbr><span>Show</span><wbr><span>Quick</span><wbr><span><span>Chat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1721901900%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-show-quick-chat.html"><span class="token function">setShowQuickChat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">show<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2068998692%2FFunctions%2F752246176" anchor-label="setTheme" id="2068998692%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-theme.html"><span>set</span><wbr><span><span>Theme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2068998692%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-theme.html"><span class="token function">setTheme</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1829175386%2FFunctions%2F752246176" anchor-label="shouldProvideNodeLocation" id="-1829175386%2FFunctions%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-provide-node-location.html"><span>should</span><wbr><span>Provide</span><wbr><span>Node</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1829175386%2FFunctions%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="should-provide-node-location.html"><span class="token function">shouldProvideNodeLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

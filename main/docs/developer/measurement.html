@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measurement & Formatting</title>
+  <link rel="stylesheet" href="../styles/docs.css">
+</head>
+<body data-page="measurement" data-locale="en">
+<pre class="markdown-content"># Measurement &amp; Formatting
+
+How the Meshtastic Android/KMP app formats numbers, units, and locale-sensitive values.
+
+---|---|
+ `MetricFormatter` | `core/common/.../util/MetricFormatter.kt` | Converts and formats physical measurements (temperature, pressure, speed, etc.) |
+ `NumberFormatter` | `core/common/.../util/NumberFormatter.kt` | Low-level fixed-point number formatting with locale-independent dot separator |
+
+Both live in `org.meshtastic.core.common.util` and are available to all KMP targets (Android, Desktop, iOS).
+
+## NumberFormatter
+
+`NumberFormatter` provides locale-independent decimal formatting using pure arithmetic (no `String.format` or `DecimalFormat`):
+
+```kotlin
+object NumberFormatter {
+    fun format(value: Double, decimalPlaces: Int): String
+    fun format(value: Float, decimalPlaces: Int): String
+}
+```
+
+&gt; **Why locale-independent?** Meshtastic is a mesh networking app where consistency matters — sensor readings shared between nodes should look the same everywhere. `NumberFormatter` always uses `.` as the decimal separator.
+
+---|---|
+ `temperature` | `isFahrenheit` | `°F = °C × 1.8 + 32` |
+ `windSpeed` | `isImperial` | m/s × 2.23694 → mph |
+ `rainfall` | `isImperial` | mm ÷ 25.4 → in |
+
+Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing [Units &amp; Locale](../user/units-and-locale) page explains what end users see.
+
+## DateFormatter
+
+Date and time formatting uses the `DateFormatter` `expect object` with platform-specific `actual` implementations:
+
+ Function | Output Example |
+---|---|
+ `formatRelativeTime()` | "5 min ago" |
+ `formatDateTime()` | "May 13, 2026 2:30 PM" |
+ `formatShortDate()` | "May 13" |
+ `formatTime()` | "2:30 PM" |
+ `formatTimeWithSeconds()` | "2:30:45 PM" |
+ `formatDate()` | "2026-05-13" |
+ `formatDateTimeShort()` | "5/13/26 2:30 PM" |
+
+Unlike `MetricFormatter`, `DateFormatter` is declared with `expect`/`actual` (an `expect object` in `commonMain`, an `actual object` per platform) because date formatting inherently depends on platform locale APIs.
+
+---|
+ Locale-independent decimal separator (`.`) | Mesh data shared between nodes must be consistent |
+ Pure arithmetic formatting (no `DecimalFormat`) | Works identically on JVM, Native, and JS targets |
+ Only temperature, wind speed, and rainfall convert | The remaining metric units are universally understood in their native form |
+ `object` singleton pattern | Stateless utility — no instance management needed |
+
+---
+
+## Related
+
+- **User-facing docs**: [Units &amp; Locale](../user/units-and-locale) explains what end users see
+- **Source code**: `core/common/src/commonMain/kotlin/org/meshtastic/core/common/util/MetricFormatter.kt`
+- **Tests**: `core/common/src/commonTest/kotlin/org/meshtastic/core/common/util/MetricFormatterTest.kt`
+</pre>
+</body>
+</html>

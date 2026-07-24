@@ -1,0 +1,504 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.database</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:database/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:database/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:database/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/androidMain" data-filter=":core:database/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/commonMain" data-filter=":core:database/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/jvmMain" data-filter=":core:database/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-database::org.meshtastic.core.database////PointingToDeclaration//1294035371">
+  <div class="breadcrumbs"><a href="../index.html">core-database</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.database</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1596077176%2FClasslikes%2F-475033937" anchor-label="AutoMigration12to13" id="-1596077176%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-auto-migration12to13/index.html"><span>Auto</span><wbr><span><span>Migration12to13</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1596077176%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-auto-migration12to13/index.html">AutoMigration12to13</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/migration/AutoMigrationSpec.html">AutoMigrationSpec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="664104263%2FClasslikes%2F-475033937" anchor-label="AutoMigration29to30" id="664104263%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-auto-migration29to30/index.html"><span>Auto</span><wbr><span><span>Migration29to30</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="664104263%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-auto-migration29to30/index.html">AutoMigration29to30</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/migration/AutoMigrationSpec.html">AutoMigrationSpec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1071086666%2FClasslikes%2F-475033937" anchor-label="AutoMigration33to34" id="1071086666%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-auto-migration33to34/index.html"><span>Auto</span><wbr><span><span>Migration33to34</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1071086666%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-auto-migration33to34/index.html">AutoMigration33to34</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/migration/AutoMigrationSpec.html">AutoMigrationSpec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1113422600%2FClasslikes%2F-475033937" anchor-label="AutoMigration34to35" id="1113422600%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-auto-migration34to35/index.html"><span>Auto</span><wbr><span><span>Migration34to35</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1113422600%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-auto-migration34to35/index.html">AutoMigration34to35</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/migration/AutoMigrationSpec.html">AutoMigrationSpec</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1953802610%2FClasslikes%2F-475033937" anchor-label="AutoMigration42to43" id="-1953802610%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-auto-migration42to43/index.html"><span>Auto</span><wbr><span><span>Migration42to43</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1953802610%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-auto-migration42to43/index.html">AutoMigration42to43</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/migration/AutoMigrationSpec.html">AutoMigrationSpec</a></div><div class="brief "><p class="paragraph">Device links moved from the bundled <code class="lang-kotlin">urls.json</code> to the resolved API; <code class="lang-kotlin">original_url</code> is no longer stored.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1588646294%2FClasslikes%2F-475033937" anchor-label="Converters" id="-1588646294%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-converters/index.html"><span><span>Converters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1588646294%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-converters/index.html">Converters</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2092269937%2FClasslikes%2F-475033937" anchor-label="DatabaseConstants" id="2092269937%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-database-constants/index.html"><span>Database</span><wbr><span><span>Constants</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2092269937%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-database-constants/index.html">DatabaseConstants</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1829169299%2FClasslikes%2F-475033937" anchor-label="DatabaseManager" id="1829169299%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-database-manager/index.html"><span>Database</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1829169299%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-database-manager/index.html">DatabaseManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="-database-provider/index.html">DatabaseProvider</a>, <a href="../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a></div><div class="brief "><p class="paragraph">Manages per-device Room database instances for node data, with LRU eviction.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2107758360%2FClasslikes%2F-475033937" anchor-label="DatabaseMerger" id="-2107758360%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-database-merger/index.html"><span>Database</span><wbr><span><span>Merger</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2107758360%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-database-merger/index.html">DatabaseMerger</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1302743505%2FClasslikes%2F-475033937" anchor-label="DatabaseProvider" id="1302743505%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-database-provider/index.html"><span>Database</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1302743505%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-database-provider/index.html">DatabaseProvider</a></div><div class="brief "><p class="paragraph">Provides multiplatform access to the current <a href="-meshtastic-database/index.html">MeshtasticDatabase</a> and a safe transactional helper. Platform implementations manage the concrete lifecycle (Room on Android, etc.).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1304354797%2FClasslikes%2F-475033937" anchor-label="MeshtasticDatabase" id="1304354797%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-meshtastic-database/index.html"><span>Meshtastic</span><wbr><span><span>Database</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1304354797%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.html">RoomDatabase</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-878917541%2FClasslikes%2F-475033937" anchor-label="MeshtasticDatabaseConstructor" id="-878917541%2FClasslikes%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-meshtastic-database-constructor/index.html"><span>Meshtastic</span><wbr><span>Database</span><wbr><span><span>Constructor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-878917541%2FClasslikes%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">object </span><a href="-meshtastic-database-constructor/index.html">MeshtasticDatabaseConstructor</a> : <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabaseConstructor.html">RoomDatabaseConstructor</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt; </span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="144354081%2FFunctions%2F-475033937" anchor-label="anonymizeAddress" id="144354081%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="anonymize-address.html"><span>anonymize</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="144354081%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="anonymize-address.html"><span class="token function">anonymizeAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="556310089%2FFunctions%2F-475033937" anchor-label="anonymizeDbName" id="556310089%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="anonymize-db-name.html"><span>anonymize</span><wbr><span>Db</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="556310089%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="anonymize-db-name.html"><span class="token function">anonymizeDbName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1404822144%2FFunctions%2F-475033937" anchor-label="buildDbName" id="-1404822144%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build-db-name.html"><span>build</span><wbr><span>Db</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1404822144%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="build-db-name.html"><span class="token function">buildDbName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-389242420%2FFunctions%2F1294035371" anchor-label="createDatabaseDataStore" id="-389242420%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-database-data-store.html"><span>create</span><wbr><span>Database</span><wbr><span>Data</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-389242420%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-database-data-store.html"><span class="token function">createDatabaseDataStore</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates an Android DataStore for database preferences.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="create-database-data-store.html"><span class="token function">createDatabaseDataStore</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates a platform-specific <a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a> for database-related preferences.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-database-data-store.html"><span class="token function">createDatabaseDataStore</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/core/DataStore.html">DataStore</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.html">Preferences</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates a JVM DataStore for database preferences in the data directory.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1333417896%2FFunctions%2F1294035371" anchor-label="deleteDatabase" id="1333417896%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-database.html"><span>delete</span><wbr><span><span>Database</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1333417896%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="delete-database.html"><span class="token function">deleteDatabase</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes the Android database using the platform-specific deleteDatabase helper.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="delete-database.html"><span class="token function">deleteDatabase</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes the database with the given <a href="delete-database.html">dbName</a> and its associated files (e.g., -wal, -shm).</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="delete-database.html"><span class="token function">deleteDatabase</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes the database and its Room-associated files on JVM.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-543732357%2FFunctions%2F80984935" anchor-label="desktopDataDir" id="-543732357%2FFunctions%2F80984935" data-filterable-set=":core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="desktop-data-dir.html"><span>desktop</span><wbr><span>Data</span><wbr><span><span>Dir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-543732357%2FFunctions%2F80984935"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-active="" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="desktop-data-dir.html"><span class="token function">desktopDataDir</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Resolves the desktop data directory for persistent storage (DataStore files, Room database). Defaults to <code class="lang-kotlin">~/.meshtastic/</code>. Override via <code class="lang-kotlin">MESHTASTIC_DATA_DIR</code> environment variable.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1199751604%2FFunctions%2F1294035371" anchor-label="getDatabaseBuilder" id="-1199751604%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-database-builder.html"><span>get</span><wbr><span>Database</span><wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1199751604%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-database-builder.html"><span class="token function">getDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for Android with the given <a href="get-database-builder.html">dbName</a>. All platforms use Room KMP's single-connection pool to avoid the reader-pool permit wedge; see <a href="-meshtastic-database/-companion/configure-common.html">MeshtasticDatabase.configureCommon</a>.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-database-builder.html"><span class="token function">getDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for the current platform with the given <a href="get-database-builder.html">dbName</a>.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-database-builder.html"><span class="token function">getDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for JVM/Desktop with the given <a href="get-database-builder.html">dbName</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1070082470%2FFunctions%2F1294035371" anchor-label="getDatabaseDirectory" id="1070082470%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-database-directory.html"><span>get</span><wbr><span>Database</span><wbr><span><span>Directory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1070082470%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-database-directory.html"><span class="token function">getDatabaseDirectory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></div><div class="brief "><p class="paragraph">Returns the Android directory where database files are stored.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-database-directory.html"><span class="token function">getDatabaseDirectory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></div><div class="brief "><p class="paragraph">Returns the platform-specific directory where database files are stored.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-database-directory.html"><span class="token function">getDatabaseDirectory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></div><div class="brief "><p class="paragraph">Returns the JVM/Desktop directory where database files are stored.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="352741079%2FFunctions%2F1294035371" anchor-label="getFileSystem" id="352741079%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-file-system.html"><span>get</span><wbr><span>File</span><wbr><span><span>System</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="352741079%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-file-system.html"><span class="token function">getFileSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span></div><div class="brief "><p class="paragraph">Returns the system FileSystem for Android.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-file-system.html"><span class="token function">getFileSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span></div><div class="brief "><p class="paragraph">Returns the <span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span> to use for database file operations.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-file-system.html"><span class="token function">getFileSystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span></div><div class="brief "><p class="paragraph">Returns the system FileSystem for JVM.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="378928990%2FFunctions%2F1294035371" anchor-label="getInMemoryDatabaseBuilder" id="378928990%2FFunctions%2F1294035371" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain" data-filterable-set=":core:database/commonMain,:core:database/androidMain,:core:database/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-in-memory-database-builder.html"><span>get</span><wbr><span>In</span><wbr><span>Memory</span><wbr><span>Database</span><wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="378928990%2FFunctions%2F1294035371"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:database/androidMain" data-filterable-set=":core:database/androidMain" data-active="" data-toggle=":core:database/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain" data-toggle=":core:database/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:database/jvmMain" data-filterable-set=":core:database/jvmMain" data-toggle=":core:database/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:database/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-in-memory-database-builder.html"><span class="token function">getInMemoryDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for an in-memory Android database.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="get-in-memory-database-builder.html"><span class="token function">getInMemoryDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for an in-memory database on the current platform.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:database/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="get-in-memory-database-builder.html"><span class="token function">getInMemoryDatabaseBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a><span class="token operator">&lt;</span><a href="-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a <a href="https://developer.android.com/reference/kotlin/androidx/room3/RoomDatabase.Builder.html">RoomDatabase.Builder</a> configured for an in-memory JVM database.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-933452051%2FFunctions%2F-475033937" anchor-label="shortSha1" id="-933452051%2FFunctions%2F-475033937" data-filterable-set=":core:database/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:database/commonMain" data-filterable-set=":core:database/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="short-sha1.html"><span>short</span><wbr><span><span>Sha1</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-933452051%2FFunctions%2F-475033937"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="short-sha1.html"><span class="token function">shortSha1</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">s<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

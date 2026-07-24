@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="et-rEE" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ühendus</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="connections" data-locale="et-rEE">
+<pre class="markdown-content"># Ühendus
+
+Meshtastic toetab mitut transpordimeetodit telefoni/arvuti ja raadiosõlme vaheliseks suhtluseks.
+
+## Sinihammas (BLE)
+
+Sinihamba madal voolutarve on Androidi vaike- ja levinuim ühendusviis.
+
+### Seadme sidumine
+
+1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
+2. Ava rakendus ja navigeeri vahekaardile **Ühendused**.
+3. Puuduta valikut **Otsi sinihamba seadmeid** – kuvatakse lähedalasuvad Meshtasticu raadiod.
+4. Select your device from the list.
+5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
+
+![Sinihamba seadmete otsimine, leitud raadio on loendis](../../assets/screenshots/connections_bluetooth_scan.png)
+
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+
+&gt; 💡 **Vihje:** Kui sinu seadet ei kuvata, kontrolli, kas sinihamba ​​ja asukoha load on antud ning et raadio poleks juba teise seadmega ühendatud.
+
+### Connection Status
+
+ Icon | Olek             | Kirjeldus                     |
+ ---- | ---------------- | ----------------------------- |
+ 🟢   | Ühendatud        | Active radio link established |
+ 🟡   | Ühendan          | Kätlemine on pooleli          |
+ 🔴   | Ühendus katkenud | No active connection          |
+ ⚪    | Pole seadistatud | Seadet pole valitud           |
+
+Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
+
+![Connecting status](../../assets/screenshots/connections_connecting.png)
+
+Kui seadmeid ei leita, kuvab rakendus tühja oleku koos juhistega:
+
+![Ühtegi seadet ei leitud](../../assets/screenshots/connections_empty_state.png)
+
+### Sinihamba veaotsing
+
+- **Seadet ei leitud:** Lülita sinihammas sisse/välja ja veendu, et asukoha määramine on lubatud.
+- **Connection drops:** Move closer to the radio; check for interference.
+- **Sidumine tagasi lükatud:** Unusta seade Androidi sinihamba ​​seadetes ja proovi uuesti.
+
+## USB port
+
+USB ühendused pakuvad juhtmega alternatiivi, mis on kasulik lauaarvutite puhul või kui sinihammas pole saadaval.
+
+### Seadistamine
+
+1. Connect your radio via USB cable to your device.
+2. Rakendus küsib USB luba – puuduta **Luba**.
+3. The connection is established automatically.
+
+&gt; ⚠️ **Märkus:** USB ühenduste jaoks on Android-seadmetes vaja OTG tuge.
+
+## TCP/IP (võrk)
+
+Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-põhiseid ühendusi kohaliku võrgu kaudu. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
+
+### Connecting over the Network
+
+1. Make sure the radio is on the same local network as your phone/desktop.
+2. On the Connect screen, select **Network** in the transport selector.
+3. Choose the radio one of two ways:
+   - **Võrguseadmete otsimine** – lülita see sisse, et automaatselt avastada raadioid, mis reklaamivad end kohalikus võrgus (mDNS / `_meshtastic._tcp`). Leitud seadmed kuvatakse loendis; ühenduse loomiseks puuduta neist ühte.
+   - **Lisa seade käsitsi…** — Sisesta raadio IP-aadress (või hostinimi) ja port (vaikimisi: 4403).
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
+
+&gt; 💡 **Vihje:** Võrgu tuvastamine kasutab mDNS-i, mis töötab ainult siis, kui mõlemad seadmed on samas alamvõrgus. Android 17+ puhul vajab rakendus skanniks kohaliku võrgu luba; kui otsing ei leia midagi, lisa seade käsitsi IP-aadressi järgi.
+
+### Millal kasutada TCP
+
+- Radio is on the same local network
+- Testing with a simulated radio
+- Asukohad kus sinihambal on häireid
+
+## Reconnection Behavior
+
+The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
+
+Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
+
+![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
+
+## Desktop Connections
+
+On Desktop (Linux/macOS/Windows), the app supports:
+
+- **Sinihammas (BLE)** — Kable'i teegi kaudu; töötab macOS-is, Linuxis ja Windowsis
+- **USB port** – peamine juhtmega ühendusmeetod
+- **TCP/IP** – võrguühendusega raadiote jaoks
+
+See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+
+## Related Topics
+
+- [Alustamine](onboarding) — esmakäivituse seadistamine ja load
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — sinihamba ​​ja võrgu seadistus
+- [Desktop App](desktop) — desktop-specific connection details
+- [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
+
+---
+
+</pre>
+</body>
+</html>

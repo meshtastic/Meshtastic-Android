@@ -1,0 +1,629 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SharedMapViewModel</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map::org.meshtastic.feature.map/SharedMapViewModel///PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map</a><span class="delimiter">/</span><span class="current">SharedMapViewModel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Shared</span><wbr><span>Map</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SharedMapViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">notificationPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a></span></span><span class="token punctuation">)</span> : <a href="../-base-map-view-model/index.html">BaseMapViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/SharedMapViewModel.kt#L28">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1658299956%2FConstructors%2F-1707802287" anchor-label="SharedMapViewModel" id="-1658299956%2FConstructors%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-shared-map-view-model.html"><span>Shared</span><wbr><span>Map</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1658299956%2FConstructors%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">notificationPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-160046462%2FProperties%2F-1707802287" anchor-label="channelSet" id="-160046462%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/channel-set.html"><span>channel</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-160046462%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/channel-set.html">channelSet</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Connected radio's channel set (primary-channel frequency + LoRa config); used to prefill a Site Planner estimate.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1647314388%2FProperties%2F-1707802287" anchor-label="displayUnits" id="1647314388%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/display-units.html"><span>display</span><wbr><span><span>Units</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1647314388%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/display-units.html">displayUnits</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/Config.DisplayConfig.DisplayUnits///PointingToDeclaration/">Config.DisplayConfig.DisplayUnits</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. StateFlow kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react to a mid-session locale change (ViewModel survives config changes).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="548069570%2FProperties%2F-1707802287" anchor-label="geofenceAlertOptIns" id="548069570%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/geofence-alert-opt-ins.html"><span>geofence</span><wbr><span>Alert</span><wbr><span>Opt</span><wbr><span><span>Ins</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="548069570%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/geofence-alert-opt-ins.html">geofenceAlertOptIns</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Waypoint ids of foreign geofences the user opted in to crossing alerts for (see <a href="../../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1614538278%2FProperties%2F-1707802287" anchor-label="isConnected" id="-1614538278%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/is-connected.html"><span>is</span><wbr><span><span>Connected</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1614538278%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/is-connected.html">isConnected</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1337721889%2FProperties%2F-1707802287" anchor-label="lastHeardFilter" id="1337721889%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/last-heard-filter.html"><span>last</span><wbr><span>Heard</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1337721889%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/last-heard-filter.html">lastHeardFilter</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-last-heard-filter/index.html">LastHeardFilter</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-673799906%2FProperties%2F-1707802287" anchor-label="lastHeardTrackFilter" id="-673799906%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/last-heard-track-filter.html"><span>last</span><wbr><span>Heard</span><wbr><span>Track</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-673799906%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/last-heard-track-filter.html">lastHeardTrackFilter</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-last-heard-filter/index.html">LastHeardFilter</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1529798806%2FProperties%2F-1707802287" anchor-label="mapFilterStateFlow" id="1529798806%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/map-filter-state-flow.html"><span>map</span><wbr><span>Filter</span><wbr><span>State</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1529798806%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/map-filter-state-flow.html">mapFilterStateFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-base-map-view-model/-map-filter-state/index.html">BaseMapViewModel.MapFilterState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-163670278%2FProperties%2F-1707802287" anchor-label="myId" id="-163670278%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/my-id.html"><span>my</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-163670278%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/my-id.html">myId</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1515248101%2FProperties%2F-1707802287" anchor-label="myNodeInfo" id="1515248101%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/my-node-info.html"><span>my</span><wbr><span>Node</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1515248101%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/my-node-info.html">myNodeInfo</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-my-node-info/index.html">MyNodeInfo</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="689407265%2FProperties%2F-1707802287" anchor-label="myNodeNum" id="689407265%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/my-node-num.html"><span>my</span><wbr><span>Node</span><wbr><span><span>Num</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="689407265%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/my-node-num.html">myNodeNum</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="836371816%2FProperties%2F-1707802287" anchor-label="nodes" id="836371816%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/nodes.html"><span><span>nodes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="836371816%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/nodes.html">nodes</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="807256985%2FProperties%2F-1707802287" anchor-label="nodesWithPosition" id="807256985%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/nodes-with-position.html"><span>nodes</span><wbr><span>With</span><wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="807256985%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/nodes-with-position.html">nodesWithPosition</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1421041725%2FProperties%2F-1707802287" anchor-label="ourNodeInfo" id="1421041725%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/our-node-info.html"><span>our</span><wbr><span>Node</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1421041725%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/our-node-info.html">ourNodeInfo</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="711226194%2FProperties%2F-1707802287" anchor-label="showOnlyFavoritesOnMap" id="711226194%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/show-only-favorites-on-map.html"><span>show</span><wbr><span>Only</span><wbr><span>Favorites</span><wbr><span>On</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="711226194%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/show-only-favorites-on-map.html">showOnlyFavoritesOnMap</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-974120651%2FProperties%2F-1707802287" anchor-label="showPrecisionCircleOnMap" id="-974120651%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/show-precision-circle-on-map.html"><span>show</span><wbr><span>Precision</span><wbr><span>Circle</span><wbr><span>On</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-974120651%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/show-precision-circle-on-map.html">showPrecisionCircleOnMap</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1270502681%2FProperties%2F-1707802287" anchor-label="showWaypointsOnMap" id="1270502681%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/show-waypoints-on-map.html"><span>show</span><wbr><span>Waypoints</span><wbr><span>On</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1270502681%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/show-waypoints-on-map.html">showWaypointsOnMap</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1303498919%2FProperties%2F-1707802287" anchor-label="waypoints" id="1303498919%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/waypoints.html"><span><span>waypoints</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1303498919%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-base-map-view-model/waypoints.html">waypoints</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-462089743%2FFunctions%2F-1707802287" anchor-label="addCloseable" id="-462089743%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#2068605057%2FFunctions%2F-1707802287"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-462089743%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#2068605057%2FFunctions%2F-1707802287"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#2093014716%2FFunctions%2F-1707802287"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-539455981%2FFunctions%2F-1707802287" anchor-label="deleteWaypoint" id="-539455981%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/delete-waypoint.html"><span>delete</span><wbr><span><span>Waypoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-539455981%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/delete-waypoint.html"><span class="token function">deleteWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1653855657%2FFunctions%2F-1707802287" anchor-label="generatePacketId" id="1653855657%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/generate-packet-id.html"><span>generate</span><wbr><span>Packet</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1653855657%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/generate-packet-id.html"><span class="token function">generatePacketId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102255800%2FFunctions%2F-1707802287" anchor-label="getCloseable" id="1102255800%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#1102255800%2FFunctions%2F-1707802287"><span>get</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102255800%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#1102255800%2FFunctions%2F-1707802287">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#1102255800%2FFunctions%2F-1707802287"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.meshtastic.feature.map.node/-node-map-view-model/index.html#1102255800%2FFunctions%2F-1707802287">T</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1787281338%2FFunctions%2F-1707802287" anchor-label="getNodeOrFallback" id="1787281338%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/get-node-or-fallback.html"><span>get</span><wbr><span>Node</span><wbr><span>Or</span><wbr><span><span>Fallback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1787281338%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/get-node-or-fallback.html"><span class="token function">getNodeOrFallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1114379063%2FFunctions%2F-1707802287" anchor-label="getUser" id="1114379063%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/get-user.html"><span>get</span><wbr><span><span>User</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1114379063%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-base-map-view-model/get-user.html"><span class="token function">getUser</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/User///PointingToDeclaration/">User</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2083229848%2FFunctions%2F-1707802287" anchor-label="isMyWaypoint" id="-2083229848%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/is-my-waypoint.html"><span>is</span><wbr><span>My</span><wbr><span><span>Waypoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2083229848%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/is-my-waypoint.html"><span class="token function">isMyWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True if the waypoint with <a href="../-base-map-view-model/is-my-waypoint.html">id</a> was created by this device (vs. received from another node over the mesh).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1270198937%2FFunctions%2F-1707802287" anchor-label="sendWaypoint" id="1270198937%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/send-waypoint.html"><span>send</span><wbr><span><span>Waypoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1270198937%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/send-waypoint.html"><span class="token function">sendWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">wpt<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Waypoint///PointingToDeclaration/">Waypoint</span><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"0"</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1244173141%2FFunctions%2F-1707802287" anchor-label="setGeofenceAlertOptIn" id="-1244173141%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/set-geofence-alert-opt-in.html"><span>set</span><wbr><span>Geofence</span><wbr><span>Alert</span><wbr><span>Opt</span><wbr><span><span>In</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1244173141%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/set-geofence-alert-opt-in.html"><span class="token function">setGeofenceAlertOptIn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">waypointId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1020774676%2FFunctions%2F-1707802287" anchor-label="setLastHeardFilter" id="-1020774676%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/set-last-heard-filter.html"><span>set</span><wbr><span>Last</span><wbr><span>Heard</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1020774676%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/set-last-heard-filter.html"><span class="token function">setLastHeardFilter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">filter<span class="token operator">: </span><a href="../-last-heard-filter/index.html">LastHeardFilter</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1362092587%2FFunctions%2F-1707802287" anchor-label="setLastHeardTrackFilter" id="-1362092587%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/set-last-heard-track-filter.html"><span>set</span><wbr><span>Last</span><wbr><span>Heard</span><wbr><span>Track</span><wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1362092587%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/set-last-heard-track-filter.html"><span class="token function">setLastHeardTrackFilter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">filter<span class="token operator">: </span><a href="../-last-heard-filter/index.html">LastHeardFilter</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="151442626%2FFunctions%2F-1707802287" anchor-label="toggleOnlyFavorites" id="151442626%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/toggle-only-favorites.html"><span>toggle</span><wbr><span>Only</span><wbr><span><span>Favorites</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="151442626%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/toggle-only-favorites.html"><span class="token function">toggleOnlyFavorites</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="874741057%2FFunctions%2F-1707802287" anchor-label="toggleShowPrecisionCircleOnMap" id="874741057%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/toggle-show-precision-circle-on-map.html"><span>toggle</span><wbr><span>Show</span><wbr><span>Precision</span><wbr><span>Circle</span><wbr><span>On</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="874741057%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/toggle-show-precision-circle-on-map.html"><span class="token function">toggleShowPrecisionCircleOnMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1390628315%2FFunctions%2F-1707802287" anchor-label="toggleShowWaypointsOnMap" id="-1390628315%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-base-map-view-model/toggle-show-waypoints-on-map.html"><span>toggle</span><wbr><span>Show</span><wbr><span>Waypoints</span><wbr><span>On</span><wbr><span><span>Map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1390628315%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/toggle-show-waypoints-on-map.html"><span class="token function">toggleShowWaypointsOnMap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1245355915%2FFunctions%2F-1707802287" anchor-label="tracerouteNodeSelection" id="-1245355915%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../traceroute-node-selection.html"><span>traceroute</span><wbr><span>Node</span><wbr><span><span>Selection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1245355915%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-base-map-view-model/index.html">BaseMapViewModel</a><span class="token punctuation">.</span><a href="../traceroute-node-selection.html"><span class="token function">tracerouteNodeSelection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tracerouteOverlay<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-traceroute-overlay/index.html">TracerouteOverlay</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">tracerouteNodePositions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span data-unresolved-link="org.meshtastic.proto/Position///PointingToDeclaration/">Position</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">nodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-traceroute-node-selection/index.html">TracerouteNodeSelection</a></div><div class="brief "><p class="paragraph">Convenience extension that delegates to <a href="../traceroute-node-selection.html">tracerouteNodeSelection</a> using the VM's getNodeOrFallback.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

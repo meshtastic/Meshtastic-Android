@@ -1,0 +1,731 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>JvmScannerViewModel</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:connections/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:connections/jvmMain" data-filter=":feature:connections/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-connections::org.meshtastic.feature.connections/JvmScannerViewModel///PointingToDeclaration//-1602585876">
+  <div class="breadcrumbs"><a href="../../index.html">feature-connections</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.connections</a><span class="delimiter">/</span><span class="current">JvmScannerViewModel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Jvm</span><wbr><span>Scanner</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">JvmScannerViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">recentAddressesDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-recent-addresses-data-source/index.html">RecentAddressesDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">getDiscoveredDevicesUseCase<span class="token operator">: </span><a href="../../org.meshtastic.feature.connections.model/-get-discovered-devices-use-case/index.html">GetDiscoveredDevicesUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">networkRepository<span class="token operator">: </span><a href="../../../../core/network/org.meshtastic.core.network.repository/-network-repository/index.html">NetworkRepository</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">bleScanner<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-scanner/index.html">BleScanner</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../-scanner-view-model/index.html">ScannerViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/connections/src/jvmMain/kotlin/org/meshtastic/feature/connections/JvmScannerViewModel.kt#L38">source</a>)</span></span></div><p class="paragraph">Desktop/JVM <a href="../-scanner-view-model/index.html">ScannerViewModel</a> registration.</p><p class="paragraph">On Desktop, the base <a href="../-scanner-view-model/index.html">ScannerViewModel</a> is used directly. The default <a href="../../../../feature/connections/org.meshtastic.feature.connections/-scanner-view-model/request-bonding.html">requestBonding</a> connects without explicit bonding since the OS Bluetooth stack handles pairing during the GATT connection.</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="1233539495%2FConstructors%2F-1602585876" anchor-label="JvmScannerViewModel" id="1233539495%2FConstructors%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-jvm-scanner-view-model.html"><span>Jvm</span><wbr><span>Scanner</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1233539495%2FConstructors%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">recentAddressesDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-recent-addresses-data-source/index.html">RecentAddressesDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">getDiscoveredDevicesUseCase<span class="token operator">: </span><a href="../../org.meshtastic.feature.connections.model/-get-discovered-devices-use-case/index.html">GetDiscoveredDevicesUseCase</a><span class="token punctuation">, </span></span><span class="parameter ">networkRepository<span class="token operator">: </span><a href="../../../../core/network/org.meshtastic.core.network.repository/-network-repository/index.html">NetworkRepository</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">bleScanner<span class="token operator">: </span><a href="../../../../core/ble/org.meshtastic.core.ble/-ble-scanner/index.html">BleScanner</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1033386302%2FProperties%2F-1602585876" anchor-label="activeTransport" id="-1033386302%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/active-transport.html"><span>active</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1033386302%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/active-transport.html">activeTransport</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The single transport pane currently rendered by the Connections screen.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="639973054%2FProperties%2F-1602585876" anchor-label="bleAutoScan" id="639973054%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/ble-auto-scan.html"><span>ble</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="639973054%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/ble-auto-scan.html">bleAutoScan</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">User preference that controls whether BLE scanning auto-starts when the Connections screen opens.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-517000918%2FProperties%2F-1602585876" anchor-label="bleDevicesForUi" id="-517000918%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/ble-devices-for-ui.html"><span>ble</span><wbr><span>Devices</span><wbr><span>For</span><wbr><span><span>Ui</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-517000918%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/ble-devices-for-ui.html">bleDevicesForUi</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.feature.connections.model/-device-list-entry/index.html">DeviceListEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">BLE devices for the UI — restricted to those currently visible via an active scan.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1676632669%2FProperties%2F-1602585876" anchor-label="connectionProgressText" id="1676632669%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/connection-progress-text.html"><span>connection</span><wbr><span>Progress</span><wbr><span><span>Text</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1676632669%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/connection-progress-text.html">connectionProgressText</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Transient, fine-grained status text emitted during connect/bonding (e.g. "Bonding…", "Requesting config…"). Nullable because <code class="lang-kotlin">serviceRepository.connectionProgress</code> does not emit during steady-state.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1039338804%2FProperties%2F-1602585876" anchor-label="discoveredTcpDevicesForUi" id="-1039338804%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/discovered-tcp-devices-for-ui.html"><span>discovered</span><wbr><span>Tcp</span><wbr><span>Devices</span><wbr><span>For</span><wbr><span><span>Ui</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1039338804%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/discovered-tcp-devices-for-ui.html">discoveredTcpDevicesForUi</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.feature.connections.model/-device-list-entry/index.html">DeviceListEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1627389123%2FProperties%2F-1602585876" anchor-label="isBleScanning" id="1627389123%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/is-ble-scanning.html"><span>is</span><wbr><span>Ble</span><wbr><span><span>Scanning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1627389123%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/is-ble-scanning.html">isBleScanning</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Whether a BLE scan is currently active.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1957141840%2FProperties%2F-1602585876" anchor-label="isNetworkScanning" id="1957141840%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/is-network-scanning.html"><span>is</span><wbr><span>Network</span><wbr><span><span>Scanning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1957141840%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/is-network-scanning.html">isNetworkScanning</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Whether an NSD network scan is currently active.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1809380277%2FProperties%2F-1602585876" anchor-label="networkAutoScan" id="-1809380277%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/network-auto-scan.html"><span>network</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1809380277%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/network-auto-scan.html">networkAutoScan</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">User preference that controls whether NSD network scanning auto-starts when the Connections screen opens.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="448944985%2FProperties%2F-1602585876" anchor-label="pendingRecovery" id="448944985%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/pending-recovery.html"><span>pending</span><wbr><span><span>Recovery</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448944985%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/pending-recovery.html">pendingRecovery</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/datastore/org.meshtastic.core.datastore.model/-pending-firmware-recovery/index.html">PendingFirmwareRecovery</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A firmware update that didn't finish, leaving a device stranded in bootloader mode. Non-null drives the recovery banner on the Connections screen, whose tap deep-links into the Firmware Update screen to re-flash the device.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-445048111%2FProperties%2F-1602585876" anchor-label="persistedDeviceName" id="-445048111%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/persisted-device-name.html"><span>persisted</span><wbr><span>Device</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-445048111%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/persisted-device-name.html">persistedDeviceName</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The persisted device name from the last selection, for use as a UI fallback.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="384544735%2FProperties%2F-1602585876" anchor-label="recentTcpDevicesForUi" id="384544735%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/recent-tcp-devices-for-ui.html"><span>recent</span><wbr><span>Tcp</span><wbr><span>Devices</span><wbr><span>For</span><wbr><span><span>Ui</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="384544735%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/recent-tcp-devices-for-ui.html">recentTcpDevicesForUi</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.feature.connections.model/-device-list-entry/index.html">DeviceListEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Recently-used TCP addresses for the Connections device list.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-477975458%2FProperties%2F-1602585876" anchor-label="selectedAddressFlow" id="-477975458%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/selected-address-flow.html"><span>selected</span><wbr><span>Address</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-477975458%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/selected-address-flow.html">selectedAddressFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The currently-selected device address, or <code class="lang-kotlin">null</code> when nothing is selected.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1100770072%2FProperties%2F-1602585876" anchor-label="selectedNotNullFlow" id="1100770072%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/selected-not-null-flow.html"><span>selected</span><wbr><span>Not</span><wbr><span>Null</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1100770072%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/selected-not-null-flow.html">selectedNotNullFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Non-null variant of <a href="../-scanner-view-model/selected-address-flow.html">selectedAddressFlow</a> that substitutes <a href="../-n-o_-d-e-v-i-c-e_-s-e-l-e-c-t-e-d.html">NO_DEVICE_SELECTED</a> for <code class="lang-kotlin">null</code>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="332957603%2FProperties%2F-1602585876" anchor-label="showMockTransport" id="332957603%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/show-mock-transport.html"><span>show</span><wbr><span>Mock</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="332957603%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/show-mock-transport.html">showMockTransport</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Whether the mock/demo transport is currently selected.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1284047199%2FProperties%2F-1602585876" anchor-label="usbDevicesForUi" id="-1284047199%2FProperties%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/usb-devices-for-ui.html"><span>usb</span><wbr><span>Devices</span><wbr><span>For</span><wbr><span><span>Ui</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1284047199%2FProperties%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="../-scanner-view-model/usb-devices-for-ui.html">usbDevicesForUi</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../org.meshtastic.feature.connections.model/-device-list-entry/index.html">DeviceListEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="978795377%2FFunctions%2F-1602585876" anchor-label="addCloseable" id="978795377%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#383812252%2FFunctions%2F-1602585876"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="978795377%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#383812252%2FFunctions%2F-1602585876"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#1722490497%2FFunctions%2F-1602585876"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-737777812%2FFunctions%2F-1602585876" anchor-label="addRecentAddress" id="-737777812%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/add-recent-address.html"><span>add</span><wbr><span>Recent</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-737777812%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/add-recent-address.html"><span class="token function">addRecentAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists <a href="../-scanner-view-model/add-recent-address.html">address</a> in the recent-TCP list under <a href="../-scanner-view-model/add-recent-address.html">name</a>. No-op when <a href="../-scanner-view-model/add-recent-address.html">address</a> does not start with <a href="../-t-c-p_-d-e-v-i-c-e_-p-r-e-f-i-x.html">TCP_DEVICE_PREFIX</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1367198355%2FFunctions%2F-1602585876" anchor-label="changeDeviceAddress" id="-1367198355%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/change-device-address.html"><span>change</span><wbr><span>Device</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1367198355%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/change-device-address.html"><span class="token function">changeDeviceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Asynchronously tells the radio controller to connect to <a href="../-scanner-view-model/change-device-address.html">address</a>.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="280790616%2FFunctions%2F-1602585876" anchor-label="connectToManualAddress" id="280790616%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/connect-to-manual-address.html"><span>connect</span><wbr><span>To</span><wbr><span>Manual</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="280790616%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/connect-to-manual-address.html"><span class="token function">connectToManualAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fullAddress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connects to a manually-entered TCP address. Wraps the manual-entry flow with the same scan-cancel invariant as <a href="../-scanner-view-model/on-selected.html">onSelected</a>: stops discovery before connection setup so the manual connect does not race an in-progress BLE/network scan for radio resources.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1254367545%2FFunctions%2F-1602585876" anchor-label="disconnect" id="1254367545%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/disconnect.html"><span><span>disconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1254367545%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Clears the persisted device name and tells the radio controller to disconnect.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1600430906%2FFunctions%2F-1602585876" anchor-label="dismissRecovery" id="-1600430906%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/dismiss-recovery.html"><span>dismiss</span><wbr><span><span>Recovery</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1600430906%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/dismiss-recovery.html"><span class="token function">dismissRecovery</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful reconnect or re-flash). The record is re-created next time a DFU update is triggered.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102255800%2FFunctions%2F-1602585876" anchor-label="getCloseable" id="1102255800%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1102255800%2FFunctions%2F-1602585876"><span>get</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102255800%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#1102255800%2FFunctions%2F-1602585876">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="index.html#1102255800%2FFunctions%2F-1602585876"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#1102255800%2FFunctions%2F-1602585876">T</a><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="256084834%2FFunctions%2F-1602585876" anchor-label="onSelected" id="256084834%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/on-selected.html"><span>on</span><wbr><span><span>Selected</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="256084834%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/on-selected.html"><span class="token function">onSelected</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">entry<span class="token operator">: </span><a href="../../org.meshtastic.feature.connections.model/-device-list-entry/index.html">DeviceListEntry</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Called by the UI when a device has been tapped. BLE and USB entries may still need bonding/permission — the concrete return value tells the caller whether the connection was initiated immediately.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-358453832%2FFunctions%2F-1602585876" anchor-label="persistNetworkAutoScanIntent" id="-358453832%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/persist-network-auto-scan-intent.html"><span>persist</span><wbr><span>Network</span><wbr><span>Auto</span><wbr><span>Scan</span><wbr><span><span>Intent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-358453832%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/persist-network-auto-scan-intent.html"><span class="token function">persistNetworkAutoScanIntent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Persists the user's intent to auto-scan the network on next screen entry without flipping the active scan flag. Used by the Connections screen when it must defer the actual scan start until after the system permission grant dialog resolves. When <a href="../-scanner-view-model/persist-network-auto-scan-intent.html">enabled</a> is <code class="lang-kotlin">true</code>, also clears <a href="../-scanner-view-model/ble-auto-scan.html">bleAutoScan</a> so persisted state mirrors the runtime mutual-exclusion invariant (at most one of <a href="../-scanner-view-model/ble-auto-scan.html">bleAutoScan</a> / <a href="../-scanner-view-model/network-auto-scan.html">networkAutoScan</a> may be true).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-326679500%2FFunctions%2F-1602585876" anchor-label="removeRecentAddress" id="-326679500%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/remove-recent-address.html"><span>remove</span><wbr><span>Recent</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-326679500%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/remove-recent-address.html"><span class="token function">removeRecentAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Removes <a href="../-scanner-view-model/remove-recent-address.html">address</a> from the recent-TCP list.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="841264899%2FFunctions%2F-1602585876" anchor-label="selectTransport" id="841264899%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/select-transport.html"><span>select</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="841264899%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/select-transport.html"><span class="token function">selectTransport</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">type<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Selects one Connections transport pane and stops scans that cannot belong to that pane.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1172758928%2FFunctions%2F-1602585876" anchor-label="startBleAutoScan" id="-1172758928%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/start-ble-auto-scan.html"><span>start</span><wbr><span>Ble</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1172758928%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/start-ble-auto-scan.html"><span class="token function">startBleAutoScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts BLE scanning for screen-entry auto-scan only when no device is already selected. Manual scan toggles call <a href="../-scanner-view-model/start-ble-scan.html">startBleScan</a> directly so users can still discover/switch devices while connected.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="337244511%2FFunctions%2F-1602585876" anchor-label="startBleScan" id="337244511%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/start-ble-scan.html"><span>start</span><wbr><span>Ble</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="337244511%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/start-ble-scan.html"><span class="token function">startBleScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts BLE scanning. Enforces mutual exclusion (cancels any active network scan first). No-op if already scanning or if <a href="../../../../feature/connections/org.meshtastic.feature.connections/-scanner-view-model/--root--.html">bleScanner</a> is null.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1214526723%2FFunctions%2F-1602585876" anchor-label="startNetworkAutoScan" id="-1214526723%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/start-network-auto-scan.html"><span>start</span><wbr><span>Network</span><wbr><span>Auto</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1214526723%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/start-network-auto-scan.html"><span class="token function">startNetworkAutoScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts NSD scanning for screen-entry auto-scan only when the Network pane is active.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="534441068%2FFunctions%2F-1602585876" anchor-label="startNetworkScan" id="534441068%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/start-network-scan.html"><span>start</span><wbr><span>Network</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="534441068%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/start-network-scan.html"><span class="token function">startNetworkScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts NSD network scanning. Enforces the same mutual-exclusion invariant as <a href="../-scanner-view-model/start-ble-scan.html">startBleScan</a>; starting Network cancels any active BLE scan first.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1017810737%2FFunctions%2F-1602585876" anchor-label="stopBleScan" id="-1017810737%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/stop-ble-scan.html"><span>stop</span><wbr><span>Ble</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1017810737%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/stop-ble-scan.html"><span class="token function">stopBleScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels the active BLE scan and resets the scanning flag. Idempotent.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1117178916%2FFunctions%2F-1602585876" anchor-label="stopNetworkScan" id="-1117178916%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/stop-network-scan.html"><span>stop</span><wbr><span>Network</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1117178916%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/stop-network-scan.html"><span class="token function">stopNetworkScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Cancels the active network scan and resets the scanning flag. Idempotent.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="102031905%2FFunctions%2F-1602585876" anchor-label="toggleBleScan" id="102031905%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/toggle-ble-scan.html"><span>toggle</span><wbr><span>Ble</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="102031905%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/toggle-ble-scan.html"><span class="token function">toggleBleScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Toggles BLE scanning. Persists the auto-scan preference only when the scan actually activates, and clears the opposite <a href="../-scanner-view-model/network-auto-scan.html">networkAutoScan</a> preference to keep persisted state consistent with the runtime mutual-exclusion invariant.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-980702162%2FFunctions%2F-1602585876" anchor-label="toggleNetworkScan" id="-980702162%2FFunctions%2F-1602585876" data-filterable-set=":feature:connections/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-scanner-view-model/toggle-network-scan.html"><span>toggle</span><wbr><span>Network</span><wbr><span><span>Scan</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-980702162%2FFunctions%2F-1602585876"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:connections/jvmMain" data-filterable-set=":feature:connections/jvmMain" data-active="" data-toggle=":feature:connections/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-scanner-view-model/toggle-network-scan.html"><span class="token function">toggleNetworkScan</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Toggles network scanning. Persists the auto-scan preference only when the scan actually activates, and clears the opposite <a href="../-scanner-view-model/ble-auto-scan.html">bleAutoScan</a> preference to keep persisted state consistent with the runtime mutual-exclusion invariant.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

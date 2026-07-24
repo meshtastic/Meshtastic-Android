@@ -1,0 +1,325 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ChartStyling</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:node/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:node/commonMain" data-filter=":feature:node/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-node::org.meshtastic.feature.node.metrics/ChartStyling///PointingToDeclaration//1906246353">
+  <div class="breadcrumbs"><a href="../../index.html">feature-node</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.node.metrics</a><span class="delimiter">/</span><span class="current">ChartStyling</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Chart</span><wbr><span><span>Styling</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">ChartStyling</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/ChartStyling.kt#L64">source</a>)</span></span></div><p class="paragraph">Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico charts.</p><p class="paragraph"><strong>Design principles</strong> (per <a href="https://github.com/meshtastic/design/issues/53">design#53</a>):</p><ul><li><p class="paragraph">Default to thin lines <strong>without</strong> point markers to avoid clutter on dense timeseries.</p></li><li><p class="paragraph">Show a single dot only at the marker/cursor position (handled by <a href="remember-marker.html">rememberMarker</a>).</p></li><li><p class="paragraph">Use <code class="lang-kotlin">Interpolator.cubic()</code> for smooth monotone curves that won't overshoot between sparse points.</p></li><li><p class="paragraph">Reserve bold lines for the single most-important series; use subtle/gradient fills for secondary data.</p></li></ul></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1004618039%2FProperties%2F1906246353" anchor-label="MEDIUM_LINE_WIDTH_DP" id="-1004618039%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-d-i-u-m_-l-i-n-e_-w-i-d-t-h_-d-p.html"><span>MEDIUM_</span><wbr><span>LINE_</span><wbr><span>WIDTH_</span><wbr><span>DP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004618039%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-d-i-u-m_-l-i-n-e_-w-i-d-t-h_-d-p.html">MEDIUM_LINE_WIDTH_DP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">2.0f</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-192624099%2FProperties%2F1906246353" anchor-label="THICK_LINE_WIDTH_DP" id="-192624099%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-h-i-c-k_-l-i-n-e_-w-i-d-t-h_-d-p.html"><span>THICK_</span><wbr><span>LINE_</span><wbr><span>WIDTH_</span><wbr><span>DP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-192624099%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-h-i-c-k_-l-i-n-e_-w-i-d-t-h_-d-p.html">THICK_LINE_WIDTH_DP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">2.5f</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1773633627%2FProperties%2F1906246353" anchor-label="THIN_LINE_WIDTH_DP" id="-1773633627%2FProperties%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-h-i-n_-l-i-n-e_-w-i-d-t-h_-d-p.html"><span>THIN_</span><wbr><span>LINE_</span><wbr><span>WIDTH_</span><wbr><span>DP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1773633627%2FProperties%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-h-i-n_-l-i-n-e_-w-i-d-t-h_-d-p.html">THIN_LINE_WIDTH_DP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">1.5f</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1667047483%2FFunctions%2F1906246353" anchor-label="createBoldLine" id="-1667047483%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-bold-line.html"><span>create</span><wbr><span>Bold</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1667047483%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="create-bold-line.html"><span class="token function">createBoldLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lineColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">interpolator<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Interpolator///PointingToDeclaration/">LineCartesianLayer.Interpolator</span><span class="token operator"> = </span>LineCartesianLayer.Interpolator.cubic()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Line///PointingToDeclaration/">LineCartesianLayer.Line</span></div><div class="brief "><p class="paragraph">Creates a bold line suitable for highlighting the primary metric in a multi-series chart.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="714052540%2FFunctions%2F1906246353" anchor-label="createColoredMarkerValueFormatter" id="714052540%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-colored-marker-value-formatter.html"><span>create</span><wbr><span>Colored</span><wbr><span>Marker</span><wbr><span>Value</span><wbr><span><span>Formatter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="714052540%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="create-colored-marker-value-formatter.html"><span class="token function">createColoredMarkerValueFormatter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">format<span class="token operator">: </span><span class="token punctuation">(</span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span>color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/DefaultCartesianMarker.ValueFormatter///PointingToDeclaration/">DefaultCartesianMarker.ValueFormatter</span></div><div class="brief "><p class="paragraph">Creates a <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/DefaultCartesianMarker.ValueFormatter///PointingToDeclaration/">DefaultCartesianMarker.ValueFormatter</span> that colors the text to match the series color.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-999265639%2FFunctions%2F1906246353" anchor-label="createDashedLine" id="-999265639%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-dashed-line.html"><span>create</span><wbr><span>Dashed</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-999265639%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="create-dashed-line.html"><span class="token function">createDashedLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lineColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">interpolator<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Interpolator///PointingToDeclaration/">LineCartesianLayer.Interpolator</span><span class="token operator"> = </span>LineCartesianLayer.Interpolator.cubic()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Line///PointingToDeclaration/">LineCartesianLayer.Line</span></div><div class="brief "><p class="paragraph">Creates a dashed secondary line. Useful for distinguishing two metrics that share the same axis without relying on colour alone.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-812509922%2FFunctions%2F1906246353" anchor-label="createGradientLine" id="-812509922%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-gradient-line.html"><span>create</span><wbr><span>Gradient</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-812509922%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="create-gradient-line.html"><span class="token function">createGradientLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lineColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">lineWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span>MEDIUM_LINE_WIDTH_DP<span class="token punctuation">, </span></span><span class="parameter ">interpolator<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Interpolator///PointingToDeclaration/">LineCartesianLayer.Interpolator</span><span class="token operator"> = </span>LineCartesianLayer.Interpolator.cubic()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Line///PointingToDeclaration/">LineCartesianLayer.Line</span></div><div class="brief "><p class="paragraph">Creates a line with a gradient area fill effect. Ideal for emphasising a single series or showing magnitude. The gradient goes from the line color at ~30% opacity to near-transparent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="784140801%2FFunctions%2F1906246353" anchor-label="createStyledLine" id="784140801%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-styled-line.html"><span>create</span><wbr><span>Styled</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="784140801%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="create-styled-line.html"><span class="token function">createStyledLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lineColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">lineWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span>MEDIUM_LINE_WIDTH_DP<span class="token punctuation">, </span></span><span class="parameter ">interpolator<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Interpolator///PointingToDeclaration/">LineCartesianLayer.Interpolator</span><span class="token operator"> = </span>LineCartesianLayer.Interpolator.cubic()</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Line///PointingToDeclaration/">LineCartesianLayer.Line</span></div><div class="brief "><p class="paragraph">Creates a clean timeseries line — thin, smooth, with <strong>no</strong> point markers. This is the default style recommended by Oscar's UX guidance: "thin lines, and maybe a dot where the cursor is."</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="371034553%2FFunctions%2F1906246353" anchor-label="createSubtleLine" id="371034553%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-subtle-line.html"><span>create</span><wbr><span>Subtle</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="371034553%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="create-subtle-line.html"><span class="token function">createSubtleLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lineColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.layer/LineCartesianLayer.Line///PointingToDeclaration/">LineCartesianLayer.Line</span></div><div class="brief "><p class="paragraph">Creates a subtle line suitable for secondary metrics that should not dominate the chart.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1246242442%2FFunctions%2F1906246353" anchor-label="createThemedColor" id="1246242442%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-themed-color.html"><span>create</span><wbr><span>Themed</span><wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1246242442%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="create-themed-color.html"><span class="token function">createThemedColor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseColor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">alpha<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">1.0f</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a></div><div class="brief "><p class="paragraph">Gets Material 3 theme-aware colors with opacity. Useful for creating color variants while respecting the current theme.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1005171340%2FFunctions%2F1906246353" anchor-label="rememberAxisLabel" id="1005171340%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-axis-label.html"><span>remember</span><wbr><span>Axis</span><wbr><span><span>Label</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1005171340%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="remember-axis-label.html"><span class="token function">rememberAxisLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token operator"> = </span>MaterialTheme.colorScheme.onSurfaceVariant</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.common.component/TextComponent///PointingToDeclaration/">TextComponent</span></div><div class="brief "><p class="paragraph">Creates and remembers a <span data-unresolved-link="com.patrykandpatrick.vico.compose.common.component/TextComponent///PointingToDeclaration/">com.patrykandpatrick.vico.compose.common.component.TextComponent</span> styled for axis labels.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2100723830%2FFunctions%2F1906246353" anchor-label="rememberMarker" id="-2100723830%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-marker.html"><span>remember</span><wbr><span><span>Marker</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2100723830%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="remember-marker.html"><span class="token function">rememberMarker</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">valueFormatter<span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/DefaultCartesianMarker.ValueFormatter///PointingToDeclaration/">DefaultCartesianMarker.ValueFormatter</span><span class="token operator"> = </span>DefaultCartesianMarker.ValueFormatter.default(colorCode = true)<span class="token punctuation">, </span></span><span class="parameter ">showIndicator<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/CartesianMarker///PointingToDeclaration/">CartesianMarker</span></div><div class="brief "><p class="paragraph">Creates and remembers a default <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.marker/CartesianMarker///PointingToDeclaration/">CartesianMarker</span> styled for the Meshtastic theme.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1446515805%2FFunctions%2F1906246353" anchor-label="rememberThresholdLine" id="-1446515805%2FFunctions%2F1906246353" data-filterable-set=":feature:node/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:node/commonMain" data-filterable-set=":feature:node/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remember-threshold-line.html"><span>remember</span><wbr><span>Threshold</span><wbr><span><span>Line</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1446515805%2FFunctions%2F1906246353"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:node/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="remember-threshold-line.html"><span class="token function">rememberThresholdLine</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">y<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">color<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Color.html">Color</a><span class="token punctuation">, </span></span><span class="parameter ">label<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.decoration/Decoration///PointingToDeclaration/">Decoration</span></div><div class="brief "><p class="paragraph">Creates a <span data-unresolved-link="com.patrykandpatrick.vico.compose.cartesian.decoration/HorizontalLine///PointingToDeclaration/">HorizontalLine</span> decoration for a reference threshold (e.g. battery low, pressure normal).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

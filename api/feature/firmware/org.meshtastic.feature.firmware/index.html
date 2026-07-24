@@ -1,0 +1,513 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.feature.firmware</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/androidMain" data-filter=":feature:firmware/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/commonMain" data-filter=":feature:firmware/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/jvmMain" data-filter=":feature:firmware/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware////PointingToDeclaration//1892259434">
+  <div class="breadcrumbs"><a href="../index.html">feature-firmware</a><span class="delimiter">/</span><span class="current">org.meshtastic.feature.firmware</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1466558880%2FClasslikes%2F-153443824" anchor-label="AndroidFirmwareFileHandler" id="1466558880%2FClasslikes%2F-153443824" data-filterable-set=":feature:firmware/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/androidMain" data-filterable-set=":feature:firmware/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-android-firmware-file-handler/index.html"><span>Android</span><wbr><span>Firmware</span><wbr><span>File</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1466558880%2FClasslikes%2F-153443824"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/androidMain" data-filterable-set=":feature:firmware/androidMain" data-active="" data-toggle=":feature:firmware/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-firmware-file-handler/index.html">AndroidFirmwareFileHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">client<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span></span></span><span class="token punctuation">)</span> : <a href="-firmware-file-handler/index.html">FirmwareFileHandler</a></div><div class="brief "><p class="paragraph">Helper class to handle file operations related to firmware updates, such as downloading, copying from URI, and extracting specific files from Zip archives.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-256580789%2FClasslikes%2F-153443824" anchor-label="AndroidFirmwareUsbManager" id="-256580789%2FClasslikes%2F-153443824" data-filterable-set=":feature:firmware/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/androidMain" data-filterable-set=":feature:firmware/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-android-firmware-usb-manager/index.html"><span>Android</span><wbr><span>Firmware</span><wbr><span>Usb</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-256580789%2FClasslikes%2F-153443824"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/androidMain" data-filterable-set=":feature:firmware/androidMain" data-active="" data-toggle=":feature:firmware/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-firmware-usb-manager/index.html">AndroidFirmwareUsbManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></span></span><span class="token punctuation">)</span> : <a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a></div><div class="brief "><p class="paragraph">Manages USB-related interactions for firmware updates.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1664621828%2FClasslikes%2F-803617142" anchor-label="DefaultFirmwareUpdateManager" id="-1664621828%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-default-firmware-update-manager/index.html"><span>Default</span><wbr><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1664621828%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-default-firmware-update-manager/index.html">DefaultFirmwareUpdateManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">secureDfuHandler<span class="token operator">: </span><a href="../org.meshtastic.feature.firmware.ota.dfu/-secure-dfu-handler/index.html">SecureDfuHandler</a><span class="token punctuation">, </span></span><span class="parameter ">usbUpdateHandler<span class="token operator">: </span><a href="-usb-update-handler/index.html">UsbUpdateHandler</a><span class="token punctuation">, </span></span><span class="parameter ">esp32OtaUpdateHandler<span class="token operator">: </span><a href="../org.meshtastic.feature.firmware.ota/-esp32-ota-update-handler/index.html">Esp32OtaUpdateHandler</a></span></span><span class="token punctuation">)</span> : <a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a></div><div class="brief "><p class="paragraph">Default <a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a> that routes to the correct handler based on the current connection type and device architecture. All handlers are KMP-ready and work on Android, Desktop, and (future) iOS.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1486036862%2FClasslikes%2F809578796" anchor-label="DesktopFirmwareUsbManager" id="1486036862%2FClasslikes%2F809578796" data-filterable-set=":feature:firmware/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-desktop-firmware-usb-manager/index.html"><span>Desktop</span><wbr><span>Firmware</span><wbr><span>Usb</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1486036862%2FClasslikes%2F809578796"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain" data-active="" data-toggle=":feature:firmware/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-desktop-firmware-usb-manager/index.html">DesktopFirmwareUsbManager</a> : <a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1146954921%2FClasslikes%2F-803617142" anchor-label="FirmwareArtifact" id="-1146954921%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-artifact/index.html"><span>Firmware</span><wbr><span><span>Artifact</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1146954921%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-firmware-artifact/index.html">FirmwareArtifact</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uri<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-common-uri/index.html">CommonUri</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>fileName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>isTemporary<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Platform-neutral handle for a firmware file or extracted artifact.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="900766219%2FClasslikes%2F-803617142" anchor-label="FirmwareFileHandler" id="900766219%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-file-handler/index.html"><span>Firmware</span><wbr><span>File</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="900766219%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a></div><div class="brief "><p class="paragraph">Abstraction over platform file and network I/O required by the firmware update pipeline. Implementations live in <code class="lang-kotlin">androidMain</code> and <code class="lang-kotlin">jvmMain</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1147741059%2FClasslikes%2F-803617142" anchor-label="FirmwareRetriever" id="1147741059%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-retriever/index.html"><span>Firmware</span><wbr><span><span>Retriever</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1147741059%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-retriever/index.html">FirmwareRetriever</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileHandler<span class="token operator">: </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Retrieves firmware files, either by direct download or by extracting from a release asset zip.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="509101317%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateActions" id="509101317%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-actions/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="509101317%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-firmware-update-actions/index.html">FirmwareUpdateActions</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>onReleaseTypeSelect<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../core/database/org.meshtastic.core.database.entity/-firmware-release-type/index.html">FirmwareReleaseType</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onStartUpdate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onPickFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onSaveFile<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onConfirmLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDismissLocalFile<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onRetry<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onCancel<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDone<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>onDismissBootloaderWarning<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="51836760%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateHandler" id="51836760%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-handler/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="51836760%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-update-handler/index.html">FirmwareUpdateHandler</a></div><div class="brief "><p class="paragraph">Common interface for all firmware update handlers (BLE DFU, ESP32 OTA, USB).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2080597077%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateManager" id="2080597077%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-manager/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2080597077%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a></div><div class="brief "><p class="paragraph">Routes firmware update requests to the appropriate platform-specific handler based on the active connection type (BLE, WiFi/TCP, or USB) and device architecture.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="177936671%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateMethod" id="177936671%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-method/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Method</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="177936671%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-firmware-update-method/index.html">FirmwareUpdateMethod</a></div><div class="brief "><p class="paragraph">The transport mechanism used to deliver firmware to the device, determined by the active radio connection.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="510054449%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateState" id="510054449%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-state/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="510054449%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-firmware-update-state/index.html">FirmwareUpdateState</a></div><div class="brief "><p class="paragraph">State machine for the firmware update flow, observed by <a href="-firmware-update-screen.html">FirmwareUpdateScreen</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="905243678%2FClasslikes%2F-803617142" anchor-label="FirmwareUpdateViewModel" id="905243678%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-view-model/index.html"><span>Firmware</span><wbr><span>Update</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="905243678%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-firmware-update-view-model/index.html">FirmwareUpdateViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">firmwareReleaseRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a><span class="token punctuation">, </span></span><span class="parameter ">deviceHardwareRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">radioPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">bootloaderWarningDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-bootloader-warning-data-source/index.html">BootloaderWarningDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareRecoveryDataSource<span class="token operator">: </span><a href="../../../core/datastore/org.meshtastic.core.datastore/-firmware-recovery-data-source/index.html">FirmwareRecoveryDataSource</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateManager<span class="token operator">: </span><a href="-firmware-update-manager/index.html">FirmwareUpdateManager</a><span class="token punctuation">, </span></span><span class="parameter ">usbManager<span class="token operator">: </span><a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a><span class="token punctuation">, </span></span><span class="parameter ">fileHandler<span class="token operator">: </span><a href="-firmware-file-handler/index.html">FirmwareFileHandler</a><span class="token punctuation">, </span></span><span class="parameter ">applicationScope<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.di/-application-coroutine-scope/index.html">ApplicationCoroutineScope</a><span class="token punctuation">, </span></span><span class="parameter ">hiddenFeaturesUnlock<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.state/-hidden-features-unlock/index.html">HiddenFeaturesUnlock</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a></div><div class="brief "><p class="paragraph">ViewModel driving the firmware update screen. Coordinates release checking, file retrieval, transport-specific update execution, and post-update device verification.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="972093824%2FClasslikes%2F-803617142" anchor-label="FirmwareUsbManager" id="972093824%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-usb-manager/index.html"><span>Firmware</span><wbr><span>Usb</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="972093824%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-firmware-usb-manager/index.html">FirmwareUsbManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-972620206%2FClasslikes%2F809578796" anchor-label="JvmFirmwareFileHandler" id="-972620206%2FClasslikes%2F809578796" data-filterable-set=":feature:firmware/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-jvm-firmware-file-handler/index.html"><span>Jvm</span><wbr><span>Firmware</span><wbr><span>File</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-972620206%2FClasslikes%2F809578796"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain" data-active="" data-toggle=":feature:firmware/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-jvm-firmware-file-handler/index.html">JvmFirmwareFileHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">client<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span></span></span><span class="token punctuation">)</span> : <a href="-firmware-file-handler/index.html">FirmwareFileHandler</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1035151033%2FClasslikes%2F-803617142" anchor-label="PendingLocalFirmwareFile" id="1035151033%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pending-local-firmware-file/index.html"><span>Pending</span><wbr><span>Local</span><wbr><span>Firmware</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1035151033%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-pending-local-firmware-file/index.html">PendingLocalFirmwareFile</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uri<span class="token operator">: </span><a href="../../../core/common/org.meshtastic.core.common.util/-common-uri/index.html">CommonUri</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>fileName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deviceName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>platformioTarget<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>updateMethod<span class="token operator">: </span><a href="-firmware-update-method/index.html">FirmwareUpdateMethod</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="44162042%2FClasslikes%2F-803617142" anchor-label="ProgressState" id="44162042%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-progress-state/index.html"><span>Progress</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="44162042%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-progress-state/index.html">ProgressState</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>message<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.core.resources/UiText///PointingToDeclaration/">UiText</span><span class="token operator"> = </span>UiText.DynamicString("")<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>progress<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.0f</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>details<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hint<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.core.resources/UiText///PointingToDeclaration/">UiText</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents the progress of a long-running firmware update task.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1982808345%2FClasslikes%2F-803617142" anchor-label="UsbUpdateHandler" id="-1982808345%2FClasslikes%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-usb-update-handler/index.html"><span>Usb</span><wbr><span>Update</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1982808345%2FClasslikes%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-usb-update-handler/index.html">UsbUpdateHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">firmwareRetriever<span class="token operator">: </span><a href="-firmware-retriever/index.html">FirmwareRetriever</a><span class="token punctuation">, </span></span><span class="parameter ">radioController<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a></span></span><span class="token punctuation">)</span> : <a href="-firmware-update-handler/index.html">FirmwareUpdateHandler</a></div><div class="brief "><p class="paragraph">Handles firmware updates via USB Mass Storage (UF2).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1485130378%2FFunctions%2F-803617142" anchor-label="CheckingStatePreview" id="1485130378%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-checking-state-preview.html"><span>Checking</span><wbr><span>State</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1485130378%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-checking-state-preview.html"><span class="token function">CheckingStatePreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="743850106%2FFunctions%2F-803617142" anchor-label="DisclaimerDialogPreview" id="743850106%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-disclaimer-dialog-preview.html"><span>Disclaimer</span><wbr><span>Dialog</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="743850106%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-disclaimer-dialog-preview.html"><span class="token function">DisclaimerDialogPreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-463449440%2FFunctions%2F-803617142" anchor-label="ErrorStatePreview" id="-463449440%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-error-state-preview.html"><span>Error</span><wbr><span>State</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-463449440%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-error-state-preview.html"><span class="token function">ErrorStatePreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-231672955%2FFunctions%2F-803617142" anchor-label="FirmwareUpdateScreen" id="-231672955%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-firmware-update-screen.html"><span>Firmware</span><wbr><span>Update</span><wbr><span><span>Screen</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-231672955%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-firmware-update-screen.html"><span class="token function">FirmwareUpdateScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">onNavigateUp<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">viewModel<span class="token operator">: </span><a href="-firmware-update-view-model/index.html">FirmwareUpdateViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="419534085%2FFunctions%2F-803617142" anchor-label="SuccessStatePreview" id="419534085%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-success-state-preview.html"><span>Success</span><wbr><span>State</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="419534085%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-success-state-preview.html"><span class="token function">SuccessStatePreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2123167873%2FFunctions%2F-803617142" anchor-label="VerifyingStatePreview" id="-2123167873%2FFunctions%2F-803617142" data-filterable-set=":feature:firmware/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:firmware/commonMain" data-filterable-set=":feature:firmware/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-verifying-state-preview.html"><span>Verifying</span><wbr><span>State</span><wbr><span><span>Preview</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2123167873%2FFunctions%2F-803617142"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-verifying-state-preview.html"><span class="token function">VerifyingStatePreview</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

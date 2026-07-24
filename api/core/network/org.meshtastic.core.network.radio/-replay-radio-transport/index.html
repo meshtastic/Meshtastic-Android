@@ -1,0 +1,243 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ReplayRadioTransport</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:network/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:network/commonMain" data-filter=":core:network/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-network::org.meshtastic.core.network.radio/ReplayRadioTransport///PointingToDeclaration//-1825752930">
+  <div class="breadcrumbs"><a href="../../index.html">core-network</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.network.radio</a><span class="delimiter">/</span><span class="current">ReplayRadioTransport</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Replay</span><wbr><span>Radio</span><wbr><span><span>Transport</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ReplayRadioTransport</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-transport-callback/index.html">RadioTransportCallback</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">frames<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter ">packetDelayMs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span>DEFAULT_PACKET_DELAY_MS</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-transport/index.html">RadioTransport</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/commonMain/kotlin/org/meshtastic/core/network/radio/ReplayRadioTransport.kt#L88">source</a>)</span></span></div><p class="paragraph">A <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-transport/index.html">RadioTransport</a> that replays a pre-captured stream of <code class="lang-kotlin">FromRadio</code> frames entirely on-device — no network and no paired radio. It is the deterministic, self-contained traffic source behind the "Demo Mode (Replay)" connection entry, used to drive realistic ~200-node mesh traffic into the app for Macrobenchmark / Baseline Profile journeys and populated-UI (node list / map / message) tests.</p><h3 class="">What it exercises</h3><p class="paragraph">Frames are handed verbatim to <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-transport-callback/handle-from-radio.html">RadioTransportCallback.handleFromRadio</a> — the <i>same</i> ingestion entry a live BLE/TCP/Serial radio uses — so everything downstream (protobuf decode, the want_config state machine, node-DB and packet handling, the UI) runs exactly as in production. The only things it skips are the physical link and the stream framing layer: it deals in already-deframed <code class="lang-kotlin">FromRadio</code> payloads.</p><h3 class="">Asset format (<code class="lang-kotlin">*.fromradio</code>)</h3><p class="paragraph">A flat, three-section container. <strong>Every integer is a big-endian (network-order) unsigned 32-bit value:</strong></p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">┌─ Stage-1: config section ────────────────────────────────────────────┐<br>│  u32  C                          number of config frames              │<br>│  C ×  ( u32 len, len bytes )     each blob = one serialized FromRadio │<br>├─ Stage-2: node section ──────────────────────────────────────────────┤<br>│  u32  N                          number of node_info frames           │<br>│  N ×  ( u32 len, len bytes )     each blob = one serialized FromRadio │<br>├─ packet section ─────────────────────────────────────────────────────┤<br>│       ( u32 len, len bytes ) *   repeated until end-of-buffer         │<br>└──────────────────────────────────────────────────────────────────────┘</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">Each <code class="lang-kotlin">len</code>-prefixed blob is a single <code class="lang-kotlin">FromRadio</code> message as produced by Wire's <code class="lang-kotlin">encode()</code>. By section:</p><ul><li><p class="paragraph"><strong>config</strong> — <code class="lang-kotlin">my_info</code>, <code class="lang-kotlin">metadata</code>, <code class="lang-kotlin">config.*</code>, <code class="lang-kotlin">moduleConfig.*</code>, and <code class="lang-kotlin">channel</code> frames: everything the app needs to come up, but <strong>no</strong> <code class="lang-kotlin">node_info</code> (the app ignores NodeInfo during Stage 1).</p></li><li><p class="paragraph"><strong>node</strong> — the connected node first, then the captured node DB (one <code class="lang-kotlin">node_info</code> per frame).</p></li><li><p class="paragraph"><strong>packet</strong> — the captured <code class="lang-kotlin">MeshPacket</code> traffic, in capture order; the section has no count and runs to EOF.</p></li></ul><p class="paragraph"><code class="lang-kotlin">config_complete_id</code> is deliberately <strong>omitted</strong> from the file — this transport injects it per phase (below) with the app's own nonce, exactly as real firmware echoes the request.</p><p class="paragraph">The file is produced by the burningmesh-replay tool (<code class="lang-kotlin">replay_server.py --export PATH</code>, which also sanitizes capture PII). <strong>This class is the authoritative reader of the format; keep the exporter and </strong><strong>ReplayRadioTransportTest</strong><strong>'s </strong><code class="strong lang-kotlin"><strong>asset()</strong></code><strong> encoder in sync with the layout above.</strong></p><h3 class="">Handshake &amp; runtime behaviour</h3><p class="paragraph">Driven by the app's two-phase want_config handshake (<a href="../../../../core/repository/org.meshtastic.core.repository/-handshake-constants/index.html">HandshakeConstants</a>):</p><ul><li><p class="paragraph"><strong>Stage 1</strong> (<a href="../../../../core/repository/org.meshtastic.core.repository/-handshake-constants/-c-o-n-f-i-g_-n-o-n-c-e.html">HandshakeConstants.CONFIG_NONCE</a>) → emit the config section, then <code class="lang-kotlin">config_complete_id</code>.</p></li><li><p class="paragraph"><strong>Stage 2</strong> (<a href="../../../../core/repository/org.meshtastic.core.repository/-handshake-constants/-n-o-d-e_-i-n-f-o_-n-o-n-c-e.html">HandshakeConstants.NODE_INFO_NONCE</a>) → emit the node section, then <code class="lang-kotlin">config_complete_id</code>, then start streaming the packet section <strong>once</strong> (a re-issued Stage-2 request does not restart it).</p></li></ul><p class="paragraph">The packet stream is paced at <a href="../../../../core/network/org.meshtastic.core.network.radio/-replay-radio-transport/--root--.html">packetDelayMs</a> and does not loop; it stops when <a href="../../../../core/network/org.meshtastic.core.network.radio/-replay-radio-transport/--root--.html">scope</a> is cancelled. Outbound <span data-unresolved-link="org.meshtastic.proto/ToRadio///PointingToDeclaration/">ToRadio</span> traffic other than want_config (heartbeats, app packets) is ignored — the replay is strictly read-only, and frames are held in memory, so <a href="close.html">close</a> has nothing to release.</p><h3 class="">Robustness</h3><p class="paragraph">The asset is parsed up front and every length is validated against the bytes actually remaining, so a truncated or corrupt file fails fast with <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a> rather than a cryptic buffer underflow or an out-of-memory allocation. <a href="handle-send-to-radio.html">handleSendToRadio</a> likewise tolerates any inbound bytes (undecodable <span data-unresolved-link="org.meshtastic.proto/ToRadio///PointingToDeclaration/">ToRadio</span> is ignored, not thrown). The bundled asset is trusted, but this same reader is a convenient injection point for malformed-input / fuzz testing of the ingestion path — see <code class="lang-kotlin">ReplayFuzz</code> in the test sources.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="90555900%2FConstructors%2F-1825752930" anchor-label="ReplayRadioTransport" id="90555900%2FConstructors%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-replay-radio-transport.html"><span>Replay</span><wbr><span>Radio</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="90555900%2FConstructors%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-transport-callback/index.html">RadioTransportCallback</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">, </span></span><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">frames<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter ">packetDelayMs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span>DEFAULT_PACKET_DELAY_MS</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1639935030%2FClasslikes%2F-1825752930" anchor-label="Companion" id="-1639935030%2FClasslikes%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1639935030%2FClasslikes%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-899106161%2FProperties%2F-1825752930" anchor-label="address" id="-899106161%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="address.html"><span><span>address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-899106161%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="address.html">address</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1430036853%2FFunctions%2F-1825752930" anchor-label="close" id="-1430036853%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1430036853%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-772210097%2FFunctions%2F-1825752930" anchor-label="handleSendToRadio" id="-772210097%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-send-to-radio.html"><span>handle</span><wbr><span>Send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772210097%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="handle-send-to-radio.html"><span class="token function">handleSendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1994555535%2FFunctions%2F-1825752930" anchor-label="keepAlive" id="-1994555535%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-stream-transport/index.html#-1994555535%2FFunctions%2F-1825752930"><span>keep</span><wbr><span><span>Alive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1994555535%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-stream-transport/index.html#-1994555535%2FFunctions%2F-1825752930"><span class="token function">keepAlive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1224105119%2FFunctions%2F-1825752930" anchor-label="start" id="-1224105119%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1224105119%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

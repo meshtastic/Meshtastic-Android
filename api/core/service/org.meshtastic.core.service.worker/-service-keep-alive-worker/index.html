@@ -1,0 +1,612 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ServiceKeepAliveWorker</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:service/androidMain">android</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:service/androidMain" data-filter=":core:service/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-service::org.meshtastic.core.service.worker/ServiceKeepAliveWorker///PointingToDeclaration//1455702677">
+  <div class="breadcrumbs"><a href="../../index.html">core-service</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.service.worker</a><span class="delimiter">/</span><span class="current">ServiceKeepAliveWorker</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Service</span><wbr><span>Keep</span><wbr><span>Alive</span><wbr><span><span>Worker</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ServiceKeepAliveWorker</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">appContext<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">workerParams<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerParameters.html">WorkerParameters</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/work/CoroutineWorker.html">CoroutineWorker</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/androidMain/kotlin/org/meshtastic/core/service/worker/ServiceKeepAliveWorker.kt#L41">source</a>)</span></span></div><p class="paragraph">A worker whose sole purpose is to start the MeshService from the background. This is used as a fallback when <code class="lang-kotlin">startForegroundService</code> is blocked by Android 14+ restrictions. It runs as an Expedited worker to gain temporary foreground start privileges.</p></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="234370960%2FConstructors%2F1455702677" anchor-label="ServiceKeepAliveWorker" id="234370960%2FConstructors%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-service-keep-alive-worker.html"><span>Service</span><wbr><span>Keep</span><wbr><span>Alive</span><wbr><span><span>Worker</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="234370960%2FConstructors%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">appContext<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">workerParams<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerParameters.html">WorkerParameters</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-327014297%2FProperties%2F1455702677" anchor-label="applicationContext" id="-327014297%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-327014297%2FProperties%2F1455702677"><span>application</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-327014297%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-327014297%2FProperties%2F1455702677">applicationContext</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1655026885%2FProperties%2F1455702677" anchor-label="backgroundExecutor" id="1655026885%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1655026885%2FProperties%2F1455702677"><span>background</span><wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1655026885%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#1655026885%2FProperties%2F1455702677">backgroundExecutor</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/java/util/concurrent/Executor.html">Executor</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1269180052%2FProperties%2F1455702677" anchor-label="coroutineContext" id="1269180052%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1269180052%2FProperties%2F1455702677"><span>coroutine</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1269180052%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#1269180052%2FProperties%2F1455702677"><strike>coroutineContext</strike></a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineDispatcher///PointingToDeclaration/">CoroutineDispatcher</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2136178756%2FProperties%2F1455702677" anchor-label="foregroundInfoAsync" id="2136178756%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2136178756%2FProperties%2F1455702677"><span>foreground</span><wbr><span>Info</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136178756%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#2136178756%2FProperties%2F1455702677">foregroundInfoAsync</a><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1553159413%2FProperties%2F1455702677" anchor-label="id" id="-1553159413%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1553159413%2FProperties%2F1455702677"><span><span>id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1553159413%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1553159413%2FProperties%2F1455702677">id</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/java/util/UUID.html">UUID</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="774082432%2FProperties%2F1455702677" anchor-label="inputData" id="774082432%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#774082432%2FProperties%2F1455702677"><span>input</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="774082432%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#774082432%2FProperties%2F1455702677">inputData</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-43937871%2FProperties%2F1455702677" anchor-label="isStopped" id="-43937871%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-43937871%2FProperties%2F1455702677"><span>is</span><wbr><span><span>Stopped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-43937871%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-43937871%2FProperties%2F1455702677">isStopped</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2101847327%2FProperties%2F1455702677" anchor-label="isUsed" id="2101847327%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2101847327%2FProperties%2F1455702677"><span>is</span><wbr><span><span>Used</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2101847327%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#2101847327%2FProperties%2F1455702677">isUsed</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1127573222%2FProperties%2F1455702677" anchor-label="network" id="1127573222%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1127573222%2FProperties%2F1455702677"><span><span>network</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1127573222%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">28</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#1127573222%2FProperties%2F1455702677">network</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/Nullable///PointingToDeclaration/"><span class="token annotation builtin">Nullable</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/android/net/Network.html">Network</a><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-633990521%2FProperties%2F1455702677" anchor-label="runAttemptCount" id="-633990521%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-633990521%2FProperties%2F1455702677"><span>run</span><wbr><span>Attempt</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-633990521%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/IntRange.html"><span class="token annotation builtin">IntRange</span></a><span class="token punctuation">(</span><span>from<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">0</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#-633990521%2FProperties%2F1455702677">runAttemptCount</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1211274080%2FProperties%2F1455702677" anchor-label="stopReason" id="-1211274080%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1211274080%2FProperties%2F1455702677"><span>stop</span><wbr><span><span>Reason</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1211274080%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">31</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#-1211274080%2FProperties%2F1455702677">stopReason</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1786896269%2FProperties%2F1455702677" anchor-label="tags" id="1786896269%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1786896269%2FProperties%2F1455702677"><span><span>tags</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1786896269%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1786896269%2FProperties%2F1455702677">tags</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="946140686%2FProperties%2F1455702677" anchor-label="taskExecutor" id="946140686%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#946140686%2FProperties%2F1455702677"><span>task</span><wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="946140686%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#946140686%2FProperties%2F1455702677">taskExecutor</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><span data-unresolved-link="androidx.work.impl.utils.taskexecutor/TaskExecutor///PointingToDeclaration/">TaskExecutor</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="526558997%2FProperties%2F1455702677" anchor-label="triggeredContentAuthorities" id="526558997%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#526558997%2FProperties%2F1455702677"><span>triggered</span><wbr><span>Content</span><wbr><span><span>Authorities</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="526558997%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">24</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#526558997%2FProperties%2F1455702677">triggeredContentAuthorities</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="297087965%2FProperties%2F1455702677" anchor-label="triggeredContentUris" id="297087965%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#297087965%2FProperties%2F1455702677"><span>triggered</span><wbr><span>Content</span><wbr><span><span>Uris</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="297087965%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RequiresApi.html"><span class="token annotation builtin">RequiresApi</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token constant">24</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="index.html#297087965%2FProperties%2F1455702677">triggeredContentUris</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/android/net/Uri.html">Uri</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-55586328%2FProperties%2F1455702677" anchor-label="workerFactory" id="-55586328%2FProperties%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-55586328%2FProperties%2F1455702677"><span>worker</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-55586328%2FProperties%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@get:</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">open </span><span class="token keyword">val </span><a href="index.html#-55586328%2FProperties%2F1455702677">workerFactory</a><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/WorkerFactory.html">WorkerFactory</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1754502309%2FFunctions%2F1455702677" anchor-label="doWork" id="-1754502309%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="do-work.html"><span>do</span><wbr><span><span>Work</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754502309%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="do-work.html"><span class="token function">doWork</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ListenableWorker.Result.html">ListenableWorker.Result</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1824804484%2FFunctions%2F1455702677" anchor-label="getForegroundInfo" id="-1824804484%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-foreground-info.html"><span>get</span><wbr><span>Foreground</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1824804484%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-foreground-info.html"><span class="token function">getForegroundInfo</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="67363926%2FFunctions%2F1455702677" anchor-label="getForegroundInfoAsync" id="67363926%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#67363926%2FFunctions%2F1455702677"><span>get</span><wbr><span>Foreground</span><wbr><span>Info</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="67363926%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#67363926%2FFunctions%2F1455702677"><span class="token function">getForegroundInfoAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1990082143%2FFunctions%2F1455702677" anchor-label="onStopped" id="-1990082143%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1990082143%2FFunctions%2F1455702677"><span>on</span><wbr><span><span>Stopped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1990082143%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1990082143%2FFunctions%2F1455702677"><span class="token function">onStopped</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="317365985%2FFunctions%2F1455702677" anchor-label="setForeground" id="317365985%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#317365985%2FFunctions%2F1455702677"><span>set</span><wbr><span><span>Foreground</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="317365985%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="index.html#317365985%2FFunctions%2F1455702677"><span class="token function">setForeground</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">foregroundInfo<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1269350234%2FFunctions%2F1455702677" anchor-label="setForegroundAsync" id="-1269350234%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1269350234%2FFunctions%2F1455702677"><span>set</span><wbr><span>Foreground</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1269350234%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-1269350234%2FFunctions%2F1455702677"><span class="token function">setForegroundAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">foregroundInfo<span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ForegroundInfo.html">ForegroundInfo</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Void.html">Void</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1755411902%2FFunctions%2F1455702677" anchor-label="setProgress" id="1755411902%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1755411902%2FFunctions%2F1455702677"><span>set</span><wbr><span><span>Progress</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1755411902%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="index.html#1755411902%2FFunctions%2F1455702677"><span class="token function">setProgress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-348364649%2FFunctions%2F1455702677" anchor-label="setProgressAsync" id="-348364649%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-348364649%2FFunctions%2F1455702677"><span>set</span><wbr><span>Progress</span><wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-348364649%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-348364649%2FFunctions%2F1455702677"><span class="token function">setProgressAsync</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/Data.html">Data</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span><span class="token annotation builtin">@</span><span data-unresolved-link="org.jspecify.annotations/NonNull///PointingToDeclaration/"><span class="token annotation builtin">NonNull</span></span>&nbsp;</span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Void.html">Void</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1019169525%2FFunctions%2F1455702677" anchor-label="setUsed" id="1019169525%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1019169525%2FFunctions%2F1455702677"><span>set</span><wbr><span><span>Used</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1019169525%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#1019169525%2FFunctions%2F1455702677"><span class="token function">setUsed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1181660772%2FFunctions%2F1455702677" anchor-label="startWork" id="-1181660772%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1181660772%2FFunctions%2F1455702677"><span>start</span><wbr><span><span>Work</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1181660772%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1181660772%2FFunctions%2F1455702677"><span class="token function">startWork</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.common.util.concurrent/ListenableFuture///PointingToDeclaration/">ListenableFuture</span><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/androidx/work/ListenableWorker.Result.html">ListenableWorker.Result</a><span class="token operator">&gt;</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1498077086%2FFunctions%2F1455702677" anchor-label="stop" id="-1498077086%2FFunctions%2F1455702677" data-filterable-set=":core:service/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1498077086%2FFunctions%2F1455702677"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1498077086%2FFunctions%2F1455702677"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:service/androidMain" data-filterable-set=":core:service/androidMain" data-active="" data-toggle=":core:service/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/androidMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.html#LIBRARY_GROUP">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">fun </span><a href="index.html#-1498077086%2FFunctions%2F1455702677"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reason<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

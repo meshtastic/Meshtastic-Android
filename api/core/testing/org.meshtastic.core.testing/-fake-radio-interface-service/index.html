@@ -1,0 +1,629 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FakeRadioInterfaceService</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:testing/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/commonMain" data-filter=":core:testing/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-testing::org.meshtastic.core.testing/FakeRadioInterfaceService///PointingToDeclaration//1783121280">
+  <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeRadioInterfaceService</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Fake</span><wbr><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioInterfaceService.kt#L57">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p><p class="paragraph">The <a href="connection-state.html">connectionState</a> here mirrors the transport-level semantics of the real implementation. In production, only <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a> observes this flow; tests should verify that bridging behavior rather than consuming it directly from UI/feature test code (use <a href="../-fake-service-repository/connection-state.html">FakeServiceRepository.connectionState</a> instead). Address selection remains separate from transport admission: <a href="connect.html">connect</a> and an in-flight <a href="restart-transport.html">restartTransport</a> publish a fresh monotonically increasing session generation.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-325924893%2FConstructors%2F1783121280" anchor-label="FakeRadioInterfaceService" id="-325924893%2FConstructors%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-interface-service.html"><span>Fake</span><wbr><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-325924893%2FConstructors%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1081016665%2FProperties%2F1783121280" anchor-label="activeSession" id="1081016665%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="active-session.html"><span>active</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1081016665%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="active-session.html">activeSession</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1236047074%2FProperties%2F1783121280" anchor-label="connectCalled" id="1236047074%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connect-called.html"><span>connect</span><wbr><span><span>Called</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1236047074%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="connect-called.html">connectCalled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-909378945%2FProperties%2F1783121280" anchor-label="connectionError" id="-909378945%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-error.html"><span>connection</span><wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-909378945%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="connection-error.html">connectionError</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="780649494%2FProperties%2F1783121280" anchor-label="connectionState" id="780649494%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-state.html"><span>connection</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="780649494%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="connection-state.html">connectionState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-connection-state/index.html">ConnectionState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="389113022%2FProperties%2F1783121280" anchor-label="currentDeviceAddressFlow" id="389113022%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-device-address-flow.html"><span>current</span><wbr><span>Device</span><wbr><span>Address</span><wbr><span><span>Flow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="389113022%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="current-device-address-flow.html">currentDeviceAddressFlow</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="693850453%2FProperties%2F1783121280" anchor-label="meshActivity" id="693850453%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mesh-activity.html"><span>mesh</span><wbr><span><span>Activity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="693850453%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="mesh-activity.html">meshActivity</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-mesh-activity/index.html">MeshActivity</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="712739622%2FProperties%2F1783121280" anchor-label="receivedData" id="712739622%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="received-data.html"><span>received</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="712739622%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="received-data.html">receivedData</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../core/repository/org.meshtastic.core.repository/-received-radio-frame/index.html">ReceivedRadioFrame</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="770878170%2FProperties%2F1783121280" anchor-label="restartTransportCalled" id="770878170%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="restart-transport-called.html"><span>restart</span><wbr><span>Transport</span><wbr><span><span>Called</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="770878170%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="restart-transport-called.html">restartTransportCalled</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1797249153%2FProperties%2F1783121280" anchor-label="sentToRadio" id="1797249153%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sent-to-radio.html"><span>sent</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1797249153%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="sent-to-radio.html">sentToRadio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2065865266%2FProperties%2F1783121280" anchor-label="serviceScope" id="2065865266%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="service-scope.html"><span>service</span><wbr><span><span>Scope</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2065865266%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="service-scope.html">serviceScope</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-642634373%2FProperties%2F1783121280" anchor-label="sessionGeneration" id="-642634373%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="session-generation.html"><span>session</span><wbr><span><span>Generation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-642634373%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="session-generation.html">sessionGeneration</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1717378724%2FProperties%2F1783121280" anchor-label="supportedDeviceTypes" id="-1717378724%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="supported-device-types.html"><span>supported</span><wbr><span>Device</span><wbr><span><span>Types</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1717378724%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="supported-device-types.html">supportedDeviceTypes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-device-type/index.html">DeviceType</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="768233311%2FFunctions%2F1783121280" anchor-label="connect" id="768233311%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connect.html"><span><span>connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="768233311%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-781950172%2FFunctions%2F1783121280" anchor-label="consumeGattCacheInvalidationRequest" id="-781950172%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="consume-gatt-cache-invalidation-request.html"><span>consume</span><wbr><span>Gatt</span><wbr><span>Cache</span><wbr><span>Invalidation</span><wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-781950172%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="consume-gatt-cache-invalidation-request.html"><span class="token function">consumeGattCacheInvalidationRequest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2111288789%2FFunctions%2F1783121280" anchor-label="disconnect" id="2111288789%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="disconnect.html"><span><span>disconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2111288789%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="755711208%2FFunctions%2F1783121280" anchor-label="emitFromRadio" id="755711208%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="emit-from-radio.html"><span>emit</span><wbr><span>From</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="755711208%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="emit-from-radio.html"><span class="token function">emitFromRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter ">session<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1837415447%2FFunctions%2F1783121280" anchor-label="getDeviceAddress" id="-1837415447%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-device-address.html"><span>get</span><wbr><span>Device</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1837415447%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="get-device-address.html"><span class="token function">getDeviceAddress</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1070086172%2FFunctions%2F1783121280" anchor-label="handleFromRadio" id="1070086172%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle-from-radio.html"><span>handle</span><wbr><span>From</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1070086172%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="handle-from-radio.html"><span class="token function">handleFromRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-832563468%2FFunctions%2F1783121280" anchor-label="isMockTransport" id="-832563468%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-mock-transport.html"><span>is</span><wbr><span>Mock</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-832563468%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="is-mock-transport.html"><span class="token function">isMockTransport</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-998697753%2FFunctions%2F1783121280" anchor-label="isSessionActive" id="-998697753%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-session-active.html"><span>is</span><wbr><span>Session</span><wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-998697753%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="is-session-active.html"><span class="token function">isSessionActive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1096155742%2FFunctions%2F1783121280" anchor-label="onConnect" id="1096155742%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-connect.html"><span>on</span><wbr><span><span>Connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1096155742%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-connect.html"><span class="token function">onConnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1059214484%2FFunctions%2F1783121280" anchor-label="onDisconnect" id="-1059214484%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="on-disconnect.html"><span>on</span><wbr><span><span>Disconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1059214484%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-disconnect.html"><span class="token function">onDisconnect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isPermanent<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">errorMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">reason<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-transport-disconnect-reason/index.html">TransportDisconnectReason</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1565774792%2FFunctions%2F1783121280" anchor-label="requestGattCacheInvalidationOnNextConnect" id="1565774792%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-gatt-cache-invalidation-on-next-connect.html"><span>request</span><wbr><span>Gatt</span><wbr><span>Cache</span><wbr><span>Invalidation</span><wbr><span>On</span><wbr><span>Next</span><wbr><span><span>Connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1565774792%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="request-gatt-cache-invalidation-on-next-connect.html"><span class="token function">requestGattCacheInvalidationOnNextConnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="917614681%2FFunctions%2F1783121280" anchor-label="resetReceivedBuffer" id="917614681%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="reset-received-buffer.html"><span>reset</span><wbr><span>Received</span><wbr><span><span>Buffer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="917614681%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="reset-received-buffer.html"><span class="token function">resetReceivedBuffer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-302629033%2FFunctions%2F1783121280" anchor-label="restartTransport" id="-302629033%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="restart-transport.html"><span>restart</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-302629033%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="restart-transport.html"><span class="token function">restartTransport</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="874483604%2FFunctions%2F1783121280" anchor-label="runIfSessionActive" id="874483604%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run-if-session-active.html"><span>run</span><wbr><span>If</span><wbr><span>Session</span><wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="874483604%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="run-if-session-active.html"><span class="token function">runIfSessionActive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1045028705%2FFunctions%2F1783121280" anchor-label="runWhileSessionActive" id="1045028705%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run-while-session-active.html"><span>run</span><wbr><span>While</span><wbr><span>Session</span><wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1045028705%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="run-while-session-active.html"><span class="token function">runWhileSessionActive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1943307574%2FFunctions%2F1783121280" anchor-label="runWithSessionLease" id="1943307574%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run-with-session-lease.html"><span>run</span><wbr><span>With</span><wbr><span>Session</span><wbr><span><span>Lease</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1943307574%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="run-with-session-lease.html"><span class="token function">runWithSessionLease</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">session<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-context/index.html">RadioSessionContext</a><span class="token punctuation">, </span></span><span class="parameter ">block<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-session-lease/index.html">RadioSessionLease</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1450179955%2FFunctions%2F1783121280" anchor-label="sendToRadio" id="-1450179955%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-to-radio.html"><span>send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1450179955%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1781788748%2FFunctions%2F1783121280" anchor-label="setConnectionState" id="-1781788748%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-connection-state.html"><span>set</span><wbr><span>Connection</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1781788748%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-connection-state.html"><span class="token function">setConnectionState</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">state<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-connection-state/index.html">ConnectionState</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-828318316%2FFunctions%2F1783121280" anchor-label="setDeviceAddress" id="-828318316%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-device-address.html"><span>set</span><wbr><span>Device</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-828318316%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="set-device-address.html"><span class="token function">setDeviceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">deviceAddr<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-119854243%2FFunctions%2F1783121280" anchor-label="toInterfaceAddress" id="-119854243%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-interface-address.html"><span>to</span><wbr><span>Interface</span><wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-119854243%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-interface-address.html"><span class="token function">toInterfaceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">interfaceId<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-interface-id/index.html">InterfaceId</a><span class="token punctuation">, </span></span><span class="parameter ">rest<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

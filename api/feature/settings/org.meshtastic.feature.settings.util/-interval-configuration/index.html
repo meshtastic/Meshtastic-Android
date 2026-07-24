@@ -1,0 +1,479 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>IntervalConfiguration</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:settings/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:settings/commonMain" data-filter=":feature:settings/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-settings::org.meshtastic.feature.settings.util/IntervalConfiguration///PointingToDeclaration//1086999794">
+  <div class="breadcrumbs"><a href="../../index.html">feature-settings</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.settings.util</a><span class="delimiter">/</span><span class="current">IntervalConfiguration</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Interval</span><wbr><span><span>Configuration</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">IntervalConfiguration</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">IntervalConfiguration</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/util/FixedUpdateIntervals.kt#L96">source</a>)</span></span></div><p class="paragraph">Represents a specific configuration context that determines a subset of allowed update intervals. This is used to filter the available <a href="../-fixed-update-intervals/index.html">FixedUpdateIntervals</a> for a particular setting.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="ENTRY">
+        <h2 class="tableheader">Entries</h2>
+        <div class="table"><a data-name="-1629015665%2FClasslikes%2F1086999794" anchor-label="ALL" id="-1629015665%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-l-l/index.html">ALL</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1629015665%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-a-l-l/index.html">ALL</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-751152244%2FClasslikes%2F1086999794" anchor-label="BROADCAST_SHORT" id="-751152244%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-r-o-a-d-c-a-s-t_-s-h-o-r-t/index.html">BROADCAST_SHORT</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-751152244%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-b-r-o-a-d-c-a-s-t_-s-h-o-r-t/index.html">BROADCAST_SHORT</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1784611027%2FClasslikes%2F1086999794" anchor-label="BROADCAST_MEDIUM" id="-1784611027%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-r-o-a-d-c-a-s-t_-m-e-d-i-u-m/index.html">BROADCAST_MEDIUM</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1784611027%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-b-r-o-a-d-c-a-s-t_-m-e-d-i-u-m/index.html">BROADCAST_MEDIUM</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1582806796%2FClasslikes%2F1086999794" anchor-label="BROADCAST_LONG" id="-1582806796%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-b-r-o-a-d-c-a-s-t_-l-o-n-g/index.html">BROADCAST_LONG</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1582806796%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-b-r-o-a-d-c-a-s-t_-l-o-n-g/index.html">BROADCAST_LONG</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2047374021%2FClasslikes%2F1086999794" anchor-label="NODE_INFO_BROADCAST" id="-2047374021%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-n-o-d-e_-i-n-f-o_-b-r-o-a-d-c-a-s-t/index.html">NODE_INFO_BROADCAST</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2047374021%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-o-d-e_-i-n-f-o_-b-r-o-a-d-c-a-s-t/index.html">NODE_INFO_BROADCAST</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1564856797%2FClasslikes%2F1086999794" anchor-label="DETECTION_SENSOR_MINIMUM" id="1564856797%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-t-e-c-t-i-o-n_-s-e-n-s-o-r_-m-i-n-i-m-u-m/index.html">DETECTION_SENSOR_MINIMUM</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1564856797%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-d-e-t-e-c-t-i-o-n_-s-e-n-s-o-r_-m-i-n-i-m-u-m/index.html">DETECTION_SENSOR_MINIMUM</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="518361568%2FClasslikes%2F1086999794" anchor-label="DETECTION_SENSOR_STATE" id="518361568%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-t-e-c-t-i-o-n_-s-e-n-s-o-r_-s-t-a-t-e/index.html">DETECTION_SENSOR_STATE</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="518361568%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-d-e-t-e-c-t-i-o-n_-s-e-n-s-o-r_-s-t-a-t-e/index.html">DETECTION_SENSOR_STATE</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1506466884%2FClasslikes%2F1086999794" anchor-label="NAG_TIMEOUT" id="1506466884%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-n-a-g_-t-i-m-e-o-u-t/index.html">NAG_TIMEOUT</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1506466884%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-n-a-g_-t-i-m-e-o-u-t/index.html">NAG_TIMEOUT</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1046236763%2FClasslikes%2F1086999794" anchor-label="OUTPUT" id="1046236763%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-o-u-t-p-u-t/index.html">OUTPUT</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1046236763%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-o-u-t-p-u-t/index.html">OUTPUT</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1960590578%2FClasslikes%2F1086999794" anchor-label="PAX_COUNTER" id="1960590578%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-a-x_-c-o-u-n-t-e-r/index.html">PAX_COUNTER</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1960590578%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-a-x_-c-o-u-n-t-e-r/index.html">PAX_COUNTER</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="575400707%2FClasslikes%2F1086999794" anchor-label="POSITION" id="575400707%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-o-s-i-t-i-o-n/index.html">POSITION</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="575400707%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-o-s-i-t-i-o-n/index.html">POSITION</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2023808997%2FClasslikes%2F1086999794" anchor-label="POSITION_BROADCAST" id="2023808997%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-o-s-i-t-i-o-n_-b-r-o-a-d-c-a-s-t/index.html">POSITION_BROADCAST</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2023808997%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-p-o-s-i-t-i-o-n_-b-r-o-a-d-c-a-s-t/index.html">POSITION_BROADCAST</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1669945416%2FClasslikes%2F1086999794" anchor-label="GPS_UPDATE" id="-1669945416%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-g-p-s_-u-p-d-a-t-e/index.html">GPS_UPDATE</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1669945416%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-g-p-s_-u-p-d-a-t-e/index.html">GPS_UPDATE</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="798737582%2FClasslikes%2F1086999794" anchor-label="RANGE_TEST_SENDER" id="798737582%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-r-a-n-g-e_-t-e-s-t_-s-e-n-d-e-r/index.html">RANGE_TEST_SENDER</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="798737582%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-r-a-n-g-e_-t-e-s-t_-s-e-n-d-e-r/index.html">RANGE_TEST_SENDER</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="111097480%2FClasslikes%2F1086999794" anchor-label="SMART_BROADCAST_MINIMUM" id="111097480%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-m-a-r-t_-b-r-o-a-d-c-a-s-t_-m-i-n-i-m-u-m/index.html">SMART_BROADCAST_MINIMUM</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="111097480%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-s-m-a-r-t_-b-r-o-a-d-c-a-s-t_-m-i-n-i-m-u-m/index.html">SMART_BROADCAST_MINIMUM</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1531900611%2FClasslikes%2F1086999794" anchor-label="DISPLAY_SCREEN_ON" id="1531900611%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-i-s-p-l-a-y_-s-c-r-e-e-n_-o-n/index.html">DISPLAY_SCREEN_ON</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1531900611%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-d-i-s-p-l-a-y_-s-c-r-e-e-n_-o-n/index.html">DISPLAY_SCREEN_ON</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="624749879%2FClasslikes%2F1086999794" anchor-label="DISPLAY_CAROUSEL" id="624749879%2FClasslikes%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-i-s-p-l-a-y_-c-a-r-o-u-s-e-l/index.html">DISPLAY_CAROUSEL</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="624749879%2FClasslikes%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><div class="block"><a href="-d-i-s-p-l-a-y_-c-a-r-o-u-s-e-l/index.html">DISPLAY_CAROUSEL</a></div></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1211104688%2FProperties%2F1086999794" anchor-label="allowedIntervals" id="-1211104688%2FProperties%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="allowed-intervals.html"><span>allowed</span><wbr><span><span>Intervals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1211104688%2FProperties%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="allowed-intervals.html">allowedIntervals</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-fixed-update-intervals/index.html">FixedUpdateIntervals</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A list of <a href="../-fixed-update-intervals/index.html">FixedUpdateIntervals</a> that are permissible for this configuration.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1574019660%2FProperties%2F1086999794" anchor-label="entries" id="-1574019660%2FProperties%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="entries.html"><span><span>entries</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1574019660%2FProperties%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="entries.html">entries</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.enums/-enum-entries/index.html">EnumEntries</a><span class="token operator">&lt;</span><a href="index.html">IntervalConfiguration</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns a representation of an immutable list of all enum entries, in the order they're declared.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-372974862%2FProperties%2F1086999794" anchor-label="name" id="-372974862%2FProperties%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../org.meshtastic.feature.settings.radio/-reboot-behavior/-n-e-v-e-r/index.html#-372974862%2FProperties%2F1086999794"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372974862%2FProperties%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="../../org.meshtastic.feature.settings.radio/-reboot-behavior/-n-e-v-e-r/index.html#-372974862%2FProperties%2F1086999794">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-739389684%2FProperties%2F1086999794" anchor-label="ordinal" id="-739389684%2FProperties%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../org.meshtastic.feature.settings.radio/-reboot-behavior/-n-e-v-e-r/index.html#-739389684%2FProperties%2F1086999794"><span><span>ordinal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739389684%2FProperties%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="../../org.meshtastic.feature.settings.radio/-reboot-behavior/-n-e-v-e-r/index.html#-739389684%2FProperties%2F1086999794">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="948855912%2FFunctions%2F1086999794" anchor-label="valueOf" id="948855912%2FFunctions%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="value-of.html"><span>value</span><wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="948855912%2FFunctions%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="value-of.html"><span class="token function">valueOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">IntervalConfiguration</a></div><div class="brief "><p class="paragraph">Returns the enum constant of this type with the specified name. The string must match exactly an identifier used to declare an enum constant in this type. (Extraneous whitespace characters are not permitted.)</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-957970572%2FFunctions%2F1086999794" anchor-label="values" id="-957970572%2FFunctions%2F1086999794" data-filterable-set=":feature:settings/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:settings/commonMain" data-filterable-set=":feature:settings/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="values.html"><span><span>values</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-957970572%2FFunctions%2F1086999794"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:settings/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">IntervalConfiguration</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

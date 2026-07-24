@@ -1,0 +1,303 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NetworkDeviceLink</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:model/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:model/commonMain" data-filter=":core:model/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-model::org.meshtastic.core.model/NetworkDeviceLink///PointingToDeclaration//394437785">
+  <div class="breadcrumbs"><a href="../../index.html">core-model</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.model</a><span class="delimiter">/</span><span class="current">NetworkDeviceLink</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Network</span><wbr><span>Device</span><wbr><span><span>Link</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">NetworkDeviceLink</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>shortCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>url<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>TYPE_INTERNAL<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>targets<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hwModels<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>marketplace<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>regions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/NetworkDeviceLink.kt#L53">source</a>)</span></span></div><p class="paragraph">A single resolved device link from the Meshtastic API.</p><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>short</span><wbr><span><span>Code</span></span></u></div></span></div><div><div class="title"><p class="paragraph">msh.to short code, e.g. <code class="lang-kotlin">rokland-t-deck-plus</code>.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>url</span></span></u></div></span></div><div><div class="title"><p class="paragraph">the user-facing <code class="lang-kotlin">https://msh.to/&lt;shortCode&gt;</code> link (the retailer destination is intentionally not exposed).</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>description</span></span></u></div></span></div><div><div class="title"><p class="paragraph">human-readable label.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>type</span></span></u></div></span></div><div><div class="title"><p class="paragraph">authoritative classification: <a href="-companion/-t-y-p-e_-i-n-t-e-r-n-a-l.html">TYPE_INTERNAL</a>, <a href="-companion/-t-y-p-e_-v-e-n-d-o-r.html">TYPE_VENDOR</a>, or <a href="-companion/-t-y-p-e_-m-a-r-k-e-t-p-l-a-c-e.html">TYPE_MARKETPLACE</a>.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>targets</span></span></u></div></span></div><div><div class="title"><p class="paragraph">device <code class="lang-kotlin">platformioTarget</code>s this link is attached to; <code class="lang-kotlin">null</code> = untriaged, empty = device-agnostic.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>hw</span><wbr><span><span>Models</span></span></u></div></span></div><div><div class="title"><p class="paragraph"><code class="lang-kotlin">hwModel</code> ints derived from <a href="../../../../core/model/org.meshtastic.core.model/-network-device-link/--root--.html">targets</a> server-side (parallel list).</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>marketplace</span></span></u></div></span></div><div><div class="title"><p class="paragraph">retailer key (e.g. <code class="lang-kotlin">rokland</code>) for marketplace links, else <code class="lang-kotlin">null</code>.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>regions</span></span></u></div></span></div><div><div class="title"><p class="paragraph">ISO 3166-1 alpha-2 shipping regions; <code class="lang-kotlin">null</code> = worldwide (no region filter).</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-472319970%2FConstructors%2F394437785" anchor-label="NetworkDeviceLink" id="-472319970%2FConstructors%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-network-device-link.html"><span>Network</span><wbr><span>Device</span><wbr><span><span>Link</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-472319970%2FConstructors%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">shortCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter ">url<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter ">description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>TYPE_INTERNAL<span class="token punctuation">, </span></span><span class="parameter ">targets<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">hwModels<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">marketplace<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">regions<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1641229797%2FClasslikes%2F394437785" anchor-label="Companion" id="-1641229797%2FClasslikes%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1641229797%2FClasslikes%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1156499096%2FProperties%2F394437785" anchor-label="description" id="1156499096%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="description.html"><span><span>description</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1156499096%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="description.html">description</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="251203981%2FProperties%2F394437785" anchor-label="hwModels" id="251203981%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="hw-models.html"><span>hw</span><wbr><span><span>Models</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="251203981%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="hw-models.html">hwModels</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-612882647%2FProperties%2F394437785" anchor-label="marketplace" id="-612882647%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="marketplace.html"><span><span>marketplace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-612882647%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="marketplace.html">marketplace</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1378570101%2FProperties%2F394437785" anchor-label="regions" id="1378570101%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="regions.html"><span><span>regions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1378570101%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="regions.html">regions</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1369475989%2FProperties%2F394437785" anchor-label="shortCode" id="-1369475989%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="short-code.html"><span>short</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1369475989%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="short-code.html">shortCode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1284481070%2FProperties%2F394437785" anchor-label="targets" id="-1284481070%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="targets.html"><span><span>targets</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1284481070%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="targets.html">targets</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="611736140%2FProperties%2F394437785" anchor-label="type" id="611736140%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="type.html"><span><span>type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="611736140%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="type.html">type</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1601586053%2FProperties%2F394437785" anchor-label="url" id="1601586053%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="url.html"><span><span>url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1601586053%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="url.html">url</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-75184532%2FFunctions%2F394437785" anchor-label="toDeviceLink" id="-75184532%2FFunctions%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../to-device-link.html"><span>to</span><wbr><span>Device</span><wbr><span><span>Link</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-75184532%2FFunctions%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html">NetworkDeviceLink</a><span class="token punctuation">.</span><a href="../to-device-link.html"><span class="token function">toDeviceLink</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-device-link/index.html">DeviceLink</a></div><div class="brief "><p class="paragraph">Pure mapping to the cached domain model. Callers are expected to drop TYPE_INTERNAL links (GitHub, YouTube, …), which never belong to a device's purchase section.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

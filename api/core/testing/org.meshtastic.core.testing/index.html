@@ -1,0 +1,948 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.testing</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:testing/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:testing/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:testing/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/androidMain" data-filter=":core:testing/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/commonMain" data-filter=":core:testing/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:testing/jvmMain" data-filter=":core:testing/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-testing::org.meshtastic.core.testing////PointingToDeclaration//1135606900">
+  <div class="breadcrumbs"><a href="../index.html">core-testing</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.testing</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1198447724%2FClasslikes%2F1783121280" anchor-label="BaseFake" id="1198447724%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-base-fake/index.html"><span>Base</span><wbr><span><span>Fake</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1198447724%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-base-fake/index.html">BaseFake</a></div><div class="brief "><p class="paragraph">Base class for fakes that provides common utilities for state management and reset capabilities.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="445574547%2FClasslikes%2F1783121280" anchor-label="FakeAnalyticsPrefs" id="445574547%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-analytics-prefs/index.html"><span>Fake</span><wbr><span>Analytics</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="445574547%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-analytics-prefs/index.html">FakeAnalyticsPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-analytics-prefs/index.html">AnalyticsPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-331480017%2FClasslikes%2F1783121280" anchor-label="FakeAppFunctionsPrefs" id="-331480017%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-app-functions-prefs/index.html"><span>Fake</span><wbr><span>App</span><wbr><span>Functions</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-331480017%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-app-functions-prefs/index.html">FakeAppFunctionsPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-app-functions-prefs/index.html">AppFunctionsPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1203926298%2FClasslikes%2F1783121280" anchor-label="FakeAppPreferences" id="-1203926298%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-app-preferences/index.html"><span>Fake</span><wbr><span>App</span><wbr><span><span>Preferences</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1203926298%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-app-preferences/index.html">FakeAppPreferences</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-app-preferences/index.html">AppPreferences</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-492897972%2FClasslikes%2F1783121280" anchor-label="FakeBleConnection" id="-492897972%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-connection/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span><span>Connection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-492897972%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-connection/index.html">FakeBleConnection</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/ble/org.meshtastic.core.ble/-ble-connection/index.html">BleConnection</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1473986828%2FClasslikes%2F1783121280" anchor-label="FakeBleConnectionFactory" id="1473986828%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-connection-factory/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span>Connection</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1473986828%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-connection-factory/index.html">FakeBleConnectionFactory</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fakeConnection<span class="token operator">: </span><a href="-fake-ble-connection/index.html">FakeBleConnection</a><span class="token operator"> = </span>FakeBleConnection()</span></span><span class="token punctuation">)</span> : <a href="../../../core/ble/org.meshtastic.core.ble/-ble-connection-factory/index.html">BleConnectionFactory</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1789998420%2FClasslikes%2F1783121280" anchor-label="FakeBleDevice" id="1789998420%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-device/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span><span>Device</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1789998420%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-device/index.html">FakeBleDevice</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span><span class="token string">"Fake Device"</span><span class="token punctuation">, </span></span><span class="parameter ">initialState<span class="token operator">: </span><a href="../../../core/ble/org.meshtastic.core.ble/-ble-connection-state/index.html">BleConnectionState</a><span class="token operator"> = </span>BleConnectionState.Disconnected()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>rssi<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/ble/org.meshtastic.core.ble/-ble-device/index.html">BleDevice</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-819380134%2FClasslikes%2F1783121280" anchor-label="FakeBleScanner" id="-819380134%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-scanner/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span><span>Scanner</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-819380134%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-scanner/index.html">FakeBleScanner</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/ble/org.meshtastic.core.ble/-ble-scanner/index.html">BleScanner</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="271637379%2FClasslikes%2F1783121280" anchor-label="FakeBleService" id="271637379%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-service/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="271637379%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-service/index.html">FakeBleService</a> : <a href="../../../core/ble/org.meshtastic.core.ble/-ble-service/index.html">BleService</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1687454887%2FClasslikes%2F1783121280" anchor-label="FakeBleWrite" id="-1687454887%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ble-write/index.html"><span>Fake</span><wbr><span>Ble</span><wbr><span><span>Write</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1687454887%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ble-write/index.html">FakeBleWrite</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>characteristic<span class="token operator">: </span><a href="../../../core/ble/org.meshtastic.core.ble/-ble-characteristic/index.html">BleCharacteristic</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>data<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>writeType<span class="token operator">: </span><a href="../../../core/ble/org.meshtastic.core.ble/-ble-write-type/index.html">BleWriteType</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1040182995%2FClasslikes%2F1783121280" anchor-label="FakeBluetoothRepository" id="-1040182995%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-bluetooth-repository/index.html"><span>Fake</span><wbr><span>Bluetooth</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1040182995%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-bluetooth-repository/index.html">FakeBluetoothRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/ble/org.meshtastic.core.ble/-bluetooth-repository/index.html">BluetoothRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="321666939%2FClasslikes%2F1783121280" anchor-label="FakeContactRepository" id="321666939%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-contact-repository/index.html"><span>Fake</span><wbr><span>Contact</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="321666939%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-contact-repository/index.html">FakeContactRepository</a></div><div class="brief "><p class="paragraph">A test double for contact management operations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1469811166%2FClasslikes%2F1783121280" anchor-label="FakeCustomEmojiPrefs" id="-1469811166%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-custom-emoji-prefs/index.html"><span>Fake</span><wbr><span>Custom</span><wbr><span>Emoji</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1469811166%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-custom-emoji-prefs/index.html">FakeCustomEmojiPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-custom-emoji-prefs/index.html">CustomEmojiPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-4391085%2FClasslikes%2F1783121280" anchor-label="FakeDatabaseManager" id="-4391085%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-database-manager/index.html"><span>Fake</span><wbr><span>Database</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-4391085%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-database-manager/index.html">FakeDatabaseManager</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/common/org.meshtastic.core.common.database/-database-manager/index.html">DatabaseManager</a> that provides a simple implementation and tracks calls.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="296946449%2FClasslikes%2F1783121280" anchor-label="FakeDatabaseProvider" id="296946449%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-database-provider/index.html"><span>Fake</span><wbr><span>Database</span><wbr><span><span>Provider</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="296946449%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-database-provider/index.html">FakeDatabaseProvider</a> : <a href="../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a></div><div class="brief "><p class="paragraph">A real <a href="../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a> that uses an in-memory database for testing.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="904597205%2FClasslikes%2F1783121280" anchor-label="FakeDeviceHardwareRepository" id="904597205%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-device-hardware-repository/index.html"><span>Fake</span><wbr><span>Device</span><wbr><span>Hardware</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="904597205%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-device-hardware-repository/index.html">FakeDeviceHardwareRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-device-hardware-repository/index.html">DeviceHardwareRepository</a> backed by an in-memory map keyed by <code class="lang-kotlin">(hwModel, target)</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-784715203%2FClasslikes%2F1783121280" anchor-label="FakeDiscoveryPrefs" id="-784715203%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-discovery-prefs/index.html"><span>Fake</span><wbr><span>Discovery</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-784715203%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-discovery-prefs/index.html">FakeDiscoveryPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-discovery-prefs/index.html">DiscoveryPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-413811795%2FClasslikes%2F1783121280" anchor-label="FakeFilterPrefs" id="-413811795%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-filter-prefs/index.html"><span>Fake</span><wbr><span>Filter</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-413811795%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-filter-prefs/index.html">FakeFilterPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-filter-prefs/index.html">FilterPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1830903217%2FClasslikes%2F1783121280" anchor-label="FakeFirmwareReleaseRepository" id="-1830903217%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-firmware-release-repository/index.html"><span>Fake</span><wbr><span>Firmware</span><wbr><span>Release</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1830903217%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-firmware-release-repository/index.html">FakeFirmwareReleaseRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-firmware-release-repository/index.html">FirmwareReleaseRepository</a> that exposes stable, alpha, and nightly releases as <span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">kotlinx.coroutines.flow.MutableStateFlow</span>s.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="20358960%2FClasslikes%2F1783121280" anchor-label="FakeHomoglyphPrefs" id="20358960%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-homoglyph-prefs/index.html"><span>Fake</span><wbr><span>Homoglyph</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="20358960%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-homoglyph-prefs/index.html">FakeHomoglyphPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-homoglyph-prefs/index.html">HomoglyphPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1817445060%2FClasslikes%2F1783121280" anchor-label="FakeLocalStatsDataSource" id="1817445060%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-local-stats-data-source/index.html"><span>Fake</span><wbr><span>Local</span><wbr><span>Stats</span><wbr><span>Data</span><wbr><span><span>Source</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1817445060%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-local-stats-data-source/index.html">FakeLocalStatsDataSource</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/datastore/org.meshtastic.core.datastore/-local-stats-data-source/index.html">LocalStatsDataSource</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/datastore/org.meshtastic.core.datastore/-local-stats-data-source/index.html">LocalStatsDataSource</a> that provides an in-memory implementation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1129739490%2FClasslikes%2F1783121280" anchor-label="FakeLocationRepository" id="-1129739490%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-location-repository/index.html"><span>Fake</span><wbr><span>Location</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1129739490%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-location-repository/index.html">FakeLocationRepository</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-location-repository/index.html">LocationRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-location-repository/index.html">LocationRepository</a> that provides a manual location emission mechanism.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1933170562%2FClasslikes%2F1783121280" anchor-label="FakeLockdownCoordinator" id="1933170562%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-lockdown-coordinator/index.html"><span>Fake</span><wbr><span>Lockdown</span><wbr><span><span>Coordinator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1933170562%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-lockdown-coordinator/index.html">FakeLockdownCoordinator</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2082886355%2FClasslikes%2F1783121280" anchor-label="FakeMapConsentPrefs" id="2082886355%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-map-consent-prefs/index.html"><span>Fake</span><wbr><span>Map</span><wbr><span>Consent</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2082886355%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-map-consent-prefs/index.html">FakeMapConsentPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-map-consent-prefs/index.html">MapConsentPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1058356713%2FClasslikes%2F1783121280" anchor-label="FakeMapPrefs" id="1058356713%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-map-prefs/index.html"><span>Fake</span><wbr><span>Map</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1058356713%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-map-prefs/index.html">FakeMapPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="227771528%2FClasslikes%2F1783121280" anchor-label="FakeMapTileProviderPrefs" id="227771528%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-map-tile-provider-prefs/index.html"><span>Fake</span><wbr><span>Map</span><wbr><span>Tile</span><wbr><span>Provider</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="227771528%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-map-tile-provider-prefs/index.html">FakeMapTileProviderPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-map-tile-provider-prefs/index.html">MapTileProviderPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-804340892%2FClasslikes%2F1783121280" anchor-label="FakeMeshLogPrefs" id="-804340892%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-log-prefs/index.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-804340892%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-mesh-log-prefs/index.html">FakeMeshLogPrefs</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-prefs/index.html">MeshLogPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="793376292%2FClasslikes%2F1783121280" anchor-label="FakeMeshLogRepository" id="793376292%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-log-repository/index.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Log</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="793376292%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-mesh-log-repository/index.html">FakeMeshLogRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a> that provides in-memory log storage.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1970363728%2FClasslikes%2F1783121280" anchor-label="FakeMeshNotificationManager" id="1970363728%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-notification-manager/index.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span>Notification</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1970363728%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-mesh-notification-manager/index.html">FakeMeshNotificationManager</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a> that provides a no-op implementation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1286611042%2FClasslikes%2F1783121280" anchor-label="FakeMeshPrefs" id="1286611042%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-prefs/index.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1286611042%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-mesh-prefs/index.html">FakeMeshPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-prefs/index.html">MeshPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1440016317%2FClasslikes%2F1783121280" anchor-label="FakeMeshService" id="1440016317%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-mesh-service/index.html"><span>Fake</span><wbr><span>Mesh</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1440016317%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-mesh-service/index.html">FakeMeshService</a></div><div class="brief "><p class="paragraph">A container for all mesh-related fakes to simplify test setup.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-671217743%2FClasslikes%2F1783121280" anchor-label="FakeNodeRepository" id="-671217743%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-node-repository/index.html"><span>Fake</span><wbr><span>Node</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-671217743%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-node-repository/index.html">FakeNodeRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a> that provides an in-memory implementation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1407586592%2FClasslikes%2F1783121280" anchor-label="FakeNotificationPrefs" id="-1407586592%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-notification-prefs/index.html"><span>Fake</span><wbr><span>Notification</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1407586592%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-notification-prefs/index.html">FakeNotificationPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="970268779%2FClasslikes%2F1783121280" anchor-label="FakePacketRepository" id="970268779%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-packet-repository/index.html"><span>Fake</span><wbr><span>Packet</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="970268779%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-packet-repository/index.html">FakePacketRepository</a></div><div class="brief "><p class="paragraph">A test double for message/packet repository operations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="203300928%2FClasslikes%2F1783121280" anchor-label="FakeQuickChatActionRepository" id="203300928%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-quick-chat-action-repository/index.html"><span>Fake</span><wbr><span>Quick</span><wbr><span>Chat</span><wbr><span>Action</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="203300928%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-quick-chat-action-repository/index.html">FakeQuickChatActionRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-quick-chat-action-repository/index.html">QuickChatActionRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-quick-chat-action-repository/index.html">QuickChatActionRepository</a> that keeps actions in an in-memory list (sorted by <code class="lang-kotlin">position</code>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="185537886%2FClasslikes%2F1783121280" anchor-label="FakeRadioConfigRepository" id="185537886%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-config-repository/index.html"><span>Fake</span><wbr><span>Radio</span><wbr><span>Config</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="185537886%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-radio-config-repository/index.html">FakeRadioConfigRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a> backed by in-memory <span data-unresolved-link="kotlinx.coroutines.flow/MutableStateFlow///PointingToDeclaration/">kotlinx.coroutines.flow.MutableStateFlow</span>s.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="995792558%2FClasslikes%2F1783121280" anchor-label="FakeRadioController" id="995792558%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-controller/index.html"><span>Fake</span><wbr><span>Radio</span><wbr><span><span>Controller</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="995792558%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-radio-controller/index.html">FakeRadioController</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-radio-controller/index.html">RadioController</a> that provides a no-op implementation and tracks calls for assertions in tests.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-565548978%2FClasslikes%2F1783121280" anchor-label="FakeRadioInterfaceService" id="-565548978%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-interface-service/index.html"><span>Fake</span><wbr><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-565548978%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-radio-interface-service/index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="724058440%2FClasslikes%2F1783121280" anchor-label="FakeRadioPrefs" id="724058440%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-prefs/index.html"><span>Fake</span><wbr><span>Radio</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="724058440%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-radio-prefs/index.html">FakeRadioPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-radio-prefs/index.html">RadioPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1968407697%2FClasslikes%2F1783121280" anchor-label="FakeRadioTransport" id="-1968407697%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-radio-transport/index.html"><span>Fake</span><wbr><span>Radio</span><wbr><span><span>Transport</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1968407697%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-radio-transport/index.html">FakeRadioTransport</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-radio-transport/index.html">RadioTransport</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-radio-transport/index.html">RadioTransport</a> that tracks sent data.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="882388166%2FClasslikes%2F1783121280" anchor-label="FakeServiceRepository" id="882388166%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-service-repository/index.html"><span>Fake</span><wbr><span>Service</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="882388166%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-service-repository/index.html">FakeServiceRepository</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1198487723%2FClasslikes%2F1783121280" anchor-label="FakeTakPrefs" id="1198487723%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-tak-prefs/index.html"><span>Fake</span><wbr><span>Tak</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1198487723%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-tak-prefs/index.html">FakeTakPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-tak-prefs/index.html">TakPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-891985685%2FClasslikes%2F1783121280" anchor-label="FakeTracerouteSnapshotRepository" id="-891985685%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-traceroute-snapshot-repository/index.html"><span>Fake</span><wbr><span>Traceroute</span><wbr><span>Snapshot</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-891985685%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-traceroute-snapshot-repository/index.html">FakeTracerouteSnapshotRepository</a> : <a href="-base-fake/index.html">BaseFake</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-snapshot-repository/index.html">TracerouteSnapshotRepository</a></div><div class="brief "><p class="paragraph">A test double for <a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-snapshot-repository/index.html">TracerouteSnapshotRepository</a> keyed by <code class="lang-kotlin">logUuid</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2034307017%2FClasslikes%2F1783121280" anchor-label="FakeUiPrefs" id="2034307017%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-fake-ui-prefs/index.html"><span>Fake</span><wbr><span>Ui</span><wbr><span><span>Prefs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2034307017%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-fake-ui-prefs/index.html">FakeUiPrefs</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-812582668%2FClasslikes%2F-1039831974" anchor-label="RobolectricBleBonding" id="-812582668%2FClasslikes%2F-1039831974" data-filterable-set=":core:testing/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-robolectric-ble-bonding/index.html"><span>Robolectric</span><wbr><span>Ble</span><wbr><span><span>Bonding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-812582668%2FClasslikes%2F-1039831974"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain" data-active="" data-toggle=":core:testing/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/androidMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-robolectric-ble-bonding/index.html">RobolectricBleBonding</a></div><div class="brief "><p class="paragraph">Reusable Robolectric helpers for driving Android Bluetooth bonding logic in <code class="lang-kotlin">androidHostTest</code> source sets.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="340807554%2FClasslikes%2F1783121280" anchor-label="TestDataFactory" id="340807554%2FClasslikes%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-test-data-factory/index.html"><span>Test</span><wbr><span>Data</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="340807554%2FClasslikes%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-test-data-factory/index.html">TestDataFactory</a></div><div class="brief "><p class="paragraph">Factory for creating test domain objects.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-646525998%2FFunctions%2F1135606900" anchor-label="createLocation" id="-646525998%2FFunctions%2F1135606900" data-filterable-set=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain" data-filterable-set=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-location.html"><span>create</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-646525998%2FFunctions%2F1135606900"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain" data-active="" data-toggle=":core:testing/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain" data-toggle=":core:testing/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:testing/jvmMain" data-filterable-set=":core:testing/jvmMain" data-toggle=":core:testing/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:testing/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-location.html"><span class="token function">createLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">altitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a></div><div class="brief "><p class="paragraph">Creates an Android <a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a> for testing.</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="create-location.html"><span class="token function">createLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">altitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a></div><div class="brief "><p class="paragraph">Platform-specific factory for creating <a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a> objects in tests.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:testing/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="create-location.html"><span class="token function">createLocation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">altitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a></div><div class="brief "><p class="paragraph">Creates a placeholder JVM <a href="../../../core/repository/org.meshtastic.core.repository/-location/index.html">Location</a> for testing.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-533723288%2FFunctions%2F1783121280" anchor-label="createTestContact" id="-533723288%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-test-contact.html"><span>create</span><wbr><span>Test</span><wbr><span><span>Contact</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-533723288%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="create-test-contact.html"><span class="token function">createTestContact</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"!test001"</span><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"Test Contact"</span><span class="token punctuation">, </span></span><span class="parameter ">lastMessageTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-fake-contact-repository/-contact/index.html">FakeContactRepository.Contact</a></div><div class="brief "><p class="paragraph">Test helper for creating test contact objects.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1274685897%2FFunctions%2F1783121280" anchor-label="failBondAfterRecording" id="-1274685897%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fail-bond-after-recording.html"><span>fail</span><wbr><span>Bond</span><wbr><span>After</span><wbr><span><span>Recording</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1274685897%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-fake-bluetooth-repository/index.html">FakeBluetoothRepository</a><span class="token punctuation">.</span><a href="fail-bond-after-recording.html"><span class="token function">failBondAfterRecording</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator"> = </span>Exception("bond failed after pairing")</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Make the next <a href="-fake-bluetooth-repository/bond.html">FakeBluetoothRepository.bond</a> call record the device as bonded and then throw <a href="fail-bond-after-recording.html">error</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1034962248%2FFunctions%2F1783121280" anchor-label="failBondWith" id="1034962248%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fail-bond-with.html"><span>fail</span><wbr><span>Bond</span><wbr><span><span>With</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1034962248%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-fake-bluetooth-repository/index.html">FakeBluetoothRepository</a><span class="token punctuation">.</span><a href="fail-bond-with.html"><span class="token function">failBondWith</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator"> = </span>Exception("bond failed")</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Make the next <a href="-fake-bluetooth-repository/bond.html">FakeBluetoothRepository.bond</a> call throw a generic <a href="fail-bond-with.html">error</a> (the flaky/interrupted-bonding path).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="29659432%2FFunctions%2F-1039831974" anchor-label="failBondWithSecurityException" id="29659432%2FFunctions%2F-1039831974" data-filterable-set=":core:testing/androidMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fail-bond-with-security-exception.html"><span>fail</span><wbr><span>Bond</span><wbr><span>With</span><wbr><span>Security</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="29659432%2FFunctions%2F-1039831974"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain" data-active="" data-toggle=":core:testing/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/androidMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="-fake-bluetooth-repository/index.html">FakeBluetoothRepository</a><span class="token punctuation">.</span><a href="fail-bond-with-security-exception.html"><span class="token function">failBondWithSecurityException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"BLUETOOTH_CONNECT not granted"</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Android-specific override: throw <a href="https://developer.android.com/reference/kotlin/java/lang/SecurityException.html">SecurityException</a> (the missing-permission path on Android). This is needed because <a href="https://developer.android.com/reference/kotlin/java/lang/SecurityException.html">SecurityException</a> is JVM-only and not available in commonMain.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-698288595%2FFunctions%2F1135606900" anchor-label="setupTestContext" id="-698288595%2FFunctions%2F1135606900" data-filterable-set=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain" data-filterable-set=":core:testing/commonMain,:core:testing/androidMain,:core:testing/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="setup-test-context.html"><span>setup</span><wbr><span>Test</span><wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-698288595%2FFunctions%2F1135606900"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:testing/androidMain" data-filterable-set=":core:testing/androidMain" data-active="" data-toggle=":core:testing/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain" data-toggle=":core:testing/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":core:testing/jvmMain" data-filterable-set=":core:testing/jvmMain" data-toggle=":core:testing/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":core:testing/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="setup-test-context.html"><span class="token function">setupTestContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initializes platform-specific test context (e.g., Robolectric on Android).</p></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="setup-test-context.html"><span class="token function">setupTestContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initializes platform-specific test context (e.g., Robolectric on Android).</p></div></div><div class="content sourceset-dependent-content" data-togglable=":core:testing/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="setup-test-context.html"><span class="token function">setupTestContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Initializes platform-specific test context (e.g., Robolectric on Android).</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1788450186%2FFunctions%2F1783121280" anchor-label="toList" id="1788450186%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-list.html"><span>to</span><wbr><span><span>List</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1788450186%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-list.html">T</a><span class="token operator">&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="to-list.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-list.html"><span class="token function">toList</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="to-list.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Collects all emissions from a Flow into a list.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Companion</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:prefs/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:prefs/commonMain" data-filter=":core:prefs/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-prefs::org.meshtastic.core.prefs.ui/UiPrefsImpl.Companion///PointingToDeclaration//752246176">
+  <div class="breadcrumbs"><a href="../../../index.html">core-prefs</a><span class="delimiter">/</span><a href="../../index.html">org.meshtastic.core.prefs.ui</a><span class="delimiter">/</span><a href="../index.html">UiPrefsImpl</a><span class="delimiter">/</span><span class="current">Companion</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Companion</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/UiPrefsImpl.kt#L299">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1423583829%2FProperties%2F752246176" anchor-label="KEY_APP_INTRO_COMPLETED" id="1423583829%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-a-p-p_-i-n-t-r-o_-c-o-m-p-l-e-t-e-d.html"><span>KEY_</span><wbr><span>APP_</span><wbr><span>INTRO_</span><wbr><span>COMPLETED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1423583829%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-a-p-p_-i-n-t-r-o_-c-o-m-p-l-e-t-e-d.html">KEY_APP_INTRO_COMPLETED</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2032391014%2FProperties%2F752246176" anchor-label="KEY_BLE_AUTO_SCAN" id="2032391014%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-b-l-e_-a-u-t-o_-s-c-a-n.html"><span>KEY_</span><wbr><span>BLE_</span><wbr><span>AUTO_</span><wbr><span>SCAN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2032391014%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-b-l-e_-a-u-t-o_-s-c-a-n.html">KEY_BLE_AUTO_SCAN</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2018342903%2FProperties%2F752246176" anchor-label="KEY_EVENT_THEME_ENABLED" id="-2018342903%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-e-v-e-n-t_-t-h-e-m-e_-e-n-a-b-l-e-d.html"><span>KEY_</span><wbr><span>EVENT_</span><wbr><span>THEME_</span><wbr><span>ENABLED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2018342903%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-e-v-e-n-t_-t-h-e-m-e_-e-n-a-b-l-e-d.html">KEY_EVENT_THEME_ENABLED</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1275981219%2FProperties%2F752246176" anchor-label="KEY_EXCLUDE_INFRASTRUCTURE" id="1275981219%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-e-x-c-l-u-d-e_-i-n-f-r-a-s-t-r-u-c-t-u-r-e.html"><span>KEY_</span><wbr><span>EXCLUDE_</span><wbr><span><span>INFRASTRUCTURE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1275981219%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-e-x-c-l-u-d-e_-i-n-f-r-a-s-t-r-u-c-t-u-r-e.html">KEY_EXCLUDE_INFRASTRUCTURE</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1595707010%2FProperties%2F752246176" anchor-label="KEY_EXCLUDE_MQTT" id="1595707010%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-e-x-c-l-u-d-e_-m-q-t-t.html"><span>KEY_</span><wbr><span>EXCLUDE_</span><wbr><span>MQTT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1595707010%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-e-x-c-l-u-d-e_-m-q-t-t.html">KEY_EXCLUDE_MQTT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="247081785%2FProperties%2F752246176" anchor-label="KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS" id="247081785%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-f-i-r-m-w-a-r-e_-u-p-d-a-t-e_-n-o-t-i-f-i-c-a-t-i-o-n_-k-e-y-s.html"><span>KEY_</span><wbr><span>FIRMWARE_</span><wbr><span>UPDATE_</span><wbr><span>NOTIFICATION_</span><wbr><span>KEYS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="247081785%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-f-i-r-m-w-a-r-e_-u-p-d-a-t-e_-n-o-t-i-f-i-c-a-t-i-o-n_-k-e-y-s.html">KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-380175038%2FProperties%2F752246176" anchor-label="KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF" id="-380175038%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-h-a-s_-s-h-o-w-n_-n-o-t_-p-a-i-r-e-d_-w-a-r-n-i-n-g_-p-r-e-f.html"><span>KEY_</span><wbr><span>HAS_</span><wbr><span>SHOWN_</span><wbr><span>NOT_</span><wbr><span>PAIRED_</span><wbr><span>WARNING_</span><wbr><span>PREF</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-380175038%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-h-a-s_-s-h-o-w-n_-n-o-t_-p-a-i-r-e-d_-w-a-r-n-i-n-g_-p-r-e-f.html">KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2069213116%2FProperties%2F752246176" anchor-label="KEY_INCLUDE_UNKNOWN" id="2069213116%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-i-n-c-l-u-d-e_-u-n-k-n-o-w-n.html"><span>KEY_</span><wbr><span>INCLUDE_</span><wbr><span>UNKNOWN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2069213116%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-i-n-c-l-u-d-e_-u-n-k-n-o-w-n.html">KEY_INCLUDE_UNKNOWN</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-873311663%2FProperties%2F752246176" anchor-label="KEY_LOCALE" id="-873311663%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-l-o-c-a-l-e.html"><span>KEY_</span><wbr><span>LOCALE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-873311663%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-l-o-c-a-l-e.html">KEY_LOCALE</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-344044365%2FProperties%2F752246176" anchor-label="KEY_NETWORK_AUTO_SCAN" id="-344044365%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-n-e-t-w-o-r-k_-a-u-t-o_-s-c-a-n.html"><span>KEY_</span><wbr><span>NETWORK_</span><wbr><span>AUTO_</span><wbr><span>SCAN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-344044365%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-n-e-t-w-o-r-k_-a-u-t-o_-s-c-a-n.html">KEY_NETWORK_AUTO_SCAN</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-974943244%2FProperties%2F752246176" anchor-label="KEY_NODE_SORT" id="-974943244%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-n-o-d-e_-s-o-r-t.html"><span>KEY_</span><wbr><span>NODE_</span><wbr><span>SORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-974943244%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-n-o-d-e_-s-o-r-t.html">KEY_NODE_SORT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-10412941%2FProperties%2F752246176" anchor-label="KEY_ONLY_DIRECT" id="-10412941%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-o-n-l-y_-d-i-r-e-c-t.html"><span>KEY_</span><wbr><span>ONLY_</span><wbr><span>DIRECT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-10412941%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-o-n-l-y_-d-i-r-e-c-t.html">KEY_ONLY_DIRECT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="249933129%2FProperties%2F752246176" anchor-label="KEY_ONLY_ONLINE" id="249933129%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-o-n-l-y_-o-n-l-i-n-e.html"><span>KEY_</span><wbr><span>ONLY_</span><wbr><span>ONLINE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="249933129%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-o-n-l-y_-o-n-l-i-n-e.html">KEY_ONLY_ONLINE</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1876944835%2FProperties%2F752246176" anchor-label="KEY_SELECTED_CONNECTION_TRANSPORT" id="1876944835%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-e-l-e-c-t-e-d_-c-o-n-n-e-c-t-i-o-n_-t-r-a-n-s-p-o-r-t.html"><span>KEY_</span><wbr><span>SELECTED_</span><wbr><span>CONNECTION_</span><wbr><span>TRANSPORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1876944835%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-e-l-e-c-t-e-d_-c-o-n-n-e-c-t-i-o-n_-t-r-a-n-s-p-o-r-t.html">KEY_SELECTED_CONNECTION_TRANSPORT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1645005960%2FProperties%2F752246176" anchor-label="KEY_SHOW_BLE_TRANSPORT" id="1645005960%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-h-o-w_-b-l-e_-t-r-a-n-s-p-o-r-t.html"><span>KEY_</span><wbr><span>SHOW_</span><wbr><span>BLE_</span><wbr><span>TRANSPORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1645005960%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-h-o-w_-b-l-e_-t-r-a-n-s-p-o-r-t.html">KEY_SHOW_BLE_TRANSPORT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="481388923%2FProperties%2F752246176" anchor-label="KEY_SHOW_IGNORED" id="481388923%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-h-o-w_-i-g-n-o-r-e-d.html"><span>KEY_</span><wbr><span>SHOW_</span><wbr><span>IGNORED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="481388923%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-h-o-w_-i-g-n-o-r-e-d.html">KEY_SHOW_IGNORED</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-329824555%2FProperties%2F752246176" anchor-label="KEY_SHOW_NETWORK_TRANSPORT" id="-329824555%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-h-o-w_-n-e-t-w-o-r-k_-t-r-a-n-s-p-o-r-t.html"><span>KEY_</span><wbr><span>SHOW_</span><wbr><span>NETWORK_</span><wbr><span>TRANSPORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-329824555%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-h-o-w_-n-e-t-w-o-r-k_-t-r-a-n-s-p-o-r-t.html">KEY_SHOW_NETWORK_TRANSPORT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-383350219%2FProperties%2F752246176" anchor-label="KEY_SHOW_QUICK_CHAT_PREF" id="-383350219%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-h-o-w_-q-u-i-c-k_-c-h-a-t_-p-r-e-f.html"><span>KEY_</span><wbr><span>SHOW_</span><wbr><span>QUICK_</span><wbr><span>CHAT_</span><wbr><span>PREF</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-383350219%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-h-o-w_-q-u-i-c-k_-c-h-a-t_-p-r-e-f.html">KEY_SHOW_QUICK_CHAT_PREF</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-939029569%2FProperties%2F752246176" anchor-label="KEY_SHOW_USB_TRANSPORT" id="-939029569%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-s-h-o-w_-u-s-b_-t-r-a-n-s-p-o-r-t.html"><span>KEY_</span><wbr><span>SHOW_</span><wbr><span>USB_</span><wbr><span>TRANSPORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-939029569%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-s-h-o-w_-u-s-b_-t-r-a-n-s-p-o-r-t.html">KEY_SHOW_USB_TRANSPORT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1462648634%2FProperties%2F752246176" anchor-label="KEY_THEME" id="-1462648634%2FProperties%2F752246176" data-filterable-set=":core:prefs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:prefs/commonMain" data-filterable-set=":core:prefs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-k-e-y_-t-h-e-m-e.html"><span>KEY_</span><wbr><span>THEME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1462648634%2FProperties%2F752246176"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:prefs/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-k-e-y_-t-h-e-m-e.html">KEY_THEME</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/datastore/preferences/core/Preferences.Key.html">Preferences.Key</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

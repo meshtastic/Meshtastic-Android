@@ -1,0 +1,500 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>org.meshtastic.core.data.manager</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:data/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:data/commonMain" data-filter=":core:data/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="core-data::org.meshtastic.core.data.manager////PointingToDeclaration//-367135906">
+  <div class="breadcrumbs"><a href="../index.html">core-data</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.data.manager</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-1953405992%2FClasslikes%2F-367135906" anchor-label="AdminPacketHandlerImpl" id="-1953405992%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-admin-packet-handler-impl/index.html"><span>Admin</span><wbr><span>Packet</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1953405992%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-admin-packet-handler-impl/index.html">AdminPacketHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">configHandler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-handler/index.html">MeshConfigHandler</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">configFlowManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-flow-manager/index.html">MeshConfigFlowManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">sessionManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-session-manager/index.html">SessionManager</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-admin-packet-handler/index.html">AdminPacketHandler</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-admin-packet-handler/index.html">AdminPacketHandler</a> that processes admin messages, including session passkeys, device/module configuration, and metadata.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-33022793%2FClasslikes%2F-367135906" anchor-label="CommandSenderImpl" id="-33022793%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-command-sender-impl/index.html"><span>Command</span><wbr><span>Sender</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-33022793%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-command-sender-impl/index.html">CommandSenderImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">tracerouteHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-handler/index.html">TracerouteHandler</a><span class="token punctuation">, </span></span><span class="parameter ">neighborInfoHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-neighbor-info-handler/index.html">NeighborInfoHandler</a><span class="token punctuation">, </span></span><span class="parameter ">sessionManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-session-manager/index.html">SessionManager</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="746645761%2FClasslikes%2F-367135906" anchor-label="DataLayerHeartbeatSender" id="746645761%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-data-layer-heartbeat-sender/index.html"><span>Data</span><wbr><span>Layer</span><wbr><span>Heartbeat</span><wbr><span><span>Sender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="746645761%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-data-layer-heartbeat-sender/index.html">DataLayerHeartbeatSender</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Centralized heartbeat sender for the data layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="415590617%2FClasslikes%2F-367135906" anchor-label="DiscoveryPacketCollectorRegistryImpl" id="415590617%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-discovery-packet-collector-registry-impl/index.html"><span>Discovery</span><wbr><span>Packet</span><wbr><span>Collector</span><wbr><span>Registry</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="415590617%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-discovery-packet-collector-registry-impl/index.html">DiscoveryPacketCollectorRegistryImpl</a> : <a href="../../../core/repository/org.meshtastic.core.repository/-discovery-packet-collector-registry/index.html">DiscoveryPacketCollectorRegistry</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-367837318%2FClasslikes%2F-367135906" anchor-label="FromRadioPacketHandlerImpl" id="-367837318%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-from-radio-packet-handler-impl/index.html"><span>From</span><wbr><span>Radio</span><wbr><span>Packet</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-367837318%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-from-radio-packet-handler-impl/index.html">FromRadioPacketHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">configFlowManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-flow-manager/index.html">MeshConfigFlowManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">configHandler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-handler/index.html">MeshConfigHandler</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">xmodemManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-x-modem-manager/index.html">XModemManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">mqttManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mqtt-manager/index.html">MqttManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">lockdownCoordinator<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a><span class="token punctuation">, </span></span><span class="parameter ">firmwareUpdateStatusRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-firmware-update-status-repository/index.html">FirmwareUpdateStatusRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-from-radio-packet-handler/index.html">FromRadioPacketHandler</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-from-radio-packet-handler/index.html">FromRadioPacketHandler</a> that dispatches <span data-unresolved-link="org.meshtastic.proto/FromRadio///PointingToDeclaration/">FromRadio</span> variants to specialized handlers.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1318832264%2FClasslikes%2F-367135906" anchor-label="GeofenceCrossingStore" id="-1318832264%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-geofence-crossing-store/index.html"><span>Geofence</span><wbr><span>Crossing</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1318832264%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-geofence-crossing-store/index.html">GeofenceCrossingStore</a></div><div class="brief "><p class="paragraph">In-memory inside/outside state per <code class="lang-kotlin">(waypointId, nodeNum)</code>. NOT persisted: a relaunch re-baselines, which is exactly what prevents spurious alerts at startup. Mutated from the service scope as positions arrive, so guarded by a <span data-unresolved-link="kotlinx.coroutines.sync/Mutex///PointingToDeclaration/">Mutex</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="901328221%2FClasslikes%2F-367135906" anchor-label="GeofenceMonitor" id="901328221%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-geofence-monitor/index.html"><span>Geofence</span><wbr><span><span>Monitor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="901328221%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-geofence-monitor/index.html">GeofenceMonitor</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">crossingStore<span class="token operator">: </span><a href="-geofence-crossing-store/index.html">GeofenceCrossingStore</a><span class="token punctuation">, </span></span><span class="parameter ">notificationPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Raises a LOCAL notification when another mesh node's reported position crosses a waypoint's geofence. Evaluation runs against OTHER nodes' positions arriving over the mesh — never the device's own location — so this is manual point-in-region math, NOT the OS Geofencing API.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-966502026%2FClasslikes%2F-367135906" anchor-label="GeofenceTransition" id="-966502026%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-geofence-transition/index.html"><span>Geofence</span><wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-966502026%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-geofence-transition/index.html">GeofenceTransition</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-geofence-transition/index.html">GeofenceTransition</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">The transition observed when a node's inside/outside state for a geofence is updated.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1580244146%2FClasslikes%2F-367135906" anchor-label="HistoryManagerImpl" id="1580244146%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-history-manager-impl/index.html"><span>History</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1580244146%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-history-manager-impl/index.html">HistoryManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">meshPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-prefs/index.html">MeshPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-history-manager/index.html">HistoryManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="666595284%2FClasslikes%2F-367135906" anchor-label="LockdownCoordinatorImpl" id="666595284%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-lockdown-coordinator-impl/index.html"><span>Lockdown</span><wbr><span>Coordinator</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="666595284%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-lockdown-coordinator-impl/index.html">LockdownCoordinatorImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">commandSender<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a><span class="token punctuation">, </span></span><span class="parameter ">passphraseStore<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-passphrase-store/index.html">LockdownPassphraseStore</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a></div><div class="brief "><p class="paragraph">Lockdown authentication state machine. Processes <code class="lang-kotlin">LockdownStatus</code> messages from the firmware, drives the <code class="lang-kotlin">LockdownState</code> exposed to the UI, and manages auto-replay of cached passphrases.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="812050055%2FClasslikes%2F-367135906" anchor-label="MeshConfigFlowManagerImpl" id="812050055%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-config-flow-manager-impl/index.html"><span>Mesh</span><wbr><span>Config</span><wbr><span>Flow</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="812050055%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-config-flow-manager-impl/index.html">MeshConfigFlowManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">analytics<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-platform-analytics/index.html">PlatformAnalytics</a><span class="token punctuation">, </span></span><span class="parameter ">commandSender<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a><span class="token punctuation">, </span></span><span class="parameter ">heartbeatSender<span class="token operator">: </span><a href="-data-layer-heartbeat-sender/index.html">DataLayerHeartbeatSender</a><span class="token punctuation">, </span></span><span class="parameter ">notificationPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-prefs/index.html">NotificationPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-flow-manager/index.html">MeshConfigFlowManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1640989636%2FClasslikes%2F-367135906" anchor-label="MeshConfigHandlerImpl" id="-1640989636%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-config-handler-impl/index.html"><span>Mesh</span><wbr><span>Config</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1640989636%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-config-handler-impl/index.html">MeshConfigHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-config-handler/index.html">MeshConfigHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1512780075%2FClasslikes%2F-367135906" anchor-label="MeshConnectionManagerImpl" id="-1512780075%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-connection-manager-impl/index.html"><span>Mesh</span><wbr><span>Connection</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1512780075%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-connection-manager-impl/index.html">MeshConnectionManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">serviceRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">uiPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-ui-prefs/index.html">UiPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">locationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-location-manager/index.html">MeshLocationManager</a><span class="token punctuation">, </span></span><span class="parameter ">mqttManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mqtt-manager/index.html">MqttManager</a><span class="token punctuation">, </span></span><span class="parameter ">historyManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-history-manager/index.html">HistoryManager</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">commandSender<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-command-sender/index.html">CommandSender</a><span class="token punctuation">, </span></span><span class="parameter ">sessionManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-session-manager/index.html">SessionManager</a><span class="token punctuation">, </span></span><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">analytics<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-platform-analytics/index.html">PlatformAnalytics</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">workerManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-worker-manager/index.html">MeshWorkerManager</a><span class="token punctuation">, </span></span><span class="parameter ">appWidgetUpdater<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-app-widget-updater/index.html">AppWidgetUpdater</a><span class="token punctuation">, </span></span><span class="parameter ">heartbeatSender<span class="token operator">: </span><a href="-data-layer-heartbeat-sender/index.html">DataLayerHeartbeatSender</a><span class="token punctuation">, </span></span><span class="parameter ">lockdownCoordinator<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-lockdown-coordinator/index.html">LockdownCoordinator</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token punctuation">, </span></span><span class="parameter ">nodeRestartTracker<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-restart-tracker/index.html">NodeRestartTracker</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1237486236%2FClasslikes%2F-367135906" anchor-label="MeshDataHandlerImpl" id="-1237486236%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-data-handler-impl/index.html"><span>Mesh</span><wbr><span>Data</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1237486236%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-data-handler-impl/index.html">MeshDataHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">serviceNotifications<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-notification-manager/index.html">MeshNotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">analytics<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-platform-analytics/index.html">PlatformAnalytics</a><span class="token punctuation">, </span></span><span class="parameter ">dataMapper<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model.util/-mesh-data-mapper/index.html">MeshDataMapper</a><span class="token punctuation">, </span></span><span class="parameter ">tracerouteHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-handler/index.html">TracerouteHandler</a><span class="token punctuation">, </span></span><span class="parameter ">neighborInfoHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-neighbor-info-handler/index.html">NeighborInfoHandler</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">messageFilter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-message-filter/index.html">MessageFilter</a><span class="token punctuation">, </span></span><span class="parameter ">storeForwardHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-store-forward-packet-handler/index.html">StoreForwardPacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">telemetryHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-telemetry-packet-handler/index.html">TelemetryPacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">adminPacketHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-admin-packet-handler/index.html">AdminPacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">collectorRegistry<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-discovery-packet-collector-registry/index.html">DiscoveryPacketCollectorRegistry</a><span class="token punctuation">, </span></span><span class="parameter ">geofenceMonitor<span class="token operator">: </span><a href="-geofence-monitor/index.html">GeofenceMonitor</a><span class="token punctuation">, </span></span><span class="parameter ">meshBeaconRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-beacon-repository/index.html">MeshBeaconRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-data-handler/index.html">MeshDataHandler</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-data-handler/index.html">MeshDataHandler</a> that decodes and routes incoming mesh data packets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-920424013%2FClasslikes%2F-367135906" anchor-label="MeshMessageProcessorImpl" id="-920424013%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mesh-message-processor-impl/index.html"><span>Mesh</span><wbr><span>Message</span><wbr><span>Processor</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-920424013%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mesh-message-processor-impl/index.html">MeshMessageProcessorImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dataHandler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-data-handler/index.html">MeshDataHandler</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">fromRadioDispatcher<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-from-radio-packet-handler/index.html">FromRadioPacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-message-processor/index.html">MeshMessageProcessor</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-mesh-message-processor/index.html">MeshMessageProcessor</a> that handles raw radio messages and prepares mesh packets for routing.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1209123816%2FClasslikes%2F-367135906" anchor-label="MessageFilterImpl" id="-1209123816%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-filter-impl/index.html"><span>Message</span><wbr><span>Filter</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1209123816%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-message-filter-impl/index.html">MessageFilterImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">filterPrefs<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-filter-prefs/index.html">FilterPrefs</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-message-filter/index.html">MessageFilter</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-message-filter/index.html">MessageFilter</a> that uses regex and plain text matching.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1520880562%2FClasslikes%2F-367135906" anchor-label="MqttManagerImpl" id="-1520880562%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-mqtt-manager-impl/index.html"><span>Mqtt</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1520880562%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-mqtt-manager-impl/index.html">MqttManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mqttRepository<span class="token operator">: </span><a href="../../../core/network/org.meshtastic.core.network.repository/-m-q-t-t-repository/index.html">MQTTRepository</a><span class="token punctuation">, </span></span><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-mqtt-manager/index.html">MqttManager</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1704751469%2FClasslikes%2F-367135906" anchor-label="NeighborInfoHandlerImpl" id="1704751469%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-neighbor-info-handler-impl/index.html"><span>Neighbor</span><wbr><span>Info</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1704751469%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-neighbor-info-handler-impl/index.html">NeighborInfoHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-neighbor-info-handler/index.html">NeighborInfoHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="779487276%2FClasslikes%2F-367135906" anchor-label="NodeManagerImpl" id="779487276%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-node-manager-impl/index.html"><span>Node</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="779487276%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-node-manager-impl/index.html">NodeManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a> that maintains an in-memory database of the mesh.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="362308533%2FClasslikes%2F-367135906" anchor-label="PacketHandlerImpl" id="362308533%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-packet-handler-impl/index.html"><span>Packet</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="362308533%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-packet-handler-impl/index.html">PacketHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">meshLogRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-log-repository/index.html">MeshLogRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">connectionStateProvider<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-connection-state-provider/index.html">ConnectionStateProvider</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="286908852%2FClasslikes%2F-367135906" anchor-label="SessionManagerImpl" id="286908852%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-session-manager-impl/index.html"><span>Session</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="286908852%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-session-manager-impl/index.html">SessionManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">clock<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-clock/index.html">Clock</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-session-manager/index.html">SessionManager</a></div><div class="brief "><p class="paragraph">In-memory implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-session-manager/index.html">SessionManager</a> backed by an atomicfu-protected <span data-unresolved-link="kotlinx.collections.immutable/PersistentMap///PointingToDeclaration/">PersistentMap</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-553595783%2FClasslikes%2F-367135906" anchor-label="StoreForwardPacketHandlerImpl" id="-553595783%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-store-forward-packet-handler-impl/index.html"><span>Store</span><wbr><span>Forward</span><wbr><span>Packet</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-553595783%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-store-forward-packet-handler-impl/index.html">StoreForwardPacketHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">historyManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-history-manager/index.html">HistoryManager</a><span class="token punctuation">, </span></span><span class="parameter ">dataHandler<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-data-handler/index.html">MeshDataHandler</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-store-forward-packet-handler/index.html">StoreForwardPacketHandler</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-store-forward-packet-handler/index.html">StoreForwardPacketHandler</a> that handles both legacy S&amp;F and SF++ packets.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1271530178%2FClasslikes%2F-367135906" anchor-label="TelemetryPacketHandlerImpl" id="1271530178%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-telemetry-packet-handler-impl/index.html"><span>Telemetry</span><wbr><span>Packet</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1271530178%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-telemetry-packet-handler-impl/index.html">TelemetryPacketHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nodeManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-manager/index.html">NodeManager</a><span class="token punctuation">, </span></span><span class="parameter ">connectionManager<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-lazy/index.html">Lazy</a><span class="token operator">&lt;</span><a href="../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-notification-manager/index.html">NotificationManager</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-telemetry-packet-handler/index.html">TelemetryPacketHandler</a></div><div class="brief "><p class="paragraph">Implementation of <a href="../../../core/repository/org.meshtastic.core.repository/-telemetry-packet-handler/index.html">TelemetryPacketHandler</a> that processes telemetry packets and manages battery-level notifications with cooldown logic.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="578009681%2FClasslikes%2F-367135906" anchor-label="TracerouteHandlerImpl" id="578009681%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-traceroute-handler-impl/index.html"><span>Traceroute</span><wbr><span>Handler</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="578009681%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-traceroute-handler-impl/index.html">TracerouteHandlerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceStateWriter<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-service-state-writer/index.html">ServiceStateWriter</a><span class="token punctuation">, </span></span><span class="parameter ">tracerouteSnapshotRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-snapshot-repository/index.html">TracerouteSnapshotRepository</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioInterfaceService<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-traceroute-handler/index.html">TracerouteHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2083776964%2FClasslikes%2F-367135906" anchor-label="XModemManagerImpl" id="-2083776964%2FClasslikes%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-x-modem-manager-impl/index.html"><span>XModem</span><wbr><span>Manager</span><wbr><span><span>Impl</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2083776964%2FClasslikes%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-x-modem-manager-impl/index.html">XModemManagerImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetHandler<span class="token operator">: </span><a href="../../../core/repository/org.meshtastic.core.repository/-packet-handler/index.html">PacketHandler</a></span></span><span class="token punctuation">)</span> : <a href="../../../core/repository/org.meshtastic.core.repository/-x-modem-manager/index.html">XModemManager</a></div><div class="brief "><p class="paragraph">XModem-CRC receiver state machine.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

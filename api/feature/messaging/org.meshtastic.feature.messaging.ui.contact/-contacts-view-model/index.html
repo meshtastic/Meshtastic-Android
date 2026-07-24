@@ -1,0 +1,408 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ContactsViewModel</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:messaging/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:messaging/commonMain" data-filter=":feature:messaging/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-messaging::org.meshtastic.feature.messaging.ui.contact/ContactsViewModel///PointingToDeclaration//340326585">
+  <div class="breadcrumbs"><a href="../../index.html">feature-messaging</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.messaging.ui.contact</a><span class="delimiter">/</span><span class="current">ContactsViewModel</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Contacts</span><wbr><span>View</span><wbr><span><span>Model</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ContactsViewModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">savedStateHandle<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/SavedStateHandle.html">SavedStateHandle</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">connectionStateProvider<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-connection-state-provider/index.html">ConnectionStateProvider</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/ViewModel.html">ViewModel</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/ui/contact/ContactsViewModel.kt#L45">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="2145907816%2FConstructors%2F340326585" anchor-label="ContactsViewModel" id="2145907816%2FConstructors%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-contacts-view-model.html"><span>Contacts</span><wbr><span>View</span><wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2145907816%2FConstructors%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">savedStateHandle<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/SavedStateHandle.html">SavedStateHandle</a><span class="token punctuation">, </span></span><span class="parameter ">nodeRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-node-repository/index.html">NodeRepository</a><span class="token punctuation">, </span></span><span class="parameter ">packetRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="token punctuation">, </span></span><span class="parameter ">radioConfigRepository<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-radio-config-repository/index.html">RadioConfigRepository</a><span class="token punctuation">, </span></span><span class="parameter ">connectionStateProvider<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-connection-state-provider/index.html">ConnectionStateProvider</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-564811846%2FClasslikes%2F340326585" anchor-label="Companion" id="-564811846%2FClasslikes%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-564811846%2FClasslikes%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="842467447%2FProperties%2F340326585" anchor-label="channels" id="842467447%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="channels.html"><span><span>channels</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="842467447%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="channels.html">channels</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ChannelSet///PointingToDeclaration/">ChannelSet</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-772462994%2FProperties%2F340326585" anchor-label="collapsedSections" id="-772462994%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="collapsed-sections.html"><span>collapsed</span><wbr><span><span>Sections</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772462994%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="collapsed-sections.html">collapsedSections</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Collapsed conversation-list section keys (see <a href="../-contact-section/index.html">ContactSection</a>), persisted across process death.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="510097664%2FProperties%2F340326585" anchor-label="connectionState" id="510097664%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-state.html"><span>connection</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="510097664%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="connection-state.html">connectionState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-connection-state/index.html">ConnectionState</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-837820971%2FProperties%2F340326585" anchor-label="contactList" id="-837820971%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="contact-list.html"><span>contact</span><wbr><span><span>List</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-837820971%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="contact-list.html">contactList</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-contact/index.html">Contact</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and ShareScreen. ContactsScreen groups it into collapsible Channels/DirectMessages sections at render time.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1278517449%2FProperties%2F340326585" anchor-label="ourNodeInfo" id="-1278517449%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="our-node-info.html"><span>our</span><wbr><span>Node</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1278517449%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="our-node-info.html">ourNodeInfo</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="346671171%2FProperties%2F340326585" anchor-label="unreadCountTotal" id="346671171%2FProperties%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="unread-count-total.html"><span>unread</span><wbr><span>Count</span><wbr><span><span>Total</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="346671171%2FProperties%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="unread-count-total.html">unreadCountTotal</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-462089743%2FFunctions%2F340326585" anchor-label="addCloseable" id="-462089743%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2068605057%2FFunctions%2F340326585"><span>add</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-462089743%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2068605057%2FFunctions%2F340326585"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="index.html#2093014716%2FFunctions%2F340326585"><span class="token function">addCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">closeable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1532508557%2FFunctions%2F340326585" anchor-label="deleteContacts" id="-1532508557%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-contacts.html"><span>delete</span><wbr><span><span>Contacts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1532508557%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="delete-contacts.html"><span class="token function">deleteContacts</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contacts<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102255800%2FFunctions%2F340326585" anchor-label="getCloseable" id="1102255800%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1102255800%2FFunctions%2F340326585"><span>get</span><wbr><span><span>Closeable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102255800%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#1102255800%2FFunctions%2F340326585">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-auto-closeable/index.html">AutoCloseable</a><span class="token operator">&gt; </span><a href="index.html#1102255800%2FFunctions%2F340326585"><span class="token function">getCloseable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#1102255800%2FFunctions%2F340326585">T</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="362382394%2FFunctions%2F340326585" anchor-label="getContactSettings" id="362382394%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-contact-settings.html"><span>get</span><wbr><span>Contact</span><wbr><span><span>Settings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="362382394%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-contact-settings.html"><span class="token function">getContactSettings</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="../../../../core/model/org.meshtastic.core.model/-contact-settings/index.html">ContactSettings</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-437198950%2FFunctions%2F340326585" anchor-label="getNode" id="-437198950%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-node.html"><span>get</span><wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-437198950%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-node.html"><span class="token function">getNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-node/index.html">Node</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1358441755%2FFunctions%2F340326585" anchor-label="getTotalMessageCount" id="1358441755%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-total-message-count.html"><span>get</span><wbr><span>Total</span><wbr><span>Message</span><wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1358441755%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-total-message-count.html"><span class="token function">getTotalMessageCount</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKeys<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Get the total message count for a list of contact keys. This queries the repository directly, so it works even if a contact isn't currently loaded in the list.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="926779735%2FFunctions%2F340326585" anchor-label="markAllAsRead" id="926779735%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mark-all-as-read.html"><span>mark</span><wbr><span>All</span><wbr><span>As</span><wbr><span><span>Read</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="926779735%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="mark-all-as-read.html"><span class="token function">markAllAsRead</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1021962539%2FFunctions%2F340326585" anchor-label="setContactFilteringDisabled" id="1021962539%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-contact-filtering-disabled.html"><span>set</span><wbr><span>Contact</span><wbr><span>Filtering</span><wbr><span><span>Disabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1021962539%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-contact-filtering-disabled.html"><span class="token function">setContactFilteringDisabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">disabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-880370872%2FFunctions%2F340326585" anchor-label="setMuteUntil" id="-880370872%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-mute-until.html"><span>set</span><wbr><span>Mute</span><wbr><span><span>Until</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-880370872%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-mute-until.html"><span class="token function">setMuteUntil</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">contacts<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">until<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/Job///PointingToDeclaration/">Job</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-282309713%2FFunctions%2F340326585" anchor-label="toggleSectionCollapse" id="-282309713%2FFunctions%2F340326585" data-filterable-set=":feature:messaging/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:messaging/commonMain" data-filterable-set=":feature:messaging/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="toggle-section-collapse.html"><span>toggle</span><wbr><span>Section</span><wbr><span><span>Collapse</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-282309713%2FFunctions%2F340326585"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:messaging/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="toggle-section-collapse.html"><span class="token function">toggleSectionCollapse</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sectionKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

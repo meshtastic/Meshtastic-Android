@@ -1,0 +1,513 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>CoTMessage</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:takserver/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:takserver/commonMain" data-filter=":core:takserver/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-takserver::org.meshtastic.core.takserver/CoTMessage///PointingToDeclaration//-470374703">
+  <div class="breadcrumbs"><a href="../../index.html">core-takserver</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.takserver</a><span class="delimiter">/</span><span class="current">CoTMessage</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Co</span><wbr><span><span>TMessage</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">CoTMessage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>uid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>time<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>Clock.System.now()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>start<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>time<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>stale<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>how<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"m-g"</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>hae<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>ce<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>le<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>contact<span class="token operator">: </span><a href="../-co-t-contact/index.html">CoTContact</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>group<span class="token operator">: </span><a href="../-co-t-group/index.html">CoTGroup</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>status<span class="token operator">: </span><a href="../-co-t-status/index.html">CoTStatus</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>track<span class="token operator">: </span><a href="../-co-t-track/index.html">CoTTrack</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>chat<span class="token operator">: </span><a href="../-co-t-chat/index.html">CoTChat</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>remarks<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>rawDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>parsedDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sourceEventXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/takserver/src/commonMain/kotlin/org/meshtastic/core/takserver/TAKModels.kt#L27">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-352555792%2FConstructors%2F-470374703" anchor-label="CoTMessage" id="-352555792%2FConstructors%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-co-t-message.html"><span>Co</span><wbr><span><span>TMessage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-352555792%2FConstructors%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">time<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>Clock.System.now()<span class="token punctuation">, </span></span><span class="parameter ">start<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator"> = </span>time<span class="token punctuation">, </span></span><span class="parameter ">stale<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token punctuation">, </span></span><span class="parameter ">how<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"m-g"</span><span class="token punctuation">, </span></span><span class="parameter ">latitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter ">longitude<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span><span class="token punctuation">, </span></span><span class="parameter ">hae<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter ">ce<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter ">le<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>TAK_UNKNOWN_POINT_VALUE<span class="token punctuation">, </span></span><span class="parameter ">contact<span class="token operator">: </span><a href="../-co-t-contact/index.html">CoTContact</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">group<span class="token operator">: </span><a href="../-co-t-group/index.html">CoTGroup</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../-co-t-status/index.html">CoTStatus</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">track<span class="token operator">: </span><a href="../-co-t-track/index.html">CoTTrack</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">chat<span class="token operator">: </span><a href="../-co-t-chat/index.html">CoTChat</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">remarks<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">rawDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">parsedDetailXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">sourceEventXml<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="661017574%2FClasslikes%2F-470374703" anchor-label="Companion" id="661017574%2FClasslikes%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="661017574%2FClasslikes%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="694363385%2FProperties%2F-470374703" anchor-label="ce" id="694363385%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ce.html"><span><span>ce</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="694363385%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="ce.html">ce</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-718545085%2FProperties%2F-470374703" anchor-label="chat" id="-718545085%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="chat.html"><span><span>chat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-718545085%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="chat.html">chat</a><span class="token operator">: </span><a href="../-co-t-chat/index.html">CoTChat</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="876319487%2FProperties%2F-470374703" anchor-label="contact" id="876319487%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="contact.html"><span><span>contact</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="876319487%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="contact.html">contact</a><span class="token operator">: </span><a href="../-co-t-contact/index.html">CoTContact</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="749750784%2FProperties%2F-470374703" anchor-label="group" id="749750784%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="group.html"><span><span>group</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="749750784%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="group.html">group</a><span class="token operator">: </span><a href="../-co-t-group/index.html">CoTGroup</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="357234451%2FProperties%2F-470374703" anchor-label="hae" id="357234451%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="hae.html"><span><span>hae</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="357234451%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="hae.html">hae</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1493285327%2FProperties%2F-470374703" anchor-label="how" id="1493285327%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="how.html"><span><span>how</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1493285327%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="how.html">how</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1899644335%2FProperties%2F-470374703" anchor-label="latitude" id="1899644335%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="latitude.html"><span><span>latitude</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1899644335%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="latitude.html">latitude</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="758954946%2FProperties%2F-470374703" anchor-label="le" id="758954946%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="le.html"><span><span>le</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="758954946%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="le.html">le</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="339045328%2FProperties%2F-470374703" anchor-label="longitude" id="339045328%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="longitude.html"><span><span>longitude</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="339045328%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="longitude.html">longitude</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-734075446%2FProperties%2F-470374703" anchor-label="parsedDetailXml" id="-734075446%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="parsed-detail-xml.html"><span>parsed</span><wbr><span>Detail</span><wbr><span><span>Xml</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-734075446%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="parsed-detail-xml.html">parsedDetailXml</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Inner XML content of <code class="lang-kotlin">&lt;detail&gt;...&lt;/detail&gt;</code> captured by <a href="../-co-t-xml-parser/index.html">CoTXmlParser</a> when this message was parsed from an incoming ATAK client event. Used as the <code class="lang-kotlin">raw_detail</code> fallback payload when converting to <span data-unresolved-link="org.meshtastic.proto/TAKPacketV2///PointingToDeclaration/">org.meshtastic.proto.TAKPacketV2</span> for CoT types that don't fit any structured payload (PLI / GeoChat / Aircraft). Null for messages constructed in-app.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-266597219%2FProperties%2F-470374703" anchor-label="rawDetailXml" id="-266597219%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="raw-detail-xml.html"><span>raw</span><wbr><span>Detail</span><wbr><span><span>Xml</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-266597219%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="raw-detail-xml.html">rawDetailXml</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="317558156%2FProperties%2F-470374703" anchor-label="remarks" id="317558156%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remarks.html"><span><span>remarks</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="317558156%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="remarks.html">remarks</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="151727299%2FProperties%2F-470374703" anchor-label="sourceEventXml" id="151727299%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="source-event-xml.html"><span>source</span><wbr><span>Event</span><wbr><span><span>Xml</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="151727299%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="source-event-xml.html">sourceEventXml</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The entire original <code class="lang-kotlin">&lt;event&gt;...&lt;/event&gt;</code> XML string as received from the ATAK client, captured by <a href="../-co-t-xml-parser/index.html">CoTXmlParser</a>. Kept solely for diagnostic logging (e.g. when a packet exceeds the mesh MTU and is dropped) so the operator can see what the client actually sent. Null for messages constructed in-app.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1137282598%2FProperties%2F-470374703" anchor-label="stale" id="1137282598%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stale.html"><span><span>stale</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1137282598%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="stale.html">stale</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1217670787%2FProperties%2F-470374703" anchor-label="start" id="-1217670787%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1217670787%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="start.html">start</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1369660311%2FProperties%2F-470374703" anchor-label="status" id="-1369660311%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="status.html"><span><span>status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1369660311%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="status.html">status</a><span class="token operator">: </span><a href="../-co-t-status/index.html">CoTStatus</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="408681838%2FProperties%2F-470374703" anchor-label="time" id="408681838%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="time.html"><span><span>time</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="408681838%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="time.html">time</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-116077388%2FProperties%2F-470374703" anchor-label="track" id="-116077388%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="track.html"><span><span>track</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-116077388%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="track.html">track</a><span class="token operator">: </span><a href="../-co-t-track/index.html">CoTTrack</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-782260831%2FProperties%2F-470374703" anchor-label="type" id="-782260831%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="type.html"><span><span>type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-782260831%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="type.html">type</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="412584399%2FProperties%2F-470374703" anchor-label="uid" id="412584399%2FProperties%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="uid.html"><span><span>uid</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="412584399%2FProperties%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="uid.html">uid</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1881019809%2FFunctions%2F-470374703" anchor-label="toTAKPacket" id="-1881019809%2FFunctions%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-t-a-k-packet-conversion/to-t-a-k-packet.html"><span>to</span><wbr><span><span>TAKPacket</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1881019809%2FFunctions%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html">CoTMessage</a><span class="token punctuation">.</span><a href="../-t-a-k-packet-conversion/to-t-a-k-packet.html"><span class="token function">toTAKPacket</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/TAKPacket///PointingToDeclaration/">TAKPacket</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-792866649%2FFunctions%2F-470374703" anchor-label="toTAKPacketV2" id="-792866649%2FFunctions%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-t-a-k-packet-v2-conversion/to-t-a-k-packet-v2.html"><span>to</span><wbr><span>TAKPacket</span><wbr><span><span>V2</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-792866649%2FFunctions%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html">CoTMessage</a><span class="token punctuation">.</span><a href="../-t-a-k-packet-v2-conversion/to-t-a-k-packet-v2.html"><span class="token function">toTAKPacketV2</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/TAKPacketV2///PointingToDeclaration/">TAKPacketV2</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1180252974%2FFunctions%2F-470374703" anchor-label="toXml" id="1180252974%2FFunctions%2F-470374703" data-filterable-set=":core:takserver/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:takserver/commonMain" data-filterable-set=":core:takserver/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../to-xml.html"><span>to</span><wbr><span><span>Xml</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1180252974%2FFunctions%2F-470374703"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:takserver/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html">CoTMessage</a><span class="token punctuation">.</span><a href="../to-xml.html"><span class="token function">toXml</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Serialize this <a href="index.html">CoTMessage</a> to a single <code class="lang-kotlin">&lt;event&gt;</code> XML element suitable for the CoT streaming TCP protocol used by ATAK / iTAK / WinTAK clients.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

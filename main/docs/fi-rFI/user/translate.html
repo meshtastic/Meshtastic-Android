@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fi-rFI" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Käännä sovellus</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="translate" data-locale="fi-rFI">
+<pre class="markdown-content"># Käännä sovellus
+
+Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman laajemmalle yleisölle. Sovellus käyttää [Crowdinia](https://crowdin.com/) yhteisökäännösten hallintaan sekä käyttöliittymän sovelluksen sisäisten dokumentaatioiden hallintaan.
+
+---------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
+ UI-tekstit          | `core/resources/src/commonMain/composeResources/values/strings.xml` | Painikkeet, otsikot, viestit ja kaikki käyttäjälle näkyvä teksti    |
+ Käyttöoppaan sivut  | `docs/en/user/*.md`                                                 | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
+ Fastlane-metatiedot | fastlane/metadata/android/en-US/                                    | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
+
+&gt; ⚠️ **Huomautus:** Kehittäjän oppaan sivut ovat saatavilla vain englanniksi. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
+
+## Uuden kielen lisääminen
+
+Jos kieltäsi ei ole vielä listattu Crowdinissa:
+
+1. Avaa GitHub-issue (https://github.com/meshtastic/Meshtastic-Android/issues/new) ja pyydä uutta kielialuetta.
+2. Ylläpitäjä lisää kielen Crowdin-projektiin ja määrittää `crowdin.yml`-asetukset.
+3. Kun kieli on lisätty, voit aloittaa kääntämisen heti.
+
+## Käännösohjeet
+
+- **Älä käännä** teknisiä termejä kuten "LoRa", "MQTT", "BLE", "TAK", "SNR" tai "RSSI" — nämä ovat yleisiä.
+- **Pidä paikkamerkit ennallaan.** Merkkijonot kuten `%1$s` tai `%d` täytetään ajon aikana. Älä poista tai muuta niiden järjestystä, ellei kielesi kielioppi sitä vaadi.
+- **Säilytä sävy.** Sovellus käyttää ystävällistä ja suoraa tyyliä. Vältä liian muodollista kieltä.
+- **Testaa jos mahdollista.** Vaihda laitteesi kieli ja avaa sovellus nähdäksesi käännökset kontekstissa.
+
+---
+
+## Kysyttävää?
+
+Jos sinulla on kysyttävää tietyn merkkijonon asiayhteydestä tai tarvitset apua alkuun pääsemisessä, avaa keskustelu [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) -sivulla.
+
+Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!
+</pre>
+</body>
+</html>
