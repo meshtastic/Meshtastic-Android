@@ -72,9 +72,11 @@ private const val HEX_RADIX = 16
  */
 internal const val GROUPING_WINDOW_MILLIS = 10 * 60 * 1000L
 
+// Gap measured on displayTime (mesh time), not receivedTime: a backlog sync after being offline delivers hours of
+// conversation with near-identical receipt times, which would otherwise collapse into one block under a single header.
 internal fun isSameGroup(older: Message, newer: Message): Boolean = older.fromLocal == newer.fromLocal &&
     (newer.fromLocal || older.node.num == newer.node.num) &&
-    abs(newer.receivedTime - older.receivedTime) <= GROUPING_WINDOW_MILLIS
+    abs(newer.displayTime - older.displayTime) <= GROUPING_WINDOW_MILLIS
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,

@@ -34,9 +34,10 @@ class MessageGroupingTest {
     private val minnie = NodePreviewParameterProvider().minnieMouse
     private val mickey = NodePreviewParameterProvider().mickeyMouse
 
-    private fun message(fromLocal: Boolean, node: Node, receivedTime: Long) = Message(
+    private fun message(fromLocal: Boolean, node: Node, receivedTime: Long, meshTime: Long = 0L) = Message(
         text = "test",
         time = "10:00",
+        meshTime = meshTime,
         fromLocal = fromLocal,
         status = MessageStatus.RECEIVED,
         snr = 2.5f,
@@ -92,6 +93,30 @@ class MessageGroupingTest {
     fun localRunBeyondWindow_startsNewBlock() {
         val older = message(fromLocal = true, node = mickey, receivedTime = 0L)
         val newer = message(fromLocal = true, node = mickey, receivedTime = GROUPING_WINDOW_MILLIS + 1)
+        assertFalse(isSameGroup(older, newer))
+    }
+
+    @Test
+    fun backlogSyncWithSpreadMeshTimes_startsNewBlock() {
+        // Offline backlog: the phone receives both at once, but they were sent an hour apart on the mesh.
+        val older = message(fromLocal = false, node = minnie, receivedTime = 1_000_000L, meshTime = 0L + 1_000L)
+        val newer =
+            message(fromLocal = false, node = minnie, receivedTime = 1_000_100L, meshTime = 60 * 60 * 1000L + 1_000L)
+        assertFalse(isSameGroup(older, newer))
+    }
+
+    @Test
+    fun backlogSyncWithCloseMeshTimes_groups() {
+        val older = message(fromLocal = false, node = minnie, receivedTime = 1_000_000L, meshTime = 1_000L)
+        val newer = message(fromLocal = false, node = minnie, receivedTime = 1_000_100L, meshTime = 2_000L)
+        assertTrue(isSameGroup(older, newer))
+    }
+
+    @Test
+    fun unstampedMeshTime_fallsBackToReceivedTime() {
+        // rx_time == 0 leaves meshTime unset; grouping must not read every such message as the epoch and merge them.
+        val older = message(fromLocal = false, node = minnie, receivedTime = 0L)
+        val newer = message(fromLocal = false, node = minnie, receivedTime = GROUPING_WINDOW_MILLIS + 1)
         assertFalse(isSameGroup(older, newer))
     }
 
