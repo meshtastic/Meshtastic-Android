@@ -7,6 +7,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* fix(messaging): use mesh time for message timestamps and grouping by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6422
+* fix(strings): correct English subnet label by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6425
+
 ### Internal (v2.8.0-internal.34)
 Changes since [`v2.8.0-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.1):
 
