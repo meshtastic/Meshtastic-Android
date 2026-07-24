@@ -99,3 +99,6 @@ build-scan-*.scan
 
 # Agent session handoff log — local-only scratch, not version-controlled
 .agent_memory/
+
+# Local agent memory (remember plugin) — must never be committed
+.remember/
