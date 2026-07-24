@@ -99,6 +99,7 @@ class MeshNotificationManagerImplConversationTest {
         systemNotificationManager.cancelAll()
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(me)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeInfo?>(null)
+        every { nodeRepository.localStats } returns MutableStateFlow(org.meshtastic.proto.LocalStats())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(7 to sender, 42 to me))
         everySuspend { nodeRepository.getNode(any()) } returns sender
         every { radioConfigRepository.channelSetFlow } returns
