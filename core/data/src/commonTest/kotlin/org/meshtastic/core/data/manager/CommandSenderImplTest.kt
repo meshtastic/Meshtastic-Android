@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -40,6 +41,7 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
@@ -50,6 +52,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -202,6 +205,101 @@ class CommandSenderImplTest {
         verifySuspend { packetHandler.sendToRadio(any<MeshPacket>()) }
     }
 
+    @Test
+    fun sendAdmin_licensedLocalWithKeys_usesSignedPlaintextPacket() = runTest {
+        val packet = sendAdminAndCapture(localLicensed = true, localHasKey = true, destinationHasKey = true)
+
+        assertPlaintextAdminPacket(packet, expectedDestination = DEST_NODE)
+    }
+
+    @Test
+    fun sendAdmin_licensedMutation_usesPlaintextAndIncludesSessionPasskey() = runTest {
+        val passkey = "session-passkey".encodeUtf8()
+        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
+
+        val packet =
+            sendAdminAndCapture(localLicensed = true, localHasKey = true, destinationHasKey = true) {
+                AdminMessage(reboot_seconds = 5)
+            }
+
+        assertPlaintextAdminPacket(packet, expectedDestination = DEST_NODE)
+        val adminMessage = AdminMessage.ADAPTER.decode(requireNotNull(packet.decoded).payload)
+        assertEquals(5, adminMessage.reboot_seconds)
+        assertEquals(passkey, adminMessage.session_passkey)
+    }
+
+    @Test
+    fun sendAdmin_normalLocalWithKeys_preservesPkiPacket() = runTest {
+        val packet = sendAdminAndCapture(localLicensed = false, localHasKey = true, destinationHasKey = true)
+
+        assertEquals(0, packet.channel)
+        assertTrue(packet.pki_encrypted)
+        assertEquals(DESTINATION_PUBLIC_KEY, packet.public_key)
+        assertAdminPacket(packet, expectedDestination = DEST_NODE)
+    }
+
+    @Test
+    fun sendAdmin_self_preservesPlaintextChannelZero() = runTest {
+        val nodes = mapOf(MY_NODE_NUM to node(MY_NODE_NUM, licensed = false, publicKey = LOCAL_PUBLIC_KEY))
+        val packet = sendAdminAndCapture(destination = MY_NODE_NUM, nodes = nodes)
+
+        assertPlaintextAdminPacket(packet, expectedDestination = MY_NODE_NUM)
+    }
+
+    @Test
+    fun sendAdmin_unknownLocalMode_preservesAdminChannelFallback() = runTest {
+        val nodes = mapOf(DEST_NODE to node(DEST_NODE, licensed = true))
+        val packet = sendAdminAndCapture(nodes = nodes, channelSet = adminChannelSet())
+
+        assertEquals(1, packet.channel)
+        assertFalse(packet.pki_encrypted)
+        assertEquals(ByteString.EMPTY, packet.public_key)
+        assertAdminPacket(packet, expectedDestination = DEST_NODE)
+    }
+
+    @Test
+    fun sendAdmin_destinationLicensed_doesNotChangeNormalPkiSelection() = runTest {
+        val nodes =
+            mapOf(
+                MY_NODE_NUM to node(MY_NODE_NUM, licensed = false, publicKey = LOCAL_PUBLIC_KEY),
+                DEST_NODE to node(DEST_NODE, licensed = true, publicKey = DESTINATION_PUBLIC_KEY),
+            )
+        val packet = sendAdminAndCapture(nodes = nodes)
+
+        assertTrue(packet.pki_encrypted)
+        assertEquals(DESTINATION_PUBLIC_KEY, packet.public_key)
+    }
+
+    @Test
+    fun sendAdminAwait_licensedSessionRequest_usesSignedPlaintextPacket() = runTest {
+        val nodes =
+            mapOf(
+                MY_NODE_NUM to node(MY_NODE_NUM, licensed = true, publicKey = LOCAL_PUBLIC_KEY),
+                DEST_NODE to node(DEST_NODE, licensed = false, publicKey = DESTINATION_PUBLIC_KEY),
+            )
+        configureNodes(nodes)
+        val passkey = "await-session-passkey".encodeUtf8()
+        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
+        var capturedPacket: MeshPacket? = null
+        everySuspend { packetHandler.sendToRadioAndAwait(any<MeshPacket>()) } calls
+            { call ->
+                capturedPacket = call.args[0] as MeshPacket
+                true
+            }
+
+        val accepted =
+            commandSender.sendAdminAwait(DEST_NODE, wantResponse = true) {
+                AdminMessage(get_device_metadata_request = true)
+            }
+
+        assertTrue(accepted)
+        val packet = requireNotNull(capturedPacket)
+        assertPlaintextAdminPacket(packet, expectedDestination = DEST_NODE)
+        assertTrue(packet.decoded?.want_response == true)
+        val adminMessage = AdminMessage.ADAPTER.decode(requireNotNull(packet.decoded).payload)
+        assertEquals(passkey, adminMessage.session_passkey)
+    }
+
     // --- requestTraceroute ---
 
     @Test
@@ -286,8 +384,78 @@ class CommandSenderImplTest {
         }
     }
 
+    private suspend fun sendAdminAndCapture(
+        destination: Int = DEST_NODE,
+        localLicensed: Boolean = false,
+        localHasKey: Boolean = false,
+        destinationHasKey: Boolean = false,
+        nodes: Map<Int, Node> =
+            mapOf(
+                MY_NODE_NUM to
+                    node(MY_NODE_NUM, licensed = localLicensed, publicKey = LOCAL_PUBLIC_KEY.takeIf { localHasKey }),
+                DEST_NODE to node(DEST_NODE, publicKey = DESTINATION_PUBLIC_KEY.takeIf { destinationHasKey }),
+            ),
+        channelSet: ChannelSet = ChannelSet(),
+        adminMessage: () -> AdminMessage = { AdminMessage(get_owner_request = true) },
+    ): MeshPacket {
+        configureNodes(nodes, channelSet)
+        var capturedPacket: MeshPacket? = null
+        everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } calls
+            { call ->
+                capturedPacket = call.args[0] as MeshPacket
+            }
+
+        commandSender.sendAdmin(destination, wantResponse = true, initFn = adminMessage)
+
+        return requireNotNull(capturedPacket)
+    }
+
+    private fun configureNodes(nodes: Map<Int, Node>, channelSet: ChannelSet = ChannelSet()) {
+        every { nodeManager.nodeDBbyNodeNum } returns nodes
+        every { radioConfigRepository.channelSetFlow } returns flowOf(channelSet)
+        val testScope = TestScope()
+        commandSender =
+            CommandSenderImpl(
+                packetHandler = packetHandler,
+                nodeManager = nodeManager,
+                radioConfigRepository = radioConfigRepository,
+                tracerouteHandler = tracerouteHandler,
+                neighborInfoHandler = neighborInfoHandler,
+                sessionManager = sessionManager,
+                scope = testScope,
+            )
+        testScope.testScheduler.runCurrent()
+    }
+
+    private fun node(num: Int, licensed: Boolean = false, publicKey: ByteString? = null) =
+        Node(num = num, user = User(is_licensed = licensed), publicKey = publicKey)
+
+    private fun adminChannelSet() = ChannelSet(
+        settings =
+        listOf(
+            org.meshtastic.proto.ChannelSettings(name = "primary"),
+            org.meshtastic.proto.ChannelSettings(name = "admin"),
+        ),
+    )
+
+    private fun assertPlaintextAdminPacket(packet: MeshPacket, expectedDestination: Int) {
+        assertEquals(0, packet.channel)
+        assertFalse(packet.pki_encrypted)
+        assertEquals(ByteString.EMPTY, packet.public_key)
+        assertAdminPacket(packet, expectedDestination)
+    }
+
+    private fun assertAdminPacket(packet: MeshPacket, expectedDestination: Int) {
+        assertEquals(expectedDestination, packet.to)
+        assertTrue(packet.want_ack)
+        assertEquals(MeshPacket.Priority.RELIABLE, packet.priority)
+        assertEquals(PortNum.ADMIN_APP, packet.decoded?.portnum)
+    }
+
     companion object {
         private const val MY_NODE_NUM = 100
         private const val DEST_NODE = 200
+        private val LOCAL_PUBLIC_KEY = "local-public-key".encodeUtf8()
+        private val DESTINATION_PUBLIC_KEY = "destination-public-key".encodeUtf8()
     }
 }
