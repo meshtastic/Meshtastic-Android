@@ -17,10 +17,30 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_message_from">Messaggio da %1$s: %2$s</string>
+    <string name="a11y_node_battery">batteria %1$d%%</string>
+    <string name="a11y_node_distance_away">distante %1$s</string>
+    <string name="a11y_node_favorite">preferito</string>
+    <string name="a11y_node_hops_away">%1$d hop di distanza</string>
+    <string name="a11y_node_last_heard">sentito l'ultima volta %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">ruolo %1$s</string>
+    <string name="a11y_node_signal">segnale %1$s</string>
+    <string name="a11y_nodes_at_hop">%1$d hop: %2$d nodi</string>
     <string name="accept">Accetta</string>
     <string name="acknowledgements">Ringraziamenti</string>
     <!-- ACTION -->
+    <string name="action_copy_message">Copia messaggio</string>
     <string name="action_delete_message">Eliminare il messaggio</string>
+    <string name="action_react_with_emoji">Aggiungi reazione con emoji</string>
+    <string name="action_select_device">Seleziona dispositivo</string>
+    <string name="action_select_message">Seleziona messaggio</string>
+    <string name="action_select_network">Seleziona rete</string>
+    <string name="action_send_reply">Rispondi</string>
+    <string name="action_show_message_status">Visualizza stato messaggio</string>
+    <string name="action_toggle_translation">Commuta tra testo originale e testo tradotto</string>
+    <string name="action_translate_message">Traduci messaggio</string>
     <string name="actions">Azioni</string>
     <string name="adc_multiplier_override">Sovrascrivi moltiplicatore ADC</string>
     <string name="adc_multiplier_override_ratio">Sovrascrivi rapporto moltiplicatore ADC</string>

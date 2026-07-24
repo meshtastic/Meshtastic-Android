@@ -249,12 +249,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11157",
-      "title": "Update LovyanGFX to v1.2.26",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11157",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11156",
       "title": "Testing build containers based on `develop` branch",
       "page_url": "https://github.com/meshtastic/firmware/pull/11156",
