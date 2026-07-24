@@ -34,11 +34,12 @@ data class Releases(
     @SerialName("stable") val stable: List<NetworkFirmwareRelease> = listOf(),
 )
 
-@Serializable
-data class NetworkFirmwareReleases(
-    @SerialName("pullRequests") val pullRequests: List<NetworkFirmwareRelease> = listOf(),
-    @SerialName("releases") val releases: Releases = Releases(),
-)
+/**
+ * The API also returns a `pullRequests` array of open firmware PRs. It is deliberately not modelled: nothing in the app
+ * offers PR builds, and the list turns over several times a day, so carrying it only churned the bundled asset. The
+ * shared [kotlinx.serialization.json.Json] is configured with `ignoreUnknownKeys`, so responses still decode.
+ */
+@Serializable data class NetworkFirmwareReleases(@SerialName("releases") val releases: Releases = Releases())
 
 /**
  * The nightly-preview pointer published to `firmware-nightly/index.json` on meshtastic.github.io. Unlike the release
