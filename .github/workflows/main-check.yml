@@ -15,19 +15,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Every commit on main arrives via the merge queue, which already ran lint, tests,
-  # screenshot validation, and rb-check on this exact merge commit. Re-running them here
-  # would be pure duplication — this workflow builds the debug APKs for the snapshot
-  # release below (run_lint: false also skips screenshot-check and rb-check) plus the
-  # desktop distributables. Desktop packaging runs here post-merge rather than in the
-  # merge queue: :desktopApp:test in the queue's shard-app already covers compilation,
-  # and the 4-OS matrix (macos/windows queue times) would slow every merge.
+  # Every commit on main arrives via the merge queue, which already ran lint,
+  # screenshot validation, rb-check, and the (coverage-free) test shards on this
+  # exact merge commit. This workflow:
+  #   - re-runs the test shards WITH coverage: Kover instrumentation lives here,
+  #     off the queue's critical path, and this is the sole source of Codecov
+  #     mainline coverage (PRs and the queue both skip it)
+  #   - builds the debug APKs for the snapshot release below with -SNAPSHOT
+  #     naming (the queue skips run_android_build; the PR already assembled them)
+  #   - builds the desktop distributables. Desktop packaging runs here post-merge
+  #     rather than in the merge queue: :desktopApp:test in the queue's shard-app
+  #     already covers compilation, and the 4-OS matrix (macos/windows queue
+  #     times) would slow every merge.
+  # run_lint: false skips lint, screenshot-check, and rb-check (queue-verified).
   validate-and-build:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-check.yml
     with:
       run_lint: false
-      run_unit_tests: false
+      run_unit_tests: true
+      run_coverage: true
       run_desktop_builds: true
       upload_artifacts: true
     secrets: inherit

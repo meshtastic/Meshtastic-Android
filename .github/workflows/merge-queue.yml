@@ -79,6 +79,15 @@ jobs:
     with:
       run_lint: true
       run_unit_tests: true
+      # Coverage is produced by main-check on the identical merge commit right
+      # after the queue merges it — keeping Kover instrumentation and report
+      # generation out of the queue's critical-path test shards.
+      run_coverage: false
+      # The PR already assembled these APKs and main-check rebuilds them (with
+      # -SNAPSHOT naming) for the snapshot release; a merge-combination
+      # packaging break would surface there minutes later. Skipping saves a
+      # runner slot per queue entry.
+      run_android_build: false
       upload_artifacts: false
     secrets: inherit
 
