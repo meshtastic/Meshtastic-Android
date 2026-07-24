@@ -35,6 +35,11 @@ interface ChannelSetDao {
     @Query("SELECT * FROM channel_set WHERE id = 0 LIMIT 1")
     suspend fun get(): ChannelSetEntity?
 
+    // Deliberately @Insert(onConflict = REPLACE), not @Upsert: on this entity, Room's generated @Upsert UPDATE path
+    // throws a bare android.database.SQLException under Robolectric's androidHostTest SQLite implementation on every
+    // write past the first (verified: 4/8 SwitchingChannelSetDataSourceTest cases failed, all and only the ones that
+    // write to an already-existing row -- pure-JVM jvmTest and on-device runs are unaffected). REPLACE is a single
+    // INSERT OR REPLACE statement with no separate UPDATE path, so it doesn't hit this incompatibility.
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: ChannelSetEntity)
 

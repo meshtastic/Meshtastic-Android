@@ -57,7 +57,9 @@ class SwitchingChannelSetDataSource(
             .distinctUntilChanged()
 
     suspend fun clearChannelSet() {
-        withContext(dispatchers.io) { dbManager.withDb { it.channelSetDao().clear() } }
+        // Must take writeMutex like mutate() -- otherwise a concurrent mutate() can read the row before this delete,
+        // then upsert it back afterwards, silently undoing the clear.
+        withContext(dispatchers.io) { writeMutex.withLock { dbManager.withDb { it.channelSetDao().clear() } } }
     }
 
     /** Replaces all [ChannelSettings] in a single atomic operation. */
