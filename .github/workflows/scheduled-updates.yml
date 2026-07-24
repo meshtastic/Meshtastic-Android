@@ -47,9 +47,12 @@ jobs:
             echo "status=error" >> "$GITHUB_OUTPUT"
             echo "detail=Invalid JSON response from firmware API" >> "$GITHUB_OUTPUT"
           else
-            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys . "$temp_firmware_file" | diff -q - <(jq --sort-keys . "$firmware_file_path"); then
+            # Drop `.pullRequests` before diffing and before writing: the API lists every open
+            # firmware PR, which turns over several times a day, and the app never reads the field
+            # (see NetworkFirmwareReleases). Keeping it churned an hourly PR carrying no real change.
+            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys 'del(.pullRequests)' "$temp_firmware_file" | diff -q - <(jq --sort-keys 'del(.pullRequests)' "$firmware_file_path"); then
               echo "Changes detected in firmware list or local file missing. Updating $firmware_file_path."
-              cp "$temp_firmware_file" "$firmware_file_path"
+              jq 'del(.pullRequests)' "$temp_firmware_file" > "$firmware_file_path"
               echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in firmware list."
