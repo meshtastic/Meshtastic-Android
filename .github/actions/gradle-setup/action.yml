@@ -54,6 +54,18 @@ runs:
       shell: bash
       run: echo "::warning::JBR setup-java failed (likely GitHub API rate limit). Gradle will auto-provision JBR via Foojay toolchain resolver."
 
+    # Kotlin/Native lives in ~/.konan, OUTSIDE the Gradle home that
+    # setup-gradle caches — without this every job re-downloads the K/N
+    # toolchain (downloadKotlinNativeDistribution) and the iOS-target compile
+    # tasks it feeds miss the build cache, while the identical tasks hit
+    # FROM-CACHE locally. Keyed on the version catalog: over-invalidates on
+    # unrelated bumps, but konan re-downloads are exactly what it prevents.
+    - name: Cache Kotlin/Native toolchain
+      uses: actions/cache@v6
+      with:
+        path: ~/.konan
+        key: konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6
       with:

@@ -6,6 +6,9 @@ on:
       run_lint:
         type: boolean
         default: true
+      run_screenshot_tests:
+        type: boolean
+        default: true
       run_unit_tests:
         type: boolean
         default: true
@@ -59,10 +62,18 @@ jobs:
   # `needs:` one, which serialized TWO runner-queue waits per run — under pool
   # congestion the setup job alone sat queued for ~10 minutes before the real
   # jobs could even enter the queue. Its two outputs are now sourced without a
-  # job: cache writability is the pure expression above, and the versionCode is
-  # derived by the build itself (GitVersionValueSource runs
-  # `git rev-list --count HEAD` when the VERSION_CODE env var is unset), which
-  # is why every Gradle job below checks out full — blob-less — history.
+  # job: cache writability is the pure expression above, and the versionCode
+  # comes from one of two places:
+  #   - Jobs whose artifacts ship (android-check, build-desktop,
+  #     build-flatpak-src) check out full — blob-less — history so the build's
+  #     GitVersionValueSource derives the real commit-count versionCode.
+  #   - Validation-only jobs (lint, screenshot, test shards) pin VERSION_CODE
+  #     to a constant instead: their outputs are never shipped, and the real
+  #     value changes on every commit, which poisons the versionCode-dependent
+  #     task chain (BuildConfig -> compile -> test/lint) in the build cache.
+  #     A stable value keeps those cache keys identical across commits so
+  #     unchanged modules resolve FROM-CACHE on every run. Keep the pinned
+  #     value (30000000) identical across the three jobs for the same reason.
 
   # ── Lint & Static Analysis ──────────────────────────────────────────
   lint-check:
@@ -71,11 +82,14 @@ jobs:
       contents: read
     timeout-minutes: 30
     if: inputs.run_lint == true
+    env:
+      VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
+          # Full history: spotless ratchetFrom("origin/main") diffs against main.
           fetch-depth: 0
           filter: 'blob:none'
           submodules: true
@@ -96,14 +110,15 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 20
-    if: inputs.run_lint == true
+    if: inputs.run_lint == true && inputs.run_screenshot_tests == true
+    env:
+      VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
-          filter: 'blob:none'
+          fetch-depth: 1
           submodules: true
 
       - name: Gradle Setup
@@ -311,6 +326,9 @@ jobs:
   # in roughly the same wall time. shard-app already compiles the full
   # dependency graph (androidApp depends on everything), so hosting extra
   # core-module tests there costs only their execution time.
+  # These lists are hand-maintained; pull-request.yml's check-changes job
+  # guards them against drift (every module in settings.gradle.kts with test
+  # sources must appear here or be explicitly exempted).
   #   shard-core:    remaining core:* KMP module tests (allTests)
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
@@ -321,6 +339,8 @@ jobs:
       contents: read
     timeout-minutes: 45
     if: inputs.run_unit_tests == true
+    env:
+      VERSION_CODE: 30000000 # pinned for cache stability -- see comment above
     strategy:
       fail-fast: false
       matrix:
@@ -330,7 +350,9 @@ jobs:
               :core:ble:allTests
               :core:common:allTests
               :core:data:allTests
+              :core:datastore:allTests
               :core:domain:allTests
+              :core:konsist:allTests
               :core:model:allTests
               :core:navigation:allTests
               :core:prefs:allTests
@@ -342,7 +364,9 @@ jobs:
               :core:ble:koverXmlReport
               :core:common:koverXmlReport
               :core:data:koverXmlReport
+              :core:datastore:koverXmlReport
               :core:domain:koverXmlReport
+              :core:konsist:koverXmlReport
               :core:model:koverXmlReport
               :core:navigation:koverXmlReport
               :core:prefs:koverXmlReport
@@ -354,21 +378,27 @@ jobs:
             tasks: >-
               :core:service:allTests
               :feature:connections:allTests
+              :feature:discovery:allTests
+              :feature:docs:allTests
               :feature:firmware:allTests
               :feature:intro:allTests
               :feature:map:allTests
               :feature:messaging:allTests
               :feature:node:allTests
               :feature:settings:allTests
+              :feature:wifi-provision:allTests
             kover: >-
               :core:service:koverXmlReport
               :feature:connections:koverXmlReport
+              :feature:discovery:koverXmlReport
+              :feature:docs:koverXmlReport
               :feature:firmware:koverXmlReport
               :feature:intro:koverXmlReport
               :feature:map:koverXmlReport
               :feature:messaging:koverXmlReport
               :feature:node:koverXmlReport
               :feature:settings:koverXmlReport
+              :feature:wifi-provision:koverXmlReport
           - name: shard-app
             tasks: >-
               :androidApp:testFdroidDebugUnitTest
@@ -378,6 +408,8 @@ jobs:
               :core:barcode:testGoogleDebugUnitTest
               :core:database:allTests
               :core:network:allTests
+              :feature:car:testFdroidDebugUnitTest
+              :feature:car:testGoogleDebugUnitTest
             kover: >-
               :androidApp:koverXmlReportFdroidDebug
               :androidApp:koverXmlReportGoogleDebug
@@ -386,13 +418,14 @@ jobs:
               :desktopApp:koverXmlReport
               :core:database:koverXmlReport
               :core:network:koverXmlReport
+              :feature:car:koverXmlReportFdroidDebug
+              :feature:car:koverXmlReportGoogleDebug
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
-          fetch-depth: 0
-          filter: 'blob:none'
+          fetch-depth: 1
           submodules: true
 
       - name: Gradle Setup
