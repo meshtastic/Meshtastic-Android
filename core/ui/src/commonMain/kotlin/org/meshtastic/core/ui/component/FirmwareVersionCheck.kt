@@ -24,6 +24,7 @@ import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.FirmwareCheckStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_old
 import org.meshtastic.core.resources.firmware_too_old
@@ -56,21 +57,20 @@ fun FirmwareVersionCheck(viewModel: UIViewModel) {
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == ConnectionState.Connected) {
             myNodeInfo?.let { info ->
-                myFirmwareVersion
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { fwVersion ->
-                        val curVer = DeviceVersion(fwVersion)
-                        Logger.i {
-                            "[FW_CHECK] Firmware version comparison - " +
-                                "device: $curVer (raw: $fwVersion), " +
-                                "absoluteMin: ${DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)}, " +
-                                "min: ${DeviceVersion(DeviceVersion.MIN_FW_VERSION)}"
-                        }
+                myFirmwareVersion?.let { fwVersion ->
+                    val curVer = DeviceVersion(fwVersion)
+                    Logger.i {
+                        "[FW_CHECK] Firmware version comparison - " +
+                            "device: $curVer (raw: $fwVersion), status: ${curVer.checkStatus}, " +
+                            "absoluteMin: ${DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)}, " +
+                            "min: ${DeviceVersion(DeviceVersion.MIN_FW_VERSION)}"
+                    }
 
-                        if (curVer < DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)) {
+                    when (curVer.checkStatus) {
+                        FirmwareCheckStatus.TOO_OLD -> {
                             Logger.w {
-                                "[FW_CHECK] Firmware too old - " +
-                                    "device: $curVer < absoluteMin: ${DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)}"
+                                "[FW_CHECK] Firmware too old - device: $curVer < " +
+                                    "absoluteMin: ${DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)}"
                             }
                             val title = getString(Res.string.firmware_too_old)
                             val message = getString(Res.string.firmware_old)
@@ -79,7 +79,9 @@ fun FirmwareVersionCheck(viewModel: UIViewModel) {
                                 html = message,
                                 onConfirm = { viewModel.setDeviceAddress("n") },
                             )
-                        } else if (curVer < DeviceVersion(DeviceVersion.MIN_FW_VERSION)) {
+                        }
+
+                        FirmwareCheckStatus.SHOULD_UPDATE -> {
                             Logger.w {
                                 "[FW_CHECK] Firmware should update - " +
                                     "device: $curVer < min: ${DeviceVersion(DeviceVersion.MIN_FW_VERSION)}"
@@ -87,10 +89,16 @@ fun FirmwareVersionCheck(viewModel: UIViewModel) {
                             val title = getString(Res.string.should_update_firmware)
                             val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, onConfirm = {})
-                        } else {
-                            Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                         }
+
+                        // An unparseable/transient version must not disconnect the device (#3726); just log it.
+                        FirmwareCheckStatus.UNKNOWN ->
+                            Logger.w { "[FW_CHECK] Firmware version unparseable - device raw: $fwVersion, skipping" }
+
+                        FirmwareCheckStatus.OK ->
+                            Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                     }
+                }
             }
         }
     }
