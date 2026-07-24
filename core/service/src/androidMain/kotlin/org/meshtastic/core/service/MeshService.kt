@@ -132,6 +132,8 @@ class MeshService : Service() {
             return START_NOT_STICKY
         }
 
+        // Queue the localized status render asynchronously. startForeground uses the last cached notification, or an
+        // immediate application-label fallback, and the renderer updates the same notification ID when it completes.
         connectionManager.updateStatusNotification()
         val notification = androidNotifications.getServiceNotification()
 
