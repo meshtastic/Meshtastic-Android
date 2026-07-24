@@ -28,8 +28,8 @@ class DeviceHardwareLocalDataSource(private val dbManager: DatabaseProvider) {
         dbManager.withDb { it.deviceHardwareDao().insertAll(deviceHardware.map { hw -> hw.asEntity() }) }
     }
 
-    suspend fun deleteAllDeviceHardware() {
-        dbManager.withDb { it.deviceHardwareDao().deleteAll() }
+    suspend fun replaceAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) {
+        dbManager.withDb { it.deviceHardwareDao().replaceAll(deviceHardware.map { hw -> hw.asEntity() }) }
     }
 
     suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity> =
