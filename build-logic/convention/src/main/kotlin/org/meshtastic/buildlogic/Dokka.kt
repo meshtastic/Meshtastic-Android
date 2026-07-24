@@ -69,7 +69,11 @@ fun Project.configureDokka() {
             // sourceLink block and only compiled because Kotlin resolved them against the outer receiver.
             enableJdkDocumentationLink.set(true)
             enableKotlinStdLibDocumentationLink.set(true)
-            reportUndocumented.set(true)
+
+            // Off deliberately: this emitted a warning per undocumented declaration — thousands of lines that
+            // dominated the docs-deploy log without anyone acting on them. It never failed the build, so it was
+            // noise rather than a gate. Re-enable locally (or flip this) when doing a deliberate KDoc pass.
+            reportUndocumented.set(false)
 
             sourceLink {
                 // Standardized repo-root based source links
