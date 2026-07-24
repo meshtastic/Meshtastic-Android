@@ -174,7 +174,8 @@ jobs:
               for p in problems:
                   print('  -', p)
               raise SystemExit(1)
-          print(f'{len(modules) - len(exempt)} modules verified against the shard matrix.')
+          exempt = covered_elsewhere | no_tests_yet
+          print(f'{len(modules) - len(modules & exempt)} modules verified against the shard matrix.')
           PY
 
   # 1c. STORE METADATA: Enforce store-listing length limits (e.g. the F-Droid /
