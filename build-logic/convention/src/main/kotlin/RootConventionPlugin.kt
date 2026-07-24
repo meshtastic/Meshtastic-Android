@@ -116,10 +116,22 @@ private val ALL_MODULES_FULL =
 private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":feature:widget")
 
 /**
- * Modules excluded from Dokka aggregation. Empty now that :core:proto has been replaced by
- * the external org.meshtastic:protobufs SDK.
+ * Modules excluded from Dokka aggregation.
+ *
+ * These are test harnesses and build-time generators with no API surface a reader would look up: they exist to run
+ * checks or emit artifacts, not to be called from other modules. Aggregating them only added generation time and
+ * empty pages to the published `/api/` reference.
+ *
+ * `:core:testing` is deliberately NOT excluded — it is a shared fixture library that other modules' tests consume,
+ * so its API docs are useful to contributors writing tests.
  */
-private val DOKKA_EXCLUDED_MODULES = emptySet<String>()
+private val DOKKA_EXCLUDED_MODULES =
+    setOf(
+        ":core:konsist", // Konsist architecture assertions; single test class, no callable API
+        ":screenshot-tests", // Paparazzi/Roborazzi harness for the screenshot gate
+        ":docs-screenshots", // generate-only module that emits documentation screenshots
+        ":baselineprofile", // macrobenchmark module that generates baseline-prof.txt
+    )
 
 private fun allModules(): List<String> = ALL_MODULES_FULL
 

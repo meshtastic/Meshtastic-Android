@@ -16,9 +16,11 @@ on:
       # Docs site sources
       - 'docs/**'
       - 'feature/docs/**'
-      # Build infrastructure
+      # Build infrastructure. Module scripts are included because they can add or
+      # drop exported `api` dependencies and reshape source sets, changing the
+      # generated reference without any edit under src/.
       - 'build-logic/**'
-      - 'build.gradle.kts'
+      - '**/build.gradle.kts'
       - 'settings.gradle.kts'
       - '.github/workflows/docs-deploy.yml'
       - 'scripts/docs/**'
@@ -59,13 +61,46 @@ jobs:
           bundler-cache: true
           working-directory: docs
 
+      # Dokka is the slowest part of this workflow (~14 min) but KDoc changes far
+      # less often than the prose docs. Rebuild /api/ only when something that can
+      # actually change the generated reference was touched; otherwise the existing
+      # /api/ on gh-pages is left in place (the publisher overlays per channel).
+      # Manual runs always rebuild everything, so the diff is only needed on push.
+      - name: Detect Dokka-relevant changes
+        if: github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          token: ''
+          filters: |
+            # Positive patterns only. paths-filter evaluates each pattern as an
+            # independent predicate and ORs them together, so a '!excluded/**'
+            # entry would match every path outside that dir and make the filter
+            # always true. The modules in DOKKA_EXCLUDED_MODULES that live under
+            # these prefixes (:core:konsist) therefore still trigger a rebuild;
+            # they change rarely enough that the odd wasted run is fine.
+            dokka:
+              - 'androidApp/src/**'
+              - 'core/**/src/**'
+              - 'feature/**/src/**'
+              - 'desktopApp/src/**'
+              # Dokka config, module list and the plugin classpath. '**/build.gradle.kts'
+              # covers the root script as well as every module's, since a module script
+              # can change exported `api` deps or source sets with no src/ edit.
+              - 'build-logic/**'
+              - '**/build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle/libs.versions.toml'
+
       - name: Generate Docs Site (main channel)
         run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=main -Pci=true
 
       # Dokka (Gradle) and Jekyll (Ruby) are independent — Dokka's output is only
       # copied in afterwards — so run them concurrently to overlap the two slowest
-      # steps (~10 min Dokka vs ~5 min Jekyll) instead of summing them (~16 -> ~11 min).
+      # steps (~14 min Dokka vs ~5 min Jekyll) instead of summing them.
       - name: Build Dokka + Jekyll concurrently
+        env:
+          BUILD_DOKKA: ${{ steps.filter.outputs.dokka == 'true' || github.event_name == 'workflow_dispatch' }}
         run: |
           set -euo pipefail
           BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
@@ -73,14 +108,27 @@ jobs:
             --destination build/jekyll_site \
             --baseurl /${{ github.event.repository.name }}/main &
           jekyll_pid=$!
-          ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+          if [ "$BUILD_DOKKA" = "true" ]; then
+            ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+          else
+            echo "No Dokka-relevant changes — skipping API reference rebuild."
+          fi
           wait "$jekyll_pid"
 
       - name: Stage channels
+        id: stage
+        env:
+          BUILD_DOKKA: ${{ steps.filter.outputs.dokka == 'true' || github.event_name == 'workflow_dispatch' }}
         run: |
+          set -euo pipefail
           mkdir -p build/pages_staging
           cp -r build/jekyll_site build/pages_staging/main
-          cp -r build/dokka/html build/pages_staging/api
+          channels="main"
+          if [ "$BUILD_DOKKA" = "true" ]; then
+            cp -r build/dokka/html build/pages_staging/api
+            channels="$channels api"
+          fi
+          echo "channels=$channels" >> "$GITHUB_OUTPUT"
 
       - name: Publish to gh-pages
-        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging main api
+        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging ${{ steps.stage.outputs.channels }}
