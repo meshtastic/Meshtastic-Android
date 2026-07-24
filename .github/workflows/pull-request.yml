@@ -12,7 +12,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1. CHANGE DETECTION: Prevents unnecessary builds
+  # 1. CHANGE DETECTION: Prevents unnecessary builds. Also verifies the path
+  # filter below stays aligned with the module roots in settings.gradle.kts
+  # (folded into this job rather than run standalone: runner-pool slots, not
+  # compute, are the scarce resource during queue bursts).
   check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
     runs-on: ubuntu-24.04-arm
@@ -51,14 +54,6 @@ jobs:
               - 'gradlew.bat'
               - 'settings.gradle.kts'
               - 'test.gradle.kts'
-
-  # 1b. FILTER DRIFT CHECK: Ensures check-changes stays aligned with module roots
-  verify-check-changes-filter:
-    if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7.0.1
       - name: Verify module roots are represented in check-changes filter
         run: |
           python3 - <<'PY'
@@ -81,10 +76,12 @@ jobs:
               for path in re.findall(r"-\s*'([^']+/\*\*)'", workflow)
           }
 
-          actual_module_roots = filter_paths & expected_roots
+          # Filter roots that are intentionally not Gradle module roots
+          # (CI/workflow implementation + shared build infrastructure).
+          allowed_infra_roots = {'.github', 'build-logic', 'config', 'gradle'}
 
-          missing = sorted(expected_roots - actual_module_roots)
-          unexpected = sorted(actual_module_roots - expected_roots)
+          missing = sorted(expected_roots - filter_paths)
+          unexpected = sorted(filter_paths - expected_roots - allowed_infra_roots)
 
           if missing or unexpected:
               print('check-changes filter drift detected:')
@@ -153,13 +150,14 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     permissions: {}
-    needs: [check-changes, verify-check-changes-filter, check-metadata, validate-and-build]
+    needs: [check-changes, check-metadata, validate-and-build]
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
-          if [[ "${{ needs.verify-check-changes-filter.result }}" == "failure" || "${{ needs.verify-check-changes-filter.result }}" == "cancelled" ]]; then
-            echo "::error::check-changes filter verification failed"
+          # skipped is fine (bot branches); failure also covers the filter-drift step
+          if [[ "${{ needs.check-changes.result }}" == "failure" || "${{ needs.check-changes.result }}" == "cancelled" ]]; then
+            echo "::error::Change detection or filter drift check failed"
             exit 1
           fi
 
