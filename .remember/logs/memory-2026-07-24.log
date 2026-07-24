@@ -1,0 +1,552 @@
+08:43:37 [hook] session-start: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:43:37 [hook] run-consolidation: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:43:38 [consolidation] start
+08:43:50 [consolidation] tokens: 9+20396cache→991out ($0.018710)
+08:43:50 [consolidation] done: 1 files consolidated
+08:44:57 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:44:58 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:01 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:01 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:10 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:13 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:13 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:22 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:25 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:40 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:40 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:40 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+08:45:40 [extract] 13 exchanges (1 human)
+08:45:40 [extract] 1 human msgs < 3, skip
+08:45:45 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:45 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:45:45 [cooldown] 5s < 120s, skip
+08:47:09 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:09 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:09 [cooldown] 89s < 120s, skip
+08:47:11 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:11 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:11 [cooldown] 91s < 120s, skip
+08:47:26 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:26 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:26 [cooldown] 106s < 120s, skip
+08:47:36 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:37 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:37 [cooldown] 117s < 120s, skip
+08:47:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:47:51 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+08:47:51 [extract] 19 exchanges (1 human)
+08:47:51 [extract] 1 human msgs < 3, skip
+08:48:01 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:48:01 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:48:01 [cooldown] 10s < 120s, skip
+08:48:15 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:48:15 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:48:15 [cooldown] 24s < 120s, skip
+08:49:29 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:49:29 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:49:29 [cooldown] 98s < 120s, skip
+08:57:20 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:20 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:20 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+08:57:20 [extract] 25 exchanges (2 human)
+08:57:20 [extract] 2 human msgs < 3, skip
+08:57:21 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:21 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:21 [cooldown] 1s < 120s, skip
+08:57:34 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:34 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:34 [cooldown] 14s < 120s, skip
+08:57:35 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:35 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:57:35 [cooldown] 15s < 120s, skip
+08:58:43 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:58:43 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:58:43 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:58:43 [cooldown] 83s < 120s, skip
+08:58:44 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:58:44 [cooldown] 84s < 120s, skip
+08:59:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:59:38 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:59:38 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+08:59:38 [extract] 33 exchanges (2 human)
+08:59:38 [extract] 2 human msgs < 3, skip
+08:59:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:59:52 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+08:59:52 [cooldown] 14s < 120s, skip
+09:00:00 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:00 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:00 [cooldown] 22s < 120s, skip
+09:00:05 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:05 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:05 [cooldown] 27s < 120s, skip
+09:00:17 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:17 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:17 [cooldown] 39s < 120s, skip
+09:00:26 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:26 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:26 [cooldown] 48s < 120s, skip
+09:00:30 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:30 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:31 [cooldown] 53s < 120s, skip
+09:00:54 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:54 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:00:54 [cooldown] 76s < 120s, skip
+09:01:03 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:03 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:04 [cooldown] 86s < 120s, skip
+09:01:09 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:09 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:09 [cooldown] 91s < 120s, skip
+09:01:12 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:13 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:13 [cooldown] 95s < 120s, skip
+09:01:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:19 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:19 [cooldown] 101s < 120s, skip
+09:01:22 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:22 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:22 [cooldown] 104s < 120s, skip
+09:01:39 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:39 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:39 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:01:39 [extract] 49 exchanges (2 human)
+09:01:39 [extract] 2 human msgs < 3, skip
+09:01:50 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:01:51 [cooldown] 12s < 120s, skip
+09:01:59 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:00 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:00 [cooldown] 21s < 120s, skip
+09:02:07 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:07 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:07 [cooldown] 28s < 120s, skip
+09:02:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:19 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:19 [cooldown] 40s < 120s, skip
+09:02:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:37 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:38 [cooldown] 59s < 120s, skip
+09:02:47 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:48 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:48 [cooldown] 69s < 120s, skip
+09:02:50 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:50 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:50 [cooldown] 71s < 120s, skip
+09:02:55 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:55 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:02:55 [cooldown] 76s < 120s, skip
+09:03:03 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:03 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:03 [cooldown] 84s < 120s, skip
+09:03:06 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:06 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:06 [cooldown] 87s < 120s, skip
+09:03:08 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:08 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:09 [cooldown] 90s < 120s, skip
+09:03:16 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:16 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:16 [cooldown] 97s < 120s, skip
+09:03:35 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:35 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:03:35 [cooldown] 116s < 120s, skip
+09:05:35 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:35 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:35 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:05:35 [extract] 65 exchanges (2 human)
+09:05:35 [extract] 2 human msgs < 3, skip
+09:05:52 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:52 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:53 [cooldown] 18s < 120s, skip
+09:05:57 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:58 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:05:58 [cooldown] 23s < 120s, skip
+09:06:01 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:01 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:01 [cooldown] 26s < 120s, skip
+09:06:14 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:15 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:15 [cooldown] 40s < 120s, skip
+09:06:32 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:33 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:06:33 [cooldown] 58s < 120s, skip
+09:12:02 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:12:03 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:12:03 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:12:03 [extract] 75 exchanges (3 human)
+09:12:03 [haiku] calling (branch: chore/ci-latency-tuning)
+09:12:10 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:12:16 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:12:28 [tokens] tokens: 9+21256cache→2093out ($0.031702)
+09:12:28 [write] appended: ## 09:12 | chore/ci-latency-tuning
+09:12:28 [write] position → 291
+09:12:28 [ndc] now.md → today-2026-07-24.md
+09:12:28 [ndc] running (PID 1398580)
+09:12:34 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:12:47 [ndc] tokens: 9+21256cache→1785out ($0.020118)
+09:12:47 [ndc] 191→180b (-5%)
+09:12:53 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:13:03 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:13:20 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:28:00 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:28:09 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:29:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:29:58 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:29:58 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:29:58 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:29:58 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:29:58 [extract] 15 exchanges (1 human)
+09:29:58 [extract] 1 human msgs < 3, skip
+09:30:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:30:37 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:30:37 [cooldown] 39s < 120s, skip
+09:31:10 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:10 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:10 [cooldown] 72s < 120s, skip
+09:31:16 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:16 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:16 [cooldown] 78s < 120s, skip
+09:31:18 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:19 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:19 [cooldown] 81s < 120s, skip
+09:31:20 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:20 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:20 [cooldown] 82s < 120s, skip
+09:31:23 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:23 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:23 [cooldown] 85s < 120s, skip
+09:31:25 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:25 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:25 [cooldown] 87s < 120s, skip
+09:31:33 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:33 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:33 [cooldown] 95s < 120s, skip
+09:31:35 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:35 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:35 [cooldown] 97s < 120s, skip
+09:31:41 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:41 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:41 [cooldown] 103s < 120s, skip
+09:31:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:52 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:52 [cooldown] 114s < 120s, skip
+09:31:54 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:54 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:31:54 [cooldown] 116s < 120s, skip
+09:32:00 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:00 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:00 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:32:00 [extract] 30 exchanges (1 human)
+09:32:00 [extract] 1 human msgs < 3, skip
+09:32:12 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:13 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:13 [cooldown] 13s < 120s, skip
+09:32:38 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:38 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:38 [cooldown] 38s < 120s, skip
+09:32:48 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:48 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:32:48 [cooldown] 48s < 120s, skip
+09:34:07 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:08 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:08 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:34:08 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:08 [extract] 39 exchanges (2 human)
+09:34:08 [extract] 2 human msgs < 3, skip
+09:34:08 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:08 [cooldown] 0s < 120s, skip
+09:34:26 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:26 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:26 [cooldown] 18s < 120s, skip
+09:34:54 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:54 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:34:54 [cooldown] 46s < 120s, skip
+09:35:00 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:00 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:00 [cooldown] 52s < 120s, skip
+09:35:04 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:04 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:04 [cooldown] 56s < 120s, skip
+09:35:07 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:08 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:08 [cooldown] 60s < 120s, skip
+09:35:11 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:11 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:35:11 [cooldown] 63s < 120s, skip
+09:36:21 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:21 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:21 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:36:21 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:21 [extract] 47 exchanges (2 human)
+09:36:21 [extract] 2 human msgs < 3, skip
+09:36:21 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:21 [cooldown] 0s < 120s, skip
+09:36:50 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:36:51 [cooldown] 30s < 120s, skip
+09:39:52 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:39:52 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:39:52 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:39:52 [extract] 51 exchanges (3 human)
+09:39:52 [haiku] calling (branch: chore/ci-stewardship)
+09:40:12 [tokens] tokens: 9+21256cache→1635out ($0.028076)
+09:40:12 [write] appended: ## 09:39 | chore/ci-stewardship
+09:40:12 [write] position → 488
+09:42:35 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:42:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:42:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:42:58 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:43:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:43:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:43:47 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:45:03 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:45:20 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:45:57 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:45:57 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:45:57 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:45:57 [extract] 16 exchanges (1 human)
+09:45:57 [extract] 1 human msgs < 3, skip
+09:46:43 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:46:44 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:46:44 [cooldown] 47s < 120s, skip
+09:46:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:46:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:46:51 [cooldown] 54s < 120s, skip
+09:47:02 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:02 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:03 [cooldown] 65s < 120s, skip
+09:47:05 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:06 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:06 [cooldown] 69s < 120s, skip
+09:47:08 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:09 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:09 [cooldown] 72s < 120s, skip
+09:47:16 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:16 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:16 [cooldown] 79s < 120s, skip
+09:47:32 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:32 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:32 [cooldown] 95s < 120s, skip
+09:47:41 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:41 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:41 [cooldown] 104s < 120s, skip
+09:47:45 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:46 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:46 [cooldown] 109s < 120s, skip
+09:47:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:51 [cooldown] 114s < 120s, skip
+09:47:53 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:54 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:47:54 [cooldown] 117s < 120s, skip
+09:48:06 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:06 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:06 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:48:07 [extract] 30 exchanges (1 human)
+09:48:07 [extract] 1 human msgs < 3, skip
+09:48:21 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:21 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:21 [cooldown] 14s < 120s, skip
+09:48:38 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:39 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:39 [cooldown] 32s < 120s, skip
+09:48:56 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:57 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:48:57 [cooldown] 50s < 120s, skip
+09:49:11 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:11 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:12 [cooldown] 65s < 120s, skip
+09:49:28 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:29 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:29 [cooldown] 82s < 120s, skip
+09:49:45 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:46 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:49:46 [cooldown] 99s < 120s, skip
+09:50:04 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:50:05 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:50:05 [cooldown] 118s < 120s, skip
+09:57:36 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:57:36 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:57:36 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:57:36 [extract] 43 exchanges (2 human)
+09:57:36 [extract] 2 human msgs < 3, skip
+09:58:03 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:03 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:03 [cooldown] 27s < 120s, skip
+09:58:36 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:36 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:36 [cooldown] 60s < 120s, skip
+09:58:43 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:43 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:58:43 [cooldown] 67s < 120s, skip
+09:59:44 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:59:44 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:59:44 [extract] session 2781943b-acc9-4e92-9892-9a36de746c83
+09:59:44 [extract] 46 exchanges (2 human)
+09:59:44 [extract] 2 human msgs < 3, skip
+09:59:56 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:59:56 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+09:59:56 [cooldown] 12s < 120s, skip
+10:00:19 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:19 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:19 [cooldown] 35s < 120s, skip
+10:00:37 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:37 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:37 [cooldown] 53s < 120s, skip
+10:00:51 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:51 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:00:51 [cooldown] 67s < 120s, skip
+10:01:08 [hook] session-start: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:13 [hook] post-tool: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:13 [hook] save-session: PROJECT_DIR=/home/james/meshtastic/android PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:13 [cooldown] 89s < 120s, skip
+10:01:15 [hook] session-start: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:48 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:53 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:54 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:57 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:01:59 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:01 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:02 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:03 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:03 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:05 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:06 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:06 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:08 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:09 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:10 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:12 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:12 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:13 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:13 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:15 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:17 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:17 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:18 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:18 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:23 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:24 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:24 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:26 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:26 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:28 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:30 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:30 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:31 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:32 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:33 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:34 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:36 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:36 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:37 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:40 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:42 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:42 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:42 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:45 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:45 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:46 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:47 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:47 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:48 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:50 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:51 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:52 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:53 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:54 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:55 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:02:58 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:00 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:01 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:02 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:03 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:04 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:04 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:05 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:10 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:13 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:14 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:15 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:18 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:21 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:22 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:25 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:31 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:32 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:34 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:36 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:36 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:37 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:38 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:40 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:40 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:43 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:43 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:55 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:55 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:57 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:03:59 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:00 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:03 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:03 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:04 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:05 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:07 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:07 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:07 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:08 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:08 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:08 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:09 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:09 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:11 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:12 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:12 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:12 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:13 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:13 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:14 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:14 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:15 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:15 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:16 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:18 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:19 [hook] save-session: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:19 [extract] session 2ba4eb75-5bcb-47a5-b10c-198ac6e19cb0
+10:04:19 [extract] 18 exchanges (3 human)
+10:04:19 [haiku] calling (branch: open-issues-validation)
+10:04:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:19 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:20 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:21 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:23 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:23 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:23 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:24 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:24 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:25 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:25 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:26 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:27 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:29 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:29 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:30 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:33 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:35 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:35 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:36 [hook] post-tool: PROJECT_DIR=/home/james/.paseo/worktrees/09n7qqwe/helpless-shrimp PIPELINE_DIR=/home/james/.claude/plugins/cache/claude-plugins-official/remember/0.8.3 PYTHON=python3 REMEMBER_DIR=/home/james/meshtastic/android/.remember
+10:04:37 [tokens] tokens: 9+21256cache→1279out ($0.021708)
+10:04:37 [write] appended: ## 10:04 | open-issues-validation
+10:04:37 [write] position → 51
+10:04:37 [git-backup] removed per-slug .gitignore (legacy bootstrap artifact)
