@@ -435,6 +435,7 @@
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, een meeting die wordt gebruikt in de communicatie om het niveau van een gewenst signaal tegenover achtergrondlawaai te kwantificeren. In Meshtastische en andere draadloze systemen geeft een hoger SNR een zuiverder signaal aan dat de betrouwbaarheid en kwaliteit van de gegevensoverdracht kan verbeteren.</string>
     <string name="ssid">SSID</string>
+    <string name="subnet">Subnet</string>
     <string name="supported">Ondersteund</string>
     <!-- TAK -->
     <string name="tak_server_section">Server</string>

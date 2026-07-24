@@ -1064,6 +1064,7 @@
     <string name="status_message">Statusmeddelande</string>
     <string name="status_message_config">Inställningar för statusmeddelande</string>
     <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>
+    <string name="subnet">Subnät</string>
     <string name="success">Lyckades</string>
     <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="supported">Stöds</string>

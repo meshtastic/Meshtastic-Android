@@ -528,6 +528,7 @@
     <string name="snr_definition">Relação sinal-para-ruído, uma medida utilizada nas comunicações para quantificar o nível de um sinal desejado com o nível de ruído de fundo. Em Meshtastic e outros sistemas sem fio. Quanto mais alta for a relação sinal-ruído, menor é o efeito do ruído de fundo sobre a deteção ou medição do sinal.</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
+    <string name="subnet">Subnet</string>
     <string name="supported">Suportado</string>
     <!-- TAK -->
     <string name="tak_server_section">Servidor</string>

@@ -665,6 +665,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
     <string name="stay_connected_anywhere">Fique Conectado em Qualquer Lugar</string>
+    <string name="subnet">Subnet</string>
     <string name="supported">Suportado</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
     <!-- TAK -->

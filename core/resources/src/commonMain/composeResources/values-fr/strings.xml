@@ -1249,7 +1249,7 @@
     <string name="store_forward">Stocker &amp; Transférer</string>
     <string name="store_forward_config">Stocker &amp; Transférer la configuration</string>
     <string name="store_forward_enabled">Stocker &amp; Transférer activé</string>
-    <string name="subnet">Subred</string>
+    <string name="subnet">Sous-réseau</string>
     <string name="super_deep_sleep_duration_seconds">Durée du sommeil extra profond</string>
     <string name="supported">Pris en charge</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>

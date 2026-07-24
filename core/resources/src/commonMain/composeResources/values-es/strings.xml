@@ -828,6 +828,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="ssid">SSID (Nombre la Red)</string>
     <string name="state_broadcast_seconds">Periodo entre transmisión de estado (segundos)</string>
     <string name="stay_connected_anywhere">Manténgase conectado en cualquier lugar</string>
+    <string name="subnet">Subred</string>
     <string name="super_deep_sleep_duration_seconds">Duración del sueño súper profundo</string>
     <string name="supported">Soportado nativamente</string>
     <string name="supported_by_community">Apoyado por la comunidad Meshtastic</string>

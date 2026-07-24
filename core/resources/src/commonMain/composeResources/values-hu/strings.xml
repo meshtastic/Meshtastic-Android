@@ -834,6 +834,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Állapot-sugárzás (másodperc)</string>
     <string name="stay_connected_anywhere">Maradj kapcsolatban bárhol</string>
+    <string name="subnet">Alhálózat</string>
     <string name="super_deep_sleep_duration_seconds">Szuper mélyalvás időtartama</string>
     <string name="supported">Támogatott</string>
     <string name="supported_by_community">Meshtastic közösség által támogatott</string>

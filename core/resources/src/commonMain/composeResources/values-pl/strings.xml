@@ -754,6 +754,7 @@
     <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="speed">Prędkość</string>
     <string name="ssid">SSID</string>
+    <string name="subnet">Podsieć</string>
     <string name="supported">Obsługiwane</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->

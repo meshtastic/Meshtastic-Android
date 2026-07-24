@@ -983,6 +983,7 @@
     <string name="status_message">Messaggio di Stato</string>
     <string name="status_message_config">Configurazione Messaggio di Stato</string>
     <string name="stay_connected_anywhere">Rimani connesso ovunque</string>
+    <string name="subnet">Subnet</string>
     <string name="super_deep_sleep_duration_seconds">Durata super deep sleep</string>
     <string name="supported">Supportato</string>
     <string name="supported_by_community">Supportato dalla comunità Meshtastic</string>
