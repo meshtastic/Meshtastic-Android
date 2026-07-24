@@ -26,7 +26,8 @@
   var baseurl = '{{ site.baseurl }}';
   var root = baseurl;
   var channel = 'latest';
-  var match = baseurl.match(/^(.*)\/(main|v\d+\.\d+\.\d+)$/);
+  // /main/, /vX.Y.Z/ or a prerelease snapshot like /v2.8.0-open.1/.
+  var match = baseurl.match(/^(.*)\/(main|v\d+\.\d+\.\d+(?:-(?:open|closed)\.\d+)?)$/);
   if (match) {
     root = match[1];
     channel = match[2];
@@ -48,8 +49,18 @@
       if (data.latest) {
         entries.push({ id: 'latest', label: 'latest (v' + data.latest + ')', base: root });
       }
+      // Prereleases are documented ahead of general availability, so the track
+      // is always spelled out — a reader must not mistake a closed-testing
+      // snapshot for a shipped release.
+      (data.prereleases || []).forEach(function(p) {
+        entries.push({
+          id: p.dir,
+          label: p.dir.replace(/^v/, 'v') + ' — ' + p.track + ' testing',
+          base: root + '/' + p.dir
+        });
+      });
       if (data.hasMain) {
-        entries.push({ id: 'main', label: 'main (snapshot)', base: root + '/main' });
+        entries.push({ id: 'main', label: 'main (unreleased snapshot)', base: root + '/main' });
       }
       (data.versions || []).forEach(function(v) {
         entries.push({ id: 'v' + v, label: 'v' + v, base: root + '/v' + v });
