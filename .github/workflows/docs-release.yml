@@ -37,14 +37,11 @@ jobs:
       - name: Extract Version
         id: version
         run: |
-          case "$GITHUB_REF" in
-            refs/tags/v*.*.*) ;;
-            *)
-              echo "This workflow must run against a vX.Y.Z tag ref (got $GITHUB_REF)." >&2
-              echo "For workflow_dispatch, select the release tag under 'Use workflow from'." >&2
-              exit 1
-              ;;
-          esac
+          if ! [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "This workflow must run against a vX.Y.Z tag ref (got $GITHUB_REF)." >&2
+            echo "For workflow_dispatch, select the release tag under 'Use workflow from'." >&2
+            exit 1
+          fi
           TAG=${GITHUB_REF#refs/tags/v}
           echo "version=$TAG" >> $GITHUB_OUTPUT
           echo "Deploying docs for version: $TAG"
