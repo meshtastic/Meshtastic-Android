@@ -7,11 +7,15 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+### Internal (v2.8.0-internal.34)
+Changes since [`v2.8.0-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.1):
 
 #### 🖥️ Desktop
 * fix(ci): defer desktop packaging toolchain resolution by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6401
 #### 🛠️ Fixes
+* fix(messaging): reduce composer recomposition and typing jank by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6318
+* fix(ble): harden reconnect sessions and Android scan lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6384
+* fix(settings): stop dropping admin config responses (0% stall, missing remote channels) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6391
 * fix(hardware): throttle repeated catalog refreshes for cache misses by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6399
 * fix(firmware): decode manifests independent of content type by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6400
 * fix(firmware): don't treat unparseable version as "too old" (#3726) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6408
@@ -20,14 +24,6 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 #### 📝 Other Changes
 * perf(docs): skip Dokka when no API sources changed, drop test modules from aggregation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6412
 * fix(desktop): restore eager JBR javaHome pin for ProGuard packaging by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6414
-
-### Internal (v2.8.0-internal.33)
-Changes since [`v2.8.0-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.1):
-
-#### 🛠️ Fixes
-* fix(messaging): reduce composer recomposition and typing jank by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6318
-* fix(ble): harden reconnect sessions and Android scan lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6384
-* fix(settings): stop dropping admin config responses (0% stall, missing remote channels) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6391
 
 ### Open Beta (v2.8.0-open.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
