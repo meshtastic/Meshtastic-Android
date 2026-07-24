@@ -26,18 +26,35 @@ jobs:
   cleanup_prereleases:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 15
+    # Dispatch inputs reach the shell as environment variables rather than being
+    # interpolated into the script text: base_version is free-form and feeds a
+    # regex that drives `rm -rf` and tag deletion, so a value containing quotes,
+    # $(...) or a newline must not be able to break out of the assignment.
+    env:
+      BASE_VERSION: ${{ github.event.inputs.base_version }}
+      CONFIRM_DELETION: ${{ github.event.inputs.confirm_deletion }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
+      # Shared by every step below: reject anything that is not a bare X.Y.Z
+      # before it reaches a regex, a tag deletion or an rm -rf.
+      - name: Validate base_version
+        run: |
+          set -euo pipefail
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "base_version must be a bare X.Y.Z version (got '$BASE_VERSION')." >&2
+            exit 1
+          fi
+          echo "Cleaning up pre-releases for $BASE_VERSION."
+
       - name: Cleanup pre-releases and their tags
         id: cleanup_releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BASE_VERSION="${{ github.event.inputs.base_version }}"
           TAG_PREFIX="v${BASE_VERSION}-"
           echo "Searching for pre-releases with tag prefix '$TAG_PREFIX'."
           RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease --limit 100 | jq -r --arg prefix "$TAG_PREFIX" '.[] | select(.isPrerelease == true and .tagName != null and (.tagName | startswith($prefix))) | .tagName')
@@ -45,7 +62,7 @@ jobs:
           if [ -z "$RELEASES_TO_DELETE" ]; then
             echo "No pre-releases found for base version $BASE_VERSION."
           else
-            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
+            if [[ "$CONFIRM_DELETION" == "true" ]]; then
               echo "!!! DELETING RELEASES AND TAGS !!!"
               echo "The following pre-releases and their tags will be deleted:"
               echo "$RELEASES_TO_DELETE"
@@ -62,9 +79,8 @@ jobs:
       - name: Cleanup pre-release docs snapshots on gh-pages
         run: |
           set -euo pipefail
-          BASE_VERSION="${{ github.event.inputs.base_version }}"
           DRY_RUN=true
-          [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]] && DRY_RUN=false
+          [[ "$CONFIRM_DELETION" == "true" ]] && DRY_RUN=false
 
           if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
             echo "No gh-pages branch; nothing to clean."
@@ -77,10 +93,24 @@ jobs:
           git worktree add --quiet -B gh-pages "$work" FETCH_HEAD
           trap 'git worktree remove --force "$work" 2>/dev/null || true' EXIT
 
+          # Reaping is only sound because /vX.Y.Z/ supersedes these snapshots.
+          # If it is missing, the production docs never published (or this was
+          # dispatched for the wrong version) and deleting the snapshots would
+          # destroy the only docs for this version — and whatever the site root
+          # currently falls back to. Fail closed instead.
+          if [ ! -d "$work/v${BASE_VERSION}" ]; then
+            echo "Refusing to reap docs snapshots: /v${BASE_VERSION}/ is not published on gh-pages." >&2
+            echo "Run Docs Release against the v${BASE_VERSION} tag first." >&2
+            exit 1
+          fi
+
+          # Dots are wildcards in an ERE, so escape them: an unescaped
+          # v1.2.3-open.1 pattern would also match a v1x2y3-open.1 directory.
+          version_re="${BASE_VERSION//./\\.}"
           mapfile -t stale < <(
             find "$work" -maxdepth 1 -mindepth 1 -type d \
               -regextype posix-extended \
-              -regex ".*/v${BASE_VERSION}-(open|closed)\.[0-9]+" -printf '%f\n' | sort
+              -regex ".*/v${version_re}-(open|closed)\.[0-9]+" -printf '%f\n' | sort
           )
 
           if [ ${#stale[@]} -eq 0 ]; then
@@ -120,7 +150,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BASE_VERSION="${{ github.event.inputs.base_version }}"
           TAG_PREFIX="v${BASE_VERSION}-"
           echo "Searching for any remaining remote pre-release tags with prefix '$TAG_PREFIX'."
 
@@ -130,7 +159,7 @@ jobs:
           if [ -z "$TAGS_TO_DELETE" ]; then
             echo "No dangling pre-release tags found."
           else
-            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
+            if [[ "$CONFIRM_DELETION" == "true" ]]; then
               echo "!!! DELETING DANGLING TAGS !!!"
               echo "The following pre-release tags will be deleted:"
               # We pipe to xargs which will run the command for each tag.
