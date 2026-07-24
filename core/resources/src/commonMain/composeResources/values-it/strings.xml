@@ -47,9 +47,14 @@
     <!-- ADD -->
     <string name="add">Aggiungere</string>
     <string name="add_a_note">Aggiungi una nota privata...</string>
+    <string name="add_channels_description">I seguenti canali sono stati trovati nel codice QR. Selezionare quelli che si desidera aggiungere al dispositivo. I canali esistenti saranno mantenuti.</string>
+    <string name="add_custom_tile_source">Aggiungi Sorgente Tile</string>
     <string name="add_favorite">Aggiungi ai preferiti</string>
     <string name="add_layer">Aggiungi livello</string>
+    <string name="add_local_mbtiles_file">Aggiungi File MBTiles Locale</string>
     <string name="add_network_device">Aggiungere</string>
+    <string name="add_network_device_manually">Aggiungi dispositivo manualmente…</string>
+    <string name="add_network_layer">Aggiungi Livello Rete</string>
     <string name="address">Indirizzo</string>
     <string name="admin_key">Chiave Amministratore</string>
     <string name="admin_keys">Chiave Amministratore</string>
@@ -58,7 +63,9 @@
     <string name="advanced_device_gps">Impostazioni Avanzate Dispositivo GPS</string>
     <string name="advanced_title">Avanzate</string>
     <!-- AIR -->
+    <string name="air_quality">Qualità Dell'Aria</string>
     <string name="air_quality_icon">Icona della qualità dell'aria</string>
+    <string name="air_quality_metrics_log">Registro Metriche Qualità Aria</string>
     <string name="air_quality_metrics_module_enabled">Modulo metriche della qualità dell'aria abilitato</string>
     <string name="air_quality_metrics_update_interval_seconds">Intervallo aggiornamento metriche qualità aria</string>
     <string name="air_util_definition">Percentuale di tempo di trasmissione utilizzato nell’ultima ora.</string>
@@ -83,6 +90,16 @@
     <string name="analytics_platforms">Piattaforme di analytics:</string>
     <string name="any">Qualsiasi</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Ottieni informazioni canale</string>
+    <string name="app_functions_get_device_status">Ottieni stato dispositivo</string>
+    <string name="app_functions_get_mesh_metrics">Ottieni metriche mesh</string>
+    <string name="app_functions_get_mesh_status">Ottieni stato mesh</string>
+    <string name="app_functions_get_node_details">Ottieni dettagli nodo</string>
+    <string name="app_functions_get_node_list">Ottieni lista nodi</string>
+    <string name="app_functions_get_recent_messages">Ottieni messaggi recenti</string>
+    <string name="app_functions_get_unread_summary">Ottieni riepilogo messaggi da leggere</string>
+    <string name="app_functions_master_summary">Lascia che gli assistenti AI del sistema (ad esempio Gemini) scoprano e utilizzino le funzioni mesh</string>
+    <string name="app_functions_master_toggle">Consenti accesso AI</string>
     <string name="app_notifications">Notifiche dell'app</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Aggiornamento dell'applicazione necessario</string>
@@ -160,10 +177,20 @@
     <string name="codec_2_enabled">CODEC 2 attivato</string>
     <string name="codec2_sample_rate">Frequenza di campionamento CODEC2</string>
     <string name="coding_rate">Coding Rate</string>
+    <string name="collapse_chart">Minimizza grafico</string>
+    <string name="collapsed">Minimizzato</string>
     <string name="communicate_off_the_grid">Comunica off-grid con i tuoi amici e la tua community senza la connessione cellulare</string>
     <!-- COMPASS -->
+    <string name="compass_bearing">Direzione: %1$s</string>
+    <string name="compass_bearing_na">Direzione: N/A</string>
+    <string name="compass_distance">Distanza: %1$s</string>
+    <string name="compass_location_disabled">Il provider di localizzazione è disabilitato. Attiva i servizi di localizzazione.</string>
+    <string name="compass_no_location_fix">In attesa di un GPS fix per calcolare la distanza e la direzione.</string>
+    <string name="compass_no_location_permission">I permessi di localizzazione sono necessari per mostrare la distanza e la direzione.</string>
+    <string name="compass_no_magnetometer">Questo dispositivo non ha un sensore di bussola. La direzione non è disponibile.</string>
     <string name="compass_north_top">Tieni in alto il nord della bussola</string>
     <string name="compass_orientation">Orientamento bussola</string>
+    <string name="compass_title">Bussola</string>
     <string name="compromised_keys">Rilevate chiavi compromesse, seleziona OK per rigenerarle.</string>
     <!-- CONFIG -->
     <string name="config_device_doubleTapAsButtonPress_summary">Considera il doppio tocco sugli accelerometri supportati come la pressione di un pulsante utente.</string>
