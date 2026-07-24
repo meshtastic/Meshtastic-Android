@@ -8,10 +8,15 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   stale_issues:
     name: Close Stale Issues
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     if: github.repository == 'meshtastic/Meshtastic-Android'
 
     steps:

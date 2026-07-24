@@ -8,9 +8,16 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:       # Allow manual triggering
 
+# Emulator runs take up to ~1 h; a manual dispatch overlapping the daily cron
+# would race on the scheduled-baseline branch. Later runs queue, never stack.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   regenerate:
     runs-on: ubuntu-24.04
+    timeout-minutes: 90
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
       contents: write      # To commit files and push branches

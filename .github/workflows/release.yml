@@ -90,6 +90,7 @@ permissions:
 jobs:
   prepare-build-info:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
@@ -130,6 +131,7 @@ jobs:
 
   release-google:
     runs-on: ubuntu-24.04
+    timeout-minutes: 90
     needs: [prepare-build-info]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
@@ -214,6 +216,7 @@ jobs:
 
   release-fdroid:
     runs-on: ubuntu-24.04
+    timeout-minutes: 90
     needs: [prepare-build-info]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
@@ -274,6 +277,7 @@ jobs:
   release-desktop:
     if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     needs: [prepare-build-info]
     strategy:
       fail-fast: false
@@ -431,6 +435,7 @@ jobs:
   create-flatpak-src:
     if: ${{ inputs.build_flatpak_src }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     needs: [prepare-build-info]
     strategy:
       fail-fast: false
@@ -487,6 +492,7 @@ jobs:
   release-flatpak-src:
     if: ${{ inputs.build_flatpak_src }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     needs: [create-flatpak-src]
     steps:
       - name: Download Flatpak source artifacts
@@ -524,6 +530,7 @@ jobs:
   github-release:
     if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     needs:
       - prepare-build-info
       - release-google

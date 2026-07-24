@@ -69,6 +69,7 @@ permissions:
 jobs:
   prepare-build-info:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
@@ -106,6 +107,7 @@ jobs:
 
   promote-release:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
     needs: [ prepare-build-info ]
     env:
       FROM_TRACK: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
@@ -144,6 +146,7 @@ jobs:
 
   update-github-release:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     needs: [ prepare-build-info, promote-release ]
     # actions: write is scoped here — only this job's publish-workflow
     # dispatch needs it, and the other jobs must not get it. Job-level
@@ -345,6 +348,7 @@ jobs:
   update-homebrew-cask:
     if: ${{ inputs.channel == 'production' }}
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     needs: [ update-github-release ]
     steps:
       - name: Checkout code

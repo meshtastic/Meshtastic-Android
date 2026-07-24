@@ -33,6 +33,7 @@ jobs:
   build:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -82,6 +83,7 @@ jobs:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     needs: build
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

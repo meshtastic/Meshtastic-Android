@@ -7,9 +7,16 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:       # Allow manual triggering
 
+# Hourly cron + manual dispatch must never stack: overlapping runs race on the
+# scheduled-updates branch force-push. Later runs queue (at most one pending).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   update_assets:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
       contents: write      # To commit files and push branches

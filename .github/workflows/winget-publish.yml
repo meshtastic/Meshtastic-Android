@@ -25,12 +25,19 @@ on:
 # nothing in this repo is written.
 permissions: {}
 
+# Serialize submissions: a release event overlapping a manual retry would open
+# duplicate winget-pkgs PRs for the same version.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   winget:
     # Belt and braces for release events — `released` should already exclude
     # these. workflow_dispatch has no release payload and passes through.
     if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       # Secrets aren't readable in step `if:` expressions; skip cleanly until
       # the token is configured.
