@@ -34,10 +34,10 @@ import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -158,7 +158,6 @@ class MeshNotificationManagerImpl(
     }
 
     private data class ServiceNotificationSnapshot(
-        val generation: Long,
         val state: ConnectionState,
         val localStats: LocalStats?,
         val deviceMetrics: DeviceMetrics?,
@@ -348,8 +347,12 @@ class MeshNotificationManagerImpl(
     private var nextStatsUpdateMillis: Long = 0
     private var cachedMessage: String? = null
     private var cachedServiceNotification: Notification? = null
-    private var serviceNotificationGeneration: Long = 0
-    private var serviceNotificationJob: Job? = null
+    private val serviceNotificationSnapshots =
+        MutableSharedFlow<ServiceNotificationSnapshot>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    init {
+        scope.launch { serviceNotificationSnapshots.collectLatest(::renderAndPostServiceNotification) }
+    }
 
     /**
      * Returns the last-built service state notification, or an immediately available application-label fallback. This
@@ -362,70 +365,42 @@ class MeshNotificationManagerImpl(
     }
 
     // region Public Notification Methods
-    @Suppress("TooGenericExceptionCaught")
     override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
-        val snapshot = synchronized(serviceNotificationLock) { captureServiceNotificationSnapshot(state, telemetry) }
-        // LAZY prevents the renderer from completing before its job is installed as the current generation.
-        val job =
-            scope.launch(start = CoroutineStart.LAZY) {
-                try {
-                    val rendered = renderServiceNotification(snapshot)
-                    commitServiceNotification(
-                        snapshot = snapshot,
-                        notification = rendered.notification,
-                        message = rendered.message,
-                    )
-                        ?.let { notification -> notificationManager.notify(SERVICE_NOTIFY_ID, notification) }
-                } catch (ex: CancellationException) {
-                    throw ex
-                } catch (ex: Exception) {
-                    Logger.e(ex) { "Failed to render service notification resources" }
-                    val fallback =
-                        createServiceStateNotification(
-                            name = applicationLabel,
-                            message = snapshot.previousMessage,
-                            nextUpdateAt = snapshot.nextUpdateAt,
-                        )
-                    commitServiceNotification(
-                        snapshot = snapshot,
-                        notification = fallback,
-                        message = snapshot.previousMessage,
-                    )
-                        ?.let { notification ->
-                            safeCatching { notificationManager.notify(SERVICE_NOTIFY_ID, notification) }
-                                .onFailure { Logger.e(it) { "Failed to post fallback service notification" } }
-                        }
-                }
-            }
-
-        val previousJob =
-            synchronized(serviceNotificationLock) {
-                if (snapshot.generation != serviceNotificationGeneration) {
-                    job.cancel()
-                    null
-                } else {
-                    serviceNotificationJob.also { serviceNotificationJob = job }
-                }
-            }
-        previousJob?.cancel()
-        job.start()
+        synchronized(serviceNotificationLock) {
+            serviceNotificationSnapshots.tryEmit(captureServiceNotificationSnapshot(state, telemetry))
+        }
     }
 
     /**
-     * Commits a rendered notification only while its captured generation is still current. The Android notification
-     * Binder call intentionally happens after this method returns so foreground startup and state snapshots never wait
-     * behind notification-manager IPC while holding [serviceNotificationLock].
+     * Renders service notifications in one ordered collector. [collectLatest] cancels obsolete resource work and does
+     * not start the next renderer until the previous block has completed, so Binder notification posts cannot overtake
+     * one another and leave stale text visible.
      */
-    private fun commitServiceNotification(
-        snapshot: ServiceNotificationSnapshot,
-        notification: Notification,
-        message: String?,
-    ): Notification? = synchronized(serviceNotificationLock) {
-        if (snapshot.generation != serviceNotificationGeneration) return@synchronized null
-        cachedMessage = message
-        cachedServiceNotification = notification
-        serviceNotificationJob = null
-        notification
+    private suspend fun renderAndPostServiceNotification(snapshot: ServiceNotificationSnapshot) {
+        safeCatching {
+            val rendered = renderServiceNotification(snapshot)
+            postServiceNotification(rendered.notification, rendered.message)
+        }
+            .onFailure { ex ->
+                Logger.e(ex) { "Failed to render service notification resources" }
+                val fallback =
+                    createServiceStateNotification(
+                        name = applicationLabel,
+                        message = snapshot.previousMessage,
+                        nextUpdateAt = snapshot.nextUpdateAt,
+                    )
+                safeCatching { postServiceNotification(fallback, snapshot.previousMessage) }
+                    .onFailure { Logger.e(it) { "Failed to post fallback service notification" } }
+            }
+    }
+
+    /** Updates the foreground fallback cache before posting the same notification through Android's Binder API. */
+    private fun postServiceNotification(notification: Notification, message: String?) {
+        synchronized(serviceNotificationLock) {
+            cachedMessage = message
+            cachedServiceNotification = notification
+        }
+        notificationManager.notify(SERVICE_NOTIFY_ID, notification)
     }
 
     private fun captureServiceNotificationSnapshot(
@@ -444,18 +419,15 @@ class MeshNotificationManagerImpl(
         if (cachedLocalStats == null || cachedDeviceMetrics == null) {
             val repo = nodeRepository.value
             val myNodeNum = repo.myNodeInfo.value?.myNodeNum
-            if (myNodeNum != null) {
-                repo.nodeDBbyNum.value[myNodeNum]?.let { node ->
-                    if (cachedDeviceMetrics == null) cachedDeviceMetrics = node.deviceMetrics
-                    if (cachedLocalStats == null) {
-                        cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
-                    }
-                }
+            if (cachedDeviceMetrics == null && myNodeNum != null) {
+                cachedDeviceMetrics = repo.nodeDBbyNum.value[myNodeNum]?.deviceMetrics
+            }
+            if (cachedLocalStats == null) {
+                cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
             }
         }
 
         return ServiceNotificationSnapshot(
-            generation = ++serviceNotificationGeneration,
             state = state,
             localStats = cachedLocalStats,
             deviceMetrics = cachedDeviceMetrics,

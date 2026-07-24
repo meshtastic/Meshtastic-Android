@@ -244,9 +244,9 @@ fun ConnectionsScreen(
         )
     }
 
-    // Work around CMP-6615: Android stringResource currently enters a blocking resource state. Keep these stable
-    // slots outside AnimatedContent so connection-state transitions do not re-enter resource loading while the main
-    // thread is applying an animation frame.
+    // Work around CMP-6615 in Compose Multiplatform 1.11.1: Android stringResource enters a blocking resource state.
+    // Keep these stable slots outside AnimatedContent so connection-state transitions do not re-enter resource loading
+    // while the main thread is applying an animation frame.
     val firmwareVersion =
         ourNode
             ?.metadata

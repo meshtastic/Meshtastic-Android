@@ -61,7 +61,12 @@ import kotlin.time.Duration.Companion.seconds
 private const val RSSI_DELAY = 2
 private const val RSSI_TIMEOUT = 1
 
-/** Plain text resolved outside the animated connected-device subtree. */
+/**
+ * Plain text resolved outside the animated connected-device subtree.
+ *
+ * TODO(CMP-6615): Remove this bundle and the caller-provided component labels after upgrading from Compose
+ *   Multiplatform 1.11.1 to a release containing the Android resource-loading fix.
+ */
 @Immutable
 data class CurrentlyConnectedText(
     val unknownLabel: String,

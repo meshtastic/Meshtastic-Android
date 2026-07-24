@@ -41,6 +41,7 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
@@ -48,6 +49,7 @@ import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
@@ -134,6 +136,41 @@ class MeshNotificationManagerImplTest {
         val title =
             activeServiceNotification()?.notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         assertEquals(getString(Res.string.disconnected), title)
+    }
+
+    @Test
+    fun `identical service state can repost after notifications are cleared`() = runWithRenderScope { renderScope ->
+        val notifications = createManager(renderScope)
+        notifications.initChannels()
+        val telemetry = populatedTelemetry()
+
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, telemetry)
+        advanceUntilIdle()
+        // Align the replayed snapshot with the now-cached rendered message; the post-clear update is then identical.
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, telemetry)
+        advanceUntilIdle()
+
+        notifications.clearNotifications()
+        assertNull(activeServiceNotification())
+
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, telemetry)
+        advanceUntilIdle()
+        assertNotNull(activeServiceNotification())
+    }
+
+    @Test
+    fun `service state seeds local stats before the local node row is available`() = runWithRenderScope { renderScope ->
+        val stats = LocalStats(uptime_seconds = 1, num_online_nodes = 2, num_total_nodes = 3)
+        every { nodeRepository.localStats } returns MutableStateFlow(stats)
+        val notifications = createManager(renderScope)
+        notifications.initChannels()
+
+        notifications.updateServiceStateNotification(ConnectionState.Disconnected, telemetry = null)
+        advanceUntilIdle()
+
+        val text = activeServiceNotification()?.notification?.extras?.getCharSequence(Notification.EXTRA_TEXT)
+        assertNotNull(text)
+        assertTrue(text.contains(getString(Res.string.local_stats_nodes, 2, 3)))
     }
 
     private fun createManager(scope: CoroutineScope) = MeshNotificationManagerImpl(
