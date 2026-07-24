@@ -195,12 +195,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11185",
-      "title": "Deliver locally-generated replies addressed to us to the phone",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11185",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11181",
       "title": "Reduce reboots and radio restarts",
       "page_url": "https://github.com/meshtastic/firmware/pull/11181",
@@ -237,12 +231,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11167",
-      "title": "lint: drop dead terrascan ignore in devcontainer Dockerfile",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11167",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "11163",
       "title": "replace screens with unique_ptr",
       "page_url": "https://github.com/meshtastic/firmware/pull/11163",
@@ -258,12 +246,6 @@
       "id": "11156",
       "title": "Testing build containers based on `develop` branch",
       "page_url": "https://github.com/meshtastic/firmware/pull/11156",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "11155",
-      "title": "Fix/call modules",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11155",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
