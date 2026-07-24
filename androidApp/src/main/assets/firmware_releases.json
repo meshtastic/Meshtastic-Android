@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "11197",
+      "title": "fix(mesh): don't assert on malloc() failure in MemoryDynamic::alloc()",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11197",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11191",
       "title": "Router: defer nested local sends to avoid handleReceived re-entrancy",
       "page_url": "https://github.com/meshtastic/firmware/pull/11191",
@@ -198,6 +204,12 @@
       "id": "11187",
       "title": "mark way fewer boards as board_level = pr",
       "page_url": "https://github.com/meshtastic/firmware/pull/11187",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11184",
+      "title": "gps: replace GeoCoord::latLongToMeter's spherical trig with equirectangular approximation",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11184",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
