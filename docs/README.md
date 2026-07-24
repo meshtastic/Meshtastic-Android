@@ -50,11 +50,30 @@ channels (GitHub Pages must be configured to serve from that branch):
 
 | Path | Content | Published by |
 |------|---------|--------------|
-| `/` | Latest published release (default landing) | `docs-release.yml` on `vX.Y.Z` tags |
+| `/` | Latest production release (default landing) | `docs-release.yml` on `vX.Y.Z` tags |
 | `/vX.Y.Z/` | Permanent per-release copy | `docs-release.yml` on `vX.Y.Z` tags |
+| `/vX.Y.Z-open.N/` | Per-tag open-testing snapshot | `docs-release.yml` on `vX.Y.Z-open.N` tags |
+| `/vX.Y.Z-closed.N/` | Per-tag closed-testing snapshot | `docs-release.yml` on `vX.Y.Z-closed.N` tags |
 | `/main/` | Snapshot of the `main` branch | `docs-deploy.yml` on pushes to `main` |
-| `/api/` | Dokka API reference | both workflows |
+| `/api/` | Dokka API reference | `docs-deploy.yml`, plus production releases |
 | `/versions.json` | Version manifest for the site's version switcher | regenerated on every deploy |
+
+`-internal.N` tags are deliberately not published — they are cut many times per
+cycle and are not a documented channel.
+
+Prerelease snapshots accumulate during a version cycle so testers can read the
+docs for the exact build they are running. Once the production `vX.Y.Z` tag
+ships, `/vX.Y.Z/` supersedes them and **Post-Release Cleanup** (run with
+`base_version=X.Y.Z`) reaps the `vX.Y.Z-open.*` / `vX.Y.Z-closed.*` directories
+along with the prerelease tags. That workflow defaults to a dry run.
+
+Only production releases own `/` and rebuild `/api/`. Prerelease tags publish
+their own directory only: `/api/` is unversioned and already refreshed by every
+push to `main`, so rebuilding Dokka (~14 min) per prerelease tag would cost far
+more than it refreshes. Until a production release exists, `/` redirects to the
+best available channel — newest open, then newest closed, then `/main/` — and
+upgrades automatically as better channels appear. Real release content at the
+root is never overwritten by that fallback.
 
 Each deploy overlays only its own channels via `scripts/docs/publish-to-gh-pages.sh`,
 so release history accumulates instead of being wiped by the next deploy. The header

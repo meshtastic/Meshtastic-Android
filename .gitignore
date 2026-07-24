@@ -102,3 +102,7 @@ build-scan-*.scan
 
 # Local agent memory (remember plugin) — must never be committed
 .remember/
+
+# Python bytecode from scripts/
+__pycache__/
+*.pyc

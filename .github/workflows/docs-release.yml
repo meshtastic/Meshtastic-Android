@@ -1,17 +1,33 @@
 name: Docs Release
 
-# Publishes release docs to the persistent gh-pages branch: the site root
-# (latest release) and a permanent /vX.Y.Z/ copy, plus refreshed Dokka at
-# /api/. The /main/ snapshot is owned by docs-deploy.yml and left untouched.
+# Publishes release docs to the persistent gh-pages branch.
 #
-# workflow_dispatch exists for backfill: run it against a vX.Y.Z tag ref to
-# (re)publish that version without cutting a new tag.
+# Production tags (vX.Y.Z) own the site root and get a permanent /vX.Y.Z/ copy,
+# plus a refreshed Dokka reference at /api/.
+#
+# Open- and closed-testing tags (vX.Y.Z-open.N / vX.Y.Z-closed.N) publish a
+# per-tag snapshot at /vX.Y.Z-open.N/ only. They deliberately do NOT touch the
+# root or /api/: the root belongs to production releases, and /api/ is an
+# unversioned channel already kept current by docs-deploy.yml on every push to
+# main — rebuilding Dokka (~14 min) for each of the many prerelease tags in a
+# cycle would cost far more than it refreshes.
+#
+# These per-tag prerelease directories accumulate during a version cycle and are
+# reaped by post-release-cleanup.yml once the production vX.Y.Z tag ships.
+#
+# The /main/ snapshot is owned by docs-deploy.yml and is left untouched here.
+#
+# workflow_dispatch exists for backfill: run it against a tag ref to (re)publish
+# that version without cutting a new tag.
 
 on:
   push:
     tags:
+      # Production plus the open/closed testing tracks. Internal builds are
+      # excluded: they are tagged many times per cycle and are not a channel we
+      # publish documentation for.
       - 'v*.*.*'
-      - '!v*-*'
+      - '!v*-internal.*'
 
   workflow_dispatch:
 
@@ -34,17 +50,34 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Extract Version
+      # Resolves the tag into: the docs version label (which becomes the
+      # published directory name) and whether this is a production release.
+      - name: Resolve Release Channel
         id: version
         run: |
-          if ! [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "This workflow must run against a vX.Y.Z tag ref (got $GITHUB_REF)." >&2
-            echo "For workflow_dispatch, select the release tag under 'Use workflow from'." >&2
+          set -euo pipefail
+          case "$GITHUB_REF" in
+            refs/tags/*) TAG="${GITHUB_REF#refs/tags/}" ;;
+            *)
+              echo "This workflow must run against a release tag ref (got $GITHUB_REF)." >&2
+              echo "For workflow_dispatch, select the tag under 'Use workflow from'." >&2
+              exit 1
+              ;;
+          esac
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "docs_version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "is_production=true" >> "$GITHUB_OUTPUT"
+            echo "Production release: ${BASH_REMATCH[1]} -> / and /v${BASH_REMATCH[1]}/"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+-(open|closed)\.[0-9]+)$ ]]; then
+            echo "docs_version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "is_production=false" >> "$GITHUB_OUTPUT"
+            echo "${BASH_REMATCH[2]}-testing prerelease -> /v${BASH_REMATCH[1]}/ only"
+          else
+            echo "Tag '$TAG' is not a publishable docs channel." >&2
+            echo "Expected vX.Y.Z, vX.Y.Z-open.N or vX.Y.Z-closed.N." >&2
             exit 1
           fi
-          TAG=${GITHUB_REF#refs/tags/v}
-          echo "version=$TAG" >> $GITHUB_OUTPUT
-          echo "Deploying docs for version: $TAG"
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -58,41 +91,59 @@ jobs:
           bundler-cache: true
           working-directory: docs
 
-      # Build root docs site (/ on Pages)
+      # Versioned docs (/vX.Y.Z/ or /vX.Y.Z-open.N/) — built for every channel.
+      - name: Build Versioned Docs
+        run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=release -Pdocs.version=${{ steps.version.outputs.docs_version }} -Pci=true
+
+      # Root site (/) — production releases only.
       - name: Build Root Docs Site
+        if: steps.version.outputs.is_production == 'true'
         run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
 
-      # Build versioned docs (/vX.Y.Z/ on Pages)
-      - name: Build Versioned Docs
-        run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=release -Pdocs.version=${{ steps.version.outputs.version }} -Pci=true
-
-      # Build Dokka API reference (/api/ on Pages)
+      # Dokka API reference (/api/) — production releases only.
       - name: Build Dokka HTML documentation
+        if: steps.version.outputs.is_production == 'true'
         run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
 
       - name: Compile Jekyll Sites
+        env:
+          DOCS_VERSION: ${{ steps.version.outputs.docs_version }}
+          IS_PRODUCTION: ${{ steps.version.outputs.is_production }}
         run: |
-          # Build versioned Jekyll site
+          set -euo pipefail
+          # Versioned site
           BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
-            --source build/_site/v${{ steps.version.outputs.version }} \
+            --source "build/_site/v${DOCS_VERSION}" \
             --destination build/jekyll_release \
-            --baseurl /${{ github.event.repository.name }}/v${{ steps.version.outputs.version }}
+            --baseurl "/${{ github.event.repository.name }}/v${DOCS_VERSION}"
 
-          # Move versioned source folder out of root source folder to avoid nested build issues
-          mv build/_site/v${{ steps.version.outputs.version }} build/v_temp
+          # Move the versioned source out of the root source tree so the root
+          # build below doesn't try to nest it.
+          mv "build/_site/v${DOCS_VERSION}" build/v_temp
 
-          # Build root Jekyll site
-          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
-            --source build/_site \
-            --destination build/jekyll_root \
-            --baseurl /${{ github.event.repository.name }}
+          if [ "$IS_PRODUCTION" = "true" ]; then
+            BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
+              --source build/_site \
+              --destination build/jekyll_root \
+              --baseurl "/${{ github.event.repository.name }}"
+          fi
 
       - name: Stage channels
+        id: stage
+        env:
+          DOCS_VERSION: ${{ steps.version.outputs.docs_version }}
+          IS_PRODUCTION: ${{ steps.version.outputs.is_production }}
         run: |
+          set -euo pipefail
           mkdir -p build/pages_staging
-          cp -r build/jekyll_root build/pages_staging/root
-          cp -r build/jekyll_release build/pages_staging/v${{ steps.version.outputs.version }}
-          cp -r build/dokka/html build/pages_staging/api
+          cp -r build/jekyll_release "build/pages_staging/v${DOCS_VERSION}"
+          channels="v${DOCS_VERSION}"
+          if [ "$IS_PRODUCTION" = "true" ]; then
+            cp -r build/jekyll_root build/pages_staging/root
+            cp -r build/dokka/html build/pages_staging/api
+            channels="root $channels api"
+          fi
+          echo "channels=$channels" >> "$GITHUB_OUTPUT"
 
       - name: Publish to gh-pages
-        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging root v${{ steps.version.outputs.version }} api
+        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging ${{ steps.stage.outputs.channels }}

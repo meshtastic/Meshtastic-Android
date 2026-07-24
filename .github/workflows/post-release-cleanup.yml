@@ -56,6 +56,66 @@ jobs:
             fi
           fi
 
+      # The docs site keeps a per-tag snapshot for every open/closed testing tag
+      # in a version cycle (see docs-release.yml). Once vX.Y.Z ships, /vX.Y.Z/
+      # supersedes them all, so reap them to stop gh-pages growing without bound.
+      - name: Cleanup pre-release docs snapshots on gh-pages
+        run: |
+          set -euo pipefail
+          BASE_VERSION="${{ github.event.inputs.base_version }}"
+          DRY_RUN=true
+          [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]] && DRY_RUN=false
+
+          if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            echo "No gh-pages branch; nothing to clean."
+            exit 0
+          fi
+
+          work="$(mktemp -d)"
+          rmdir "$work"
+          git fetch --quiet origin gh-pages
+          git worktree add --quiet -B gh-pages "$work" FETCH_HEAD
+          trap 'git worktree remove --force "$work" 2>/dev/null || true' EXIT
+
+          mapfile -t stale < <(
+            find "$work" -maxdepth 1 -mindepth 1 -type d \
+              -regextype posix-extended \
+              -regex ".*/v${BASE_VERSION}-(open|closed)\.[0-9]+" -printf '%f\n' | sort
+          )
+
+          if [ ${#stale[@]} -eq 0 ]; then
+            echo "No pre-release docs snapshots found for $BASE_VERSION."
+            exit 0
+          fi
+
+          printf 'Pre-release docs snapshots for %s:\n' "$BASE_VERSION"
+          printf '  %s\n' "${stale[@]}"
+
+          if [ "$DRY_RUN" = true ]; then
+            echo "DRY RUN: the directories above would be removed from gh-pages."
+            exit 0
+          fi
+
+          for d in "${stale[@]}"; do
+            rm -rf "$work/$d"
+          done
+
+          # Rebuild versions.json (and the root placeholder) from what remains,
+          # using the same generator the publisher runs.
+          python3 scripts/docs/regenerate-versions.py "$work"
+
+          cd "$work"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "gh-pages already clean."
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -q -m "docs: reap pre-release snapshots for ${BASE_VERSION}"
+          git push --quiet origin HEAD:gh-pages
+          echo "Removed ${#stale[@]} pre-release docs snapshot(s) from gh-pages."
+
       - name: Cleanup dangling pre-release tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
