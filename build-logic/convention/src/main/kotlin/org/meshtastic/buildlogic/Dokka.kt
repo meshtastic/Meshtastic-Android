@@ -65,11 +65,13 @@ fun Project.configureDokka() {
             val isCoreSourceSet = name in baseSourceSets
             suppress.set(!isCoreSourceSet)
 
-            sourceLink {
-                enableJdkDocumentationLink.set(true)
-                enableKotlinStdLibDocumentationLink.set(true)
-                reportUndocumented.set(true)
+            // These are source-set level settings, not sourceLink ones — they previously sat inside the
+            // sourceLink block and only compiled because Kotlin resolved them against the outer receiver.
+            enableJdkDocumentationLink.set(true)
+            enableKotlinStdLibDocumentationLink.set(true)
+            reportUndocumented.set(true)
 
+            sourceLink {
                 // Standardized repo-root based source links
                 localDirectory.set(project.projectDir)
                 val rootDir = project.isolated.rootProject.projectDirectory.asFile
