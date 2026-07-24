@@ -273,6 +273,7 @@
     <string name="config_position_flags_summary">Valinnaiset kentät, jotka sisällytetään sijaintiviesteihin. Mitä enemmän kenttiä sisällytetään, sitä suurempi viesti on, mikä pidentää lähetysaikaa ja lisää pakettihäviön riskiä.</string>
     <string name="config_position_gps_update_interval_summary">Kuinka usein yritetään hakea GPS-sijainti (&lt;10 sekuntia pitää GPS:n päällä).</string>
     <string name="config_power_is_power_saving_summary">Asetus laittaa kaiken mahdollisen lepotilaan. Seuranta- ja anturiroolissa tämä sisältää myös LoRa-radion. Älä käytä tätä asetusta, jos haluat käyttää laitetta puhelinsovellusten kanssa tai laitetta ilman käyttäjäpainiketta.</string>
+    <string name="config_saved_restarting">Radio käynnistyy uudelleen ja on hetken aikaa tavoittamattomissa.</string>
     <string name="config_security_admin_key">Julkinen avain, jolla on oikeus lähettää hallintaviestejä tälle laitteelle.</string>
     <string name="config_security_debug_log_api_enabled">Tulosta reaaliaikainen virheenkorjausloki sarjaportin kautta, ja tarkastele sekä vie Bluetoothin kautta laitteesta poistettuja sijaintitietoja sisältäviä lokitiedostoja.</string>
     <string name="config_security_is_managed">Laite on verkon ylläpitäjän hallinnoima, eikä käyttäjä pääse muokkaamaan laitteen asetuksia.</string>
@@ -1176,6 +1177,7 @@
     <string name="node_list_help_title">Radiolistan ohje</string>
     <string name="node_list_long_click_label">Radion asetukset</string>
     <string name="node_number">Laitteen numero</string>
+    <string name="node_restarting">Käynnistetään uudelleen…</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_channel">Kanava</string>
@@ -1458,6 +1460,7 @@
     <string name="sats">Satelliitit</string>
     <!-- SAVE -->
     <string name="save">Tallenna</string>
+    <string name="save_and_restart">Tallenna &amp; käynnistä uudelleen</string>
     <string name="save_changes">Tallenna</string>
     <string name="save_csv_in_storage_esp32_only">Tallenna .CSV (ESP32 ainoastaan)</string>
     <string name="save_rangetest">Vie kuuluvuustestin paketit</string>

@@ -189,16 +189,64 @@
   },
   "pullRequests": [
     {
+      "id": "11187",
+      "title": "mark way fewer boards as board_level = pr",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11187",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11185",
+      "title": "Deliver locally-generated replies addressed to us to the phone",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11185",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "11181",
       "title": "Reduce reboots and radio restarts",
       "page_url": "https://github.com/meshtastic/firmware/pull/11181",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "11180",
-      "title": "Fix: ESP32 NimBLE deinit/reinit cycle breaks bonded reconnect (reason…",
-      "page_url": "https://github.com/meshtastic/firmware/pull/11180",
-      "zip_url": "https://discord.com/invite/meshtastic"
+      "id": "11174",
+      "title": "lint: mark example MQTT password as a non-secret",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11174",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11173",
+      "title": "lint: drop redundant bandit ignores in c3 exception decoder",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11173",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11172",
+      "title": "lint: hoist stdlib imports above Import(env) in add_mbedtls_sources",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11172",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11170",
+      "title": "lint: drop dead CKV2_GHA_1 ignore in main_matrix workflow",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11170",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11168",
+      "title": "lint: drop redundant quotes in .coderabbit.yaml",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11168",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11167",
+      "title": "lint: drop dead terrascan ignore in devcontainer Dockerfile",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11167",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "11163",
+      "title": "replace screens with unique_ptr",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11163",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "11157",

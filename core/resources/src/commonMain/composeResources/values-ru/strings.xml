@@ -143,6 +143,12 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунду.</item>
+        <item quantity="few">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунды.</item>
+        <item quantity="many">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунд.</item>
+        <item quantity="other">Достигнут предел сканирования Bluetooth. Попробуйте снова через %1$d секунд.</item>
+    </plurals>
     <string name="bold_heading">Выделять заголовок жирным</string>
     <string name="bonding_failed_permissions">Сопряжение не удалось. Дай соседнему устройству разрешения и попробуй снова.</string>
     <string name="bonding_failed_retry">Сопряжение не завершилось. Попробуй снова.</string>
@@ -269,6 +275,7 @@
     <string name="config_position_flags_summary">Необязательные поля в сообщении о местоположении. Чем больше полей включено, тем больше сообщение, а значит больше время передачи и риск потери пакетов.</string>
     <string name="config_position_gps_update_interval_summary">Как часто запрашивать координаты GPS (&lt;10 секунд держит GPS включенным постоянно).</string>
     <string name="config_power_is_power_saving_summary">Все компоненты устройства будут  засыпать, насколько возможно. Для ролей  TRACKER или SENSOR также будет засыпать радио LoRa. Не включайте режим, если используете узел с телефоном или у узла нет кнопки для пробуждения.</string>
+    <string name="config_saved_restarting">Нода перезапускается и будет недоступна короткое время.</string>
     <string name="config_security_admin_key">Открытый ключ узла администратора, имеющего право на управление данным узлом отсылкой административных сообщений.</string>
     <string name="config_security_debug_log_api_enabled">Вывод журнала отладки по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
     <string name="config_security_is_managed">Устройство управляется сетевым администратором, пользователь не может изменять настройки устройства.</string>
@@ -1177,6 +1184,7 @@
     <string name="node_list_help_title">Справка по списку нод</string>
     <string name="node_list_long_click_label">Параметры ноды</string>
     <string name="node_number">Номер ноды</string>
+    <string name="node_restarting">Перезапуск…</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Варианты сортировки нод</string>
     <string name="node_sort_channel">Канал</string>
@@ -1467,6 +1475,7 @@
     <string name="sats">Количество спутников</string>
     <!-- SAVE -->
     <string name="save">Сохранить</string>
+    <string name="save_and_restart">Сохранить и перезапустить</string>
     <string name="save_changes">Сохранить</string>
     <string name="save_csv_in_storage_esp32_only">Сохранить .CSV в хранилище (только ESP32)</string>
     <string name="save_rangetest">Экспортировать пакеты для проверки дальности</string>
