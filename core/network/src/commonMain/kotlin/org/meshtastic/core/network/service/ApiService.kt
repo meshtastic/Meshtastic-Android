@@ -38,7 +38,17 @@ import org.meshtastic.core.model.NetworkFirmwareReleases
 private const val NIGHTLY_INDEX_URL =
     "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-nightly/index.json"
 
-private val nightlyIndexJson = Json { ignoreUnknownKeys = true }
+private val firmwareJson = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+}
+
+/**
+ * Decodes a GitHub release manifest independently of Ktor content negotiation. GitHub release assets commonly use
+ * `application/octet-stream` even when their payload is JSON.
+ */
+internal fun decodeFirmwareReleaseManifest(body: String): FirmwareReleaseManifest = firmwareJson.decodeFromString(body)
 
 /** Client for the Meshtastic public API (device hardware catalog and firmware releases). */
 interface ApiService {
@@ -81,16 +91,13 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
 
     override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
-        client.get(manifestUrl).body()
+        decodeFirmwareReleaseManifest(client.get(manifestUrl).bodyAsText())
 
     override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
         val response = client.get(NIGHTLY_INDEX_URL)
         return when {
             response.status == HttpStatusCode.NotFound -> null
-
-            response.status.isSuccess() ->
-                nightlyIndexJson.decodeFromString<NetworkFirmwareNightly>(response.bodyAsText())
-
+            response.status.isSuccess() -> firmwareJson.decodeFromString<NetworkFirmwareNightly>(response.bodyAsText())
             else -> error("Unexpected HTTP ${response.status} fetching nightly firmware index")
         }
     }
