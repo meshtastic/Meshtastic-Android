@@ -17,6 +17,10 @@
 
 import dev.detekt.gradle.Detekt
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.tasks.AbstractCheckNativeDistributionRuntime
+import org.jetbrains.compose.desktop.application.tasks.AbstractJvmToolOperationTask
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
+import org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.resolveVersionInfo
@@ -105,27 +109,28 @@ kotlin {
 // Exclude generated Compose resource files from detekt analysis
 tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
 
+// Compose Desktop otherwise derives these task inputs from the JVM running Gradle. Bind only the packaging tasks to a
+// JBR 25 provider so ProGuard and jlink receive jmods without provisioning JBR while unrelated CI tasks configure.
+// Task-type configuration also covers aliases and dependency-driven execution without parsing requested task names.
+val desktopPackagingJavaHome =
+    javaToolchains
+        .launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(25))
+            vendor.set(JvmVendorSpec.JETBRAINS)
+        }
+        .map { launcher -> launcher.metadata.installationPath.asFile.absolutePath }
+
+tasks.withType<AbstractJvmToolOperationTask>().configureEach { javaHome.set(desktopPackagingJavaHome) }
+
+tasks.withType<AbstractProguardTask>().configureEach { javaHome.set(desktopPackagingJavaHome) }
+
+tasks.withType<AbstractSuggestModulesTask>().configureEach { javaHome.set(desktopPackagingJavaHome) }
+
+tasks.withType<AbstractCheckNativeDistributionRuntime>().configureEach { jdkHome.set(desktopPackagingJavaHome) }
+
 compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
-
-        // CMP resolves javaHome from the JVM running Gradle, not the Kotlin toolchain. On CI
-        // that's Temurin 25, which ships without jmods (JEP 493): jlink still works, but the
-        // ProGuard task derives -libraryjars from $javaHome/jmods and fails with ~857k
-        // unresolved java.* references. Pin packaging to the JBR SDK toolchain (jmods
-        // included) so ProGuard sees the platform classes and the bundled runtime is
-        // deterministically JBR 25 on every machine.
-        javaHome =
-            javaToolchains
-                .launcherFor {
-                    languageVersion.set(JavaLanguageVersion.of(25))
-                    vendor.set(JvmVendorSpec.JETBRAINS)
-                }
-                .get()
-                .metadata
-                .installationPath
-                .asFile
-                .absolutePath
 
         val desktopJvmArgs =
             listOf(
