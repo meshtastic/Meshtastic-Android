@@ -22,11 +22,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.CommonUri
@@ -61,9 +57,10 @@ import kotlin.test.assertTrue
  *   cleanly with no exception to chase.
  * - Silent firmware → legacy fallback disconnects the mesh transport and proceeds toward OTA connection attempts.
  *
- * The firmware response is simulated by mutating [FakeRadioController.clientNotification] from a sibling coroutine
- * scheduled to fire after `triggerRebootOta`. Because baseline is captured BEFORE the trigger (see `performUpdate`), a
- * value written afterward is recognized as the response, not the baseline.
+ * The firmware response is published from inside [FakeRadioController.requestRebootOta] via a deterministic test hook
+ * ([FakeRadioController.onRequestRebootOta]). The handler clears stale notifications and captures the baseline BEFORE
+ * invoking `requestRebootOta` (see `performUpdate`), so the hook always fires after those steps — no fixed-delay
+ * sibling coroutine that can race the handler under slower host timing.
  */
 class Esp32OtaUpdateHandlerTest {
 
@@ -107,14 +104,10 @@ class Esp32OtaUpdateHandlerTest {
         setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 1, firmwareVersion = "1.0"))
     }
 
-    /** Schedule [block] on a sibling Default dispatcher; cancelled at the end of the test. */
-    private fun runSideEffect(block: suspend CoroutineScope.() -> Unit): Job =
-        CoroutineScope(Dispatchers.Default).launch { block() }
-
     /**
-     * Shared fixture builder for preflight tests. Schedules a sibling coroutine that emits [confirmationMessage] as a
-     * firmware ClientNotification after [CONFIRMATION_DELAY_MS]; pass `confirmationMessage = null` to skip the emitter
-     * entirely and exercise the legacy fallback path.
+     * Shared fixture builder for preflight tests. Publishes [confirmationMessage] from the reboot-request hook as a
+     * firmware ClientNotification; pass `confirmationMessage = null` to skip the simulated response entirely and
+     * exercise the legacy fallback path.
      */
     private fun runPreflightTest(
         target: String = BLE_TARGET,
@@ -140,19 +133,17 @@ class Esp32OtaUpdateHandlerTest {
         val states = mutableListOf<FirmwareUpdateState>()
         val fixture = PreflightFixture(handler = handler, radioController = radioController, states = states)
 
-        val emitter =
-            confirmationMessage?.let { msg ->
-                runSideEffect {
-                    delay(CONFIRMATION_DELAY_MS)
-                    radioController.setClientNotification(ClientNotification(message = msg))
-                }
+        // Deterministically publish the simulated firmware confirmation from inside requestRebootOta, which the
+        // handler invokes AFTER clearing stale notifications and capturing the baseline (see performUpdate). This
+        // makes the notification arrive after those steps on every dispatcher — no fixed-delay sibling coroutine
+        // that can fire too early (or too late) under slower host timing.
+        confirmationMessage?.let { msg ->
+            radioController.onRequestRebootOta = { _, _, _, _ ->
+                radioController.setClientNotification(ClientNotification(message = msg))
             }
-
-        try {
-            fixture.runUpdate()
-        } finally {
-            emitter?.cancel()
         }
+
+        fixture.runUpdate()
 
         fixture.assertions()
         assertFalse(
@@ -463,7 +454,6 @@ class Esp32OtaUpdateHandlerTest {
         const val DISCOVERED_WIFI_TARGET = "192.168.1.44"
         const val BLE_CONFIRMATION = "Rebooting to BLE OTA"
         const val WIFI_CONFIRMATION = "Rebooting to WiFi OTA"
-        const val CONFIRMATION_DELAY_MS = 50L
         const val BLE_CONNECT_ATTEMPTS = 5
         const val WIFI_CONNECT_ATTEMPTS = 10
         const val TEST_WIFI_READINESS_DELAY_MS = 1234L
