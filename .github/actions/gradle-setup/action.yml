@@ -66,14 +66,34 @@ runs:
         path: ~/.konan
         key: konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
 
+    # Robolectric downloads its android-all-instrumented jars to the local Maven
+    # repo, which lives outside the Gradle User Home and so isn't covered by
+    # setup-gradle's caching. (This was previously attempted via
+    # gradle-home-cache-includes, but those entries resolve relative to the
+    # Gradle User Home — the `~/.m2/...` line expanded to the literal path
+    # `<gradle-home>/~/.m2/...` and never matched anything.) Keyed on the
+    # version catalog, which pins the Robolectric version.
+    - name: Cache Robolectric android-all jars
+      uses: actions/cache@v6
+      with:
+        path: ~/.m2/repository/org/robolectric
+        key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
+        restore-keys: |
+          robolectric-${{ runner.os }}-${{ runner.arch }}-
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6
       with:
         cache-read-only: ${{ inputs.cache_read_only }}
         cache-encryption-key: ${{ inputs.gradle_encryption_key }}
-        cache-cleanup: on-success
+        # Cache cleanup is broken on Windows with setup-gradle v6's "enhanced
+        # caching" provider: it deletes the whole Gradle User Home instead of
+        # just unused entries (1739 files "excluded from the cache" here vs 25
+        # on Linux), so every subsequent save fails path validation and the
+        # Windows cache is never written. Upstream: gradle/actions#1013.
+        # Skip cleanup there — a slightly larger cache beats no cache at all.
+        cache-cleanup: ${{ runner.os == 'Windows' && 'never' || 'on-success' }}
         add-job-summary: always
         gradle-home-cache-includes: |
           caches
           notifications
-          ~/.m2/repository/org/robolectric
