@@ -27,11 +27,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.datastore.ChannelSetDataSource
+import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -43,10 +44,18 @@ class RadioConfigRepositoryImplTest {
 
     private val nodeDB = mock<NodeRepository>(MockMode.autofill)
 
-    // The DataSources are final classes (can't be mocked directly) that just wrap a DataStore<T> --
-    // mock the DataStore instead. None of these are touched by the addFileInfo/fileManifestFlow/
-    // clearFileManifest behavior under test here.
-    private val channelSetDataSource = ChannelSetDataSource(mock<DataStore<ChannelSet>>(MockMode.autofill))
+    // These data sources are concrete wrappers -- construct them with mocked dependencies. Channels are now stored
+    // per-device via SwitchingChannelSetDataSource (DatabaseProvider), the others still wrap a DataStore<T>. None are
+    // touched by the addFileInfo/fileManifestFlow/clearFileManifest behavior under test here.
+    private val channelSetDataSource =
+        SwitchingChannelSetDataSource(
+            mock<DatabaseProvider>(MockMode.autofill),
+            CoroutineDispatchers(
+                main = Dispatchers.Unconfined,
+                io = Dispatchers.Unconfined,
+                default = Dispatchers.Unconfined,
+            ),
+        )
     private val localConfigDataSource = LocalConfigDataSource(mock<DataStore<LocalConfig>>(MockMode.autofill))
     private val moduleConfigDataSource = ModuleConfigDataSource(mock<DataStore<LocalModuleConfig>>(MockMode.autofill))
 

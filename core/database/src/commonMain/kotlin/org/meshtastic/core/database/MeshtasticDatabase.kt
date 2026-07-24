@@ -25,6 +25,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.database.dao.ChannelSetDao
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.DeviceLinkDao
 import org.meshtastic.core.database.dao.DiscoveryDao
@@ -36,6 +37,7 @@ import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
+import org.meshtastic.core.database.entity.ChannelSetEntity
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.DeviceLinkEntity
@@ -76,6 +78,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         DiscoveredNodeEntity::class,
         EventFirmwareEditionEntity::class,
         MergeMarkerEntity::class,
+        ChannelSetEntity::class,
     ],
     autoMigrations =
     [
@@ -125,13 +128,15 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 46, to = 47),
         AutoMigration(from = 47, to = 48),
         AutoMigration(from = 48, to = 49),
+        AutoMigration(from = 49, to = 50),
     ],
-    version = 49,
+    version = 50,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
 @ColumnTypeConverters(Converters::class)
 @androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
+@Suppress("TooManyFunctions") // One accessor per DAO; the count grows with the schema, not with class complexity.
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
 
@@ -154,6 +159,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun eventFirmwareEditionDao(): EventFirmwareEditionDao
 
     abstract fun mergeMarkerDao(): MergeMarkerDao
+
+    abstract fun channelSetDao(): ChannelSetDao
 
     companion object {
         /**

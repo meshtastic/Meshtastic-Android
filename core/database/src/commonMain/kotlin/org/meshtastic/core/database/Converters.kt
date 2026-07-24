@@ -25,6 +25,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -79,6 +80,11 @@ class Converters {
         DeviceMetadata.ADAPTER.decodeOrNull(bytes, Logger) ?: DeviceMetadata()
 
     @ColumnTypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray = DeviceMetadata.ADAPTER.encode(value)
+
+    @ColumnTypeConverter
+    fun bytesToChannelSet(bytes: ByteArray): ChannelSet = ChannelSet.ADAPTER.decodeOrNull(bytes, Logger) ?: ChannelSet()
+
+    @ColumnTypeConverter fun channelSetToBytes(value: ChannelSet): ByteArray = ChannelSet.ADAPTER.encode(value)
 
     @ColumnTypeConverter
     fun fromStringList(value: String?): List<String>? {
