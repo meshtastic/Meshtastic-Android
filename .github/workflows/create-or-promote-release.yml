@@ -28,9 +28,16 @@ permissions:
   id-token: write
   attestations: write
 
+# Never allow two release pipelines to run at once — they race on tags,
+# release objects, and Play track state. Later dispatches queue.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   determine-tags:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     outputs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
       release_name: ${{ steps.calculate_tags.outputs.release_name }}
@@ -158,6 +165,7 @@ jobs:
     needs: [determine-tags, call-release-workflow]
     if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1

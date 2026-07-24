@@ -26,12 +26,19 @@ on:
 permissions:
   contents: read
 
+# Partner Center submissions must never race (a release event overlapping a
+# manual retry would collide on the same in-progress submission). Serialize.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   msstore:
     # Belt and braces for release events — `released` should already exclude
     # these. workflow_dispatch has no release payload and passes through.
     if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       # Secrets aren't readable in step `if:` expressions; skip cleanly until
       # Partner Center is configured. Presence is gated on PRODUCT_ID alone so

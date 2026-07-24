@@ -16,9 +16,16 @@ on:
 permissions:
   contents: write
 
+# Destructive (deletes releases + tags): serialize dispatches so two cleanups
+# can never interleave.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   cleanup_prereleases:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1

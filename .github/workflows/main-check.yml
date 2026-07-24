@@ -50,6 +50,7 @@ jobs:
     # APK build itself failed, the artifact download below fails and this job goes red.
     if: github.repository == 'meshtastic/Meshtastic-Android' && !cancelled()
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     permissions:
       contents: write
     env:

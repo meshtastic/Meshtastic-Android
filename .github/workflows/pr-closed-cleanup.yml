@@ -1,0 +1,38 @@
+name: PR Closed Cleanup
+
+# When a PR is closed (merged or abandoned) its in-flight CI runs keep burning
+# runner slots to completion: per-PR concurrency groups only cancel on a NEW
+# push, and nothing pushes to a closed PR. Reap queued/in-progress
+# pull_request-event runs for the closed PR's head SHA (pull-request.yml,
+# verify-flatpak.yml, ...). Runs for older SHAs were already cancelled by the
+# per-PR concurrency group when that SHA was superseded.
+#
+# pull_request_target is required: the plain pull_request event gets a
+# read-only GITHUB_TOKEN for fork PRs, which cannot cancel runs. Per the
+# pull_request_target warnings, this workflow must never check out or execute
+# PR code — it only calls the Actions API.
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  actions: write
+
+jobs:
+  cancel-pr-runs:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - name: Cancel in-flight CI runs for the closed PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for status in queued in_progress; do
+            gh api "repos/${{ github.repository }}/actions/runs?event=pull_request&status=${status}&head_sha=${HEAD_SHA}&per_page=100" \
+              --jq '.workflow_runs[].id'
+          done | sort -u | while read -r run_id; do
+            echo "Cancelling run $run_id"
+            gh run cancel "$run_id" --repo "${{ github.repository }}" || true
+          done
