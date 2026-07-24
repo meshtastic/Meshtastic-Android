@@ -27,13 +27,8 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -46,6 +41,7 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import org.robolectric.annotation.Config
@@ -138,15 +134,6 @@ class MeshNotificationManagerImplTest {
         val title =
             activeServiceNotification()?.notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()
         assertEquals(getString(Res.string.disconnected), title)
-    }
-
-    private fun runWithRenderScope(block: suspend TestScope.(CoroutineScope) -> Unit) = runTest {
-        val renderScope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
-        try {
-            block(renderScope)
-        } finally {
-            renderScope.cancel()
-        }
     }
 
     private fun createManager(scope: CoroutineScope) = MeshNotificationManagerImpl(

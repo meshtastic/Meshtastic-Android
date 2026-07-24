@@ -29,12 +29,9 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runTest
-import org.junit.After
+import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,6 +43,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.User
 import org.robolectric.annotation.Config
@@ -72,30 +70,28 @@ class MeshNotificationManagerImplConversationTest {
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val notificationScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
-    private val manager =
-        MeshNotificationManagerImpl(
-            context = context,
-            packetRepository = lazy { packetRepository },
-            nodeRepository = lazy { nodeRepository },
-            conversationShortcutPublisher =
-            lazy {
-                ConversationShortcutPublisher(
-                    context,
-                    nodeRepository,
-                    packetRepository,
-                    radioConfigRepository,
-                    CoroutineDispatchers(
-                        io = Dispatchers.Unconfined,
-                        main = Dispatchers.Unconfined,
-                        default = Dispatchers.Unconfined,
-                    ),
-                )
-            },
-            radioConfigRepository = lazy { radioConfigRepository },
-            scope = notificationScope,
-        )
+    private fun createManager(scope: CoroutineScope) = MeshNotificationManagerImpl(
+        context = context,
+        packetRepository = lazy { packetRepository },
+        nodeRepository = lazy { nodeRepository },
+        conversationShortcutPublisher =
+        lazy {
+            ConversationShortcutPublisher(
+                context,
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                CoroutineDispatchers(
+                    io = Dispatchers.Unconfined,
+                    main = Dispatchers.Unconfined,
+                    default = Dispatchers.Unconfined,
+                ),
+            )
+        },
+        radioConfigRepository = lazy { radioConfigRepository },
+        scope = scope,
+    )
 
     @Before
     fun setUp() {
@@ -112,12 +108,6 @@ class MeshNotificationManagerImplConversationTest {
                     lora_config = MeshChannel.default.loraConfig,
                 ),
             )
-        manager.initChannels()
-    }
-
-    @After
-    fun tearDown() {
-        notificationScope.cancel()
     }
 
     /** Newest-first message history, mirroring the repository's ordering. */
@@ -162,7 +152,8 @@ class MeshNotificationManagerImplConversationTest {
     }
 
     @Test
-    fun `read messages become historic context and unread messages stay alerting`() = runTest {
+    fun `read messages become historic context and unread messages stay alerting`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
         mockHistory(
             message("new unread", read = false, receivedTime = 3_000),
             message("older read 2", read = true, receivedTime = 2_000),
@@ -176,6 +167,7 @@ class MeshNotificationManagerImplConversationTest {
             isBroadcast = true,
             channelName = "LongFast",
         )
+        advanceUntilIdle()
 
         val posted = activeByTag("message").single().notification
         val alerting = posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES)
@@ -186,57 +178,74 @@ class MeshNotificationManagerImplConversationTest {
     }
 
     @Test
-    fun `group summary alerts via children only and is dropped with the last conversation`() = runTest {
-        mockHistory(message("hello", read = false, receivedTime = 1_000))
+    fun `group summary alerts via children only and is dropped with the last conversation`() =
+        runWithRenderScope { scope ->
+            val manager = createManager(scope).also { it.initChannels() }
+            mockHistory(message("hello", read = false, receivedTime = 1_000))
 
-        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+            manager.updateMessageNotification(
+                "0^all",
+                "Hawk Ridge",
+                "hello",
+                isBroadcast = true,
+                channelName = "LongFast",
+            )
+            advanceUntilIdle()
 
-        val summary = activeByTag("message_summary").single().notification
-        assertEquals(Notification.GROUP_ALERT_CHILDREN, summary.groupAlertBehavior)
-        // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender.
-        val summaryLatest =
-            androidx.core.app.NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary)
-                ?.messages
-                ?.lastOrNull()
-        assertEquals("hello", summaryLatest?.text?.toString())
-        assertEquals("Hawk Ridge", summaryLatest?.person?.name?.toString())
+            val summary = activeByTag("message_summary").single().notification
+            assertEquals(Notification.GROUP_ALERT_CHILDREN, summary.groupAlertBehavior)
+            // The summary line is rebuilt from the child's real MessagingStyle, so it carries the actual sender.
+            val summaryLatest =
+                androidx.core.app.NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(summary)
+                    ?.messages
+                    ?.lastOrNull()
+            assertEquals("hello", summaryLatest?.text?.toString())
+            assertEquals("Hawk Ridge", summaryLatest?.person?.name?.toString())
 
-        manager.cancelMessageNotification("0^all")
+            manager.cancelMessageNotification("0^all")
 
-        assertTrue(activeByTag("message").isEmpty(), "conversation should be cancelled")
-        assertTrue(activeByTag("message_summary").isEmpty(), "summary must not outlive the last conversation")
-    }
-
-    @Test
-    fun `notification ids are namespaced per type so a node num cannot clobber the service notification`() = runTest {
-        // SERVICE_NOTIFY_ID is 101; a node whose num is also 101 used to overwrite the foreground notification.
-        manager.updateServiceStateNotification(ConnectionState.Connected, telemetry = null)
-        manager.showOrUpdateLowBatteryNotification(Node(num = 101), isRemote = false)
-
-        val service = systemNotificationManager.activeNotifications.filter { it.id == 101 && it.tag == null }
-        val battery = activeByTag("low_battery").filter { it.id == 101 }
-        assertEquals(1, service.size, "service notification should survive")
-        assertEquals(1, battery.size, "low-battery notification should coexist under its own tag")
-        assertEquals(0xFF67EA94.toInt(), service.single().notification.color, "brand accent color")
-    }
+            assertTrue(activeByTag("message").isEmpty(), "conversation should be cancelled")
+            assertTrue(activeByTag("message_summary").isEmpty(), "summary must not outlive the last conversation")
+        }
 
     @Test
-    fun `refreshConversationAfterReply reposts the conversation with the effective channel name`() = runTest {
-        mockHistory(message("original", read = true, receivedTime = 1_000))
+    fun `notification ids are namespaced per type so a node num cannot clobber the service notification`() =
+        runWithRenderScope { scope ->
+            val manager = createManager(scope).also { it.initChannels() }
+            // SERVICE_NOTIFY_ID is 101; a node whose num is also 101 used to overwrite the foreground notification.
+            manager.updateServiceStateNotification(ConnectionState.Connected, telemetry = null)
+            manager.showOrUpdateLowBatteryNotification(Node(num = 101), isRemote = false)
+            advanceUntilIdle()
 
-        manager.refreshConversationAfterReply("0^all")
-
-        val posted = activeByTag("message").single().notification
-        // Empty primary channel resolves to its modem-preset display name, matching the in-app conversation list.
-        assertEquals("LongFast", posted.extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString())
-        assertNotNull(posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES))
-    }
+            val service = systemNotificationManager.activeNotifications.filter { it.id == 101 && it.tag == null }
+            val battery = activeByTag("low_battery").filter { it.id == 101 }
+            assertEquals(1, service.size, "service notification should survive")
+            assertEquals(1, battery.size, "low-battery notification should coexist under its own tag")
+            assertEquals(0xFF67EA94.toInt(), service.single().notification.color, "brand accent color")
+        }
 
     @Test
-    fun `refreshConversationAfterReply resolves a dm peer name for the shortcut label`() = runTest {
+    fun `refreshConversationAfterReply reposts the conversation with the effective channel name`() =
+        runWithRenderScope { scope ->
+            val manager = createManager(scope).also { it.initChannels() }
+            mockHistory(message("original", read = true, receivedTime = 1_000))
+
+            manager.refreshConversationAfterReply("0^all")
+            advanceUntilIdle()
+
+            val posted = activeByTag("message").single().notification
+            // Empty primary channel resolves to its modem-preset display name, matching the in-app conversation list.
+            assertEquals("LongFast", posted.extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString())
+            assertNotNull(posted.extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+        }
+
+    @Test
+    fun `refreshConversationAfterReply resolves a dm peer name for the shortcut label`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
         mockHistory(message("dm text", read = true, receivedTime = 1_000))
 
         manager.refreshConversationAfterReply("0!00000007")
+        advanceUntilIdle()
 
         val posted = activeByTag("message").single().notification
         // A DM is not a group conversation, so no conversation title is set.

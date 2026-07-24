@@ -45,6 +45,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
@@ -390,7 +391,10 @@ class MeshNotificationManagerImpl(
                         notification = fallback,
                         message = snapshot.previousMessage,
                     )
-                        ?.let { notification -> notificationManager.notify(SERVICE_NOTIFY_ID, notification) }
+                        ?.let { notification ->
+                            safeCatching { notificationManager.notify(SERVICE_NOTIFY_ID, notification) }
+                                .onFailure { Logger.e(it) { "Failed to post fallback service notification" } }
+                        }
                 }
             }
 
