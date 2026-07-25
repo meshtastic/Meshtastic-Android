@@ -99,6 +99,8 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
+import org.meshtastic.core.model.util.PUSHPIN_CODE_POINT
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -525,7 +527,8 @@ fun MapView(
             val lock = if (pt.isLocked) "\uD83D\uDD12" else ""
             val time = DateFormatter.formatDateTime(waypoint.time)
             val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt(), unknownText, nowText)
-            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            // pt.icon is untrusted input; toCodePointString substitutes a fallback rather than throwing.
+            val emoji = if (pt.icon == 0) PUSHPIN_CODE_POINT.toCodePointString() else pt.icon.toCodePointString()
             val now = nowMillis
             val expireTimeMillis = pt.expire * 1000L
             val expireTimeStr =
