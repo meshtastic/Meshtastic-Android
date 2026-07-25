@@ -124,6 +124,63 @@ class AirQualityIndexTest {
         assertEquals(20.0, result!!, EPSILON)
     }
 
+    // --- nowCastAqiSeries: historical AQI for the Air Quality graph/table (issue #6381) ---
+
+    @Test
+    fun nowCastAqiSeries_returns_an_entry_per_reading_in_input_order() {
+        val readings = List(4) { i -> (NOW + i * SECONDS_PER_HOUR) to 20.0 }
+        assertEquals(readings.size, AirQualityIndex.nowCastAqiSeries(readings).size)
+    }
+
+    @Test
+    fun nowCastAqiSeries_is_empty_for_no_readings() {
+        assertEquals(emptyList(), AirQualityIndex.nowCastAqiSeries(emptyList()))
+    }
+
+    @Test
+    fun nowCastAqiSeries_leaves_the_first_reading_null_because_one_hour_is_below_the_epa_minimum() {
+        // EPA needs the current hour plus at least one of the two hours before it, so the opening sample can never
+        // have an AQI - a point must never be plotted from insufficient history.
+        val readings = listOf(NOW to 20.0, (NOW + SECONDS_PER_HOUR) to 20.0)
+        assertEquals(listOf(null, AirQualityIndex.pm25ToAqi(20.0)), AirQualityIndex.nowCastAqiSeries(readings))
+    }
+
+    @Test
+    fun nowCastAqiSeries_scopes_each_point_to_its_own_timestamp_not_the_newest() {
+        // Point 1 sees only clean air; point 2 (an hour later) is the first with two populated hours, and the spike
+        // at point 3 must not leak backwards into the earlier points' values.
+        val readings = listOf(NOW to 5.0, (NOW + SECONDS_PER_HOUR) to 5.0, (NOW + 2 * SECONDS_PER_HOUR) to 200.0)
+        val series = AirQualityIndex.nowCastAqiSeries(readings)
+        assertNull(series[0])
+        assertEquals(AirQualityIndex.pm25ToAqi(5.0), series[1])
+        kotlin.test.assertTrue(series[2]!! > series[1]!!, "the spike must raise only its own point: $series")
+    }
+
+    @Test
+    fun nowCastAqiSeries_drops_history_older_than_the_twelve_hour_window() {
+        // A 500 µg/m³ reading 13h before the last point is outside the NowCast window, so the tail must read as the
+        // clean-air pair alone - identical to calling computeNowCastPm25 with the stale reading omitted.
+        val last = NOW + 13 * SECONDS_PER_HOUR
+        val readings = listOf(NOW to 500.0, (last - SECONDS_PER_HOUR) to 20.0, last to 20.0)
+        assertEquals(AirQualityIndex.pm25ToAqi(20.0), AirQualityIndex.nowCastAqiSeries(readings).last())
+    }
+
+    @Test
+    fun nowCastAqiSeries_matches_computeNowCastPm25_at_the_final_point() {
+        val readings = List(6) { i -> (NOW + i * SECONDS_PER_HOUR) to (10.0 + i) }
+        val expected = AirQualityIndex.pm25ToAqi(AirQualityIndex.computeNowCastPm25(readings, readings.last().first)!!)
+        assertEquals(expected, AirQualityIndex.nowCastAqiSeries(readings).last())
+    }
+
+    @Test
+    fun nowCastAqiSeries_yields_null_where_a_gap_breaks_the_epa_minimum_data_rule() {
+        // A 5h gap leaves the resumed reading as the only populated hour in its recent-3h window -> no AQI.
+        val readings = listOf(NOW to 20.0, (NOW + SECONDS_PER_HOUR) to 20.0, (NOW + 6 * SECONDS_PER_HOUR) to 20.0)
+        val series = AirQualityIndex.nowCastAqiSeries(readings)
+        assertEquals(AirQualityIndex.pm25ToAqi(20.0), series[1])
+        assertNull(series[2])
+    }
+
     private fun assertEquals(expected: Double, actual: Double, epsilon: Double) {
         kotlin.test.assertTrue(abs(expected - actual) < epsilon, "expected $expected but was $actual")
     }

@@ -74,16 +74,81 @@ class AirQualityMetricsTest {
     fun `metricsWithData drops selected series that have no reading so the legend is not ever-present`() {
         // Issue 5873, CO2-only node: PM2.5 is default-selected but never reported, so it must not survive into the
         // legend.
-        val co2Only = listOf(telemetry(AirQualityMetrics(co2 = 450)))
+        val co2Only = listOf(sample(AirQualityMetrics(co2 = 450)))
         assertEquals(listOf(AirQuality.CO2), metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), co2Only))
     }
 
     @Test
     fun `metricsWithData keeps a series once it has any reading in the frame`() {
-        val mixed = listOf(telemetry(AirQualityMetrics(co2 = 450)), telemetry(AirQualityMetrics(pm25_standard = 8)))
+        val mixed = listOf(sample(AirQualityMetrics(co2 = 450)), sample(AirQualityMetrics(pm25_standard = 8)))
         assertEquals(
             listOf(AirQuality.PM2_5, AirQuality.CO2),
             metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), mixed),
         )
+    }
+
+    // --- AQI series (issue #6381): derived from PM2.5 history, not carried by the telemetry proto ---
+
+    @Test
+    fun `getValue for AQI comes from the sample derived value rather than the telemetry`() {
+        val t = telemetry(AirQualityMetrics(pm25_standard = 25))
+        assertNull(AirQuality.AQI.getValue(t), "AQI is not a proto field, so a bare Telemetry has none")
+        assertEquals(78f, AirQuality.AQI.getValue(AirQualitySample(t, aqi = 78)))
+        assertNull(AirQuality.AQI.getValue(AirQualitySample(t, aqi = null)))
+    }
+
+    @Test
+    fun `getValue for AQI plots a zero AQI instead of suppressing it`() {
+        // Pristine air is AQI 0 - a real value, and the same present-and-zero rule the PM series follow.
+        assertEquals(0f, AirQuality.AQI.getValue(AirQualitySample(telemetry(AirQualityMetrics()), aqi = 0)))
+    }
+
+    @Test
+    fun `withNowCastAqi returns samples ascending by time regardless of input order`() {
+        // The list view feeds newest-first data in; the chart needs oldest-first.
+        val newestFirst = (3 downTo 0).map { hourlyTelemetry(it, pm25 = 10) }
+        assertEquals(listOf(0, 1, 2, 3).map { HOUR * it }, withNowCastAqi(newestFirst).map { it.telemetry.time })
+    }
+
+    @Test
+    fun `withNowCastAqi leaves the earliest sample without an AQI and fills in later ones`() {
+        val samples = withNowCastAqi((0..3).map { hourlyTelemetry(it, pm25 = 10) })
+        assertNull(samples.first().aqi, "one hour of history is below EPA's minimum-data rule")
+        // 2024 EPA table: a steady 10 µg/m³ is AQI 53 (Moderate).
+        assertEquals(listOf(53, 53, 53), samples.drop(1).map { it.aqi })
+        assertEquals(listOf(AirQuality.AQI), metricsWithData(listOf(AirQuality.AQI), samples))
+    }
+
+    @Test
+    fun `withNowCastAqi gives a CO2-only node no AQI so the series is never offered`() {
+        val co2Only =
+            (0..3).map { hour -> Telemetry(time = HOUR * hour, air_quality_metrics = AirQualityMetrics(co2 = 450)) }
+        val samples = withNowCastAqi(co2Only)
+        assertEquals(emptyList(), samples.mapNotNull { it.aqi })
+        assertEquals(emptyList(), metricsWithData(listOf(AirQuality.AQI), samples))
+    }
+
+    @Test
+    fun `withNowCastAqi skips samples whose PM2_5 is absent without shifting the others' values`() {
+        // A CO2-only sample interleaved with PM2.5 samples must not consume an entry of the AQI series.
+        val telemetries =
+            listOf(
+                hourlyTelemetry(0, pm25 = 10),
+                Telemetry(time = HOUR, air_quality_metrics = AirQualityMetrics(co2 = 450)),
+                hourlyTelemetry(2, pm25 = 10),
+                hourlyTelemetry(3, pm25 = 10),
+            )
+        val samples = withNowCastAqi(telemetries)
+        assertNull(samples[1].aqi, "a sample with no PM2.5 reading gets no AQI")
+        assertEquals(53, samples[3].aqi)
+    }
+
+    private fun hourlyTelemetry(hoursFromStart: Int, pm25: Int) =
+        Telemetry(time = HOUR * hoursFromStart, air_quality_metrics = AirQualityMetrics(pm25_standard = pm25))
+
+    private fun sample(aq: AirQualityMetrics, aqi: Int? = null) = AirQualitySample(telemetry(aq), aqi)
+
+    private companion object {
+        const val HOUR = 3600
     }
 }

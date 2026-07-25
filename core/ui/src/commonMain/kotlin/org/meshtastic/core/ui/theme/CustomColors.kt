@@ -212,3 +212,28 @@ object DiscoveryMapColors {
 object MessageItemColors {
     val Red = Color(0x4DFF0000)
 }
+
+/**
+ * Semantic palette for the six EPA AQI categories, following [StatusColors]' per-theme pattern.
+ *
+ * EPA publishes canonical category hex values (`#00E400` Good … `#7E0023` Hazardous), but those are billboard colors
+ * and several are unusable as text: `#FFFF00` Moderate scores 1.01:1 against our light `surface`. So EPA's *hue order*
+ * (green → yellow → orange → red → purple → maroon) is preserved while each category is re-toned per theme — dark tones
+ * for light surfaces, light tones for dark surfaces. `AqiSeverityColorsTest` pins every tone at WCAG AA text contrast
+ * (4.5:1) against both `surface` and `surfaceVariant` (the metric-log card background).
+ *
+ * Color is never the only signal: the category name is always rendered next to the AQI value.
+ */
+@Suppress("MagicNumber")
+object AqiSeverityColors {
+
+    /** The light-theme and dark-theme tone for one AQI category. */
+    data class Tones(val light: Color, val dark: Color)
+
+    val Good = Tones(light = Color(0xFF0F5C29), dark = Color(0xFF8DE0A6))
+    val Moderate = Tones(light = Color(0xFF6B5300), dark = Color(0xFFF5D07A))
+    val UnhealthySensitive = Tones(light = Color(0xFF7A2E00), dark = Color(0xFFFFB07A))
+    val Unhealthy = Tones(light = Color(0xFF8C0F16), dark = Color(0xFFFF9F98))
+    val VeryUnhealthy = Tones(light = Color(0xFF6B2F72), dark = Color(0xFFE0B4E6))
+    val Hazardous = Tones(light = Color(0xFF5E001A), dark = Color(0xFFF6A8C0))
+}

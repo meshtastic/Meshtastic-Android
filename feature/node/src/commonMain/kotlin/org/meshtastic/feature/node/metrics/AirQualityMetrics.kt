@@ -56,10 +56,13 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.AirQualityIndex
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_metrics_log
+import org.meshtastic.core.resources.aqi
+import org.meshtastic.core.resources.aqi_value_with_severity
 import org.meshtastic.core.resources.co2
 import org.meshtastic.core.resources.co2_humidity
 import org.meshtastic.core.resources.co2_temperature
@@ -69,10 +72,12 @@ import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
 import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
+import org.meshtastic.core.ui.component.PmAqiSeverity
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
@@ -80,35 +85,73 @@ import org.meshtastic.proto.AirQualityMetrics as AirQualityMetricsProto
 
 /**
  * Selectable chart metric enum for air quality data series. Internal (not private) so [getValue] can be unit-tested.
+ *
+ * [AQI] is the odd one out: the firmware's `AirQualityMetrics` telemetry carries no AQI field, so it is derived from
+ * the PM2.5 history by [AirQualityIndex] and supplied per sample via [AirQualitySample.aqi] rather than read off a
+ * single [Telemetry]. It is dimensionless, hence the empty [unit].
  */
 internal enum class AirQuality(val labelRes: StringResource, val unit: String, val color: Color) {
     PM1_0(Res.string.pm1_0, "µg/m³", Blue),
     PM2_5(Res.string.pm2_5, "µg/m³", Cyan),
     PM10(Res.string.pm10, "µg/m³", Green),
     CO2(Res.string.co2, "ppm", Red),
+    AQI(Res.string.aqi, "", Purple),
     ;
 
-    fun getValue(telemetry: Telemetry): Float? {
-        val aq = telemetry.air_quality_metrics ?: return null
+    /**
+     * The plotted value for this series, or null when the sample has no reading for it. [aqi] is the precomputed
+     * NowCast AQI for this sample (see [withNowCastAqi]) and is only consulted by the [AQI] series.
+     */
+    fun getValue(telemetry: Telemetry, aqi: Int? = null): Float? {
         // A field that is present-and-zero is a real reading (e.g. a PM sensor in clean air reports 0 µg/m³) and must
         // be plotted. The `?.` already excludes genuinely-absent fields (Wire decodes an unset optional uint32 to
         // null), so no zero-suppression guard is needed — adding one would discard valid clean-air data.
+        val aq = telemetry.air_quality_metrics
         return when (this) {
-            PM1_0 -> aq.pm10_standard?.toFloat()
-            PM2_5 -> aq.pm25_standard?.toFloat()
-            PM10 -> aq.pm100_standard?.toFloat()
-            CO2 -> aq.co2?.toFloat()
+            PM1_0 -> aq?.pm10_standard?.toFloat()
+            PM2_5 -> aq?.pm25_standard?.toFloat()
+            PM10 -> aq?.pm100_standard?.toFloat()
+            CO2 -> aq?.co2?.toFloat()
+            AQI -> aqi?.toFloat() // derived, so it arrives alongside the sample rather than inside the telemetry.
         }
     }
+
+    fun getValue(sample: AirQualitySample): Float? = getValue(sample.telemetry, sample.aqi)
+}
+
+/** An air quality [telemetry] reading paired with the NowCast [aqi] as of its own timestamp (null if unavailable). */
+internal data class AirQualitySample(val telemetry: Telemetry, val aqi: Int?)
+
+/**
+ * Pairs every reading in [telemetries] with its historical NowCast AQI, returned sorted **ascending by time** (the
+ * order the chart plots in; the list view uses `asReversed()`).
+ *
+ * Each point's AQI is scoped to its own timestamp, so the graph shows how AQI actually moved rather than smearing the
+ * latest value backwards. Samples whose PM2.5 field is absent contribute no reading and get a null AQI, as do samples
+ * with too little preceding history for EPA's minimum-data rule (issue #6381).
+ */
+internal fun withNowCastAqi(telemetries: List<Telemetry>): List<AirQualitySample> {
+    val ascending = telemetries.sortedBy { it.time }
+    // Keep each PM2.5 reading tied to its position in `ascending` so the returned AQI series can be mapped back onto
+    // the full sample list, gaps included.
+    val pm25Readings =
+        ascending.mapIndexedNotNull { index, telemetry ->
+            telemetry.air_quality_metrics?.pm25_standard?.let { pm25 ->
+                index to (telemetry.time.toLong() to pm25.toDouble())
+            }
+        }
+    val aqiSeries = AirQualityIndex.nowCastAqiSeries(pm25Readings.map { it.second })
+    val aqiByIndex = pm25Readings.mapIndexed { position, (index, _) -> index to aqiSeries[position] }.toMap()
+    return ascending.mapIndexed { index, telemetry -> AirQualitySample(telemetry, aqiByIndex[index]) }
 }
 
 /**
- * The subset of [candidates] with at least one reading in [telemetries]. The chart only draws series that have data, so
- * the legend must use this rather than the raw selection — otherwise a default-selected series (PM2.5) shows a legend
- * entry on nodes that never report it (issue #5873). Internal so it can be unit-tested.
+ * The subset of [candidates] with at least one reading in [samples]. The chart only draws series that have data, so the
+ * legend must use this rather than the raw selection — otherwise a default-selected series (PM2.5) shows a legend entry
+ * on nodes that never report it (issue #5873). Internal so it can be unit-tested.
  */
-internal fun metricsWithData(candidates: List<AirQuality>, telemetries: List<Telemetry>): List<AirQuality> =
-    candidates.filter { metric -> telemetries.any { metric.getValue(it) != null } }
+internal fun metricsWithData(candidates: List<AirQuality>, samples: List<AirQualitySample>): List<AirQuality> =
+    candidates.filter { metric -> samples.any { metric.getValue(it) != null } }
 
 private val LEGEND_DATA =
     AirQuality.entries.map { metric -> LegendData(nameRes = metric.labelRes, color = metric.color, isLine = true) }
@@ -121,10 +164,16 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.airQualityMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
 
-    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveAirQualityMetricsCSV(uri, data) }
+    // AQI has to be derived from the PM2.5 history (the telemetry proto carries no AQI field), so compute it once here
+    // and hand the same samples to the chart, the list and the CSV export.
+    val samples = remember(data) { withNowCastAqi(data) }
+    val newestFirstSamples = remember(samples) { samples.asReversed() }
 
-    val availableMetrics =
-        remember(data) { AirQuality.entries.filter { metric -> data.any { metric.getValue(it) != null } } }
+    // Export the chronological samples, not the newest-first list the LazyColumn renders: every sibling metrics screen
+    // writes CSV rows oldest-first.
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveAirQualityMetricsCSV(uri, samples) }
+
+    val availableMetrics = remember(samples) { metricsWithData(AirQuality.entries, samples) }
     var selectedMetrics by rememberSaveable { mutableStateOf(setOf(AirQuality.PM2_5, AirQuality.CO2)) }
 
     BaseMetricScreen(
@@ -169,7 +218,7 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             AirQualityChart(
-                telemetries = data.reversed(),
+                samples = samples,
                 selectedMetrics = selectedMetrics,
                 vicoScrollState = vicoScrollState,
                 selectedX = selectedX,
@@ -180,15 +229,15 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
-                    data,
-                    key = { index, telemetry -> "${telemetry.time}_$index" },
+                    newestFirstSamples,
+                    key = { index, sample -> "${sample.telemetry.time}_$index" },
                     contentType = { _, _ -> "air_quality_metrics" },
-                ) { _, telemetry ->
+                ) { _, sample ->
                     AirQualityMetricsCard(
-                        telemetry = telemetry,
+                        sample = sample,
                         isFahrenheit = state.isFahrenheit,
-                        isSelected = telemetry.time.toDouble() == selectedX,
-                        onClick = { onCardClick(telemetry.time.toDouble()) },
+                        isSelected = sample.telemetry.time.toDouble() == selectedX,
+                        onClick = { onCardClick(sample.telemetry.time.toDouble()) },
                     )
                 }
             }
@@ -199,7 +248,7 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
 @Suppress("LongMethod")
 @Composable
 private fun AirQualityChart(
-    telemetries: List<Telemetry>,
+    samples: List<AirQualitySample>,
     selectedMetrics: Set<AirQuality>,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
@@ -207,10 +256,10 @@ private fun AirQualityChart(
     modifier: Modifier = Modifier,
 ) {
     val activeMetrics = AirQuality.entries.filter { it in selectedMetrics }
-    val drawnMetrics = metricsWithData(activeMetrics, telemetries)
+    val drawnMetrics = metricsWithData(activeMetrics, samples)
     val metricLabels = activeMetrics.associateWith { stringResource(it.labelRes) }
     MetricChartScaffold(
-        isEmpty = telemetries.isEmpty() || activeMetrics.isEmpty(),
+        isEmpty = samples.isEmpty() || activeMetrics.isEmpty(),
         legendData = LEGEND_DATA.filter { ld -> drawnMetrics.any { it.labelRes == ld.nameRes } },
         modifier = modifier,
     ) { modelProducer, chartModifier ->
@@ -221,7 +270,8 @@ private fun AirQualityChart(
                     val metric = activeMetrics.firstOrNull { it.color == color }
                     if (metric != null) {
                         val label = metricLabels[metric] ?: ""
-                        "$label: ${NumberFormatter.format(value.toFloat(), 0)} ${metric.unit}"
+                        // AQI is dimensionless, so trim away the separator that would leave a trailing space.
+                        "$label: ${NumberFormatter.format(value.toFloat(), 0)} ${metric.unit}".trimEnd()
                     } else {
                         NumberFormatter.format(value.toFloat(), 0)
                     }
@@ -229,17 +279,20 @@ private fun AirQualityChart(
             )
 
         val metricDataSets =
-            remember(telemetries, activeMetrics) {
-                activeMetrics.map { metric -> telemetries.filter { metric.getValue(it) != null } }
+            remember(samples, activeMetrics) {
+                activeMetrics.map { metric -> samples.filter { metric.getValue(it) != null } }
             }
 
-        LaunchedEffect(telemetries, activeMetrics) {
+        LaunchedEffect(samples, activeMetrics) {
             modelProducer.runTransaction {
                 activeMetrics.forEachIndexed { index, metric ->
                     val metricData = metricDataSets[index]
                     if (metricData.isNotEmpty()) {
                         lineModel {
-                            series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it) ?: 0f })
+                            series(
+                                x = metricData.map { it.telemetry.time },
+                                y = metricData.map { metric.getValue(it) ?: 0f },
+                            )
                         }
                     }
                 }
@@ -285,14 +338,35 @@ private fun AirQualityChart(
     }
 }
 
+/**
+ * The NowCast AQI for one log row, derived from that row's preceding PM2.5 history (issue #6381) rather than read from
+ * the telemetry — the proto carries no AQI field. Rows without enough recent history for EPA's minimum-data rule simply
+ * omit this. The category name always accompanies the value, so the severity color is reinforcement, never the only
+ * signal.
+ */
+@Composable
+private fun AqiText(aqi: Int) {
+    val severity = PmAqiSeverity.fromAqi(aqi)
+    val value =
+        severity?.let { stringResource(Res.string.aqi_value_with_severity, aqi, stringResource(it.labelRes)) }
+            ?: aqi.toString()
+    Text(
+        text = "${stringResource(Res.string.aqi)}: $value",
+        style = MaterialTheme.typography.bodySmall,
+        fontWeight = FontWeight.Medium,
+        color = severity?.color() ?: MaterialTheme.colorScheme.onSurface,
+    )
+}
+
 @Composable
 private fun AirQualityMetricsCard(
-    telemetry: Telemetry,
+    sample: AirQualitySample,
     isSelected: Boolean,
     onClick: () -> Unit,
     isFahrenheit: Boolean = false,
     timeTextOverride: String? = null,
 ) {
+    val telemetry = sample.telemetry
     val aq = telemetry.air_quality_metrics ?: return
     val time = timeTextOverride ?: DateFormatter.formatDateTime(telemetry.time.toLong() * MS_PER_SEC)
 
@@ -319,6 +393,7 @@ private fun AirQualityMetricsCard(
                         .forEach { (label, value) ->
                             Text("${stringResource(label)}: $value $ugm3", style = MaterialTheme.typography.bodySmall)
                         }
+                    sample.aqi?.let { AqiText(it) }
                 }
                 Column {
                     aq.co2?.let { co2 ->
@@ -379,15 +454,19 @@ fun PreviewAirQualityCards() {
                 AirQualityMetricsProto(pm10_standard = 11, pm25_standard = 25, pm100_standard = 33, co2 = 2300),
             ) to "2023-11-14 22:13",
         )
+    // Newest first, matching the list view; AQI is derived rather than read from the proto, so the first row has too
+    // little history to show one.
+    val samples = withNowCastAqi(readings.map { it.first }).asReversed()
+    val timeTexts = readings.map { it.second }.asReversed()
     AppTheme {
         Surface {
             Column {
-                readings.forEach { (telemetry, timeText) ->
+                samples.forEachIndexed { index, sample ->
                     AirQualityMetricsCard(
-                        telemetry = telemetry,
+                        sample = sample,
                         isSelected = false,
                         onClick = {},
-                        timeTextOverride = timeText,
+                        timeTextOverride = timeTexts[index],
                     )
                 }
             }

@@ -112,7 +112,15 @@
     <string name="app_too_old">Application update required</string>
     <string name="app_version">Version</string>
     <string name="apply">Apply</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Good</string>
+    <string name="aqi_hazardous">Hazardous</string>
+    <string name="aqi_moderate">Moderate</string>
+    <string name="aqi_unhealthy">Unhealthy</string>
+    <string name="aqi_unhealthy_sensitive">Unhealthy for Sensitive Groups</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Very Unhealthy</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="audio">Audio</string>
