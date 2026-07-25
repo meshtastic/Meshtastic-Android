@@ -112,7 +112,9 @@
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="app_version">Версия</string>
     <string name="apply">Применить</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Хороший</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="audio">Звук</string>

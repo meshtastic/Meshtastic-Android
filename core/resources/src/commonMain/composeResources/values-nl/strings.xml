@@ -37,6 +37,8 @@
     <!-- APP -->
     <string name="app_too_old">Applicatie bijwerken vereist</string>
     <string name="apply">Toepassen</string>
+    <!-- AQI -->
+    <string name="aqi_good">Goed</string>
     <string name="are_you_sure">Weet u het zeker?</string>
     <string name="are_you_sure_change_default">Weet je zeker dat je naar het standaard kanaal wilt wijzigen?</string>
     <string name="audio">Geluid</string>

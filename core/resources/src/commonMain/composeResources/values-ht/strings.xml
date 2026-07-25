@@ -30,6 +30,8 @@
     <!-- APP -->
     <string name="app_too_old">Aplikasyon twò ansyen</string>
     <string name="apply">Aplike</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bon</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="bad">Move</string>
     <string name="battery">Batri</string>

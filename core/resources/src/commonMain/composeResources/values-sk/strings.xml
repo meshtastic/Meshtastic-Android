@@ -37,6 +37,8 @@
     <!-- APP -->
     <string name="app_too_old">Aplikáciu je potrebné aktualizovať</string>
     <string name="apply">Použiť</string>
+    <!-- AQI -->
+    <string name="aqi_good">Dobrý</string>
     <string name="are_you_sure">Si si istý?</string>
     <string name="are_you_sure_change_default">Ste si istý, že sa chcete prepnúť na predvolený kanál?</string>
     <string name="audio">Zvuk</string>

@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
     <string name="apply">Potvrdi</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
     <string name="audio">Zvuk</string>
     <string name="audio_config">Postavke Zvuka</string>

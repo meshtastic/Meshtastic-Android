@@ -31,6 +31,8 @@
     <!-- APP -->
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
     <string name="apply">Taikyti</string>
+    <!-- AQI -->
+    <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
     <string name="battery">Baterija</string>

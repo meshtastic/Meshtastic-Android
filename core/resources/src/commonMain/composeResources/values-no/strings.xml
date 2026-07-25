@@ -31,6 +31,8 @@
     <!-- APP -->
     <string name="app_too_old">Applikasjon for gammel</string>
     <string name="apply">Bruk</string>
+    <!-- AQI -->
+    <string name="aqi_good">Godt</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="bad">Dårlig</string>
     <string name="battery">Batteri</string>

@@ -49,6 +49,8 @@
     <!-- APP -->
     <string name="app_too_old">A aplicação é muito antiga</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bom</string>
     <string name="are_you_sure">Confirma?</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="audio">Áudio</string>

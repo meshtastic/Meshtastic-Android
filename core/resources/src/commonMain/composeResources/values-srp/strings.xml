@@ -43,6 +43,13 @@
     <!-- APP -->
     <string name="app_too_old">Неопходно је ажурирање апликације</string>
     <string name="apply">Примени</string>
+    <!-- AQI -->
+    <string name="aqi_good">Добро</string>
+    <string name="aqi_hazardous">Опасно</string>
+    <string name="aqi_moderate">Умерено</string>
+    <string name="aqi_unhealthy">Нездраво</string>
+    <string name="aqi_unhealthy_sensitive">Нездраво за осетљиве групе</string>
+    <string name="aqi_very_unhealthy">Веома нездраво</string>
     <string name="are_you_sure">Да ли сте сигурни?</string>
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="back">Назад</string>

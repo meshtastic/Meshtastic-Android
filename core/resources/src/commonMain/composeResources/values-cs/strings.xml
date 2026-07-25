@@ -84,7 +84,9 @@
     <string name="app_too_old">Aplikace je příliš stará</string>
     <string name="app_version">Verze</string>
     <string name="apply">Použít</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Silný</string>
     <string name="are_you_sure">Jste si jistý?</string>
     <string name="are_you_sure_change_default">Opravdu chcete změnit na výchozí kanál?</string>
     <string name="audio">Zvuk</string>

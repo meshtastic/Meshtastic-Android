@@ -92,6 +92,8 @@
     <string name="app_too_old">需要應用程式更新</string>
     <string name="app_version">版本</string>
     <string name="apply">套用</string>
+    <!-- AQI -->
+    <string name="aqi_good">良好</string>
     <string name="are_you_sure">你確定嗎？</string>
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>
     <string name="audio">音頻</string>

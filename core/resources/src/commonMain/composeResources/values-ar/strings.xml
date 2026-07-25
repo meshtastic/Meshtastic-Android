@@ -28,6 +28,8 @@
     <!-- APP -->
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
     <string name="apply">تفعيل</string>
+    <!-- AQI -->
+    <string name="aqi_good">جيد</string>
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
     <string name="audio">إعدادات الصوت</string>
     <string name="bad">سيئ</string>

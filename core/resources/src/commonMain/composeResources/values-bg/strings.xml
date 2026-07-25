@@ -77,7 +77,9 @@
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="app_version">Версия</string>
     <string name="apply">Приложи</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Добър</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="audio">Аудио</string>

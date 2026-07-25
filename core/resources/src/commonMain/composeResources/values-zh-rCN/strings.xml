@@ -112,7 +112,10 @@
     <string name="app_too_old">需要更新应用程序</string>
     <string name="app_version">版本</string>
     <string name="apply">申请</string>
+    <!-- AQI -->
     <string name="aqi">空气质量指数</string>
+    <string name="aqi_good">良好</string>
+    <string name="aqi_moderate">适度</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="are_you_sure_change_default">您是否确定要改回默认频道？</string>
     <string name="audio">音频</string>

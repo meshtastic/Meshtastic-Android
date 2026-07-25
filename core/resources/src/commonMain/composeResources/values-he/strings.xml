@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>
     <string name="apply">החל</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>
     <!-- BLUETOOTH -->
     <string name="bottom_nav_settings">הגדרות</string>
