@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>values</title>
+    <title>nowCastAqiSeries</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:model/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:model/commonMain" data-filter=":core:model/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-ui::org.meshtastic.core.ui.component/PmAqiSeverity/values/#/PointingToDeclaration//-920980536">
-  <div class="breadcrumbs"><a href="../../index.html">core-ui</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ui.component</a><span class="delimiter">/</span><a href="index.html">PmAqiSeverity</a><span class="delimiter">/</span><span class="current">values</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-model::org.meshtastic.core.model.util/AirQualityIndex/nowCastAqiSeries/#kotlin.collections.List[kotlin.Pair[kotlin.Long,kotlin.Double]]/PointingToDeclaration//394437785">
+  <div class="breadcrumbs"><a href="../../index.html">core-model</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.model.util</a><span class="delimiter">/</span><a href="index.html">AirQualityIndex</a><span class="delimiter">/</span><span class="current">nowCastAqiSeries</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>values</span></span></h1>
+    <h1 class="cover"><span>now</span><wbr><span>Cast</span><wbr><span>Aqi</span><wbr><span><span>Series</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="values.html"><span class="token function">values</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">PmAqiSeverity</a><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/PmAqiSeverity.kt#L43">source</a>)</span></span></div><p class="paragraph">Returns an array containing the constants of this enum type, in the order they're declared.</p><p class="paragraph">This method may be used to iterate over the constants.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="now-cast-aqi-series.html"><span class="token function">nowCastAqiSeries</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">readings<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-pair/index.html">Pair</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/util/AirQualityIndex.kt#L89">source</a>)</span></span></div><p class="paragraph">The historical NowCast AQI for every reading in <a href="now-cast-aqi-series.html">readings</a> — element <code class="lang-kotlin">i</code> is the AQI as of <code class="lang-kotlin">readings[i]</code>'s own timestamp, derived only from readings at or before it, or null where EPA's minimum-data rule (see <a href="compute-now-cast-pm25.html">computeNowCastPm25</a>) isn't met at that point. Used to chart/tabulate AQI over time (issue #6381) rather than only the single live value.</p><p class="paragraph"><a href="now-cast-aqi-series.html">readings</a> must be sorted ascending by epoch-second timestamp; a sliding window keeps this linear in the number of readings per 12-hour window rather than quadratic over the whole time frame.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
