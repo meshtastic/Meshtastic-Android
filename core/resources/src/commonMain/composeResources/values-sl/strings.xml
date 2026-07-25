@@ -31,6 +31,8 @@
     <!-- APP -->
     <string name="app_too_old">Aplikacija je prestara</string>
     <string name="apply">Uporabi</string>
+    <!-- AQI -->
+    <string name="aqi_good">Dober</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>
     <string name="bad">Slab</string>
     <string name="battery">Baterija</string>

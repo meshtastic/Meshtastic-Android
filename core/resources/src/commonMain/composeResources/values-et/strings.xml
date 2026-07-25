@@ -112,7 +112,9 @@
     <string name="app_too_old">Vajalik on rakenduse värskendus</string>
     <string name="app_version">Versioon</string>
     <string name="apply">Rakenda</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Hea</string>
     <string name="are_you_sure">Oled kindel?</string>
     <string name="are_you_sure_change_default">Kas oled kindel, et soovid vaikekanalit muuta?</string>
     <string name="audio">Heli</string>

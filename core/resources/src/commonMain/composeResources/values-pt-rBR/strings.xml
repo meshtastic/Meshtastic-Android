@@ -50,6 +50,8 @@
     <string name="app_notifications">Notificações do Aplicativo</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bom</string>
     <string name="are_you_sure">Você tem certeza?</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="audio">Áudio</string>

@@ -68,6 +68,8 @@
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
     <string name="app_version">Verzió</string>
     <string name="apply">Alkalmaz</string>
+    <!-- AQI -->
+    <string name="aqi_good">Jó</string>
     <string name="are_you_sure">Biztos vagy benne?</string>
     <string name="are_you_sure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
     <string name="audio">Hang</string>

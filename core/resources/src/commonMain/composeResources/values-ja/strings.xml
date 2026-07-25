@@ -112,7 +112,9 @@
     <string name="app_too_old">アプリを更新して下さい。</string>
     <string name="app_version">バージョン</string>
     <string name="apply">適用</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">良</string>
     <string name="are_you_sure">よろしいですか？</string>
     <string name="are_you_sure_change_default">デフォルトチャンネルに変更しますか？</string>
     <string name="audio">オーディオ</string>

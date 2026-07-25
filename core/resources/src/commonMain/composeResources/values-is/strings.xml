@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
     <string name="apply">Virkja</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Reiknar…</string>

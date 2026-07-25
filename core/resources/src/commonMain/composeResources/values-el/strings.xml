@@ -29,6 +29,7 @@
     <!-- APP -->
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
     <string name="apply">Εφαρμογή</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="audio">Ήχος</string>
     <string name="battery">Μπαταρία</string>

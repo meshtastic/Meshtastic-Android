@@ -112,7 +112,9 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="app_version">Versio</string>
     <string name="apply">Hyväksy</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Hyvä</string>
     <string name="are_you_sure">Oletko varma?</string>
     <string name="are_you_sure_change_default">Oletko varma, että haluat vaihtaa oletuskanavan?</string>
     <string name="audio">Ääni</string>

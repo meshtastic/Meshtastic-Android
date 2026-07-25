@@ -87,7 +87,9 @@
     <string name="app_too_old">Потрібне оновлення програми</string>
     <string name="app_version">Версія</string>
     <string name="apply">Застосувати</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Хороший</string>
     <string name="are_you_sure">Ви впевнені?</string>
     <string name="are_you_sure_change_default">Ви впевнені, що хочете змінити канал за умовчанням?</string>
     <string name="audio">Аудіо</string>

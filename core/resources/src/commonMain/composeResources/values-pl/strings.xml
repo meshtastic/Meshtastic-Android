@@ -52,6 +52,8 @@
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
     <string name="app_version">Wersja</string>
     <string name="apply">Zastosuj</string>
+    <!-- AQI -->
+    <string name="aqi_good">dobry</string>
     <string name="are_you_sure">Czy jesteś pewien?</string>
     <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny?</string>
     <string name="audio">Dźwięk</string>

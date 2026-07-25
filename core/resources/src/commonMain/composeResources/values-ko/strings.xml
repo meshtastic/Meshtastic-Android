@@ -47,6 +47,8 @@
     <!-- APP -->
     <string name="app_too_old">앱 업데이트가 필요합니다.</string>
     <string name="apply">적용</string>
+    <!-- AQI -->
+    <string name="aqi_good">좋음</string>
     <string name="are_you_sure">확실합니까?</string>
     <string name="are_you_sure_change_default">기본 채널로 변경하시겠습니까?</string>
     <string name="audio">오디오</string>

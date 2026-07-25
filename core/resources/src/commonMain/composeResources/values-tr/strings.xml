@@ -52,6 +52,8 @@
     <!-- APP -->
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
     <string name="apply">Uygula</string>
+    <!-- AQI -->
+    <string name="aqi_good">İyi</string>
     <string name="are_you_sure">Emin misiniz?</string>
     <string name="are_you_sure_change_default">Varsayılan kanala geçmek istediğinizden emin misiniz?</string>
     <string name="audio">Ses</string>

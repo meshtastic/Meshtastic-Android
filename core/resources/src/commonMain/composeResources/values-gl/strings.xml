@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">Actualización da aplicación requerida</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>

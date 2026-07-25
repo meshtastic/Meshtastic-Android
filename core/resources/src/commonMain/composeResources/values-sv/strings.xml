@@ -94,6 +94,8 @@
     <string name="app_too_old">Applikationen måste uppgraderas</string>
     <string name="app_version">Version</string>
     <string name="apply">Verkställ</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bra</string>
     <string name="are_you_sure">Är du säker?</string>
     <string name="are_you_sure_change_default">Är du säker på att du vill ändra till standardkanalen?</string>
     <string name="audio">Ljud</string>
