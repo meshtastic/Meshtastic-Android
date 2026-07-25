@@ -310,12 +310,16 @@ class SharedRadioInterfaceService(
         }
     }
 
-    // Unbounded Channel preserves strict FIFO delivery of incoming radio bytes, which the
-    // firmware handshake depends on (initial config packet ordering). A SharedFlow with
-    // `launch { emit() }` per packet reorders under concurrent dispatch and breaks config load.
-    // trySend on an UNLIMITED channel never suspends and never drops, so handleFromRadio can
-    // remain a non-suspend synchronous callback.
-    private val _receivedData = Channel<ReceivedRadioFrame>(Channel.UNLIMITED)
+    // A Channel preserves strict FIFO delivery of incoming radio bytes, which the firmware
+    // handshake depends on (initial config packet ordering). A SharedFlow with `launch { emit() }`
+    // per packet reorders under concurrent dispatch and breaks config load. trySend never
+    // suspends, so handleFromRadio can remain a non-suspend synchronous callback.
+    //
+    // Bounded rather than UNLIMITED: inbound frames arrive faster than they can be processed under
+    // sustained traffic, and an unbounded queue grows with no drop policy at all. At the cap
+    // trySend fails and the newest frame is dropped, which keeps the already-queued (earlier)
+    // frames and so preserves the ordering the handshake relies on.
+    private val _receivedData = Channel<ReceivedRadioFrame>(RECEIVE_QUEUE_CAPACITY)
     override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
 
     private val _meshActivity =
@@ -376,6 +380,15 @@ class SharedRadioInterfaceService(
     private fun now(): Long = clockMillis()
 
     companion object {
+        /**
+         * Capacity of the inbound frame queue.
+         *
+         * Sized well above the burst a firmware handshake produces (config + channels + a large NodeDB) so normal
+         * operation never reaches it, while still bounding memory: each frame's payload is at most
+         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE` bytes.
+         */
+        const val RECEIVE_QUEUE_CAPACITY = 2048
+
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
 
         // If we haven't received any data from the radio within this window after sending a
@@ -939,7 +952,11 @@ class SharedRadioInterfaceService(
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
             if (result.isFailure) {
-                Logger.e(result.exceptionOrNull()) { "Failed to enqueue ${bytes.size} received bytes; dropping packet" }
+                // A full queue reports failure with no exception; a closed channel carries one.
+                Logger.e(result.exceptionOrNull()) {
+                    "Failed to enqueue ${bytes.size} received bytes; dropping packet " +
+                        "(receive queue at capacity $RECEIVE_QUEUE_CAPACITY or closed)"
+                }
             }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {
