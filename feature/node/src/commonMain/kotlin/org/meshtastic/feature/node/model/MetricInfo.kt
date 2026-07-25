@@ -20,16 +20,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
+/** A single labelled reading rendered as one info card; the icon comes from either a vector or a drawable resource. */
+internal sealed interface MetricInfo {
+    val label: StringResource
+    val value: String
+    val rotateIcon: Float
+}
+
 internal data class VectorMetricInfo(
-    val label: StringResource,
-    val value: String,
+    override val label: StringResource,
+    override val value: String,
     val icon: ImageVector,
-    val rotateIcon: Float = 0f,
-)
+    override val rotateIcon: Float = 0f,
+) : MetricInfo
 
 internal data class DrawableMetricInfo(
-    val label: StringResource,
-    val value: String,
+    override val label: StringResource,
+    override val value: String,
     val icon: DrawableResource,
-    val rotateIcon: Float = 0f,
-)
+    override val rotateIcon: Float = 0f,
+) : MetricInfo

@@ -115,6 +115,12 @@ fun InfoCard(
 }
 
 @Composable
-internal fun DrawableInfoCard(iconRes: DrawableResource, text: String, value: String, rotateIcon: Float = 0f) {
-    InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
+internal fun DrawableInfoCard(
+    iconRes: DrawableResource,
+    text: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    rotateIcon: Float = 0f,
+) {
+    InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon, modifier = modifier)
 }

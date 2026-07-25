@@ -16,13 +16,8 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
@@ -72,39 +67,46 @@ private fun buildAirQualityCards(
     tempIcon: ImageVector,
     humidityIcon: ImageVector,
     isFahrenheit: Boolean,
-): List<VectorMetricInfo> = buildList {
+): List<MetricGroup> = buildList {
     // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
     // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
-    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", icon)) }
+    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", icon).asGroup()) }
     metrics.pm25_standard?.let { pm ->
-        add(VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", icon))
-        // AQI sits alongside the raw PM2.5 reading, so only show it when that raw reading is present.
-        aqi?.let { (aqiValue, severity) ->
-            add(VectorMetricInfo(Res.string.aqi, "$aqiValue (${severity.label})", icon))
-        }
+        add(
+            listOfNotNull(
+                VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", icon),
+                // AQI is derived from the raw PM2.5 reading, so it stacks directly under it — and is only shown when
+                // that raw reading is present.
+                aqi?.let { (aqiValue, severity) ->
+                    VectorMetricInfo(Res.string.aqi, "$aqiValue (${severity.label})", icon)
+                },
+            ),
+        )
     }
-    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", icon)) }
-    metrics.co2?.let { co2 -> add(VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", icon)) }
+    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", icon).asGroup()) }
     // The SCD4x CO₂ sensor also reports its own temperature/humidity (#5873) — surfaced here so a node can double as a
-    // weather station without a separate BME sensor. `?.` hides only genuinely-absent readings.
-    metrics.co2_temperature?.let { temp ->
-        add(VectorMetricInfo(Res.string.co2_temperature, temp.toTempString(isFahrenheit), tempIcon))
-    }
-    metrics.co2_humidity?.let { hum ->
-        add(VectorMetricInfo(Res.string.co2_humidity, "${NumberFormatter.format(hum, 0)}%", humidityIcon))
-    }
+    // weather station without a separate BME sensor. All three come from that one sensor, so they share a column.
+    // `?.` hides only genuinely-absent readings.
+    add(
+        listOfNotNull(
+            metrics.co2?.let { co2 -> VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", icon) },
+            metrics.co2_temperature?.let { temp ->
+                VectorMetricInfo(Res.string.co2_temperature, temp.toTempString(isFahrenheit), tempIcon)
+            },
+            metrics.co2_humidity?.let { hum ->
+                VectorMetricInfo(Res.string.co2_humidity, "${NumberFormatter.format(hum, 0)}%", humidityIcon)
+            },
+        ),
+    )
 }
 
-private fun metricValueColor(
-    label: StringResource,
-    co2Color: Color?,
-    aqiSeverity: PmAqiSeverity?,
-    defaultColor: Color,
-): Color = when (label) {
-    Res.string.co2 -> co2Color
-    Res.string.aqi -> aqiSeverity?.color
-    else -> null
-} ?: defaultColor
+/** Severity color for a metric's value text, or null to keep the default card color. */
+private fun metricValueColor(label: StringResource, co2Color: Color?, aqiSeverity: PmAqiSeverity?): Color? =
+    when (label) {
+        Res.string.co2 -> co2Color
+        Res.string.aqi -> aqiSeverity?.color
+        else -> null
+    }
 
 /**
  * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. A card is shown for each metric
@@ -134,24 +136,10 @@ internal fun AirQualityInfoCards(
             buildAirQualityCards(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
         }
 
-    if (cards.isEmpty()) return
+    if (cards.none { it.isNotEmpty() }) return
 
     val co2Color = Co2Severity.fromPpm(metrics.co2 ?: 0)?.color
     val aqiSeverity = aqi?.second
-    val defaultColor = MaterialTheme.colorScheme.onSurface
 
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        cards.forEach { metric ->
-            InfoCard(
-                icon = metric.icon,
-                text = stringResource(metric.label),
-                value = metric.value,
-                valueColor = metricValueColor(metric.label, co2Color, aqiSeverity, defaultColor),
-            )
-        }
-    }
+    MetricCardFlow(groups = cards, valueColor = { metric -> metricValueColor(metric.label, co2Color, aqiSeverity) })
 }
