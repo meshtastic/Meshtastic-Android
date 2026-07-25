@@ -259,6 +259,101 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `handleReceivedPosition keeps precise position when a coarse report lands in the same box`() {
+        // Regression test for #6360: a fixed position set from the app is exact, but the node then broadcasts
+        // that same position coarsened to the channel's position_precision. The coarse report must not
+        // replace the exact coordinates we already hold, otherwise the value shown in the app "drifts".
+        val nodeNum = 1234
+        val exactLatI = 524595000 // 52.4595
+        val exactLonI = 310255000 // 31.0255
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = exactLatI, longitude_i = exactLonI, altitude = 135, time = 1000),
+            1000000L,
+        )
+
+        // Firmware coarsening for precision_bits = 13: mask off the low (32 - 13) bits, then re-center the box.
+        val coarseLatI = (exactLatI and (-1 shl 19)) + (1 shl 18) // 524550144 -> 52.4550144
+        val coarseLonI = (exactLonI and (-1 shl 19)) + (1 shl 18) // 310116352 -> 31.0116352
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(
+                latitude_i = coarseLatI,
+                longitude_i = coarseLonI,
+                altitude = 135,
+                time = 2000,
+                precision_bits = 13,
+            ),
+            2000000L,
+        )
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result)
+        assertEquals(exactLatI, result.position.latitude_i)
+        assertEquals(exactLonI, result.position.longitude_i)
+        // The newer report is still applied for everything else.
+        assertEquals(2000, result.position.time)
+        assertEquals(2000, result.lastHeard)
+    }
+
+    @Test
+    fun `handleReceivedPosition accepts a coarse report from a different box`() {
+        val nodeNum = 1234
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = 524595000, longitude_i = 310255000, time = 1000),
+            1000000L,
+        )
+
+        // A coarse report whose box does not contain the stored position means the node actually moved.
+        val movedLatI = ((524595000 + (1 shl 20)) and (-1 shl 19)) + (1 shl 18)
+        val movedLonI = ((310255000 + (1 shl 20)) and (-1 shl 19)) + (1 shl 18)
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = movedLatI, longitude_i = movedLonI, time = 2000, precision_bits = 13),
+            2000000L,
+        )
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result)
+        assertEquals(movedLatI, result.position.latitude_i)
+        assertEquals(movedLonI, result.position.longitude_i)
+        assertEquals(13, result.position.precision_bits)
+    }
+
+    @Test
+    fun `handleReceivedPosition accepts a coarse report when the stored position is coarser`() {
+        val nodeNum = 1234
+        val coarseLatI = (524595000 and (-1 shl 21)) + (1 shl 20)
+        val coarseLonI = (310255000 and (-1 shl 21)) + (1 shl 20)
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = coarseLatI, longitude_i = coarseLonI, time = 1000, precision_bits = 11),
+            1000000L,
+        )
+
+        val finerLatI = (524595000 and (-1 shl 19)) + (1 shl 18)
+        val finerLonI = (310255000 and (-1 shl 19)) + (1 shl 18)
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = finerLatI, longitude_i = finerLonI, time = 2000, precision_bits = 13),
+            2000000L,
+        )
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result)
+        assertEquals(finerLatI, result.position.latitude_i)
+        assertEquals(finerLonI, result.position.longitude_i)
+        assertEquals(13, result.position.precision_bits)
+    }
+
+    @Test
     fun `handleReceivedPosition for local node ignores purely empty packets`() {
         val myNum = 1111
         val emptyPos = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
@@ -431,6 +526,32 @@ class NodeManagerImplTest {
         assertEquals(pk, result.publicKey)
         assertEquals(pk, result.user.public_key)
         assertTrue(result.hasPKC)
+    }
+
+    @Test
+    fun `installNodeInfo keeps precise position when the snapshot only has the coarse one`() {
+        val nodeNum = 5678
+        val exactLatI = 524595000
+        val exactLonI = 310255000
+        nodeManager.handleReceivedPosition(
+            nodeNum,
+            9999,
+            ProtoPosition(latitude_i = exactLatI, longitude_i = exactLonI, time = 1000),
+            1000000L,
+        )
+
+        val coarse =
+            ProtoPosition(
+                latitude_i = (exactLatI and (-1 shl 19)) + (1 shl 18),
+                longitude_i = (exactLonI and (-1 shl 19)) + (1 shl 18),
+                time = 2000,
+                precision_bits = 13,
+            )
+        nodeManager.installNodeInfo(ProtoNodeInfo(num = nodeNum, position = coarse, last_heard = 2000, channel = 0))
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals(exactLatI, result.position.latitude_i)
+        assertEquals(exactLonI, result.position.longitude_i)
     }
 
     @Test

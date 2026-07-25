@@ -308,6 +308,60 @@ class NodeManagerImpl(
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
         private const val TIME_MS_TO_S = 1000L
         private const val GENERATED_NODE_NAME_SUFFIX_LENGTH = 4
+
+        /** `precision_bits` value used by firmware for an un-degraded (full 32-bit) coordinate. */
+        private const val FULL_POSITION_PRECISION_BITS = 32
+
+        /** Total bits in the `latitude_i` / `longitude_i` fixed-point representation. */
+        private const val POSITION_COORDINATE_BITS = 32
+
+        /**
+         * Reproduces the firmware's coarsening of a coordinate to [bits] of precision: mask off the low bits, then
+         * re-center the value inside the remaining box. Mirrors `Router::sendLocal` / `PositionModule` behaviour so we
+         * can tell whether a coarse report describes the box that already contains a coordinate we hold.
+         */
+        internal fun coarsenCoordinate(degI: Int, bits: Int): Int =
+            (degI and (-1 shl (POSITION_COORDINATE_BITS - bits))) + (1 shl (POSITION_COORDINATE_BITS - 1 - bits))
+
+        /**
+         * Returns [incoming] with the coordinates of [stored] restored when [incoming] is merely a precision-degraded
+         * restatement of what we already know (see [isRedundantCoarsePosition]); otherwise [incoming] unchanged.
+         */
+        internal fun preservingKnownPrecision(incoming: ProtoPosition, stored: ProtoPosition): ProtoPosition =
+            if (isRedundantCoarsePosition(incoming, stored)) {
+                incoming.copy(
+                    latitude_i = stored.latitude_i,
+                    longitude_i = stored.longitude_i,
+                    precision_bits = stored.precision_bits,
+                )
+            } else {
+                incoming
+            }
+
+        /**
+         * True when [incoming] is a precision-degraded report that carries no new information over [stored].
+         *
+         * Nodes on a channel with `position_precision` set broadcast their location coarsened to the box centre. When
+         * we already hold a more precise coordinate for that node (e.g. a fixed position we just wrote, or an earlier
+         * full-precision report) and that coordinate falls inside the same box, adopting the coarse value would make
+         * the position visibly "drift" away from the real one (issue #6360). Only positions from a *different* box
+         * indicate the node actually moved, and those are accepted normally.
+         */
+        internal fun isRedundantCoarsePosition(incoming: ProtoPosition, stored: ProtoPosition): Boolean {
+            val incomingBits = incoming.precision_bits
+            val storedLatI = stored.latitude_i ?: 0
+            val storedLonI = stored.longitude_i ?: 0
+            // `0` means the stored coordinate was never degraded, so treat it as full precision.
+            val storedBits = stored.precision_bits.takeIf { it > 0 } ?: FULL_POSITION_PRECISION_BITS
+
+            val isDegradedReport = incomingBits > 0 && incomingBits < FULL_POSITION_PRECISION_BITS
+            val haveMorePreciseCoordinate = (storedLatI != 0 || storedLonI != 0) && storedBits > incomingBits
+
+            return isDegradedReport &&
+                haveMorePreciseCoordinate &&
+                coarsenCoordinate(storedLatI, incomingBits) == (incoming.latitude_i ?: 0) &&
+                coarsenCoordinate(storedLonI, incomingBits) == (incoming.longitude_i ?: 0)
+        }
     }
 
     override fun loadCachedNodeDB() {
@@ -573,16 +627,17 @@ class NodeManagerImpl(
             val newLastHeard = maxOf(node.lastHeard, posTime)
 
             val newPos =
-                if (isZeroPos) {
-                    p.copy(
-                        time = posTime,
-                        latitude_i = node.position.latitude_i,
-                        longitude_i = node.position.longitude_i,
-                        altitude = p.altitude ?: node.position.altitude,
-                        sats_in_view = p.sats_in_view,
-                    )
-                } else {
-                    p.copy(time = posTime)
+                when {
+                    isZeroPos ->
+                        p.copy(
+                            time = posTime,
+                            latitude_i = node.position.latitude_i,
+                            longitude_i = node.position.longitude_i,
+                            altitude = p.altitude ?: node.position.altitude,
+                            sats_in_view = p.sats_in_view,
+                        )
+
+                    else -> preservingKnownPrecision(p.copy(time = posTime), node.position)
                 }
 
             node.copy(position = newPos, lastHeard = newLastHeard)
@@ -643,7 +698,10 @@ class NodeManagerImpl(
             next = next.copy(user = newUser, publicKey = newUser.public_key)
         }
         info.position?.let { position ->
-            next = next.copy(position = position.copy(time = clampTimestampToNow(position.time)))
+            // The NodeDB snapshot from the connected device carries the coarsened position for nodes on a
+            // precision-limited channel; do not let it clobber a more precise coordinate we already hold (#6360).
+            val timed = position.copy(time = clampTimestampToNow(position.time))
+            next = next.copy(position = preservingKnownPrecision(timed, next.position))
         }
         return next.copy(
             lastHeard = clampTimestampToNow(info.last_heard),
