@@ -90,7 +90,7 @@ class AirQualityMetricsTest {
     // --- AQI series (issue #6381): derived from PM2.5 history, not carried by the telemetry proto ---
 
     @Test
-    fun `getValue for AQI comes from the sample's derived value, not the telemetry`() {
+    fun `getValue for AQI comes from the sample derived value rather than the telemetry`() {
         val t = telemetry(AirQualityMetrics(pm25_standard = 25))
         assertNull(AirQuality.AQI.getValue(t), "AQI is not a proto field, so a bare Telemetry has none")
         assertEquals(78f, AirQuality.AQI.getValue(AirQualitySample(t, aqi = 78)))
