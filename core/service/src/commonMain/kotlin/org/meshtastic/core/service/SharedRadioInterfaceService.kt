@@ -322,6 +322,9 @@ class SharedRadioInterfaceService(
     private val _receivedData = Channel<ReceivedRadioFrame>(RECEIVE_QUEUE_CAPACITY)
     override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
 
+    /** Running count of frames dropped because the queue was full. Diagnostic only; see [enqueueReceivedData]. */
+    private var droppedFrameCount = 0L
+
     private val _meshActivity =
         MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
@@ -383,11 +386,18 @@ class SharedRadioInterfaceService(
         /**
          * Capacity of the inbound frame queue.
          *
-         * Sized well above the burst a firmware handshake produces (config + channels + a large NodeDB) so normal
-         * operation never reaches it, while still bounding memory: each frame's payload is at most
-         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE` bytes.
+         * Sized above the burst a firmware handshake produces — `my_info` + metadata + ~10 config + ~14 moduleConfig +
+         * 8 channel + one frame per NodeDB entry (firmware `MAX_NUM_NODES` is 100–250 by target) + `config_complete`,
+         * so roughly 285 frames worst case.
+         *
+         * Memory is bounded by capacity × frame size. On the stream transports a frame cannot exceed
+         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE`; the BLE path passes through whatever the GATT read returned, which
+         * ATT caps at 512 bytes in practice rather than by anything enforced here.
          */
         const val RECEIVE_QUEUE_CAPACITY = 2048
+
+        /** Log one dropped-frame warning per this many drops. See [enqueueReceivedData]. */
+        private const val DROP_LOG_INTERVAL = 512L
 
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
 
@@ -945,17 +955,23 @@ class SharedRadioInterfaceService(
     private fun enqueueReceivedData(bytes: ByteArray, session: RadioTransportSession) {
         try {
             lastDataReceivedMillis = now()
-            // trySend synchronously onto the unbounded Channel so packet order matches arrival
-            // order. The previous `launch { emit() }` pattern dispatched each packet onto a
-            // fresh coroutine, letting the scheduler reorder them — which broke the firmware
-            // config handshake (see PhoneAPI.cpp initial-handshake sequence).
+            // trySend synchronously onto the Channel so packet order matches arrival order. The
+            // previous `launch { emit() }` pattern dispatched each packet onto a fresh coroutine,
+            // letting the scheduler reorder them — which broke the firmware config handshake
+            // (see PhoneAPI.cpp initial-handshake sequence).
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
             if (result.isFailure) {
-                // A full queue reports failure with no exception; a closed channel carries one.
-                Logger.e(result.exceptionOrNull()) {
-                    "Failed to enqueue ${bytes.size} received bytes; dropping packet " +
-                        "(receive queue at capacity $RECEIVE_QUEUE_CAPACITY or closed)"
+                // Rate-limited on purpose: drops only happen under sustained inbound traffic, and Kermit forwards to
+                // Datadog/Crashlytics, so logging every drop would turn a bounded memory problem into unbounded
+                // network and battery use. The counter is deliberately unsynchronised — a racy count only skews a
+                // diagnostic line. A full queue reports failure with no exception; a closed channel carries one.
+                val drops = ++droppedFrameCount
+                if (drops == 1L || drops % DROP_LOG_INTERVAL == 0L) {
+                    Logger.w(result.exceptionOrNull()) {
+                        "Dropped ${bytes.size} received bytes ($drops total); receive queue at capacity " +
+                            "$RECEIVE_QUEUE_CAPACITY or closed"
+                    }
                 }
             }
             _meshActivity.tryEmit(MeshActivity.Receive)

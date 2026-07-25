@@ -22,12 +22,15 @@ import android.os.Bundle
 /**
  * No-op target for the `com.atakmap.app.component` discovery marker in the manifest.
  *
- * ATAK finds Meshtastic by enumerating activities that declare that action via `queryIntentActivities`; it never calls
- * `startActivity` on the result. The intent filter therefore has to stay exported, but it previously pointed at
- * `com.atakmap.app.component` — a class that does not exist in this APK — so any process that *did* launch it crashed
- * the app on activity instantiation.
+ * The filter previously pointed at `com.atakmap.app.component`, a class that does not exist in this APK, so any process
+ * that launched it — and it is exported, so any app could — crashed Meshtastic on activity instantiation. This class
+ * exists purely so the advertised component resolves to something real. It shows no UI and finishes immediately.
  *
- * This exists purely so the advertised component resolves to something real. It shows no UI and finishes immediately.
+ * The marker is believed to be discovery-only (enumerated via `queryIntentActivities`, never started), which is why
+ * renaming the target should be safe. **That has not been verified against a real ATAK install**, and nothing in this
+ * repository documents ATAK's matching behaviour — see the manifest comment. Note also that no `plugin-api` meta-data
+ * is declared anywhere here, so this app is not an ATAK plugin and the marker may simply be vestigial; TAK interop
+ * actually runs over the local CoT server and `AtakFileWriter`.
  */
 class AtakPluginDiscoveryActivity : Activity() {
 
