@@ -160,6 +160,101 @@ fun TelemetricActionsSectionLocalPreview() {
 }
 
 // ---------------------------------------------------------------------------
+// PowerMetrics previews
+// ---------------------------------------------------------------------------
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun PowerMetricsPreview() {
+    val node =
+        previewData.mickeyMouse.copy(
+            powerMetrics =
+            org.meshtastic.proto.PowerMetrics(
+                ch1_voltage = 4.19f,
+                ch1_current = 128.4f,
+                ch2_voltage = 3.72f,
+                ch2_current = 12.5f,
+                ch3_voltage = 5.02f,
+                ch3_current = 431.7f,
+            ),
+        )
+    AppTheme { Surface { PowerMetrics(node = node) } }
+}
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun PowerMetricsPartialPreview() {
+    // Only channel 1 reports a voltage — a single column, matching the partial layout in issue #4507.
+    val node =
+        previewData.mickeyMouse.copy(
+            powerMetrics = org.meshtastic.proto.PowerMetrics(ch1_voltage = 4.19f, ch1_current = 128.4f),
+        )
+    AppTheme { Surface { PowerMetrics(node = node) } }
+}
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun PowerMetricsNoCurrentPreview() {
+    // Channels report voltage but no current at all — voltage-only columns, no fabricated 0.0mA cards.
+    val node =
+        previewData.mickeyMouse.copy(
+            powerMetrics = org.meshtastic.proto.PowerMetrics(ch1_voltage = 4.19f, ch2_voltage = 3.72f),
+        )
+    AppTheme { Surface { PowerMetrics(node = node) } }
+}
+
+// ---------------------------------------------------------------------------
+// EnvironmentMetrics / AirQualityInfoCards previews
+// ---------------------------------------------------------------------------
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun EnvironmentMetricsPreview() {
+    val node =
+        previewData.mickeyMouse.copy(
+            environmentMetrics =
+            org.meshtastic.proto.EnvironmentMetrics(
+                temperature = 21.5f,
+                relative_humidity = 47f,
+                barometric_pressure = 1013f,
+                gas_resistance = 1200f,
+                voltage = 4.19f,
+                current = 128.4f,
+                iaq = 62,
+                lux = 480f,
+                uv_lux = 12f,
+                soil_temperature = 18.2f,
+                soil_moisture = 33,
+                radiation = 0.15f,
+            ),
+        )
+    AppTheme { Surface { EnvironmentMetrics(node = node, displayUnits = Config.DisplayConfig.DisplayUnits.METRIC) } }
+}
+
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun AirQualityInfoCardsPreview() {
+    val node =
+        previewData.mickeyMouse.copy(
+            airQualityMetrics =
+            org.meshtastic.proto.AirQualityMetrics(
+                pm10_standard = 8,
+                pm25_standard = 12,
+                pm100_standard = 18,
+                co2 = 640,
+                co2_temperature = 22.1f,
+                co2_humidity = 44f,
+            ),
+        )
+    AppTheme { Surface { AirQualityInfoCards(node = node) } }
+}
+
+// ---------------------------------------------------------------------------
 // PositionInlineContent preview
 // ---------------------------------------------------------------------------
 

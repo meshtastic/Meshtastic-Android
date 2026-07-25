@@ -16,12 +16,7 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
@@ -34,74 +29,30 @@ import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays environmental metrics for a node, including temperature, humidity, pressure, and other sensor data.
- *
- * WARNING: All metrics must be added in pairs (e.g., voltage and current for each channel) due to the display logic,
- * which arranges metrics in columns of two. If an odd number of metrics is provided, the UI may not display as
- * intended.
+ * Displays power metrics for a node: for every channel reporting a non-zero voltage, its voltage and — when the channel
+ * reports one — its current are stacked in a single vertical column so the pair stays visually grouped and the columns
+ * flow side by side.
  */
 @Composable
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal fun PowerMetrics(node: Node) {
-    val metrics = buildList {
+    val channels =
         with(node.powerMetrics) {
-            if ((ch1_voltage ?: 0f) != 0f) {
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_1,
-                        "${NumberFormatter.format(ch1_voltage ?: 0f, 2)}V",
-                        MeshtasticIcons.Voltage,
-                    ),
-                )
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_1,
-                        "${NumberFormatter.format(ch1_current ?: 0f, 1)}mA",
-                        MeshtasticIcons.PowerSupply,
-                    ),
-                )
-            }
-            if ((ch2_voltage ?: 0f) != 0f) {
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_2,
-                        "${NumberFormatter.format(ch2_voltage ?: 0f, 2)}V",
-                        MeshtasticIcons.Voltage,
-                    ),
-                )
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_2,
-                        "${NumberFormatter.format(ch2_current ?: 0f, 1)}mA",
-                        MeshtasticIcons.PowerSupply,
-                    ),
-                )
-            }
-            if ((ch3_voltage ?: 0f) != 0f) {
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_3,
-                        "${NumberFormatter.format(ch3_voltage ?: 0f, 2)}V",
-                        MeshtasticIcons.Voltage,
-                    ),
-                )
-                add(
-                    VectorMetricInfo(
-                        Res.string.channel_3,
-                        "${NumberFormatter.format(ch3_current ?: 0f, 1)}mA",
-                        MeshtasticIcons.PowerSupply,
-                    ),
-                )
-            }
+            listOf(
+                Triple(Res.string.channel_1, ch1_voltage, ch1_current),
+                Triple(Res.string.channel_2, ch2_voltage, ch2_current),
+                Triple(Res.string.channel_3, ch3_voltage, ch3_current),
+            )
         }
-    }
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        metrics.forEach { metric ->
-            InfoCard(icon = metric.icon, text = stringResource(metric.label), value = metric.value)
-        }
-    }
+            .filter { (_, voltage, _) -> (voltage ?: 0f) != 0f }
+            .map { (label, voltage, current) ->
+                // A reported current of 0mA is a real reading and is shown; only an absent one is hidden.
+                listOfNotNull(
+                    VectorMetricInfo(label, "${NumberFormatter.format(voltage ?: 0f, 2)}V", MeshtasticIcons.Voltage),
+                    current?.let {
+                        VectorMetricInfo(label, "${NumberFormatter.format(it, 1)}mA", MeshtasticIcons.PowerSupply)
+                    },
+                )
+            }
+
+    MetricCardFlow(groups = channels)
 }
