@@ -1112,7 +1112,10 @@ no_usb_devices_found
 no_usb_devices_hint
 no_usb_devices_seen
 ### NODE ###
+node_count_online
+node_count_shown
 node_count_template
+node_count_total
 node_filter_exclude_infrastructure
 node_filter_exclude_mqtt
 node_filter_ignored
