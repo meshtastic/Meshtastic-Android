@@ -77,6 +77,26 @@ object AirQualityIndex {
         }
     }
 
+    /**
+     * The historical NowCast AQI for every reading in [readings] — element `i` is the AQI as of `readings[i]`'s own
+     * timestamp, derived only from readings at or before it, or null where EPA's minimum-data rule (see
+     * [computeNowCastPm25]) isn't met at that point. Used to chart/tabulate AQI over time (issue #6381) rather than
+     * only the single live value.
+     *
+     * [readings] must be sorted ascending by epoch-second timestamp; a sliding window keeps this linear in the number
+     * of readings per 12-hour window rather than quadratic over the whole time frame.
+     */
+    fun nowCastAqiSeries(readings: List<Pair<Long, Double>>): List<Int?> {
+        val windowSeconds = NOWCAST_WINDOW_HOURS * SECONDS_PER_HOUR
+        var start = 0
+        return readings.mapIndexed { index, (time, _) ->
+            // Readings at or before this cutoff fall outside the point's own 12h window, so drop them from the front.
+            val cutoff = time - windowSeconds
+            while (readings[start].first <= cutoff) start++
+            computeNowCastPm25(readings.subList(start, index + 1), time)?.let(::pm25ToAqi)
+        }
+    }
+
     private data class Breakpoint(
         val concentrationLow: Double,
         val concentrationHigh: Double,

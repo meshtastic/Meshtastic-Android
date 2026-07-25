@@ -60,7 +60,7 @@ private fun nowCastAqi(pm25History: List<Telemetry>): Pair<Int, PmAqiSeverity>? 
 
 private fun buildAirQualityCards(
     metrics: AirQualityMetrics,
-    aqi: Pair<Int, PmAqiSeverity>?,
+    aqiText: String?,
     ugm3: String,
     ppmUnit: String,
     icon: ImageVector,
@@ -77,9 +77,7 @@ private fun buildAirQualityCards(
                 VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", icon),
                 // AQI is derived from the raw PM2.5 reading, so it stacks directly under it — and is only shown when
                 // that raw reading is present.
-                aqi?.let { (aqiValue, severity) ->
-                    VectorMetricInfo(Res.string.aqi, "$aqiValue (${severity.label})", icon)
-                },
+                aqiText?.let { VectorMetricInfo(Res.string.aqi, it, icon) },
             ),
         )
     }
@@ -100,13 +98,15 @@ private fun buildAirQualityCards(
     )
 }
 
-/** Severity color for a metric's value text, or null to keep the default card color. */
-private fun metricValueColor(label: StringResource, co2Color: Color?, aqiSeverity: PmAqiSeverity?): Color? =
-    when (label) {
-        Res.string.co2 -> co2Color
-        Res.string.aqi -> aqiSeverity?.color
-        else -> null
-    }
+/**
+ * Severity color for a metric's value text, or null to keep the default card color. The AQI tone is resolved by the
+ * caller because [PmAqiSeverity.color] is `@Composable`.
+ */
+private fun metricValueColor(label: StringResource, co2Color: Color?, aqiColor: Color?): Color? = when (label) {
+    Res.string.co2 -> co2Color
+    Res.string.aqi -> aqiColor
+    else -> null
+}
 
 /**
  * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. A card is shown for each metric
@@ -128,18 +128,20 @@ internal fun AirQualityInfoCards(
     val ppmUnit = stringResource(Res.string.ppm)
 
     val aqi = nowCastAqi(pm25History)
+    // The category name always accompanies the value, so the AQI card never relies on color alone.
+    val aqiText = aqi?.let { (value, severity) -> "$value (${stringResource(severity.labelRes)})" }
     val icon = MeshtasticIcons.AirQuality
     val tempIcon = MeshtasticIcons.Temperature
     val humidityIcon = MeshtasticIcons.Humidity
     val cards =
-        remember(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
-            buildAirQualityCards(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
+        remember(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
+            buildAirQualityCards(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
         }
 
     if (cards.none { it.isNotEmpty() }) return
 
     val co2Color = Co2Severity.fromPpm(metrics.co2 ?: 0)?.color
-    val aqiSeverity = aqi?.second
+    val aqiColor = aqi?.second?.color()
 
-    MetricCardFlow(groups = cards, valueColor = { metric -> metricValueColor(metric.label, co2Color, aqiSeverity) })
+    MetricCardFlow(groups = cards, valueColor = { metric -> metricValueColor(metric.label, co2Color, aqiColor) })
 }

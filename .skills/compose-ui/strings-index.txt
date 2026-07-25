@@ -94,7 +94,14 @@ app_settings
 app_too_old
 app_version
 apply
+### AQI ###
 aqi
+aqi_good
+aqi_hazardous
+aqi_moderate
+aqi_unhealthy
+aqi_unhealthy_sensitive
+aqi_very_unhealthy
 are_you_sure
 are_you_sure_change_default
 audio

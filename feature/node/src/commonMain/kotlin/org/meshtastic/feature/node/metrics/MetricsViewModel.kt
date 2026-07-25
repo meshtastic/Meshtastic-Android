@@ -474,12 +474,16 @@ open class MetricsViewModel(
         }
     }
 
+    /**
+     * Exports the air quality log. [data] carries the derived NowCast AQI alongside each reading (the telemetry proto
+     * has no AQI field), so the export matches what the graph and table show rather than dropping the derived column.
+     */
     @Suppress("CyclomaticComplexMethod")
-    fun saveAirQualityMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+    internal fun saveAirQualityMetricsCSV(uri: CommonUri, data: List<AirQualitySample>) {
         exportCsv(
             uri = uri,
             header =
-            "\"date\",\"time\",\"pm10_standard\",\"pm25_standard\",\"pm100_standard\"," +
+            "\"date\",\"time\",\"aqi\",\"pm10_standard\",\"pm25_standard\",\"pm100_standard\"," +
                 "\"pm10_environmental\",\"pm25_environmental\",\"pm100_environmental\"," +
                 "\"particles_03um\",\"particles_05um\",\"particles_10um\"," +
                 "\"particles_25um\",\"particles_50um\",\"particles_100um\"," +
@@ -489,12 +493,13 @@ open class MetricsViewModel(
                 "\"pm_temperature\",\"pm_humidity\",\"pm_voc_idx\",\"pm_nox_idx\"," +
                 "\"particles_tps\"\n",
             rows = data,
-            epochSeconds = { it.time.toLong() },
-        ) { t ->
+            epochSeconds = { it.telemetry.time.toLong() },
+        ) { sample ->
             // Present-and-zero is a real reading and must be exported (matching the chart/card); only a genuinely
             // absent field (null) renders as an empty cell. No zero-suppression guards here.
-            val aq = t.air_quality_metrics
-            "\"${aq?.pm10_standard ?: ""}\"," +
+            val aq = sample.telemetry.air_quality_metrics
+            "\"${sample.aqi ?: ""}\"," +
+                "\"${aq?.pm10_standard ?: ""}\"," +
                 "\"${aq?.pm25_standard ?: ""}\"," +
                 "\"${aq?.pm100_standard ?: ""}\"," +
                 "\"${aq?.pm10_environmental ?: ""}\"," +
