@@ -157,7 +157,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                             formState.value = formState.value.copy(private_key = it)
                         }
                     },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.private_key.encodeToString()) },
+                    trailingIcon = {
+                        CopyIconButton(valueToCopy = formState.value.private_key.encodeToString(), sensitive = true)
+                    },
                 )
                 HorizontalDivider()
                 NodeActionButton(

@@ -19,5 +19,7 @@ package org.meshtastic.core.ui.util
 import androidx.compose.ui.platform.ClipEntry
 import java.awt.datatransfer.StringSelection
 
+// `sensitive` has no AWT equivalent — the desktop clipboard carries no such flag — so it is accepted and ignored.
 @OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
-actual fun createClipEntry(text: String, label: String): ClipEntry = ClipEntry(StringSelection(text))
+actual fun createClipEntry(text: String, label: String, sensitive: Boolean): ClipEntry =
+    ClipEntry(StringSelection(text))

@@ -149,7 +149,10 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
                     }
                     IconButton(
                         onClick = {
-                            coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(uriString)) }
+                            // The channel URL embeds channel PSKs, so mark the clip as sensitive.
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(createClipEntry(uriString, sensitive = true))
+                            }
                         },
                     ) {
                         Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
