@@ -63,7 +63,6 @@ import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.hop_histogram_title
-import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.node_list_help_title
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.nodes_empty_disconnected_hint
@@ -85,6 +84,7 @@ import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.feature.node.component.NodeContextMenu
+import org.meshtastic.feature.node.component.NodeCountSummary
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
@@ -168,7 +168,9 @@ fun NodeListScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.nodes),
-                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, nodes.size, totalNodeCount),
+                // Node counts deliberately live in the list header (NodeCountSummary), not here: the app bar's
+                // title/subtitle slot competes for width with the node chip + action icons and is clipped to a
+                // single line, which truncated the counts (issue #6268).
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
@@ -212,32 +214,43 @@ fun NodeListScreen(
                 stickyHeader {
                     val animatedAlpha by
                         animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
-                    NodeFilterTextField(
+                    Column(
                         modifier =
                         Modifier.fillMaxWidth()
                             .graphicsLayer(alpha = animatedAlpha)
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
-                        filterText = state.filter.filterText,
-                        onTextChange = { viewModel.nodeFilterText = it },
-                        currentSortOption = state.sort,
-                        onSortSelect = viewModel::setSortOption,
-                        includeUnknown = state.filter.includeUnknown,
-                        onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
-                        excludeInfrastructure = state.filter.excludeInfrastructure,
-                        onToggleExcludeInfrastructure = {
-                            viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
-                        },
-                        onlyOnline = state.filter.onlyOnline,
-                        onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },
-                        onlyDirect = state.filter.onlyDirect,
-                        onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
-                        showIgnored = state.filter.showIgnored,
-                        onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
-                        ignoredNodeCount = ignoredNodeCount,
-                        excludeMqtt = state.filter.excludeMqtt,
-                        onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
-                    )
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        NodeCountSummary(
+                            onlineCount = onlineNodeCount,
+                            shownCount = nodes.size,
+                            totalCount = totalNodeCount,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                        )
+                        NodeFilterTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            filterText = state.filter.filterText,
+                            onTextChange = { viewModel.nodeFilterText = it },
+                            currentSortOption = state.sort,
+                            onSortSelect = viewModel::setSortOption,
+                            includeUnknown = state.filter.includeUnknown,
+                            onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
+                            excludeInfrastructure = state.filter.excludeInfrastructure,
+                            onToggleExcludeInfrastructure = {
+                                viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
+                            },
+                            onlyOnline = state.filter.onlyOnline,
+                            onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },
+                            onlyDirect = state.filter.onlyDirect,
+                            onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
+                            showIgnored = state.filter.showIgnored,
+                            onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
+                            ignoredNodeCount = ignoredNodeCount,
+                            excludeMqtt = state.filter.excludeMqtt,
+                            onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
+                        )
+                    }
                 }
 
                 items(nodes, key = { it.num }) { node ->
