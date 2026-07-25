@@ -36,6 +36,7 @@ import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.NodeItemSignedPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
+import org.meshtastic.feature.node.component.PowerMetricsNoCurrentPreview
 import org.meshtastic.feature.node.component.PowerMetricsPartialPreview
 import org.meshtastic.feature.node.component.PowerMetricsPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
@@ -118,6 +119,13 @@ fun ScreenshotPowerMetrics() {
 @Composable
 fun ScreenshotPowerMetricsPartial() {
     PowerMetricsPartialPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPowerMetricsNoCurrent() {
+    PowerMetricsNoCurrentPreview()
 }
 
 @PreviewTest

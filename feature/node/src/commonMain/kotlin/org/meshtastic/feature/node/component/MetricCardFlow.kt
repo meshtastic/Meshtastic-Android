@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -99,26 +100,17 @@ internal fun MetricCardFlow(
 private fun MetricCard(metric: MetricInfo, valueColor: Color?) {
     val cardModifier = Modifier.fillMaxWidth()
     val label = stringResource(metric.label)
+    val resolvedValueColor = valueColor ?: MaterialTheme.colorScheme.onSurface
     when (metric) {
         is VectorMetricInfo ->
-            if (valueColor == null) {
-                InfoCard(
-                    icon = metric.icon,
-                    text = label,
-                    value = metric.value,
-                    rotateIcon = metric.rotateIcon,
-                    modifier = cardModifier,
-                )
-            } else {
-                InfoCard(
-                    icon = metric.icon,
-                    text = label,
-                    value = metric.value,
-                    rotateIcon = metric.rotateIcon,
-                    modifier = cardModifier,
-                    valueColor = valueColor,
-                )
-            }
+            InfoCard(
+                icon = metric.icon,
+                text = label,
+                value = metric.value,
+                rotateIcon = metric.rotateIcon,
+                modifier = cardModifier,
+                valueColor = resolvedValueColor,
+            )
 
         is DrawableMetricInfo ->
             DrawableInfoCard(
@@ -127,6 +119,7 @@ private fun MetricCard(metric: MetricInfo, valueColor: Color?) {
                 value = metric.value,
                 rotateIcon = metric.rotateIcon,
                 modifier = cardModifier,
+                valueColor = resolvedValueColor,
             )
     }
 }

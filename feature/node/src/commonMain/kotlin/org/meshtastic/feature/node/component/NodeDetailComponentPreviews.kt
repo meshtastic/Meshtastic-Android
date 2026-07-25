@@ -194,6 +194,18 @@ fun PowerMetricsPartialPreview() {
     AppTheme { Surface { PowerMetrics(node = node) } }
 }
 
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun PowerMetricsNoCurrentPreview() {
+    // Channels report voltage but no current at all — voltage-only columns, no fabricated 0.0mA cards.
+    val node =
+        previewData.mickeyMouse.copy(
+            powerMetrics = org.meshtastic.proto.PowerMetrics(ch1_voltage = 4.19f, ch2_voltage = 3.72f),
+        )
+    AppTheme { Surface { PowerMetrics(node = node) } }
+}
+
 // ---------------------------------------------------------------------------
 // EnvironmentMetrics / AirQualityInfoCards previews
 // ---------------------------------------------------------------------------

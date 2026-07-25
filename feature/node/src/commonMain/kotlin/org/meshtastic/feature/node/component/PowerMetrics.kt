@@ -29,8 +29,9 @@ import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays power metrics for a node: for every channel reporting a non-zero voltage, its voltage and current are
- * stacked in a single vertical column so the pair stays visually grouped and the columns flow side by side.
+ * Displays power metrics for a node: for every channel reporting a non-zero voltage, its voltage and — when the channel
+ * reports one — its current are stacked in a single vertical column so the pair stays visually grouped and the columns
+ * flow side by side.
  */
 @Composable
 internal fun PowerMetrics(node: Node) {
@@ -44,13 +45,12 @@ internal fun PowerMetrics(node: Node) {
         }
             .filter { (_, voltage, _) -> (voltage ?: 0f) != 0f }
             .map { (label, voltage, current) ->
-                listOf(
+                // A reported current of 0mA is a real reading and is shown; only an absent one is hidden.
+                listOfNotNull(
                     VectorMetricInfo(label, "${NumberFormatter.format(voltage ?: 0f, 2)}V", MeshtasticIcons.Voltage),
-                    VectorMetricInfo(
-                        label,
-                        "${NumberFormatter.format(current ?: 0f, 1)}mA",
-                        MeshtasticIcons.PowerSupply,
-                    ),
+                    current?.let {
+                        VectorMetricInfo(label, "${NumberFormatter.format(it, 1)}mA", MeshtasticIcons.PowerSupply)
+                    },
                 )
             }
 

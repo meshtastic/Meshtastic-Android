@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
@@ -61,7 +62,7 @@ fun InfoCard(
     icon: ImageVector? = null,
     iconRes: DrawableResource? = null,
     rotateIcon: Float = 0f,
-    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -121,6 +122,14 @@ internal fun DrawableInfoCard(
     value: String,
     modifier: Modifier = Modifier,
     rotateIcon: Float = 0f,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon, modifier = modifier)
+    InfoCard(
+        iconRes = iconRes,
+        text = text,
+        value = value,
+        rotateIcon = rotateIcon,
+        modifier = modifier,
+        valueColor = valueColor,
+    )
 }
