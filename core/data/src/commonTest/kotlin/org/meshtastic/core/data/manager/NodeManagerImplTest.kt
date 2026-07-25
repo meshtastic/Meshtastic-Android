@@ -282,7 +282,8 @@ class NodeManagerImplTest {
             ProtoPosition(
                 latitude_i = coarseLatI,
                 longitude_i = coarseLonI,
-                altitude = 135,
+                altitude = 210,
+                sats_in_view = 7,
                 time = 2000,
                 precision_bits = 13,
             ),
@@ -293,7 +294,12 @@ class NodeManagerImplTest {
         assertNotNull(result)
         assertEquals(exactLatI, result.position.latitude_i)
         assertEquals(exactLonI, result.position.longitude_i)
-        // The newer report is still applied for everything else.
+        // The stored precision must be retained as well. If the incoming precision_bits were kept, the *next*
+        // coarse report would compare as equally precise and would be free to overwrite the exact coordinates.
+        assertEquals(0, result.position.precision_bits)
+        // Everything else from the newer report is still applied.
+        assertEquals(210, result.position.altitude)
+        assertEquals(7, result.position.sats_in_view)
         assertEquals(2000, result.position.time)
         assertEquals(2000, result.lastHeard)
     }
@@ -552,6 +558,11 @@ class NodeManagerImplTest {
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(exactLatI, result.position.latitude_i)
         assertEquals(exactLonI, result.position.longitude_i)
+        // Full precision is retained, so a later coarse snapshot cannot displace the exact coordinates either.
+        assertEquals(0, result.position.precision_bits)
+        // The snapshot's newer timestamps are still adopted.
+        assertEquals(2000, result.position.time)
+        assertEquals(2000, result.lastHeard)
     }
 
     @Test
