@@ -33,11 +33,19 @@ import androidx.core.content.LocusIdCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
@@ -60,6 +68,7 @@ import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
@@ -114,6 +123,7 @@ class MeshNotificationManagerImpl(
     private val nodeRepository: Lazy<NodeRepository>,
     private val conversationShortcutPublisher: Lazy<ConversationShortcutPublisher>,
     private val radioConfigRepository: Lazy<RadioConfigRepository>,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshNotificationManager {
 
     private val notificationManager =
@@ -146,6 +156,16 @@ class MeshNotificationManagerImpl(
         private const val TAG_LOW_BATTERY = "low_battery"
         private const val TAG_CLIENT = "client"
     }
+
+    private data class ServiceNotificationSnapshot(
+        val state: ConnectionState,
+        val localStats: LocalStats?,
+        val deviceMetrics: DeviceMetrics?,
+        val previousMessage: String?,
+        val nextUpdateAt: Long,
+    )
+
+    private data class RenderedServiceNotification(val notification: Notification, val message: String)
 
     /**
      * Caches generated avatar icons keyed by (person id + short name + colors) so a conversation rebuild does not
@@ -318,93 +338,131 @@ class MeshNotificationManagerImpl(
         notificationManager.createNotificationChannel(channel)
     }
 
+    private val serviceNotificationLock = Any()
+    private val applicationLabel: String by lazy {
+        context.applicationInfo.loadLabel(context.packageManager).toString().ifBlank { context.packageName }
+    }
     private var cachedDeviceMetrics: DeviceMetrics? = null
     private var cachedLocalStats: LocalStats? = null
     private var nextStatsUpdateMillis: Long = 0
     private var cachedMessage: String? = null
     private var cachedServiceNotification: Notification? = null
+    private val serviceNotificationSnapshots =
+        MutableSharedFlow<ServiceNotificationSnapshot>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    init {
+        scope.launch { serviceNotificationSnapshots.collectLatest(::renderAndPostServiceNotification) }
+    }
 
     /**
-     * Returns the last-built service state notification, or builds a default one if none exists. This is used by
-     * [MeshService] for [android.app.Service.startForeground].
+     * Returns the last-built service state notification, or an immediately available application-label fallback. This
+     * method is used by [MeshService] for [android.app.Service.startForeground], so it must not wait for Compose
+     * Multiplatform resource loading.
      */
-    fun getServiceNotification(): Notification = cachedServiceNotification
-        ?: createServiceStateNotification(
-            name = getString(Res.string.meshtastic_app_name),
-            message = null,
-            nextUpdateAt = 0,
-        )
+    fun getServiceNotification(): Notification {
+        val cached = synchronized(serviceNotificationLock) { cachedServiceNotification }
+        return cached ?: createServiceStateNotification(name = applicationLabel, message = null, nextUpdateAt = 0)
+    }
 
     // region Public Notification Methods
-    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
-        val summaryString =
-            when (state) {
-                is ConnectionState.Connected ->
-                    getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
+        synchronized(serviceNotificationLock) {
+            serviceNotificationSnapshots.tryEmit(captureServiceNotificationSnapshot(state, telemetry))
+        }
+    }
 
-                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
-
-                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-
-                is ConnectionState.Connecting -> getString(Res.string.connecting)
+    /**
+     * Renders service notifications in one ordered collector. [collectLatest] cancels obsolete resource work and does
+     * not start the next renderer until the previous block has completed, so Binder notification posts cannot overtake
+     * one another and leave stale text visible.
+     */
+    private suspend fun renderAndPostServiceNotification(snapshot: ServiceNotificationSnapshot) {
+        safeCatching {
+            val rendered = renderServiceNotification(snapshot)
+            postServiceNotification(rendered.notification, rendered.message)
+        }
+            .onFailure { ex ->
+                Logger.e(ex) { "Failed to render service notification resources" }
+                val fallback =
+                    createServiceStateNotification(
+                        name = applicationLabel,
+                        message = snapshot.previousMessage,
+                        nextUpdateAt = snapshot.nextUpdateAt,
+                    )
+                safeCatching { postServiceNotification(fallback, snapshot.previousMessage) }
+                    .onFailure { Logger.e(it) { "Failed to post fallback service notification" } }
             }
+    }
 
-        // Update caches if telemetry is provided
-        telemetry?.let { t ->
-            t.local_stats?.let { stats ->
+    /** Updates the foreground fallback cache before posting the same notification through Android's Binder API. */
+    private fun postServiceNotification(notification: Notification, message: String?) {
+        synchronized(serviceNotificationLock) {
+            cachedMessage = message
+            cachedServiceNotification = notification
+        }
+        notificationManager.notify(SERVICE_NOTIFY_ID, notification)
+    }
+
+    private fun captureServiceNotificationSnapshot(
+        state: ConnectionState,
+        telemetry: Telemetry?,
+    ): ServiceNotificationSnapshot {
+        telemetry?.let { currentTelemetry ->
+            currentTelemetry.local_stats?.let { stats ->
                 cachedLocalStats = stats
                 nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
             }
-            t.device_metrics?.let { metrics -> cachedDeviceMetrics = metrics }
+            currentTelemetry.device_metrics?.let { metrics -> cachedDeviceMetrics = metrics }
         }
 
-        // Seeding from database if caches are still null (e.g. on restart or reconnection)
+        // Seed from database if the in-memory telemetry cache is empty after a process or transport restart.
         if (cachedLocalStats == null || cachedDeviceMetrics == null) {
             val repo = nodeRepository.value
             val myNodeNum = repo.myNodeInfo.value?.myNodeNum
-            if (myNodeNum != null) {
-                // Use .value instead of runBlocking { .first() } to avoid potential deadlock
-                // if called on the same dispatcher the Flow's upstream coroutine needs.
-                val nodes = repo.nodeDBbyNum.value
-                nodes[myNodeNum]?.let { node ->
-                    if (cachedDeviceMetrics == null) {
-                        cachedDeviceMetrics = node.deviceMetrics
-                    }
-                    if (cachedLocalStats == null) {
-                        // Fallback to DB stats if repository hasn't received any fresh ones yet
-                        cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
-                    }
-                }
+            if (cachedDeviceMetrics == null && myNodeNum != null) {
+                cachedDeviceMetrics = repo.nodeDBbyNum.value[myNodeNum]?.deviceMetrics
+            }
+            if (cachedLocalStats == null) {
+                cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
             }
         }
 
-        val stats = cachedLocalStats
-        val metrics = cachedDeviceMetrics
+        return ServiceNotificationSnapshot(
+            state = state,
+            localStats = cachedLocalStats,
+            deviceMetrics = cachedDeviceMetrics,
+            previousMessage = cachedMessage,
+            nextUpdateAt = nextStatsUpdateMillis,
+        )
+    }
 
-        val message =
+    private suspend fun renderServiceNotification(snapshot: ServiceNotificationSnapshot): RenderedServiceNotification {
+        val title =
+            when (snapshot.state) {
+                is ConnectionState.Connected ->
+                    getStringSuspend(Res.string.meshtastic_app_name) + ": " + getStringSuspend(Res.string.connected)
+
+                is ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
+
+                is ConnectionState.DeviceSleep -> getStringSuspend(Res.string.device_sleeping)
+
+                is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
+            }
+
+        val freshMessage =
             when {
-                stats != null -> stats.formatToString(metrics?.battery_level)
-                metrics != null -> metrics.formatToString()
+                snapshot.localStats != null ->
+                    snapshot.localStats.formatToStringSuspend(snapshot.deviceMetrics?.battery_level)
+
+                snapshot.deviceMetrics != null -> snapshot.deviceMetrics.formatToStringSuspend()
+
                 else -> null
             }
-
-        // Only update cachedMessage if we have something new, otherwise keep what we have.
-        // Fallback to "No Stats Available" only if we truly have nothing.
-        if (message != null) {
-            cachedMessage = message
-        } else if (cachedMessage == null) {
-            cachedMessage = getString(Res.string.no_local_stats)
-        }
-
-        val notification =
-            createServiceStateNotification(
-                name = summaryString.orEmpty(),
-                message = cachedMessage,
-                nextUpdateAt = nextStatsUpdateMillis,
-            )
-        cachedServiceNotification = notification
-        notificationManager.notify(SERVICE_NOTIFY_ID, notification)
+        val message = freshMessage ?: snapshot.previousMessage ?: getStringSuspend(Res.string.no_local_stats)
+        return RenderedServiceNotification(
+            notification = createServiceStateNotification(title, message, snapshot.nextUpdateAt),
+            message = message,
+        )
     }
 
     override suspend fun updateMessageNotification(
@@ -994,20 +1052,20 @@ class MeshNotificationManagerImpl(
 
     // region Extension Functions (Localized)
 
-    private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
+    private suspend fun LocalStats.formatToStringSuspend(batteryLevel: Int? = null): String {
         val parts = mutableListOf<String>()
         batteryLevel?.let {
             if (it > MAX_BATTERY_LEVEL) {
-                parts.add(BULLET + getString(Res.string.powered))
+                parts.add(BULLET + getStringSuspend(Res.string.powered))
             } else {
-                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
+                parts.add(BULLET + getStringSuspend(Res.string.local_stats_battery, it))
             }
         }
-        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
-        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        parts.add(BULLET + getStringSuspend(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
         parts.add(
             BULLET +
-                getString(
+                getStringSuspend(
                     Res.string.local_stats_utilization,
                     NumberFormatter.format(channel_utilization.toDouble(), 2),
                     NumberFormatter.format(air_util_tx.toDouble(), 2),
@@ -1017,45 +1075,48 @@ class MeshNotificationManagerImpl(
         if (heap_free_bytes > 0 || heap_total_bytes > 0) {
             parts.add(
                 BULLET +
-                    getString(Res.string.local_stats_heap) +
+                    getStringSuspend(Res.string.local_stats_heap) +
                     ": " +
-                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
+                    getStringSuspend(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
             )
         }
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
+            parts.add(
+                BULLET + getStringSuspend(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe),
+            )
         }
         if (num_tx_relay > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
+            parts.add(BULLET + getStringSuspend(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
         }
 
         // Diagnostic Fields
         val diagnosticParts = mutableListOf<String>()
-        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
+        if (noise_floor != 0) diagnosticParts.add(getStringSuspend(Res.string.local_stats_noise, noise_floor))
         if (num_packets_rx_bad > 0) {
-            diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
+            diagnosticParts.add(getStringSuspend(Res.string.local_stats_bad, num_packets_rx_bad))
         }
-        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
+        if (num_tx_dropped > 0) diagnosticParts.add(getStringSuspend(Res.string.local_stats_dropped, num_tx_dropped))
 
         if (diagnosticParts.isNotEmpty()) {
             parts.add(
-                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
+                BULLET +
+                    getStringSuspend(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
             )
         }
 
         return parts.joinToString("\n")
     }
 
-    private fun DeviceMetrics.formatToString(): String {
+    private suspend fun DeviceMetrics.formatToStringSuspend(): String {
         val parts = mutableListOf<String>()
-        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
-        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
+        battery_level?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_battery, it)) }
+        uptime_seconds?.let { parts.add(BULLET + getStringSuspend(Res.string.local_stats_uptime, formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
                 BULLET +
-                    getString(
+                    getStringSuspend(
                         Res.string.local_stats_utilization,
                         NumberFormatter.format((channel_utilization ?: 0f).toDouble(), 2),
                         NumberFormatter.format((air_util_tx ?: 0f).toDouble(), 2),
