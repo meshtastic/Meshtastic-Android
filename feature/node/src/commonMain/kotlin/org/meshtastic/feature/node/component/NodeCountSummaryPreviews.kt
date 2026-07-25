@@ -35,7 +35,7 @@ private val ENGLISH_LABELS = listOf("76 online", "398 shown", "1247 total")
  * Deliberately verbose stand-ins for the longest Crowdin locales (German/Hungarian style compounds run roughly twice
  * the English width). Hard-coded rather than locale-switched so the preview does not depend on a translated bundle.
  */
-private val LONG_LOCALE_LABELS = listOf("76 verbunden", "398 angezeigt", "1247 insgesamt insgesamt")
+private val LONG_LOCALE_LABELS = listOf("76 Knoten verbunden", "398 Knoten angezeigt", "1247 Knoten insgesamt")
 
 private const val ENGLISH_DESCRIPTION = "(76 online / 398 shown / 1247 total)"
 
@@ -67,7 +67,7 @@ fun NodeCountSummaryNarrowPreview() {
 }
 
 /** Long/translated text: verbose locale on a narrow phone. */
-@Preview(name = "NodeCountSummary - long locale", widthDp = 360)
+@Preview(name = "NodeCountSummary - long locale", widthDp = 320)
 @Composable
 fun NodeCountSummaryLongLocalePreview() {
     PreviewBody(LONG_LOCALE_LABELS, ENGLISH_DESCRIPTION)
@@ -81,7 +81,7 @@ fun NodeCountSummaryLargeFontPreview() {
 }
 
 /** Worst case: verbose locale AND largest font scale on a narrow phone. */
-@Preview(name = "NodeCountSummary - long locale font scale 2x", widthDp = 360, fontScale = 2.0f)
+@Preview(name = "NodeCountSummary - long locale font scale 2x", widthDp = 320, fontScale = 2.0f)
 @Composable
 fun NodeCountSummaryLongLocaleLargeFontPreview() {
     PreviewBody(LONG_LOCALE_LABELS, ENGLISH_DESCRIPTION)
