@@ -52,8 +52,17 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for Status Message module. Supported since firmware v2.8.0. */
     val supportsStatusMessage = atLeast(V2_8_0)
 
-    /** Support for TAK (ATAK) module configuration. Supported since firmware v2.7.19. */
-    val supportsTakConfig = atLeast(V2_7_19)
+    /**
+     * Support for TAK (ATAK) module configuration. Gated to firmware v2.8.0.
+     *
+     * The v2.7.19 gate this replaces was set on protobuf availability rather than firmware support: v2.7.x
+     * `AdminModule::handleSetModuleConfig()` has no case for the `tak` submessage, so the node ACKs the write and
+     * reboots without storing anything, and `NodeDB::saveToDisk()` never sets `has_tak`. The editor therefore appeared
+     * to save and always read back as unspecified (Meshtastic-Android#6430).
+     *
+     * The firmware write, persist and remote-admin read paths land in meshtastic/firmware#11216, labelled for 2.8.
+     */
+    val supportsTakConfig = atLeast(V2_8_0)
 
     /**
      * Support for the v2 TAK port (ATAK_PLUGIN_V2 = 78) with TAKPacketV2 + zstd dictionary compression. Supported since
@@ -94,7 +103,6 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_6_10 = DeviceVersion("2.6.10")
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
-        private val V2_7_19 = DeviceVersion("2.7.19")
         private val V2_8_0 = DeviceVersion("2.8.0")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }
