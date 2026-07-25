@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.navigation
 
+import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.SettingsRoute
 import kotlin.test.Test
@@ -52,8 +53,41 @@ class SettingsNavigationTest {
     }
 
     @Test
+    fun `settings session uses stable local and remote keys`() {
+        val localSession = settingsRadioConfigSession(listOf(SettingsRoute.Settings()))
+        val remoteSession = settingsRadioConfigSession(listOf(SettingsRoute.Settings(destNum = 1234)))
+
+        assertNull(localSession.destination)
+        assertEquals("settings-local", localSession.viewModelKey)
+        assertNull(localSession.entryKey)
+        assertEquals(1234, remoteSession.destination)
+        assertEquals("settings-remote-1234", remoteSession.viewModelKey)
+        assertEquals("1234", remoteSession.entryKey)
+    }
+
+    @Test
+    fun `clearing a settings session store clears its view models`() {
+        val owner = SettingsRadioConfigViewModelStoreOwner()
+        val viewModel = TrackingViewModel()
+        owner.viewModelStore.put("remote", viewModel)
+
+        owner.clear()
+
+        assertTrue(viewModel.wasCleared)
+    }
+
+    @Test
     fun `duplicate current route is not pushed again`() {
         assertFalse(shouldAddSettingsRoute(SettingsRoute.DeviceConfiguration, SettingsRoute.DeviceConfiguration))
         assertTrue(shouldAddSettingsRoute(SettingsRoute.DeviceConfiguration, SettingsRoute.ModuleConfiguration))
+    }
+
+    private class TrackingViewModel : ViewModel() {
+        var wasCleared = false
+            private set
+
+        override fun onCleared() {
+            wasCleared = true
+        }
     }
 }

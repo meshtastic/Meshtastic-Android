@@ -22,7 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import org.meshtastic.core.navigation.MultiBackstack
@@ -31,6 +30,7 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
+import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelStoreOwner
 import org.meshtastic.feature.settings.navigation.settingsRadioConfigViewModel
 
 /**
@@ -41,7 +41,7 @@ import org.meshtastic.feature.settings.navigation.settingsRadioConfigViewModel
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
     val backStack = multiBackstack.activeBackStack
-    val appViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
+    val settingsViewModelStoreOwner = rememberSettingsRadioConfigViewModelStoreOwner(backStack)
 
     Surface(modifier = Modifier.fillMaxSize()) {
         MeshtasticAppShell(
@@ -61,7 +61,7 @@ fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) 
                             uiViewModel = uiViewModel,
                             multiBackstack = multiBackstack,
                             settingsRadioConfigViewModel = {
-                                settingsRadioConfigViewModel(backStack, appViewModelStoreOwner)
+                                settingsRadioConfigViewModel(backStack, settingsViewModelStoreOwner)
                             },
                         )
                     }
