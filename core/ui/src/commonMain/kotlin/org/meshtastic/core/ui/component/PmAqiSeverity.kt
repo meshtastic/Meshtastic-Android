@@ -16,10 +16,11 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.aqi_good
@@ -49,13 +50,31 @@ enum class PmAqiSeverity(
     UNHEALTHY_SENSITIVE(AqiSeverityColors.UnhealthySensitive, Res.string.aqi_unhealthy_sensitive, 101..150),
     UNHEALTHY(AqiSeverityColors.Unhealthy, Res.string.aqi_unhealthy, 151..200),
     VERY_UNHEALTHY(AqiSeverityColors.VeryUnhealthy, Res.string.aqi_very_unhealthy, 201..300),
+
+    /**
+     * EPA ends the scale at 500; the range saturates instead of stopping there so an out-of-scale value still reads as
+     * the worst category rather than losing its label. `aqiFromPm25` already clamps to 500, so this is defensive only.
+     */
     HAZARDOUS(AqiSeverityColors.Hazardous, Res.string.aqi_hazardous, 301..Int.MAX_VALUE),
     ;
 
-    /** The category color for the active theme, legible as body text on `surface` and `surfaceVariant` in both. */
-    @Composable fun color(): Color = if (isSystemInDarkTheme()) tones.dark else tones.light
+    /** The category color for [darkTheme], legible as body text on `surface` and `surfaceVariant` in both. */
+    fun colorFor(darkTheme: Boolean): Color = if (darkTheme) tones.dark else tones.light
+
+    /**
+     * The category color for the *applied* theme. Resolved from the surface actually in use rather than
+     * `isSystemInDarkTheme()`, so a user who forces light while the system is dark (or vice versa — `AppTheme` takes an
+     * explicit `darkTheme`) still gets the tone that was contrast-checked against the surface they are looking at.
+     */
+    @Composable fun color(): Color = colorFor(MaterialTheme.colorScheme.surface.luminance() < DARK_SURFACE_LUMINANCE)
 
     companion object {
+        /**
+         * Midpoint luminance separating a light surface from a dark one. Well clear of both static schemes and of any
+         * plausible dynamic-color surface, which stay near the extremes.
+         */
+        private const val DARK_SURFACE_LUMINANCE = 0.5f
+
         /** Returns the [PmAqiSeverity] for the given 0-500 EPA [aqi] value, or null if negative. */
         fun fromAqi(aqi: Int): PmAqiSeverity? = when {
             aqi < 0 -> null

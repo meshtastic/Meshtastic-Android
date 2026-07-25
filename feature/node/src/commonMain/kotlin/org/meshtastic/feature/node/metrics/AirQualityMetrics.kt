@@ -62,6 +62,7 @@ import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_metrics_log
 import org.meshtastic.core.resources.aqi
+import org.meshtastic.core.resources.aqi_value_with_severity
 import org.meshtastic.core.resources.co2
 import org.meshtastic.core.resources.co2_humidity
 import org.meshtastic.core.resources.co2_temperature
@@ -168,10 +169,11 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
     val samples = remember(data) { withNowCastAqi(data) }
     val newestFirstSamples = remember(samples) { samples.asReversed() }
 
-    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveAirQualityMetricsCSV(uri, newestFirstSamples) }
+    // Export the chronological samples, not the newest-first list the LazyColumn renders: every sibling metrics screen
+    // writes CSV rows oldest-first.
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveAirQualityMetricsCSV(uri, samples) }
 
-    val availableMetrics =
-        remember(samples) { AirQuality.entries.filter { metric -> samples.any { metric.getValue(it) != null } } }
+    val availableMetrics = remember(samples) { metricsWithData(AirQuality.entries, samples) }
     var selectedMetrics by rememberSaveable { mutableStateOf(setOf(AirQuality.PM2_5, AirQuality.CO2)) }
 
     BaseMetricScreen(
@@ -345,9 +347,11 @@ private fun AirQualityChart(
 @Composable
 private fun AqiText(aqi: Int) {
     val severity = PmAqiSeverity.fromAqi(aqi)
-    val category = severity?.let { " (${stringResource(it.labelRes)})" } ?: ""
+    val value =
+        severity?.let { stringResource(Res.string.aqi_value_with_severity, aqi, stringResource(it.labelRes)) }
+            ?: aqi.toString()
     Text(
-        text = "${stringResource(Res.string.aqi)}: $aqi$category",
+        text = "${stringResource(Res.string.aqi)}: $value",
         style = MaterialTheme.typography.bodySmall,
         fontWeight = FontWeight.Medium,
         color = severity?.color() ?: MaterialTheme.colorScheme.onSurface,

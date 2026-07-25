@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.meshtastic.core.ui.component.PmAqiSeverity
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -57,6 +58,26 @@ class AqiSeverityColorsTest {
     fun everyCategoryHasItsOwnTonePair() {
         val tones = PmAqiSeverity.entries.map { it.tones }
         assertTrue(tones.distinct().size == tones.size, "two AQI categories share a tone pair: $tones")
+    }
+
+    @Test
+    fun forcedThemeSelectsThatThemesTone() {
+        // color() resolves darkTheme from the applied surface rather than the system setting, so a user forcing light
+        // while the OS is dark must still get the light tone that was contrast-checked above.
+        PmAqiSeverity.entries.forEach { severity ->
+            assertTrue(severity.colorFor(darkTheme = false) == severity.tones.light, "${severity.name} forced light")
+            assertTrue(severity.colorFor(darkTheme = true) == severity.tones.dark, "${severity.name} forced dark")
+        }
+    }
+
+    @Test
+    fun staticSurfacesFallOnTheExpectedSideOfTheDarkThresholdColorUses() {
+        // color() classifies via MaterialTheme.colorScheme.surface.luminance() < 0.5f; both schemes must land clearly.
+        assertTrue(
+            surfaceLight.luminance() >= 0.5f,
+            "surfaceLight would be classified dark: ${surfaceLight.luminance()}",
+        )
+        assertTrue(surfaceDark.luminance() < 0.5f, "surfaceDark would be classified light: ${surfaceDark.luminance()}")
     }
 
     private fun assertAaText(color: Color, background: Color, severity: PmAqiSeverity, backgroundName: String) {

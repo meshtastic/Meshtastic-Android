@@ -29,6 +29,7 @@ import org.meshtastic.core.model.util.AirQualityIndex
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.aqi
+import org.meshtastic.core.resources.aqi_value_with_severity
 import org.meshtastic.core.resources.co2
 import org.meshtastic.core.resources.co2_humidity
 import org.meshtastic.core.resources.co2_temperature
@@ -129,7 +130,10 @@ internal fun AirQualityInfoCards(
 
     val aqi = nowCastAqi(pm25History)
     // The category name always accompanies the value, so the AQI card never relies on color alone.
-    val aqiText = aqi?.let { (value, severity) -> "$value (${stringResource(severity.labelRes)})" }
+    val aqiText =
+        aqi?.let { (value, severity) ->
+            stringResource(Res.string.aqi_value_with_severity, value, stringResource(severity.labelRes))
+        }
     val icon = MeshtasticIcons.AirQuality
     val tempIcon = MeshtasticIcons.Temperature
     val humidityIcon = MeshtasticIcons.Humidity
