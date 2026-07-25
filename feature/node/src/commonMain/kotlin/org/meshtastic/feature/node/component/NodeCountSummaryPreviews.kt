@@ -29,13 +29,13 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 
 /** English labels matching the counts from issue #6268 (76 online / 398 shown / 1247 total). */
-private val EnglishLabels = listOf("76 online", "398 shown", "1247 total")
+private val ENGLISH_LABELS = listOf("76 online", "398 shown", "1247 total")
 
 /**
  * Deliberately verbose stand-ins for the longest Crowdin locales (German/Hungarian style compounds run roughly twice
  * the English width). Hard-coded rather than locale-switched so the preview does not depend on a translated bundle.
  */
-private val LongLocaleLabels = listOf("76 verbunden", "398 angezeigt", "1247 insgesamt insgesamt")
+private val LONG_LOCALE_LABELS = listOf("76 verbunden", "398 angezeigt", "1247 insgesamt insgesamt")
 
 private const val ENGLISH_DESCRIPTION = "(76 online / 398 shown / 1247 total)"
 
@@ -56,40 +56,40 @@ private fun PreviewBody(labels: List<String>, description: String) {
 @Preview(name = "NodeCountSummary - default", widthDp = 360)
 @Composable
 fun NodeCountSummaryDefaultPreview() {
-    PreviewBody(EnglishLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(ENGLISH_LABELS, ENGLISH_DESCRIPTION)
 }
 
 /** Narrowest realistic phone width — labels must reflow, never ellipsize. */
 @Preview(name = "NodeCountSummary - narrow 320dp", widthDp = 320)
 @Composable
 fun NodeCountSummaryNarrowPreview() {
-    PreviewBody(EnglishLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(ENGLISH_LABELS, ENGLISH_DESCRIPTION)
 }
 
 /** Long/translated text: verbose locale on a narrow phone. */
 @Preview(name = "NodeCountSummary - long locale", widthDp = 360)
 @Composable
 fun NodeCountSummaryLongLocalePreview() {
-    PreviewBody(LongLocaleLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(LONG_LOCALE_LABELS, ENGLISH_DESCRIPTION)
 }
 
 /** Accessibility text size: largest Android font scale. */
 @Preview(name = "NodeCountSummary - font scale 2x", widthDp = 360, fontScale = 2.0f)
 @Composable
 fun NodeCountSummaryLargeFontPreview() {
-    PreviewBody(EnglishLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(ENGLISH_LABELS, ENGLISH_DESCRIPTION)
 }
 
 /** Worst case: verbose locale AND largest font scale on a narrow phone. */
 @Preview(name = "NodeCountSummary - long locale font scale 2x", widthDp = 360, fontScale = 2.0f)
 @Composable
 fun NodeCountSummaryLongLocaleLargeFontPreview() {
-    PreviewBody(LongLocaleLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(LONG_LOCALE_LABELS, ENGLISH_DESCRIPTION)
 }
 
 /** Wide/tablet layout — the labels stay on one line and the block does not stretch awkwardly. */
 @Preview(name = "NodeCountSummary - wide 840dp", widthDp = 840)
 @Composable
 fun NodeCountSummaryWidePreview() {
-    PreviewBody(EnglishLabels, ENGLISH_DESCRIPTION)
+    PreviewBody(ENGLISH_LABELS, ENGLISH_DESCRIPTION)
 }
