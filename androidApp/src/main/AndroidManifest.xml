@@ -316,11 +316,18 @@
                 android:resource="@xml/widget_local_stats_info" />
         </receiver>
 
-        <!-- allow for plugin discovery -->
+        <!--
+            Allow for ATAK plugin discovery. ATAK enumerates this action via queryIntentActivities and never starts it,
+            but the filter must stay exported for discovery to work. It points at a real no-op activity: the name used
+            to be com.atakmap.app.component, a class not present in this APK, so anything that did launch it crashed
+            the app on instantiation.
+        -->
         <activity
-            android:name="com.atakmap.app.component"
+            android:name=".AtakPluginDiscoveryActivity"
+            android:excludeFromRecents="true"
             android:exported="true"
-            tools:ignore="MissingClass">
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter android:label="@string/app_name">
                 <action android:name="com.atakmap.app.component" />
             </intent-filter>
