@@ -83,6 +83,64 @@ class NodeManagerImplTest {
         nodeManager.notificationTitleFormatter = { shortName -> "New node seen: $shortName" }
     }
 
+    // ---------- In-memory index bounding ----------
+
+    /** Drives [NodeManagerImpl.updateNode], the growth path for the in-memory index, with distinct node numbers. */
+    private fun floodDistinctNodes(count: Int, startAt: Int = 100_000) {
+        repeat(count) { i -> nodeManager.updateNode(startAt + i) { node -> node.copy(lastHeard = i) } }
+    }
+
+    @Test
+    fun `a flood of novel node numbers cannot grow the in-memory index without bound`() {
+        // packet.from is unauthenticated, so every novel value would otherwise allocate a permanent Node. The index is
+        // read only inside core:data for correlation, and every consumer tolerates a miss, so eviction is safe here.
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "index grew to ${nodeManager.nodeDBbyNodeNum.size}, over the ${NodeManagerImpl.MAX_IN_MEMORY_NODES} cap",
+        )
+    }
+
+    @Test
+    fun `eviction never drops the local node`() {
+        val myNum = 4242
+        nodeManager.setMyNodeNum(myNum)
+        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(hw_model = HardwareModel.TBEAM)) }
+
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[myNum], "the local node must never be evicted")
+    }
+
+    @Test
+    fun `eviction never drops user-marked nodes`() {
+        val favourite = 5150
+        val ignored = 5151
+        nodeManager.updateNode(favourite) { it.copy(isFavorite = true) }
+        nodeManager.updateNode(ignored) { it.copy(isIgnored = true) }
+
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[favourite], "a favourite must never be evicted")
+        assertNotNull(nodeManager.nodeDBbyNodeNum[ignored], "an ignored node must never be evicted")
+    }
+
+    @Test
+    fun `eviction prefers placeholders over nodes with a real identity`() {
+        val identified = 7777
+        nodeManager.updateNode(identified) {
+            it.copy(user = it.user.copy(long_name = "Real Node", hw_model = HardwareModel.TLORA_V2))
+        }
+
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+
+        assertNotNull(
+            nodeManager.nodeDBbyNodeNum[identified],
+            "a node with a real NodeInfo identity should outlive bare-packet placeholders",
+        )
+    }
+
     @Test
     fun `getOrCreateNode creates default user for unknown node`() {
         val nodeNum = 1234

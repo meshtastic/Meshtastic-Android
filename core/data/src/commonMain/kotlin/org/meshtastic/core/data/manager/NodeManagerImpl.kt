@@ -148,6 +148,34 @@ class NodeManagerImpl(
         }
 
         /**
+         * Shrinks the index to at most [maxNodes] entries, never removing anything in [keep].
+         *
+         * `packet.from` is untrusted and unthrottled, so without this every novel value allocates a permanent [Node]
+         * and the index grows until the process dies. Only `core:data` reads this index — for correlation,
+         * notifications, channel lookup and staging DB writes — and every one of those readers already tolerates a
+         * miss, so dropping a cold entry degrades correlation rather than losing user-visible data. The node list and
+         * map read Room, not this index, so eviction is not visible in the UI.
+         *
+         * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo,
+         * and within each group the least recently heard. Nodes the user has marked (favourite, ignored) are never
+         * evicted, since that is user data rather than observed mesh state.
+         */
+        fun evictedToFit(maxNodes: Int, keep: Set<Int>): NodeIndex {
+            if (byNum.size <= maxNodes) return this
+            val evictable =
+                byNum.values
+                    .filterNot { it.num in keep || it.isFavorite || it.isIgnored }
+                    // Placeholders first, then oldest-heard, then node num so the outcome is deterministic.
+                    .sortedWith(
+                        compareByDescending<Node> { isDefaultIdentityPlaceholder(it) }
+                            .thenBy { it.lastHeard }
+                            .thenBy { it.num },
+                    )
+            val toDrop = evictable.take(byNum.size - maxNodes)
+            return toDrop.fold(this) { index, node -> index.remove(node.num) }
+        }
+
+        /**
          * Removes [num] from both indices. When the removed node's user ID was the [byId] representative and another
          * surviving node shares that ID, [preferredNum] wins when present; otherwise deterministic ordering selects the
          * replacement.
@@ -362,6 +390,14 @@ class NodeManagerImpl(
                 coarsenCoordinate(storedLatI, incomingBits) == (incoming.latitude_i ?: 0) &&
                 coarsenCoordinate(storedLonI, incomingBits) == (incoming.longitude_i ?: 0)
         }
+
+        /**
+         * Ceiling on entries in the in-memory node index. See [NodeIndex.evictedToFit].
+         *
+         * An order of magnitude above the largest NodeDB firmware exposes (`MAX_NUM_NODES` is 100–250 by target), so a
+         * legitimately busy mesh never reaches it and only sustained novel-`from` traffic does.
+         */
+        const val MAX_IN_MEMORY_NODES = 2_000
     }
 
     override fun loadCachedNodeDB() {
@@ -517,7 +553,11 @@ class NodeManagerImpl(
             val current = state.index.byNum[nodeNum] ?: createDefaultNode(nodeNum, channel)
             val next = transform(current)
             change = NodeStateChange(previous = current, next = next)
-            state.copy(index = state.index.put(nodeNum, next), revision = state.revision + 1)
+            val grown = state.index.put(nodeNum, next)
+            state.copy(
+                index = grown.evictedToFit(MAX_IN_MEMORY_NODES, keep = setOfNotNull(nodeNum, state.localNodeNum)),
+                revision = state.revision + 1,
+            )
         }
         return change
     }
