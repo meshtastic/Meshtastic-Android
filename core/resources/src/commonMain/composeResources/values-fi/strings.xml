@@ -115,6 +115,12 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Hyvä</string>
+    <string name="aqi_hazardous">Vaarallinen</string>
+    <string name="aqi_moderate">Kohtalainen</string>
+    <string name="aqi_unhealthy">Epäterveellinen</string>
+    <string name="aqi_unhealthy_sensitive">Epäterveellinen herkille ryhmille</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Erittäin epäterveellinen</string>
     <string name="are_you_sure">Oletko varma?</string>
     <string name="are_you_sure_change_default">Oletko varma, että haluat vaihtaa oletuskanavan?</string>
     <string name="audio">Ääni</string>
@@ -1141,7 +1147,10 @@
     <string name="no_usb_devices_hint">Yhdistä laite USB-datakaapelilla sarjaportin käyttöä varten.</string>
     <string name="no_usb_devices_seen">USB-laitteita ei löytynyt</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d verkossa</string>
+    <string name="node_count_shown">%1$d nähty</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>
+    <string name="node_count_total">%1$d yhteensä</string>
     <string name="node_filter_exclude_infrastructure">Ohita infrastruktuurilaitteet</string>
     <string name="node_filter_exclude_mqtt">Rajaa MQTT pois</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
