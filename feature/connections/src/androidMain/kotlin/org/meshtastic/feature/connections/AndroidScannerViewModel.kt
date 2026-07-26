@@ -127,7 +127,7 @@ class AndroidScannerViewModel(
                     Logger.i { "User approved USB access" }
                     changeDeviceAddress(entry.fullAddress)
                 } else {
-                    Logger.e { "USB permission denied for device ${entry.address}" }
+                    Logger.e { "USB permission denied for device ${entry.address.anonymize()}" }
                     serviceRepository.setErrorMessage(
                         text = getString(Res.string.usb_permission_denied),
                         severity = Severity.Warn,

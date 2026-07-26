@@ -47,6 +47,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
 import org.meshtastic.core.ble.MeshtasticBleDevice
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.receiveWithin
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
@@ -101,7 +102,7 @@ class SecureDfuTransport(
         // Nordic Android DFU library does (BluetoothAdapter.getRemoteDevice(address).connectGatt). Scanning here is
         // unreliable because the device may not have resumed advertising in the brief window after we released the
         // mesh-service GATT.
-        Logger.i { "DFU: Connecting to $address to trigger buttonless DFU..." }
+        Logger.i { "DFU: Connecting to ${address.anonymize()} to trigger buttonless DFU..." }
         bleConnection.connectAndAwait(MeshtasticBleDevice(address), CONNECT_TIMEOUT)
 
         // Try the Nordic Secure DFU service (FE59) first — used when the firmware is built with BLE_DFU_SECURE.
@@ -230,23 +231,25 @@ class SecureDfuTransport(
     override suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
         val dfuAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, dfuAddress)
-        Logger.i { "DFU: Scanning for DFU mode device at $targetAddresses..." }
+        Logger.i { "DFU: Scanning for DFU mode device at ${targetAddresses.map { it.anonymize() }}..." }
 
         val device =
             scanForDevice { d -> d.address in targetAddresses }
                 ?: throw DfuException.ConnectionFailed(
-                    "DFU mode device not found (tried $targetAddresses). If the device never rebooted into DFU mode, " +
+                    "DFU mode device not found (tried ${targetAddresses.map {
+                        it.anonymize()
+                    }}). If the device never rebooted into DFU mode, " +
                         "a stale BLE bond may be blocking the trigger (Meshtastic BLEDfu requires " +
                         "SECMODE_ENC_WITH_MITM) — Forget+Re-pair the device in Android Bluetooth settings and retry.",
                 )
 
-        Logger.i { "DFU: Found DFU mode device at ${device.address}, connecting..." }
+        Logger.i { "DFU: Found DFU mode device at ${device.address.anonymize()}, connecting..." }
 
         bleConnection.connectionState.onEach { Logger.d { "DFU: Connection state → $it" } }.launchIn(transportScope)
 
         val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
         if (connected is BleConnectionState.Disconnected) {
-            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address}")
+            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address.anonymize()}")
         }
 
         bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
@@ -271,7 +274,7 @@ class SecureDfuTransport(
             // Conservative settle after CCCD confirmation before issuing commands.
             delay(SUBSCRIPTION_SETTLE)
 
-            Logger.i { "DFU: Connected and ready (${device.address})" }
+            Logger.i { "DFU: Connected and ready (${device.address.anonymize()})" }
         }
     }
 
