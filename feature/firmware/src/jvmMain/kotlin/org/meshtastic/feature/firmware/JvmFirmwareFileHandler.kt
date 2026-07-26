@@ -181,21 +181,19 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             }
     }
 
+    /**
+     * Fully expands [artifact] into memory, keyed by entry name.
+     *
+     * Shares [extractZipEntriesBounded] with the Android handler so the two cannot drift — they previously carried
+     * independent copies of this loop, and only one of them got bounded.
+     */
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
         withContext(ioDispatcher) {
-            val entries = mutableMapOf<String, ByteArray>()
             val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
-            ZipInputStream(file.inputStream()).use { zip ->
-                var entry = zip.nextEntry
-                while (entry != null) {
-                    if (!entry.isDirectory) {
-                        entries[entry.name] = zip.readBytes()
-                    }
-                    zip.closeEntry()
-                    entry = zip.nextEntry
-                }
+            require(file.length() <= MAX_FIRMWARE_ZIP_BYTES) {
+                "Firmware archive is ${file.length()} bytes, over the $MAX_FIRMWARE_ZIP_BYTES limit"
             }
-            entries
+            file.inputStream().use { extractZipEntriesBounded(it) }
         }
 
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =

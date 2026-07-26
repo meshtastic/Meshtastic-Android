@@ -38,6 +38,7 @@ import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.net.URI
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -289,22 +290,30 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         if (platformUri.scheme == "file") uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() } else null
     }
 
+    /**
+     * Fully expands [artifact] into memory, keyed by entry name.
+     *
+     * Streams from the artifact rather than buffering it whole, and delegates the bounds to [extractZipEntriesBounded]
+     * so this and the desktop handler cannot drift apart. The [getFileSize] check is only a cheap early rejection — it
+     * returns 0 for a provider that declines to report a length, so the inflation bound inside the extractor is what
+     * actually protects the heap.
+     */
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
         withContext(ioDispatcher) {
-            val entries = mutableMapOf<String, ByteArray>()
-            val bytes = readBytes(artifact)
-            ZipInputStream(bytes.inputStream()).use { zip ->
-                var entry = zip.nextEntry
-                while (entry != null) {
-                    if (!entry.isDirectory) {
-                        entries[entry.name] = zip.readBytes()
-                    }
-                    zip.closeEntry()
-                    entry = zip.nextEntry
-                }
+            val declaredSize = getFileSize(artifact)
+            require(declaredSize <= MAX_FIRMWARE_ZIP_BYTES) {
+                "Firmware archive is $declaredSize bytes, over the $MAX_FIRMWARE_ZIP_BYTES limit"
             }
-            entries
+            openArtifactStream(artifact).use { extractZipEntriesBounded(it) }
         }
+
+    /** Opens [artifact] for streaming, preferring a local file and falling back to the content resolver. */
+    private fun openArtifactStream(artifact: FirmwareArtifact): InputStream {
+        val localFile = artifact.toLocalFileOrNull()
+        if (localFile != null && localFile.exists()) return localFile.inputStream()
+        return context.contentResolver.openInputStream(artifact.uri.toAndroidUri())
+            ?: throw IOException("Cannot open artifact: ${artifact.uri}")
+    }
 
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean =
         org.meshtastic.feature.firmware.isValidFirmwareFile(filename, target, fileExtension)
