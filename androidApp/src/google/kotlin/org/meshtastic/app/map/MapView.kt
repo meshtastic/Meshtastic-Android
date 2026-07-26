@@ -135,6 +135,7 @@ import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.cancel
@@ -1546,7 +1547,8 @@ internal fun convertIntToEmoji(unicodeCodePoint: Int): String {
     if (!unicodeCodePoint.isValidCodePoint()) {
         Logger.w { "Invalid unicode code point: $unicodeCodePoint" }
     }
-    return unicodeCodePoint.toCodePointString()
+    // waypointIconOrDefault before rendering: 0 is a valid code point, so it would otherwise render as U+0000.
+    return unicodeCodePoint.waypointIconOrDefault().toCodePointString()
 }
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */

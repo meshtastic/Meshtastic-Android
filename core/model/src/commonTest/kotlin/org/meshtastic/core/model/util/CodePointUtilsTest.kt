@@ -58,6 +58,28 @@ class CodePointUtilsTest {
     }
 
     @Test
+    fun `zero renders as a control character without the waypoint helper`() {
+        // The premise for waypointIconOrDefault existing: zero is a valid scalar value, so toCodePointString has no
+        // reason to substitute anything. If this ever starts returning the pushpin, the helper is redundant.
+        assertEquals("\u0000", 0.toCodePointString())
+    }
+
+    @Test
+    fun `waypointIconOrDefault maps the unset icon to the pushpin`() {
+        assertEquals(PUSHPIN_CODE_POINT, 0.waypointIconOrDefault())
+        assertEquals("📍", 0.waypointIconOrDefault().toCodePointString())
+    }
+
+    @Test
+    fun `waypointIconOrDefault leaves a chosen icon alone`() {
+        // Includes an out-of-range value: the helper resolves "unset", it is not a validity clamp — that is
+        // toCodePointString's job, and conflating the two would silently discard the distinction.
+        assertEquals('A'.code, 'A'.code.waypointIconOrDefault())
+        assertEquals(0x1F600, 0x1F600.waypointIconOrDefault())
+        assertEquals(-1, (-1).waypointIconOrDefault())
+    }
+
+    @Test
     fun `toCodePointString honours an explicit fallback`() {
         assertEquals("?", (-1).toCodePointString(fallback = '?'.code))
         // A bogus fallback must not propagate the throw either.

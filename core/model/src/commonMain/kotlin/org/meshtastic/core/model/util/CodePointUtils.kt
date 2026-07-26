@@ -36,6 +36,15 @@ private const val LOW_SURROGATE_MASK = 0x3FF
 fun Int.isValidCodePoint(): Boolean = this in 0..MAX_CODE_POINT && this !in MIN_HIGH_SURROGATE..MAX_LOW_SURROGATE
 
 /**
+ * The icon to render for a waypoint, where `0` on the wire means "unset" and selects [PUSHPIN_CODE_POINT].
+ *
+ * Zero is a *valid* code point, so [toCodePointString] renders it as U+0000 rather than falling back. That matters
+ * because the trust-boundary clamp in `MeshDataHandlerImpl` normalises an unrenderable icon to `0` — every display and
+ * send path therefore has to read zero as the default rather than as a control character.
+ */
+fun Int.waypointIconOrDefault(): Int = if (this == 0) PUSHPIN_CODE_POINT else this
+
+/**
  * Renders this Unicode code point as a string, substituting [fallback] when the value is not a usable scalar value.
  *
  * Code points that reach the UI may come from untrusted input, so they must not be handed to `Character.toChars`, which
