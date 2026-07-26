@@ -651,6 +651,12 @@ class SharedRadioInterfaceService(
                     Logger.d { "restartTransport: aborted, disconnect requested during stop" }
                     return@withLock
                 }
+                // Drop whatever the dead session left queued before admitting the replacement. The consumer discards
+                // stale-generation frames on dequeue, but they still occupy slots until then — and now that the queue
+                // is bounded, a backlog carried across the cycle can make the fresh session's handshake frames fail
+                // trySend. `MeshServiceOrchestrator.start()` drains for its own stop/start path, but a transport-level
+                // restart does not go through it, so the drain has to happen here too.
+                resetReceivedBuffer()
                 // startTransportLocked() re-validates the selected address (no-op if null) and emits
                 // Connected through the transport callbacks (via the new transport's onConnect) once
                 // the fresh transport comes up — there is no Connecting emission at the transport
