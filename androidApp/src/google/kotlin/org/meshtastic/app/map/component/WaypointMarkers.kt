@@ -37,6 +37,7 @@ import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.locked
@@ -71,7 +72,7 @@ fun WaypointMarkers(
                 }
             }
 
-            val iconCodePoint = if (waypoint.icon == 0) PUSHPIN else waypoint.icon
+            val iconCodePoint = waypoint.icon.waypointIconOrDefault()
             val emojiText = convertIntToEmoji(iconCodePoint)
             val icon =
                 rememberComposeBitmapDescriptor(iconCodePoint) {
@@ -115,5 +116,4 @@ fun WaypointMarkers(
     }
 }
 
-private const val PUSHPIN = 0x1F4CD // Unicode for Round Pushpin
 private const val LOCK = 0x1F512 // Unicode for Lock

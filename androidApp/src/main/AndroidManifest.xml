@@ -316,11 +316,21 @@
                 android:resource="@xml/widget_local_stats_info" />
         </receiver>
 
-        <!-- allow for plugin discovery -->
+        <!--
+            ATAK plugin-discovery marker. The action is what ATAK looks for, so the filter stays exported; it now
+            resolves to a real no-op activity because the name used to be com.atakmap.app.component, a class not
+            present in this APK, so anything that launched it crashed the app on instantiation.
+
+            NOT VERIFIED AGAINST A REAL ATAK INSTALL: if any ATAK version keys discovery off the activity's class name
+            rather than off the action, this rename silently breaks it. Confirm on-device before relying on TAK
+            interop. Nothing else in this repo depends on the class name.
+        -->
         <activity
-            android:name="com.atakmap.app.component"
+            android:name=".AtakPluginDiscoveryActivity"
+            android:excludeFromRecents="true"
             android:exported="true"
-            tools:ignore="MissingClass">
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter android:label="@string/app_name">
                 <action android:name="com.atakmap.app.component" />
             </intent-filter>

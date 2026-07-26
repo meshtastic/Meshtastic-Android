@@ -30,6 +30,8 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.common)
             implementation(projects.core.di)
+            // For Any?.anonymize(), used to keep BLE addresses out of remote logs.
+            implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.resources)
             implementation(projects.core.ui)

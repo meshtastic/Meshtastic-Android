@@ -337,6 +337,7 @@
     <string name="debug_logcat_empty">No app logs to show</string>
     <string name="debug_logcat_refresh">Refresh</string>
     <string name="debug_logs_export">Export Logs</string>
+    <string name="debug_logs_export_warning">This file can contain your message text, precise locations, and node details. Review it before sharing it publicly.</string>
     <string name="debug_logs_exported">Logs exported</string>
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_search_clear">Clear search</string>

@@ -17,6 +17,9 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    // Shares the bounded zip extraction (ZipExtraction.kt) between the Android and desktop JVM file handlers, which
+    // previously carried two independent copies of the same logic.
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 

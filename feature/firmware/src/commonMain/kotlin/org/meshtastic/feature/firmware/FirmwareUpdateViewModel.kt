@@ -844,7 +844,7 @@ class FirmwareUpdateViewModel(
             }
 
         if (result == null) {
-            Logger.w { "Post-update verification timed out for $address" }
+            Logger.w { "Post-update verification timed out for ${address.anonymize()}" }
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
             // Device is back and healthy — retire any recovery record (covers both normal and recovery updates).

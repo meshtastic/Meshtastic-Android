@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.PUSHPIN_CODE_POINT
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
@@ -62,12 +64,13 @@ fun WaypointInfoDialog(
     onEdit: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    val emoji = if (waypoint.icon == 0) PUSHPIN else waypoint.icon
+    // waypoint.icon is untrusted input; toCodePointString substitutes a fallback rather than throwing.
+    val emoji = if (waypoint.icon == 0) PUSHPIN_CODE_POINT.toCodePointString() else waypoint.icon.toCodePointString()
     val title = waypoint.name.takeIf { it.isNotBlank() } ?: stringResource(Res.string.geofence)
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = "${String(Character.toChars(emoji))}  $title", fontWeight = FontWeight.Bold) },
+        title = { Text(text = "$emoji  $title", fontWeight = FontWeight.Bold) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (waypoint.description.isNotBlank()) {
@@ -108,5 +111,3 @@ fun WaypointInfoDialog(
         modifier = modifier,
     )
 }
-
-private const val PUSHPIN = 0x1F4CD // 📍 Round Pushpin

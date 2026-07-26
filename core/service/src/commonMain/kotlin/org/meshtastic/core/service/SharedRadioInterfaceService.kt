@@ -310,13 +310,20 @@ class SharedRadioInterfaceService(
         }
     }
 
-    // Unbounded Channel preserves strict FIFO delivery of incoming radio bytes, which the
-    // firmware handshake depends on (initial config packet ordering). A SharedFlow with
-    // `launch { emit() }` per packet reorders under concurrent dispatch and breaks config load.
-    // trySend on an UNLIMITED channel never suspends and never drops, so handleFromRadio can
-    // remain a non-suspend synchronous callback.
-    private val _receivedData = Channel<ReceivedRadioFrame>(Channel.UNLIMITED)
+    // A Channel preserves strict FIFO delivery of incoming radio bytes, which the firmware
+    // handshake depends on (initial config packet ordering). A SharedFlow with `launch { emit() }`
+    // per packet reorders under concurrent dispatch and breaks config load. trySend never
+    // suspends, so handleFromRadio can remain a non-suspend synchronous callback.
+    //
+    // Bounded rather than UNLIMITED: inbound frames arrive faster than they can be processed under
+    // sustained traffic, and an unbounded queue grows with no drop policy at all. At the cap
+    // trySend fails and the newest frame is dropped, which keeps the already-queued (earlier)
+    // frames and so preserves the ordering the handshake relies on.
+    private val _receivedData = Channel<ReceivedRadioFrame>(RECEIVE_QUEUE_CAPACITY)
     override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
+
+    /** Running count of frames dropped because the queue was full. Diagnostic only; see [enqueueReceivedData]. */
+    private var droppedFrameCount = 0L
 
     private val _meshActivity =
         MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -376,6 +383,40 @@ class SharedRadioInterfaceService(
     private fun now(): Long = clockMillis()
 
     companion object {
+        /**
+         * Capacity of the inbound frame queue.
+         *
+         * Sized against the burst a connect produces, which is roughly `35 + 5N` frames for a NodeDB of N nodes:
+         * - ~35 fixed: `my_info`, metadata, ~10 config, ~14 moduleConfig, 8 channels, deviceui, `config_complete`.
+         * - N thin `NodeInfo` frames — one per *hot-store* node. Warm-tier entries (firmware `WARM_NODE_COUNT`, up to
+         *   2000 on a native host) are identity-only records for evicted nodes and are NOT streamed to the phone, so
+         *   they do not contribute here.
+         * - Up to 4N more from the post-`config_complete` replay drain, which re-sends stored position, telemetry,
+         *   environment and status as ordinary mesh packets — one of each per node.
+         *
+         * N is firmware `MAX_NUM_NODES`: 250 on portduino/native-host and top-tier ESP32-S3, 120 on nRF52840 and
+         * generic ESP32, 10 on STM32WL. So the realistic worst case is a Linux/Pi node at N=250 → ~1285 frames, and
+         * those arrive over TCP, the transport most able to outrun the consumer. 8192 keeps roughly 6x headroom over
+         * that; a custom build raising `MAX_NUM_NODES` past ~1630 would need this raised too.
+         *
+         * Memory stays bounded at capacity x frame size. On the stream transports a frame cannot exceed
+         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE` (512 B); the BLE path passes through whatever the GATT read
+         * returned, which ATT caps at 512 B in practice rather than by anything enforced here. A thin `NodeInfo` is
+         * closer to 100 B, so the realistic ceiling is well under the ~4 MB absolute worst case.
+         */
+        const val RECEIVE_QUEUE_CAPACITY = 8192
+
+        /** Log one dropped-frame warning per this many drops. See [enqueueReceivedData]. */
+        private const val DROP_LOG_INTERVAL = 512L
+
+        /**
+         * Per-frame ceiling, matching `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE`.
+         *
+         * Duplicated rather than imported because `core:service` does not depend on `core:network`; the stream codec
+         * enforces the same number on its own path, and ATT caps BLE at the same value in practice.
+         */
+        const val MAX_FRAME_BYTES = 512
+
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
 
         // If we haven't received any data from the radio within this window after sending a
@@ -610,6 +651,12 @@ class SharedRadioInterfaceService(
                     Logger.d { "restartTransport: aborted, disconnect requested during stop" }
                     return@withLock
                 }
+                // Drop whatever the dead session left queued before admitting the replacement. The consumer discards
+                // stale-generation frames on dequeue, but they still occupy slots until then — and now that the queue
+                // is bounded, a backlog carried across the cycle can make the fresh session's handshake frames fail
+                // trySend. `MeshServiceOrchestrator.start()` drains for its own stop/start path, but a transport-level
+                // restart does not go through it, so the drain has to happen here too.
+                resetReceivedBuffer()
                 // startTransportLocked() re-validates the selected address (no-op if null) and emits
                 // Connected through the transport callbacks (via the new transport's onConnect) once
                 // the fresh transport comes up — there is no Connecting emission at the transport
@@ -932,14 +979,31 @@ class SharedRadioInterfaceService(
     private fun enqueueReceivedData(bytes: ByteArray, session: RadioTransportSession) {
         try {
             lastDataReceivedMillis = now()
-            // trySend synchronously onto the unbounded Channel so packet order matches arrival
-            // order. The previous `launch { emit() }` pattern dispatched each packet onto a
-            // fresh coroutine, letting the scheduler reorder them — which broke the firmware
-            // config handshake (see PhoneAPI.cpp initial-handshake sequence).
+            // trySend synchronously onto the Channel so packet order matches arrival order. The
+            // previous `launch { emit() }` pattern dispatched each packet onto a fresh coroutine,
+            // letting the scheduler reorder them — which broke the firmware config handshake
+            // (see PhoneAPI.cpp initial-handshake sequence).
+            // Reject before the copy: the channel bounds the frame COUNT, so without a per-frame ceiling a transport
+            // handing over an oversized buffer defeats the memory bound the capacity is supposed to give. The stream
+            // codec already enforces this on its own path; BLE passes through whatever the GATT read returned.
+            if (bytes.size > MAX_FRAME_BYTES) {
+                Logger.w { "Discarding oversized ${bytes.size}-byte frame (max $MAX_FRAME_BYTES)" }
+                return
+            }
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
             if (result.isFailure) {
-                Logger.e(result.exceptionOrNull()) { "Failed to enqueue ${bytes.size} received bytes; dropping packet" }
+                // Rate-limited on purpose: drops only happen under sustained inbound traffic, and Kermit forwards to
+                // Datadog/Crashlytics, so logging every drop would turn a bounded memory problem into unbounded
+                // network and battery use. The counter is deliberately unsynchronised — a racy count only skews a
+                // diagnostic line. A full queue reports failure with no exception; a closed channel carries one.
+                val drops = ++droppedFrameCount
+                if (drops == 1L || drops % DROP_LOG_INTERVAL == 0L) {
+                    Logger.w(result.exceptionOrNull()) {
+                        "Dropped ${bytes.size} received bytes ($drops total); receive queue at capacity " +
+                            "$RECEIVE_QUEUE_CAPACITY or closed"
+                    }
+                }
             }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {

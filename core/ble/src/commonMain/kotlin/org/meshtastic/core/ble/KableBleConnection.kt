@@ -43,6 +43,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.util.anonymize
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -131,9 +132,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging { applyConfig(loggingConfig, identifier = device.address) }
+            logging { applyConfig(loggingConfig, identifier = device.address.anonymize()) }
             observationExceptionHandler { cause ->
-                Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                Logger.w(cause) { "[${device.address.anonymize()}] Observation failure suppressed" }
             }
             platformConfig(device) { autoConnect }
         }
@@ -180,7 +181,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             autoConnect =
                 try {
                     connectionScope?.let { oldScope ->
-                        Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
+                        Logger.d {
+                            "[${device.address.anonymize()}] Cancelling previous connectionScope before reconnect"
+                        }
                         oldScope.coroutineContext.job.cancel()
                     }
                     connectionScope = p.connect()
@@ -192,12 +195,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                         // Already on the autoConnect path and still failing: surface a clear Disconnected
                         // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
                         Logger.w {
-                            "[${device.address}] autoConnect attempt also failed; deferring to outer reconnect loop"
+                            "[${device.address.anonymize()}] autoConnect also failed; deferring to outer reconnect loop"
                         }
                         _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
                         throw e
                     }
-                    Logger.d { "[${device.address}] Direct connect failed, falling back to autoConnect" }
+                    Logger.d { "[${device.address.anonymize()}] Direct connect failed, falling back to autoConnect" }
                     delay(AUTOCONNECT_FALLBACK_DELAY)
                     true
                 }

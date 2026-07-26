@@ -48,6 +48,7 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
@@ -119,13 +120,15 @@ internal constructor(
     override suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
         val dfuAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, dfuAddress)
-        Logger.i { "Legacy DFU: Scanning for DFU mode device at $targetAddresses..." }
+        Logger.i { "Legacy DFU: Scanning for DFU mode device at ${targetAddresses.map { it.anonymize() }}..." }
 
         val device =
             scanForDevice { d -> d.address in targetAddresses }
-                ?: throw DfuException.ConnectionFailed("DFU mode device not found. Tried: $targetAddresses")
+                ?: throw DfuException.ConnectionFailed(
+                    "DFU mode device not found. Tried: ${targetAddresses.map { it.anonymize() }}",
+                )
 
-        Logger.i { "Legacy DFU: Found DFU mode device at ${device.address} (name=${device.name}), connecting..." }
+        Logger.i { "Legacy DFU: Found DFU mode device at ${device.address.anonymize()}, connecting..." }
         dfuAdvertisedName = device.name
 
         bleConnection.connectionState
@@ -134,7 +137,7 @@ internal constructor(
 
         val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
         if (connected is BleConnectionState.Disconnected) {
-            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address}")
+            throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address.anonymize()}")
         }
 
         bleConnection.profile(LegacyDfuUuids.SERVICE) { service ->
@@ -175,7 +178,7 @@ internal constructor(
                 throw LegacyDfuException.UnsupportedBootloader(version)
             }
 
-            Logger.i { "Legacy DFU: Connected and ready (${device.address})" }
+            Logger.i { "Legacy DFU: Connected and ready (${device.address.anonymize()})" }
         }
     }
 

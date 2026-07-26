@@ -129,10 +129,13 @@ import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
+import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.cancel
@@ -1540,11 +1543,12 @@ private fun Int.withAlpha(opacity: Float): Int = AndroidColor.argb(
 
 // region --- Utilities ---
 
-internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
-    String(Character.toChars(unicodeCodePoint))
-} catch (e: IllegalArgumentException) {
-    Logger.w(e) { "Invalid unicode code point: $unicodeCodePoint" }
-    "\uD83D\uDCCD"
+internal fun convertIntToEmoji(unicodeCodePoint: Int): String {
+    if (!unicodeCodePoint.isValidCodePoint()) {
+        Logger.w { "Invalid unicode code point: $unicodeCodePoint" }
+    }
+    // waypointIconOrDefault before rendering: 0 is a valid code point, so it would otherwise render as U+0000.
+    return unicodeCodePoint.waypointIconOrDefault().toCodePointString()
 }
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */

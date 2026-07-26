@@ -41,6 +41,9 @@ class StreamFrameCodec(
         const val MAX_TO_FROM_RADIO_SIZE = 512
         const val HEADER_SIZE = 4
 
+        /** Cap on the device-log line buffer. Bounds [debugOut] for a stream that never yields a newline. */
+        const val MAX_DEBUG_LINE_LENGTH = 512
+
         /** Default Meshtastic TCP service port. */
         const val DEFAULT_TCP_PORT = 4403
 
@@ -141,7 +144,13 @@ class StreamFrameCodec(
         debugLineBuf.clear()
     }
 
-    /** Print device serial debug output to the logger. */
+    /**
+     * Print device serial debug output to the logger.
+     *
+     * Any byte stream that never yields a newline accumulates here, so the buffer is capped: a stream of non-`START1`
+     * bytes with no `\n` would otherwise grow the heap without limit. At the cap the line is flushed as-is and the
+     * buffer reset, which keeps the output readable rather than silently dropping it.
+     */
     private fun debugOut(b: Byte) {
         when (val c = b.toInt().toChar()) {
             '\r' -> {}
@@ -151,7 +160,13 @@ class StreamFrameCodec(
                 debugLineBuf.clear()
             }
 
-            else -> debugLineBuf.append(c)
+            else -> {
+                debugLineBuf.append(c)
+                if (debugLineBuf.length >= MAX_DEBUG_LINE_LENGTH) {
+                    Logger.d { "$logTag DeviceLog: $debugLineBuf" }
+                    debugLineBuf.clear()
+                }
+            }
         }
     }
 }

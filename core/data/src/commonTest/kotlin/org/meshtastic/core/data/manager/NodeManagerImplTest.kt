@@ -83,6 +83,104 @@ class NodeManagerImplTest {
         nodeManager.notificationTitleFormatter = { shortName -> "New node seen: $shortName" }
     }
 
+    // ---------- In-memory index bounding ----------
+
+    /** Drives [NodeManagerImpl.updateNode], the growth path for the in-memory index, with distinct node numbers. */
+    private fun floodDistinctNodes(count: Int, startAt: Int = 100_000) {
+        repeat(count) { i -> nodeManager.updateNode(startAt + i) { node -> node.copy(lastHeard = i) } }
+    }
+
+    /**
+     * Floods past the cap and asserts eviction actually ran.
+     *
+     * The protection tests below must assert this too: without it they pass trivially when eviction is disabled, since
+     * nothing being evicted also means the protected node survives.
+     */
+    private fun floodPastCapAndAssertEvicted() {
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "eviction did not run: index is ${nodeManager.nodeDBbyNodeNum.size}",
+        )
+    }
+
+    @Test
+    fun `a flood of novel node numbers cannot grow the in-memory index without bound`() {
+        // packet.from is unauthenticated, so every novel value would otherwise allocate a permanent Node. The index is
+        // read only inside core:data for correlation, and every consumer tolerates a miss, so eviction is safe here.
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "index grew to ${nodeManager.nodeDBbyNodeNum.size}, over the ${NodeManagerImpl.MAX_IN_MEMORY_NODES} cap",
+        )
+    }
+
+    @Test
+    fun `a flood of novel NodeInfo packets cannot grow the in-memory index without bound`() {
+        // handleReceivedUser commits its own index rather than going through updateNodeState, so bounding only the
+        // latter left this path — the one an unauthenticated peer drives most directly — completely unbounded.
+        repeat(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500) { i ->
+            val num = 200_000 + i
+            nodeManager.handleReceivedUser(
+                num,
+                User(
+                    id = NodeAddress.numToDefaultId(num),
+                    long_name = "Flood $i",
+                    short_name = "F$i",
+                    hw_model = HardwareModel.TLORA_V2,
+                ),
+            )
+        }
+
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "index grew to ${nodeManager.nodeDBbyNodeNum.size} via the NodeInfo path",
+        )
+    }
+
+    @Test
+    fun `eviction never drops the local node`() {
+        // Deliberately left as a bare placeholder with the oldest lastHeard, i.e. the FIRST node eviction would
+        // otherwise pick. A local node with real NodeInfo survives incidentally by sorting last, which would not
+        // exercise the explicit exemption at all.
+        val myNum = 4242
+        nodeManager.setMyNodeNum(myNum)
+        nodeManager.updateNode(myNum) { it.copy(lastHeard = -1) }
+
+        floodPastCapAndAssertEvicted()
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[myNum], "the local node must never be evicted")
+    }
+
+    @Test
+    fun `eviction never drops user-marked nodes`() {
+        val favourite = 5150
+        val ignored = 5151
+        nodeManager.updateNode(favourite) { it.copy(isFavorite = true) }
+        nodeManager.updateNode(ignored) { it.copy(isIgnored = true) }
+
+        floodPastCapAndAssertEvicted()
+
+        assertNotNull(nodeManager.nodeDBbyNodeNum[favourite], "a favourite must never be evicted")
+        assertNotNull(nodeManager.nodeDBbyNodeNum[ignored], "an ignored node must never be evicted")
+    }
+
+    @Test
+    fun `eviction prefers placeholders over nodes with a real identity`() {
+        val identified = 7777
+        nodeManager.updateNode(identified) {
+            it.copy(user = it.user.copy(long_name = "Real Node", hw_model = HardwareModel.TLORA_V2))
+        }
+
+        floodPastCapAndAssertEvicted()
+
+        assertNotNull(
+            nodeManager.nodeDBbyNodeNum[identified],
+            "a node with a real NodeInfo identity should outlive bare-packet placeholders",
+        )
+    }
+
     @Test
     fun `getOrCreateNode creates default user for unknown node`() {
         val nodeNum = 1234

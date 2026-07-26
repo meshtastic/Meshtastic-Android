@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
@@ -42,6 +43,7 @@ import org.meshtastic.core.model.source
 import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
@@ -293,6 +295,13 @@ class MeshDataHandlerImpl(
         val u = Waypoint.ADAPTER.decode(payload)
         // A locked waypoint may only be created/updated by its owner; drop it if the sender isn't allowed to modify it.
         if (!u.isModifiableBy(packet.from)) return
+        // icon is an arbitrary int on the wire and a waypoint with expire == 0 is retained indefinitely, so
+        // normalise an unrenderable code point here at the trust boundary rather than relying on every consumer to
+        // guard (0 means "use the default pushpin").
+        if (!u.icon.isValidCodePoint()) {
+            Logger.w { "Clearing an out-of-range waypoint icon code point (${u.icon})" }
+            dataPacket.bytes = Waypoint.ADAPTER.encode(u.copy(icon = 0)).toByteString()
+        }
         val updateNotification = u.expire > nowSeconds.toInt()
         radioInterfaceService.launchSessionWork(scope, session) {
             // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.

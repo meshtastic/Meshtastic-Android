@@ -76,6 +76,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.systemTimeZone
 import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
 import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
@@ -190,7 +191,7 @@ fun EditWaypointDialog(
                         trailingIcon = {
                             IconButton(onClick = { showEmojiPickerView = true }) {
                                 Text(
-                                    text = String(Character.toChars(currentEmojiCodepoint)),
+                                    text = currentEmojiCodepoint.toCodePointString(),
                                     modifier =
                                     Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                                         .padding(6.dp),

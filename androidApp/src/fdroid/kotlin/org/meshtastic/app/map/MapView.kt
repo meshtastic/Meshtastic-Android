@@ -99,6 +99,8 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
+import org.meshtastic.core.model.util.toCodePointString
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -525,7 +527,8 @@ fun MapView(
             val lock = if (pt.isLocked) "\uD83D\uDD12" else ""
             val time = DateFormatter.formatDateTime(waypoint.time)
             val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt(), unknownText, nowText)
-            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            // pt.icon is untrusted input; toCodePointString substitutes a fallback rather than throwing.
+            val emoji = pt.icon.waypointIconOrDefault().toCodePointString()
             val now = nowMillis
             val expireTimeMillis = pt.expire * 1000L
             val expireTimeStr =
@@ -947,7 +950,7 @@ fun MapView(
                 val newId = if (waypoint.id == 0) mapViewModel.generatePacketId() else waypoint.id
                 val newName = if (waypoint.name.isNullOrEmpty()) "Dropped Pin" else waypoint.name
                 val newExpire = if (waypoint.expire == 0) Int.MAX_VALUE else waypoint.expire
-                val newIcon = if (waypoint.icon == 0) 128205 else waypoint.icon
+                val newIcon = waypoint.icon.waypointIconOrDefault()
 
                 // locked_to is already resolved by the editor (our node number when locked, 0 when not).
                 mapViewModel.sendWaypoint(waypoint.copy(id = newId, name = newName, expire = newExpire, icon = newIcon))
