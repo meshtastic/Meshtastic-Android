@@ -453,10 +453,10 @@ fun <R : Route> EntryProviderScope<NavKey>.configComposable(
 ) {
     addEntryProvider(route) {
         val viewModel = radioConfigViewModelProvider(null)
-        // Set loading state before content reads the StateFlow, ensuring
-        // LoadingOverlay is visible from the very first composition frame.
+        // Remote settings need a blocking progress overlay from the first frame. Local settings already have their
+        // connect-time repository snapshot, so their route refresh stays non-blocking and does not flash a 0% overlay.
         remember { viewModel.ensureLoadingForRemote().let { true } }
-        LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        LaunchedEffect(Unit) { viewModel.loadConfigRoute(routeInfo) }
         content(viewModel)
     }
 }
