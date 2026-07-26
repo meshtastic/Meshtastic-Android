@@ -22,6 +22,7 @@ import java.io.FilterInputStream
 import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -165,6 +166,28 @@ class ZipExtractionTest {
         le32(0x06054B50) // end of central directory: stops the stream reader
         repeat(18) { out.write(0) }
         return out.toByteArray()
+    }
+
+    @Test
+    fun `the compressed side is bounded even when the declared size is unknown`() {
+        // getFileSize reports 0 for a provider that declines to answer, so the declared-size gate passes vacuously.
+        // Seeded-random content so deflate cannot shrink it — a regular pattern here compresses to a few hundred bytes
+        // and the bound would never be reached, making the test pass for the wrong reason.
+        val incompressible = Random(seed = 1234).nextBytes(256 * 1024)
+        val zip = zipOf("firmware.bin" to incompressible)
+
+        assertFailsWith<IllegalArgumentException> {
+            extractZipEntriesBounded(ByteArrayInputStream(zip), maxCompressedBytes = 4096)
+        }
+    }
+
+    @Test
+    fun `a normal archive is unaffected by the compressed bound`() {
+        val zip = zipOf("firmware.bin" to ByteArray(64) { 3 })
+
+        val entries = extractZipEntriesBounded(ByteArrayInputStream(zip), maxCompressedBytes = 1024 * 1024)
+
+        assertEquals(setOf("firmware.bin"), entries.keys)
     }
 
     @Test
