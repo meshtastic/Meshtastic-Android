@@ -63,6 +63,25 @@ class FakeRadioInterfaceServiceSessionTest {
     }
 
     @Test
+    fun `trySendToRadio records bytes only while a session is admitted`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        val bytes = byteArrayOf(1, 2, 3)
+
+        assertFalse(service.trySendToRadio(bytes))
+        assertTrue(service.sentToRadio.isEmpty())
+
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        assertTrue(service.trySendToRadio(bytes))
+        assertEquals(1, service.sentToRadio.size)
+        assertTrue(bytes.contentEquals(service.sentToRadio.single()))
+
+        service.disconnect()
+        assertFalse(service.trySendToRadio(bytes))
+        assertEquals(1, service.sentToRadio.size)
+    }
+
+    @Test
     fun `disconnect closes admission and waits for admitted fake session work`() = runTest {
         val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
         service.setDeviceAddress("ble:test")

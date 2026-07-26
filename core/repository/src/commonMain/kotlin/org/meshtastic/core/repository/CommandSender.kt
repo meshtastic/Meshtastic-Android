@@ -37,10 +37,12 @@ interface CommandSender {
     /** Generates a new unique packet ID. */
     fun generatePacketId(): Int
 
-    /** Sends a data packet to the mesh. */
+    /**
+     * Sends a data packet to the mesh, recording [org.meshtastic.core.model.MessageStatus.ERROR] if admission fails.
+     */
     suspend fun sendData(p: DataPacket)
 
-    /** Sends an admin message to a specific node. */
+    /** Sends an admin message to a specific node, or throws if the outbound queue rejects it. */
     suspend fun sendAdmin(
         destNum: Int,
         requestId: Int = generatePacketId(),
@@ -59,7 +61,8 @@ interface CommandSender {
      * Sends an admin message and suspends until the radio acknowledges it.
      *
      * This is used when the caller needs to guarantee a packet has been accepted by the radio before proceeding, such
-     * as sending a shared contact before the first DM to a node.
+     * as sending a shared contact before the first DM to a node. Time spent behind existing FIFO entries does not count
+     * against the radio-response timeout.
      *
      * @return `true` if the radio accepted the packet, `false` on timeout or failure.
      */
@@ -68,27 +71,35 @@ interface CommandSender {
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
         initFn: () -> AdminMessage,
-    ): Boolean
+    ): Boolean = sendAdminAwaitResult(destNum, requestId, wantResponse, initFn).accepted
 
-    /** Sends our current position to the mesh. */
+    /** Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. */
+    suspend fun sendAdminAwaitResult(
+        destNum: Int,
+        requestId: Int = generatePacketId(),
+        wantResponse: Boolean = false,
+        initFn: () -> AdminMessage,
+    ): AwaitedSendResult
+
+    /** Sends our current position to the mesh, or throws if the outbound queue rejects it. */
     suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false)
 
-    /** Requests the position of a specific node. */
+    /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestPosition(destNum: Int, currentPosition: Position)
 
-    /** Sets a fixed position for a node. */
+    /** Sets a fixed position for a node, or throws if the outbound queue rejects the admin command. */
     suspend fun setFixedPosition(destNum: Int, pos: Position)
 
-    /** Requests user info from a specific node. */
+    /** Requests user info from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestUserInfo(destNum: Int)
 
-    /** Requests a traceroute to a specific node. */
+    /** Requests a traceroute to a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTraceroute(requestId: Int, destNum: Int)
 
-    /** Requests telemetry from a specific node. */
+    /** Requests telemetry from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
 
-    /** Requests neighbor info from a specific node. */
+    /** Requests neighbor info from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 
     /**

@@ -19,6 +19,8 @@ package org.meshtastic.core.data.manager
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.repository.AwaitedSendResult
+import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -114,14 +116,14 @@ class LockdownCoordinatorImplTest {
             initFn: () -> AdminMessage,
         ) = Unit
 
-        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) = Unit
-
-        override suspend fun sendAdminAwait(
+        override suspend fun sendAdminAwaitResult(
             destNum: Int,
             requestId: Int,
             wantResponse: Boolean,
             initFn: () -> AdminMessage,
-        ) = true
+        ) = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true)
+
+        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) = Unit
 
         override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) =
             Unit

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.NonCancellable
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -145,7 +146,16 @@ interface AdminController {
      * SDK's `AdminApi.editSettings { }`.
      *
      * All admin packets for the session — begin, the [block]'s writes, and commit — are issued from the calling
-     * coroutine, which is required for the firmware to associate them with one transaction.
+     * coroutine, which is required for the firmware to associate them with one transaction. The implementation waits
+     * for radio queue acceptance at both boundaries, so callers cannot start a later rebooting stage while this
+     * transaction is still queued or uncommitted.
+     *
+     * For the locally connected node, a commit dispatched immediately before the expected transport departure is
+     * treated as accepted because the reboot can prevent an acknowledgement from returning.
+     *
+     * Firmware exposes no abort boundary, so commit is attempted in [NonCancellable] context even when [block] throws
+     * or the caller is cancelled. The original block failure is rethrown, with a distinct commit failure attached as a
+     * suppressed exception.
      */
     suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit)
 
@@ -167,7 +177,10 @@ interface AdminEditScope {
     /** Updates a module configuration on the session's node. */
     suspend fun setModuleConfig(config: ModuleConfig)
 
-    /** Updates a channel configuration on the session's node. */
+    /**
+     * Updates a channel configuration on the session's node. The batch operation that owns the complete target set is
+     * responsible for authoritative local-cache reconciliation after [AdminController.editSettings] returns.
+     */
     suspend fun setChannel(channel: Channel)
 
     /** Sets a fixed position on the session's node. */

@@ -16,11 +16,14 @@
  */
 package org.meshtastic.core.testing
 
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminEditScope
+import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
@@ -38,8 +41,10 @@ class FakeRadioController :
     RadioController {
 
     /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
-    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState
+    private val connectionStateHolder = ConnectionStateHolder()
+    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
+    override val connectionState = connectionStateHolder.connectionState
+    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
     private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification
@@ -48,13 +53,56 @@ class FakeRadioController :
     val favoritedNodes = mutableListOf<Int>()
     val sentSharedContacts = mutableListOf<Int>()
 
-    /** Every [setLocalConfig] call, in order — lets tests assert e.g. that a scan restored the home LoRa preset. */
-    val localConfigs = mutableListOf<Config>()
-    val lastLocalConfig: Config?
-        get() = localConfigs.lastOrNull()
+    /** One local or admin configuration write. Local writes have no destination. */
+    data class ConfigWrite(val destination: Int?, val config: Config)
 
-    /** Every [setLocalChannel] call, in order. */
+    /** One module configuration write, preserving its destination and payload as a single observation. */
+    data class ModuleConfigWrite(val destination: Int, val config: ModuleConfig)
+
+    /** Every local or admin configuration write, preserving destination and call order together. */
+    val configWrites = mutableListOf<ConfigWrite>()
+
+    /** Local configuration payloads in call order. Prefer [configWrites] when destination identity matters. */
+    val localConfigs: List<Config>
+        get() = configWrites.filter { it.destination == null }.map(ConfigWrite::config)
+
+    val lastLocalConfig: Config?
+        get() = configWrites.lastOrNull { it.destination == null }?.config
+
+    /** Every local or admin channel write, in call order. */
     val localChannels = mutableListOf<Channel>()
+
+    /** Every [setFixedPosition] call, in order. */
+    val fixedPositions = mutableListOf<Position>()
+
+    /** Every module configuration write, preserving destination and call order together. */
+    val moduleConfigWrites = mutableListOf<ModuleConfigWrite>()
+
+    /** Module configuration payloads in call order. Prefer [moduleConfigWrites] when destination identity matters. */
+    val moduleConfigs: List<ModuleConfig>
+        get() = moduleConfigWrites.map(ModuleConfigWrite::config)
+
+    /** Destination node for every module configuration write, in order. */
+    val moduleConfigDestinations: List<Int>
+        get() = moduleConfigWrites.map(ModuleConfigWrite::destination)
+
+    /** Destination node for every edit transaction, in order. Local edits use the fake's sentinel value of zero. */
+    val editSettingsDestinations = mutableListOf<Int>()
+
+    /** High-level admin operation order, including edit transaction boundaries. */
+    val adminOperations = mutableListOf<String>()
+
+    /** When true, an edit transaction fails before the begin boundary is recorded. */
+    var failEditSettingsBegin: Boolean = false
+
+    /** Test hook invoked after an edit transaction commits. */
+    var onEditSettingsCommitted: suspend () -> Unit = {}
+
+    /** Test hook invoked after a standalone module-config write. */
+    var onStandaloneModuleConfig: suspend (ModuleConfig) -> Unit = {}
+
+    /** Test hook invoked after a standalone general-config write. */
+    var onStandaloneConfig: suspend (Config) -> Unit = {}
 
     var throwOnSend: Boolean = false
 
@@ -81,11 +129,20 @@ class FakeRadioController :
 
     init {
         registerResetAction {
+            connectionStateHolder.reset()
             sentPackets.clear()
             favoritedNodes.clear()
             sentSharedContacts.clear()
-            localConfigs.clear()
+            configWrites.clear()
             localChannels.clear()
+            fixedPositions.clear()
+            moduleConfigWrites.clear()
+            editSettingsDestinations.clear()
+            adminOperations.clear()
+            failEditSettingsBegin = false
+            onEditSettingsCommitted = {}
+            onStandaloneModuleConfig = {}
+            onStandaloneConfig = {}
             throwOnSend = false
             throwOnSetLocalConfig = false
             failChannelWriteAfter = null
@@ -129,7 +186,7 @@ class FakeRadioController :
 
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
-        localConfigs.add(config)
+        configWrites.add(ConfigWrite(destination = null, config = config))
     }
 
     override suspend fun setLocalChannel(channel: Channel) {
@@ -138,22 +195,41 @@ class FakeRadioController :
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
         lastSetOwnerUser = user
+        adminOperations.add("owner")
     }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {}
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        localConfigs.add(config)
+        recordConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
 
-    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {}
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
+        recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
+    }
+
+    private suspend fun recordConfigWrite(destNum: Int, config: Config, invokeStandaloneHook: Boolean) {
+        configWrites.add(ConfigWrite(destination = destNum, config = config))
+        adminOperations.add("config:update")
+        if (invokeStandaloneHook) onStandaloneConfig(config)
+    }
+
+    private suspend fun recordModuleConfigWrite(destNum: Int, config: ModuleConfig, invokeStandaloneHook: Boolean) {
+        moduleConfigWrites.add(ModuleConfigWrite(destination = destNum, config = config))
+        adminOperations.add("module:update")
+        if (invokeStandaloneHook) onStandaloneModuleConfig(config)
+    }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
         failChannelWriteAfter?.let { if (localChannels.size >= it) error("Fake channel write failure") }
         localChannels.add(channel)
+        adminOperations.add("channel:${channel.index}")
     }
 
-    override suspend fun setFixedPosition(destNum: Int, position: Position) {}
+    override suspend fun setFixedPosition(destNum: Int, position: Position) {
+        fixedPositions.add(position)
+        adminOperations.add("fixed-position")
+    }
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {}
 
@@ -202,15 +278,19 @@ class FakeRadioController :
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
+        editSettingsDestinations.add(destNum)
         editSettingsCalled = true
+        if (failEditSettingsBegin) error("Fake edit-settings begin failure")
+        adminOperations.add("begin")
         val scope =
             object : AdminEditScope {
                 override suspend fun setOwner(user: User) = setOwner(destNum, user, generatePacketId())
 
-                override suspend fun setConfig(config: Config) = setConfig(destNum, config, generatePacketId())
+                override suspend fun setConfig(config: Config) =
+                    recordConfigWrite(destNum, config, invokeStandaloneHook = false)
 
                 override suspend fun setModuleConfig(config: ModuleConfig) =
-                    setModuleConfig(destNum, config, generatePacketId())
+                    recordModuleConfigWrite(destNum, config, invokeStandaloneHook = false)
 
                 override suspend fun setChannel(channel: Channel) =
                     setRemoteChannel(destNum, channel, generatePacketId())
@@ -218,7 +298,19 @@ class FakeRadioController :
                 override suspend fun setFixedPosition(position: Position) =
                     this@FakeRadioController.setFixedPosition(destNum, position)
             }
-        scope.block()
+        val blockResult = runCatching { scope.block() }
+        val commitResult = runCatching {
+            withContext(NonCancellable) {
+                adminOperations.add("commit")
+                onEditSettingsCommitted()
+            }
+        }
+
+        blockResult.exceptionOrNull()?.let { blockFailure ->
+            commitResult.exceptionOrNull()?.takeUnless { it === blockFailure }?.let(blockFailure::addSuppressed)
+            throw blockFailure
+        }
+        commitResult.getOrThrow()
     }
 
     override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(0, block)
@@ -243,9 +335,7 @@ class FakeRadioController :
 
     // --- Helper methods for testing ---
 
-    fun setConnectionState(state: ConnectionState) {
-        _connectionState.value = state
-    }
+    fun setConnectionState(state: ConnectionState) = connectionStateHolder.setConnectionState(state)
 
     fun setClientNotification(notification: ClientNotification?) {
         _clientNotification.value = notification

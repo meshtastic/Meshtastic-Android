@@ -220,6 +220,33 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    /** Triggers a liveness restart from inside one synchronous send handoff. */
+    private class ReentrantRestartTransport(private val requestRestart: () -> Unit) : RadioTransport {
+        var handoffCompleted = false
+            private set
+
+        var closeCalled = false
+            private set
+
+        var closeObservedBeforeHandoff = false
+            private set
+
+        private var restartRequested = false
+
+        override fun handleSendToRadio(p: ByteArray) {
+            if (!restartRequested) {
+                restartRequested = true
+                requestRestart()
+            }
+            handoffCompleted = true
+        }
+
+        override suspend fun close() {
+            closeCalled = true
+            closeObservedBeforeHandoff = !handoffCompleted
+        }
+    }
+
     /** Controllable clock — tests advance this manually so all time comparisons are deterministic. */
     private var clock: Long = 0L
 
@@ -656,6 +683,46 @@ class SharedRadioInterfaceServiceLivenessTest {
 
             val firstTransportCloses = createdTransports.firstOrNull()?.closeCount ?: 0
             assertEquals(1, firstTransportCloses, "First transport should be closed exactly once (no stacking)")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `transport teardown drains a synchronously admitted send before close`() = runTest(testDispatcher) {
+        val transports = mutableListOf<RadioTransport>()
+        lateinit var service: SharedRadioInterfaceService
+        lateinit var initialTransport: ReentrantRestartTransport
+        val transportProvider: () -> RadioTransport = {
+            if (transports.isEmpty()) {
+                ReentrantRestartTransport {
+                    clock = 65_000L
+                    service.checkLiveness()
+                }
+                    .also {
+                        initialTransport = it
+                        transports += it
+                    }
+            } else {
+                FakeRadioTransport().also { transports += it }
+            }
+        }
+
+        clock = 0L
+        service = createConnectedService("xAA:BB:CC:DD:EE:FF", transportProvider)
+        try {
+            val accepted = service.trySendToRadio(byteArrayOf(1, 2, 3))
+            testDispatcher.scheduler.runCurrent()
+
+            assertTrue(accepted)
+            assertTrue(initialTransport.handoffCompleted)
+            assertTrue(initialTransport.closeCalled)
+            assertFalse(
+                initialTransport.closeObservedBeforeHandoff,
+                "teardown must wait until the admitted handoff releases its session lease",
+            )
+            assertEquals(2, transports.size, "the liveness restart should publish one replacement transport")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

@@ -18,7 +18,11 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
@@ -26,7 +30,9 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
+import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.AdminMessage
@@ -36,6 +42,10 @@ import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.User
+import kotlin.time.Duration.Companion.seconds
+
+internal fun editSettingsCommitFailureMessage(status: AwaitedSendStatus, dispatched: Boolean): String =
+    "Device rejected or timed out while sending edit-settings commit (status=$status, dispatched=$dispatched)"
 
 /**
  * [AdminController] implementation: local/remote configuration, channels, owner, device lifecycle, and the
@@ -51,6 +61,7 @@ internal class AdminControllerImpl(
     private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
+    private val connectionStateProvider: ConnectionStateProvider,
     private val scope: CoroutineScope,
 ) : AdminController {
 
@@ -219,9 +230,18 @@ internal class AdminControllerImpl(
     // ── Edit Settings (transactional) ───────────────────────────────────────
 
     override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
-        commandSender.sendAdmin(destNum) { AdminMessage(begin_edit_settings = true) }
-        EditSettingsSession(destNum).block()
-        commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
+        requireEditBoundaryAccepted(destNum, "begin") { AdminMessage(begin_edit_settings = true) }
+
+        // Firmware has no abort boundary. Preserve any block failure, including cancellation, only long enough to
+        // attempt the commit that closes the accepted session; the original failure is restored below.
+        val blockResult = runCatching { EditSettingsSession(destNum).block() }
+        val commitResult = runCatching { withContext(NonCancellable) { requireCommitBoundaryAccepted(destNum) } }
+
+        blockResult.exceptionOrNull()?.let { blockFailure ->
+            commitResult.exceptionOrNull()?.takeUnless { it === blockFailure }?.let(blockFailure::addSuppressed)
+            throw blockFailure
+        }
+        commitResult.getOrThrow()
     }
 
     override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(myNodeNum, block)
@@ -235,10 +255,9 @@ internal class AdminControllerImpl(
         override suspend fun setModuleConfig(config: ModuleConfig) =
             setModuleConfig(destNum, config, commandSender.generatePacketId())
 
-        // Unlike the one-shot setRemoteChannel, a transactional channel write does NOT mirror to the local cache per
-        // slot: importChannelSet owns the cache and writes it once after commit (replaceAllSettings), so an import
-        // interrupted before commit leaves the local channel cache untouched. (Firmware still writes each set_channel
-        // into its in-memory channel table on arrival; only disk persist/reload/reboot is deferred to commit.)
+        // Unlike one-shot writes, a transaction can replace several slots. This scope cannot infer the complete target
+        // set, so the operation adding channel writes must reconcile that set after the transaction; mirroring slots
+        // here could expose a partial cache if a later write or commit fails.
         override suspend fun setChannel(channel: Channel) =
             commandSender.sendAdmin(destNum) { AdminMessage(set_channel = channel) }
 
@@ -246,7 +265,46 @@ internal class AdminControllerImpl(
             this@AdminControllerImpl.setFixedPosition(destNum, position)
     }
 
+    /**
+     * Applies back-pressure at transaction boundaries. Ordinary writes are already queued FIFO by [CommandSender], so
+     * waiting for the commit's queue acceptance keeps the caller suspended until the sender has processed every
+     * preceding write. This prevents a rebooting transport write from overtaking an uncommitted settings transaction.
+     */
+    private suspend fun requireEditBoundaryAccepted(destNum: Int, boundary: String, message: () -> AdminMessage) {
+        check(commandSender.sendAdminAwait(destNum, initFn = message)) {
+            "Device rejected or timed out while sending edit-settings $boundary"
+        }
+    }
+
+    private suspend fun requireCommitBoundaryAccepted(destNum: Int) {
+        val isLocalDestination = destNum == nodeManager.myNodeNum.value
+        val departureBaseline = connectionStateProvider.connectionLifecycle.value.epochs.departures
+        val result = commandSender.sendAdminAwaitResult(destNum) { AdminMessage(commit_edit_settings = true) }
+        val stoppedAfterDispatch =
+            isLocalDestination && result.dispatched && result.status == AwaitedSendStatus.TRANSPORT_STOPPED
+        val departedLifecycle =
+            if (stoppedAfterDispatch) {
+                withTimeoutOrNull(COMMIT_DEPARTURE_TIMEOUT) {
+                    connectionStateProvider.connectionLifecycle.first { it.epochs.departures > departureBaseline }
+                }
+            } else {
+                null
+            }
+        // A dispatched local commit is durable once any post-baseline departure is observed. Firmware may move the
+        // connection through Disconnected, Connecting, or DeviceSleep while rebooting.
+        val committedBeforeLocalDeparture =
+            stoppedAfterDispatch && departedLifecycle?.epochs?.lastDepartureState != null
+
+        check(result.accepted || committedBeforeLocalDeparture) {
+            editSettingsCommitFailureMessage(result.status, result.dispatched)
+        }
+        if (committedBeforeLocalDeparture) {
+            Logger.i { "Edit-settings commit dispatched before expected local transport departure" }
+        }
+    }
+
     private companion object {
         private const val DEFAULT_DELAY_SECONDS = 5
+        private val COMMIT_DEPARTURE_TIMEOUT = 5.seconds
     }
 }
