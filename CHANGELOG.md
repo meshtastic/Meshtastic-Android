@@ -7,12 +7,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
-
-#### 🛠️ Fixes
-* fix(car): drop CarAppService from production manifests to satisfy Play car-app review by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6438
-
-### Internal (v2.8.0-internal.36)
+### Internal (v2.8.0-internal.37)
 Changes since [`v2.8.0-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.2):
 
 #### 🏗️ Features
@@ -22,6 +17,7 @@ Changes since [`v2.8.0-open.2`](https://github.com/meshtastic/Meshtastic-Android
 * fix(node): show node counts without truncation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6433
 * fix(model): gate TAK module config on firmware 2.8.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6435
 * fix(data): don't let coarse position reports overwrite precise coordinates by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6432
+* fix(car): drop CarAppService from production manifests to satisfy Play car-app review by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6438
 
 ### Open Beta (v2.8.0-open.2)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
