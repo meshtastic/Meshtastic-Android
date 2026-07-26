@@ -336,6 +336,7 @@
     <string name="debug_logcat_empty">Ei näytettäviä sovelluslokitietoja</string>
     <string name="debug_logcat_refresh">Päivitä</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
+    <string name="debug_logs_export_warning">Tämä tiedosto voi sisältää viestiesi tekstin, tarkat sijaintitiedot ja radion tiedot. Tarkista tiedoston sisältö ennen sen jakamista julkisesti.</string>
     <string name="debug_logs_exported">Lokitiedot viety</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_search_clear">Tyhjennä haku</string>

@@ -717,7 +717,9 @@
     <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <!-- NODE -->
+    <string name="node_count_shown">%1$d zobrazeno</string>
     <string name="node_count_template">(%1$d online / %2$d zobrazeno / %3$d celkem)</string>
+    <string name="node_count_total">%1$d celkem</string>
     <string name="node_filter_exclude_infrastructure">Vyloučit infrastrukturu</string>
     <string name="node_filter_exclude_mqtt">Vyloučit MQTT</string>
     <string name="node_filter_ignored">Prohlížíte ignorované uzly,\nStiskněte pro návrat do seznamu uzlů.</string>
