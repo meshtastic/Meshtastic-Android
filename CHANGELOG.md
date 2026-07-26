@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🛠️ Fixes
+* fix(car): drop CarAppService from production manifests to satisfy Play car-app review by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6438
+
+### Internal (v2.8.0-internal.36)
+Changes since [`v2.8.0-open.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.2):
+
 #### 🏗️ Features
 * feat(node): group related metric cards into vertical columns by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6431
 * feat(node): show AQI in the air quality graph and table by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6434
