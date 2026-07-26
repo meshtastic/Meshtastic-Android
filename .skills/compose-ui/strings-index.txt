@@ -313,6 +313,7 @@ debug_log_api_enabled
 debug_logcat_empty
 debug_logcat_refresh
 debug_logs_export
+debug_logs_export_warning
 debug_logs_exported
 debug_panel
 debug_search_clear

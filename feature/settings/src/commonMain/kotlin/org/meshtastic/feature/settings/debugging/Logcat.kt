@@ -58,6 +58,8 @@ import org.meshtastic.core.resources.debug_default_search
 import org.meshtastic.core.resources.debug_logcat_empty
 import org.meshtastic.core.resources.debug_logcat_refresh
 import org.meshtastic.core.resources.debug_logs_export
+import org.meshtastic.core.resources.debug_logs_export_warning
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
@@ -113,6 +115,19 @@ fun LogcatContent(modifier: Modifier = Modifier) {
     val listState = rememberLazyListState()
 
     val export = rememberLogExporter { buildString { appendLogcat(this, raw.orEmpty()) } }
+    // Same warning as the packet-log export: this file is meant to be attached to public issue trackers.
+    var showExportWarning by remember { mutableStateOf(false) }
+    if (showExportWarning) {
+        MeshtasticResourceDialog(
+            titleRes = Res.string.debug_logs_export,
+            messageRes = Res.string.debug_logs_export_warning,
+            onConfirm = {
+                showExportWarning = false
+                export(timestampedExportName("meshtastic_logcat"))
+            },
+            onDismiss = { showExportWarning = false },
+        )
+    }
 
     fun refresh() = scope.launch { raw = withContext(ioDispatcher) { captureAppLogcat() } }
     LaunchedEffect(Unit) { refresh() }
@@ -146,7 +161,7 @@ fun LogcatContent(modifier: Modifier = Modifier) {
                 )
             }
             Box(modifier = Modifier.weight(1f))
-            IconButton(onClick = { export(timestampedExportName("meshtastic_logcat")) }) {
+            IconButton(onClick = { showExportWarning = true }) {
                 Icon(MeshtasticIcons.FileDownload, contentDescription = stringResource(Res.string.debug_logs_export))
             }
         }
