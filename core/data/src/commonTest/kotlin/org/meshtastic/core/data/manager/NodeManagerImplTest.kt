@@ -117,6 +117,29 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `a flood of novel NodeInfo packets cannot grow the in-memory index without bound`() {
+        // handleReceivedUser commits its own index rather than going through updateNodeState, so bounding only the
+        // latter left this path — the one an unauthenticated peer drives most directly — completely unbounded.
+        repeat(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500) { i ->
+            val num = 200_000 + i
+            nodeManager.handleReceivedUser(
+                num,
+                User(
+                    id = NodeAddress.numToDefaultId(num),
+                    long_name = "Flood $i",
+                    short_name = "F$i",
+                    hw_model = HardwareModel.TLORA_V2,
+                ),
+            )
+        }
+
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "index grew to ${nodeManager.nodeDBbyNodeNum.size} via the NodeInfo path",
+        )
+    }
+
+    @Test
     fun `eviction never drops the local node`() {
         // Deliberately left as a bare placeholder with the oldest lastHeard, i.e. the FIRST node eviction would
         // otherwise pick. A local node with real NodeInfo survives incidentally by sorting last, which would not

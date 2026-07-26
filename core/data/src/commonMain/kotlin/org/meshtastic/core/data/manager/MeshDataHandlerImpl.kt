@@ -299,7 +299,7 @@ class MeshDataHandlerImpl(
         // normalise an unrenderable code point here at the trust boundary rather than relying on every consumer to
         // guard (0 means "use the default pushpin").
         if (!u.icon.isValidCodePoint()) {
-            Logger.w { "Waypoint ${u.id} from ${packet.from} has invalid icon code point ${u.icon}; clearing it" }
+            Logger.w { "Clearing an out-of-range waypoint icon code point (${u.icon})" }
             dataPacket.bytes = Waypoint.ADAPTER.encode(u.copy(icon = 0)).toByteString()
         }
         val updateNotification = u.expire > nowSeconds.toInt()

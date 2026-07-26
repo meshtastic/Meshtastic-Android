@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -130,7 +131,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
     // Prepare a document creator for exporting logs
     val exportLogsLauncher = rememberLogExporter { buildString { formatLogsTo(this, viewModel.loadLogsForExport()) } }
     // The export exists so users can attach it to a public issue, so state what it contains before writing it.
-    var showExportWarning by remember { mutableStateOf(false) }
+    var showExportWarning by rememberSaveable { mutableStateOf(false) }
     if (showExportWarning) {
         MeshtasticResourceDialog(
             titleRes = Res.string.debug_logs_export,

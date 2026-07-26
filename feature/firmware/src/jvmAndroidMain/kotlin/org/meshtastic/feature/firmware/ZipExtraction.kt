@@ -77,11 +77,15 @@ internal fun extractZipEntriesBounded(
 ): Map<String, ByteArray> {
     val entries = mutableMapOf<String, ByteArray>()
     var remaining = maxTotalBytes
+    // Counted separately from `entries.size`: duplicate names collapse to one map key, so counting the map would let
+    // an archive of arbitrarily many same-named entries walk straight past the cap.
+    var entriesSeen = 0
     ZipInputStream(input).use { zip ->
         var entry = zip.nextEntry
         while (entry != null) {
             if (!entry.isDirectory) {
-                require(entries.size < maxEntries) { "Firmware archive has more than $maxEntries entries" }
+                entriesSeen++
+                require(entriesSeen <= maxEntries) { "Firmware archive has more than $maxEntries entries" }
                 // Bounded by whatever budget is left, so the running total cannot be exceeded by a single entry.
                 val bytes =
                     readAtMost(zip, remaining)

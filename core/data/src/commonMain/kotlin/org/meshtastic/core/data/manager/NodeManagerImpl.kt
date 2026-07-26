@@ -159,6 +159,10 @@ class NodeManagerImpl(
          * Eviction order is least-valuable-first: bare-packet placeholders before nodes that have sent a real NodeInfo,
          * and within each group the least recently heard. Nodes the user has marked (favourite, ignored) are never
          * evicted, since that is user data rather than observed mesh state.
+         *
+         * The cap is therefore best-effort rather than absolute: if protected entries alone exceed [maxNodes] the index
+         * stays above it. That is deliberate — favourite and ignored are set only by the local user, so no remote party
+         * can inflate them, and silently discarding user data to satisfy a memory bound would be the worse trade.
          */
         fun evictedToFit(maxNodes: Int, keep: Set<Int>): NodeIndex {
             if (byNum.size <= maxNodes) return this
@@ -431,10 +435,12 @@ class NodeManagerImpl(
                         // No live mutation since capture: install the filtered snapshot directly. Preserve any
                         // local-node number learned during the session; fall back to the persisted value only when
                         // we have none yet.
-                        state.copy(
-                            index = NodeIndex.fromByNum(filteredSnapshot),
-                            localNodeNum = state.localNodeNum ?: persistedLocalNum,
-                        )
+                        state
+                            .copy(
+                                index = NodeIndex.fromByNum(filteredSnapshot),
+                                localNodeNum = state.localNodeNum ?: persistedLocalNum,
+                            )
+                            .withBoundedIndex()
                     } else {
                         // Live state changed during the load window. Merge: current nodes (with their fresher
                         // fields) win over snapshot rows at the same num; snapshot rows only fill slots that the
@@ -443,10 +449,12 @@ class NodeManagerImpl(
                         val liveByNum = state.index.byNum
                         val merged = filteredSnapshot.toMutableMap()
                         liveByNum.forEach { (num, node) -> merged[num] = node }
-                        state.copy(
-                            index = NodeIndex.fromByNum(merged),
-                            localNodeNum = state.localNodeNum ?: persistedLocalNum,
-                        )
+                        state
+                            .copy(
+                                index = NodeIndex.fromByNum(merged),
+                                localNodeNum = state.localNodeNum ?: persistedLocalNum,
+                            )
+                            .withBoundedIndex()
                     }
                 }
             }
@@ -543,6 +551,20 @@ class NodeManagerImpl(
     internal fun getOrCreateNode(n: Int, channel: Int = 0): Node =
         nodeState.value.index.byNum[n] ?: createDefaultNode(n, channel)
 
+    /**
+     * Applies [MAX_IN_MEMORY_NODES] to this state's index, protecting the local node and [alsoKeep].
+     *
+     * EVERY path that installs an index must go through this. There are three — the ordinary [updateNodeState] reducer,
+     * the [handleReceivedUser] commit, and the [loadCachedNodeDB] snapshot install — and bounding only the first left
+     * the NodeInfo path, which is the one an unauthenticated peer drives most directly, completely unbounded.
+     *
+     * Returns the receiver unchanged when nothing needs evicting, so a CAS on the result stays cheap.
+     */
+    private fun NodeState.withBoundedIndex(alsoKeep: Int? = null): NodeState {
+        val bounded = index.evictedToFit(MAX_IN_MEMORY_NODES, keep = setOfNotNull(alsoKeep, localNodeNum))
+        return if (bounded === index) this else copy(index = bounded)
+    }
+
     private data class NodeStateChange(val previous: Node, val next: Node)
 
     private fun updateNodeState(nodeNum: Int, channel: Int, transform: (Node) -> Node): NodeStateChange? {
@@ -553,11 +575,9 @@ class NodeManagerImpl(
             val current = state.index.byNum[nodeNum] ?: createDefaultNode(nodeNum, channel)
             val next = transform(current)
             change = NodeStateChange(previous = current, next = next)
-            val grown = state.index.put(nodeNum, next)
-            state.copy(
-                index = grown.evictedToFit(MAX_IN_MEMORY_NODES, keep = setOfNotNull(nodeNum, state.localNodeNum)),
-                revision = state.revision + 1,
-            )
+            state
+                .copy(index = state.index.put(nodeNum, next), revision = state.revision + 1)
+                .withBoundedIndex(alsoKeep = nodeNum)
         }
         return change
     }
@@ -622,16 +642,18 @@ class NodeManagerImpl(
                 )
             receivedUserReductionHook?.invoke()
             val after =
-                before.copy(
-                    index = transition.after,
-                    retiredNodeNums =
-                    transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
-                        ?: before.retiredNodeNums,
-                    retiredKeyHints =
-                    transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
-                        ?: before.retiredKeyHints,
-                    revision = before.revision + 1,
-                )
+                before
+                    .copy(
+                        index = transition.after,
+                        retiredNodeNums =
+                        transition.unretireNodeNum?.let { before.retiredNodeNums.removing(it) }
+                            ?: before.retiredNodeNums,
+                        retiredKeyHints =
+                        transition.unretireNodeNum?.let { before.retiredKeyHints.removing(it) }
+                            ?: before.retiredKeyHints,
+                        revision = before.revision + 1,
+                    )
+                    .withBoundedIndex(alsoKeep = fromNum)
             if (nodeState.compareAndSet(before, after)) {
                 Logger.d {
                     val keyStr = resolveValidatedPublicKeyHint(p.public_key)?.let(::publicKeyLogFingerprint) ?: "none"

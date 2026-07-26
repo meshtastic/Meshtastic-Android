@@ -409,6 +409,14 @@ class SharedRadioInterfaceService(
         /** Log one dropped-frame warning per this many drops. See [enqueueReceivedData]. */
         private const val DROP_LOG_INTERVAL = 512L
 
+        /**
+         * Per-frame ceiling, matching `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE`.
+         *
+         * Duplicated rather than imported because `core:service` does not depend on `core:network`; the stream codec
+         * enforces the same number on its own path, and ATT caps BLE at the same value in practice.
+         */
+        const val MAX_FRAME_BYTES = 512
+
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
 
         // If we haven't received any data from the radio within this window after sending a
@@ -969,6 +977,13 @@ class SharedRadioInterfaceService(
             // previous `launch { emit() }` pattern dispatched each packet onto a fresh coroutine,
             // letting the scheduler reorder them — which broke the firmware config handshake
             // (see PhoneAPI.cpp initial-handshake sequence).
+            // Reject before the copy: the channel bounds the frame COUNT, so without a per-frame ceiling a transport
+            // handing over an oversized buffer defeats the memory bound the capacity is supposed to give. The stream
+            // codec already enforces this on its own path; BLE passes through whatever the GATT read returned.
+            if (bytes.size > MAX_FRAME_BYTES) {
+                Logger.w { "Discarding oversized ${bytes.size}-byte frame (max $MAX_FRAME_BYTES)" }
+                return
+            }
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
             if (result.isFailure) {

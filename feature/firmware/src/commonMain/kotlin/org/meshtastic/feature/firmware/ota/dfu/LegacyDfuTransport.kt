@@ -128,9 +128,7 @@ internal constructor(
                     "DFU mode device not found. Tried: ${targetAddresses.map { it.anonymize() }}",
                 )
 
-        Logger.i {
-            "Legacy DFU: Found DFU mode device at ${device.address.anonymize()} (name=${device.name}), connecting..."
-        }
+        Logger.i { "Legacy DFU: Found DFU mode device at ${device.address.anonymize()}, connecting..." }
         dfuAdvertisedName = device.name
 
         bleConnection.connectionState

@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,7 +117,7 @@ fun LogcatContent(modifier: Modifier = Modifier) {
 
     val export = rememberLogExporter { buildString { appendLogcat(this, raw.orEmpty()) } }
     // Same warning as the packet-log export: this file is meant to be attached to public issue trackers.
-    var showExportWarning by remember { mutableStateOf(false) }
+    var showExportWarning by rememberSaveable { mutableStateOf(false) }
     if (showExportWarning) {
         MeshtasticResourceDialog(
             titleRes = Res.string.debug_logs_export,

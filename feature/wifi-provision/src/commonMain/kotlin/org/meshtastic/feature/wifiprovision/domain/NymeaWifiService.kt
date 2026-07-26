@@ -100,7 +100,7 @@ class NymeaWifiService(
             }
 
         val deviceName = device.name ?: device.address
-        Logger.i { "$TAG: Found device: ${device.name} @ ${device.address.anonymize()}" }
+        Logger.i { "$TAG: Found device @ ${device.address.anonymize()}" }
 
         val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT)
         check(state is BleConnectionState.Connected) {

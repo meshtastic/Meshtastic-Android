@@ -130,6 +130,65 @@ class ZipExtractionTest {
         }
     }
 
+    /**
+     * Builds an archive containing [count] zero-byte STORED entries that all share [name].
+     *
+     * `ZipOutputStream` refuses to write a duplicate name, so this emits the local file headers directly — which is how
+     * a hostile archive would be produced anyway. `ZipInputStream` reads local headers sequentially and stops at the
+     * end-of-central-directory signature, so it yields all [count] entries.
+     */
+    private fun zipWithDuplicateNames(name: String, count: Int): ByteArray {
+        val out = ByteArrayOutputStream()
+        fun le16(v: Int) {
+            out.write(v and 0xFF)
+            out.write((v ushr 8) and 0xFF)
+        }
+        fun le32(v: Int) {
+            le16(v and 0xFFFF)
+            le16((v ushr 16) and 0xFFFF)
+        }
+        val nameBytes = name.encodeToByteArray()
+        repeat(count) {
+            le32(0x04034B50) // local file header signature
+            le16(20) // version needed
+            le16(0) // flags
+            le16(0) // method: stored
+            le16(0) // mod time
+            le16(0) // mod date
+            le32(0) // crc32 of empty data
+            le32(0) // compressed size
+            le32(0) // uncompressed size
+            le16(nameBytes.size)
+            le16(0) // extra length
+            out.write(nameBytes)
+        }
+        le32(0x06054B50) // end of central directory: stops the stream reader
+        repeat(18) { out.write(0) }
+        return out.toByteArray()
+    }
+
+    @Test
+    fun `duplicate entry names cannot bypass the entry cap`() {
+        // The cap counted map keys, and duplicates collapse to one key — so an archive of arbitrarily many same-named
+        // entries walked straight past it while doing unbounded work.
+        val zip = zipWithDuplicateNames("same.bin", count = 50)
+
+        assertFailsWith<IllegalArgumentException> {
+            extractZipEntriesBounded(ByteArrayInputStream(zip), maxEntries = 10)
+        }
+    }
+
+    @Test
+    fun `the duplicate-name fixture really does yield repeated entries`() {
+        // Guards the fixture itself: if ZipInputStream collapsed or rejected these, the cap test above would pass for
+        // the wrong reason.
+        val zip = zipWithDuplicateNames("same.bin", count = 5)
+
+        val entries = extractZipEntriesBounded(ByteArrayInputStream(zip), maxEntries = 100)
+
+        assertEquals(setOf("same.bin"), entries.keys, "duplicates collapse to one key — that is the bug's premise")
+    }
+
     @Test
     fun `directory entries do not consume the entry budget`() {
         val out = ByteArrayOutputStream()
