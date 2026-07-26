@@ -386,15 +386,25 @@ class SharedRadioInterfaceService(
         /**
          * Capacity of the inbound frame queue.
          *
-         * Sized above the burst a firmware handshake produces — `my_info` + metadata + ~10 config + ~14 moduleConfig +
-         * 8 channel + one frame per NodeDB entry (firmware `MAX_NUM_NODES` is 100–250 by target) + `config_complete`,
-         * so roughly 285 frames worst case.
+         * Sized against the burst a connect produces, which is roughly `35 + 5N` frames for a NodeDB of N nodes:
+         * - ~35 fixed: `my_info`, metadata, ~10 config, ~14 moduleConfig, 8 channels, deviceui, `config_complete`.
+         * - N thin `NodeInfo` frames — one per *hot-store* node. Warm-tier entries (firmware `WARM_NODE_COUNT`, up to
+         *   2000 on a native host) are identity-only records for evicted nodes and are NOT streamed to the phone, so
+         *   they do not contribute here.
+         * - Up to 4N more from the post-`config_complete` replay drain, which re-sends stored position, telemetry,
+         *   environment and status as ordinary mesh packets — one of each per node.
          *
-         * Memory is bounded by capacity × frame size. On the stream transports a frame cannot exceed
-         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE`; the BLE path passes through whatever the GATT read returned, which
-         * ATT caps at 512 bytes in practice rather than by anything enforced here.
+         * N is firmware `MAX_NUM_NODES`: 250 on portduino/native-host and top-tier ESP32-S3, 120 on nRF52840 and
+         * generic ESP32, 10 on STM32WL. So the realistic worst case is a Linux/Pi node at N=250 → ~1285 frames, and
+         * those arrive over TCP, the transport most able to outrun the consumer. 8192 keeps roughly 6x headroom over
+         * that; a custom build raising `MAX_NUM_NODES` past ~1630 would need this raised too.
+         *
+         * Memory stays bounded at capacity x frame size. On the stream transports a frame cannot exceed
+         * `StreamFrameCodec.MAX_TO_FROM_RADIO_SIZE` (512 B); the BLE path passes through whatever the GATT read
+         * returned, which ATT caps at 512 B in practice rather than by anything enforced here. A thin `NodeInfo` is
+         * closer to 100 B, so the realistic ceiling is well under the ~4 MB absolute worst case.
          */
-        const val RECEIVE_QUEUE_CAPACITY = 2048
+        const val RECEIVE_QUEUE_CAPACITY = 8192
 
         /** Log one dropped-frame warning per this many drops. See [enqueueReceivedData]. */
         private const val DROP_LOG_INTERVAL = 512L
