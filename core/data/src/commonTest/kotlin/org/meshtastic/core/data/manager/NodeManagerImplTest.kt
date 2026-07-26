@@ -90,6 +90,20 @@ class NodeManagerImplTest {
         repeat(count) { i -> nodeManager.updateNode(startAt + i) { node -> node.copy(lastHeard = i) } }
     }
 
+    /**
+     * Floods past the cap and asserts eviction actually ran.
+     *
+     * The protection tests below must assert this too: without it they pass trivially when eviction is disabled, since
+     * nothing being evicted also means the protected node survives.
+     */
+    private fun floodPastCapAndAssertEvicted() {
+        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+        assertTrue(
+            nodeManager.nodeDBbyNodeNum.size <= NodeManagerImpl.MAX_IN_MEMORY_NODES,
+            "eviction did not run: index is ${nodeManager.nodeDBbyNodeNum.size}",
+        )
+    }
+
     @Test
     fun `a flood of novel node numbers cannot grow the in-memory index without bound`() {
         // packet.from is unauthenticated, so every novel value would otherwise allocate a permanent Node. The index is
@@ -104,11 +118,14 @@ class NodeManagerImplTest {
 
     @Test
     fun `eviction never drops the local node`() {
+        // Deliberately left as a bare placeholder with the oldest lastHeard, i.e. the FIRST node eviction would
+        // otherwise pick. A local node with real NodeInfo survives incidentally by sorting last, which would not
+        // exercise the explicit exemption at all.
         val myNum = 4242
         nodeManager.setMyNodeNum(myNum)
-        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(hw_model = HardwareModel.TBEAM)) }
+        nodeManager.updateNode(myNum) { it.copy(lastHeard = -1) }
 
-        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+        floodPastCapAndAssertEvicted()
 
         assertNotNull(nodeManager.nodeDBbyNodeNum[myNum], "the local node must never be evicted")
     }
@@ -120,7 +137,7 @@ class NodeManagerImplTest {
         nodeManager.updateNode(favourite) { it.copy(isFavorite = true) }
         nodeManager.updateNode(ignored) { it.copy(isIgnored = true) }
 
-        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+        floodPastCapAndAssertEvicted()
 
         assertNotNull(nodeManager.nodeDBbyNodeNum[favourite], "a favourite must never be evicted")
         assertNotNull(nodeManager.nodeDBbyNodeNum[ignored], "an ignored node must never be evicted")
@@ -133,7 +150,7 @@ class NodeManagerImplTest {
             it.copy(user = it.user.copy(long_name = "Real Node", hw_model = HardwareModel.TLORA_V2))
         }
 
-        floodDistinctNodes(NodeManagerImpl.MAX_IN_MEMORY_NODES + 500)
+        floodPastCapAndAssertEvicted()
 
         assertNotNull(
             nodeManager.nodeDBbyNodeNum[identified],
