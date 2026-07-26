@@ -62,6 +62,7 @@ fun PersistenceSection(
     onSetCacheLimit: (Int) -> Unit,
     nodeShortName: String,
     onExportData: (android.net.Uri) -> Unit,
+    showTitle: Boolean = true,
 ) {
     val timestamp =
         fromEpochMilliseconds(nowMillis)
@@ -82,7 +83,7 @@ fun PersistenceSection(
             }
         }
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+    ExpressiveSection(title = stringResource(Res.string.app_settings), showTitle = showTitle) {
         val cacheItems = remember {
             (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map { it.toLong() to it.toString() }
         }

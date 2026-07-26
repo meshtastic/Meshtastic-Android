@@ -39,7 +39,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 /** Section for app appearance settings like language and theme. */
 @Composable
-fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
+fun AppearanceSection(
+    onShowLanguagePicker: () -> Unit,
+    onShowThemePicker: () -> Unit,
+    showTitle: Boolean = true,
+) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -48,7 +52,7 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
     // picker for these devices.
     val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+    ExpressiveSection(title = stringResource(Res.string.app_settings), showTitle = showTitle) {
         ListItem(
             text = stringResource(Res.string.preferences_language),
             leadingIcon = MeshtasticIcons.Language,

@@ -241,6 +241,7 @@ fun SettingsScreen(
                     showEditDeviceProfileDialog = true
                 },
                 onNavigate = onNavigate,
+                showSectionTitles = false,
             )
 
             // App-local settings are only relevant when configuring the local node
@@ -255,14 +256,16 @@ fun SettingsScreen(
                     onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                     startProvideLocation = { settingsViewModel.startProvidingLocation() },
                     stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                    showTitle = false,
                 )
 
                 AppearanceSection(
                     onShowLanguagePicker = { showLanguagePickerDialog = true },
                     onShowThemePicker = { showThemePickerDialog = true },
+                    showTitle = false,
                 )
 
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
                         leadingIcon = MeshtasticIcons.List,
@@ -271,7 +274,7 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.discovery_local_mesh),
                         leadingIcon = MeshtasticIcons.PermScanWifi,
@@ -280,13 +283,13 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                ExpressiveSection(title = stringResource(Res.string.wifi_devices), showTitle = false) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
+                ExpressiveSection(title = stringResource(Res.string.filter_settings), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.filter_settings),
                         leadingIcon = MeshtasticIcons.FilterList,
@@ -295,14 +298,14 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                ExpressiveSection(title = stringResource(Res.string.device_links), showTitle = false) {
                     ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
                         onNavigate(SettingsRoute.DeviceLinks)
                     }
                 }
 
                 if (appFunctionsAvailable) {
-                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings)) {
+                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings), showTitle = false) {
                         ListItem(
                             text = stringResource(Res.string.app_functions_settings),
                             supportingText = stringResource(Res.string.app_functions_settings_summary),
@@ -318,6 +321,7 @@ fun SettingsScreen(
                     onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     nodeShortName = ourNode?.user?.short_name ?: "",
                     onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                    showTitle = false,
                 )
 
                 AppInfoSection(
@@ -326,10 +330,11 @@ fun SettingsScreen(
                     onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
+                    showTitle = false,
                 )
             }
 
-            ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
+            ExpressiveSection(title = stringResource(Res.string.help_and_documentation), showTitle = false) {
                 ListItem(
                     text = stringResource(Res.string.help_and_documentation),
                     leadingIcon = MeshtasticIcons.HelpOutline,

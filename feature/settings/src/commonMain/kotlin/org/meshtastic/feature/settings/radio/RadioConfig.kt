@@ -78,29 +78,35 @@ fun RadioConfigItemList(
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
     onNavigate: (Route) -> Unit,
+    showSectionTitles: Boolean = true,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        RadioConfigSection(isManaged, enabled, onRouteClick)
-        DeviceConfigSection(isManaged, enabled, onNavigate)
-        ModuleSettingsSection(isManaged, enabled, onNavigate)
+        RadioConfigSection(isManaged, enabled, onRouteClick, showSectionTitles)
+        DeviceConfigSection(isManaged, enabled, onNavigate, showSectionTitles)
+        ModuleSettingsSection(isManaged, enabled, onNavigate, showSectionTitles)
 
         if (state.isLocal) {
-            BackupRestoreSection(isManaged, enabled, onImport, onExport)
+            BackupRestoreSection(isManaged, enabled, onImport, onExport, showSectionTitles)
         }
 
-        AdministrationSection(enabled, onNavigate)
+        AdministrationSection(enabled, onNavigate, showSectionTitles)
 
         if (state.isLocal) {
-            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
+            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate, showSectionTitles)
         }
     }
 }
 
 @Composable
-private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
+private fun RadioConfigSection(
+    isManaged: Boolean,
+    enabled: Boolean,
+    onRouteClick: (Enum<*>) -> Unit,
+    showTitle: Boolean,
+) {
+    ExpressiveSection(title = stringResource(Res.string.radio_configuration), showTitle = showTitle) {
         if (isManaged) {
             ManagedMessage()
         }
@@ -117,8 +123,8 @@ private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClic
 }
 
 @Composable
-private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
+private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit, showTitle: Boolean) {
+    ExpressiveSection(title = stringResource(Res.string.device_configuration), showTitle = showTitle) {
         if (isManaged) {
             ManagedMessage()
         }
@@ -134,8 +140,13 @@ private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate
 }
 
 @Composable
-private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.module_settings)) {
+private fun ModuleSettingsSection(
+    isManaged: Boolean,
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+    showTitle: Boolean,
+) {
+    ExpressiveSection(title = stringResource(Res.string.module_settings), showTitle = showTitle) {
         if (isManaged) {
             ManagedMessage()
         }
@@ -151,8 +162,14 @@ private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNaviga
 }
 
 @Composable
-private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport: () -> Unit, onExport: () -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
+private fun BackupRestoreSection(
+    isManaged: Boolean,
+    enabled: Boolean,
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    showTitle: Boolean,
+) {
+    ExpressiveSection(title = stringResource(Res.string.backup_restore), showTitle = showTitle) {
         if (isManaged) {
             ManagedMessage()
         }
@@ -173,8 +190,8 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
 }
 
 @Composable
-private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.administration)) {
+private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit, showTitle: Boolean) {
+    ExpressiveSection(title = stringResource(Res.string.administration), showTitle = showTitle) {
         ListItem(
             text = stringResource(Res.string.administration),
             leadingIcon = MeshtasticIcons.AdminPanelSettings,
@@ -190,8 +207,14 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
 }
 
 @Composable
-private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
+private fun AdvancedSection(
+    isManaged: Boolean,
+    isOtaCapable: Boolean,
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+    showTitle: Boolean,
+) {
+    ExpressiveSection(title = stringResource(Res.string.advanced_title), showTitle = showTitle) {
         if (isManaged) {
             ManagedMessage()
         }

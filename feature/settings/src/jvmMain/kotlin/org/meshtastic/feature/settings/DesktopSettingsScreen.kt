@@ -168,11 +168,12 @@ fun DesktopSettingsScreen(
                 onExport = {
                     // Profile export not yet supported on Desktop
                 },
+                showSectionTitles = false,
             )
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
-                ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+                ExpressiveSection(title = stringResource(Res.string.app_settings), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.theme),
                         leadingIcon = MeshtasticIcons.FormatPaint,
@@ -209,7 +210,7 @@ fun DesktopSettingsScreen(
                     )
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
                         leadingIcon = MeshtasticIcons.List,
@@ -218,7 +219,7 @@ fun DesktopSettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.discovery_local_mesh),
                         leadingIcon = MeshtasticIcons.PermScanWifi,
@@ -227,13 +228,13 @@ fun DesktopSettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                ExpressiveSection(title = stringResource(Res.string.device_links), showTitle = false) {
                     ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
                         onNavigate(SettingsRoute.DeviceLinks)
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                ExpressiveSection(title = stringResource(Res.string.wifi_devices), showTitle = false) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
                     }
@@ -246,9 +247,10 @@ fun DesktopSettingsScreen(
                     onToggleNodeEvents = { settingsViewModel.setNodeEventsEnabled(it) },
                     lowBatteryEnabled = settingsViewModel.lowBatteryEnabled.collectAsStateWithLifecycle().value,
                     onToggleLowBattery = { settingsViewModel.setLowBatteryEnabled(it) },
+                    showTitle = false,
                 )
 
-                ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
+                ExpressiveSection(title = stringResource(Res.string.help_and_documentation), showTitle = false) {
                     ListItem(
                         text = stringResource(Res.string.help_and_documentation),
                         leadingIcon = MeshtasticIcons.HelpOutline,
@@ -276,7 +278,7 @@ private fun DesktopAppInfoSection(
     onUnlockHiddenFeatures: () -> Unit,
     onNavigateToAbout: () -> Unit,
 ) {
-    ExpressiveSection(title = stringResource(Res.string.info)) {
+    ExpressiveSection(title = stringResource(Res.string.info), showTitle = false) {
         ListItem(
             text = stringResource(Res.string.acknowledgements),
             leadingIcon = MeshtasticIcons.Info,

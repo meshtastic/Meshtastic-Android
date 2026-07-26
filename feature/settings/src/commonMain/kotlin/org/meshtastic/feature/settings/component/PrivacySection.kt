@@ -44,6 +44,7 @@ fun PrivacySection(
     onToggleHomoglyph: () -> Unit,
     startProvideLocation: () -> Unit,
     stopProvideLocation: () -> Unit,
+    showTitle: Boolean = true,
 ) {
     val showToast = rememberShowToastResource()
     val locationPermission = rememberLocationPermissionState()
@@ -67,7 +68,7 @@ fun PrivacySection(
         }
     }
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+    ExpressiveSection(title = stringResource(Res.string.app_settings), showTitle = showTitle) {
         if (analyticsAvailable) {
             SwitchListItem(
                 text = stringResource(Res.string.analytics_okay),
