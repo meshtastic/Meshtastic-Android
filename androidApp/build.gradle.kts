@@ -130,10 +130,6 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
 
-        // Activates the (google-only) CarAppService. Off by default so production builds ship
-        // notification-only car messaging; flipped on by -PenableCarTemplates=true for Closed tracks.
-        manifestPlaceholders["carTemplatesEnabled"] = enableCarTemplates.toString()
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
