@@ -568,10 +568,13 @@ jobs:
           TAG: ${{ inputs.tag_name }}
           TARGET: ${{ inputs.commit_sha || github.sha }}
         run: |
-          PREV=$(gh api "repos/${REPO}/releases" --paginate \
-            --jq '.[] | select(.draft == false) | .tag_name' \
-            | grep -E '^v[0-9]' | grep -Fxv "$TAG" | head -1 || true)
-          echo "Previous release tag: ${PREV:-<none>}"
+          # Fail the step if the listing itself fails — an empty PREV must only ever
+          # mean "no published v* release exists yet", never a swallowed API error,
+          # because empty PREV re-enables the automatic selection this step avoids.
+          PUBLISHED_TAGS=$(gh api "repos/${REPO}/releases" --paginate \
+            --jq '.[] | select(.draft == false) | .tag_name')
+          PREV=$(printf '%s\n' "$PUBLISHED_TAGS" | grep -E '^v[0-9]' | grep -Fxv "$TAG" | head -1 || true)
+          echo "Previous release tag: ${PREV:-<none — falling back to automatic selection>}"
           gh api "repos/${REPO}/releases/generate-notes" \
             -f tag_name="$TAG" \
             -f target_commitish="$TARGET" \
