@@ -76,6 +76,7 @@ open class MeshUtilApplication :
     override fun onCreate() {
         super.onCreate()
         ContextServices.app = this
+        configureFlavorApplication(BuildConfig.APPLICATION_ID)
 
         startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)

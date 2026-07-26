@@ -24,8 +24,7 @@ import org.meshtastic.proto.Position
 
 /**
  * Flavor-unified entry point for the embeddable node-track map. Resolves [destNum] to obtain
- * [NodeMapViewModel.applicationId] and [NodeMapViewModel.mapStyleId], then delegates to the OSMDroid implementation
- * ([NodeTrackOsmMap]).
+ * [NodeMapViewModel.mapStyleId], then delegates to the OSMDroid implementation ([NodeTrackOsmMap]).
  *
  * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelected].
  */
@@ -41,7 +40,6 @@ fun NodeTrackMap(
     vm.setDestNum(destNum)
     NodeTrackOsmMap(
         positions = positions,
-        applicationId = vm.applicationId,
         mapStyleId = vm.mapStyleId,
         modifier = modifier,
         selectedPositionTime = selectedPositionTime,

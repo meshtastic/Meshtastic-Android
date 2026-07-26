@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
@@ -47,7 +46,6 @@ class MapViewModel(
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
     notificationPrefs: NotificationPrefs,
-    buildConfigProvider: BuildConfigProvider,
     private val mapLayersManager: MapLayersManager,
     savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(
@@ -86,8 +84,6 @@ class MapViewModel(
         set(value) {
             mapPrefs.setMapStyle(value)
         }
-
-    val applicationId = buildConfigProvider.applicationId
 
     /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and drawn on the OSMdroid map. */
     val mapLayers: StateFlow<List<MapLayerItem>> = mapLayersManager.mapLayers
