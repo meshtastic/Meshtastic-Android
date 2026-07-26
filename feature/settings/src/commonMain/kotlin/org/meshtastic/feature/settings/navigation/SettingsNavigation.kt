@@ -19,8 +19,12 @@ package org.meshtastic.feature.settings.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,7 +32,9 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
@@ -79,22 +85,25 @@ import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
 /**
- * Resolves the settings [RadioConfigViewModel] from a session-owned [androidx.lifecycle.ViewModelStoreOwner].
- *
- * Navigation 3 gives each entry its own store. Resolving this ViewModel inside every settings entry therefore destroys
- * and recreates the same radio-config session while moving between settings menus. A store keyed to the active local or
- * remote session preserves that session across its submenu entries and clears it when the destination changes, so an
- * abandoned remote session cannot retain collectors for the rest of the activity or window lifetime.
+ * Identifies whether the active back stack is outside settings, local settings, or remote settings for one node.
+ * Keeping these states distinct prevents a local settings ViewModel from remaining active on unrelated tabs.
  */
-private const val LOCAL_SETTINGS_VIEW_MODEL_KEY = "settings-local"
-private const val REMOTE_SETTINGS_VIEW_MODEL_KEY_PREFIX = "settings-remote-"
+internal sealed interface SettingsRadioConfigSession {
+    data object Inactive : SettingsRadioConfigSession
 
-internal data class SettingsRadioConfigSession(val destination: Int?) {
-    val viewModelKey: String
-        get() = destination?.let { "$REMOTE_SETTINGS_VIEW_MODEL_KEY_PREFIX$it" } ?: LOCAL_SETTINGS_VIEW_MODEL_KEY
+    sealed interface Active : SettingsRadioConfigSession {
+        val destination: Int?
+        val viewModelKey: String
+    }
 
-    val entryKey: String?
-        get() = destination?.toString()
+    data object Local : Active {
+        override val destination: Int? = null
+        override val viewModelKey: String = "settings-local"
+    }
+
+    data class Remote(override val destination: Int) : Active {
+        override val viewModelKey: String = "settings-remote-$destination"
+    }
 }
 
 internal class SettingsRadioConfigViewModelStoreOwner : ViewModelStoreOwner {
@@ -103,41 +112,142 @@ internal class SettingsRadioConfigViewModelStoreOwner : ViewModelStoreOwner {
     fun clear() = viewModelStore.clear()
 }
 
-@Composable
-fun rememberSettingsRadioConfigViewModelStoreOwner(backStack: NavBackStack<NavKey>): ViewModelStoreOwner {
-    val session = rememberSettingsRadioConfigSession(backStack)
-    val owner = remember(session) { SettingsRadioConfigViewModelStoreOwner() }
-    DisposableEffect(owner) { onDispose(owner::clear) }
-    return owner
-}
+/**
+ * Retains settings-session stores across configuration changes. A store remains available while its session is the
+ * active settings destination or while a navigation entry still holds a lease during an exit transition. Once neither
+ * condition applies, the store is cleared and its [RadioConfigViewModel] collectors are cancelled.
+ */
+@KoinViewModel
+internal class SettingsRadioConfigSessionHolder : ViewModel() {
+    private data class SessionStore(
+        val owner: SettingsRadioConfigViewModelStoreOwner = SettingsRadioConfigViewModelStoreOwner(),
+        var leases: Int = 0,
+    )
 
-@Composable
-fun settingsRadioConfigViewModel(
-    backStack: NavBackStack<NavKey>,
-    viewModelStoreOwner: ViewModelStoreOwner,
-): RadioConfigViewModel {
-    val session = rememberSettingsRadioConfigSession(backStack)
-    return koinViewModel<RadioConfigViewModel>(key = session.viewModelKey, viewModelStoreOwner = viewModelStoreOwner) {
-        parametersOf(session.destination)
+    private val stores = mutableMapOf<SettingsRadioConfigSession.Active, SessionStore>()
+    private var activeSession: SettingsRadioConfigSession = SettingsRadioConfigSession.Inactive
+    private var lastActiveSession: SettingsRadioConfigSession.Active? = null
+
+    fun activate(session: SettingsRadioConfigSession) {
+        activeSession = session
+        if (session is SettingsRadioConfigSession.Active) lastActiveSession = session
+        clearUnusedStores()
+    }
+
+    /**
+     * Resolves the session captured by a settings entry. During an exit transition the active back stack may already be
+     * outside settings, so the most recently active session is used instead of throwing from the outgoing composition.
+     */
+    fun resolveEntrySession(session: SettingsRadioConfigSession): SettingsRadioConfigSession.Active =
+        (session as? SettingsRadioConfigSession.Active) ?: lastActiveSession ?: SettingsRadioConfigSession.Local
+
+    fun ownerFor(session: SettingsRadioConfigSession.Active): ViewModelStoreOwner = storeFor(session).owner
+
+    fun retain(session: SettingsRadioConfigSession.Active) {
+        storeFor(session).leases += 1
+    }
+
+    fun release(session: SettingsRadioConfigSession.Active) {
+        stores[session]?.let { store -> if (store.leases > 0) store.leases -= 1 }
+        clearUnusedStores()
+    }
+
+    private fun storeFor(session: SettingsRadioConfigSession.Active): SessionStore =
+        stores.getOrPut(session, ::SessionStore)
+
+    private fun clearUnusedStores() {
+        val current = activeSession as? SettingsRadioConfigSession.Active
+        val iterator = stores.iterator()
+        while (iterator.hasNext()) {
+            val (session, store) = iterator.next()
+            if (session != current && store.leases == 0) {
+                store.owner.clear()
+                iterator.remove()
+            }
+        }
+    }
+
+    override fun onCleared() {
+        stores.values.forEach { it.owner.clear() }
+        stores.clear()
+        super.onCleared()
     }
 }
 
+/**
+ * Observes back-stack mutations without invalidating the app shell for every settings submenu push or pop. The returned
+ * state changes only when the logical settings session changes.
+ */
 @Composable
-private fun entryScopedRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
-    val session = rememberSettingsRadioConfigSession(backStack)
-    return koinViewModel<RadioConfigViewModel>(key = session.entryKey) { parametersOf(session.destination) }
+internal fun rememberSettingsRadioConfigSession(backStack: NavBackStack<NavKey>) =
+    produceState(initialValue = settingsRadioConfigSession(backStack.toList()), backStack) {
+        snapshotFlow { settingsRadioConfigSession(backStack.toList()) }.distinctUntilChanged().collect { value = it }
+    }
+
+@Composable
+internal fun settingsRadioConfigViewModel(
+    session: SettingsRadioConfigSession.Active,
+    viewModelStoreOwner: ViewModelStoreOwner,
+): RadioConfigViewModel =
+    koinViewModel<RadioConfigViewModel>(key = session.viewModelKey, viewModelStoreOwner = viewModelStoreOwner) {
+        parametersOf(session.destination)
+    }
+
+/** Returns the retained provider used by all entries in the active settings session. */
+@Composable
+fun rememberSettingsRadioConfigViewModelProvider(
+    backStack: NavBackStack<NavKey>,
+): @Composable (SettingsRoute.Settings?) -> RadioConfigViewModel {
+    val session by rememberSettingsRadioConfigSession(backStack)
+    val holder: SettingsRadioConfigSessionHolder = koinViewModel()
+    SideEffect { holder.activate(session) }
+
+    return remember(backStack, holder) {
+        @Composable { settingsRoot ->
+            // Capture the session once for this navigation entry. An outgoing entry keeps its original local/remote
+            // session during crossfades even after the active top-level back stack has changed.
+            val entrySession =
+                remember(settingsRoot, holder) {
+                    val candidate =
+                        if (settingsRoot != null) {
+                            settingsRoot.destNum?.let(SettingsRadioConfigSession::Remote)
+                                ?: SettingsRadioConfigSession.Local
+                        } else {
+                            settingsRadioConfigSession(backStack.toList())
+                        }
+                    holder.resolveEntrySession(candidate)
+                }
+            val owner = remember(entrySession, holder) { holder.ownerFor(entrySession) }
+
+            DisposableEffect(holder, entrySession) {
+                holder.retain(entrySession)
+                onDispose { holder.release(entrySession) }
+            }
+
+            settingsRadioConfigViewModel(session = entrySession, viewModelStoreOwner = owner)
+        }
+    }
 }
 
-@Composable
-private fun rememberSettingsRadioConfigSession(backStack: NavBackStack<NavKey>): SettingsRadioConfigSession {
-    val stackSnapshot = backStack.toList()
-    return remember(stackSnapshot) { settingsRadioConfigSession(stackSnapshot) }
+internal fun settingsRadioConfigSession(backStack: List<NavKey>): SettingsRadioConfigSession {
+    if (backStack.none(NavKey::usesRadioConfigSettingsSession)) return SettingsRadioConfigSession.Inactive
+
+    // Remote administration always carries a Settings root with its destination. Local configuration can also be
+    // opened directly from another graph (currently Connections -> LoRa), so the absence of a root is still an active
+    // local session while a radio-config route remains on the active back stack.
+    val settingsRoot = backStack.filterIsInstance<SettingsRoute.Settings>().lastOrNull()
+    return settingsRoot?.destNum?.let(SettingsRadioConfigSession::Remote) ?: SettingsRadioConfigSession.Local
 }
 
-internal fun settingsRadioConfigSession(backStack: List<NavKey>): SettingsRadioConfigSession =
-    SettingsRadioConfigSession(backStack.filterIsInstance<SettingsRoute.Settings>().lastOrNull()?.destNum)
+private fun NavKey.usesRadioConfigSettingsSession(): Boolean = this is SettingsRoute.Settings ||
+    this == SettingsRoute.DeviceConfiguration ||
+    this == SettingsRoute.ModuleConfiguration ||
+    this == SettingsRoute.Administration ||
+    ConfigRoute.entries.any { it.route == this } ||
+    ModuleRoute.entries.any { it.route == this }
 
-internal fun settingsDestination(backStack: List<NavKey>): Int? = settingsRadioConfigSession(backStack).destination
+internal fun settingsDestination(backStack: List<NavKey>): Int? =
+    (settingsRadioConfigSession(backStack) as? SettingsRadioConfigSession.Active)?.destination
 
 internal fun shouldAddSettingsRoute(current: NavKey?, route: Route): Boolean = current != route
 
@@ -148,15 +258,13 @@ private fun NavBackStack<NavKey>.addSettingsRoute(route: Route) {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(
     backStack: NavBackStack<NavKey>,
-    radioConfigViewModelProvider: @Composable () -> RadioConfigViewModel = {
-        entryScopedRadioConfigViewModel(backStack)
-    },
+    radioConfigViewModelProvider: @Composable (SettingsRoute.Settings?) -> RadioConfigViewModel,
 ) {
     entry<SettingsRoute.Settings> { args ->
         val isTabRoot = backStack.firstOrNull() == args
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
-            radioConfigViewModel = radioConfigViewModelProvider(),
+            radioConfigViewModel = radioConfigViewModelProvider(args),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = backStack::addSettingsRoute,
             onBack = if (isTabRoot) null else dropUnlessResumed { backStack.removeLastOrNull() },
@@ -165,7 +273,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
 
     entry<SettingsRoute.DeviceConfiguration> {
         DeviceConfigurationScreen(
-            viewModel = radioConfigViewModelProvider(),
+            viewModel = radioConfigViewModelProvider(null),
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
             onNavigate = backStack::addSettingsRoute,
         )
@@ -175,7 +283,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         val settingsViewModel: SettingsViewModel = koinViewModel()
         val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
-            viewModel = radioConfigViewModelProvider(),
+            viewModel = radioConfigViewModelProvider(null),
             hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
             onNavigate = backStack::addSettingsRoute,
@@ -184,7 +292,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
 
     entry<SettingsRoute.Administration> {
         AdministrationScreen(
-            viewModel = radioConfigViewModelProvider(),
+            viewModel = radioConfigViewModelProvider(null),
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
@@ -340,11 +448,11 @@ expect fun SettingsMainScreen(
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
     routeInfo: Enum<*>,
-    radioConfigViewModelProvider: @Composable () -> RadioConfigViewModel,
+    radioConfigViewModelProvider: @Composable (SettingsRoute.Settings?) -> RadioConfigViewModel,
     content: @Composable (RadioConfigViewModel) -> Unit,
 ) {
     addEntryProvider(route) {
-        val viewModel = radioConfigViewModelProvider()
+        val viewModel = radioConfigViewModelProvider(null)
         // Set loading state before content reads the StateFlow, ensuring
         // LoadingOverlay is visible from the very first composition frame.
         remember { viewModel.ensureLoadingForRemote().let { true } }

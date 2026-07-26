@@ -30,20 +30,19 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
-import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelStoreOwner
-import org.meshtastic.feature.settings.navigation.settingsRadioConfigViewModel
+import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 
 /**
  * Desktop main screen — assembles the shared [MeshtasticAppShell], [MeshtasticNavigationSuite], and
  * [MeshtasticNavDisplay] with the desktop-specific [desktopNavGraph] entry provider.
  */
-@Suppress("ViewModelForwarding", "ModifierMissing")
+@Suppress("ViewModelForwarding")
 @Composable
-fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
+fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack, modifier: Modifier = Modifier) {
     val backStack = multiBackstack.activeBackStack
-    val settingsViewModelStoreOwner = rememberSettingsRadioConfigViewModelStoreOwner(backStack)
+    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
 
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = modifier.fillMaxSize()) {
         MeshtasticAppShell(
             multiBackstack = multiBackstack,
             uiViewModel = uiViewModel,
@@ -60,9 +59,7 @@ fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) 
                             backStack = backStack,
                             uiViewModel = uiViewModel,
                             multiBackstack = multiBackstack,
-                            settingsRadioConfigViewModel = {
-                                settingsRadioConfigViewModel(backStack, settingsViewModelStoreOwner)
-                            },
+                            settingsRadioConfigViewModel = settingsRadioConfigViewModelProvider,
                         )
                     }
                 MeshtasticNavDisplay(

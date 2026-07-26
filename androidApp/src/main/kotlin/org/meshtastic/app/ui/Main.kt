@@ -54,9 +54,8 @@ import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.lockdown.LockdownDialog
-import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelStoreOwner
+import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 import org.meshtastic.feature.settings.navigation.settingsGraph
-import org.meshtastic.feature.settings.navigation.settingsRadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
@@ -68,7 +67,7 @@ fun MainScreen() {
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
     val scrollToTopEvents = viewModel.scrollToTopEventFlow
-    val settingsViewModelStoreOwner = rememberSettingsRadioConfigViewModelStoreOwner(backStack)
+    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
 
     AndroidAppVersionCheck(viewModel)
 
@@ -110,9 +109,7 @@ fun MainScreen() {
                     channelsGraph(backStack)
                     connectionsGraph(backStack)
                     discoveryGraph(backStack)
-                    settingsGraph(backStack) {
-                        settingsRadioConfigViewModel(backStack, settingsViewModelStoreOwner)
-                    }
+                    settingsGraph(backStack, settingsRadioConfigViewModelProvider)
                     docsEntries(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)

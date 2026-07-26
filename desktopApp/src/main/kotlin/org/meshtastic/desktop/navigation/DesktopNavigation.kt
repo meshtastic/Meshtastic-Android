@@ -21,6 +21,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.MultiBackstack
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
@@ -45,7 +46,7 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
     backStack: NavBackStack<NavKey>,
     uiViewModel: UIViewModel,
     multiBackstack: MultiBackstack,
-    settingsRadioConfigViewModel: @Composable () -> RadioConfigViewModel,
+    settingsRadioConfigViewModel: @Composable (SettingsRoute.Settings?) -> RadioConfigViewModel,
 ) {
     nodesGraph(
         backStack = backStack,
