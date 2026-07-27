@@ -78,7 +78,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -91,6 +93,7 @@ import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -703,16 +706,18 @@ fun MapView(
         }
 
     // osmdroid runs the tile download on its own task for minutes and then calls back from there, not from a
-    // composable. Publishing the outcome as state keeps the toast on an effect that lives and dies with this screen: a
-    // callback that lands after the user left the map can no longer launch into a forgotten composition scope.
-    var tileDownloadOutcome by remember { mutableStateOf<TileDownloadOutcome?>(null) }
-    LaunchedEffect(tileDownloadOutcome) {
-        when (val outcome = tileDownloadOutcome) {
-            null -> return@LaunchedEffect
-            is TileDownloadOutcome.Complete -> context.showToast(Res.string.map_download_complete)
-            is TileDownloadOutcome.Failed -> context.showToast(Res.string.map_download_errors, outcome.errors)
+    // composable. The callback only queues the outcome; the toast is emitted by an effect that lives and dies with this
+    // screen, so a callback landing after the user left the map can no longer launch into a forgotten composition
+    // scope. A queue rather than a state value: outcomes are one-shot events, and two equal ones (two completions, or
+    // two failures with the same error count) must still produce two toasts.
+    val tileDownloadOutcomes = remember { Channel<TileDownloadOutcome>(Channel.UNLIMITED) }
+    LaunchedEffect(Unit) {
+        for (outcome in tileDownloadOutcomes) {
+            when (outcome) {
+                is TileDownloadOutcome.Complete -> context.showToast(Res.string.map_download_complete)
+                is TileDownloadOutcome.Failed -> context.showToast(Res.string.map_download_errors, outcome.errors)
+            }
         }
-        tileDownloadOutcome = null
     }
 
     fun startDownload() {
@@ -732,11 +737,11 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        tileDownloadOutcome = TileDownloadOutcome.Complete
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Complete)
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        tileDownloadOutcome = TileDownloadOutcome.Failed(errors)
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Failed(errors))
                         writer.onDetach()
                     },
                 ),
@@ -955,8 +960,11 @@ fun MapView(
             onPurge = { sources ->
                 scope.launch {
                     sources.forEach { source ->
+                        // purgeCache does synchronous SQLite deletes over the tile cache; this scope dispatches on the
+                        // UI thread, so the delete has to move off it.
+                        val purged = withContext(ioDispatcher) { SqlTileWriterExt().purgeCache(source) }
                         context.showToast(
-                            if (SqlTileWriterExt().purgeCache(source)) {
+                            if (purged) {
                                 getString(Res.string.map_purge_success, source)
                             } else {
                                 getString(Res.string.map_purge_fail)

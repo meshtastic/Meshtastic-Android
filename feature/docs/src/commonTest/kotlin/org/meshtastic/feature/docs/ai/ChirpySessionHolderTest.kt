@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -64,6 +65,23 @@ class ChirpySessionHolderTest {
         advanceUntilIdle()
 
         assertFalse(holder.sessionState.isLoading, "a stream with no terminal result must not wedge the composer")
+    }
+
+    @Test
+    fun `a thrown failure clears loading instead of wedging the composer`() = runTest {
+        val holder = holderFor(FakeDocAssistant(stream = flow { throw IllegalStateException("assistant blew up") }))
+
+        holder.sessionState = holder.sessionState.copy(draftQuestion = "Why?")
+        holder.submit(currentPageId = null)
+        advanceUntilIdle()
+
+        assertFalse(holder.sessionState.isLoading, "a failed request must not block every later question")
+
+        // The composer is usable again: the next question is accepted rather than dropped by the isLoading guard.
+        holder.sessionState = holder.sessionState.copy(draftQuestion = "Again?")
+        holder.submit(currentPageId = null)
+
+        assertEquals(2, holder.sessionState.messages.count { it.role == ChirpyRole.USER })
     }
 
     @Test

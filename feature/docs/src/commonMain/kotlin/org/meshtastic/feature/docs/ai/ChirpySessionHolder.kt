@@ -19,12 +19,15 @@ package org.meshtastic.feature.docs.ai
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.resources.chirpy_error_busy
 import org.meshtastic.core.resources.chirpy_error_model_unavailable
@@ -136,14 +139,30 @@ class ChirpySessionHolder(private val aiAssistant: AIDocAssistant, dispatchers: 
                     }
                 }
             }
-            // A stream that ends without a terminal result would otherwise leave the composer disabled for good.
-            if (sessionState.isLoading) sessionState = sessionState.copy(isLoading = false)
         }
     }
 
+    /**
+     * Runs [block] as the one current request. Every exit path — success, a stream that ended without a terminal
+     * result, a thrown failure, or cancellation — clears [AIDocAssistantSessionState.isLoading], because leaving it set
+     * blocks [submit] and [introduce] for the rest of the process. Only the current request may clear it: a superseded
+     * one must not unblock the composer on behalf of the request that replaced it.
+     */
     private fun launchRequest(block: suspend () -> Unit) {
         request?.cancel()
-        request = scope.launch { block() }
+        // LAZY so `request` is assigned before the body can observe it.
+        val job =
+            scope.launch(start = CoroutineStart.LAZY) {
+                try {
+                    safeCatching { block() }.onFailure { Logger.e(it) { "[Chirpy] request failed" } }
+                } finally {
+                    if (request === coroutineContext[Job] && sessionState.isLoading) {
+                        sessionState = sessionState.copy(isLoading = false)
+                    }
+                }
+            }
+        request = job
+        job.start()
     }
 }
 
