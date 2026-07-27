@@ -268,14 +268,29 @@ fun SettingsScreen(
                         nodeShortName = ourNode?.user?.short_name ?: "",
                         onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
                     )
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
                         leadingIcon = MeshtasticIcons.List,
                     ) {
                         onNavigate(SettingsRoute.NodeList)
+                    }
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
+                        onNavigate(WifiProvisionRoute.WifiProvision())
+                    }
+                    ListItem(
+                        text = stringResource(Res.string.filter_settings),
+                        leadingIcon = MeshtasticIcons.FilterList,
+                    ) {
+                        onNavigate(SettingsRoute.FilterSettings)
+                    }
+                    if (appFunctionsAvailable) {
+                        ListItem(
+                            text = stringResource(Res.string.app_functions_settings),
+                            supportingText = stringResource(Res.string.app_functions_settings_summary),
+                            leadingIcon = MeshtasticIcons.SettingsRemote,
+                        ) {
+                            onNavigate(SettingsRoute.AppFunctionsSettings)
+                        }
                     }
                 }
 
@@ -288,36 +303,9 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
-                        onNavigate(WifiProvisionRoute.WifiProvision())
-                    }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
-                    ListItem(
-                        text = stringResource(Res.string.filter_settings),
-                        leadingIcon = MeshtasticIcons.FilterList,
-                    ) {
-                        onNavigate(SettingsRoute.FilterSettings)
-                    }
-                }
-
                 ExpressiveSection(title = stringResource(Res.string.device_links)) {
                     ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
                         onNavigate(SettingsRoute.DeviceLinks)
-                    }
-                }
-
-                if (appFunctionsAvailable) {
-                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings)) {
-                        ListItem(
-                            text = stringResource(Res.string.app_functions_settings),
-                            supportingText = stringResource(Res.string.app_functions_settings_summary),
-                            leadingIcon = MeshtasticIcons.SettingsRemote,
-                        ) {
-                            onNavigate(SettingsRoute.AppFunctionsSettings)
-                        }
                     }
                 }
 

@@ -90,13 +90,12 @@ fun RadioConfigItemList(
             RadioConfigContent(enabled, onRouteClick)
             DeviceConfigContent(enabled, onNavigate)
             ModuleSettingsContent(enabled, onNavigate)
+            AdministrationContent(enabled, onNavigate)
         }
 
         if (state.isLocal) {
             BackupRestoreSection(isManaged, enabled, onImport, onExport)
         }
-
-        AdministrationSection(enabled, onNavigate)
 
         if (state.isLocal) {
             AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
@@ -175,19 +174,17 @@ private fun BackupRestoreSection(
 }
 
 @Composable
-private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.administration)) {
-        ListItem(
-            text = stringResource(Res.string.administration),
-            leadingIcon = MeshtasticIcons.AdminPanelSettings,
-            trailingIcon = MeshtasticIcons.ChevronRight,
-            leadingIconTint = MaterialTheme.colorScheme.error,
-            textColor = MaterialTheme.colorScheme.error,
-            trailingIconTint = MaterialTheme.colorScheme.error,
-            enabled = enabled,
-        ) {
-            onNavigate(SettingsRoute.Administration)
-        }
+private fun ColumnScope.AdministrationContent(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.administration),
+        leadingIcon = MeshtasticIcons.AdminPanelSettings,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        leadingIconTint = MaterialTheme.colorScheme.error,
+        textColor = MaterialTheme.colorScheme.error,
+        trailingIconTint = MaterialTheme.colorScheme.error,
+        enabled = enabled,
+    ) {
+        onNavigate(SettingsRoute.Administration)
     }
 }
 
