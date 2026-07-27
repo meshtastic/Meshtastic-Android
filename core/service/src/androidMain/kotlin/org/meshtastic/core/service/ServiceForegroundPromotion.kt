@@ -43,18 +43,24 @@ internal fun Service.startForegroundSafely(notification: Notification, foregroun
     false
 } catch (ex: SecurityException) {
     retryWithoutRefusedType(ex, notification, foregroundServiceType)
+} catch (ex: IllegalArgumentException) {
+    // AOSP surfaces a refused type as SecurityException, but a type/manifest mismatch (or OEM variance in how the
+    // refusal is reported) arrives as IllegalArgumentException. connectedDevice is always manifest-declared, so the
+    // same fallback applies.
+    retryWithoutRefusedType(ex, notification, foregroundServiceType)
 } catch (ex: Exception) {
     Logger.e(ex) { "Error starting foreground service" }
     false
 }
 
 /**
- * Handles a [SecurityException] from `startForeground()` by dropping back to `connectedDevice` alone, which carries no
- * while-in-use restriction. Only the additive `location` type can be refused this way, so when it was not requested
+ * Handles a refused foreground-service type ([SecurityException] on AOSP, [IllegalArgumentException] on a type/manifest
+ * mismatch) by dropping back to `connectedDevice` alone, which carries no while-in-use restriction and is always
+ * declared in the manifest. Only the additive `location` type can be refused this way, so when it was not requested
  * there is nothing left to give up.
  */
 private fun Service.retryWithoutRefusedType(
-    ex: SecurityException,
+    ex: RuntimeException,
     notification: Notification,
     requestedType: Int,
 ): Boolean {
