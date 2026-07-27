@@ -217,6 +217,9 @@ coding_rate
 collapse_chart
 collapsed
 communicate_off_the_grid
+companion_association_dismiss
+companion_association_prompt
+companion_association_set_up
 ### COMPASS ###
 compass_bearing
 compass_bearing_na

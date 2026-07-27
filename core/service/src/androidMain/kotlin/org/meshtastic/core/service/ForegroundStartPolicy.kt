@@ -53,11 +53,16 @@ object ForegroundStartPolicy {
      * opening the app ([ServiceStartTrigger.UserInterface]).
      *
      * @param appInForeground whether this process currently holds a user-visible component.
+     * @param hasCompanionAssociation whether a Companion Device Manager association exists for the selected device.
+     *   Together with the declared `REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND` permission (API 31,
+     *   exactly coextensive with the background-start restriction) this is a named exemption, so a backgrounded
+     *   [ServiceStartTrigger.DeviceAddressChanged] start becomes legal for an associated radio.
      * @param sdkInt the running platform API level.
      */
     fun isForegroundStartAllowed(
         trigger: ServiceStartTrigger,
         appInForeground: Boolean,
+        hasCompanionAssociation: Boolean,
         sdkInt: Int = Build.VERSION.SDK_INT,
     ): Boolean = when {
         // Before Android 12 there is no background-start restriction at all.
@@ -70,8 +75,10 @@ object ForegroundStartPolicy {
 
         trigger == ServiceStartTrigger.BootCompleted -> true
 
-        // No exemption of its own — legal only while the app is genuinely still in the foreground.
-        else -> appInForeground
+        // No exemption of its own — legal while the app is still in the foreground, or (from API 31, where both the
+        // restriction and the companion-device exemption begin) when the selected radio holds a CDM association.
+        // The caller keeps its try/catch either way: the exemption claim is verified by the OS, never trusted.
+        else -> appInForeground || hasCompanionAssociation
     }
 
     /**

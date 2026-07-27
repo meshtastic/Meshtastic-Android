@@ -16,16 +16,20 @@
  */
 package org.meshtastic.feature.connections
 
+import android.os.Build
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.ble.CompanionAssociationRepository
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.model.util.anonymize
@@ -40,6 +44,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bonding_failed_permissions
 import org.meshtastic.core.resources.bonding_failed_retry
 import org.meshtastic.core.resources.usb_permission_denied
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -56,6 +61,7 @@ class AndroidScannerViewModel(
     networkRepository: NetworkRepository,
     dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
+    private val companionAssociationRepository: CompanionAssociationRepository,
     private val usbRepository: UsbRepository,
     uiPrefs: UiPrefs,
     firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
@@ -113,9 +119,43 @@ class AndroidScannerViewModel(
                     }
                 }
             if (armTransport) {
+                maybeAssociateCompanionDevice(entry.device.address)
                 changeDeviceAddress(entry.fullAddress)
             }
         }
+    }
+
+    /**
+     * Offers a Companion Device Manager association right after a successful bond (Android 12+, where the association
+     * buys the background service-start exemption). Strictly additive: user cancellation or failure leaves the connect
+     * flow exactly as it was — the chooser is fire-and-forget and never gates [changeDeviceAddress].
+     */
+    private fun maybeAssociateCompanionDevice(mac: String) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        companionAssociationRepository.associate(mac)
+    }
+
+    /**
+     * The migration prompt for radios paired before companion associations existed: visible while an unassociated BLE
+     * radio is selected on Android 12+ and the user has not dismissed it. The connected-state gate lives in the UI.
+     */
+    override val companionAssociationPromptVisible: StateFlow<Boolean> =
+        combine(
+            selectedAddressFlow,
+            uiPrefs.companionAssociationPromptDismissed,
+            companionAssociationRepository.associationsRevision,
+        ) { address, dismissed, _ ->
+            val mac = CompanionAssociationRepository.bleMacFromFullAddress(address)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                !dismissed &&
+                mac != null &&
+                !companionAssociationRepository.hasAssociationFor(mac)
+        }
+            .stateInWhileSubscribed(initialValue = false)
+
+    override fun requestCompanionAssociationForSelectedDevice() {
+        val mac = CompanionAssociationRepository.bleMacFromFullAddress(selectedAddressFlow.value) ?: return
+        companionAssociationRepository.associate(mac)
     }
 
     override fun requestPermission(entry: DeviceListEntry.Usb) {

@@ -38,6 +38,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -66,6 +67,9 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_disabled
+import org.meshtastic.core.resources.companion_association_dismiss
+import org.meshtastic.core.resources.companion_association_prompt
+import org.meshtastic.core.resources.companion_association_set_up
 import org.meshtastic.core.resources.connections
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.firmware_event_ended_banner
@@ -92,6 +96,7 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.RecoveryCard
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
@@ -152,6 +157,7 @@ fun ConnectionsScreen(
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
     val pendingRecovery by scanModel.pendingRecovery.collectAsStateWithLifecycle()
+    val companionPromptEligible by scanModel.companionAssociationPromptVisible.collectAsStateWithLifecycle()
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -417,6 +423,17 @@ fun ConnectionsScreen(
                             }
                         }
 
+                        // One-time migration offer for radios paired before companion associations existed. Gated on
+                        // Connected because the system's association chooser scans for the radio — it can only
+                        // succeed while the device is provably present. Dismissible and strictly additive.
+                        if (companionPromptEligible && connectionState is ConnectionState.Connected) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            CompanionAssociationPromptCard(
+                                onSetUp = scanModel::requestCompanionAssociationForSelectedDevice,
+                                onDismiss = scanModel::dismissCompanionAssociationPrompt,
+                            )
+                        }
+
                         // Transport selector sits between the connection card and device list; it controls only the
                         // visible discovery pane, not the globally selected/connected device shown above.
                         TransportSelector(
@@ -562,6 +579,43 @@ private fun FirmwareUpdateNoticeCard(notice: FirmwareUpdateNotice, onAction: () 
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(actionLabel)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Dismissible one-time offer to register the connected radio as an OS companion device, which keeps background service
+ * starts legal for it (Android 12+). Informational tone on purpose: nothing is wrong, so it must not look like the
+ * error-styled [RecoveryCard]s around it.
+ */
+@Composable
+private fun CompanionAssociationPromptCard(onSetUp: () -> Unit, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.Top) {
+            Icon(
+                imageVector = MeshtasticIcons.Bluetooth,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(
+                    text = stringResource(Res.string.companion_association_prompt),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(modifier = Modifier.padding(top = 12.dp), onClick = onSetUp) {
+                    Text(stringResource(Res.string.companion_association_set_up))
+                }
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    imageVector = MeshtasticIcons.Close,
+                    contentDescription = stringResource(Res.string.companion_association_dismiss),
+                )
             }
         }
     }
