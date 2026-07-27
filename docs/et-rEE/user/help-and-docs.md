@@ -17,7 +17,7 @@ This same user documentation ships **inside the app**, so you can read it offlin
 
 ## Browsing
 
-The docs browser lists every user-guide page. Tap a page to read it; images and cross-links work just like they do here.
+The docs browser lists every user-guide page. Selle lugemiseks klõpsa lehel; pildid ja ristlingid toimivad ka.
 
 ![In-app documentation browser table of contents](../../assets/screenshots/docs-browser_toc.png)
 
@@ -33,13 +33,13 @@ A page open in the browser:
 
 ## Chirpy — the AI Assistant
 
-**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Tap the Chirpy button in the docs browser, type a question, and it replies with an answer and links to the relevant pages.
+**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Klõpsai dokumendibrauseris nuppu Chirpy, sisesta küsimus ja see vastab vastuse ja linkidega asjakohastele lehtedele.
 
-![Chirpy AI assistant answering a question with page links](../../assets/screenshots/docs-browser_chirpy.png)
+![Chirpy TI assistent vastab küsimusele lehelinkide abil](../../assets/screenshots/docs-browser_chirpy.png)
 
 > 🔒 **Privacy:** On supported Google-flavor devices, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. Väike mudel laetakse alla esmakordsel kasutamisel.
 
-> ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
+> ⚠️ **Märkus:** F-Droidi, töölaua ja iOS-i versioonide puhul kasutab Chirpy dokumentatsiooni asemel **märksõnaotsingut**, mitte generatiivset mudelit. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
 
 ## Related Topics
 

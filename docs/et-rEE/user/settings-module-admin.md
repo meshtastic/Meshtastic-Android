@@ -60,7 +60,7 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 
 ### Välise teavitusmoodul
 
-Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Kasulik seadmetele, mis peavad sõnumi saabumisest füüsiliselt märku andma – eriti kasulik järelevalveta või välistingimustes paigaldamise korral.
 
 | Sätted                            | Kirjeldus                     |
 | --------------------------------- | ----------------------------- |
@@ -80,7 +80,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 | Sätted                                     | Kirjeldus                                                                                                                                        |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lubatud                                    | Activate store and forward                                                                                                                       |
+| Lubatud                                    | Aktiveeri salvesta ja saada                                                                                                                      |
 | Südamelöögid                               | Periodically announce this node's store-and-forward capability                                                                                   |
 | Records                                    | Maximum stored messages                                                                                                                          |
 | History Return (max)    | Max messages to replay                                                                                                                           |
@@ -91,11 +91,11 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Kaugustesti moodul
 
-Automated range testing tool for evaluating link quality between nodes. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
 | Sätted                                 | Kirjeldus                         |
 | -------------------------------------- | --------------------------------- |
-| Lubatud                                | Activate range testing            |
+| Lubatud                                | Aktiveeri levi test               |
 | Sender Interval (s) | Time between test transmissions   |
 | Salvesta CSV                           | Log received test data to SD card |
 
@@ -185,16 +185,16 @@ Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvas
 | Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                                               |
 | Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                                                 |
 | Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                                                 |
-| Friendly Name                              | Custom name for this sensor                                                                                                             |
+| Friendly Name                              | Selle anduri kohandatud nimi                                                                                                            |
 
 ### Paxloenduri moodul
 
 Inimeste loendur WiFi ja BLE päringute abil. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Sätted                                     | Kirjeldus                  |
-| ------------------------------------------ | -------------------------- |
-| Lubatud                                    | Activate people counting   |
-| Värskendusintervall(id) | How often to report counts |
+| Sätted                                     | Kirjeldus                     |
+| ------------------------------------------ | ----------------------------- |
+| Lubatud                                    | Aktiveeri inimeste loendamine |
+| Värskendusintervall(id) | How often to report counts    |
 
 > 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Counts are approximate — one person may carry multiple devices.
 
@@ -233,7 +233,7 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 
 ### Kaug-admin tõrkeotsing
 
-- **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Verify the admin key matches on both nodes.
+- **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Veendu, et administraatori võti sobiks mõlemas sõlmele.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
 - **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 

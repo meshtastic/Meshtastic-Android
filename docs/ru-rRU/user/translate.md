@@ -97,6 +97,6 @@ docs/
 
 ## Вопросы?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+Если у тебя есть вопросы о контексте конкретной строки или нужна помощь для начала работы, создайте обсуждение на странице [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions).
 
 Спасибо за помощь в расширении охвата Meshtastic!

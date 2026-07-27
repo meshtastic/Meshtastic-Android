@@ -84,7 +84,7 @@ Additional features available from the results:
 - **Avastuskaart** – skanni käigus leitud sõlmede kaart.
 - **Aruande eksport** – ekspordi aruanne PDF-failina Androidis või tekstina muudel platvormidel.
 
-> 💡 **Vihje:** Androidis saab Discovery genereerida tulemustest seadmesisese tehisintellekti kokkuvõtte (Gemini Nano). If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Vihje:** Androidis saab Discovery genereerida tulemustest seadmesisese TI kokkuvõtte (Gemini Nano). If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
 
 ---
 
@@ -135,8 +135,8 @@ Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values a
 | What to look for                                                                  | What it means                                                               |
 | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | All hops show Good SNR (≥ −7 dB, green)                        | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< −15 dB, red) | Weak link — this relay segment is fragile                                   |
-| Mitu hüppet (4+)                                               | Long path — consider repositioning a node to shorten it                     |
+| One hop shows Bad SNR (< −15 dB, red) | Kehv ühendus – see releesegment on habras                                   |
+| Mitu hüppet (4+)                                               | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
 | Different path on retry                                                           | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
@@ -198,8 +198,8 @@ See [Nodes](nodes) for full details on filtering and sorting options.
 ## Tips for Mesh Exploration
 
 - **Start with traceroute** — it gives you immediate, actionable information about a specific path.
-- **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
-- **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
+- **Luba naabriinfo funktsioon võtmesõlmedes** – eriti ruuterites ja repiiterites, et saada ülevaade magistraalvõrgust.
+- **Kontrolli kaarti** — sõlmede asukohad [Kaart] (map-and-waypoints) koos signaaliandmetega aitavad sul mõista, miks mõned ühendused on tugevad ja teised nõrgad.
 - **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
 
 ---

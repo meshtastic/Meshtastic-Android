@@ -90,20 +90,20 @@ aliases:
 
 ## Маяк сети
 
-Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+Маяк mesh-сети позволяет нодам приглашать другие устройства присоединиться к своей сети. Нода-маяк периодически передаёт приглашение, при необходимости указывая канал, регион и пресет модема, которое ближайшие устройства могут услышать ещё до того, как получат общую конфигурацию.
 
-Configure it under **Settings → Module Config → Mesh Beacon**:
+Настройте его в разделе **Настройки → Конфигурация модулей → Маяк mesh-сети**:
 
-- **Listen for beacons** — receive invitations broadcast by other nodes.
-- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+- **Слушать маяки** — принимать приглашения, передаваемые другими нодами.
+- **Передавать маяк** — отправлять собственное приглашение через заданный интервал с необязательным сообщением и предлагаемым каналом.
 
-Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+Полученные приглашения отображаются в виде карточек **"Приглашения mesh-сети"** на экране **"Обнаружение"**. На каждой карточке показано сообщение отправителя, а также предлагаемые канал, регион, пресет и качество сигнала, и доступны следующие действия:
 
-- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
-- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
-- **Dismiss** — ignore the invitation.
+- **Присоединиться** — переключиться на предлагаемый канал и пресет (перенастраивает радио и перезагружает его). Если предложение совпадает с вашим текущим частотным слотом, действие **"Добавить канал"** добавляет его без перезагрузки.
+- **Обнаружить** — запустить сканирование «Обнаружения» с предложенным пресетом, чтобы ты мог изучить эту сеть перед присоединением (отображается, только если маяк передаёт пресет).
+- **Отклонить** — проигнорировать приглашение.
 
-Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+Каналы, объявленные маяками, также отображаются в настройках сканирования как **Каналы маяков** — выберите один, чтобы включить его в число целей сканирования.
 
 ---
 
@@ -188,7 +188,7 @@ Channels advertised by beacons also show up in the scan setup as **Beacon channe
 
 ### Аудит инфраструктуры
 
-- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
+- Отключите **"Исключить инфраструктуру"**, чтобы увидеть ноды Router, Router Late и Client Base.
 - Проверьте качество их сигнала и время последнего приёма, чтобы убедиться, что твои ноды инфраструктуры работают исправно.
 
 См. раздел [Ноды](Nodes) для получения полной информации о параметрах фильтрации и сортировки.

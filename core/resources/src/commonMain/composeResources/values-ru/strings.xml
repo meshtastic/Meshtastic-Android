@@ -115,6 +115,12 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Хороший</string>
+    <string name="aqi_hazardous">Опасный</string>
+    <string name="aqi_moderate">Умеренный</string>
+    <string name="aqi_unhealthy">Вредный</string>
+    <string name="aqi_unhealthy_sensitive">Вредный для чувствительных групп</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Очень вредный</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="audio">Звук</string>
@@ -332,6 +338,7 @@
     <string name="debug_logcat_empty">Нет журналов приложения</string>
     <string name="debug_logcat_refresh">Обновить</string>
     <string name="debug_logs_export">Выгрузить логи</string>
+    <string name="debug_logs_export_warning">Этот файл может содержать текст ваших сообщений, точные координаты и сведения об узлах. Просмотрите его перед публикацией.</string>
     <string name="debug_logs_exported">Журналы экспортированы</string>
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_search_clear">Очистить условия поиска</string>
@@ -1148,7 +1155,10 @@
     <string name="no_usb_devices_hint">Подключи устройство с помощью USB-кабеля для передачи данных, чтобы использовать последовательное соединение.</string>
     <string name="no_usb_devices_seen">USB-устройства не обнаружены</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d в сети</string>
+    <string name="node_count_shown">%1$d показано</string>
     <string name="node_count_template">(онлайн %1$d / показано %2$d / всего %3$d)</string>
+    <string name="node_count_total">%1$d всего</string>
     <string name="node_filter_exclude_infrastructure">Исключить инфраструктуру</string>
     <string name="node_filter_exclude_mqtt">Исключить MQTT</string>
     <string name="node_filter_ignored">Вы просматриваете игнорируемые ноды,\nНажмите, чтобы вернуться к списку всех нод.</string>

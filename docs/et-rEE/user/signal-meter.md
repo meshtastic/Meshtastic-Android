@@ -26,7 +26,7 @@ Every time the LoRa radio chip receives a message, it reports two measurements:
 - **RSSI (Received Signal Strength Indicator):** The **loudness** of the raw power hitting your antenna.
 - **SNR (Signal-to-Noise Ratio):** The **clarity** of the signal compared to the background static.
 
-> 💡 **Tip:** Here's an analogy — imagine you are trying to hear a friend talking to you.
+> 💡 **Vihje:** Siin on analoogia – kujuta ette, et sa üritad kuulda sõpra sinuga rääkimas.
 >
 > - **RSSI** is how loud their voice is.
 > - **The Noise Floor** is the background noise in the room (air conditioning, other people talking, traffic).
@@ -50,7 +50,7 @@ Sõltuvalt sellest, millist Meshtastic eelhäälestust kasutad (nt `PikkKauge` v
 
 The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, measured relative to the preset's SNR Limit** — the demodulation floor described above. It deliberately does **not** factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)
 
-Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
+Kuna hinnang on eelseadistatud piirangu suhtes suhteline, võib _sama_ signaali-müra suhe erinevatel eelseadistustel olla erinev – „-15 dB” on „LongSlow” puhul kasutatav, kuid „ShortFast” puhul mittekasutatav. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
 
 | Level    | Bars | Criteria                               | Meaning                                                                                  |
 | -------- | ---- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -67,7 +67,7 @@ Because the rating is relative to the preset limit, the _same_ SNR can rate diff
 
 Kuna Meshtasticu mõõdik toimib **"selguse mõõturina"**, käitub see erinevalt sellest, mida enamik inimesi ootab:
 
-> 💡 **Tip:** Don't panic over low RSSI. You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. Aga kui sinu seadme signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
+> 💡 **Vihje:** Ära paanitse madala RSSI pärast. You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. Aga kui sinu seadme signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
 
 > ⚠️ **Warning:** Watch out for local noise. If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
 

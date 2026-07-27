@@ -29,9 +29,9 @@ Kanalid toetavad mitut krüpteerimistaset:
 
 | Ikoon | Security Level                       | Kirjeldus                                                                                                                                 |
 | ----- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.         |
-| 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.           |
-| 🔓    | Default / Open                       | Uses the well-known default key. **Iga Meshtastic seade** saab sama eelseadistusega neid sõnumeid lugeda. |
+| 🔒    | PSK (256-bit AES) | Täielikult krüpteeritud eel-jagatud tugeva võtmega. Ainult sobiva võtmega sõlmed saavad sõnumeid lugeda.  |
+| 🔐    | PSK (128-bit AES) | Krüpteeritud lühema võtmega. Secure for most uses but 256-bit is preferred for sensitive data.            |
+| 🔓    | Default / Open                       | Kasutab teada-tuntud vaikevõtit. **Iga Meshtastic seade** saab sama eelseadistusega neid sõnumeid lugeda. |
 | ⚠️    | Insecure + Position                  | Ava kanal, mis levitab ka sinu GPS asukohta. Use with caution in public meshes.                           |
 
 > 🔒 **Turvanõuanne:** Privaatse suhtluse jaoks konfi alati unikaalne PSK. Vaikimisi kanal on tahtlikult avatud, et uued kasutajad saaksid kärgvõrku avastada – aga kõige tundliku jaoks peaksite looma eraldi krüptitud kanali.
@@ -81,7 +81,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
 | Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Proovi teist kanalit või oota, kuni olukord paraneb.                                                           |
 | Kanalit pole     | Sihtkanalit pole olemas                  | Veendu, et mõlemal sõlmel oleks sama kanali seadistus.                                                                                                      |
-| Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Shorten your message (max ~200 characters).                                                                              |
+| Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Lühenda oma sõnumit (maksimaalselt ~200 tähemärki).                                                                      |
 | Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
 | Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
 | Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
@@ -134,11 +134,11 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 | Italic        | `*italic*`                     | _italic_             |
 | Strikethrough | `~~strike~~`                   | ~~strike~~           |
 | Inline code   | `` `code` ``                   | monospace `code`     |
-| Link          | `[label](https://example.com)` | a tappable **label** |
+| Ühendus       | `[label](https://example.com)` | a tappable **label** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Vali tekst ja puuduta stiili, et see murda (puuduta uuesti, et see eemaldada); kui valikut pole, lisab stiil tühja paari, kusjuures kursor on markerite vahel. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
 
-> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
+> 💡 **Vihje:** Vormindus kantakse võrgusilma literaalmärkidena – samad baidid, mida iOS saadab. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
 
 ### Mentions
 
@@ -187,7 +187,7 @@ Messages are queued and transmitted based on priority:
 
 - Kasuta kanaleid grupi koordineerimiseks
 - Use direct messages for private person-to-person communication
-- Keep messages short — mesh bandwidth is limited
+- Hoidke sõnumid lühikesed – võrgu ribalaius on piiratud
 - Configure encryption for sensitive communications
 
 ## Related Topics

@@ -47,7 +47,7 @@
     <string name="adc_multiplier_override_ratio">Sovrascrivi rapporto moltiplicatore ADC</string>
     <!-- ADD -->
     <string name="add">Aggiungere</string>
-    <string name="add_a_note">Aggiungi una nota privata...</string>
+    <string name="add_a_note">Aggiungi una nota privata…</string>
     <string name="add_channels_description">I seguenti canali sono stati trovati nel codice QR. Selezionare quelli che si desidera aggiungere al dispositivo. I canali esistenti saranno mantenuti.</string>
     <string name="add_custom_tile_source">Aggiungi Sorgente Tile</string>
     <string name="add_favorite">Aggiungi ai preferiti</string>
@@ -64,7 +64,7 @@
     <string name="advanced_device_gps">Impostazioni Avanzate Dispositivo GPS</string>
     <string name="advanced_title">Avanzate</string>
     <!-- AIR -->
-    <string name="air_quality">Qualità Dell'Aria</string>
+    <string name="air_quality">Qualità dell'Aria</string>
     <string name="air_quality_icon">Icona della qualità dell'aria</string>
     <string name="air_quality_metrics_log">Registro Metriche Qualità Aria</string>
     <string name="air_quality_metrics_module_enabled">Modulo metriche della qualità dell'aria abilitato</string>
@@ -177,7 +177,7 @@
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
     <string name="cant_shutdown">Spegnimento non supportato su questo dispositivo</string>
     <string name="carousel_interval">Durata di ogni schermata</string>
-    <string name="ch_util_definition">Utilizzazione del canale attuale, compreso TX, RX ben formato e RX malformato (cioè rumore).</string>
+    <string name="ch_util_definition">Impegno del canale attuale, inclusi TX e RX ben formati e RX malformati (cioè rumore).</string>
     <!-- CHANNEL -->
     <string name="channel">Ch</string>
     <string name="channel_1">Canale 1</string>
@@ -193,7 +193,7 @@
     <string name="channel_label">Canale</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_url">URL Canale</string>
-    <string name="channel_utilization">Canale di utilizzo</string>
+    <string name="channel_utilization">ChUtil</string>
     <string name="channels">Canali</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
@@ -236,7 +236,7 @@
     <string name="coding_rate">Coding Rate</string>
     <string name="collapse_chart">Minimizza grafico</string>
     <string name="collapsed">Minimizzato</string>
-    <string name="communicate_off_the_grid">Comunica off-grid con i tuoi amici e la tua community senza la connessione cellulare</string>
+    <string name="communicate_off_the_grid">Comunica off-grid con i tuoi amici e la tua comunità senza la connessione cellulare.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Direzione: %1$s</string>
     <string name="compass_bearing_na">Direzione: N/A</string>
@@ -336,6 +336,7 @@
     <string name="debug_logcat_empty">Nessun registro dell'app da visualizzare</string>
     <string name="debug_logcat_refresh">Aggiorna</string>
     <string name="debug_logs_export">Esporta i logs</string>
+    <string name="debug_logs_export_warning">Questo file può contenere il testo del messaggio, posizione precisa e dettagli del nodo. Controllalo prima di condividerlo pubblicamente.</string>
     <string name="debug_logs_exported">Registri esportati</string>
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_search_clear">Azzera ricerca</string>
@@ -452,10 +453,10 @@
     <string name="discovery_start_scan_reason_no_presets">nessun preset selezionato</string>
     <string name="discovery_start_scan_reason_not_connected">dispositivo non connesso</string>
     <string name="discovery_stat_analysis">Analisi</string>
-    <string name="discovery_stat_avg_airtime_rate">Tasso medio di airtime</string>
-    <string name="discovery_stat_avg_channel_utilization">Utilizzo canale medio</string>
+    <string name="discovery_stat_avg_airtime_rate">Tasso medio del tempo di trasmissione</string>
+    <string name="discovery_stat_avg_channel_utilization">Impegno medio del canale</string>
     <string name="discovery_stat_bad_packets">Pacchetti non validi</string>
-    <string name="discovery_stat_channel_utilization">Utilizzo Canale</string>
+    <string name="discovery_stat_channel_utilization">Impegno canale</string>
     <string name="discovery_stat_date">Data</string>
     <string name="discovery_stat_direct">Diretto</string>
     <string name="discovery_stat_duplicate_packets">Pacchetti duplicati</string>
@@ -558,7 +559,7 @@
     <string name="download">Scarica</string>
     <string name="duplicated_public_key_title">Rilevata chiave pubblica duplicata</string>
     <string name="dynamic">Dinamico</string>
-    <string name="easily_set_up_private_mesh_networks">Crea reti mesh private in modo semplice per connessioni sicure e affidabili in zone remote</string>
+    <string name="easily_set_up_private_mesh_networks">Crea reti mesh private in modo semplice per connessioni sicure e affidabili in zone remote.</string>
     <string name="echo_enabled">Echo abilitato</string>
     <string name="edit">Modifica</string>
     <string name="edit_custom_tile_source">Modifica sorgente tile di rete</string>
@@ -823,6 +824,7 @@
     <string name="insert">Inserisci</string>
     <string name="insert_link_message">Inserisci l'URL per il testo selezionato</string>
     <string name="insert_link_title">Inserisci Link</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Attualmente in uso</string>
     <string name="internal">Interno</string>
     <string name="interval_always_on">Sempre Attivo</string>
@@ -1011,7 +1013,7 @@
     <string name="mesh_beacon_offer_channel_key">Chiave del canale offerto (base64)</string>
     <string name="mesh_beacon_offer_channel_name">Nome del canale offerto</string>
     <string name="mesh_beacon_offer_discover">Scopri</string>
-    <string name="mesh_beacon_offer_dismiss">Cancella</string>
+    <string name="mesh_beacon_offer_dismiss">Ignora</string>
     <string name="mesh_beacon_offer_from_unknown">Da un nodo sconosciuto</string>
     <string name="mesh_beacon_offer_join">Unisciti</string>
     <string name="mesh_beacon_offer_preset">Preset: %1$s</string>
@@ -1109,10 +1111,10 @@
     <string name="mute_notifications">Disattiva notifiche</string>
     <string name="mute_remove">Ripristinare le notifiche per '%1$s'?</string>
     <string name="mute_selected">Silenzia selezionati</string>
-    <string name="mute_status_always">Sempre mutato</string>
+    <string name="mute_status_always">Sempre silenziato</string>
     <string name="mute_status_muted_for_days">Mutato per %1$d giorni, %2$s ore</string>
     <string name="mute_status_muted_for_hours">Mutato per %1$s ore</string>
-    <string name="mute_status_unmuted">Non mutato</string>
+    <string name="mute_status_unmuted">Non silenziato</string>
     <string name="nag_timeout_seconds">Timeout chiusura popup (secondi)</string>
     <string name="name">Nome</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
@@ -1151,7 +1153,7 @@
     <string name="node_count_total">%1$d totali</string>
     <string name="node_filter_exclude_infrastructure">Escludi infrastruttura</string>
     <string name="node_filter_exclude_mqtt">Escludi MQTT</string>
-    <string name="node_filter_ignored">Stai visualizzando i nodi ignorati,\nPremi per tornare alla lista dei nodi</string>
+    <string name="node_filter_ignored">Stai visualizzando i nodi ignorati,\nPremi per tornare alla lista dei nodi.</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
     <string name="node_filter_only_direct">Mostra solamente i nodi diretti</string>
     <string name="node_filter_only_online">Nascondi i nodi offline</string>
@@ -1217,7 +1219,7 @@
     <string name="notes">Note</string>
     <string name="notification_permissions_description">Meshtastic utilizza le notifiche per tenerti aggiornato su nuovi messaggi e altri eventi importanti. È possibile aggiornare i permessi di notifica in qualsiasi momento dalle impostazioni.</string>
     <!-- NOTIFICATIONS -->
-    <string name="notifications_for_channel_and_direct_messages">Notifiche per i canali e i messaggi diretti</string>
+    <string name="notifications_for_channel_and_direct_messages">Notifiche per i canali e i messaggi diretti.</string>
     <string name="notifications_for_low_battery_alerts">Notifiche per gli avvisi di batteria scarica per il dispositivo collegato.</string>
     <string name="notifications_for_newly_discovered_nodes">Notifiche per i nodi appena scoperti.</string>
     <string name="notifications_on_alert_bell_receipt">Notifiche alla ricezione di alert/campanello</string>
@@ -1457,10 +1459,10 @@
     <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_none">Confermato</string>
     <string name="routing_error_not_authorized">Non Autorizzato</string>
-    <string name="routing_error_pki_failed">Invio Criptato Non Riuscito</string>
+    <string name="routing_error_pki_failed">Invio Cifrato Non Riuscito</string>
     <string name="routing_error_pki_send_fail_public_key">Invio PKI non riuscito, nessuna chiave pubblica</string>
     <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
-    <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi</string>
+    <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi.</string>
     <string name="routing_error_timeout">Timeout</string>
     <string name="routing_error_too_large">Pacchetto troppo grande</string>
     <string name="rssi">RSSI</string>
@@ -1471,7 +1473,7 @@
     <string name="save">Salva</string>
     <string name="save_and_restart">Salva &amp; riavvia</string>
     <string name="save_changes">Salva</string>
-    <string name="save_csv_in_storage_esp32_only">Salva .CSV nello storage (solo ESP32)</string>
+    <string name="save_csv_in_storage_esp32_only">Salva .CSV nella memoria (solo ESP32)</string>
     <string name="save_rangetest">Esporta pacchetti di test di portata</string>
     <!-- SCAN -->
     <string name="scan">Scan</string>
@@ -1496,15 +1498,15 @@
     <string name="security">Sicurezza</string>
     <string name="security_icon_badge_warning_description">Badge di attenzione</string>
     <string name="security_icon_description">Stato di sicurezza</string>
-    <string name="security_icon_help_dismiss">Annulla</string>
-    <string name="security_icon_help_green_lock">L'icona di un lucchetto verde chiuso indica che il canale è criptato in modo sicuro con una chiave AES a 128 o 256 bit</string>
-    <string name="security_icon_help_red_open_lock">L'icona di un lucchetto rosso aperto indica che il canale non è criptato, viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_dismiss">Ignora</string>
+    <string name="security_icon_help_green_lock">L'icona di un lucchetto verde chiuso indica che il canale è cifrato in modo sicuro con una chiave AES a 128 o 256 bit.</string>
+    <string name="security_icon_help_red_open_lock">L'icona di un lucchetto rosso aperto indica che il canale non è cifrato in modo sicuro, viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
     <string name="security_icon_help_show_all">Mostra tutti i significati</string>
     <string name="security_icon_help_show_less">Mostra lo stato attuale</string>
     <string name="security_icon_help_title">Sicurezza del canale</string>
     <string name="security_icon_help_title_all">Significato di sicurezza del canale</string>
-    <string name="security_icon_help_warning_precise_mqtt">L'icona di un lucchetto rosso aperto con un avvertimento indica che il canale non è criptato in modo sicuro, viene usato per la posizione precisa e viene fatto l'uplink su internet attraverso MQTT e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
-    <string name="security_icon_help_yellow_open_lock">L'icona di un lucchetto giallo aperto indica che il canale non è criptato, non viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_warning_precise_mqtt">L'icona di un lucchetto rosso aperto con un avvertimento indica che il canale non è cifrato in modo sicuro, viene usato per dati di posizione precisa di cui viene fatto l'uplink su internet tramite MQTT, e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_yellow_open_lock">L'icona di un lucchetto giallo aperto indica che il canale non è cifrato in modo sicuro, non viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
     <string name="security_icon_insecure_no_precise">Canale non sicuro, non preciso</string>
     <string name="security_icon_insecure_precise_only">Canale non sicuro, posizione precisa</string>
     <string name="security_icon_secure">Sicuro</string>
@@ -1635,10 +1637,12 @@
     <string name="tak_server_enabled">Abilita server TAK locale</string>
     <string name="tak_server_enabled_desc">Avvia un server TLS locale sulla porta 8089 per le connessioni ATAK/iTAK</string>
     <string name="tak_server_export_data_package_desc">Genera uno .zip per far connettere ATAK/iTAK a questo server</string>
+    <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_test_card_title">Test TAK Mesh (Debug)</string>
     <string name="tak_server_test_idle">Invia alla mesh tutte le %1$d fixture di test</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_results">%1$d superati, %2$d falliti su %3$d/%4$d</string>
     <string name="tak_server_test_run">Esegui</string>
     <string name="tak_server_test_running">In esecuzione: %1$s</string>
@@ -1828,6 +1832,7 @@
     <string name="wifi_provision_success_open_ssh_fallback">Se non si apre nessuna app, copia il comando SSH e incollalo nel tuo client SSH.</string>
     <string name="wifi_provision_success_setup_description">Accedi via SSH per cambiare nome utente e password predefiniti.</string>
     <string name="wifi_provision_success_setup_title">Completa la configurazione del dispositivo</string>
+    <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
     <string name="wifi_provision_success_ssh_label">Comando SSH</string>
     <string name="wifi_provision_success_ssh_unavailable">Comando SSH disponibile dopo l'assegnazione dell'IP.</string>
     <string name="wifi_provision_success_username">Username</string>

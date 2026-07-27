@@ -313,13 +313,20 @@
     <string name="disconnected">Odpojeno</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
     <!-- DISCOVERY -->
+    <string name="discovery_dwell_progress">Naslouchání na %1$s, %2$s zbývá</string>
+    <string name="discovery_local_mesh">Vyhledávání zařízení v místní mesh síti</string>
     <string name="discovery_not_connected">Nepřipojeno</string>
+    <string name="discovery_scan_progress">Průběh vyhledávání</string>
+    <string name="discovery_scan_summary">Výsledek vyhledávání</string>
+    <string name="discovery_start_scan">Spustit vyhledávání</string>
     <string name="discovery_stat_date">Datum</string>
     <string name="discovery_stat_direct">Přímý</string>
+    <string name="discovery_stat_dwelling_on">Naslouchání na %1$s</string>
     <string name="discovery_stat_messages">Zprávy</string>
     <string name="discovery_stat_online_total_nodes">Online / Celkem uzlů</string>
     <string name="discovery_stat_selected">Vybrané</string>
     <string name="discovery_stop_scan">Zastavit vyhledávání</string>
+    <string name="discovery_time_remaining">%1$s zbývá</string>
     <string name="discovery_view_map">Zobrazit na mapě</string>
     <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
@@ -336,14 +343,18 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Vymazat hledání</string>
+    <string name="doc_section_developer">Příručka vývojáře</string>
     <string name="doc_section_user">Uživatelská příručka</string>
     <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_connections">Připojení</string>
     <string name="doc_title_discovery">Objevujte</string>
+    <string name="doc_title_messages">Zprávy a kanály</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Metriky uzlu</string>
     <string name="doc_title_nodes">Uzly</string>
     <string name="doc_title_settings_radio">Nastavení – Rádio &amp; Uživatel</string>
     <string name="doc_title_tak">TAK integrace</string>
+    <string name="doc_title_telemetry">Telemetrie a senzory</string>
     <string name="doc_title_translate">Překlad aplikace</string>
     <string name="done">Hotovo</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>

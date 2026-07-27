@@ -17,7 +17,7 @@ Kui midagi töötab valesti, on rakenduse arendajalogid kõige kasulikum asi, mi
 
 Ava **Arendajapaneel**, valides **Seaded → Täpsemad → Arendajapaneel**.
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+> 📎 **Esitad probleemi?** Eksporti oma logid (vt allpool) ja lisa `.txt`-fail oma aruandele aadressil [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
 
 ## The two tabs
 
@@ -40,11 +40,11 @@ Error and warning lines are tinted so problems stand out.
 
 ## Exporting
 
-Praeguste logide faili salvestamiseks puuduta ikooni **allalaadimine**. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+Praeguste logide faili salvestamiseks puuduta ikooni **allalaadimine**. Süsteemi failivalijast valite, kuhu see liigub ja failile lisatakse ajatempliga nimi (näiteks `meshtastic_logcat_20260701_143312.txt`), nii, et korduvad ekspordid ei kirjuta üksteist kunagi üle.
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jaga seda privaatselt, kui teil on kahtlusi.
+> 🔒 **Privaatsus:** Ekspordib automaatselt **redigeeri** privaatvõtmed, administraatori võtmed ja seansi paroolid enne faili kirjutamist. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jaga seda privaatselt, kui teil on kahtlusi.
 
 ## Töölaud
 
