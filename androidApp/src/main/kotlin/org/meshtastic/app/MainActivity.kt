@@ -65,6 +65,7 @@ import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.EventFontResolver
@@ -173,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        MeshService.startService(this)
+        MeshService.startService(this, ServiceStartTrigger.UserInterface)
     }
 
     override fun onResume() {

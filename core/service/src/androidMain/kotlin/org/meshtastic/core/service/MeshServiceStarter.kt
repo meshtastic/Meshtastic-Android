@@ -16,39 +16,40 @@
  */
 package org.meshtastic.core.service
 
-import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
-import android.os.Build
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
-import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.service.worker.ServiceKeepAliveWorker
 
-// / Helper function to start running our service
-fun MeshService.Companion.startService(context: Context) {
-    // We explicitly start the service as a foreground service so it stays alive for the duration of the radio
-    // connection — keeping the BLE/TCP/serial link active and forwarding packets to the mesh network.
-    Logger.i { "Trying to start service debug=${false}" }
-
-    val intent = createIntent(context)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        try {
-            context.startForegroundService(intent)
-        } catch (ex: ForegroundServiceStartNotAllowedException) {
-            Logger.w { "Unable to start service foreground: ${ex.message}. Scheduling fallback worker." }
-            scheduleKeepAliveWorker(context)
+/**
+ * Starts [MeshService] as a foreground service so the radio link stays alive for the duration of the connection.
+ *
+ * The start is gated on [ForegroundStartPolicy]: when the platform would reject it we do not call
+ * `startForegroundService()` at all. That matters for more than tidiness — a rejected start still leaves
+ * ActivityManager expecting the service to reach the foreground, and the resulting watchdog kills the process. Not
+ * asking is the only way to be sure.
+ *
+ * There is deliberately no retry. Every context that can legally promote this app to the foreground already has its own
+ * trigger, and the dominant one — the user opening the app — fires on every `MainActivity.onStart()`. A background
+ * retry has no exemption the original caller lacked, so it can only fail again.
+ */
+fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTrigger) {
+    val appInForeground = isAppInForeground()
+    if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground)) {
+        Logger.i {
+            "Skipping MeshService start: trigger=$trigger is not permitted to start a foreground service while " +
+                "backgrounded. Waiting for the next user-visible start."
         }
-    } else {
-        context.startForegroundService(intent)
+        return
     }
-}
 
-private fun scheduleKeepAliveWorker(context: Context) {
-    val request =
-        OneTimeWorkRequestBuilder<ServiceKeepAliveWorker>()
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .build()
-
-    WorkManager.getInstance(context).enqueue(request)
+    Logger.i { "Starting MeshService (trigger=$trigger, appInForeground=$appInForeground)" }
+    try {
+        context.startForegroundService(createIntent(context))
+    } catch (ex: IllegalStateException) {
+        // ForegroundServiceStartNotAllowedException extends IllegalStateException (via ServiceStartNotAllowedException)
+        // and only exists from API 31; catching the supertype keeps this call site free of an API-gated class
+        // reference. The service was never created, so there is nothing to tear down here.
+        Logger.w(ex) { "Rejected MeshService foreground start (trigger=$trigger)" }
+    } catch (ex: SecurityException) {
+        Logger.w(ex) { "Missing permission for MeshService foreground start (trigger=$trigger)" }
+    }
 }

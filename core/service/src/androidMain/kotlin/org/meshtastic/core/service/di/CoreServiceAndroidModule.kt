@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.RadioControllerImpl
+import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
 
 @Module
@@ -95,6 +96,6 @@ class CoreServiceAndroidModule {
         messageProcessor = messageProcessor,
         radioConfigRepository = radioConfigRepository,
         scope = scope,
-        onDeviceAddressChanged = { MeshService.startService(context) },
+        onDeviceAddressChanged = { MeshService.startService(context, ServiceStartTrigger.DeviceAddressChanged) },
     )
 }
