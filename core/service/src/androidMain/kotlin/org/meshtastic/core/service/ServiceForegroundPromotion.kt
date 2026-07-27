@@ -66,7 +66,7 @@ private fun Service.retryWithoutRefusedType(
 ): Boolean {
     val fallbackType = ForegroundStartPolicy.fallbackForegroundServiceType()
     if (requestedType == fallbackType) {
-        Logger.e(ex) { "SecurityException starting foreground service" }
+        Logger.e(ex) { "Foreground start refused with no additive type to drop" }
         return false
     }
     Logger.w(ex) { "Foreground start refused with type $requestedType, retrying as connectedDevice" }
