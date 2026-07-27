@@ -1556,7 +1556,7 @@
     <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>
     <string name="share_location">Share Location</string>
-    <string name="share_location_description">Use your phone GPS to send locations to your node to instead of using a hardware GPS on your node.</string>
+    <string name="share_location_description">Use your phone GPS to send locations to your node instead of using a hardware GPS on your node.</string>
     <string name="share_to">Share to…</string>
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
     <string name="short_name">Short Name</string>
