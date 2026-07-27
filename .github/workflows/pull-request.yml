@@ -143,7 +143,6 @@ jobs:
               ':core:di',
               ':core:nfc',
               ':core:resources',
-              ':feature:widget',
           }
 
           shards = check.split('# ── Sharded Unit Tests')[1].split('# ── Android Build')[0]
