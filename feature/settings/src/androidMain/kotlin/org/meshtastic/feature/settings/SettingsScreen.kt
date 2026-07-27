@@ -49,6 +49,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_functions_settings
 import org.meshtastic.core.resources.app_functions_settings_summary
 import org.meshtastic.core.resources.bottom_nav_settings
@@ -74,10 +75,10 @@ import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
-import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.AppearanceSettingsContent
 import org.meshtastic.feature.settings.component.ExpressiveSection
-import org.meshtastic.feature.settings.component.PersistenceSection
-import org.meshtastic.feature.settings.component.PrivacySection
+import org.meshtastic.feature.settings.component.PersistenceSettingsContent
+import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -241,31 +242,35 @@ fun SettingsScreen(
                     showEditDeviceProfileDialog = true
                 },
                 onNavigate = onNavigate,
-                showSectionTitles = false,
             )
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
-                PrivacySection(
-                    analyticsAvailable = appFunctionsAvailable,
-                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
-                    onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                    provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
-                    onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                    homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
-                    onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                    startProvideLocation = { settingsViewModel.startProvidingLocation() },
-                    stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
-                    showTitle = false,
-                )
+                ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+                    PrivacySettingsContent(
+                        analyticsAvailable = appFunctionsAvailable,
+                        analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
+                        onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
+                        provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                        onToggleLocation = { settingsViewModel.setProvideLocation(it) },
+                        homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                        onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                        startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                        stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                    )
+                    AppearanceSettingsContent(
+                        onShowLanguagePicker = { showLanguagePickerDialog = true },
+                        onShowThemePicker = { showThemePickerDialog = true },
+                    )
+                    PersistenceSettingsContent(
+                        cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                        nodeShortName = ourNode?.user?.short_name ?: "",
+                        onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                    )
+                }
 
-                AppearanceSection(
-                    onShowLanguagePicker = { showLanguagePickerDialog = true },
-                    onShowThemePicker = { showThemePickerDialog = true },
-                    showTitle = false,
-                )
-
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title), showTitle = false) {
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
                         leadingIcon = MeshtasticIcons.List,
@@ -274,7 +279,7 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh), showTitle = false) {
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
                     ListItem(
                         text = stringResource(Res.string.discovery_local_mesh),
                         leadingIcon = MeshtasticIcons.PermScanWifi,
@@ -283,13 +288,13 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices), showTitle = false) {
+                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.filter_settings), showTitle = false) {
+                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
                     ListItem(
                         text = stringResource(Res.string.filter_settings),
                         leadingIcon = MeshtasticIcons.FilterList,
@@ -298,14 +303,14 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.device_links), showTitle = false) {
+                ExpressiveSection(title = stringResource(Res.string.device_links)) {
                     ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
                         onNavigate(SettingsRoute.DeviceLinks)
                     }
                 }
 
                 if (appFunctionsAvailable) {
-                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings), showTitle = false) {
+                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings)) {
                         ListItem(
                             text = stringResource(Res.string.app_functions_settings),
                             supportingText = stringResource(Res.string.app_functions_settings_summary),
@@ -316,25 +321,16 @@ fun SettingsScreen(
                     }
                 }
 
-                PersistenceSection(
-                    cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
-                    onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                    nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
-                    showTitle = false,
-                )
-
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
                     hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
                     onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
-                    showTitle = false,
                 )
             }
 
-            ExpressiveSection(title = stringResource(Res.string.help_and_documentation), showTitle = false) {
+            ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
                 ListItem(
                     text = stringResource(Res.string.help_and_documentation),
                     leadingIcon = MeshtasticIcons.HelpOutline,

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.jetbrains.compose.resources.stringResource
@@ -44,7 +45,33 @@ fun PrivacySection(
     onToggleHomoglyph: () -> Unit,
     startProvideLocation: () -> Unit,
     stopProvideLocation: () -> Unit,
-    showTitle: Boolean = true,
+) {
+    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+        PrivacySettingsContent(
+            analyticsAvailable,
+            analyticsEnabled,
+            onToggleAnalytics,
+            provideLocation,
+            onToggleLocation,
+            homoglyphEnabled,
+            onToggleHomoglyph,
+            startProvideLocation,
+            stopProvideLocation,
+        )
+    }
+}
+
+@Composable
+internal fun ColumnScope.PrivacySettingsContent(
+    analyticsAvailable: Boolean,
+    analyticsEnabled: Boolean,
+    onToggleAnalytics: () -> Unit,
+    provideLocation: Boolean,
+    onToggleLocation: (Boolean) -> Unit,
+    homoglyphEnabled: Boolean,
+    onToggleHomoglyph: () -> Unit,
+    startProvideLocation: () -> Unit,
+    stopProvideLocation: () -> Unit,
 ) {
     val showToast = rememberShowToastResource()
     val locationPermission = rememberLocationPermissionState()
@@ -68,24 +95,22 @@ fun PrivacySection(
         }
     }
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings), showTitle = showTitle) {
-        if (analyticsAvailable) {
-            SwitchListItem(
-                text = stringResource(Res.string.analytics_okay),
-                checked = analyticsEnabled,
-                leadingIcon = MeshtasticIcons.BugReport,
-                onClick = onToggleAnalytics,
-            )
-        }
-
+    if (analyticsAvailable) {
         SwitchListItem(
-            text = stringResource(Res.string.provide_location_to_mesh),
-            leadingIcon = MeshtasticIcons.LocationOn,
-            enabled = !isGpsOff,
-            checked = provideLocation,
-            onClick = { onToggleLocation(!provideLocation) },
+            text = stringResource(Res.string.analytics_okay),
+            checked = analyticsEnabled,
+            leadingIcon = MeshtasticIcons.BugReport,
+            onClick = onToggleAnalytics,
         )
-
-        HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
     }
+
+    SwitchListItem(
+        text = stringResource(Res.string.provide_location_to_mesh),
+        leadingIcon = MeshtasticIcons.LocationOn,
+        enabled = !isGpsOff,
+        checked = provideLocation,
+        onClick = { onToggleLocation(!provideLocation) },
+    )
+
+    HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
 }

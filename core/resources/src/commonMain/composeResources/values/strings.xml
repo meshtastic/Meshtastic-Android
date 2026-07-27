@@ -289,6 +289,7 @@
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
     <string name="config_security_public_key">Generated from your private key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
+    <string name="configuration">Configuration</string>
     <string name="configure_bluetooth_permissions">Configure Bluetooth Permissions</string>
     <string name="configure_critical_alerts">Configure Critical Alerts</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
