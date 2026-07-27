@@ -1205,7 +1205,6 @@
     <string name="share_channels_qr">分享頻道 QR Code</string>
     <string name="share_contact">分享聯絡人</string>
     <string name="share_location">分享位置</string>
-    <string name="share_location_description">使用您手機的 GPS 來向節點發送位置，而不是使用節點上的 GPS 模組。</string>
     <string name="share_to">分享至…</string>
     <string name="share_your_location_in_real_time">透過整合的 GPS 功能，即時分享你的位置，並保持團隊協調一致。</string>
     <string name="short_name">裝置短名稱</string>

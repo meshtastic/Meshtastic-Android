@@ -1178,7 +1178,6 @@
     <string name="share_connected_node">Dela ansluten nod</string>
     <string name="share_contact">Dela kontakt</string>
     <string name="share_location">Dela plats</string>
-    <string name="share_location_description">Använd din telefons GPS för position istället för GPS:en på din nod.</string>
     <string name="share_to">Dela med…</string>
     <string name="share_your_location_in_real_time">Dela din plats i realtid och håll din grupp samordnad med integrerade GPS-funktioner.</string>
     <string name="short_name">Kort namn</string>

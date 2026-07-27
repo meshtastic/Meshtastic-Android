@@ -1059,7 +1059,6 @@
     <string name="share">Сподели</string>
     <string name="share_contact">Споделяне на контакт</string>
     <string name="share_location">Споделяне на местоположение</string>
-    <string name="share_location_description">Използвайте GPS на телефона си, за да изпращате местоположения до вашия възел, вместо да използвате хардуеренния GPS на вашия възел.</string>
     <string name="share_to">Сподели с…</string>
     <string name="share_your_location_in_real_time">Споделяйте местоположението си в реално време и координирайте групата си с вградени GPS функции.</string>
     <string name="short_name">Кратко име</string>

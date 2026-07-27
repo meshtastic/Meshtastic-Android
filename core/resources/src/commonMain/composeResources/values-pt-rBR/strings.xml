@@ -644,7 +644,6 @@
     <string name="share">Compartilhar</string>
     <string name="share_contact">Compartilhar Contato</string>
     <string name="share_location">Compartilhar Localização</string>
-    <string name="share_location_description">Use o GPS do seu telefone para enviar locais para seu nó em vez de usar um módulo GPS no seu nó.</string>
     <string name="share_to">Compartilhar com…</string>
     <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
     <string name="should_update">Para se beneficiar das últimas correções e recursos, por favor, atualize o seu firmware de nó.\n\nÚltima versão de firmwares estáveis: %1$s</string>

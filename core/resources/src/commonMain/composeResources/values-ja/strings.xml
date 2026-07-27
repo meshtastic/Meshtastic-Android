@@ -1464,7 +1464,6 @@
     <string name="share_connected_node">接続中のノードを共有</string>
     <string name="share_contact">連絡先を共有</string>
     <string name="share_location">位置情報を共有</string>
-    <string name="share_location_description">ノードのハードウェア GPS を使用する代わりに、スマートフォンの GPS を使ってノードに位置情報を送信します。</string>
     <string name="share_to">共有…</string>
     <string name="share_your_location_in_real_time">統合された GPS 機能で位置情報をリアルタイムに共有し、グループの連携を保ちます。</string>
     <string name="short_name">短縮名</string>

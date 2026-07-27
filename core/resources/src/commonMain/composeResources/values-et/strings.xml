@@ -1515,7 +1515,6 @@
     <string name="share_channels_qr">Jaga kanalite QR koodi</string>
     <string name="share_contact">Jaga kontakti</string>
     <string name="share_location">Jaga asukohta</string>
-    <string name="share_location_description">Kasuta asukohana oma telefoni GPS, mitte sõlme riistvaralist GPS.</string>
     <string name="share_to">Jaga…</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="short_name">Lühi nimi</string>

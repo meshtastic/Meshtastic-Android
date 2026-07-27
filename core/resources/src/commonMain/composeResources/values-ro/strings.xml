@@ -1028,7 +1028,6 @@
     <string name="share_channels_qr">Distribuie codul QR al canalelor</string>
     <string name="share_contact">Împărtășește contacte</string>
     <string name="share_location">Partajați locația</string>
-    <string name="share_location_description">Folosește GPS-ul telefonului pentru a trimite locații către nodul tău în loc să folosești un GPS hardware de pe nodul tău.</string>
     <string name="share_to">Distribuire către…</string>
     <string name="share_your_location_in_real_time">Partajați-vă locația în timp real și păstrați grupul coordonat cu funcții GPS integrate.</string>
     <string name="short_name">Nume scurt</string>

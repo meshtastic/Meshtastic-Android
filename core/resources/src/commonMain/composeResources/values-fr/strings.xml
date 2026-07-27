@@ -1212,7 +1212,6 @@
     <string name="share_channels_qr">Partager le code QR des canaux</string>
     <string name="share_contact">Partager le contact</string>
     <string name="share_location">Localisation partagée</string>
-    <string name="share_location_description">Utilisez le GPS de votre téléphone pour envoyer des emplacements à votre nœud au lieu d'utiliser le GPS de votre nœud.</string>
     <string name="share_to">Partager vers…</string>
     <string name="share_your_location_in_real_time">Partagez votre position en temps réel et gardez votre groupe coordonné avec les fonctionnalités GPS intégrées.</string>
     <string name="short_name">Nom court</string>

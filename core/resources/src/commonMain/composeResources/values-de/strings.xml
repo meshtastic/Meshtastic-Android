@@ -1269,7 +1269,6 @@
     <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="share_contact">Kontakt teilen</string>
     <string name="share_location">Standort teilen</string>
-    <string name="share_location_description">Benutzen Sie das GPS Ihres Telefons um Standorte an Ihren Knoten zu senden, anstatt ein Hardware GPS in Ihrem Knoten zu verwenden.</string>
     <string name="share_to">Teile mit…</string>
     <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="short_name">Kurzname</string>

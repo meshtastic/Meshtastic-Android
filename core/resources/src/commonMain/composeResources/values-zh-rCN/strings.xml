@@ -1518,7 +1518,6 @@
     <string name="share_connected_node">分享已连接的节点</string>
     <string name="share_contact">分享联系人</string>
     <string name="share_location">分享位置</string>
-    <string name="share_location_description">使用您的手机 GPS 位置而不是使用您节点上的硬件GPS。</string>
     <string name="share_to">分享到…</string>
     <string name="share_your_location_in_real_time">实时分享您的位置，并通过集成的GPS功能保持团队的协调一致。</string>
     <string name="short_name">短名称</string>

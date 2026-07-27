@@ -1546,7 +1546,6 @@
     <string name="share_connected_node">Condividi il nodo connesso</string>
     <string name="share_contact">Condividi contatto</string>
     <string name="share_location">Condividi posizione</string>
-    <string name="share_location_description">Usa il GPS del telefono per inviare la posizione al nodo invece di utilizzare un GPS hardware sul tuo nodo.</string>
     <string name="share_to">Condividi con…</string>
     <string name="share_your_location_in_real_time">Condividi la tua posizione in tempo reale e mantieni il tuo gruppo coordinato con le funzionalità GPS integrate.</string>
     <string name="short_name">Nome Breve</string>
