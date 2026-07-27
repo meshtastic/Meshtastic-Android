@@ -351,7 +351,9 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
     MqttClient(setup.ownerId) {
         // mqtt-client 0.4.0 makes transport a required SPI: the client throws at connect if unset.
         // Register TCP/TLS (the default) + WebSocket (for user-entered ws://-/wss:// brokers).
-        transportFactory = TcpTransportFactory() + WebSocketTransportFactory()
+        // Both get the same private-CA trust hook so the grant stays scoped to this socket — see [mqttTlsConfig].
+        val tls = mqttTlsConfig()
+        transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         autoReconnect = true
         username = setup.mqttConfig?.username
