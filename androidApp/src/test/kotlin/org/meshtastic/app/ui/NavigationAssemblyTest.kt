@@ -54,7 +54,7 @@ class NavigationAssemblyTest {
                 channelsGraph(backStack)
                 connectionsGraph(backStack)
                 discoveryGraph(backStack)
-                settingsGraph(backStack)
+                settingsGraph(backStack) { _ -> error("Settings ViewModel is not composed in this assembly test") }
                 firmwareGraph(backStack)
             }
         }

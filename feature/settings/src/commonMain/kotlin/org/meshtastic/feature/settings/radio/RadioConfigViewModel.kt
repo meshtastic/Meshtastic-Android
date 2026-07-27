@@ -736,12 +736,21 @@ open class RadioConfigViewModel(
      */
     fun ensureLoadingForRemote() {
         val state = _radioConfigState.value
-        if (!state.isLocal && state.responseState is ResponseState.Empty) {
+        if (destNum != null && state.responseState is ResponseState.Empty) {
             _radioConfigState.update { it.copy(responseState = ResponseState.Loading()) }
         }
     }
 
+    /** Refreshes a config route while keeping the connect-time local snapshot visible. */
+    fun loadConfigRoute(route: Enum<*>) {
+        setResponseStateLoading(route = route, showOverlay = destNum != null)
+    }
+
     fun setResponseStateLoading(route: Enum<*>) {
+        setResponseStateLoading(route = route, showOverlay = true)
+    }
+
+    private fun setResponseStateLoading(route: Enum<*>, showOverlay: Boolean) {
         val destNum = destNum ?: destNode.value?.num ?: return
 
         // A module without a per-module get (no ModuleConfigType, e.g. MeshBeacon) reads from the connect-time config
@@ -751,7 +760,9 @@ open class RadioConfigViewModel(
             return
         }
 
-        _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
+        _radioConfigState.update {
+            it.copy(route = route.name, responseState = ResponseState.Loading(showOverlay = showOverlay))
+        }
 
         when (route) {
             ConfigRoute.USER ->
@@ -783,37 +794,41 @@ open class RadioConfigViewModel(
                 setResponseStateTotal(2)
             }
 
-            is ConfigRoute -> {
-                if (route == ConfigRoute.LORA) {
-                    safeLaunch(tag = "getChannel0ForLora") {
-                        radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
-                    }
-                }
-                if (route == ConfigRoute.NETWORK) {
-                    safeLaunch(tag = "getConnectionStatus") {
-                        radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerRequestId)
-                    }
-                }
-                safeLaunch(tag = "getConfig") {
-                    radioConfigUseCase.getConfig(destNum, route.type, onRequestId = ::registerRequestId)
-                }
-            }
+            is ConfigRoute -> loadConfigRoute(destNum, route)
 
-            is ModuleRoute -> {
-                if (route == ModuleRoute.CANNED_MESSAGE) {
-                    safeLaunch(tag = "getCannedMessages") {
-                        radioConfigUseCase.getCannedMessages(destNum, onRequestId = ::registerRequestId)
-                    }
-                }
-                if (route == ModuleRoute.EXT_NOTIFICATION) {
-                    safeLaunch(tag = "getRingtone") {
-                        radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerRequestId)
-                    }
-                }
-                safeLaunch(tag = "getModuleConfig") {
-                    radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerRequestId)
-                }
+            is ModuleRoute -> loadModuleRoute(destNum, route)
+        }
+    }
+
+    private fun loadConfigRoute(destNum: Int, route: ConfigRoute) {
+        if (route == ConfigRoute.LORA) {
+            safeLaunch(tag = "getChannel0ForLora") {
+                radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerRequestId)
             }
+        }
+        if (route == ConfigRoute.NETWORK) {
+            safeLaunch(tag = "getConnectionStatus") {
+                radioConfigUseCase.getDeviceConnectionStatus(destNum, onRequestId = ::registerRequestId)
+            }
+        }
+        safeLaunch(tag = "getConfig") {
+            radioConfigUseCase.getConfig(destNum, route.type, onRequestId = ::registerRequestId)
+        }
+    }
+
+    private fun loadModuleRoute(destNum: Int, route: ModuleRoute) {
+        if (route == ModuleRoute.CANNED_MESSAGE) {
+            safeLaunch(tag = "getCannedMessages") {
+                radioConfigUseCase.getCannedMessages(destNum, onRequestId = ::registerRequestId)
+            }
+        }
+        if (route == ModuleRoute.EXT_NOTIFICATION) {
+            safeLaunch(tag = "getRingtone") {
+                radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerRequestId)
+            }
+        }
+        safeLaunch(tag = "getModuleConfig") {
+            radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerRequestId)
         }
     }
 

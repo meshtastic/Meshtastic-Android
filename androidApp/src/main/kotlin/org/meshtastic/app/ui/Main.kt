@@ -54,6 +54,7 @@ import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.lockdown.LockdownDialog
+import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
@@ -62,16 +63,11 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
     // Land on Connections for first-run / no-device-selected; otherwise on Nodes (seeded from prefs).
-    val initialTab = remember {
-        if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
-            TopLevelDestination.Connect.route
-        } else {
-            NodesRoute.Nodes
-        }
-    }
+    val initialTab = remember { initialRoute(viewModel.currentDeviceAddressFlow.value) }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
     val scrollToTopEvents = viewModel.scrollToTopEventFlow
+    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
 
     AndroidAppVersionCheck(viewModel)
 
@@ -113,7 +109,7 @@ fun MainScreen() {
                     channelsGraph(backStack)
                     connectionsGraph(backStack)
                     discoveryGraph(backStack)
-                    settingsGraph(backStack)
+                    settingsGraph(backStack, settingsRadioConfigViewModelProvider)
                     docsEntries(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)
@@ -124,6 +120,9 @@ fun MainScreen() {
         }
     }
 }
+
+private fun initialRoute(deviceAddress: String?): NavKey =
+    if (deviceAddress.isNullOrSelectedNone()) TopLevelDestination.Connect.route else NodesRoute.Nodes
 
 /** True when no device address is persisted, or the address is the "none" sentinel (`"n"`). */
 private fun String?.isNullOrSelectedNone(): Boolean = isNullOrBlank() || this == "n"

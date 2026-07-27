@@ -1125,6 +1125,7 @@ class RadioConfigViewModelTest {
             }
         viewModel.setResponseStateLoading(ConfigRoute.USER)
         verifySuspend { radioConfigUseCase.getOwner(123, any()) }
+        assertTrue((viewModel.radioConfigState.value.responseState as ResponseState.Loading).showOverlay)
 
         // CHANNELS
         everySuspend { radioConfigUseCase.getChannel(any(), any(), any()) } returns 42
@@ -1138,6 +1139,49 @@ class RadioConfigViewModelTest {
         // LORA
         viewModel.setResponseStateLoading(ConfigRoute.LORA)
         verifySuspend { radioConfigUseCase.getConfig(123, ConfigRoute.LORA.type, any()) }
+    }
+
+    @Test
+    fun `loadConfigRoute hides progress overlay for local settings refresh`() = runTest {
+        val localNode = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel(destNum = null)
+
+        everySuspend { radioConfigUseCase.getOwner(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel.loadConfigRoute(ConfigRoute.USER)
+        runCurrent()
+
+        val loading = viewModel.radioConfigState.value.responseState as ResponseState.Loading
+        assertFalse(loading.showOverlay)
+        verifySuspend { radioConfigUseCase.getOwner(123, any()) }
+    }
+
+    @Test
+    fun `loadConfigRoute shows progress overlay for remote settings refresh`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        everySuspend { radioConfigUseCase.getOwner(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel.loadConfigRoute(ConfigRoute.USER)
+        runCurrent()
+
+        val loading = viewModel.radioConfigState.value.responseState as ResponseState.Loading
+        assertTrue(loading.showOverlay)
+        verifySuspend { radioConfigUseCase.getOwner(456, any()) }
     }
 
     @Test
@@ -1186,17 +1230,9 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `ensureLoadingForRemote is no-op for local nodes`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        nodeRepository.setNodes(listOf(localNode))
-        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+    fun `ensureLoadingForRemote is no-op for local session before node identity resolves`() = runTest {
+        val localVm = createViewModel(destNum = null)
 
-        val localVm = createViewModel(destNum = 100)
-
-        // Local VM should have isLocal = true
-        assertTrue(localVm.radioConfigState.value.isLocal)
-
-        // ensureLoadingForRemote should NOT change responseState
         localVm.ensureLoadingForRemote()
         assertEquals(ResponseState.Empty, localVm.radioConfigState.value.responseState)
     }
