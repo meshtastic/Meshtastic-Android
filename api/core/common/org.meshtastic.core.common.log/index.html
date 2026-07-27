@@ -42,6 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:common/commonMain">common</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":core:common/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -51,6 +52,13 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":core:common/commonMain" data-filter=":core:common/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":core:common/jvmMain" data-filter=":core:common/jvmMain">
@@ -89,17 +97,32 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="core-common::org.meshtastic.core.common.log////PointingToDeclaration//-292363145">
+<div class="main-content" data-page-type="package" id="content" pageids="core-common::org.meshtastic.core.common.log////PointingToDeclaration//87723338">
   <div class="breadcrumbs"><a href="../index.html">core-common</a><span class="delimiter">/</span><span class="current">org.meshtastic.core.common.log</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="tableheader">Types</h2>
-        <div class="table"><a data-name="1818111745%2FClasslikes%2F-292363145" anchor-label="InMemoryLogBuffer" id="1818111745%2FClasslikes%2F-292363145" data-filterable-set=":core:common/jvmMain"></a>
+        <div class="table"><a data-name="-1865434596%2FClasslikes%2F-2004510817" anchor-label="ExpectedCondition" id="-1865434596%2FClasslikes%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-expected-condition/index.html"><span>Expected</span><wbr><span><span>Condition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1865434596%2FClasslikes%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-expected-condition/index.html">ExpectedCondition</a></div><div class="brief "><p class="paragraph">Marks a <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a> as an <i>expected condition</i>: a state the app is designed to encounter and recover from, caused by the environment rather than by a defect in this code.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1818111745%2FClasslikes%2F-292363145" anchor-label="InMemoryLogBuffer" id="1818111745%2FClasslikes%2F-292363145" data-filterable-set=":core:common/jvmMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -112,6 +135,70 @@
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:common/jvmMain" data-filterable-set=":core:common/jvmMain" data-active="" data-toggle=":core:common/jvmMain">jvm</button></div>
 <div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/jvmMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-in-memory-log-buffer/index.html">InMemoryLogBuffer</a> : <span data-unresolved-link="co.touchlab.kermit/LogWriter///PointingToDeclaration/">LogWriter</span></div><div class="brief "><p class="paragraph">A bounded in-memory ring buffer of recent Kermit log lines. Desktop has no system logcat, so install this writer at startup (<code class="lang-kotlin">Logger.setLogWriters(platformLogWriter(), InMemoryLogBuffer)</code>) to let the Debug screen view and export the app's own logs. Lines are formatted to loosely match Android's <code class="lang-kotlin">logcat -v time</code> shape (<code class="lang-kotlin">L/tag: message</code>) so the same viewer/filters work on both platforms.</p></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1697822718%2FFunctions%2F-2004510817" anchor-label="expectedConditionLabel" id="1697822718%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="expected-condition-label.html"><span>expected</span><wbr><span>Condition</span><wbr><span><span>Label</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1697822718%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="expected-condition-label.html"><span class="token function">expectedConditionLabel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns the <a href="-expected-condition/expected-condition-label.html">ExpectedCondition.expectedConditionLabel</a> of the first <a href="-expected-condition/index.html">ExpectedCondition</a> in this throwable's cause chain, or <code class="lang-kotlin">null</code> when nothing in the chain is an expected condition.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-360752808%2FFunctions%2F-2004510817" anchor-label="isExpectedCondition" id="-360752808%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-expected-condition.html"><span>is</span><wbr><span>Expected</span><wbr><span><span>Condition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-360752808%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="is-expected-condition.html"><span class="token function">isExpectedCondition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns <code class="lang-kotlin">true</code> when this throwable, or anything in its cause chain, is an <a href="-expected-condition/index.html">ExpectedCondition</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1808904505%2FFunctions%2F-2004510817" anchor-label="shouldDowngradeForDatadog" id="1808904505%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-downgrade-for-datadog.html"><span>should</span><wbr><span>Downgrade</span><wbr><span>For</span><wbr><span><span>Datadog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1808904505%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="should-downgrade-for-datadog.html"><span class="token function">shouldDowngradeForDatadog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">severity<span class="token operator">: </span><span data-unresolved-link="co.touchlab.kermit/Severity///PointingToDeclaration/">Severity</span><span class="token punctuation">, </span></span><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether the <strong>Datadog</strong> writer must downgrade an error-level log to <code class="lang-kotlin">WARN</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1767773124%2FFunctions%2F-2004510817" anchor-label="shouldReportAsException" id="1767773124%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="should-report-as-exception.html"><span>should</span><wbr><span>Report</span><wbr><span>As</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1767773124%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="should-report-as-exception.html"><span class="token function">shouldReportAsException</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">severity<span class="token operator">: </span><span data-unresolved-link="co.touchlab.kermit/Severity///PointingToDeclaration/">Severity</span><span class="token punctuation">, </span></span><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether a log line should become a <strong>Crashlytics</strong> non-fatal.</p></div></div></div>
                 </div>
               </div>
             </div>
