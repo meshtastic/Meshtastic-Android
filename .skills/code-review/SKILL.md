@@ -60,7 +60,7 @@ Kermit is the only logging API, and on the **google** flavor its writers fan eve
 
 **The rule: `Logger.e` means "a defect someone can fix". Everything else is `Logger.w` or below.**
 
-- [ ] **Severity gates reporting:** `Severity.Error`/`Assert` become a Crashlytics non-fatal **and** a Datadog RUM error. `Warn` and below never do — in either sink. Attaching a throwable at warn level is free and keeps the stack trace in the logs, so demoting costs nothing.
+- [ ] **Severity gates reporting:** `Severity.Error`/`Assert` become a Crashlytics non-fatal **and** a Datadog RUM error *unless* `shouldReportAsException` suppresses them — it exempts `CancellationException` and any `ExpectedCondition` in the cause chain. `Warn` and below never report in either sink, with no exceptions. Attaching a throwable at warn level is free and keeps the stack trace in the logs, so demoting costs nothing.
 - [ ] **`Logger.e` with no throwable still reports.** Crashlytics synthesises an `Exception(message)`; Datadog raises a RUM error from the level alone. `Logger.e { "…" }` is *not* a cheap log line.
 - [ ] **Expected conditions must not be reported.** Bluetooth off, a permission not granted, location services off, a deliberate disconnect, a peer/broker protocol violation, a handled retry, a guard that is doing its job — these are environment states, not bugs. Reporting them buries real regressions during release triage.
 - [ ] **Use the `ExpectedCondition` seam** (`core/common/src/commonMain/.../log/ExpectedCondition.kt`):
