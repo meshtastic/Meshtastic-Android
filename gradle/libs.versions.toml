@@ -133,8 +133,10 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-glance-appwidget-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
+androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
 androidx-glance-preview = { module = "androidx.glance:glance-preview", version.ref = "glance" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
+androidx-glance-testing = { module = "androidx.glance:glance-testing", version.ref = "glance" }
 # Android-only lifecycle — no KMP equivalent (use only in androidMain / androidHostTest)
 # lifecycle-runtime-ktx dropped: KTX extensions merged into lifecycle-runtime since 2.8.0;
 # use jetbrains-lifecycle-runtime (JB KMP fork) instead.
