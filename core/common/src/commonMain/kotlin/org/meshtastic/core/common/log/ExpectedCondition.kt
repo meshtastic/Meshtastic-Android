@@ -30,7 +30,8 @@ import kotlinx.coroutines.CancellationException
  *
  * Implement this on exception types whose very existence means "the environment said no". Where an exception type is
  * shared between expected and genuine failures, keep the type clean and simply log the expected call site at
- * [Severity.Warn] instead — see [shouldReportAsException] for the rule both reporting sinks apply.
+ * [Severity.Warn] instead. An [ExpectedCondition] is suppressed by both sinks — see [shouldReportAsException]
+ * (Crashlytics) and [shouldDowngradeForDatadog] (Datadog), which agree here but deliberately differ on cancellation.
  */
 interface ExpectedCondition {
     /**
@@ -67,24 +68,40 @@ fun Throwable.expectedConditionLabel(): String? {
 fun Throwable.isExpectedCondition(): Boolean = expectedConditionLabel() != null
 
 /**
- * The single source of truth for "should this log line become a reported exception?".
- *
- * Both reporting sinks consult this so they cannot drift apart:
- * - **Crashlytics** calls `recordException` only when this returns `true`.
- * - **Datadog** has no equivalent hook — its SDK turns *any* log at `ERROR` or above into a RUM error, throwable or
- *   not. The writer therefore downgrades the emitted level to `WARN` when this returns `false`, which is the only way
- *   to keep an expected condition out of RUM error tracking while still emitting the log line.
+ * Whether a log line should become a **Crashlytics** non-fatal.
  *
  * A log below [Severity.Error] is never reported by either sink, so warn-level logging remains the simplest way to
  * record an expected condition without reporting it.
+ *
+ * The two sinks deliberately differ on [CancellationException] — see [shouldDowngradeForDatadog].
  */
 fun shouldReportAsException(severity: Severity, throwable: Throwable?): Boolean = when {
     severity < Severity.Error -> false
 
-    // Structured-concurrency bookkeeping, never a defect. Crashlytics already filtered these; Datadog did not.
+    // Top-level only, matching the long-standing Crashlytics behaviour. Deliberately NOT a cause-chain walk:
+    // coroutine machinery routinely attaches a cancellation as the cause of an unrelated genuine failure, and
+    // unwrapping here would silently drop those reports. An ExpectedCondition marker is an explicit statement by
+    // the author about the nature of the condition, so that one is safe to unwrap; an incidental cancellation
+    // buried in a cause chain is not.
     throwable is CancellationException -> false
 
     throwable?.isExpectedCondition() == true -> false
 
     else -> true
 }
+
+/**
+ * Whether the **Datadog** writer must downgrade an error-level log to `WARN`.
+ *
+ * Datadog has no per-call opt-out: its SDK turns *any* log at `ERROR` or above into a RUM error, throwable or not.
+ * Downgrading the emitted level is the only way to keep something out of RUM error tracking while still emitting the
+ * log line.
+ *
+ * This intentionally does **not** mirror [shouldReportAsException] for [CancellationException]. Crashlytics filters
+ * cancellations because it is a crash-triage tool; Datadog keeps them because a cancellation logged at error level
+ * means some call site *swallowed* it instead of rethrowing — broken structured concurrency, and a real bug. That
+ * asymmetry is what surfaced the swallowed-cancellation defects fixed in #6468, so it is load-bearing: do not "unify"
+ * the two rules.
+ */
+fun shouldDowngradeForDatadog(severity: Severity, throwable: Throwable?): Boolean =
+    severity >= Severity.Error && throwable?.isExpectedCondition() == true

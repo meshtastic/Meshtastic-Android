@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
+import org.meshtastic.core.common.log.shouldDowngradeForDatadog
 import org.meshtastic.core.common.log.shouldReportAsException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DataPair
@@ -321,15 +322,10 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
             val logger = datadogLogger ?: return
             // The Datadog SDK turns any log at ERROR or above into a RUM error purely from the level — it has no
-            // per-call opt-out. Downgrading to WARN is therefore the only way to keep an expected condition (or a
-            // plain coroutine cancellation, which Crashlytics has always filtered) out of RUM error tracking while
-            // still emitting the log line. Keeps the two sinks agreeing on what counts as a defect.
-            val effectiveSeverity =
-                if (severity >= Severity.Error && !shouldReportAsException(severity, throwable)) {
-                    Severity.Warn
-                } else {
-                    severity
-                }
+            // per-call opt-out — so downgrading to WARN is the only way to keep an expected condition out of RUM
+            // error tracking while still emitting the log line. Note this deliberately keeps CancellationException
+            // at error here even though Crashlytics drops it; see shouldDowngradeForDatadog.
+            val effectiveSeverity = if (shouldDowngradeForDatadog(severity, throwable)) Severity.Warn else severity
             val datadogPriority =
                 when (effectiveSeverity) {
                     Severity.Verbose -> android.util.Log.VERBOSE

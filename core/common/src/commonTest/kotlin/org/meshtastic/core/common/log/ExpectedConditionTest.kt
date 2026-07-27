@@ -80,6 +80,38 @@ class ExpectedConditionTest {
         assertFalse(shouldReportAsException(Severity.Error, wrapped))
     }
 
+    @Test
+    fun `a genuine failure carrying a cancellation cause is still reported`() {
+        // Coroutine machinery routinely attaches a cancellation as the cause of an unrelated real failure.
+        // Unwrapping the chain for CancellationException would silently drop these reports.
+        val wrapped = RuntimeException("write failed", CancellationException("scope closed"))
+        assertTrue(shouldReportAsException(Severity.Error, wrapped))
+    }
+
+    // ── Datadog downgrade rule (deliberately differs on cancellation) ────────────────
+
+    @Test
+    fun `datadog downgrades expected conditions`() {
+        assertTrue(shouldDowngradeForDatadog(Severity.Error, TestExpected()))
+        assertTrue(shouldDowngradeForDatadog(Severity.Assert, RuntimeException("outer", TestExpected())))
+    }
+
+    @Test
+    fun `datadog keeps cancellation at error even though crashlytics drops it`() {
+        // Load-bearing asymmetry: a cancellation logged at error means a call site swallowed it instead of
+        // rethrowing — broken structured concurrency, and a real bug. This is the signal that surfaced #6468.
+        val cancellation = CancellationException("cancelled")
+        assertFalse(shouldReportAsException(Severity.Error, cancellation))
+        assertFalse(shouldDowngradeForDatadog(Severity.Error, cancellation))
+    }
+
+    @Test
+    fun `datadog leaves genuine errors and sub-error severities alone`() {
+        assertFalse(shouldDowngradeForDatadog(Severity.Error, RuntimeException("boom")))
+        assertFalse(shouldDowngradeForDatadog(Severity.Error, null))
+        assertFalse(shouldDowngradeForDatadog(Severity.Warn, TestExpected()))
+    }
+
     // ── cause-chain walking ──────────────────────────────────────────────────────────
 
     @Test
