@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discovery_interrupted_scan_restored
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.service.CompanionPresenceCoordinator
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
 import org.meshtastic.feature.discovery.DiscoveryScanEngine
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
@@ -120,6 +121,10 @@ open class MeshUtilApplication :
                 }
             }
         }
+
+        // Re-assert Companion Device Manager presence observation for the selected radio (it does not reliably
+        // survive reboots) and keep it reconciled with the selection for the process's life.
+        applicationScope.launch { get<CompanionPresenceCoordinator>().start() }
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         applicationScope.launch {

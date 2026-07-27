@@ -127,6 +127,40 @@ class ForegroundStartPolicyTest {
     }
 
     @Test
+    fun `a backgrounded companion-presence start is allowed with an association`() {
+        // The trigger only fires for an associated device, so this is the production shape: the system delivered a
+        // device-appeared event, which is exactly the companion-device exemption.
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertTrue(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.CompanionDevicePresent,
+                    appInForeground = false,
+                    hasCompanionAssociation = true,
+                    sdkInt = sdk,
+                ),
+                "CompanionDevicePresent with an association should be allowed on API $sdk",
+            )
+        }
+    }
+
+    @Test
+    fun `a backgrounded companion-presence start without an association is refused`() {
+        // Unreachable in production (presence events imply an association), but the policy must stay fail-closed if
+        // a caller ever supplies the trigger without the fact.
+        RESTRICTED_LEVELS.forEach { sdk ->
+            assertFalse(
+                ForegroundStartPolicy.isForegroundStartAllowed(
+                    ServiceStartTrigger.CompanionDevicePresent,
+                    appInForeground = false,
+                    hasCompanionAssociation = false,
+                    sdkInt = sdk,
+                ),
+                "CompanionDevicePresent without an association should be refused on API $sdk",
+            )
+        }
+    }
+
+    @Test
     fun `a device-address change while the app is visible is allowed`() {
         RESTRICTED_LEVELS.forEach { sdk ->
             listOf(true, false).forEach { associated ->

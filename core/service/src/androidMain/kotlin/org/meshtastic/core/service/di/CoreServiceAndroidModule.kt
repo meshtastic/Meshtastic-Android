@@ -42,6 +42,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.service.CompanionPresenceCoordinator
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.ServiceStartTrigger
@@ -50,6 +51,21 @@ import org.meshtastic.core.service.startService
 @Module
 @ComponentScan("org.meshtastic.core.service")
 class CoreServiceAndroidModule {
+    /**
+     * Provider (not component-scanned) because the coordinator deliberately takes the bare address flow instead of
+     * [RadioInterfaceService] — see its KDoc. Eagerly started from `MeshUtilApplication.onCreate`.
+     */
+    @Single
+    fun companionPresenceCoordinator(
+        radioInterfaceService: RadioInterfaceService,
+        companionAssociationRepository: CompanionAssociationRepository,
+        scope: ServiceScope,
+    ): CompanionPresenceCoordinator = CompanionPresenceCoordinator(
+        selectedAddressFlow = radioInterfaceService.currentDeviceAddressFlow,
+        repository = companionAssociationRepository,
+        scope = scope,
+    )
+
     @Suppress("LongParameterList")
     @Single(
         binds =
