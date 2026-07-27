@@ -105,6 +105,7 @@ import com.google.maps.android.data.renderer.model.LineString
 import com.google.maps.android.data.renderer.model.LineStyle
 import com.google.maps.android.data.renderer.model.MultiGeometry
 import com.google.maps.android.data.renderer.model.PolygonStyle
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -1360,6 +1361,11 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
                 } else {
                     RenderedMapLayer(map, dataLayer)
                 }
+            } catch (e: CancellationException) {
+                // Not a load failure: this MapEffect is relaunched on every refresh (refreshToken) and cancelled when
+                // the layer or the map leaves the composition, which lands here while parseMapLayer is suspended.
+                // Swallowing it broke structured concurrency and reported routine refreshes to error tracking.
+                throw e
             } catch (e: Exception) {
                 Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
                 null
