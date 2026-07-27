@@ -317,6 +317,33 @@
         </receiver>
 
         <!--
+            glance-appwidget declares ActionTrampolineActivity, but nothing in Glance ever targets it. Its onCreate
+            calls launchTrampolineAction(intent), which require()s an "ACTION_INTENT" Intent extra, so ANY launch that
+            does not carry that extra is a guaranteed FATAL IllegalArgumentException ("List adapter activity trampoline
+            invoked without specifying target intent") before a single line of our code runs.
+
+            Nothing can supply that extra, because nothing creates the intent. Verified against the Glance sources for
+            our pinned 1.2.0-rc01 (and 1.3.0-alpha02): applyTrampolineIntent() picks ActionTrampolineActivity only for
+            ActionTrampolineType.ACTIVITY, and no call site ever passes ACTIVITY. The four call sites all live in
+            getFillInIntentForAction() - i.e. only inside a lazy collection - and pass BROADCAST / SERVICE /
+            FOREGROUND_SERVICE, which all route to InvisibleActionTrampolineActivity instead. StartActivityAction is
+            special-cased there to skip the trampoline entirely and ride the collection's pending-intent template. The
+            non-lazy path never trampolines at all: actionStartActivity() becomes a direct PendingIntent.getActivity()
+            and actionRunCallback() a direct PendingIntent.getBroadcast() to ActionCallbackBroadcastReceiver.
+
+            So this is dead-but-launchable library code: an exported=false activity that crashes the process on every
+            launch and that our widget can never legitimately reach (LocalStatsWidget has no lazy collection, and a tap
+            on it dispatches its own PendingIntent directly). Same defect class as the ATAK marker below. Removing the
+            node is the whole fix - it takes the component out of the merged manifest so it cannot be started.
+
+            If glance is ever bumped, re-verify that ActionTrampolineType.ACTIVITY still has no producer before
+            trusting this removal; GlanceTrampolineManifestTest guards the removal itself.
+        -->
+        <activity
+            android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+            tools:node="remove" />
+
+        <!--
             ATAK plugin-discovery marker. The action is what ATAK looks for, so the filter stays exported; it now
             resolves to a real no-op activity because the name used to be com.atakmap.app.component, a class not
             present in this APK, so anything that launched it crashed the app on instantiation.
