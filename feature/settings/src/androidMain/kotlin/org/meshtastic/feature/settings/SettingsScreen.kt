@@ -48,9 +48,9 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_functions_settings
 import org.meshtastic.core.resources.app_functions_settings_summary
+import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.export_configuration
@@ -250,7 +250,8 @@ fun SettingsScreen(
                         onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
                         provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
                         onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                        homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                        homoglyphEnabled =
+                        viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
                         onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                         startProvideLocation = { settingsViewModel.startProvidingLocation() },
                         stopProvideLocation = { settingsViewModel.stopProvidingLocation() },

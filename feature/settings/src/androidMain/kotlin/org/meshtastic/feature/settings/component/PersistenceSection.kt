@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.export_data_csv
@@ -127,8 +128,13 @@ internal fun ColumnScope.PersistenceSettingsContent(
 @Composable
 fun PersistenceSectionPreview() {
     AppTheme {
-        ExpressiveSection(title = "App Settings") {
-            PersistenceSettingsContent(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {})
+        ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+            PersistenceSettingsContent(
+                cacheLimit = 100,
+                onSetCacheLimit = {},
+                nodeShortName = "TEST",
+                onExportData = {},
+            )
         }
     }
 }
