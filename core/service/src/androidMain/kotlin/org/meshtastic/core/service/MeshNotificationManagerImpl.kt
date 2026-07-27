@@ -508,7 +508,11 @@ class MeshNotificationManagerImpl(
         // Publish (or refresh) a long-lived conversation shortcut before the notification references it, so Android can
         // rank the notification in the shade's Conversations section and expose it to Android Auto/Wear. A channel name
         // labels a broadcast conversation; a direct message is labelled by the other participant's name.
-        conversationShortcutPublisher.value.ensureConversationShortcut(contactKey, channelName ?: conversationName)
+        // Both names come from packet metadata and can be empty, so prefer the first non-blank one.
+        conversationShortcutPublisher.value.ensureConversationShortcut(
+            contactKey,
+            channelName?.takeIf { it.isNotBlank() } ?: conversationName,
+        )
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val history =

@@ -251,6 +251,10 @@ class ConversationShortcutPublisher(
         pendingOnDemandIds += contactKey
         val alreadyPublished = ShortcutManagerCompat.getDynamicShortcuts(context).any { it.id == contactKey }
         if (alreadyPublished) return
+        // ShortcutInfoCompat.Builder.build() rejects a blank short label. On-demand callers derive the name from packet
+        // metadata that can be empty (an unnamed node, or a reaction that arrives before the NodeDB knows the sender),
+        // so fall back to the same localized placeholder the observer uses rather than letting build() throw.
+        val label = displayName.takeIf { it.isNotBlank() } ?: getString(Res.string.unknown_username)
         // Match the styling the observer will republish so there is no generic-head flash: rounded channel badge with
         // its number, or a circular initial for a DM. Color is derived from the key (the node object may not be known
         // yet at on-demand time).
@@ -260,21 +264,23 @@ class ConversationShortcutPublisher(
                 channelIcon(contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull() ?: 0)
             } else {
                 val (foregroundColor, backgroundColor) = nodeColorsFromNum(contactKey.hashCode())
-                PersonIconFactory.create(displayName, backgroundColor, foregroundColor)
+                PersonIconFactory.create(label, backgroundColor, foregroundColor)
             }
-        val person = Person.Builder().setName(displayName).setKey(contactKey).setIcon(icon).build()
-        val shortcut =
-            ShortcutInfoCompat.Builder(context, contactKey)
-                .setShortLabel(displayName)
-                .setLongLabel(displayName)
-                .setLocusId(LocusIdCompat(contactKey))
-                .setPerson(person)
-                .setLongLived(true)
-                .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
-                .setIntent(conversationIntent(contactKey))
-                .setIcon(icon)
-                .build()
+        val person = Person.Builder().setName(label).setKey(contactKey).setIcon(icon).build()
+        // build() as well as pushDynamicShortcut() enforces the builder's invariants, so both stay inside the guard: an
+        // escaping throw here cancels the caller's coroutine and drops the notification it was about to post.
         try {
+            val shortcut =
+                ShortcutInfoCompat.Builder(context, contactKey)
+                    .setShortLabel(label)
+                    .setLongLabel(label)
+                    .setLocusId(LocusIdCompat(contactKey))
+                    .setPerson(person)
+                    .setLongLived(true)
+                    .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
+                    .setIntent(conversationIntent(contactKey))
+                    .setIcon(icon)
+                    .build()
             ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
         } catch (e: IllegalArgumentException) {
             // Don't log the contactKey: node/channel identifiers are user-traceable (privacy-first convention).

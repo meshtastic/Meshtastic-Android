@@ -43,6 +43,7 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.User
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.meshtastic.core.model.Channel as MeshChannel
@@ -153,6 +154,18 @@ class ConversationShortcutPublisherTest {
             shortcutManager.dynamicShortcuts.any { it.id == "0!000000ff" },
             "pending on-demand shortcut must not be pruned before the snapshot catches up",
         )
+    }
+
+    @Test
+    fun `on-demand shortcut with a blank display name falls back instead of throwing`() = runTest {
+        // Regression: a reaction from a node the NodeDB does not know yet supplied an empty name, and
+        // ShortcutInfoCompat.Builder.build() threw "Shortcut must have a non-empty label" out of the caller's
+        // coroutine, dropping the notification (2.8.0 build 29321664).
+        publisher.ensureConversationShortcut("0!000000fe", "")
+
+        val published = shortcutManager.dynamicShortcuts.find { it.id == "0!000000fe" }
+        assertNotNull(published, "a blank display name must still publish a shortcut")
+        assertTrue(published.shortLabel?.isNotBlank() == true, "short label must be non-blank")
     }
 
     private fun pushRawShortcut(id: String, label: String) {
