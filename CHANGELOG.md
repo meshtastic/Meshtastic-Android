@@ -9,12 +9,16 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 🖥️ Desktop
-* fix(settings): retain config session across navigation by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6449
 #### 🛠️ Fixes
-* fix(map): configure OSMdroid user agent at F-Droid startup by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6448
+* fix(strings): remove stray "to" in share location description by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6463
+* fix(mqtt): scope user-CA trust to the MQTT connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6464
+* fix(logging): stop reporting expected conditions as crashes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6470
+* fix(map): stop reporting cancelled layer loads as errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6468
+* fix(network): resync stream framing and stop reporting expected disconnects as errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6469
+* fix(notifications): guard blank conversation-shortcut labels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6472
+* fix(service): guarantee startForeground is reached or MeshService stops itself by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6471
 
-### Open Beta (v2.8.0-open.3)
+### Open Beta (v2.8.0-open.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -83,6 +87,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: make NotificationManager.dispatch await the platform send by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6326
 * fix(database): make DB updates atomic across device switches by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6256
 * fix(ci): defer desktop packaging toolchain resolution by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6401
+* fix(settings): retain config session across navigation by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6449
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -207,6 +212,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(model): gate TAK module config on firmware 2.8.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6435
 * fix(data): don't let coarse position reports overwrite precise coordinates by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6432
 * fix(car): drop CarAppService from production manifests to satisfy Play car-app review by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6438
+* fix(map): configure OSMdroid user agent at F-Droid startup by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6448
 #### 📝 Other Changes
 * refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
 * refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
