@@ -93,24 +93,24 @@
   <div class="breadcrumbs"><a href="../../index.html">feature-docs</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.docs.ai</a><span class="delimiter">/</span><span class="current">ChirpySessionHolder</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Chirpy</span><wbr><span>Session</span><wbr><span><span>Holder</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ChirpySessionHolder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ai/ChirpySessionHolder.kt#L32">source</a>)</span></span></div><p class="paragraph">Global Chirpy conversation state shared across all docs panes.</p><p class="paragraph">Registered as a Koin singleton so both the list and detail entries access the same conversation. Uses Compose snapshot state so reads trigger recomposition automatically.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ChirpySessionHolder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">aiAssistant<span class="token operator">: </span><a href="../-a-i-doc-assistant/index.html">AIDocAssistant</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ai/ChirpySessionHolder.kt#L63">source</a>)</span></span></div><p class="paragraph">Global Chirpy conversation state shared across all docs panes.</p><p class="paragraph">Registered as a Koin singleton so both the list and detail entries access the same conversation. Uses Compose snapshot state so reads trigger recomposition automatically.</p><p class="paragraph">The holder also <i>runs</i> the requests, on its own scope. Callers must not launch them from a <code class="lang-kotlin">rememberCoroutineScope()</code>: on-device inference takes seconds, and the pane that submitted a question is routinely disposed before the answer lands — the adaptive docs layout swaps the list pane for a detail pane as soon as the user opens a page. A composition scope is cancelled at that point, so the answer would be dropped mid-stream and <a href="../../org.meshtastic.feature.docs.model/-a-i-doc-assistant-session-state/is-loading.html">AIDocAssistantSessionState.isLoading</a> would stay <code class="lang-kotlin">true</code> forever in this singleton, permanently blocking the next question. The session outlives any one pane, so the scope that fills it has to as well.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="301481361%2FConstructors%2F-351812214" anchor-label="ChirpySessionHolder" id="301481361%2FConstructors%2F-351812214" data-filterable-set=":feature:docs/commonMain"></a>
+        <div class="table"><a data-name="-247233393%2FConstructors%2F-351812214" anchor-label="ChirpySessionHolder" id="-247233393%2FConstructors%2F-351812214" data-filterable-set=":feature:docs/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:docs/commonMain" data-filterable-set=":feature:docs/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-chirpy-session-holder.html"><span>Chirpy</span><wbr><span>Session</span><wbr><span><span>Holder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="301481361%2FConstructors%2F-351812214"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-247233393%2FConstructors%2F-351812214"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">aiAssistant<span class="token operator">: </span><a href="../-a-i-doc-assistant/index.html">AIDocAssistant</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -145,6 +145,40 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="show-sheet.html">showSheet</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1068952611%2FFunctions%2F-351812214" anchor-label="introduce" id="-1068952611%2FFunctions%2F-351812214" data-filterable-set=":feature:docs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:docs/commonMain" data-filterable-set=":feature:docs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="introduce.html"><span><span>introduce</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1068952611%2FFunctions%2F-351812214"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="introduce.html"><span class="token function">introduce</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Auto-introduction, shown the first time the sheet opens on a ready model. Safe to call repeatedly: it no-ops once the conversation has started or while a request is already running.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="39249541%2FFunctions%2F-351812214" anchor-label="submit" id="39249541%2FFunctions%2F-351812214" data-filterable-set=":feature:docs/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:docs/commonMain" data-filterable-set=":feature:docs/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="submit.html"><span><span>submit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="39249541%2FFunctions%2F-351812214"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:docs/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="submit.html"><span class="token function">submit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">currentPageId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Submits the trimmed draft question and streams the answer into <a href="session-state.html">sessionState</a>. No-ops on a blank draft or while a request is already running.</p></div></div></div>
                 </div>
               </div>
             </div>
