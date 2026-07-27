@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2025 Meshtastic LLC
+  ~ Copyright (c) 2026 Meshtastic LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -16,6 +16,14 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
+<!--
+    Widget-picker preview (android:previewLayout in widget_local_stats_info.xml), used on API levels that predate the
+    generated previews LocalStatsWidget.providePreview supplies.
+
+    Lives in this module rather than androidApp because the provider info XML that references it does. Keeping it in
+    androidApp left this module's resources unresolvable on their own, which broke resource linking as soon as the
+    module gained unit tests.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,14 +35,14 @@
     <ImageView
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_launcher_foreground"
+        android:src="@drawable/widget_app_icon"
         android:contentDescription="@null" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Meshtastic Stats"
+        android:text="@string/widget_local_stats_label"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:textSize="14sp" />

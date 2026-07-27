@@ -332,7 +332,8 @@ jobs:
   #   shard-core:    remaining core:* KMP module tests (allTests)
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
-  #                  core:barcode) + :core:database + :core:network
+  #                  core:barcode, feature:car, feature:widget)
+  #                  + :core:database + :core:network
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
@@ -410,6 +411,7 @@ jobs:
               :core:network:allTests
               :feature:car:testFdroidDebugUnitTest
               :feature:car:testGoogleDebugUnitTest
+              :feature:widget:testDebugUnitTest
             kover: >-
               :androidApp:koverXmlReportFdroidDebug
               :androidApp:koverXmlReportGoogleDebug
@@ -420,6 +422,7 @@ jobs:
               :core:network:koverXmlReport
               :feature:car:koverXmlReportFdroidDebug
               :feature:car:koverXmlReportGoogleDebug
+              :feature:widget:koverXmlReportDebug
 
     steps:
       - name: Checkout code
