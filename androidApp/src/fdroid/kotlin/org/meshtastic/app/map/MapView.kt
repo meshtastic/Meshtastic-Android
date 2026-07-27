@@ -702,6 +702,19 @@ fun MapView(
             }
         }
 
+    // osmdroid runs the tile download on its own task for minutes and then calls back from there, not from a
+    // composable. Publishing the outcome as state keeps the toast on an effect that lives and dies with this screen: a
+    // callback that lands after the user left the map can no longer launch into a forgotten composition scope.
+    var tileDownloadOutcome by remember { mutableStateOf<TileDownloadOutcome?>(null) }
+    LaunchedEffect(tileDownloadOutcome) {
+        when (val outcome = tileDownloadOutcome) {
+            null -> return@LaunchedEffect
+            is TileDownloadOutcome.Complete -> context.showToast(Res.string.map_download_complete)
+            is TileDownloadOutcome.Failed -> context.showToast(Res.string.map_download_errors, outcome.errors)
+        }
+        tileDownloadOutcome = null
+    }
+
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
         try {
@@ -719,11 +732,11 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        scope.launch { context.showToast(Res.string.map_download_complete) }
+                        tileDownloadOutcome = TileDownloadOutcome.Complete
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        scope.launch { context.showToast(Res.string.map_download_errors, errors) }
+                        tileDownloadOutcome = TileDownloadOutcome.Failed(errors)
                         writer.onDetach()
                     },
                 ),
@@ -934,7 +947,25 @@ fun MapView(
     }
 
     if (showPurgeTileSourceDialog) {
-        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
+        PurgeTileSourceDialog(
+            onDismiss = { showPurgeTileSourceDialog = false },
+            // Purging runs on the map screen's scope, not the dialog's: the dialog dismisses itself in the same click
+            // that starts the purge, so its own rememberCoroutineScope() is already forgotten by the time the work
+            // would run — which silently skipped the purge and its toast.
+            onPurge = { sources ->
+                scope.launch {
+                    sources.forEach { source ->
+                        context.showToast(
+                            if (SqlTileWriterExt().purgeCache(source)) {
+                                getString(Res.string.map_purge_success, source)
+                            } else {
+                                getString(Res.string.map_purge_fail)
+                            },
+                        )
+                    }
+                }
+            },
+        )
     }
 
     if (showEditWaypointDialog != null) {
@@ -1200,9 +1231,7 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit, onPurge: (List<String>) -> Unit) {
     val cache = SqlTileWriterExt()
 
     val sourceList by remember { derivedStateOf { cache.sources.map { it.source as String } } }
@@ -1215,19 +1244,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
             TextButton(
                 enabled = selected.isNotEmpty(),
                 onClick = {
-                    selected.forEach { selectedIndex ->
-                        val source = sourceList[selectedIndex]
-                        scope.launch {
-                            context.showToast(
-                                if (cache.purgeCache(source)) {
-                                    getString(Res.string.map_purge_success, source)
-                                } else {
-                                    getString(Res.string.map_purge_fail)
-                                },
-                            )
-                        }
-                    }
-
+                    onPurge(selected.map { sourceList[it] })
                     onDismiss()
                 },
             ) {
@@ -1327,4 +1344,14 @@ private fun GeofenceBoxAuthoringBar(onConfirm: () -> Unit, onCancel: () -> Unit,
             Button(onClick = onConfirm) { Text(stringResource(Res.string.geofence_box_author_confirm)) }
         }
     }
+}
+
+/**
+ * Outcome of an osmdroid offline tile download, published as state so the toast is emitted from a composition-scoped
+ * effect rather than from the CacheManager's own callback thread.
+ */
+private sealed interface TileDownloadOutcome {
+    data object Complete : TileDownloadOutcome
+
+    data class Failed(val errors: Int) : TileDownloadOutcome
 }
