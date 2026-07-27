@@ -620,7 +620,11 @@ class MeshConnectionManagerImpl(
                     if (serviceRepository.connectionState.value !is ConnectionState.Connecting) {
                         return@handledLaunch
                     }
-                    Logger.e {
+                    // Warn, not error: the watchdog firing is the recovery mechanism working, and the cause is a
+                    // stalled radio or link rather than a defect here. A throwable-less Logger.e still synthesises a
+                    // non-fatal in Crashlytics and a RUM error, which made this one of the loudest issues in triage.
+                    // Track it as a rate over this log line instead.
+                    Logger.w {
                         "Fast-handshake watchdog expired after progress stalled — requesting forced transport restart"
                     }
                     runSiblingHandshakeRecovery()

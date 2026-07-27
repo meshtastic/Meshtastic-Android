@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.log.expectedConditionLabel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.unknown_error
@@ -122,7 +123,14 @@ fun safeLaunch(
         throw e
     } catch (e: Exception) {
         val label = tag ?: "safeLaunch"
-        Logger.e(e) { "[$label] Unhandled exception" }
+        // Expected conditions (Bluetooth off, permission not granted, …) still reach the user as an error
+        // event, but are logged at warn so neither Crashlytics nor Datadog RUM records them as a defect.
+        val expectedLabel = e.expectedConditionLabel()
+        if (expectedLabel != null) {
+            Logger.w(e) { "[$label] Expected condition: $expectedLabel" }
+        } else {
+            Logger.e(e) { "[$label] Unhandled exception" }
+        }
         val message = e.message?.let { UiText.DynamicString(it) } ?: UiText.Resource(Res.string.unknown_error)
         errorEvents?.tryEmit(message)
     }

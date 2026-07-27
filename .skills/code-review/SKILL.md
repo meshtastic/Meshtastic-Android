@@ -55,7 +55,24 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Libraries:** Verify usage of `Turbine` for Flow testing, `Kotest` for property-based testing, and `Mokkery` for mocking.
 - [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent SDK 35 compatibility issues.
 
-### 8. ProGuard / R8 Rules
+### 8. Logging & Crash Reporting
+Kermit is the only logging API, and on the **google** flavor its writers fan every call out to **both** Firebase Crashlytics and Datadog RUM (`androidApp/src/google/.../GooglePlatformAnalytics.kt`). Log level is therefore a *reporting* decision, not just a verbosity one.
+
+**The rule: `Logger.e` means "a defect someone can fix". Everything else is `Logger.w` or below.**
+
+- [ ] **Severity gates reporting:** `Severity.Error`/`Assert` become a Crashlytics non-fatal (`shouldReportAsException`, which exempts `CancellationException` and any `ExpectedCondition` in the cause chain) **and** a Datadog RUM error (`shouldDowngradeForDatadog`, which exempts only `ExpectedCondition`). `Warn` and below never report in either sink, with no exceptions. Attaching a throwable at warn level is free and keeps the stack trace in the logs, so demoting costs nothing.
+- [ ] **Don't "unify" the two cancellation rules.** Crashlytics drops `CancellationException` because it is a crash-triage tool; Datadog keeps it because a cancellation logged at *error* means a call site swallowed it instead of rethrowing — broken structured concurrency, and a real bug. That asymmetry is the detector that found #6468. Likewise, neither rule unwraps the cause chain for cancellation: coroutine machinery attaches cancellations as the cause of unrelated genuine failures, and unwrapping would silently drop those reports.
+- [ ] **`Logger.e` with no throwable still reports.** Crashlytics synthesises an `Exception(message)`; Datadog raises a RUM error from the level alone. `Logger.e { "…" }` is *not* a cheap log line.
+- [ ] **Expected conditions must not be reported.** Bluetooth off, a permission not granted, location services off, a deliberate disconnect, a peer/broker protocol violation, a handled retry, a guard that is doing its job — these are environment states, not bugs. Reporting them buries real regressions during release triage.
+- [ ] **Use the `ExpectedCondition` seam** (`core/common/src/commonMain/.../log/ExpectedCondition.kt`):
+  - Exception type that *only ever* means "the environment said no" → implement `ExpectedCondition` and give it a stable, low-cardinality `expectedConditionLabel` (e.g. `ble-scan-bluetooth-disabled`). `BleScanStartException` is the reference example.
+  - Exception type shared between expected and genuine failures → leave the type alone and log that call site at `Logger.w`.
+  - Both sinks consult `shouldReportAsException(severity, throwable)`, so an `ExpectedCondition` is suppressed even if some call site logs it at error. Treat that as a backstop, not a licence to log expected states at error.
+- [ ] **Prefer a rate over an exception.** For conditions worth *watching* but not *fixing* (watchdog fired, reconnect attempt failed), emit a warn log with a stable label and track its rate in the log backend. Do not manufacture a throwable just to get a stack trace.
+- [ ] **Third-party log bridges:** adapters that forward another library's logs into Kermit must downgrade that library's "error" level — its errors are usually operational. See `core/ble/.../KermitLogEngine.kt` (Kable).
+- [ ] **New `Logger.e` in a PR:** ask what the on-call engineer would *do* about it. If the answer is "nothing, that's just the user's phone", it is a `Logger.w`.
+
+### 9. ProGuard / R8 Rules
 - [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `androidApp/proguard-rules.pro` (R8) and `desktopApp/proguard-rules.pro` (ProGuard). The two files must stay aligned.
 - [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktopApp:runRelease` succeed.
 

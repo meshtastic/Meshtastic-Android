@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.io.IOException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -208,7 +209,19 @@ class MQTTRepositoryImpl(
                     }
 
                     else -> {
-                        Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        val failure = result.exceptionOrNull()
+                        // Broker- and network-side failures are what this retry loop exists to absorb — an
+                        // unreachable host, a TLS problem, a dropped connection, or a broker that violates the
+                        // MQTT 5 spec (e.g. the topic-alias limit). None are defects in this app, and reporting
+                        // every retry as a non-fatal drowned real regressions.
+                        //
+                        // Anything else landing here is unexpected — a fault in our own connect/subscribe setup
+                        // rather than the peer's — so it keeps reporting.
+                        if (failure.isExpectedMqttRetryFailure()) {
+                            Logger.w(failure) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        } else {
+                            Logger.e(failure) { "MQTT connect failed unexpectedly, retrying in ${reconnectDelay}ms" }
+                        }
                         delay(reconnectDelay)
                         reconnectDelay =
                             (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
@@ -305,6 +318,24 @@ class MQTTRepositoryImpl(
             }
         }
     }
+}
+
+/**
+ * `true` when an MQTT connect/subscribe failure is one the retry loop is designed to absorb, rather than a defect worth
+ * reporting to Crashlytics/Datadog.
+ *
+ * Covers the MQTT client's own sealed error hierarchy — a lost connection, and protocol violations by the broker such
+ * as an inbound topic alias above the advertised maximum — plus transport-level I/O failures (unreachable host, TLS,
+ * socket reset). All are peer- or network-side and not actionable by this app.
+ *
+ * Deliberately narrow: an unexpected exception escaping our own client/state setup is a real bug and must keep
+ * reporting, so anything outside these families returns `false`.
+ */
+private fun Throwable?.isExpectedMqttRetryFailure(): Boolean = when (this) {
+    null -> false
+    is MqttException -> true
+    is IOException -> true
+    else -> false
 }
 
 internal data class MqttClientSetup(

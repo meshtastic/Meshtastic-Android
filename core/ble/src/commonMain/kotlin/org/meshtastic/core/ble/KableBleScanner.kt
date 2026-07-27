@@ -18,6 +18,8 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
 import com.juul.kable.Scanner
+import com.juul.kable.UnmetRequirementException
+import com.juul.kable.UnmetRequirementReason
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -71,6 +73,10 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
         return scanner.advertisements.map(Advertisement::toScanResult)
     }
 
+    // ThrowsCount: three deliberate rethrow paths, one per exception family Kable can surface here — cancellation
+    // (must propagate untouched), UnmetRequirementException (an IOException) and IllegalStateException. They have no
+    // common supertype below Exception, so merging them would mean catching Exception broadly instead.
+    @Suppress("ThrowsCount")
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val filter = resolveKableScanFilter(serviceUuid = serviceUuid, address = address)
 
@@ -91,6 +97,12 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
                     }
                 } catch (ex: CancellationException) {
                     throw ex
+                } catch (ex: UnmetRequirementException) {
+                    // Kable models "Bluetooth is off" and "location services are off" as an IOException, so these
+                    // never matched the IllegalStateException branch below and escaped raw to ViewModel-level
+                    // catch-alls that log at error — the top source of Crashlytics/RUM noise. Map them to the
+                    // typed, non-reported BleScanStartException instead.
+                    throw ex.asBleScanStartException()
                 } catch (ex: IllegalStateException) {
                     throw ex.asBleScanStartExceptionOrNull() ?: ex
                 }
@@ -98,6 +110,23 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
         }
     }
 }
+
+/**
+ * Maps Kable's typed [UnmetRequirementReason] onto the matching [BleScanStartFailureReason].
+ *
+ * Kable's reason enum is exhaustive over the preconditions it checks, so this needs no message matching — unlike the
+ * [IllegalStateException] paths below, which Kable only distinguishes by message text.
+ *
+ * Kept `internal` and separate from the exception so it stays unit-testable: [UnmetRequirementException] has an
+ * `internal` constructor in Kable and cannot be instantiated from our tests.
+ */
+internal fun UnmetRequirementReason.toBleScanStartFailureReason(): BleScanStartFailureReason = when (this) {
+    UnmetRequirementReason.BluetoothDisabled -> BleScanStartFailureReason.BluetoothDisabled
+    UnmetRequirementReason.LocationServicesDisabled -> BleScanStartFailureReason.LocationServicesDisabled
+}
+
+private fun UnmetRequirementException.asBleScanStartException(): BleScanStartException =
+    BleScanStartException(reason.toBleScanStartFailureReason(), this)
 
 private fun Throwable.asBleScanStartExceptionOrNull(): BleScanStartException? {
     var current: Throwable? = this
