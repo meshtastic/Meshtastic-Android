@@ -48,11 +48,11 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 
 ### Локальный TAK-сервер
 
-The app can also run a **local TAK server** so ATAK/iTAK on the **same device** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Откройте **Настройки → Конфигурация модулей → TAK → TAK-сервер**:
+Приложение также может запускать **локальный TAK-сервер**, чтобы ATAK/iTAK на **том же устройстве** могли подключаться напрямую, без удалённого TAK-сервера. Сервер привязывается только к локальному хосту (`127.0.0.1:8089`) и использует TLS с взаимной аутентификацией по сертификатам (mTLS), поэтому он недоступен с других устройств в сети. Откройте **Настройки → Конфигурация модулей → TAK → TAK-сервер**:
 
 ![Настройки локального TAK-сервера с переключателем включения и опцией экспорта](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
+- **Включить локальный TAK-сервер** — запускает mTLS-сервер только на локальную петлю на порту **8089** для подключений ATAK/iTAK с того же устройства.
 - **Экспорт пакета данных TAK** — создаёт пакет данных `.zip`, который ATAK/iTAK может импортировать для подключения к этому серверу.
 
 ## Роли TAK
@@ -126,7 +126,7 @@ Meshtastic поддерживает два формата передачи да�
 - [Настройки — Модули и администрирование](settings-module-admin) — конфигурация модуля TAK
 - [Ноды](nodes) — роли TAK и TAK Tracker в списке нод
 - [Карта и путевые точки](map-and-waypoints) — расположение нод на карте
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
+- [Руководство по плагину ATAK](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — подробная настройка ATAK на meshtastic.org
 
 ---
 

@@ -16,7 +16,7 @@ The Nodes screen displays all devices visible on your mesh network.
 The node list shows every node your radio has heard, including:
 
 - **Sõlme nimi** — kasutaja pandud pikk nimi
-- **Short name** — 4-character identifier
+- **Lühinimi** — 4-tähemärgiline identifikaator
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
 - **Distance** — estimated distance (if positions are shared)
@@ -70,11 +70,11 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Nodes display encryption status icons next to their name:
 
- Icon            | Meaning                                                                                                                    |
- --------------- | -------------------------------------------------------------------------------------------------------------------------- |
- 🔒 Lukustatud   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity        |
- 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                           |
- ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri) |
+ Icon            | Meaning                                                                                                                          |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+ 🔒 Lukustatud   | Suhtlus kasutab PKI-d (avaliku võtme infrastruktuuri) – otsast lõpuni krüpteeritud kontrollitud identiteediga |
+ 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                                 |
+ ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri)       |
 
 &gt; 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
@@ -95,7 +95,7 @@ From the node list, you can:
 
 ### Text Search
 
-Type in the search field to filter nodes by name or short name. Filter uueneb reaalajas kirjutamise ajal.
+Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter uueneb reaalajas kirjutamise ajal.
 
 ### Filter Toggles
 
@@ -134,7 +134,7 @@ The detail screen includes device info, position, and action buttons:
 
 ![Sõlme üksikasjade jaotis](../../assets/screenshots/nodes_detail_section.png)
 
-Inline status indicators show key metrics at a glance:
+Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
  Indicator       | Screenshot                                                    |
  --------------- | ------------------------------------------------------------- |
@@ -144,11 +144,11 @@ Inline status indicators show key metrics at a glance:
  Viimati kuuldud | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
  Kaugus          | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 
-### Device Links ("I want one")
+### Seadme lingid ("Soovin ühte")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+Täielik ja sirvitav kataloog iga lingi kohta on saadaval ka menüüs **Seaded → Seadme lingid**.
 
 ## Related Topics
 
