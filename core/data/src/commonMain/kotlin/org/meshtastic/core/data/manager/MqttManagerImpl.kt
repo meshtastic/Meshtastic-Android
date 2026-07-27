@@ -34,6 +34,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.mqttTlsConfig
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
@@ -139,8 +140,10 @@ class MqttManagerImpl(
         val endpoint = resolveEndpoint(address, tlsEnabled)
         val result =
             MqttClient.probe(endpoint = endpoint) {
-                // probe() requires a transportFactory in 0.4.0 (errors otherwise); mirror the live client.
-                transportFactory = TcpTransportFactory() + WebSocketTransportFactory()
+                // probe() requires a transportFactory in 0.4.0 (errors otherwise); mirror the live client,
+                // including its scoped private-CA trust hook — otherwise a probe would fail where a connect succeeds.
+                val tls = mqttTlsConfig()
+                transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
                 // Per-connection random suffix: myId identifies the node (and is null →
                 // "unknown" before the node record loads), so two probes can collide on one
                 // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
