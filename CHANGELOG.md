@@ -7,6 +7,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🖥️ Desktop
+* fix(settings): retain config session across navigation by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6449
+#### 🛠️ Fixes
+* fix(map): configure OSMdroid user agent at F-Droid startup by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6448
+
 ### Open Beta (v2.8.0-open.3)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
