@@ -42,7 +42,6 @@
     <ID>ModifierMissing:AdministrationScreen.kt:@Composable fun AdministrationScreen</ID>
     <ID>ModifierMissing:AmbientLightingConfigItemList.kt:@Composable fun AmbientLightingConfigScreen</ID>
     <ID>ModifierMissing:AppInfoSection.kt:@Composable fun AppInfoSection</ID>
-    <ID>ModifierMissing:AppearanceSection.kt:@Composable fun AppearanceSection</ID>
     <ID>ModifierMissing:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
     <ID>ModifierMissing:BluetoothConfigItemList.kt:@Composable fun BluetoothConfigScreen</ID>
     <ID>ModifierMissing:CannedMessageConfigItemList.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun CannedMessageConfigScreen</ID>
@@ -65,7 +64,6 @@
     <ID>ModifierMissing:NetworkConfigItemList.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun NetworkConfigScreen</ID>
     <ID>ModifierMissing:PacketResponseStateDialog.kt:@Composable fun &lt;T> PacketResponseStateDialog</ID>
     <ID>ModifierMissing:PaxcounterConfigItemList.kt:@Composable fun PaxcounterConfigScreen</ID>
-    <ID>ModifierMissing:PersistenceSection.kt:@Composable fun PersistenceSection</ID>
     <ID>ModifierMissing:PositionConfigScreen.android.kt:@Composable actual fun DeviceLocationButton</ID>
     <ID>ModifierMissing:PositionConfigScreen.kt:@Composable @Suppress("LongMethod", "CyclomaticComplexMethod") fun PositionConfigScreenCommon</ID>
     <ID>ModifierMissing:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>

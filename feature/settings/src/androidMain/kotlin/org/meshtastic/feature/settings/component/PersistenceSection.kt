@@ -33,7 +33,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.export_data_csv
@@ -57,18 +56,6 @@ private val EXPORT_TIMESTAMP_FORMAT =
     }
 
 /** Section for settings related to data persistence and exports. */
-@Composable
-fun PersistenceSection(
-    cacheLimit: Int,
-    onSetCacheLimit: (Int) -> Unit,
-    nodeShortName: String,
-    onExportData: (android.net.Uri) -> Unit,
-) {
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        PersistenceSettingsContent(cacheLimit, onSetCacheLimit, nodeShortName, onExportData)
-    }
-}
-
 @Composable
 internal fun ColumnScope.PersistenceSettingsContent(
     cacheLimit: Int,
@@ -139,5 +126,9 @@ internal fun ColumnScope.PersistenceSettingsContent(
 @Preview(showBackground = true)
 @Composable
 fun PersistenceSectionPreview() {
-    AppTheme { PersistenceSection(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {}) }
+    AppTheme {
+        ExpressiveSection(title = "App Settings") {
+            PersistenceSettingsContent(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {})
+        }
+    }
 }

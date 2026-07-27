@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
@@ -39,16 +38,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 /** Section for app appearance settings like language and theme. */
-@Composable
-fun AppearanceSection(
-    onShowLanguagePicker: () -> Unit,
-    onShowThemePicker: () -> Unit,
-) {
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        AppearanceSettingsContent(onShowLanguagePicker, onShowThemePicker)
-    }
-}
-
 @Composable
 internal fun ColumnScope.AppearanceSettingsContent(
     onShowLanguagePicker: () -> Unit,
@@ -92,5 +81,9 @@ internal fun ColumnScope.AppearanceSettingsContent(
 @Preview(showBackground = true)
 @Composable
 fun AppearanceSectionPreview() {
-    AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}) }
+    AppTheme {
+        ExpressiveSection(title = "App Settings") {
+            AppearanceSettingsContent(onShowLanguagePicker = {}, onShowThemePicker = {})
+        }
+    }
 }

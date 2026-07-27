@@ -40,9 +40,8 @@ fun NotificationSection(
     onToggleNodeEvents: (Boolean) -> Unit,
     lowBatteryEnabled: Boolean,
     onToggleLowBattery: (Boolean) -> Unit,
-    showTitle: Boolean = true,
 ) {
-    ExpressiveSection(title = stringResource(Res.string.app_notifications), showTitle = showTitle) {
+    ExpressiveSection(title = stringResource(Res.string.app_notifications)) {
         SwitchListItem(
             text = stringResource(Res.string.meshtastic_messages_notifications),
             leadingIcon = MeshtasticIcons.Message,

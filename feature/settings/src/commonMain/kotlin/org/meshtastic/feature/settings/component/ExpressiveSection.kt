@@ -40,19 +40,16 @@ fun ExpressiveSection(
     title: String,
     modifier: Modifier = Modifier,
     titleColor: Color = MaterialTheme.colorScheme.primary,
-    showTitle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (showTitle) {
-            Text(
-                text = title,
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                style = MaterialTheme.typography.titleMediumEmphasized,
-                fontWeight = FontWeight.Bold,
-                color = titleColor,
-            )
-        }
+        Text(
+            text = title,
+            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            fontWeight = FontWeight.Bold,
+            color = titleColor,
+        )
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),

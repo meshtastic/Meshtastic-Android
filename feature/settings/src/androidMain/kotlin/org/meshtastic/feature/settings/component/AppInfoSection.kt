@@ -62,13 +62,12 @@ fun AppInfoSection(
     onUnlockHiddenFeatures: () -> Unit,
     onShowAppIntro: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    showTitle: Boolean = true,
 ) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
 
-    ExpressiveSection(title = stringResource(Res.string.info), showTitle = showTitle) {
+    ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
             text = stringResource(Res.string.intro_show),
             leadingIcon = MeshtasticIcons.WavingHand,

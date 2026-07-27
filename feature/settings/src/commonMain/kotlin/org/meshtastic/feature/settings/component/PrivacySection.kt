@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.analytics_okay
-import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.ui.component.SwitchListItem
@@ -34,33 +33,6 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.rememberShowToastResource
 
 /** Section managing privacy settings like analytics and location sharing. */
-@Composable
-fun PrivacySection(
-    analyticsAvailable: Boolean,
-    analyticsEnabled: Boolean,
-    onToggleAnalytics: () -> Unit,
-    provideLocation: Boolean,
-    onToggleLocation: (Boolean) -> Unit,
-    homoglyphEnabled: Boolean,
-    onToggleHomoglyph: () -> Unit,
-    startProvideLocation: () -> Unit,
-    stopProvideLocation: () -> Unit,
-) {
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        PrivacySettingsContent(
-            analyticsAvailable,
-            analyticsEnabled,
-            onToggleAnalytics,
-            provideLocation,
-            onToggleLocation,
-            homoglyphEnabled,
-            onToggleHomoglyph,
-            startProvideLocation,
-            stopProvideLocation,
-        )
-    }
-}
-
 @Composable
 internal fun ColumnScope.PrivacySettingsContent(
     analyticsAvailable: Boolean,
