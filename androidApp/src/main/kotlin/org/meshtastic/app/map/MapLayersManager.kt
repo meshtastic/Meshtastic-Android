@@ -26,6 +26,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -252,6 +253,10 @@ class MapLayersManager(
                 } else {
                     application.contentResolver.openInputStream(uriToLoad)
                 }
+            } catch (e: CancellationException) {
+                // The caller is a composition-scoped effect, so a layer refresh or leaving the map cancels this fetch
+                // mid-flight. That is not a load failure and must not be reported as one.
+                throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 // Redact the URI: a content:///file:// path can include a user-chosen file name.
                 Logger.withTag(TAG).e(e) { "Error opening InputStream for layer (scheme=${uriToLoad.scheme})" }

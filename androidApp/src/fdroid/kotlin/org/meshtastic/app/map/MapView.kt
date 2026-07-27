@@ -78,7 +78,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -91,6 +93,7 @@ import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -702,6 +705,21 @@ fun MapView(
             }
         }
 
+    // osmdroid runs the tile download on its own task for minutes and then calls back from there, not from a
+    // composable. The callback only queues the outcome; the toast is emitted by an effect that lives and dies with this
+    // screen, so a callback landing after the user left the map can no longer launch into a forgotten composition
+    // scope. A queue rather than a state value: outcomes are one-shot events, and two equal ones (two completions, or
+    // two failures with the same error count) must still produce two toasts.
+    val tileDownloadOutcomes = remember { Channel<TileDownloadOutcome>(Channel.UNLIMITED) }
+    LaunchedEffect(Unit) {
+        for (outcome in tileDownloadOutcomes) {
+            when (outcome) {
+                is TileDownloadOutcome.Complete -> context.showToast(Res.string.map_download_complete)
+                is TileDownloadOutcome.Failed -> context.showToast(Res.string.map_download_errors, outcome.errors)
+            }
+        }
+    }
+
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
         try {
@@ -719,11 +737,11 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        scope.launch { context.showToast(Res.string.map_download_complete) }
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Complete)
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        scope.launch { context.showToast(Res.string.map_download_errors, errors) }
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Failed(errors))
                         writer.onDetach()
                     },
                 ),
@@ -934,7 +952,28 @@ fun MapView(
     }
 
     if (showPurgeTileSourceDialog) {
-        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
+        PurgeTileSourceDialog(
+            onDismiss = { showPurgeTileSourceDialog = false },
+            // Purging runs on the map screen's scope, not the dialog's: the dialog dismisses itself in the same click
+            // that starts the purge, so its own rememberCoroutineScope() is already forgotten by the time the work
+            // would run — which silently skipped the purge and its toast.
+            onPurge = { sources ->
+                scope.launch {
+                    sources.forEach { source ->
+                        // purgeCache does synchronous SQLite deletes over the tile cache; this scope dispatches on the
+                        // UI thread, so the delete has to move off it.
+                        val purged = withContext(ioDispatcher) { SqlTileWriterExt().purgeCache(source) }
+                        context.showToast(
+                            if (purged) {
+                                getString(Res.string.map_purge_success, source)
+                            } else {
+                                getString(Res.string.map_purge_fail)
+                            },
+                        )
+                    }
+                }
+            },
+        )
     }
 
     if (showEditWaypointDialog != null) {
@@ -1200,9 +1239,7 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit, onPurge: (List<String>) -> Unit) {
     val cache = SqlTileWriterExt()
 
     val sourceList by remember { derivedStateOf { cache.sources.map { it.source as String } } }
@@ -1215,19 +1252,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
             TextButton(
                 enabled = selected.isNotEmpty(),
                 onClick = {
-                    selected.forEach { selectedIndex ->
-                        val source = sourceList[selectedIndex]
-                        scope.launch {
-                            context.showToast(
-                                if (cache.purgeCache(source)) {
-                                    getString(Res.string.map_purge_success, source)
-                                } else {
-                                    getString(Res.string.map_purge_fail)
-                                },
-                            )
-                        }
-                    }
-
+                    onPurge(selected.map { sourceList[it] })
                     onDismiss()
                 },
             ) {
@@ -1327,4 +1352,14 @@ private fun GeofenceBoxAuthoringBar(onConfirm: () -> Unit, onCancel: () -> Unit,
             Button(onClick = onConfirm) { Text(stringResource(Res.string.geofence_box_author_confirm)) }
         }
     }
+}
+
+/**
+ * Outcome of an osmdroid offline tile download, published as state so the toast is emitted from a composition-scoped
+ * effect rather than from the CacheManager's own callback thread.
+ */
+private sealed interface TileDownloadOutcome {
+    data object Complete : TileDownloadOutcome
+
+    data class Failed(val errors: Int) : TileDownloadOutcome
 }

@@ -28,6 +28,7 @@ import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -173,6 +174,8 @@ class MapViewModel(
                         _errorFlow.emit("Failed to copy MBTiles file to internal storage.")
                         return@launch
                     }
+                } catch (e: CancellationException) {
+                    throw e // A cancelled copy (ViewModel cleared) is not a processing failure.
                 } catch (e: Exception) {
                     Logger.withTag("MapViewModel").e(e) { "Error processing local URI" }
                     _errorFlow.emit("Error processing local URI for MBTiles.")
