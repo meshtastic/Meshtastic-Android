@@ -52,6 +52,7 @@ graph TB
   :feature:wifi-provision -.-> :core:ble
   :feature:wifi-provision -.-> :core:common
   :feature:wifi-provision -.-> :core:di
+  :feature:wifi-provision -.-> :core:model
   :feature:wifi-provision -.-> :core:navigation
   :feature:wifi-provision -.-> :core:resources
   :feature:wifi-provision -.-> :core:ui
