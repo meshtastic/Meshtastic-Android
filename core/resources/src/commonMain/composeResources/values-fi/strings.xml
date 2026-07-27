@@ -149,6 +149,7 @@
     <string name="bluetooth_feature_discovery">Haku</string>
     <string name="bluetooth_feature_discovery_description">Etsi ja tunnista lähelläsi olevia Meshtastic-laitteita.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Sijaintipalvelut ovat pois käytöstä. Ota ne käyttöön etsiäksesi lähistöllä olevia laitteita.</string>
     <string name="bluetooth_scan_missing_permission">Bluetooth-laitteiden haku edellyttää käyttöoikeutta. Myönnä lähistön laitteet (tai sijainti) käyttöoikeus, jotta laitteita voidaan etsiä.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth-skannaus ei onnistunut. Yritä uudelleen tai ota bluetooth-yhteys uudelleen käyttöön jos ongelma jatkuu.</string>
     <plurals name="bluetooth_scan_too_frequent">
