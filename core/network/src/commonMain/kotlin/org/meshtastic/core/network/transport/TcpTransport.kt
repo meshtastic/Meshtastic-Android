@@ -213,7 +213,14 @@ class TcpTransport(
                     disconnectSocket()
                     throw ce
                 } catch (@Suppress("TooGenericExceptionCaught") ex: Throwable) {
-                    Logger.e(ex) { "$logTag: [$address] TCP exception" }
+                    // An unreachable host is routine, not a defect — most often a hostname that no longer resolves
+                    // (UnresolvedAddressException, which is an IllegalArgumentException and so misses the IOException
+                    // branch above). Log it, retry it, but keep it out of error tracking.
+                    if (ex.isExpectedConnectionFailure()) {
+                        Logger.w(ex) { "$logTag: [$address] Radio unreachable" }
+                    } else {
+                        Logger.e(ex) { "$logTag: [$address] TCP exception" }
+                    }
                     disconnectSocket()
                     false
                 }

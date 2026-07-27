@@ -19,6 +19,7 @@ package org.meshtastic.core.network.transport
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.Volatile
 
 /**
  * Meshtastic stream framing codec — pure Kotlin, no platform dependencies.
@@ -61,55 +62,141 @@ class StreamFrameCodec(
     private val rxPacket = ByteArray(MAX_TO_FROM_RADIO_SIZE)
     private val debugLineBuf = StringBuilder()
 
+    // Written only by the transport's read thread, but published through [framingDesyncCount] for diagnostics, so a
+    // reader on another thread needs a visibility guarantee. Matches the metrics counters in TcpTransport. The rest of
+    // the state machine stays plain: it is single-reader by contract.
+    @Volatile private var desyncCount = 0L
+
+    // Purely local to the read thread — it only throttles logging — so it needs no cross-thread guarantee.
+    private var consecutiveDesyncs = 0
+
+    /**
+     * Number of framing desyncs observed since the last [reset].
+     *
+     * Exposed for diagnostics and tests. A non-zero count on an otherwise healthy link means the peer is emitting bytes
+     * we cannot frame — truncated writes, a corrupt length prefix, or non-protocol output on the wire.
+     */
+    val framingDesyncCount: Long
+        get() = desyncCount
+
     /**
      * Process a single incoming byte through the stream framing state machine.
      *
      * Call this repeatedly with bytes from the transport (serial, TCP, etc). When a complete packet is decoded,
      * [onPacketReceived] is invoked.
+     *
+     * Malformed input never throws. On a broken frame the machine records a desync, rewinds to the hunting state, and
+     * resynchronizes on the next valid frame header — a corrupt frame costs one frame, not the connection.
      */
     fun processInputByte(c: Byte) {
-        var nextPtr = ptr + 1
+        // A byte that breaks framing may itself be the START1 of the next frame, so re-examine it from the hunting
+        // state instead of dropping it. This matters most for a corrupt length prefix whose low byte is 0x94: the
+        // machine rejects the length and the very next header would otherwise be missing its start byte.
+        //
+        // Discarding the offending byte is what let one bad byte cascade. The machine would resume hunting partway
+        // into the *payload* of the frame that followed, re-sync on an incidental 0x94/0xc3 pair inside it, and hand
+        // a misaligned byte range to the protobuf parser — surfacing downstream as ProtocolException or
+        // "Unexpected call to beginMessage()".
+        //
+        // The retry always runs in state 0, which never reports a desync, so this terminates after at most one retry.
+        if (!step(c)) step(c)
+    }
 
-        fun lostSync() {
-            Logger.e { "$logTag: Lost protocol sync" }
-            nextPtr = 0
+    /**
+     * Advance the state machine by a single byte.
+     *
+     * @return `false` when [c] broke framing and must be re-examined from the hunting state.
+     */
+    private fun step(c: Byte): Boolean = when (ptr) {
+        0 -> {
+            // Hunting for a frame start; anything else is device debug output.
+            if (c == START1) ptr = 1 else debugOut(c)
+            true
         }
 
-        fun deliverPacket() {
-            val buf = rxPacket.copyOf(packetLen)
-            onPacketReceived(buf)
-            nextPtr = 0
+        1 -> stepExpectStart2(c)
+
+        2 -> {
+            msb = c.toInt() and 0xff
+            ptr = 3
+            true
         }
 
-        when (ptr) {
-            0 ->
-                if (c != START1) {
-                    debugOut(c)
-                    nextPtr = 0
-                }
+        3 -> stepLength(c)
 
-            1 -> if (c != START2) lostSync()
+        else -> {
+            appendPayloadByte(c)
+            true
+        }
+    }
 
-            2 -> msb = c.toInt() and 0xff
+    /**
+     * State 1: expecting START2.
+     *
+     * A repeated START1 is padding rather than corruption — the wake sequence is four of them, and a peer may pad an
+     * idle link the same way — so hold in this state and take the next byte as the candidate START2.
+     */
+    private fun stepExpectStart2(c: Byte): Boolean = when (c) {
+        START2 -> {
+            ptr = 2
+            true
+        }
 
-            3 -> {
-                lsb = c.toInt() and 0xff
-                packetLen = (msb shl 8) or lsb
-                if (packetLen > MAX_TO_FROM_RADIO_SIZE) {
-                    lostSync()
-                } else if (packetLen == 0) {
-                    deliverPacket()
-                }
+        START1 -> {
+            // Padding — hold here, still expecting START2.
+            true
+        }
+
+        else -> {
+            lostSync("expected START2")
+            false
+        }
+    }
+
+    /** State 3: low byte of the length prefix, completing the header. */
+    private fun stepLength(c: Byte): Boolean {
+        lsb = c.toInt() and 0xff
+        packetLen = (msb shl 8) or lsb
+        return when {
+            packetLen > MAX_TO_FROM_RADIO_SIZE -> {
+                lostSync("declared length $packetLen exceeds $MAX_TO_FROM_RADIO_SIZE")
+                false
+            }
+
+            packetLen == 0 -> {
+                deliverPacket()
+                true
             }
 
             else -> {
-                rxPacket[ptr - HEADER_SIZE] = c
-                if (ptr - HEADER_SIZE + 1 == packetLen) {
-                    deliverPacket()
-                }
+                ptr = HEADER_SIZE
+                true
             }
         }
-        ptr = nextPtr
+    }
+
+    /** States 4 and up: accumulating the payload declared by the header. */
+    private fun appendPayloadByte(c: Byte) {
+        rxPacket[ptr - HEADER_SIZE] = c
+        if (ptr - HEADER_SIZE + 1 == packetLen) deliverPacket() else ptr++
+    }
+
+    private fun lostSync(reason: String) {
+        desyncCount++
+        consecutiveDesyncs++
+        // Structural detail only — never payload bytes, which can carry message content or keys.
+        val detail = "$logTag: Lost protocol sync ($reason); resynchronizing. Desyncs since connect: $desyncCount"
+        // Warn once per disruption, then drop to debug: a peer streaming non-protocol bytes would otherwise emit a
+        // warning every few hundred bytes.
+        if (consecutiveDesyncs == 1) Logger.w { detail } else Logger.d { detail }
+        ptr = 0
+    }
+
+    private fun deliverPacket() {
+        consecutiveDesyncs = 0
+        // Rewind before dispatching so the machine is already hunting if the callback re-enters.
+        ptr = 0
+        onPacketReceived(rxPacket.copyOf(packetLen))
     }
 
     /**
@@ -141,6 +228,8 @@ class StreamFrameCodec(
         msb = 0
         lsb = 0
         packetLen = 0
+        desyncCount = 0
+        consecutiveDesyncs = 0
         debugLineBuf.clear()
     }
 

@@ -17,6 +17,7 @@
 package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.network.transport.isExpectedConnectionFailure
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttLogger
 
@@ -33,15 +34,32 @@ import org.meshtastic.mqtt.MqttLogger
  * Note: The production log level should be set to [MqttLogLevel.WARN] (not INFO) to prevent the library's own
  * INFO-level messages (which include endpoint addresses and topic strings) from reaching remote analytics sinks.
  */
-class KermitMqttLogger : MqttLogger {
+class KermitMqttLogger(
+    /** Base logger to tag and delegate to. Injectable so tests can capture severities. */
+    private val baseLogger: Logger = Logger,
+) : MqttLogger {
     override fun log(level: MqttLogLevel, tag: String, message: String, throwable: Throwable?) {
-        val logger = Logger.withTag(tag)
+        val logger = baseLogger.withTag(tag)
         when (level) {
             MqttLogLevel.TRACE -> logger.v(throwable) { message }
+
             MqttLogLevel.DEBUG -> logger.d(throwable) { message }
+
             MqttLogLevel.INFO -> logger.i(throwable) { message }
+
             MqttLogLevel.WARN -> logger.w(throwable) { message }
-            MqttLogLevel.ERROR -> logger.e(throwable) { message }
+
+            // The library reports a broker that closed the socket, an unreachable host, or Wi-Fi dropping mid-read at
+            // ERROR ("Read loop error: Not enough data available"), and the client then reconnects on its own. Those
+            // are expected for a mobile client and dominated our error tracking, so log them at WARN — diagnosable in
+            // a support session, but not counted as application errors.
+            MqttLogLevel.ERROR ->
+                if (throwable?.isExpectedConnectionFailure() == true) {
+                    logger.w(throwable) { message }
+                } else {
+                    logger.e(throwable) { message }
+                }
+
             MqttLogLevel.NONE -> return
         }
     }
