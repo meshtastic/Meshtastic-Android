@@ -1062,7 +1062,6 @@
     <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
-    <string name="share_location_description">Použijte GPS telefonu k odesílání polohy do svého uzlu namísto použití hardwarového GPS přímo na uzlu.</string>
     <string name="share_to">Sdílet do…</string>
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
     <string name="short_name">Krátké jméno</string>

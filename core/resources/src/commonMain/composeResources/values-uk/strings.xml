@@ -1138,7 +1138,6 @@
     <string name="share">Поділіться</string>
     <string name="share_contact">Поділитися контактом</string>
     <string name="share_location">Поділитися місцезнаходженням</string>
-    <string name="share_location_description">Використовувати GPS телефона для передачі координат на вузол замість вбудованого GPS-модуля.</string>
     <string name="share_to">Поділитися з…</string>
     <string name="share_your_location_in_real_time">Діліться своїм місцезнаходженням у реальному часі та координуйте групу завдяки вбудованим функціям GPS.</string>
     <string name="short_name">Коротка назва</string>

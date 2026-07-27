@@ -20,7 +20,7 @@
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d%%</string>
-    <string name="a11y_node_distance_away">%1$s away</string>
+    <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
     <string name="a11y_node_hops_away">%1$d hops away</string>
     <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
@@ -1562,7 +1562,7 @@
     <string name="share_connected_node">Поделиться подключенной нодой</string>
     <string name="share_contact">Отправить контакт</string>
     <string name="share_location">Поделиться геопозицией</string>
-    <string name="share_location_description">........</string>
+    <string name="share_location_description">Используй GPS твоего телефона для отправки координат на твою ноду вместо аппаратного GPS на самой ноде.</string>
     <string name="share_to">Поделиться…</string>
     <string name="share_your_location_in_real_time">Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS.</string>
     <string name="short_name">Короткое имя</string>

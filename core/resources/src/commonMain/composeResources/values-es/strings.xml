@@ -801,7 +801,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="share">Compartir</string>
     <string name="share_contact">Compartir contacto</string>
     <string name="share_location">Compartir ubicación</string>
-    <string name="share_location_description">Utilice el GPS del teléfono para enviar ubicaciones a su nodo en lugar de usar el hardware GPS de su nodo.</string>
     <string name="share_to">Compartir con…</string>
     <string name="share_your_location_in_real_time">Comparte tu ubicación en tiempo real y mantén tu grupo coordinado con las características integradas del GPS.</string>
     <string name="short_name">Nombre Corto</string>

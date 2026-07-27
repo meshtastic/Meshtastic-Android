@@ -806,7 +806,6 @@
     <string name="share">Megosztás</string>
     <string name="share_contact">Kapcsolat megosztása</string>
     <string name="share_location">Helyzet megosztása</string>
-    <string name="share_location_description">Használd a telefon GPS-ét a helyzet elküldéséhez a csomópontra, ahelyett, hogy a csomópont hardveres GPS-ét használnád.</string>
     <string name="share_to">Megosztás…</string>
     <string name="share_your_location_in_real_time">Oszd meg a helyzeted valós időben, és tartsd összehangoltan a csoportot a beépített GPS-funkciókkal.</string>
     <string name="short_name">Rövid név</string>
