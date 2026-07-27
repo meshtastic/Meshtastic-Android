@@ -19,6 +19,7 @@ package org.meshtastic.core.network.transport
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.Volatile
 
 /**
  * Meshtastic stream framing codec — pure Kotlin, no platform dependencies.
@@ -61,7 +62,12 @@ class StreamFrameCodec(
     private val rxPacket = ByteArray(MAX_TO_FROM_RADIO_SIZE)
     private val debugLineBuf = StringBuilder()
 
-    private var desyncCount = 0L
+    // Written only by the transport's read thread, but published through [framingDesyncCount] for diagnostics, so a
+    // reader on another thread needs a visibility guarantee. Matches the metrics counters in TcpTransport. The rest of
+    // the state machine stays plain: it is single-reader by contract.
+    @Volatile private var desyncCount = 0L
+
+    // Purely local to the read thread — it only throttles logging — so it needs no cross-thread guarantee.
     private var consecutiveDesyncs = 0
 
     /**
