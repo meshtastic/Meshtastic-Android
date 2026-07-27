@@ -208,7 +208,11 @@ class MQTTRepositoryImpl(
                     }
 
                     else -> {
-                        Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        // Warn, not error: this branch is the retry path, so the condition is already handled. The
+                        // causes are broker- and network-side (unreachable host, TLS handshake, brokers that violate
+                        // MQTT 5 topic-alias limits) — none are defects in this app, and reporting each retry as a
+                        // non-fatal drowned real regressions. The retry count remains visible in the logs.
+                        Logger.w(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
                         delay(reconnectDelay)
                         reconnectDelay =
                             (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)

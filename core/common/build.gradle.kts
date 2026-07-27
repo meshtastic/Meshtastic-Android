@@ -31,7 +31,8 @@ kotlin {
             api(libs.kotlinx.datetime)
             api(libs.okio)
             api(libs.uri.kmp)
-            implementation(libs.kermit)
+            // api: `shouldReportAsException` exposes Kermit's Severity in its signature.
+            api(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
     }

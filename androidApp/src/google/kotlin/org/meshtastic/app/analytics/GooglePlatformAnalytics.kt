@@ -52,11 +52,11 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import io.opentelemetry.api.GlobalOpenTelemetry
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
+import org.meshtastic.core.common.log.shouldReportAsException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -301,21 +301,18 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             // Add the log to the Crashlytics log buffer so it appears in reports
             Firebase.crashlytics.log("$severity/$tag: $message")
 
-            // Filter out normal coroutine cancellations
-            if (throwable is CancellationException) return
+            // Cancellations and expected conditions stay breadcrumbs only — see shouldReportAsException.
+            if (!shouldReportAsException(severity, throwable)) return
 
-            // Only record non-fatal exceptions for actual Errors (Severity.Error or Severity.Assert)
-            if (severity >= Severity.Error) {
-                if (throwable != null) {
-                    Firebase.crashlytics.recordException(throwable)
-                } else {
-                    Firebase.crashlytics.setCustomKeys {
-                        key(KEY_PRIORITY, severity.ordinal)
-                        key(KEY_TAG, tag)
-                        key(KEY_MESSAGE, message)
-                    }
-                    Firebase.crashlytics.recordException(Exception(message))
+            if (throwable != null) {
+                Firebase.crashlytics.recordException(throwable)
+            } else {
+                Firebase.crashlytics.setCustomKeys {
+                    key(KEY_PRIORITY, severity.ordinal)
+                    key(KEY_TAG, tag)
+                    key(KEY_MESSAGE, message)
                 }
+                Firebase.crashlytics.recordException(Exception(message))
             }
         }
     }
@@ -323,8 +320,18 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
     private inner class DatadogLogWriter : LogWriter() {
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
             val logger = datadogLogger ?: return
+            // The Datadog SDK turns any log at ERROR or above into a RUM error purely from the level — it has no
+            // per-call opt-out. Downgrading to WARN is therefore the only way to keep an expected condition (or a
+            // plain coroutine cancellation, which Crashlytics has always filtered) out of RUM error tracking while
+            // still emitting the log line. Keeps the two sinks agreeing on what counts as a defect.
+            val effectiveSeverity =
+                if (severity >= Severity.Error && !shouldReportAsException(severity, throwable)) {
+                    Severity.Warn
+                } else {
+                    severity
+                }
             val datadogPriority =
-                when (severity) {
+                when (effectiveSeverity) {
                     Severity.Verbose -> android.util.Log.VERBOSE
                     Severity.Debug -> android.util.Log.DEBUG
                     Severity.Info -> android.util.Log.INFO

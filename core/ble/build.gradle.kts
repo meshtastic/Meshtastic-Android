@@ -25,7 +25,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
+            // api: BleScanStartException implements core.common's ExpectedCondition in its public supertype list.
+            api(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
 

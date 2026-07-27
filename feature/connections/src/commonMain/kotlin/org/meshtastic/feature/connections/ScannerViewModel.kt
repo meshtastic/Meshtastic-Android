@@ -59,6 +59,8 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_disabled
+import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
 import org.meshtastic.core.resources.bluetooth_scan_missing_permission
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.bluetooth_scan_too_frequent
@@ -425,6 +427,11 @@ open class ScannerViewModel(
                             retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
                             retryCooldownSeconds,
                         )
+
+                    BleScanStartFailureReason.BluetoothDisabled -> getStringSuspend(Res.string.bluetooth_disabled)
+
+                    BleScanStartFailureReason.LocationServicesDisabled ->
+                        getStringSuspend(Res.string.bluetooth_scan_location_services_disabled)
                 }
             }
                 .getOrDefault(
