@@ -13,17 +13,17 @@ aliases:
 
 # App Functions
 
-Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele tehisintellekti assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. Kui need on lubatud, saab assistent sinu eest kärgvõrgu töövooge avastada ja käivitada – näiteks sõnumi saata või kärgvõrgu olekut kontrollida – ilma, et peaksid rakendust avama.
+Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele TI assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. Kui need on lubatud, saab assistent sinu eest kärgvõrgu töövooge avastada ja käivitada – näiteks sõnumi saata või kärgvõrgu olekut kontrollida – ilma, et peaksid rakendust avama.
 
 > ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
 
-> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ tehisintellekti assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
+> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ TI assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
 
 ## Enabling App Functions
 
 Rakenduse funktsioone saab juhtida menüüst **Seaded → Süsteemi TI** (rakenduse sisemine ekraan on tähistatud kui „Süsteemi TI“). The screen has:
 
-- **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi tehisintellekti assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. When off, no functions are exposed to the system.
+- **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi TI assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. When off, no functions are exposed to the system.
 - An **individual toggle for each function**, so you can expose only the capabilities you want.
 
 The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).

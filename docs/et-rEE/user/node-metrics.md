@@ -99,7 +99,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
 
 | Quality  | Criteria                                                         |
 | -------- | ---------------------------------------------------------------- |

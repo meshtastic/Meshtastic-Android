@@ -29,7 +29,7 @@ The map displays:
 
 ### Node Markers
 
-Each node that reports a position is shown as a **node chip** marker displaying the node's short name. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
+Iga positsiooni teatav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
 
 ### Map Controls
 
@@ -57,14 +57,14 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 
 ### Waypoint Properties
 
-| Property   | Kirjeldus                                               |
-| ---------- | ------------------------------------------------------- |
-| Nimi       | Short identifier (max 29 characters) |
-| Kirjeldus  | Optional longer description                             |
-| Icon       | Visual marker emoji on the map                          |
-| Lukustatud | If locked, only the creator can edit or delete          |
-| Expiration | Optional auto-remove date and time                      |
-| Geopiire   | Valikuline sisenemis-/väljumishoiatusala – vt allpool   |
+| Property   | Kirjeldus                                                   |
+| ---------- | ----------------------------------------------------------- |
+| Nimi       | Lühike identifikaator (max 29 tähemärki) |
+| Kirjeldus  | Optional longer description                                 |
+| Icon       | Visual marker emoji on the map                              |
+| Lukustatud | If locked, only the creator can edit or delete              |
+| Expiration | Optional auto-remove date and time                          |
+| Geopiire   | Valikuline sisenemis-/väljumishoiatusala – vt allpool       |
 
 ### Waypoint Expiration
 
@@ -98,7 +98,7 @@ Puuduta kaardil kihtide ikooni, et avada **Kaardikihtide haldamine**, kus saad i
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Konfi saatja (asukoht, sagedus, saatja võimsus, antenni võimendus ja kõrgus), vastuvõtja (tundlikkus, kõrgus) ja simulatsioonivalikud (maksimaalne ulatus, kõrge eraldusvõimega maastik, värvipalett) ning seejärel käivita hinnang. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
 
 ## Position Sharing
 

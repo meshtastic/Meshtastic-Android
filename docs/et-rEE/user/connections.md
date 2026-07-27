@@ -29,20 +29,20 @@ Sinihamba madal voolutarve on Androidi vaike- ja levinuim ühendusviis.
 
 ![Sinihamba seadmete otsimine, leitud raadio on loendis](../../assets/screenshots/connections_bluetooth_scan.png)
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+Sinihamba, võrgu ja USB-transpordi vahel vahetamiseks (üks on korraga aktiivne) kasutage transpordivalijat – ühenduskaardi all asuvat segmenteeritud nuppude rida:
 
-![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+![Transpordi valik](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Vihje:** Kui sinu seadet ei kuvata, kontrolli, kas sinihamba ​​ja asukoha load on antud ning et raadio poleks juba teise seadmega ühendatud.
 
 ### Connection Status
 
-| Icon | Olek             | Kirjeldus                     |
-| ---- | ---------------- | ----------------------------- |
-| 🟢   | Ühendatud        | Active radio link established |
-| 🟡   | Ühendan          | Kätlemine on pooleli          |
-| 🔴   | Ühendus katkenud | No active connection          |
-| ⚪    | Pole seadistatud | Seadet pole valitud           |
+| Icon | Olek             | Kirjeldus                  |
+| ---- | ---------------- | -------------------------- |
+| 🟢   | Ühendatud        | Aktiivne raadioside loodud |
+| 🟡   | Ühendan          | Kätlemine on pooleli       |
+| 🔴   | Ühendus katkenud | No active connection       |
+| ⚪    | Pole seadistatud | Seadet pole valitud        |
 
 Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
 
@@ -77,7 +77,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select **Network** in the transport selector.
+2. Valige ühenduse loomise ekraanil transpordivalikus **Võrk**.
 3. Choose the radio one of two ways:
    - **Võrguseadmete otsimine** – lülita see sisse, et automaatselt avastada raadioid, mis reklaamivad end kohalikus võrgus (mDNS / `_meshtastic._tcp`). Leitud seadmed kuvatakse loendis; ühenduse loomiseks puuduta neist ühte.
    - **Lisa seade käsitsi…** — Sisesta raadio IP-aadress (või hostinimi) ja port (vaikimisi: 4403).
@@ -93,7 +93,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 
 ## Reconnection Behavior
 
-The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
+The app reconnects to the **last selected device** on startup. Transporti saab ühenduskuvalt igal ajal vahetada.
 
 Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
 
@@ -107,7 +107,7 @@ On Desktop (Linux/macOS/Windows), the app supports:
 - **USB port** – peamine juhtmega ühendusmeetod
 - **TCP/IP** – võrguühendusega raadiote jaoks
 
-See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+Platvormipõhiste üksikasjade ja kiirklahvide kohta vaata [Töölauarakendus] (desktop).
 
 ## Related Topics
 

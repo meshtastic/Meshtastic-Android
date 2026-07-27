@@ -18,7 +18,7 @@ Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hP
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 
-> 💡 **Tip:** You never need to toggle units inside the app. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
+> 💡 **Vihje:** Rakenduses pole kunagi vaja ühikuid vahetada. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
 ---
 
@@ -46,7 +46,7 @@ Distances between nodes and GPS altitudes are transmitted as **meters** and auto
 | Meetriline                       | 350 m          | 2.5 km | 1,200 m  |
 | Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
-The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
+Rakendus kasutab loomulikku skaleerimist – lühikesed vahemaad jäävad meetritesse või jalgadesse, pikemad vahemaad aga muutuvad automaatselt kilomeetriteks või miilideks.
 
 ### Where these appear
 

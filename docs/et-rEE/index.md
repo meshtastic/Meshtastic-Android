@@ -12,7 +12,7 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 
 ---
 
-## Quick Links
+## Kiir ühendus
 
 | Guide                                            | Kirjeldus                                                   |
 | ------------------------------------------------ | ----------------------------------------------------------- |

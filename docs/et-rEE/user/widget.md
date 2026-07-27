@@ -26,7 +26,7 @@ The widget displays the **connected radio's** current local stats:
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Vihje:** Väärtused kajastavad raadiojaama, millega olete hetkel ühendatud. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
 
 ## Adding the Widget
 
@@ -35,7 +35,7 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
 4. Resize it as needed — the layout adapts to the available space.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ⚠️ **Märkus:** Vidin on ainult Androidile. It is not available on the Desktop or iOS builds.
 
 ## Related Topics
 

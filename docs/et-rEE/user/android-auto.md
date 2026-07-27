@@ -40,7 +40,7 @@ The Messages tab lists your recent conversations. While driving, you can:
 
 ## Sõlmed
 
-The Nodes tab shows your mesh node list in a car-friendly layout. Selecting a node opens a node-detail view with key information about that node. See [Nodes](nodes) for the full meaning of the information shown.
+The Nodes tab shows your mesh node list in a car-friendly layout. Sõlme valimine avab sõlme detailvaate, kus on selle sõlme kohta põhiteave. See [Nodes](nodes) for the full meaning of the information shown.
 
 ## Status
 

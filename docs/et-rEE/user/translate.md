@@ -24,7 +24,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 | User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help & Documentation |
 | Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
 
-> ⚠️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
+> ⚠️ **Märkus:** Arendaja juhend ainult inglise keeles. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
 ---
 
@@ -36,7 +36,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
 5. **Submit.** Approved translations are automatically merged into the next release.
 
-> 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
+> 💡 \*\*Vihje." Hoia tõlked lühikesed. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
 
 ---
 
@@ -89,7 +89,7 @@ Rakendus valib automaatselt õige lokaadi seadme **Keele ja piirkonna** sätete 
 ## Translation Guidelines
 
 - **Ära tõlgi** tehnilisi termineid nagu "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — need on universaalsed.
-- **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
+- **Jäta kohatäited puutumata.** Stringid nagu `%1$s` või `%d` täidetakse käitusajal. Do not remove or reorder them unless the grammar of your language requires it.
 - **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
 - **Testi võimalusel.** Vaheta seadme keelt ja ava rakendus, et näha, kuidas tõlked kontekstis välja näevad.
 

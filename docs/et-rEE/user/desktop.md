@@ -16,7 +16,7 @@ aliases:
 
 Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplatformi kaudu. Most features work identically on Linux, macOS, and Windows.
 
-## Installation
+## Paigaldus
 
 ### Linux
 
@@ -30,7 +30,7 @@ Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplat
 
 ### Windows
 
-- Lae väljalaske lehelt `.msi` installifail
+- Lae väljalaske lehelt `.msi` paigaldus fail
 - Or build from source
 
 ## Connecting Your Radio
@@ -82,11 +82,11 @@ Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/
 
 The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
-### Keyboard Shortcuts
+### Kiirklahvid
 
-Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
+Otseteed kasutavad macOS-is **⌘** (Command) ja Windowsis ning Linuxis **Ctrl**. (Super/Windowsi võti pole seotud.)
 
-| Shortcut     | Action                 |
+| Otsetee      | Action                 |
 | ------------ | ---------------------- |
 | **⌘/Ctrl+Q** | Quit the application   |
 | **⌘/Ctrl+,** | Ava sätted             |
