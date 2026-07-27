@@ -21,8 +21,6 @@ package org.meshtastic.core.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
@@ -43,7 +41,6 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -127,8 +124,9 @@ class MeshService : Service() {
     @Suppress("ReturnCount")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!isServiceInitialized) {
+            // Also a never-reached-foreground path: stop promptly so the pending-start watchdog cannot fire.
             Logger.w { "onStartCommand called but service is not initialized (likely DI failure). Stopping." }
-            stopSelf()
+            stopServiceCleanly()
             return START_NOT_STICKY
         }
 
@@ -137,20 +135,26 @@ class MeshService : Service() {
         connectionManager.updateStatusNotification()
         val notification = androidNotifications.getServiceNotification()
 
+        // Recomputed on every start command, which is load-bearing: MainActivity.onStart() re-issues startService()
+        // on each app open, so a service that began in the background with connectedDevice only (location is
+        // while-in-use restricted there) upgrades to connectedDevice|location the next time the user opens the app.
         val foregroundServiceType =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                if (hasLocationPermission()) {
-                    types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                }
-                types
-            } else {
-                0
-            }
+            ForegroundStartPolicy.foregroundServiceType(
+                hasLocationPermission = hasLocationPermission(),
+                appInForeground = isAppInForeground(),
+            )
 
         // Start foreground FIRST. Android requires startForeground() within ~5s of onStartCommand and before any
         // potentially-blocking work. We never defer this — even when the selected-device address is not yet loaded.
-        startForegroundSafely(notification, foregroundServiceType)
+        if (!startForegroundSafely(notification, foregroundServiceType)) {
+            // We were reached via startForegroundService(), so ActivityManager has armed a ~5s watchdog that kills
+            // the process with ForegroundServiceDidNotStartInTimeException unless this service either enters the
+            // foreground or goes away. We could not enter the foreground, so we must go away — immediately, and
+            // without START_STICKY, which would only have the system restart us into the same restricted state.
+            Logger.w { "MeshService: could not enter foreground; stopping to release the pending-start watchdog" }
+            stopServiceCleanly()
+            return START_NOT_STICKY
+        }
 
         val address = radioInterfaceService.getDeviceAddress()
         if (isValidDeviceAddress(address)) {
@@ -193,42 +197,16 @@ class MeshService : Service() {
                     acquireWakeLock()
                 } else {
                     Logger.i { "MeshService: no device selected after address flow settled; stopping" }
-                    releaseWakeLock()
-                    ServiceCompat.stopForeground(this@MeshService, ServiceCompat.STOP_FOREGROUND_REMOVE)
-                    stopSelf()
+                    stopServiceCleanly()
                 }
             }
     }
 
-    private fun startForegroundSafely(notification: android.app.Notification, foregroundServiceType: Int) {
-        try {
-            ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
-        } catch (ex: android.app.ForegroundServiceStartNotAllowedException) {
-            Logger.e(ex) { "ForegroundServiceStartNotAllowedException: OS restricted background start." }
-        } catch (ex: SecurityException) {
-            val connectedDeviceOnly =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                } else {
-                    0
-                }
-            if (foregroundServiceType != connectedDeviceOnly) {
-                Logger.w(ex) {
-                    "Failed to start foreground service with location type, retrying with connectedDevice only"
-                }
-                try {
-                    ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
-                } catch (retryEx: android.app.ForegroundServiceStartNotAllowedException) {
-                    Logger.e(retryEx) { "ForegroundServiceStartNotAllowedException on retry." }
-                } catch (retryEx: Exception) {
-                    Logger.e(retryEx) { "Failed to start foreground service even after retry" }
-                }
-            } else {
-                Logger.e(ex) { "SecurityException starting foreground service" }
-            }
-        } catch (ex: Exception) {
-            Logger.e(ex) { "Error starting foreground service" }
-        }
+    /** Releases everything this service holds and stops it. Safe to call before it ever reached the foreground. */
+    private fun stopServiceCleanly() {
+        releaseWakeLock()
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     private fun acquireWakeLock() {

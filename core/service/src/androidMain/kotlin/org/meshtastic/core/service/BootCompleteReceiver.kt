@@ -32,7 +32,10 @@ class BootCompleteReceiver :
     private val meshPrefs: MeshPrefs by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (Intent.ACTION_BOOT_COMPLETED != intent.action) {
+        // Only these two actions carry a background foreground-service-start exemption. The manifest also filters the
+        // OEM quick-boot actions, which do not, so acting on those would guarantee a rejected start.
+        if (intent.action !in EXEMPT_ACTIONS) {
+            Logger.d { "BootCompleteReceiver: ignoring non-exempt action ${intent.action}" }
             return
         }
         val address = meshPrefs.deviceAddress.value
@@ -41,7 +44,16 @@ class BootCompleteReceiver :
             return
         }
 
-        Logger.i { "BootCompleteReceiver: starting MeshService for device $address" }
-        MeshService.startService(context)
+        Logger.i { "BootCompleteReceiver: starting MeshService after ${intent.action}" }
+        MeshService.startService(context, ServiceStartTrigger.BootCompleted)
+    }
+
+    private companion object {
+        /**
+         * `MY_PACKAGE_REPLACED` is filtered by the manifest so an in-place upgrade restores the radio link without
+         * waiting for the user to reopen the app, and it is exempt from the background-start restriction just as
+         * `BOOT_COMPLETED` is.
+         */
+        val EXEMPT_ACTIONS = setOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED)
     }
 }
