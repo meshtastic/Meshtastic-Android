@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.navigation.FirmwareRoute
+import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -40,6 +41,7 @@ import org.meshtastic.core.resources.clean_node_database_title
 import org.meshtastic.core.resources.configuration
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.device_configuration
+import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.factory_reset
 import org.meshtastic.core.resources.firmware_update_title
@@ -64,6 +66,7 @@ import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
@@ -221,6 +224,13 @@ private fun AdvancedSection(
             leadingIcon = MeshtasticIcons.Settings,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoute.TakServer) },
+        )
+
+        ListItem(
+            text = stringResource(Res.string.discovery_local_mesh),
+            leadingIcon = MeshtasticIcons.PermScanWifi,
+            enabled = enabled,
+            onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
         )
 
         // Always enabled: the Debug Panel reads app-local logs only — no radio connection,

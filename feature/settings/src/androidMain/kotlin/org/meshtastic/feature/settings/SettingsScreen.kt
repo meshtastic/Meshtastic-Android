@@ -44,7 +44,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -54,7 +53,6 @@ import org.meshtastic.core.resources.app_functions_settings
 import org.meshtastic.core.resources.app_functions_settings_summary
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.device_links
-import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.help_and_documentation
@@ -71,7 +69,6 @@ import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
@@ -294,21 +291,6 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
-                    ListItem(
-                        text = stringResource(Res.string.discovery_local_mesh),
-                        leadingIcon = MeshtasticIcons.PermScanWifi,
-                    ) {
-                        onNavigate(DiscoveryRoute.DiscoveryGraph)
-                    }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.device_links)) {
-                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
-                        onNavigate(SettingsRoute.DeviceLinks)
-                    }
-                }
-
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
                     hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
@@ -324,6 +306,11 @@ fun SettingsScreen(
                     leadingIcon = MeshtasticIcons.HelpOutline,
                 ) {
                     onNavigate(SettingsRoute.HelpDocs)
+                }
+                if (state.isLocal) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
+                    }
                 }
             }
         }
