@@ -46,7 +46,6 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
     ) { paddingValues ->
         NodeTrackOsmMap(
             positions = positions,
-            applicationId = nodeMapViewModel.applicationId,
             mapStyleId = nodeMapViewModel.mapStyleId,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         )

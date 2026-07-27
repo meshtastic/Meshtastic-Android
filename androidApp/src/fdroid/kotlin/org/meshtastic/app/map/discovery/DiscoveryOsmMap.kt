@@ -79,12 +79,7 @@ fun DiscoveryOsmMap(
 
     var hasCentered by remember { mutableStateOf(false) }
 
-    val mapView =
-        rememberMapViewWithLifecycle(
-            applicationId = context.packageName,
-            box = initialBounds,
-            tileSource = CustomTileSource.getTileSource(0),
-        )
+    val mapView = rememberMapViewWithLifecycle(box = initialBounds, tileSource = CustomTileSource.getTileSource(0))
 
     // Camera auto-center once
     LaunchedEffect(allGeoPoints) {

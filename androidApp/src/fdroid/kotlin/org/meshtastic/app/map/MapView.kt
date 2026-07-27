@@ -315,7 +315,6 @@ fun MapView(
     val initialCameraPosition = (initialCameraState as InitialCameraState.Ready).position
     val map =
         rememberMapViewWithLifecycle(
-            applicationId = mapViewModel.applicationId,
             zoomLevel = initialCameraPosition?.zoom ?: INITIAL_MAP_ZOOM,
             mapCenter = initialCameraPosition?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0),
             tileSource = loadOnlineTileSourceBase(),

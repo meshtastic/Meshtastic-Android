@@ -72,7 +72,6 @@ import kotlin.math.roundToInt
 @Composable
 fun NodeTrackOsmMap(
     positions: List<Position>,
-    applicationId: String,
     mapStyleId: Int,
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
@@ -96,11 +95,7 @@ fun NodeTrackOsmMap(
         }
     val cameraView = remember(geoPoints) { BoundingBox.fromGeoPoints(geoPoints) }
     val mapView =
-        rememberMapViewWithLifecycle(
-            applicationId = applicationId,
-            box = cameraView,
-            tileSource = CustomTileSource.getTileSource(mapStyleId),
-        )
+        rememberMapViewWithLifecycle(box = cameraView, tileSource = CustomTileSource.getTileSource(mapStyleId))
 
     var filterMenuExpanded by remember { mutableStateOf(false) }
 
