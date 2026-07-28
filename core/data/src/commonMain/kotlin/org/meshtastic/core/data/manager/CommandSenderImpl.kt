@@ -182,6 +182,12 @@ class CommandSenderImpl(
         packetHandler.sendToRadio(packet)
     }
 
+    override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
+        val packet = buildAdminPacket(to = destNum, adminMessage = adminMsg)
+        packetHandler.sendToRadio(ToRadio(packet = packet))
+    }
+
     override suspend fun sendAdminAwait(
         destNum: Int,
         requestId: Int,

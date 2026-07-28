@@ -500,20 +500,26 @@ class MeshConnectionManagerImpl(
         }
     }
 
+    override fun onMyNodeInfoReceived(myNodeNum: Int) {
+        // Set device time as early as possible: MyNodeInfo is the first Stage 1 frame, so this
+        // lands before the firmware flushes its queued packet backlog and lets it stamp those
+        // packets with a corrected clock (firmware #11274). A single small write ahead of the
+        // config/node-info bursts avoids the GATT contention that pushed the old
+        // onRadioConfigLoaded-time send out of Stage 1. Must bypass the outbound packet queue:
+        // it only drains once Connected, which would hold this until after the backlog flush.
+        commandSender.sendAdminImmediate(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
+    }
+
     override suspend fun onNodeDbReady() {
         // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
         // orphan a job in the gap between cancel and reassign.
         handshakeTimeout.getAndSet(null)?.cancel()
 
         val myNodeNum = nodeManager.myNodeNum.value ?: 0
-        // Set device time now that the full node picture is ready. Sending this during Stage 1
-        // (onRadioConfigLoaded) introduced GATT write contention with the Stage 2 node-info burst.
-        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
-
         // Proactively seed the session passkey. The firmware embeds session_passkey in every
-        // admin *response* (wantResponse=true), but set_time_only has no response. A get_owner
-        // request is the lightest way to trigger a response and populate the passkey cache so
-        // that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
+        // admin *response* (wantResponse=true), but set_time_only (sent at MyNodeInfo) has no
+        // response. A get_owner request is the lightest way to trigger a response and populate the
+        // passkey cache so that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
         commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
 
         // Start MQTT if enabled

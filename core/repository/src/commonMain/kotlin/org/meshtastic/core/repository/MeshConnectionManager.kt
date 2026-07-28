@@ -29,6 +29,13 @@ interface MeshConnectionManager {
     /** Initiates the node information synchronization stage. */
     fun startNodeInfoOnly()
 
+    /**
+     * Called when the MyNodeInfo frame arrives — the first frame of the Stage 1 config stream. This is the earliest
+     * point where the local node number is authoritative, before the firmware flushes its queued packet backlog, so
+     * time-sensitive setup (e.g. set_time_only) sent here lets the firmware stamp backlog packets with real rx_time.
+     */
+    fun onMyNodeInfoReceived(myNodeNum: Int)
+
     /** Called when the node database is ready and fully populated. */
     suspend fun onNodeDbReady()
 
