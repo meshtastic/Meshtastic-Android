@@ -17,12 +17,15 @@
 package org.meshtastic.core.database
 
 import androidx.room3.testing.MigrationTestHelper
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
 import kotlinx.coroutines.test.runTest
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Creates the earliest exported schema (v3) and walks every auto-migration up to the current version, validating the
@@ -64,6 +67,57 @@ class MeshtasticDatabaseMigrationTest {
         helper.runMigrationsAndValidate(latestSchemaVersion(), emptyList()).close()
     }
 
+    /**
+     * 50→51 makes the three `rssi` columns nullable, which Room implements by recreating `packet`, `reactions` and
+     * `discovered_node` (DROP + RENAME). [migrateAll] only proves the resulting schema validates from an empty
+     * database; this proves existing rows survive the rebuild with their values — including a legacy `rssi = 0`, which
+     * stays 0 rather than becoming NULL.
+     */
+    @Test
+    fun rssiColumnsGoNullableWithoutLosingRows() = runTest {
+        helper.createDatabase(RSSI_NULLABLE_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO packet (uuid, myNodeNum, port_num, contact_key, received_time, read, data, snr, rssi) " +
+                    "VALUES (1, 42, 1, '0^all', 1000, 1, '{}', 5.0, 0)",
+            )
+            connection.execSQL(
+                "INSERT INTO reactions (myNodeNum, reply_id, user_id, emoji, timestamp, snr, rssi) " +
+                    "VALUES (42, 7, '!abc', 'X', 2000, 5.0, -70)",
+            )
+            connection.execSQL(
+                "INSERT INTO discovery_session (id, timestamp, presets_scanned, home_preset) " +
+                    "VALUES (1, 3000, 1, 'LONG_FAST')",
+            )
+            connection.execSQL(
+                "INSERT INTO discovery_preset_result (id, session_id, preset_name) VALUES (1, 1, 'LONG_FAST')",
+            )
+            connection.execSQL(
+                "INSERT INTO discovered_node (id, preset_result_id, node_num, snr, rssi) VALUES (1, 1, 99, 5.0, 0)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(RSSI_NULLABLE_TO_VERSION, emptyList()).use { connection ->
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT rssi FROM packet"))
+            assertEquals(listOf("-70"), queryColumn(connection, "SELECT rssi FROM reactions"))
+            assertEquals(listOf("0"), queryColumn(connection, "SELECT rssi FROM discovered_node"))
+            // The recreate must not have orphaned the cascading FK target.
+            assertEquals(listOf("1"), queryColumn(connection, "SELECT preset_result_id FROM discovered_node"))
+            // A NULL is now storable where the column was previously NOT NULL DEFAULT 0.
+            connection.execSQL("UPDATE packet SET rssi = NULL WHERE uuid = 1")
+            assertEquals(listOf(null), queryColumn(connection, "SELECT rssi FROM packet"))
+        }
+    }
+
+    /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
+    private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
+        connection.prepare(sql).use { statement ->
+            buildList {
+                while (statement.step()) {
+                    add(if (statement.isNull(0)) null else statement.getText(0))
+                }
+            }
+        }
+
     private fun latestSchemaVersion(): Int {
         val dbSchemas = schemaDir.resolve(checkNotNull(MeshtasticDatabase::class.qualifiedName)).toFile()
         return dbSchemas
@@ -74,5 +128,7 @@ class MeshtasticDatabaseMigrationTest {
 
     private companion object {
         const val EARLIEST_SCHEMA_VERSION = 3
+        const val RSSI_NULLABLE_FROM_VERSION = 50
+        const val RSSI_NULLABLE_TO_VERSION = 51
     }
 }
