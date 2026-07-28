@@ -86,6 +86,7 @@ class ReactionKeyTest {
 
         val keys = entity.toMessage(getNode).emojis.map { it.user.id to it.emoji }
 
+        assertEquals(3, keys.size, "keys: $keys")
         assertEquals(3, keys.toSet().size, "keys: $keys")
     }
 
