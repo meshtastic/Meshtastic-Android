@@ -53,7 +53,9 @@ fun DeleteWaypointDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var alsoDeleteForEveryone by remember { mutableStateOf(false) }
+    // Keyed on eligibility so a mid-dialog disconnect clears the opt-in along with the checkbox that set it, rather
+    // than leaving a stale selection that would broadcast on confirm.
+    var alsoDeleteForEveryone by remember(canDeleteForEveryone) { mutableStateOf(false) }
 
     MeshtasticDialog(
         modifier = modifier,
@@ -81,7 +83,7 @@ fun DeleteWaypointDialog(
             null
         },
         confirmTextRes = Res.string.delete,
-        onConfirm = { if (alsoDeleteForEveryone) onDeleteForEveryone() else onDeleteForMe() },
+        onConfirm = { if (canDeleteForEveryone && alsoDeleteForEveryone) onDeleteForEveryone() else onDeleteForMe() },
         dismissTextRes = Res.string.cancel,
         onDismiss = onDismissRequest,
     )
