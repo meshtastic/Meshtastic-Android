@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 📝 Other Changes
+* Clean up configuration menus by @pdxlocations in https://github.com/meshtastic/Meshtastic-Android/pull/6478
+
+### Internal (v2.8.0-internal.40)
+Changes since [`v2.8.0-open.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.4):
+
 #### 🛠️ Fixes
 * fix(strings): remove stray "to" in share location description by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6463
 * fix(mqtt): scope user-CA trust to the MQTT connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6464
@@ -241,6 +247,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @sashko made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6315
 * @CatSu-OSM made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6351
 * @dzmpr made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6369
+* @pdxlocations made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6478
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
