@@ -38,12 +38,13 @@ class SignalLogKeyTest {
 
     @Test
     fun `a negative packet id is not conflated with its positive twin`() {
-        // Packet ids are signed in the proto.
-        val packets = listOf(packet(id = -1344023121), packet(id = 1344023121))
+        // Packet ids are signed in the proto, so the sign has to survive into the key. Both packets sit at index 0 so
+        // the index cannot be what separates them.
+        val negative = buildSignalLog(signalData = listOf(packet(id = -1344023121)), localStatsData = emptyList())
+        val positive = buildSignalLog(signalData = listOf(packet(id = 1344023121)), localStatsData = emptyList())
 
-        val keys = buildSignalLog(signalData = packets, localStatsData = emptyList()).map { it.key }
-
-        assertEquals(2, keys.toSet().size)
+        assertEquals("packet_-1344023121_0", negative.single().key)
+        assertEquals("packet_1344023121_0", positive.single().key)
     }
 
     @Test
