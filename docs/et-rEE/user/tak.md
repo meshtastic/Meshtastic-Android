@@ -82,7 +82,7 @@ TAK rollide kasutamisel levitab sinu sõlm identiteediteavet, mis kuvatakse TAK 
 | Meeskonna värv | Sinu meeskonna värv TAK kaardil (nt sinine, punane, tsüaansinine, roheline)       |
 | Liikme roll    | Sinu operatiivne roll (meeskonnaliige, meeskonnajuht, peakorter, meedik, RTO jne) |
 
-Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, kui TAK moodul on lubatud. Your TAK callsign isn't a separate setting — it's derived automatically from your Meshtastic node name.
+Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, kui TAK moodul on lubatud. Sinu TAK kutsung ei ole eraldi säte – see tuletatakse automaatselt sinu Meshtastic sõlme nimest.
 
 > 💡 **Vihje:** Meeskonna/rolli värvid on TAK standardsed kuuluvusvärvid. Koordineeri oma TAK meeskonnaga järjepidevat meeskonnatöö jagamist.
 
@@ -129,7 +129,7 @@ Kui on seadistatud:
 - [Seaded — moodulid ja admin](settings-module-admin) — TAK mooduli konf
 - [Sõlmed](nodes) — TAK ja TAK jälgimisseade rollid sõlmede loendis
 - [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
+- [ATAK plugina juhend](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — üksikasjalik ATAK seadistamine aadressil meshtastic.org
 
 ---
 

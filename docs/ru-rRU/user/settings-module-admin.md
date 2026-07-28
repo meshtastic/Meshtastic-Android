@@ -116,13 +116,13 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Настройка          | Описание                                                    |
-| ------------------ | ----------------------------------------------------------- |
-| ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
-| Сообщения          | Newline-separated list of messages                          |
-| Отправлять 🔔      | Play bell sound on send                                     |
-| Rotary Encoder     | Enable rotary encoder input                                 |
-| Up/Down/Press Pins | GPIO pin assignments for input                              |
+| Настройка          | Описание                                                                 |
+| ------------------ | ------------------------------------------------------------------------ |
+| ~~Включено~~       | ⚠️ **Устарело** — текущая прошивка может игнорировать этот переключатель |
+| Сообщения          | Список сообщений, разделённых новой строкой                              |
+| Отправлять 🔔      | Play bell sound on send                                                  |
+| Rotary Encoder     | Enable rotary encoder input                                              |
+| Up/Down/Press Pins | GPIO pin assignments for input                                           |
 
 ### Audio Module
 

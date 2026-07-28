@@ -21,7 +21,7 @@ Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga
 
 ## Overview
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), the beta build presents Meshtastic as a messaging app built with the Android Car App Library, with a tabbed Home screen optimized for driving-safe, glanceable use:
+Kui telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), esitleb beetaversioon Meshtasticut Android Car App Library abil loodud sõnumsiderakendusena, millel on vahekaartidega avakuva, mis on optimeeritud sõiduohutuks ja hõlpsasti kasutatavaks:
 
 - **Messages** — recent conversations, with hands-free reading and replies.
 - **Nodes** — the mesh node list, with a node-detail view.

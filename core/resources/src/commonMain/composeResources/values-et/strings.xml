@@ -276,6 +276,7 @@
     <string name="config_position_flags_summary">Valikulised väljad lisatakse asukohasõnumitele, mida rohkem välju, seda pikem sõnum – see pikendab eetriaega ja suurendab pakettide kadumise ohtu.</string>
     <string name="config_position_gps_update_interval_summary">Kui tihti peaksime proovima GPS asukohta määrata (&lt;10sekundit hoiab GPSi sisselülitatuna).</string>
     <string name="config_power_is_power_saving_summary">Unereziimis nii palju kui võimalik, jälgitava ja anduri rolli puhul hõlmab see ka Lora raadiot. Ärge kasutage seda sätet, kui soovite oma seadet kasutada telefonirakendustega või kui kasutate seadet ilma kasutajanuputa.</string>
+    <string name="config_saved_restarting">Sõlm taaskäivitub ja on lühikeseks ajaks kättesaamatu.</string>
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
     <string name="config_security_debug_log_api_enabled">Väljunda reaalajas arendajalogi jadapordi kaudu, vaata ja salvesta asukoha redigeerimisega seadmelogisid sinihamba ​​kaudu.</string>
     <string name="config_security_is_managed">Seadet haldab kärgvõrgu administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
@@ -633,6 +634,7 @@
     <string name="firmware_update_almost_there">Kohe lõpetan...</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_archive_missing_target">Püsivara %2$s (%3$s) jaoks, ei leitud "%1$s".</string>
+    <string name="firmware_update_available">Püsivara värskendused on saadaval</string>
     <string name="firmware_update_battery_low">Aku liiga tühi (%1$d%). Palun lae seade enne uuendamist.</string>
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_confirm_file_button">Alusta püsivarauuendust</string>
@@ -674,6 +676,8 @@
     <string name="firmware_update_not_found_in_release">Selles versioonis ei leitud püsivara %1$s'le.</string>
     <string name="firmware_update_notification_android">%1$s on paigaldatud. Stabiilne %2$s on saadaval. Kui oled valmis, ava püsivara värskendused.</string>
     <string name="firmware_update_notification_flasher">%1$s on paigadatud. Stabiilne %2$s on saadaval. Selle riistvara värskendamiseks ava Meshtastic Flasher.</string>
+    <string name="firmware_update_open">Ava püsivara värskendused</string>
+    <string name="firmware_update_open_flasher">Ava Meshtastic uuendaja</string>
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasuta tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil dfu jadapordi oma koos alglaaduri .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
@@ -1172,6 +1176,7 @@
     <string name="node_list_help_title">Sõlmede loendi abi</string>
     <string name="node_list_long_click_label">Sõlme valikud</string>
     <string name="node_number">Sõlme number</string>
+    <string name="node_restarting">Taaskäivitan…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sõlmede filter</string>
     <string name="node_sort_channel">Kanal</string>
@@ -1443,6 +1448,7 @@
     <string name="sats">Sateliit</string>
     <!-- SAVE -->
     <string name="save">Salvesta</string>
+    <string name="save_and_restart">Salvesta &amp; taaskäivitus</string>
     <string name="save_changes">Salvesta</string>
     <string name="save_csv_in_storage_esp32_only">Salvesta .CSV faili (ainult ESP32)</string>
     <string name="save_rangetest">Ekspordi rangetest paketid</string>

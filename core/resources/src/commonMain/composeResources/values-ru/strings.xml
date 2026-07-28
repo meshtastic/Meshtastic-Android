@@ -149,6 +149,7 @@
     <string name="bluetooth_feature_discovery">Обнаружение</string>
     <string name="bluetooth_feature_discovery_description">Найдите и определите устройства Meshtastic рядом с вами.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Службы определения местоположения отключены. Включите их, чтобы искать ближайшие устройства.</string>
     <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
     <plurals name="bluetooth_scan_too_frequent">
