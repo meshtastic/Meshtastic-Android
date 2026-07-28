@@ -25,6 +25,7 @@ import org.meshtastic.feature.discovery.scan.PresetRankingInput
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DiscoveryRankingEngineTest {
@@ -59,7 +60,7 @@ class DiscoveryRankingEngineTest {
         presetResultId: Long = 1,
         nodeNum: Long = 1,
         snr: Float = 0f,
-        rssi: Int = 0,
+        rssi: Int? = 0,
         distanceFromUser: Double? = null,
     ) = DiscoveredNodeEntity(
         presetResultId = presetResultId,
@@ -373,8 +374,22 @@ class DiscoveryRankingEngineTest {
         val result = engine.rank(listOf(input(p, emptyList())))
 
         assertEquals(0f, result[0].scoreBreakdown.medianSnr)
-        assertEquals(0, result[0].scoreBreakdown.medianRssi)
+        assertNull(result[0].scoreBreakdown.medianRssi, "no nodes means no rssi median, not 0 dBm")
         assertEquals(0.0, result[0].scoreBreakdown.bestKnownDistance)
+    }
+
+    @Test
+    fun presetWithNoRssiReadingsDoesNotOutrankMeasuredPreset() {
+        val pA = preset(id = 1, name = "measured", uniqueNodes = 3, numPacketsRx = 50)
+        val pB = preset(id = 2, sessionId = 100, name = "unreported", uniqueNodes = 3, numPacketsRx = 50)
+        // Equal on every earlier criterion; B reports no rssi at all, so its median is absent rather than 0 dBm.
+        val nodesA = List(3) { node(presetResultId = 1, nodeNum = it + 1L, snr = 5f, rssi = -60) }
+        val nodesB = List(3) { node(presetResultId = 2, nodeNum = it + 4L, snr = 5f, rssi = null) }
+
+        val result = engine.rank(listOf(input(pB, nodesB), input(pA, nodesA)))
+
+        assertEquals("measured", result[0].presetResult.presetName, "an absent rssi median must not win on 0 dBm")
+        assertNull(result[1].scoreBreakdown.medianRssi)
     }
 
     @Test

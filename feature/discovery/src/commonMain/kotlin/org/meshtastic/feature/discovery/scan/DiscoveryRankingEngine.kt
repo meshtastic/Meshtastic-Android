@@ -36,8 +36,11 @@ data class RankingScoreBreakdown(
     val nonDupePacketCount: Int,
     /** Criterion 4a: median SNR across discovered nodes. */
     val medianSnr: Float,
-    /** Criterion 4b: median RSSI across discovered nodes (tiebreak within criterion 4). */
-    val medianRssi: Int,
+    /**
+     * Criterion 4b: median RSSI across discovered nodes (tiebreak within criterion 4). Null when no node reported one —
+     * 0 dBm would otherwise read as an excellent median and outrank real negative readings.
+     */
+    val medianRssi: Int?,
     /** Criterion 5: best known distance to a valid-position node (metres). */
     val bestKnownDistance: Double,
     /** Criterion 6: failure/reconnect penalty (packet failure rate). */
@@ -93,7 +96,8 @@ class DiscoveryRankingEngine {
         val nodes = discoveredNodes
 
         val snrValues = nodes.map { it.snr }.sorted()
-        val rssiValues = nodes.map { it.rssi }.sorted()
+        // Nodes that never reported an rssi are excluded rather than dragged toward 0 dBm.
+        val rssiValues = nodes.mapNotNull { it.rssi }.sorted()
 
         return ScoredPreset(
             presetResult = pr,
@@ -161,7 +165,9 @@ class DiscoveryRankingEngine {
                 // 4. Best median link quality: SNR first, then RSSI
                 cmp = b.breakdown.medianSnr.compareTo(a.breakdown.medianSnr)
                 if (cmp != 0) return@Comparator cmp
-                cmp = b.breakdown.medianRssi.compareTo(a.breakdown.medianRssi)
+                // Higher rssi wins, but a preset where nobody reported one ranks after any measured preset rather
+                // than winning on a phantom 0 dBm.
+                cmp = compareByRssiDescendingMissingLast(a.breakdown.medianRssi, b.breakdown.medianRssi)
                 if (cmp != 0) return@Comparator cmp
 
                 // 5. Greatest best-known distance
@@ -183,9 +189,17 @@ class DiscoveryRankingEngine {
             }
         }
 
-        /** Compute the median of a sorted Int list. Returns 0 for empty. */
-        private fun medianInt(sorted: List<Int>): Int {
-            if (sorted.isEmpty()) return 0
+        /** Orders two medians best-first, with an absent median always losing to a measured one. */
+        private fun compareByRssiDescendingMissingLast(a: Int?, b: Int?): Int = when {
+            a == b -> 0
+            a == null -> 1
+            b == null -> -1
+            else -> b.compareTo(a)
+        }
+
+        /** Compute the median of a sorted Int list. Returns null for empty — 0 is a real rssi, not "no data". */
+        private fun medianInt(sorted: List<Int>): Int? {
+            if (sorted.isEmpty()) return null
             val mid = sorted.size / 2
             return if (sorted.size % 2 == 0) {
                 (sorted[mid - 1] + sorted[mid]) / 2

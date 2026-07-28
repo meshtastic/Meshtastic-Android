@@ -159,6 +159,18 @@ class PacketDaoAtomicTransactionTest {
     // ── updateLastReadMessage ────────────────────────────────────────────────────
 
     @Test
+    fun rssiRoundTripsAbsentAndZeroDistinctly() = runTest {
+        seedMyNodeInfo()
+        val contact = "0${NodeAddress.ID_BROADCAST}"
+        packetDao.insert(textPacket(contact, "no reading", time = 1000L).copy(rssi = null))
+        packetDao.insert(textPacket(contact, "zero dBm", time = 2000L).copy(rssi = 0))
+
+        // Order-independent: the query returns newest-first, which is not what this test is about.
+        val stored = packetDao.getMessagesFrom(contact).first().map { it.packet.rssi }.toSet()
+        assertEquals(setOf(null, 0), stored, "0 dBm is a real reading and must not collapse into absent")
+    }
+
+    @Test
     fun updateLastReadMessageCreatesSettingsWhenAbsent() = runTest {
         seedMyNodeInfo()
         val contact = "0${NodeAddress.ID_BROADCAST}"

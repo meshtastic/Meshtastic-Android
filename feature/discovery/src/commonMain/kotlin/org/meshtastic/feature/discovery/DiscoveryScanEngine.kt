@@ -136,7 +136,8 @@ class DiscoveryScanEngine(
         var latitude: Double? = null,
         var longitude: Double? = null,
         var snr: Float = 0f,
-        var rssi: Int = 0,
+        /** Null until a packet reports one, so an absent reading stays distinct from a valid 0 dBm. */
+        var rssi: Int? = null,
         var hopCount: Int = 0,
         var messageCount: Int = 0,
         var sensorPacketCount: Int = 0,
@@ -267,7 +268,8 @@ class DiscoveryScanEngine(
             val node = collectedNodes.getOrPut(fromNum) { CollectedNodeData(nodeNum = fromNum) }
             // Update signal info from the direct packet
             if (meshPacket.rx_snr != 0f) node.snr = meshPacket.rx_snr
-            if (meshPacket.rx_rssi != 0) node.rssi = meshPacket.rx_rssi
+            // Explicit presence: record a reported 0 dBm, skip only a genuinely absent one.
+            meshPacket.rx_rssi?.let { node.rssi = it }
             node.hopCount = dataPacket.hopsAway.coerceAtLeast(0)
 
             when (portNum) {
@@ -488,7 +490,7 @@ class DiscoveryScanEngine(
             val node =
                 collectedNodes.getOrPut(neighborNum) { CollectedNodeData(nodeNum = neighborNum, neighborType = "mesh") }
             // Only mark as mesh if not already seen directly
-            if (node.snr == 0f && node.rssi == 0) {
+            if (node.snr == 0f && node.rssi == null) {
                 node.neighborType = "mesh"
             }
         }

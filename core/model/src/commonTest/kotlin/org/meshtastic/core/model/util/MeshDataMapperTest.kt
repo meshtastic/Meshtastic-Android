@@ -91,6 +91,26 @@ class MeshDataMapperTest {
     }
 
     @Test
+    fun toDataPacket_preservesAbsentRssiRatherThanCoercingToZero() {
+        val packet = MeshPacket(from = 1, to = 2, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+
+        val mapped = mapper.toDataPacket(packet)
+
+        assertNotNull(mapped)
+        assertNull(mapped.rssi)
+    }
+
+    @Test
+    fun toDataPacket_keepsAReportedZeroRssiDistinctFromAbsent() {
+        val packet = MeshPacket(from = 1, to = 2, rx_rssi = 0, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+
+        val mapped = mapper.toDataPacket(packet)
+
+        assertNotNull(mapped)
+        assertEquals(0, mapped.rssi)
+    }
+
+    @Test
     fun toDataPacket_usesPkcChannelWhenPacketIsPkiEncrypted() {
         val packet =
             MeshPacket(

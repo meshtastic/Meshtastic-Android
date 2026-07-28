@@ -96,7 +96,7 @@ enum class Quality(
 @Composable
 fun NodeSignalQuality(
     snr: Float,
-    rssi: Int,
+    rssi: Int?,
     modifier: Modifier = Modifier,
     modemPreset: ModemPreset? = LocalModemPreset.current,
 ) {
@@ -126,7 +126,7 @@ private const val SIZE_ICON_DP = 16
 
 /** Displays the `snr` and `rssi` with color depending on the values respectively. */
 @Composable
-fun SnrAndRssi(snr: Float, rssi: Int, modemPreset: ModemPreset? = LocalModemPreset.current) {
+fun SnrAndRssi(snr: Float, rssi: Int?, modemPreset: ModemPreset? = LocalModemPreset.current) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Snr(snr, modemPreset = modemPreset)
         Rssi(rssi)
@@ -173,8 +173,10 @@ fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = L
     )
 }
 
+/** Renders nothing when [rssi] is absent — 0 dBm is a real reading, so it must not stand in for "no reading". */
 @Composable
-fun Rssi(rssi: Int, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
+fun Rssi(rssi: Int?, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
+    if (rssi == null) return
     val color: Color =
         if (rssi > RSSI_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()

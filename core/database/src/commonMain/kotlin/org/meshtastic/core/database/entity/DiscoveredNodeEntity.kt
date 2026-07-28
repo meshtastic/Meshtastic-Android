@@ -47,7 +47,8 @@ data class DiscoveredNodeEntity(
     @ColumnInfo(name = "distance_from_user") val distanceFromUser: Double? = null,
     @ColumnInfo(name = "hop_count", defaultValue = "0") val hopCount: Int = 0,
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
-    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    /** Null when no packet from this node reported an rssi. Rows written before schema 51 store 0 for both cases. */
+    @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "message_count", defaultValue = "0") val messageCount: Int = 0,
     @ColumnInfo(name = "sensor_packet_count", defaultValue = "0") val sensorPacketCount: Int = 0,
     @ColumnInfo(name = "is_infrastructure", defaultValue = "0") val isInfrastructure: Boolean = false,

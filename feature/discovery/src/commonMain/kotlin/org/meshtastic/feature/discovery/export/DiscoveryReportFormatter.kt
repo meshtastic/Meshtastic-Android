@@ -17,6 +17,7 @@
 package org.meshtastic.feature.discovery.export
 
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -58,7 +59,7 @@ internal object DiscoveryReportFormatter {
         append(node.longName ?: node.shortName ?: "!${node.nodeNum.toString(radix = 16)}")
         append(" | ${node.neighborType}")
         append(" | SNR: ${NumberFormatter.format(node.snr, 1)}")
-        append(" | RSSI: ${node.rssi}")
+        append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")
         val distance = node.distanceFromUser
         if (distance != null) {
             append(" | ${NumberFormatter.format(distance, 0)}m")

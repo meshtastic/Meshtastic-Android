@@ -440,6 +440,53 @@ class DiscoveryScanEngineTest {
     }
 
     @Test
+    fun reportedZeroRssiIsRecordedRatherThanDiscarded() = runTest {
+        val engine = createEngine(this)
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        while (engine.scanState.value !is DiscoveryScanState.Dwell) {
+            delay(100)
+        }
+
+        // 0 dBm is a legitimate reading on some radios, not a stand-in for "no reading".
+        val meshPacket =
+            createPositionMeshPacket(from = 12345, latI = 377749300, lonI = -1224194200, snr = 5.5f, rssi = 0)
+        engine.onPacketReceived(meshPacket, createDataPacket(from = 12345))
+        engine.stopScan()
+
+        assertEquals(0, discoveryDao.discoveredNodes.values.first().rssi)
+    }
+
+    @Test
+    fun absentRssiPersistsAsNullRatherThanZero() = runTest {
+        val engine = createEngine(this)
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        while (engine.scanState.value !is DiscoveryScanState.Dwell) {
+            delay(100)
+        }
+
+        val posPayload = Position.ADAPTER.encode(Position(latitude_i = 377749300)).toByteString()
+        val meshPacket =
+            MeshPacket(
+                from = 12345,
+                decoded = Data(portnum = PortNum.POSITION_APP, payload = posPayload),
+                rx_snr = 5.5f,
+                rx_rssi = null,
+            )
+        engine.onPacketReceived(meshPacket, createDataPacket(from = 12345))
+        engine.stopScan()
+
+        assertNull(discoveryDao.discoveredNodes.values.first().rssi)
+    }
+
+    @Test
     fun telemetryWithLocalStatsPopulatesRfHealth() = runTest {
         val engine = createEngine(this)
         nodeRepository.setMyNodeInfo(createMyNodeInfo())
