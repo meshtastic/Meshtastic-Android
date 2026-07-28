@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude-Specific Instructions
 
-- **Think First:** Outline step-by-step reasoning inside `<thinking>` tags before writing code or shell commands.
 - **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting).
 - **Plan Mode:** Use it for changes spanning multiple modules; write plans to `.agent_plans/` (git-ignored).
 - **Delegate to keep context lean** (this is a 20+ module KMP repo):
