@@ -39,6 +39,7 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -52,6 +53,7 @@ abstract class CommonChannelViewModelTest {
 
     protected lateinit var viewModel: ChannelViewModel
 
+    @BeforeTest
     fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
