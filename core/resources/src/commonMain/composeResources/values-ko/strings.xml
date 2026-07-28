@@ -107,6 +107,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">장치에서 깜빡이는 LED를 제어합니다. 대부분 장치의 경우 최대 4개의 LED 중 하나를 제어할 수 있지만 충전 상태 LED와 GPS 상태 LED는 제어할 수 없습니다.</string>
     <string name="config_device_transmitOverLora_summary">MQTT 및 PhoneAPI로 전송하는 것 외에도, 우리 NeighborInfo는 LoRa를 통해 전송되어야 합니다. 기본 키와 이름을 사용하는 채널에서는 사용할 수 없습니다.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">이 설정은 기기에 가속도계가 내장되어 있어야 사용할 수 있습니다.</string>
+    <string name="configuration">설정</string>
     <string name="connect">연결</string>
     <string name="connected">연결됨</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>

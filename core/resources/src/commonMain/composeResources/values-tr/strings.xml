@@ -109,6 +109,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Cihaz üzerindeki yanıp sönen LED'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED'den birini kontrol edecektir, şarj ve GPS LED'leri kontrol edilemez.</string>
     <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI'ye göndermenin yanı sıra, NeighborInfo'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
+    <string name="configuration">Yapılandırma</string>
     <string name="configure_critical_alerts">Kritik Uyarı Yapılandır</string>
     <string name="configure_location_permissions">Konum İzinlerini Yapılandırın</string>
     <string name="connect">Bağlan</string>

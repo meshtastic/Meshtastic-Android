@@ -288,6 +288,7 @@
     <string name="config_security_private_key">Usata per creare una chiave condivisa con un dispositivo remoto.</string>
     <string name="config_security_public_key">Generata a partire dalla chiave privata e inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
     <string name="config_security_serial_enabled">Console seriale attraverso la Stream API.</string>
+    <string name="configuration">Configurazione</string>
     <string name="configure_bluetooth_permissions">Configura Permessi Bluetooth</string>
     <string name="configure_critical_alerts">Configura avvisi critici</string>
     <string name="configure_location_permissions">Configura i permessi sulla posizione</string>

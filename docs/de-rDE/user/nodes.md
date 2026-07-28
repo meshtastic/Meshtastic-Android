@@ -2,7 +2,7 @@
 title: Knoten
 parent: User Guide
 nav_order: 4
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -152,7 +152,7 @@ Inline status indicators show key metrics at a glance:
 
 Sobald die Hardware eines Knotens erkannt wird, zeigt die Detailansicht einen ausklappbaren Bereich mit der Bezeichnung **„Ich möchte eins“** an. Dieser enthält Links zu Bezugsquellen oder weiterführenden Informationen zu dem jeweiligen Gerät – etwa zur Produktseite des Herstellers, zu Produktvarianten sowie zu Angeboten auf regionalen Marktplätzen (wie AliExpress, Amazon und unterstützten Händlern), gefiltert nach Ihrem Land. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
 
 ## Related Topics
 

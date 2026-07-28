@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: Ръководство за потребители
 nav_order: 7
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - настройки
@@ -29,7 +29,7 @@ Configure your radio hardware and user identity parameters.
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
 
-## Конфигурация на радиото
+## Конфигурация
 
 ### Конфигуриране на устройството
 

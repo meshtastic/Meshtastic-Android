@@ -217,6 +217,7 @@
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <string name="config_security_public_key">Генерується на основі вашого приватного ключа та надсилається іншим вузлам мережі, щоб вони могли обчислити спільний секретний ключ.</string>
     <string name="config_security_serial_enabled">Послідовна консоль через Stream API.</string>
+    <string name="configuration">Налаштування</string>
     <string name="configure_critical_alerts">Налаштування критичних оповіщень</string>
     <string name="configure_notification_permissions">Налаштувати дозволи для сповіщень</string>
     <string name="connect">Під’єднатися</string>

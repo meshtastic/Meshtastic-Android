@@ -2,7 +2,7 @@
 title: Entdecken
 parent: User Guide
 nav_order: 12
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-discovery
@@ -27,7 +27,7 @@ The app offers two complementary approaches:
 
 Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. Es schaltet das angeschlossene Funkgerät nacheinander auf eine oder mehrere von Ihnen gewählte Voreinstellungen, verweilt jeweils für eine festgelegte Zeit auf dem Kanal, um Datenpakete zu erfassen, und analysiert sowie bewertet anschließend die Ergebnisse.
 
-Open it from **Settings → Local Mesh Discovery**.
+Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
 > ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
 

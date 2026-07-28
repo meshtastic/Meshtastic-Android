@@ -278,6 +278,7 @@
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_public_key">从您的私钥生成并发送到网络上的其他节点，让它们能够计算共享的密钥。</string>
     <string name="config_security_serial_enabled">串口控制 API</string>
+    <string name="configuration">Configuration</string>
     <string name="configure_bluetooth_permissions">设置蓝牙权限</string>
     <string name="configure_critical_alerts">配置关键警报</string>
     <string name="configure_location_permissions">配置位置权限</string>

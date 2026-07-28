@@ -168,6 +168,7 @@
     <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
     <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
+    <string name="configuration">Configuración</string>
     <string name="configure_critical_alerts">Configurar alertas críticas</string>
     <string name="configure_location_permissions">Configurar permisos de ubicación</string>
     <string name="configure_notification_permissions">Configurar permisos de notificación</string>

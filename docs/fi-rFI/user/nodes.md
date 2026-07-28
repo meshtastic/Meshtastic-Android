@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -152,7 +152,7 @@ Rivinsisäiset tilailmaisimet näyttävät tärkeimmät tiedot yhdellä silmäyk
 
 Kun radion laitteisto tunnistetaan, tietonäkymä näyttää avattavan **"Haluan sellaisen"** -osion, jossa on linkkejä laitteen ostamiseen tai lisätietojen hankkimiseen: valmistajan tuotesivu, tuoteversiot sekä alueelliset kauppapaikkalistaukset (esim. AliExpress, Amazon ja tuetut jälleenmyyjät), suodatettuna maasi mukaan. Jokainen linkki avautuu mesh.to -uudelleenohjauspalvelun kautta. Laitteet, joille ei löydy vastaavia linkkejä, eivät näytä tätä osiota.
 
-Täydellinen selattava hakemisto kaikista linkeistä on saatavilla myös kohdassa **Asetukset → Laite-linkit**.
+Kaikkien linkkien selattava hakemisto löytyy myös kohdasta **Asetukset → Ohje ja dokumentaatio → Laitelinkit**.
 
 ## Aiheeseen liittyvät aiheet
 

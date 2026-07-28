@@ -289,6 +289,7 @@
     <string name="config_security_private_key">Käytetään jaetun avaimen luomiseen etälaitteen kanssa.</string>
     <string name="config_security_public_key">Luotu yksityisestä avaimestasi ja lähetetty muille verkon laitteille, jotta ne voivat laskea yhteisen salaisen avaimen.</string>
     <string name="config_security_serial_enabled">Sarjaporttikonsoli käyttöön Stream API:n kautta.</string>
+    <string name="configuration">Asetukset</string>
     <string name="configure_bluetooth_permissions">Määritä Bluetooth-oikeudet</string>
     <string name="configure_critical_alerts">Määritä kriittiset hälytykset</string>
     <string name="configure_location_permissions">Määritä sijainnin käyttöoikeudet</string>

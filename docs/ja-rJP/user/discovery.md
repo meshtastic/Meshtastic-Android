@@ -2,7 +2,7 @@
 title: 探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - mesh-discovery
@@ -27,7 +27,7 @@ aliases:
 
 ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 接続中の無線機を、選択した 1 つ以上のプリセットで順に切り替え、パケットを収集するために各プリセットで一定時間受信（「滞在」）し、その後、結果を分析してランク付けします。
 
-「**設定 → ローカルメッシュ探索**」から開きます。
+Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
 > ⚠️ **注意：** 探索は、スキャン中に無線機の LoRa 設定を一時的に変更し、完了時に元の構成に戻します。 スキャンを実行するには、デバイスが接続されている必要があります。
 

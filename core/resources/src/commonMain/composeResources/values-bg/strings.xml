@@ -199,6 +199,7 @@
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_public_key">Генерира се от вашия частен ключ и се изпраща до други възли в mesh за да им позволи да изчислят споделен секретен ключ.</string>
     <string name="config_security_serial_enabled">Серийна конзола през Stream API.</string>
+    <string name="configuration">Конфигурация</string>
     <string name="configure_bluetooth_permissions">Конфигуриране на разрешения за Bluetooth</string>
     <string name="configure_critical_alerts">Конфигуриране на критични предупреждения</string>
     <string name="configure_location_permissions">Конфигуриране на разрешенията за местоположение</string>

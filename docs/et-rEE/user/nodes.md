@@ -2,7 +2,7 @@
 title: Sõlmed
 parent: User Guide
 nav_order: 4
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -152,7 +152,7 @@ Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
 Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.
 
-Täielik ja sirvitav kataloog iga lingi kohta on saadaval ka menüüs **Seaded → Seadme lingid**.
+A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
 
 ## Related Topics
 

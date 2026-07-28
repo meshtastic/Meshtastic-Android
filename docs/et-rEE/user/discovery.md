@@ -2,7 +2,7 @@
 title: Avastamine
 parent: User Guide
 nav_order: 12
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
   - kärgvõrgu-avastamine
@@ -27,7 +27,7 @@ The app offers two complementary approaches:
 
 Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. See kerib ühendatud raadio läbi ühe või mitu valitud eelseadet, kuulab (või "ootab") igaüht neist määratud aja jooksul pakettide kogumiseks ning seejärel analüüsib ja järjestab tulemused.
 
-Ava **Sätted → Kohalik kärgvõrgu avastaja**.
+Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
 > ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Your device must be connected to run a scan.
 

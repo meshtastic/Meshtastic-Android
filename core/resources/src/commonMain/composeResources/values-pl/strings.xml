@@ -154,6 +154,7 @@
     <string name="config_security_is_managed">Urządzenie jest zarządzane przez administratora sieci mesh, użytkownik nie ma dostępu do żadnych ustawień urządzenia.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
     <string name="config_security_serial_enabled">Konsola szeregowa przez Stream API.</string>
+    <string name="configuration">Konfiguracja</string>
     <string name="configure_notification_permissions">Skonfiguruj uprawnienia powiadomień</string>
     <string name="connect">Połącz</string>
     <string name="connected">Połączony</string>

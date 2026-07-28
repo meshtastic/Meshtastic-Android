@@ -282,6 +282,7 @@
     <string name="config_security_private_key">Kasutatakse jagatud võtme loomiseks kaugseadmega.</string>
     <string name="config_security_public_key">Genereeritakse privaatvõtmest ja saadetakse kärgvõrgu sõlmedele, et nad saaksid koostada jagatud salajase võtme.</string>
     <string name="config_security_serial_enabled">Jadapordi konsool voog API kaudu.</string>
+    <string name="configuration">Sätted</string>
     <string name="configure_bluetooth_permissions">Sinihamba ​​õiguste sätted</string>
     <string name="configure_critical_alerts">Kriitiliste hoiatuste seadistamine</string>
     <string name="configure_location_permissions">Muuda asukoha kasutusload</string>

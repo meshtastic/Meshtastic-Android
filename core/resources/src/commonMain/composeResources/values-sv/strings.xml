@@ -222,6 +222,7 @@
     <string name="config_security_is_managed">Enheten hanteras av en mesh-administratör. Användaren kan inte ändra enhetsinställningarna.</string>
     <string name="config_security_private_key">Används för att skapa en delad nyckel med en fjärrnod.</string>
     <string name="config_security_serial_enabled">Seriell kommunikation över Stream API.</string>
+    <string name="configuration">Konfiguration</string>
     <string name="configure_bluetooth_permissions">Ställ in Bluetooth-behörigheter</string>
     <string name="configure_critical_alerts">Konfigurera kritiska larm</string>
     <string name="configure_location_permissions">Konfigurera platsbehörigheter</string>

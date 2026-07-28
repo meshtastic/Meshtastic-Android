@@ -59,6 +59,7 @@
     <!-- CONFIG -->
     <string name="config_device_tripleClickAsAdHocPing_summary">Адсылае месцазнаходжанне на асноўным канале калі націснуць кнопку тройчы.</string>
     <string name="config_device_use_phone_tz">Зрабіць як на тэлефоне</string>
+    <string name="configuration">Конфигурация</string>
     <string name="connected">Злучаны</string>
     <string name="connected_sleeping">Злучаныя з радыё, але яно спіць</string>
     <string name="connecting">Злучаемся</string>

@@ -240,6 +240,7 @@
     <string name="config_security_private_key">用於與遠端設備交換密鑰。</string>
     <string name="config_security_public_key">從您的私鑰生成並傳送給網狀網路中的其他節點，以供它們計算出共享密鑰。</string>
     <string name="config_security_serial_enabled">透過 API 串流的序列主控台。</string>
+    <string name="configuration">設定</string>
     <string name="configure_bluetooth_permissions">設定藍牙權限</string>
     <string name="configure_critical_alerts">設定緊急警示</string>
     <string name="configure_location_permissions">設定定位權限</string>

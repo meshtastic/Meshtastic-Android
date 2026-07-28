@@ -262,6 +262,7 @@
     <string name="config_security_private_key">Utilisée pour créer une clé partagée avec un appareil distant.</string>
     <string name="config_security_public_key">Généré à partir de votre clé publique et envoyé à d'autres nœuds sur le maillage pour leur permettre de calculer une clé secrète partagée.</string>
     <string name="config_security_serial_enabled">Console série via l’API de flux.</string>
+    <string name="configuration">Configuration</string>
     <string name="configure_bluetooth_permissions">Configurer les autorisations Bluetooth</string>
     <string name="configure_critical_alerts">Configurer les alertes critiques</string>
     <string name="configure_location_permissions">Configurer les autorisations de localisation</string>
