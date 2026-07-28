@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -401,7 +402,7 @@ class MQTTRepositoryImplTest {
             MqttException.ConnectionRejected(ReasonCode.BAD_USER_NAME_OR_PASSWORD, "Connection refused"),
         )
 
-        val outcome = backgroundScope.async { runCatching { harness.repository.proxyMessageFlow.collect {} } }
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
         runCurrent()
         advanceTimeBy(60_000)
         runCurrent()

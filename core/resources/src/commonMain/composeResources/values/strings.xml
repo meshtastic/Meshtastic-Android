@@ -1090,6 +1090,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Config</string>
     <string name="mqtt_enabled">MQTT enabled</string>
+    <string name="mqtt_error_connection_lost">MQTT: connection lost</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: connection rejected (check credentials)</string>
+    <string name="mqtt_error_proxy_failed">MQTT proxy failed: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: connection rejected: %1$s</string>
     <string name="mqtt_probe_dns_failure">Host not found</string>
     <string name="mqtt_probe_other_failure">Connection failed</string>
     <string name="mqtt_probe_rejected">Broker rejected: %1$s</string>

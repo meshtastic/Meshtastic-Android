@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
@@ -42,6 +43,13 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.mqtt_error_connection_lost
+import org.meshtastic.core.resources.mqtt_error_credentials_rejected
+import org.meshtastic.core.resources.mqtt_error_proxy_failed
+import org.meshtastic.core.resources.mqtt_error_rejected
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttException
@@ -82,18 +90,26 @@ class MqttManagerImpl(
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable ->
                         _proxyActive.value = false
+                        // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
+                        // compose-resources raises on headless JVM tests; production resolves the
+                        // localized string and the error is still surfaced either way.
                         val message =
-                            when {
-                                throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
-                                    "MQTT: connection rejected (check credentials)"
+                            safeCatchingAll {
+                                when {
+                                    throwable is MqttException.ConnectionRejected &&
+                                        throwable.isCredentialRejection() ->
+                                        getStringSuspend(Res.string.mqtt_error_credentials_rejected)
 
-                                throwable is MqttException.ConnectionRejected ->
-                                    "MQTT: connection rejected: ${throwable.message}"
+                                    throwable is MqttException.ConnectionRejected ->
+                                        getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
 
-                                throwable is MqttException.ConnectionLost -> "MQTT: connection lost"
+                                    throwable is MqttException.ConnectionLost ->
+                                        getStringSuspend(Res.string.mqtt_error_connection_lost)
 
-                                else -> "MQTT proxy failed: ${throwable.message}"
+                                    else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
+                                }
                             }
+                                .getOrDefault("")
                         serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
@@ -199,3 +215,6 @@ class MqttManagerImpl(
         is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
     }
 }
+
+/** Failure detail for a user-facing message; a throwable without a message still needs a placeholder to substitute. */
+private suspend fun Throwable.detail(): String = message ?: getStringSuspend(Res.string.unknown)
