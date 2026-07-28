@@ -46,7 +46,6 @@ fun WaypointMarkers(
     displayableWaypoints: List<Waypoint>,
     mapFilterState: BaseMapViewModel.MapFilterState,
     myNodeNum: Int,
-    isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
     onDeleteWaypointRequest: (Waypoint) -> Unit,
     isMyWaypoint: (Int) -> Boolean,
@@ -100,10 +99,10 @@ fun WaypointMarkers(
                         // Foreign geofences: read-only view hosting the receiver-local crossing-alert opt-in.
                         waypoint.toGeofence() != null && !isMyWaypoint(waypoint.id) -> onShowGeofenceInfo(waypoint)
 
-                        waypoint.isModifiableBy(myNodeNum) || !isConnected -> onEditWaypointRequest(waypoint)
+                        waypoint.isModifiableBy(myNodeNum) -> onEditWaypointRequest(waypoint)
 
-                        // Locked to someone else: the editor would be pointless, but our local copy is still ours to
-                        // remove, so offer that instead of only reporting the lock.
+                        // Locked to someone else: the editor could never broadcast a change, whether we are connected
+                        // or not, but our local copy is still ours to remove — so offer that instead.
                         else -> onDeleteWaypointRequest(waypoint)
                     }
                 },

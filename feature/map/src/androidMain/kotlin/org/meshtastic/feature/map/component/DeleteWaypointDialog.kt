@@ -16,25 +16,34 @@
  */
 package org.meshtastic.feature.map.component
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_for_everyone
-import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.waypoint_delete
+import org.meshtastic.core.ui.component.MeshtasticDialog
 
 /**
- * Waypoint removal confirmation, shared by both map flavors. "Delete for me" drops only our local copy and is always
- * offered — a locked waypoint belongs to another node mesh-wide, but our own database is ours to prune. "Delete for
- * everyone" broadcasts the removal and so is gated on [canDeleteForEveryone] (unlocked or locked to us, and connected).
+ * Waypoint removal confirmation, shared by both map flavors. Confirming always drops our local copy — that needs no
+ * mesh-wide permission, so it stays available for a waypoint locked to another node. Broadcasting the removal to the
+ * mesh is the opt-in checkbox, offered only when [canDeleteForEveryone] (unlocked or locked to us, and connected).
  */
 @Composable
 fun DeleteWaypointDialog(
@@ -44,28 +53,36 @@ fun DeleteWaypointDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(Res.string.waypoint_delete)) },
-        // Up to three actions, none of them abbreviable, so they stack instead of crowding a single row. All of them
-        // live in the confirm slot to keep that stack in one column; dismissing is the Cancel entry.
-        confirmButton = {
-            Column(horizontalAlignment = Alignment.End) {
-                TextButton(onClick = onDeleteForMe) {
-                    Text(text = stringResource(Res.string.delete_for_me), color = MaterialTheme.colorScheme.error)
-                }
-                if (canDeleteForEveryone) {
-                    TextButton(onClick = onDeleteForEveryone) {
-                        Text(
-                            text = stringResource(Res.string.delete_for_everyone),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
-                TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) }
-            }
-        },
-        dismissButton = null,
+    var alsoDeleteForEveryone by remember { mutableStateOf(false) }
+
+    MeshtasticDialog(
         modifier = modifier,
+        titleRes = Res.string.waypoint_delete,
+        text =
+        if (canDeleteForEveryone) {
+            {
+                // The whole row is one toggleable target so the label names the checkbox to a screen reader.
+                Row(
+                    modifier =
+                    Modifier.fillMaxWidth()
+                        .toggleable(
+                            value = alsoDeleteForEveryone,
+                            role = Role.Checkbox,
+                            onValueChange = { alsoDeleteForEveryone = it },
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(checked = alsoDeleteForEveryone, onCheckedChange = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(Res.string.delete_for_everyone))
+                }
+            }
+        } else {
+            null
+        },
+        confirmTextRes = Res.string.delete,
+        onConfirm = { if (alsoDeleteForEveryone) onDeleteForEveryone() else onDeleteForMe() },
+        dismissTextRes = Res.string.cancel,
+        onDismiss = onDismissRequest,
     )
 }

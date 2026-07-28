@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.ui.theme.AppTheme
 
-/** Waypoint locked to another node (or offline): only the local delete is offered. */
+/** Waypoint locked to another node (or offline): confirming removes only our local copy. */
 @PreviewLightDark
 @Composable
 @Suppress("PreviewPublic")
@@ -35,11 +35,11 @@ fun DeleteWaypointDialogLocalOnlyPreview() {
     }
 }
 
-/** Waypoint we may modify mesh-wide while connected: both deletes are offered. */
+/** Waypoint we may modify mesh-wide while connected: the broadcast opt-in is offered. */
 @PreviewLightDark
 @Composable
 @Suppress("PreviewPublic")
-fun DeleteWaypointDialogBothPreview() {
+fun DeleteWaypointDialogWithBroadcastPreview() {
     AppTheme {
         DeleteWaypointDialog(
             canDeleteForEveryone = true,
