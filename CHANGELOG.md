@@ -9,10 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 📝 Other Changes
-* Clean up configuration menus by @pdxlocations in https://github.com/meshtastic/Meshtastic-Android/pull/6478
+#### 🏗️ Features
+* feat(event): DEF CON 34 logo and full brand palette in event theming by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6483
 
-### Internal (v2.8.0-internal.40)
+### Internal (v2.8.0-internal.41)
 Changes since [`v2.8.0-open.4`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-open.4):
 
 #### 🛠️ Fixes
@@ -23,6 +23,8 @@ Changes since [`v2.8.0-open.4`](https://github.com/meshtastic/Meshtastic-Android
 * fix(network): resync stream framing and stop reporting expected disconnects as errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6469
 * fix(notifications): guard blank conversation-shortcut labels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6472
 * fix(service): guarantee startForeground is reached or MeshService stops itself by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6471
+#### 📝 Other Changes
+* Clean up configuration menus by @pdxlocations in https://github.com/meshtastic/Meshtastic-Android/pull/6478
 
 ### Open Beta (v2.8.0-open.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
