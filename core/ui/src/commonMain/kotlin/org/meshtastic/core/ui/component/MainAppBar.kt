@@ -19,7 +19,12 @@ package org.meshtastic.core.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +65,12 @@ import org.meshtastic.core.ui.util.LocalEventBranding
 /** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
 private const val EVENT_ACCENT_ALPHA = 0.12f
 
+/** Height of the event brand rule under the app bar. A hairline: brand presence without stealing vertical space. */
+private val EVENT_BRAND_RULE_HEIGHT = 3.dp
+
+/** A gradient needs two stops; a single-color palette is drawn as a flat rule instead. */
+private const val MIN_GRADIENT_STOPS = 2
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppBar(
@@ -73,7 +87,8 @@ fun MainAppBar(
 ) {
     // Ambient event theming: when connected to event firmware (and not opted out), tint the bar with a faint wash of
     // the edition's accent color. Gated with the app-wide fonts via LocalEventTheme / the "Use event theme" toggle.
-    val accent = LocalEventTheme.current?.accent
+    val eventTheme = LocalEventTheme.current
+    val accent = eventTheme?.accent
     val colors =
         if (accent != null) {
             TopAppBarDefaults.topAppBarColors(
@@ -83,45 +98,71 @@ fun MainAppBar(
         } else {
             TopAppBarDefaults.topAppBarColors()
         }
-    TopAppBar(
-        colors = colors,
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLargeEmphasized,
-            )
-        },
-        subtitle = {
-            subtitle?.let {
+    Column(modifier = modifier) {
+        TopAppBar(
+            colors = colors,
+            title = {
                 Text(
-                    text = it,
+                    text = title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
                 )
-            }
-        },
-        modifier = modifier,
-        navigationIcon =
-        if (canNavigateUp) {
-            {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = MeshtasticIcons.ArrowBack,
-                        contentDescription = stringResource(Res.string.navigate_back),
+            },
+            subtitle = {
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            },
+            navigationIcon =
+            if (canNavigateUp) {
+                {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
+                    }
+                }
+            } else {
+                { brandingContent() }
+            },
+            actions = {
+                TopBarActions(
+                    ourNode = ourNode,
+                    showNodeChip = showNodeChip,
+                    actions = actions,
+                    onClickChip = onClickChip,
+                )
+            },
+        )
+        EventBrandRule(palette = eventTheme?.palette.orEmpty())
+    }
+}
+
+/**
+ * Hairline of the event's full brand palette under the app bar. The accent wash alone can only carry one color, and for
+ * editions whose primary is very dark (DEF CON's navy) it is nearly invisible against a dark surface — the rule is
+ * where the rest of the palette actually shows up. Draws nothing when the edition publishes no colors.
+ */
+@Composable
+private fun EventBrandRule(palette: List<Color>) {
+    if (palette.isEmpty()) return
+    val brush =
+        remember(palette) {
+            if (palette.size >= MIN_GRADIENT_STOPS) {
+                Brush.horizontalGradient(palette)
+            } else {
+                SolidColor(palette.first())
             }
-        } else {
-            { brandingContent() }
-        },
-        actions = {
-            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
-        },
-    )
+        }
+    Box(Modifier.fillMaxWidth().height(EVENT_BRAND_RULE_HEIGHT).background(brush))
 }
 
 /** Reads [LocalEventBranding] to show event branding (tap → [EventInfoSheet]), or the default Meshtastic logo. */

@@ -92,6 +92,8 @@ import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.accentColorOrNull
+import org.meshtastic.core.ui.util.brandHighlightOrNull
+import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
@@ -193,16 +195,23 @@ class MainActivity : AppCompatActivity() {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
         val eventThemeEnabled by model.eventThemeEnabled.collectAsStateWithLifecycle()
         val eventFontResolver = koinInject<EventFontResolver>()
-        // Resolve the ambient event theme once per edition: an accent wash (works on any flavor) and/or downloadable
-        // fonts (Google flavor only). Applied app-wide only while on event firmware and not opted out.
+        // Resolve the ambient event theme once per edition: an accent wash and brand palette (any flavor) and/or
+        // downloadable fonts (Google flavor only). Applied app-wide only while on event firmware and not opted out.
         val eventAccent = eventEdition?.accentColorOrNull()
+        val eventHighlight = eventEdition?.brandHighlightOrNull()
+        val eventPalette = remember(eventEdition) { eventEdition?.brandPalette().orEmpty() }
         val resolvedEventFonts =
             remember(eventEdition, eventFontResolver) { eventFontResolver.resolve(eventEdition?.theme?.fonts) }
         CompositionLocalProvider(
             LocalEventBranding provides eventEdition,
             LocalEventTheme provides
                 if (eventThemeEnabled && eventEdition != null) {
-                    EventTheme(accent = eventAccent, fonts = resolvedEventFonts)
+                    EventTheme(
+                        accent = eventAccent,
+                        highlight = eventHighlight,
+                        palette = eventPalette,
+                        fonts = resolvedEventFonts,
+                    )
                 } else {
                     null
                 },
