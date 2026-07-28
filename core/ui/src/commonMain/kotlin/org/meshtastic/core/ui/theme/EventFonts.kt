@@ -29,13 +29,22 @@ import org.meshtastic.core.model.EventFirmwareFonts
 data class EventFonts(val heading: FontFamily? = null, val body: FontFamily? = null)
 
 /**
- * The ambient event branding to apply **app-wide** — a subtle [accent] wash and/or the event [fonts]. Populated at the
- * composition root only when a device is on event firmware and the user hasn't opted out via [LocalEventThemeToggle];
- * `null` everywhere else. [AppTheme] reads [fonts] to swap [AppTypography]; the app bar reads [accent] for its wash.
- * The event info sheet and branding icon are driven separately by
- * [LocalEventBranding][org.meshtastic.core.ui.util.LocalEventBranding] so they stay available even when opted out.
+ * The ambient event branding to apply **app-wide** — a subtle [accent] wash, the event [palette], and/or the event
+ * [fonts]. Populated at the composition root only when a device is on event firmware and the user hasn't opted out via
+ * [LocalEventThemeToggle]; `null` everywhere else. [AppTheme] reads [fonts] to swap [AppTypography]; the app bar reads
+ * [accent] for its wash and [palette] for its brand rule. The event info sheet and branding icon are driven separately
+ * by [LocalEventBranding][org.meshtastic.core.ui.util.LocalEventBranding] so they stay available even when opted out.
+ *
+ * @param accent the edition's primary — calm enough to sit behind title text as a low-alpha wash.
+ * @param highlight the edition's loud detail color, for small marks that need to pop rather than recede.
+ * @param palette every brand color the edition publishes, in authored order; empty when it publishes none.
  */
-data class EventTheme(val accent: Color? = null, val fonts: EventFonts? = null)
+data class EventTheme(
+    val accent: Color? = null,
+    val highlight: Color? = null,
+    val palette: List<Color> = emptyList(),
+    val fonts: EventFonts? = null,
+)
 
 /**
  * Resolves an edition's [EventFirmwareFonts] (Google Font *family names*, e.g. `Lato`) into loadable [FontFamily]s.

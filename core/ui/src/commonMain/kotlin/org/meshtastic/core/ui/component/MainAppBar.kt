@@ -20,6 +20,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -57,6 +59,9 @@ import org.meshtastic.core.ui.util.LocalEventBranding
 /** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
 private const val EVENT_ACCENT_ALPHA = 0.12f
 
+/** Height of the event brand rule under the app bar. A hairline: brand presence without stealing vertical space. */
+private val EVENT_BRAND_RULE_HEIGHT = 3.dp
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppBar(
@@ -73,7 +78,8 @@ fun MainAppBar(
 ) {
     // Ambient event theming: when connected to event firmware (and not opted out), tint the bar with a faint wash of
     // the edition's accent color. Gated with the app-wide fonts via LocalEventTheme / the "Use event theme" toggle.
-    val accent = LocalEventTheme.current?.accent
+    val eventTheme = LocalEventTheme.current
+    val accent = eventTheme?.accent
     val colors =
         if (accent != null) {
             TopAppBarDefaults.topAppBarColors(
@@ -83,45 +89,52 @@ fun MainAppBar(
         } else {
             TopAppBarDefaults.topAppBarColors()
         }
-    TopAppBar(
-        colors = colors,
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLargeEmphasized,
-            )
-        },
-        subtitle = {
-            subtitle?.let {
+    Column(modifier = modifier) {
+        TopAppBar(
+            colors = colors,
+            title = {
                 Text(
-                    text = it,
+                    text = title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
                 )
-            }
-        },
-        modifier = modifier,
-        navigationIcon =
-        if (canNavigateUp) {
-            {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = MeshtasticIcons.ArrowBack,
-                        contentDescription = stringResource(Res.string.navigate_back),
+            },
+            subtitle = {
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-        } else {
-            { brandingContent() }
-        },
-        actions = {
-            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
-        },
-    )
+            },
+            navigationIcon =
+            if (canNavigateUp) {
+                {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
+                    }
+                }
+            } else {
+                { brandingContent() }
+            },
+            actions = {
+                TopBarActions(
+                    ourNode = ourNode,
+                    showNodeChip = showNodeChip,
+                    actions = actions,
+                    onClickChip = onClickChip,
+                )
+            },
+        )
+        EventPaletteStrip(palette = eventTheme?.palette.orEmpty(), height = EVENT_BRAND_RULE_HEIGHT)
+    }
 }
 
 /** Reads [LocalEventBranding] to show event branding (tap → [EventInfoSheet]), or the default Meshtastic logo. */

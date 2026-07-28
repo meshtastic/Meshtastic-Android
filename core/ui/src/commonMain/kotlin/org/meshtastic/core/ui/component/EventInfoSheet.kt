@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +49,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.EventFirmwareEdition
@@ -58,8 +61,11 @@ import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Place
 import org.meshtastic.core.ui.theme.LocalEventThemeToggle
+import org.meshtastic.core.ui.theme.pickLegible
 import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.accentColorOrNull
+import org.meshtastic.core.ui.util.brandHighlightOrNull
+import org.meshtastic.core.ui.util.brandPalette
 
 /**
  * Bottom sheet shown when the user taps the event branding in [MainAppBar]. Surfaces the event metadata the bundled
@@ -71,82 +77,131 @@ fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val uriHandler = LocalUriHandler.current
     val accent = edition.accentColorOrNull()
+    val palette = edition.brandPalette()
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-            EventHeader(edition, accent)
-
-            Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (edition.welcomeMessage.isNotBlank()) {
-                    Text(text = edition.welcomeMessage, style = MaterialTheme.typography.bodyLarge)
-                }
-
-                val iconTint = accent ?: MaterialTheme.colorScheme.onSurfaceVariant
-                edition.location?.takeIf { it.isNotBlank() }?.let { InfoRow(MeshtasticIcons.Place, it, iconTint) }
-                dateRange(edition)?.let { InfoRow(MeshtasticIcons.CalendarMonth, it, iconTint) }
-
-                val links = edition.links.filter { it.url.isNotBlank() }
-                if (links.isNotEmpty()) {
-                    HorizontalDivider()
-                    links.forEach { link ->
-                        LinkRow(label = link.label.ifBlank { link.url }, tint = iconTint) {
-                            uriHandler.openUri(link.url)
-                        }
-                    }
-                }
-
-                // Opt-out for the ambient event theme (accent wash + app-wide fonts). Always shown — the sheet only
-                // opens for an active event, so there's always a theme to govern.
-                val themeToggle = LocalEventThemeToggle.current
-                HorizontalDivider()
-                Row(
-                    modifier =
-                    Modifier.fillMaxWidth()
-                        .toggleable(
-                            value = themeToggle.enabled,
-                            onValueChange = themeToggle.onChange,
-                            role = Role.Switch,
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.event_use_event_theme),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f),
-                    )
-                    // Row owns the toggle; null keeps the Switch visual-only (no double-fire).
-                    Switch(checked = themeToggle.enabled, onCheckedChange = null)
-                }
-            }
+            EventHeader(edition, accent, palette)
+            EventDetails(edition = edition, palette = palette, onOpenUri = uriHandler::openUri)
         }
     }
 }
 
-/** Accent-colored header band with the event icon + display name; falls back to the theme surface when no accent. */
+/** Welcome message, theme tagline, venue/dates, links, and the ambient-theme opt-out. */
 @Composable
-private fun EventHeader(edition: EventFirmwareEdition, accent: Color?) {
-    val background = accent ?: MaterialTheme.colorScheme.surfaceVariant
-    val foreground = accent?.contentColorFor() ?: MaterialTheme.colorScheme.onSurfaceVariant
+private fun EventDetails(edition: EventFirmwareEdition, palette: List<Color>, onOpenUri: (String) -> Unit) {
+    Column(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        if (edition.welcomeMessage.isNotBlank()) {
+            Text(text = edition.welcomeMessage, style = MaterialTheme.typography.bodyLarge)
+        }
+
+        edition.theme
+            ?.tagline
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+        // Brand colors are authored for the event's own materials, not for our light *and* dark surfaces — pick the
+        // loudest one that still reads here, preferring the highlight, then the rest of the palette.
+        val surface = MaterialTheme.colorScheme.surface
+        val fallbackTint = MaterialTheme.colorScheme.onSurfaceVariant
+        val iconTint =
+            remember(edition, surface, fallbackTint) {
+                pickLegible(
+                    candidates = listOfNotNull(edition.brandHighlightOrNull()) + palette,
+                    background = surface,
+                    fallback = fallbackTint,
+                )
+            }
+        edition.location?.takeIf { it.isNotBlank() }?.let { InfoRow(MeshtasticIcons.Place, it, iconTint) }
+        dateRange(edition)?.let { InfoRow(MeshtasticIcons.CalendarMonth, it, iconTint) }
+
+        val links = edition.links.filter { it.url.isNotBlank() }
+        if (links.isNotEmpty()) {
+            HorizontalDivider()
+            links.forEach { link ->
+                LinkRow(label = link.label.ifBlank { link.url }, tint = iconTint) { onOpenUri(link.url) }
+            }
+        }
+
+        HorizontalDivider()
+        EventThemeToggleRow()
+    }
+}
+
+/**
+ * Opt-out for the ambient event theme (accent wash, brand rule, and app-wide fonts). Always shown — the sheet only
+ * opens for an active event, so there's always a theme to govern.
+ */
+@Composable
+private fun EventThemeToggleRow() {
+    val themeToggle = LocalEventThemeToggle.current
     Row(
-        modifier = Modifier.fillMaxWidth().background(background).padding(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier =
+        Modifier.fillMaxWidth()
+            .toggleable(value = themeToggle.enabled, onValueChange = themeToggle.onChange, role = Role.Switch),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        EventBrandingIcon(
-            edition = edition,
-            modifier = Modifier.size(48.dp).clip(CircleShape),
-            contentDescription = null,
-        )
         Text(
-            text = edition.displayName,
-            style = MaterialTheme.typography.headlineSmall,
-            color = foreground,
-            modifier = Modifier.semantics { heading() },
+            text = stringResource(Res.string.event_use_event_theme),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
         )
+        // Row owns the toggle; null keeps the Switch visual-only (no double-fire).
+        Switch(checked = themeToggle.enabled, onCheckedChange = null)
+    }
+}
+
+/**
+ * Accent-colored header band with the event icon, display name, and theme name ("Agency" for DEF CON 34), closed by a
+ * gradient edge of the edition's full [palette]. The band stays a single flat color so the title keeps a predictable
+ * contrast ratio; the palette gets its own strip rather than running under the text.
+ */
+@Composable
+private fun EventHeader(edition: EventFirmwareEdition, accent: Color?, palette: List<Color>) {
+    val background = accent ?: MaterialTheme.colorScheme.surfaceVariant
+    val foreground = accent?.contentColorFor() ?: MaterialTheme.colorScheme.onSurfaceVariant
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().background(background).padding(24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            EventBrandingIcon(
+                edition = edition,
+                modifier = Modifier.size(48.dp).clip(CircleShape),
+                contentDescription = null,
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = edition.displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = foreground,
+                    modifier = Modifier.semantics { heading() },
+                )
+                edition.theme
+                    ?.name
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = foreground.copy(alpha = THEME_NAME_ALPHA),
+                        )
+                    }
+            }
+        }
+        EventPaletteStrip(palette = palette, height = PALETTE_STRIP_HEIGHT)
     }
 }
 
@@ -195,3 +250,9 @@ private fun dateRange(edition: EventFirmwareEdition): String? {
 private fun Color.contentColorFor(): Color = if (luminance() > LUMINANCE_MIDPOINT) Color.Black else Color.White
 
 private const val LUMINANCE_MIDPOINT = 0.5f
+
+/** The theme name is a subtitle to the event name — dimmed, but still well clear of the AA text threshold. */
+private const val THEME_NAME_ALPHA = 0.8f
+
+/** Height of the brand palette strip closing the header band. */
+private val PALETTE_STRIP_HEIGHT = 6.dp

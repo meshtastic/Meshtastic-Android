@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
+import org.meshtastic.core.resources.img_event_defcon
 import org.meshtastic.core.resources.img_event_hamvention
 import kotlin.time.Clock
 
@@ -51,6 +52,7 @@ val LocalEventBranding = compositionLocalOf<EventFirmwareEdition?> { null }
  */
 fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
     "HAMVENTION" -> Res.drawable.img_event_hamvention
+    "DEFCON" -> Res.drawable.img_event_defcon
     else -> null
 }
 
@@ -101,17 +103,43 @@ fun EventFirmwareEdition.hasEnded(): Boolean {
     return Clock.System.todayIn(zone) > end
 }
 
-/** Parses the edition's `#RRGGBB` [EventFirmwareEdition.accentColor] into a [Color], or `null` if absent/malformed. */
-fun EventFirmwareEdition.accentColorOrNull(): Color? {
+/**
+ * Parses a `#RRGGBB` brand color into a [Color], or `null` if absent/malformed. Tolerates a missing `#` and any case.
+ */
+fun parseBrandColor(hex: String?): Color? {
     val rgb =
-        accentColor?.trim()?.removePrefix("#")?.takeIf { it.length == RGB_HEX_LENGTH }?.toIntOrNull(HEX_RADIX)
-            ?: return null
+        hex?.trim()?.removePrefix("#")?.takeIf { it.length == RGB_HEX_LENGTH }?.toIntOrNull(HEX_RADIX) ?: return null
     return Color(
         red = (rgb shr RED_SHIFT) and BYTE_MASK,
         green = (rgb shr GREEN_SHIFT) and BYTE_MASK,
         blue = rgb and BYTE_MASK,
     )
 }
+
+/** Parses the edition's `#RRGGBB` [EventFirmwareEdition.accentColor] into a [Color], or `null` if absent/malformed. */
+fun EventFirmwareEdition.accentColorOrNull(): Color? = parseBrandColor(accentColor)
+
+/**
+ * The edition's full brand palette (`theme.palette`) as colors, malformed entries dropped. Falls back to the named
+ * `theme.colors` (primary/secondary/accent) and finally the top-level [accentColor][EventFirmwareEdition.accentColor],
+ * so an edition that carries only one color still yields a usable, non-empty list where one exists.
+ */
+fun EventFirmwareEdition.brandPalette(): List<Color> {
+    // distinct() on both paths: a repeated hex would otherwise become a repeated gradient stop, flattening the
+    // gradient over that span. Order is preserved, so the authored reading order still holds.
+    val fromPalette = theme?.palette.orEmpty().mapNotNull(::parseBrandColor).distinct()
+    if (fromPalette.isNotEmpty()) return fromPalette
+    val named = listOfNotNull(theme?.colors?.primary, theme?.colors?.secondary, theme?.colors?.accent, accentColor)
+    return named.mapNotNull(::parseBrandColor).distinct()
+}
+
+/**
+ * The edition's high-contrast detail color — `theme.colors.accent` (DEF CON's pink against its navy primary), falling
+ * back to `theme.colors.secondary`. Distinct from [accentColorOrNull], which is the *primary* used for the ambient
+ * wash: the wash wants the calm color, small details want the loud one.
+ */
+fun EventFirmwareEdition.brandHighlightOrNull(): Color? =
+    parseBrandColor(theme?.colors?.accent) ?: parseBrandColor(theme?.colors?.secondary)
 
 private const val RGB_HEX_LENGTH = 6
 private const val HEX_RADIX = 16

@@ -34,4 +34,18 @@ fun contrastRatio(a: Color, b: Color): Float {
     return (hi + WCAG_OFFSET) / (lo + WCAG_OFFSET)
 }
 
+/**
+ * The first of [candidates] that clears [minRatio] against [background], or [fallback] if none does.
+ *
+ * Brand palettes are authored for the event's own print/web treatment, not for the app's light *and* dark surfaces — an
+ * event's darkest brand color is invisible in dark mode, its lightest is invisible in light mode. Callers pass their
+ * preferred order (usually brand accent, then the rest of the palette) and get back a tint that actually reads.
+ */
+fun pickLegible(
+    candidates: List<Color>,
+    background: Color,
+    fallback: Color,
+    minRatio: Float = MIN_GRAPHICAL_CONTRAST,
+): Color = candidates.firstOrNull { contrastRatio(it, background) >= minRatio } ?: fallback
+
 private const val WCAG_OFFSET = 0.05f
