@@ -16,12 +16,10 @@
  */
 package org.meshtastic.core.data.repository
 
+import app.cash.turbine.test
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import okio.Buffer
 import okio.Source
@@ -46,7 +44,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 class EventFirmwareRepositoryImplTest {
 
@@ -142,18 +142,18 @@ class EventFirmwareRepositoryImplTest {
         seed.editions = listOf(edition("HAMVENTION"))
         api.response = EventFirmwareResponse(editions = listOf(edition("HAMVENTION"), edition("DEFCON")))
 
-        val emissions = mutableListOf<String?>()
-        val collector = launch { repository.observeEdition("DEFCON").collect { emissions += it?.displayName } }
-
-        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.lastOrNull() == null) delay(EMISSION_POLL_MS) }
-        // DEFCON exists only in the network response, never in the seed, so observing it at all proves the value
-        // arrived via refresh → cache write → emission. Collection is what drove that fetch: nothing else in this test
-        // touches the network or the cache.
-        assertEquals("defcon", emissions.last())
+        repository.observeEdition("DEFCON").test(timeout = EMISSION_TIMEOUT) {
+            // The first item is null only if the refresh is still in flight when collection starts; under
+            // Dispatchers.Unconfined it may already have completed inline. Which of the two happens is timing, not
+            // contract, so accept either and assert on the value that matters.
+            val observed = assertNotNull(awaitItem() ?: awaitItem(), "expected the refreshed DEFCON edition")
+            // DEFCON exists only in the network response, never in the seed, so observing it at all proves the value
+            // arrived via refresh → cache write → emission.
+            assertEquals("defcon", observed.displayName)
+            cancelAndIgnoreRemainingEvents()
+        }
+        // Collection is what drove that fetch: nothing else in this test touches the network or the cache.
         assertEquals(1, api.eventFirmwareCalls)
-        // Deliberately no assertion on the *first* emission: these tests run on Dispatchers.Unconfined, where the
-        // refresh can complete inline before emitAll starts, so whether the seed-only null is observed is timing.
-        collector.cancel()
     }
 
     @Test
@@ -267,8 +267,7 @@ class EventFirmwareRepositoryImplTest {
     }
 
     private companion object {
-        /** Room's invalidation tracker delivers asynchronously, so emission waits poll rather than assume immediacy. */
-        private const val EMISSION_TIMEOUT_MS = 10_000L
-        private const val EMISSION_POLL_MS = 20L
+        /** Room's invalidation tracker plus the fake network round-trip; generous, since it only bounds a failure. */
+        private val EMISSION_TIMEOUT = 10.seconds
     }
 }
