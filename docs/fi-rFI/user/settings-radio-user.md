@@ -2,7 +2,7 @@
 title: Asetukset — Radio ja käyttäjä
 parent: Käyttöopas
 nav_order: 7
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Määritä radion laitteisto, LoRa-esiasetukset, käyttäjäprofiili, sijainnin jakaminen, virranhallinta ja tietoturva.
 aliases:
   - asetukset
@@ -29,7 +29,7 @@ Määritä radion laitteisto ja käyttäjätunnistetiedot.
 
 Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykset radioon. Laite voidaan käynnistää uudelleen muutosten käyttöönottoa varten.
 
-## Radion asetukset
+## Asetukset
 
 ### Laitteen asetukset
 

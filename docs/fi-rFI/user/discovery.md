@@ -2,7 +2,7 @@
 title: Haku
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
   - mesh-verkon haku
@@ -27,7 +27,7 @@ Sovellus tarjoaa kaksi toisiaan täydentävää lähestymistapaa:
 
 Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Se kierrättää yhdistettyä radiota valitsemiesi esiasetusten läpi, kuuntelee jokaisella asetuksella määrätyn ajan kerätäkseen paketteja ja analysoi sekä pisteyttää tulokset.
 
-Avaa se kohdasta **Asetukset → Paikallinen verkon haku**.
+Avaa se kohdasta **Asetukset → Lisäasetukset → Paikallinen mesh-haku**. Työpöytäversiossa sille on oma kohta kohdassa **Asetukset → Paikallinen mesh-haku**.
 
 > ⚠️ **Huom:** Haku muuttaa radiosi LoRa-asetuksia väliaikaisesti skannauksen ajaksi ja palauttaa alkuperäisen konfiguraation sen päätyttyä. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
 

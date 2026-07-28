@@ -213,6 +213,7 @@
     <string name="config_security_private_key">Slouží k vytvoření sdíleného klíče se vzdáleným zařízením.</string>
     <string name="config_security_public_key">Je generován z vašeho soukromého klíče a odesílán ostatním uzlům v mesh síti, aby mohly vypočítat sdílený tajný klíč.</string>
     <string name="config_security_serial_enabled">Sériová konzole pomocí Stream API.</string>
+    <string name="configuration">Nastavení</string>
     <string name="configure_bluetooth_permissions">Nastavení oprávnění Bluetooth</string>
     <string name="configure_critical_alerts">Nastavit kritická upozornění</string>
     <string name="configure_location_permissions">Nastavit oprávnění polohy</string>

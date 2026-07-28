@@ -2,7 +2,7 @@
 title: 节点
 parent: User Guide
 nav_order: 4
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -152,7 +152,7 @@ Inline status indicators show key metrics at a glance:
 
 When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
 
 ## Related Topics
 

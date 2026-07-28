@@ -276,6 +276,7 @@
     <string name="config_security_private_key">リモートデバイスとの共有鍵を作成するために使用されます。</string>
     <string name="config_security_public_key">秘密鍵から生成され、メッシュ上の他のノードに送信されて、共有秘密鍵を計算できるようにします。</string>
     <string name="config_security_serial_enabled">Stream API 経由のシリアルコンソール。</string>
+    <string name="configuration">設定</string>
     <string name="configure_bluetooth_permissions">Bluetooth の権限を設定</string>
     <string name="configure_critical_alerts">重要なアラートを設定</string>
     <string name="configure_location_permissions">位置情報の権限を設定</string>

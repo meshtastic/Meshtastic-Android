@@ -2,7 +2,7 @@
 title: ノード
 parent: User Guide
 nav_order: 4
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -152,7 +152,7 @@ aliases:
 
 ノードのハードウェアが認識されると、詳細ビューに折りたたみ式の\*\*「購入はこちら」\*\*セクションが表示され、そのデバイスを購入したり詳しく知ったりできる場所（ベンダーの製品ページ、製品バリエーション、AliExpress・Amazon・対応小売店などの地域のマーケットプレイスの掲載）が、あなたの国に合わせて絞り込まれて表示されます。 各リンクは `msh.to` のリダイレクトサービスを通じて開きます。 一致するリンクがないデバイスでは、このセクションは表示されません。
 
-すべてのリンクを一覧できる完全なディレクトリは、「**設定 → デバイスのリンク**」からも利用できます。
+A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
 
 ## 関連トピック
 

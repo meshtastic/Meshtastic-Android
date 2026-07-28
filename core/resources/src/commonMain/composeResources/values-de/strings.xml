@@ -265,6 +265,7 @@
     <string name="config_security_private_key">Wird verwendet, um einen gemeinsamen Schlüssel mit einem entfernten Gerät zu erstellen.</string>
     <string name="config_security_public_key">Wird aus Ihrem privaten Schlüssel generiert und an andere Knoten im Netzwerk gesendet, damit diese einen gemeinsamen geheimen Schlüssel berechnen können.</string>
     <string name="config_security_serial_enabled">Serielle Konsole über die Stream-API.</string>
+    <string name="configuration">Einstellungen</string>
     <string name="configure_bluetooth_permissions">Bluetooth Berechtigungen konfigurieren</string>
     <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
     <string name="configure_location_permissions">Standortberechtigungen konfigurieren</string>

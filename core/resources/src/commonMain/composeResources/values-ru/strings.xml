@@ -290,6 +290,7 @@
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
     <string name="config_security_public_key">Сгенерировано из вашего приватного ключа и отправлено другим узлам сети, чтобы они могли вычислить совместный секретный ключ.</string>
     <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
+    <string name="configuration">Настройки</string>
     <string name="configure_bluetooth_permissions">Настроить разрешения Bluetooth</string>
     <string name="configure_critical_alerts">Настроить критические оповещения</string>
     <string name="configure_location_permissions">Настроить права доступа к местоположению</string>

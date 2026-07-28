@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-07-08
+last_updated: 2026-07-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - sätted
@@ -29,7 +29,7 @@ Configure your radio hardware and user identity parameters.
 
 Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. The device may reboot to apply changes.
 
-## Raadio seadistus
+## Sätted
 
 ### Seadme sätted
 
