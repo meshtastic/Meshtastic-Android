@@ -41,5 +41,12 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
+
+        // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
+        // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.
+        jvmTest.dependencies {
+            implementation(libs.compose.multiplatform.ui.test)
+            implementation(compose.desktop.currentOs)
+        }
     }
 }

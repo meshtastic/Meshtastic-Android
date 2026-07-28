@@ -262,7 +262,7 @@ private class PreviewBleDevice(
     override val isBonded: Boolean = true
     override val isConnected: Boolean = false
 
-    override suspend fun readRssi(): Int = rssi ?: PREVIEW_BLE_RSSI
+    override suspend fun readRssi(): Int? = rssi
 
     override suspend fun bond() = Unit
 }

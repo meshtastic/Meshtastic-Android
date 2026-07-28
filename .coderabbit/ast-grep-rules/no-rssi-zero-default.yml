@@ -1,0 +1,15 @@
+# Recurring defect class A — see "Presence vs sentinel zero" in .skills/code-review/SKILL.md.
+#
+# 0 dBm is the STRONGEST value on the RSSI scale, so defaulting a missing reading to 0 renders an unknown signal as an
+# excellent one. Keep the value nullable end-to-end and let `MetricFormatter.rssi(null)` render an em dash.
+id: no-rssi-zero-default
+language: kotlin
+severity: error
+message: "0 dBm is the strongest RSSI, not \"unknown\" — keep the value nullable."
+rule:
+  any:
+    - pattern: "$X ?: 0"
+    - pattern: "($X ?: 0) != 0"
+constraints:
+  X:
+    regex: "(?i)rssi$"

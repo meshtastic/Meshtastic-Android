@@ -389,26 +389,27 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
             )
         }
     }
-    if ((env.soil_temperature ?: 0f) != 0f) {
-        val temp = MetricFormatter.temperature(env.soil_temperature ?: 0f, tempInFahrenheit)
+    // Soil temperature, moisture, voltage and current all carry presence: `null` is "no sensor", 0 is a real reading.
+    env.soil_temperature?.let { soilTemperature ->
+        val temp = MetricFormatter.temperature(soilTemperature, tempInFahrenheit)
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
-    if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
-        items.add { SoilMoistureInfo(moisture = "${env.soil_moisture}%", contentColor = contentColor) }
+    env.soil_moisture?.let { soilMoisture ->
+        items.add { SoilMoistureInfo(moisture = "$soilMoisture%", contentColor = contentColor) }
     }
-    if ((env.voltage ?: 0f) != 0f) {
+    env.voltage?.let { voltage ->
         items.add {
             PowerInfo(
-                value = MetricFormatter.voltage(env.voltage ?: 0f),
+                value = MetricFormatter.voltage(voltage),
                 label = stringResource(Res.string.voltage),
                 contentColor = contentColor,
             )
         }
     }
-    if ((env.current ?: 0f) != 0f) {
+    env.current?.let { current ->
         items.add {
             PowerInfo(
-                value = MetricFormatter.current(env.current ?: 0f),
+                value = MetricFormatter.current(current),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )

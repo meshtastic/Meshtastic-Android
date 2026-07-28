@@ -142,30 +142,16 @@ data class Node(
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
-    @Suppress("CyclomaticComplexMethod")
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
-        val temp =
-            if ((temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        // These fields carry presence: `null` means "no sensor", so 0 °C / 0 V / 0 A / 0% are real readings and must
+        // still render. Humidity keeps its zero-guard because 0% RH is not physically reachable.
+        val temp = temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val humidity = if ((relative_humidity ?: 0f) != 0f) MetricFormatter.humidity(relative_humidity ?: 0f) else null
-        val soilTemperatureStr =
-            if ((soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(soil_temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        val soilTemperatureStr = soil_temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val soilMoistureRange = 0..100
-        val soilMoisture =
-            if ((soil_moisture ?: Int.MIN_VALUE) in soilMoistureRange && (soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.percent(soil_moisture ?: 0)
-            } else {
-                null
-            }
-        val voltage = if ((this.voltage ?: 0f) != 0f) MetricFormatter.voltage(this.voltage ?: 0f) else null
-        val current = if ((current ?: 0f) != 0f) MetricFormatter.current(current ?: 0f) else null
+        val soilMoisture = soil_moisture?.takeIf { it in soilMoistureRange }?.let { MetricFormatter.percent(it) }
+        val voltage = this.voltage?.let { MetricFormatter.voltage(it) }
+        val current = current?.let { MetricFormatter.current(it) }
         val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(

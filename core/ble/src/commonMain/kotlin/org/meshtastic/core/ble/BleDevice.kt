@@ -44,8 +44,11 @@ interface BleDevice {
     val rssi: Int?
         get() = null
 
-    /** Reads the current RSSI value. */
-    suspend fun readRssi(): Int
+    /**
+     * Reads the current RSSI value in dBm, or `null` when no reading is available (no live connection and no scan
+     * advertisement). 0 dBm is the strongest value on this scale, so it must never stand in for "unknown".
+     */
+    suspend fun readRssi(): Int?
 
     /** Bond the device. */
     suspend fun bond()

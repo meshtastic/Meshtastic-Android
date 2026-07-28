@@ -55,12 +55,12 @@ class MeshtasticBleDevice(
     override val rssi: Int? = advertisement?.rssi
 
     @OptIn(ExperimentalKableApi::class)
-    override suspend fun readRssi(): Int {
+    override suspend fun readRssi(): Int? {
         val active = ActiveBleConnection.active
         return if (active != null && active.address == address) {
             active.peripheral.rssi()
         } else {
-            advertisement?.rssi ?: 0
+            advertisement?.rssi
         }
     }
 
