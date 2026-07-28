@@ -34,6 +34,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
+import org.meshtastic.core.network.repository.isCredentialRejection
 import org.meshtastic.core.network.repository.mqttTlsConfig
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
@@ -81,9 +83,15 @@ class MqttManagerImpl(
                     .catch { throwable ->
                         _proxyActive.value = false
                         val message =
-                            when (throwable) {
-                                is MqttException.ConnectionRejected -> "MQTT: connection rejected (check credentials)"
-                                is MqttException.ConnectionLost -> "MQTT: connection lost"
+                            when {
+                                throwable is MqttException.ConnectionRejected && throwable.isCredentialRejection() ->
+                                    "MQTT: connection rejected (check credentials)"
+
+                                throwable is MqttException.ConnectionRejected ->
+                                    "MQTT: connection rejected: ${throwable.message}"
+
+                                throwable is MqttException.ConnectionLost -> "MQTT: connection lost"
+
                                 else -> "MQTT proxy failed: ${throwable.message}"
                             }
                         serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
@@ -144,6 +152,9 @@ class MqttManagerImpl(
                 // including its scoped private-CA trust hook — otherwise a probe would fail where a connect succeeds.
                 val tls = mqttTlsConfig()
                 transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+                // Mirror the live client's keepalive too: the library default is 0 (no keepalive),
+                // which some brokers reject — misleadingly, as CLIENT_IDENTIFIER_NOT_VALID.
+                keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
                 // Per-connection random suffix: myId identifies the node (and is null →
                 // "unknown" before the node record loads), so two probes can collide on one
                 // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
