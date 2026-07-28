@@ -65,7 +65,7 @@ The module includes unit tests for key components, utilizing Kable's architectur
 ```mermaid
 graph TB
   :core:ble[ble]:::kmp-library
-  :core:ble -.-> :core:common
+  :core:ble --> :core:common
   :core:ble -.-> :core:di
   :core:ble -.-> :core:model
   :core:ble -.-> :core:testing
