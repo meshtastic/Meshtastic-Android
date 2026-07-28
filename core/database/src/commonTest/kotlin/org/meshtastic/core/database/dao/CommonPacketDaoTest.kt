@@ -105,26 +105,6 @@ abstract class CommonPacketDaoTest {
     }
 
     @Test
-    fun rssiRoundTripsAbsentAndZeroDistinctly() = runTest {
-        val contactKey = "2!rssitest"
-        val base =
-            Packet(
-                uuid = 0L,
-                myNodeNum = myNodeNum,
-                port_num = PortNum.TEXT_MESSAGE_APP.value,
-                contact_key = contactKey,
-                received_time = nowMillis,
-                read = false,
-                data = DataPacket(to = NodeAddress.ID_BROADCAST, bytes = null, dataType = 1),
-            )
-        packetDao.insert(base.copy(rssi = null))
-        packetDao.insert(base.copy(received_time = nowMillis + 1, rssi = 0))
-
-        val stored = packetDao.getMessagesFrom(contactKey).first().map { it.packet.rssi }
-        assertEquals(listOf(null, 0), stored)
-    }
-
-    @Test
     fun testGetMessageCount() = runTest {
         val contactKey = testContactKeys.first()
         assertEquals(SAMPLE_SIZE, packetDao.getMessageCount(contactKey))

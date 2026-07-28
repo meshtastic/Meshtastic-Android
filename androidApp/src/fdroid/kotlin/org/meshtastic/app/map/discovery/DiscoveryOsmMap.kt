@@ -36,6 +36,7 @@ import org.meshtastic.app.map.addScaleBarOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.rememberMapViewWithLifecycle
 import org.meshtastic.app.map.zoomIn
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.ui.theme.DiscoveryMapColors
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
@@ -121,7 +122,7 @@ fun DiscoveryOsmMap(
                         position = nodeGeoPoint
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         title = node.longName ?: node.shortName ?: "Unknown"
-                        snippet = "SNR: ${node.snr} dB / RSSI: ${node.rssi} dBm"
+                        snippet = "SNR: ${node.snr} dB / RSSI: ${MetricFormatter.rssi(node.rssi)}"
 
                         val drawableId =
                             if (node.isSensorNode) {

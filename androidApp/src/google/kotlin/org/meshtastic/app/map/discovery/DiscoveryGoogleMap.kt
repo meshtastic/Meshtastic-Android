@@ -36,6 +36,7 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Temperature
@@ -125,7 +126,7 @@ fun DiscoveryGoogleMap(
             MarkerComposable(
                 state = rememberUpdatedMarkerState(position = nodeLatLng),
                 title = node.longName ?: node.shortName ?: "Unknown",
-                snippet = "SNR: ${node.snr} dB / RSSI: ${node.rssi} dBm",
+                snippet = "SNR: ${node.snr} dB / RSSI: ${MetricFormatter.rssi(node.rssi)}",
             ) {
                 DiscoveryMarkerChip(label = node.shortName ?: "?", color = markerColor, icon = nodeIcon)
             }

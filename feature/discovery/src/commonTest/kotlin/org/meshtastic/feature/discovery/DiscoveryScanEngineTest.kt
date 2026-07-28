@@ -461,6 +461,32 @@ class DiscoveryScanEngineTest {
     }
 
     @Test
+    fun absentRssiPersistsAsNullRatherThanZero() = runTest {
+        val engine = createEngine(this)
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        while (engine.scanState.value !is DiscoveryScanState.Dwell) {
+            delay(100)
+        }
+
+        val posPayload = Position.ADAPTER.encode(Position(latitude_i = 377749300)).toByteString()
+        val meshPacket =
+            MeshPacket(
+                from = 12345,
+                decoded = Data(portnum = PortNum.POSITION_APP, payload = posPayload),
+                rx_snr = 5.5f,
+                rx_rssi = null,
+            )
+        engine.onPacketReceived(meshPacket, createDataPacket(from = 12345))
+        engine.stopScan()
+
+        assertNull(discoveryDao.discoveredNodes.values.first().rssi)
+    }
+
+    @Test
     fun telemetryWithLocalStatsPopulatesRfHealth() = runTest {
         val engine = createEngine(this)
         nodeRepository.setMyNodeInfo(createMyNodeInfo())

@@ -93,7 +93,8 @@ class DiscoveryRankingEngine {
         val nodes = discoveredNodes
 
         val snrValues = nodes.map { it.snr }.sorted()
-        val rssiValues = nodes.map { it.rssi }.sorted()
+        // Nodes that never reported an rssi are excluded rather than dragged toward 0 dBm.
+        val rssiValues = nodes.mapNotNull { it.rssi }.sorted()
 
         return ScoredPreset(
             presetResult = pr,
