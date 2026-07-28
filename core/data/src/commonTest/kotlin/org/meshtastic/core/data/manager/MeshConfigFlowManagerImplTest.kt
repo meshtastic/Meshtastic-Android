@@ -821,50 +821,34 @@ class MeshConfigFlowManagerImplTest {
     }
 
     // ---------- Event firmware notification defaults ----------
+    //
+    // The decision itself (which preference wins, and when) is a single atomic prefs operation and is covered in
+    // NotificationPrefsTest. These only assert that the config flow delegates with the right firmware classification.
 
     @Test
-    fun `handleMyInfo disables node notifications for event firmware`() = testScope.runTest {
-        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
-
-        val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
-        handleMyInfo(eventMyInfo)
+    fun `handleMyInfo applies the event node-event default for event firmware`() = testScope.runTest {
+        handleMyInfo(protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON))
         advanceUntilIdle()
 
-        verify { notificationPrefs.setNodeEventsEnabled(false) }
-        verify { notificationPrefs.setNodeEventsAutoDisabledForEvent(true) }
+        verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true) }
     }
 
     @Test
-    fun `handleMyInfo does not re-disable if already auto-disabled`() = testScope.runTest {
-        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
-
-        val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
-        handleMyInfo(eventMyInfo)
-        advanceUntilIdle()
-
-        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
-    }
-
-    @Test
-    fun `handleMyInfo re-enables node notifications when vanilla firmware reconnects`() = testScope.runTest {
-        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
-
+    fun `handleMyInfo applies the vanilla node-event default for vanilla firmware`() = testScope.runTest {
         handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
-        verify { notificationPrefs.setNodeEventsEnabled(true) }
-        verify { notificationPrefs.setNodeEventsAutoDisabledForEvent(false) }
+        verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = false) }
     }
 
     @Test
-    fun `handleMyInfo does not touch prefs for vanilla when not previously auto-disabled`() = testScope.runTest {
-        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
-
-        handleMyInfo(protoMyNodeInfo)
+    fun `handleMyInfo treats DIY_EDITION as event firmware`() = testScope.runTest {
+        // Any non-vanilla edition counts, including the DIY catch-all — it has no branding metadata but the same
+        // notification noise problem.
+        handleMyInfo(protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DIY_EDITION))
         advanceUntilIdle()
 
-        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
-        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsAutoDisabledForEvent(any()) }
+        verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true) }
     }
 
     // ---------- onHandshakeProgress ----------

@@ -19,6 +19,7 @@ package org.meshtastic.core.database.dao
 import androidx.room3.Dao
 import androidx.room3.Query
 import androidx.room3.Upsert
+import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.EventFirmwareEditionEntity
 
 @Dao
@@ -27,6 +28,14 @@ interface EventFirmwareEditionDao {
 
     @Query("SELECT * FROM event_firmware_edition WHERE edition = :edition")
     suspend fun getByEdition(edition: String): EventFirmwareEditionEntity?
+
+    /**
+     * Observes [edition], re-emitting whenever the table changes. This is what lets a background manifest refresh reach
+     * already-visible event branding: a one-shot read resolves once when the connection is established, so metadata
+     * that lands afterwards would sit in the table unseen until the user reconnected.
+     */
+    @Query("SELECT * FROM event_firmware_edition WHERE edition = :edition LIMIT 1")
+    fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?>
 
     /**
      * Deletes rows whose edition is not in [keep]. WARNING: `NOT IN ()` is always true in SQLite, so an **empty**

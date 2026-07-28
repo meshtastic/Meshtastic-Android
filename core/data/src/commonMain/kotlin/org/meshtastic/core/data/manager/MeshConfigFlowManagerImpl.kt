@@ -493,18 +493,10 @@ class MeshConfigFlowManagerImpl(
         null
     }
 
+    // Whether to silence new-node notifications is a read-decide-write over two preferences, so it lives behind one
+    // atomic prefs operation rather than being assembled from setter calls here.
     private fun applyEventFirmwareNotificationDefaults(edition: FirmwareEdition) {
-        if (edition != FirmwareEdition.VANILLA) {
-            if (!notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
-                notificationPrefs.setNodeEventsEnabled(false)
-                notificationPrefs.setNodeEventsAutoDisabledForEvent(true)
-            }
-        } else {
-            if (notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
-                notificationPrefs.setNodeEventsEnabled(true)
-                notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
-            }
-        }
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = edition != FirmwareEdition.VANILLA)
     }
 }
 

@@ -212,6 +212,19 @@ interface NotificationPrefs {
 
     val nodeEventsAutoDisabledForEvent: StateFlow<Boolean>
 
+    /**
+     * Applies the node-event notification default for the connected firmware, as a single atomic update.
+     *
+     * The decision reads both [nodeEventsEnabled] and [nodeEventsAutoDisabledForEvent] and conditionally writes both,
+     * so it cannot be expressed as separate reads and setter calls: the setters are asynchronous and the StateFlows lag
+     * them, so a caller doing it by hand can read stale values or clobber a concurrent user toggle.
+     *
+     * On event firmware, node events are disabled and the restore is claimed — but only if they were actually on, so a
+     * user who had already turned them off is not re-enabled later. On vanilla firmware, a previously claimed restore
+     * is honored and released.
+     */
+    fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean)
+
     fun setNodeEventsAutoDisabledForEvent(disabled: Boolean)
 
     val lowBatteryEnabled: StateFlow<Boolean>

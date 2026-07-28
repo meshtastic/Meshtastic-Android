@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.data.datasource
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
@@ -34,6 +37,10 @@ class EventFirmwareEditionLocalDataSource(
 
     suspend fun getByEdition(edition: String): EventFirmwareEditionEntity? =
         withContext(dispatchers.io) { dao.getByEdition(edition) }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?> =
+        dbManager.currentDb.flatMapLatest { db -> db.eventFirmwareEditionDao().observeByEdition(edition) }
 
     suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) {
         withContext(dispatchers.io) { dbManager.withDb { it.eventFirmwareEditionDao().upsertAll(editions) } }

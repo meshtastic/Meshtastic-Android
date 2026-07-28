@@ -16,7 +16,9 @@
  */
 package org.meshtastic.core.data.repository
 
+import app.cash.turbine.test
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okio.Buffer
@@ -42,7 +44,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 class EventFirmwareRepositoryImplTest {
 
@@ -127,6 +131,36 @@ class EventFirmwareRepositoryImplTest {
         seed.editions = listOf(edition("HAMVENTION"))
 
         assertNull(repository.getEdition("VANILLA"))
+    }
+
+    @Test
+    fun observeEditionReEmitsWhenTheCacheIsRefreshed() = runBlocking {
+        // The point of the observable: an edition absent at connect time — because the bundled seed predates it —
+        // must reach the UI when the refresh lands, without the caller re-subscribing. The new value therefore has to
+        // arrive *through the refresh path*; writing it into the cache by hand would still pass if observeEdition
+        // stopped refreshing at all.
+        seed.editions = listOf(edition("HAMVENTION"))
+        api.response = EventFirmwareResponse(editions = listOf(edition("HAMVENTION"), edition("DEFCON")))
+
+        repository.observeEdition("DEFCON").test(timeout = EMISSION_TIMEOUT) {
+            // The first item is null only if the refresh is still in flight when collection starts; under
+            // Dispatchers.Unconfined it may already have completed inline. Which of the two happens is timing, not
+            // contract, so accept either and assert on the value that matters.
+            val observed = assertNotNull(awaitItem() ?: awaitItem(), "expected the refreshed DEFCON edition")
+            // DEFCON exists only in the network response, never in the seed, so observing it at all proves the value
+            // arrived via refresh → cache write → emission.
+            assertEquals("defcon", observed.displayName)
+            cancelAndIgnoreRemainingEvents()
+        }
+        // Collection is what drove that fetch: nothing else in this test touches the network or the cache.
+        assertEquals(1, api.eventFirmwareCalls)
+    }
+
+    @Test
+    fun observeEditionEmitsNullForUnknownEdition() = runBlocking {
+        seed.editions = listOf(edition("HAMVENTION"))
+
+        assertNull(repository.observeEdition("VANILLA").first())
     }
 
     @Test
@@ -230,5 +264,10 @@ class EventFirmwareRepositoryImplTest {
             )
 
         assertEquals("hamvention", restarted.getEdition("HAMVENTION")?.displayName)
+    }
+
+    private companion object {
+        /** Room's invalidation tracker plus the fake network round-trip; generous, since it only bounds a failure. */
+        private val EMISSION_TIMEOUT = 10.seconds
     }
 }

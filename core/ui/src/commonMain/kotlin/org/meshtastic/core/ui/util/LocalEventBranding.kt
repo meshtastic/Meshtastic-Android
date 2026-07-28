@@ -31,6 +31,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.EventFirmwareEdition
+import org.meshtastic.core.model.EventFirmwareLink
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.img_event_defcon
@@ -57,9 +58,41 @@ fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
 }
 
 /**
- * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present, falling back to the bundled
- * per-edition drawable ([eventIconFor]), and finally the Meshtastic logo. The fallback painter also backs Coil's
- * loading/error states so there is never an empty slot.
+ * Whether [url] is safe to fetch or open from event metadata: an absolute `https` URL whose authority is a valid host
+ * with an optional numeric port.
+ *
+ * The manifest is first-party but arrives over the network, and its URLs reach an image loader and the platform URI
+ * handler. A URI handler will honour whatever scheme it is given, so without this check a bad or tampered manifest
+ * entry could invoke arbitrary handlers on the device. Scheme comparison is case-insensitive; everything else is
+ * rejected, including protocol-relative (`//host`) and scheme-relative input.
+ *
+ * The authority is matched whole rather than merely tested for emptiness, so a port with no host (`https://:443`),
+ * whitespace, a truncated IPv6 literal, and userinfo (`https://trusted.host@evil.example`, which wears a trusted
+ * prefix) are all rejected — none of those characters appear in the permitted set.
+ */
+fun safeBrandUrlOrNull(url: String?): String? {
+    val trimmed = url?.trim().orEmpty()
+    if (!trimmed.startsWith(HTTPS_SCHEME, ignoreCase = true)) return null
+    val authority = trimmed.drop(HTTPS_SCHEME.length).takeWhile { it != '/' && it != '?' && it != '#' }
+    // Return the trimmed form, not the caller's original: consumers must use the string that was actually validated,
+    // or a padded-but-otherwise-valid URL passes here and then fails as a malformed URI at the image loader.
+    return trimmed.takeIf { AUTHORITY_REGEX.matches(authority) }
+}
+
+/** Whether [url] is safe to fetch or open — see [safeBrandUrlOrNull], which callers should prefer for the value. */
+fun isSafeBrandUrl(url: String?): Boolean = safeBrandUrlOrNull(url) != null
+
+/**
+ * Links that are safe to open, carrying the normalized URL — see [safeBrandUrlOrNull]. Unsafe or blank entries are
+ * dropped rather than rendered and refused on tap.
+ */
+fun EventFirmwareEdition.safeLinks(): List<EventFirmwareLink> =
+    links.mapNotNull { link -> safeBrandUrlOrNull(link.url)?.let { link.copy(url = it) } }
+
+/**
+ * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present *and* safe to fetch, falling back
+ * to the bundled per-edition drawable ([eventIconFor]), and finally the Meshtastic logo. The fallback painter also
+ * backs Coil's loading/error states so there is never an empty slot.
  */
 @Composable
 fun EventBrandingIcon(
@@ -70,7 +103,7 @@ fun EventBrandingIcon(
     val bundled = eventIconFor(edition.edition)
     val fallback =
         bundled?.let { painterResource(it) } ?: rememberVectorPainter(vectorResource(Res.drawable.ic_meshtastic))
-    val url = edition.iconUrl
+    val url = safeBrandUrlOrNull(edition.iconUrl)
     if (url.isNullOrBlank()) {
         Image(
             painter = fallback,
@@ -141,6 +174,10 @@ fun EventFirmwareEdition.brandPalette(): List<Color> {
 fun EventFirmwareEdition.brandHighlightOrNull(): Color? =
     parseBrandColor(theme?.colors?.accent) ?: parseBrandColor(theme?.colors?.secondary)
 
+private const val HTTPS_SCHEME = "https://"
+
+/** A registered name or bracketed IPv6 literal, plus an optional numeric port. See [isSafeBrandUrl]. */
+private val AUTHORITY_REGEX = Regex("""(?:[A-Za-z0-9._~-]+|\[[0-9A-Fa-f:.]+])(?::\d+)?""")
 private const val RGB_HEX_LENGTH = 6
 private const val HEX_RADIX = 16
 private const val RED_SHIFT = 16

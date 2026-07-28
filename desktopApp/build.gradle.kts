@@ -346,6 +346,7 @@ dependencies {
     implementation(libs.jna)
 
     testRuntimeOnly(libs.junit.vintage.engine)
+    testImplementation(projects.core.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))

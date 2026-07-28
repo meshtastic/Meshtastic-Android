@@ -17,12 +17,11 @@
 package org.meshtastic.desktop.notification
 
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.desktop.DesktopNotificationManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,41 +42,6 @@ class DesktopNotificationManagerTest {
         }
     }
 
-    /** Simple [NotificationPrefs] with all categories enabled by default. */
-    private class FakeNotificationPrefs(
-        messages: Boolean = true,
-        nodeEvents: Boolean = true,
-        lowBattery: Boolean = true,
-    ) : NotificationPrefs {
-        override val messagesEnabled = MutableStateFlow(messages)
-        override val nodeEventsEnabled = MutableStateFlow(nodeEvents)
-        override val nodeEventsAutoDisabledForEvent = MutableStateFlow(false)
-        override val lowBatteryEnabled = MutableStateFlow(lowBattery)
-
-        override fun setMessagesEnabled(enabled: Boolean) {
-            messagesEnabled.value = enabled
-        }
-
-        override fun setNodeEventsEnabled(enabled: Boolean) {
-            nodeEventsEnabled.value = enabled
-        }
-
-        override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
-            nodeEventsAutoDisabledForEvent.value = disabled
-        }
-
-        override fun setLowBatteryEnabled(enabled: Boolean) {
-            lowBatteryEnabled.value = enabled
-        }
-
-        override val geofenceAlertOptIns = MutableStateFlow<Set<Int>>(emptySet())
-
-        override fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) {
-            geofenceAlertOptIns.value =
-                geofenceAlertOptIns.value.toMutableSet().apply { if (enabled) add(waypointId) else remove(waypointId) }
-        }
-    }
-
     @Test
     fun `dispatch sends to native sender and reports success when enabled`() = runTest {
         val sender = FakeNativeSender()
@@ -93,7 +57,7 @@ class DesktopNotificationManagerTest {
     @Test
     fun `dispatch reports false and skips native sender when preference disabled`() = runTest {
         val sender = FakeNativeSender()
-        val manager = DesktopNotificationManager(FakeNotificationPrefs(messages = false), sender)
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setMessagesEnabled(false) }, sender)
 
         val dispatched =
             manager.dispatch(Notification(title = "Msg", message = "Hi", category = Notification.Category.Message))
@@ -105,7 +69,7 @@ class DesktopNotificationManagerTest {
     @Test
     fun `alerts are always dispatched even when messages disabled`() = runTest {
         val sender = FakeNativeSender()
-        val manager = DesktopNotificationManager(FakeNotificationPrefs(messages = false), sender)
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setMessagesEnabled(false) }, sender)
 
         val dispatched =
             manager.dispatch(
