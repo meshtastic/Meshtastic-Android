@@ -84,7 +84,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Lühenda oma sõnumit (maksimaalselt ~200 tähemärki).                                                                      |
 | Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
 | Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
-| Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
+| Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Proovi rakendust taaskäivitada.                                                                      |
 
 > 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
 
@@ -138,7 +138,7 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 
 When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Vali tekst ja puuduta stiili, et see murda (puuduta uuesti, et see eemaldada); kui valikut pole, lisab stiil tühja paari, kusjuures kursor on markerite vahel. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
 
-> 💡 **Vihje:** Vormindus kantakse võrgusilma literaalmärkidena – samad baidid, mida iOS saadab. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
+> 💡 **Vihje:** Vormindus kantakse võrgusilma literaalmärkidena – samad baidid, mida iOS saadab. Kliendid, mis ei toeta Markdowni (vanemad rakendused, tavalised püsivara kliendid), kuvavad toored `**`/`~~` märgid. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
 
 ### Mentions
 

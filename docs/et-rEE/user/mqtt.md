@@ -56,7 +56,7 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 
 If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
 
-The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+MQTT sätete ekraani ülaosas olev lüliti **MQTT puhverserver sellel telefonil** näitab, kas see relee töötab praegu, ja võimaldab selle kohe välja lülitada (või taaskäivitada) – ilma seadme MQTT konfiguratsiooni muutmata ja uuesti salvestamata.
 
 ### Meshtastic vaikemaakler
 

@@ -13,7 +13,7 @@ aliases:
 
 # Arendaja logid
 
-Kui midagi töötab valesti, on rakenduse arendajalogid kõige kasulikum asi, mida saad veateatele lisada. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+Kui midagi töötab valesti, on rakenduse arendajalogid kõige kasulikum asi, mida saad veateatele lisada. Meshtastic saab need **sinu eest, rakenduse seest** jäädvustada – sa ei vaja enam nende kogumiseks `adb`-d ega muid töölaua tööriistu.
 
 Ava **Arendajapaneel**, valides **Seaded → Täpsemad → Arendajapaneel**.
 

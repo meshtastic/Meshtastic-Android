@@ -14,7 +14,7 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
+Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrites, °C, m/s, hPa jne). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 

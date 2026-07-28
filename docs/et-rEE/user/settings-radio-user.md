@@ -147,19 +147,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Turva sätted
 
-| Setting                 | Kirjeldus                                                                                                                                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                   |
-| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                               |
-| Salajane võti           | Sinu sõlme privaatvõti (käsitsege turvaliselt)                                                                                                                                              |
-| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                          |
-| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                      |
-| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                           |
-| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                   |
-| Taastevõtmed            | Salvesta sõlme võtmete krüpteeritud varukoopia sellesse seadmesse (ainult Android)                                                                                                          |
-| Taasta võtmed           | Kirjuta varundatud võtmed tagasi sõlme (saadaval siis, kui varukoopia on olemas)                                                                                                            |
-| Kustuta taastevõtmed    | Eemalda salvestatud võtme varukoopia sellest seadmest                                                                                                                                                          |
-| Protection Level        | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+| Setting                 | Kirjeldus                                                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                                          |
+| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                                                      |
+| Salajane võti           | Sinu sõlme privaatvõti (käsitsege turvaliselt)                                                                                                                                                                     |
+| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                                                 |
+| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                                             |
+| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                                                  |
+| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                                          |
+| Taastevõtmed            | Salvesta sõlme võtmete krüpteeritud varukoopia sellesse seadmesse (ainult Android)                                                                                                                                 |
+| Taasta võtmed           | Kirjuta varundatud võtmed tagasi sõlme (saadaval siis, kui varukoopia on olemas)                                                                                                                                   |
+| Kustuta taastevõtmed    | Eemalda salvestatud võtme varukoopia sellest seadmest                                                                                                                                                                                 |
+| Protection Level        | Pakettide autentsus – kuidas käsitletakse allkirjastamata või edastatud pakette: **range**, **tasakaalustatud** või **ühilduv** (nõuab toetavat püsivara; range režiimi puhul küsitakse kinnitust) |
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 

@@ -3,7 +3,7 @@ title: Home Screen Widget
 parent: Kasutaja juhis
 nav_order: 20
 last_updated: 2026-06-25
-description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
+description: Lisa Meshtastici avakuva vidin, et vaadata ühendatud raadio kohalikku statistikat ilma rakendust avamata.
 aliases:
   - widget
   - home-screen-widget
@@ -12,7 +12,7 @@ aliases:
 
 # Home Screen Widget
 
-On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+Androidis pakub Meshtastic avakuva **vidinat**, mis näitab teie ühendatud raadio reaalajas kohalikku statistikat – rakendust pole vaja avada.
 
 ## What It Shows
 
@@ -32,7 +32,7 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 
 1. Long-press an empty area of your Android home screen.
 2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
+3. Leia loendist **Meshtastic** ja lohista **Kohaliku statistika** vidin oma avakuvale.
 4. Resize it as needed — the layout adapts to the available space.
 
 > ⚠️ **Märkus:** Vidin on ainult Androidile. It is not available on the Desktop or iOS builds.

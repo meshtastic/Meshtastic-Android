@@ -3,7 +3,7 @@ title: Help & In-App Docs
 parent: Kasutaja juhis
 nav_order: 21
 last_updated: 2026-06-25
-description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
+description: Sirvi seda dokumentatsiooni rakenduses, otsi seda ja küsi Chirpylt – seadmesisesele TI assistendile – küsimusi Meshtasticu kohta.
 aliases:
   - help
   - docs-browser
@@ -13,7 +13,7 @@ aliases:
 
 # Help & In-App Docs
 
-This same user documentation ships **inside the app**, so you can read it offline without leaving Meshtastic. Open it from **Settings → Help & Documentation**.
+Sama kasutajadokumentatsioon on **rakenduse sees**, nii et saate seda lugeda võrguühenduseta ilma Meshtasticust lahkumata. Open it from **Settings → Help & Documentation**.
 
 ## Browsing
 
@@ -33,7 +33,7 @@ A page open in the browser:
 
 ## Chirpy — the AI Assistant
 
-**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Klõpsai dokumendibrauseris nuppu Chirpy, sisesta küsimus ja see vastab vastuse ja linkidega asjakohastele lehtedele.
+**Chirpy** vastab Meshtasticu kohta käivatele lihtsatele küsimustele, kasutades allikana seda komplekti kuuluvat dokumentatsiooni. Klõpsai dokumendibrauseris nuppu Chirpy, sisesta küsimus ja see vastab vastuse ja linkidega asjakohastele lehtedele.
 
 ![Chirpy TI assistent vastab küsimusele lehelinkide abil](../../assets/screenshots/docs-browser_chirpy.png)
 
