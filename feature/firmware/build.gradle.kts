@@ -52,5 +52,9 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.markdown.renderer.android) }
+
+        // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
+        // the skiko-awt runtime to read the system theme.
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

@@ -97,6 +97,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetMessagesFrom() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         val messages = packetDao.getMessagesFrom(contactKey).first()
         assertEquals(SAMPLE_SIZE, messages.size)
@@ -106,18 +107,21 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetMessageCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         assertEquals(SAMPLE_SIZE, packetDao.getMessageCount(contactKey))
     }
 
     @Test
     fun testGetUnreadCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         assertEquals(SAMPLE_SIZE, packetDao.getUnreadCount(contactKey))
     }
 
     @Test
     fun testClearUnreadCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         packetDao.clearUnreadCount(contactKey, nowMillis + SAMPLE_SIZE)
         assertEquals(0, packetDao.getUnreadCount(contactKey))
@@ -125,12 +129,14 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testClearAllUnreadCounts() = runTest {
+        createDb()
         packetDao.clearAllUnreadCounts()
         testContactKeys.forEach { assertEquals(0, packetDao.getUnreadCount(it)) }
     }
 
     @Test
     fun testUpdateMessageStatus() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         val messages = packetDao.getMessagesFrom(contactKey).first()
         val packet = messages.first().packet.data
@@ -148,6 +154,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetQueuedPackets() = runTest {
+        createDb()
         val queuedPacket =
             Packet(
                 uuid = 0L,
@@ -173,6 +180,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testDeleteMessages() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         packetDao.deleteContacts(listOf(contactKey))
         assertEquals(0, packetDao.getMessageCount(contactKey))
@@ -180,6 +188,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetContactKeys() = runTest {
+        createDb()
         val contacts = packetDao.getContactKeys().first()
         assertEquals(testContactKeys.size, contacts.size)
         testContactKeys.forEach { assertTrue(contacts.containsKey(it)) }
@@ -187,6 +196,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetWaypoints() = runTest {
+        createDb()
         val waypointPacket =
             Packet(
                 uuid = 0L,
@@ -210,6 +220,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testUpsertReaction() = runTest {
+        createDb()
         val reaction =
             ReactionEntity(myNodeNum = myNodeNum, replyId = 123, userId = "!test", emoji = "👍", timestamp = nowMillis)
         packetDao.insert(reaction)
@@ -217,6 +228,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetMessagesFromWithIncludeFiltered() = runTest {
+        createDb()
         val contactKey = "filter-test"
         val normalMessages = listOf("Msg 1", "Msg 2")
         val filteredMessages = listOf("Filtered 1")
@@ -274,6 +286,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetPacketsByPacketIdsChunked() = runTest {
+        createDb()
         // Regression test for SQLITE_MAX_VARIABLE_NUMBER (999) limit. Inserting >999 packets and
         // looking them up by id must not throw; callers are expected to chunk, and each chunk
         // must return the correct rows.

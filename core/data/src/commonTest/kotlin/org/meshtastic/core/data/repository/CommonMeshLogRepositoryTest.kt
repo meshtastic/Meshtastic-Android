@@ -40,6 +40,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -57,6 +58,7 @@ abstract class CommonMeshLogRepositoryTest {
 
     private val nowMillis = 1000000000L
 
+    @BeforeTest
     fun setupRepo() {
         dbProvider = FakeDatabaseProvider()
         meshLogPrefs = FakeMeshLogPrefs()
