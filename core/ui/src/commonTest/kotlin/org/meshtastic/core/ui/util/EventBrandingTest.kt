@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.EventFirmwareEdition
+import org.meshtastic.core.model.EventFirmwareLink
 import org.meshtastic.core.model.EventFirmwareTheme
 import org.meshtastic.core.model.EventFirmwareThemeColors
 import kotlin.test.Test
@@ -122,6 +123,49 @@ class EventBrandingTest {
     @Test
     fun brandPaletteEmptyWhenEditionPublishesNoColors() {
         assertTrue(EventFirmwareEdition(edition = "X").brandPalette().isEmpty())
+    }
+
+    @Test
+    fun safeBrandUrlAcceptsOnlyAbsoluteHttps() {
+        assertTrue(isSafeBrandUrl("https://api.meshtastic.org/resource/eventFirmware/defcon34.png"))
+        assertTrue(isSafeBrandUrl("HTTPS://defcon.org")) // scheme is case-insensitive
+        assertTrue(isSafeBrandUrl("  https://defcon.org  ")) // surrounding whitespace tolerated
+
+        assertFalse(isSafeBrandUrl("http://defcon.org")) // cleartext
+        assertFalse(isSafeBrandUrl("//defcon.org")) // protocol-relative
+        assertFalse(isSafeBrandUrl("defcon.org")) // no scheme
+        assertFalse(isSafeBrandUrl("https://")) // no host
+        assertFalse(isSafeBrandUrl("https:///path")) // empty host
+        assertFalse(isSafeBrandUrl(null))
+        assertFalse(isSafeBrandUrl(""))
+    }
+
+    @Test
+    fun safeBrandUrlRejectsNonHttpSchemesAndUserinfo() {
+        // These are the cases that make an unchecked URL dangerous: the platform URI handler honours whatever scheme it
+        // is handed, and userinfo lets a hostile host masquerade as a trusted one in the visible prefix.
+        assertFalse(isSafeBrandUrl("javascript:alert(1)"))
+        assertFalse(isSafeBrandUrl("file:///etc/passwd"))
+        assertFalse(isSafeBrandUrl("intent://scan/#Intent;scheme=zxing;end"))
+        assertFalse(isSafeBrandUrl("meshtastic://settings"))
+        assertFalse(isSafeBrandUrl("https://api.meshtastic.org@evil.example/x.png"))
+    }
+
+    @Test
+    fun safeLinksDropsUnsafeEntriesAndKeepsOrder() {
+        val edition =
+            EventFirmwareEdition(
+                edition = "DEFCON",
+                links =
+                listOf(
+                    EventFirmwareLink("Event Website", "https://defcon.org"),
+                    EventFirmwareLink("Bad scheme", "javascript:alert(1)"),
+                    EventFirmwareLink("Cleartext", "http://defcon.org"),
+                    EventFirmwareLink("Blank", ""),
+                    EventFirmwareLink("Mastodon", "https://defcon.social"),
+                ),
+            )
+        assertEquals(listOf("https://defcon.org", "https://defcon.social"), edition.safeLinks().map { it.url })
     }
 
     @Test

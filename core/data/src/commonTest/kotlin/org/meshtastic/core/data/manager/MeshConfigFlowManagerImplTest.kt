@@ -867,6 +867,34 @@ class MeshConfigFlowManagerImplTest {
         verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsAutoDisabledForEvent(any()) }
     }
 
+    @Test
+    fun `handleMyInfo does not claim the restore when node events were already off`() = testScope.runTest {
+        // The user turned node events off themselves. We never disabled them, so we must not flag a restore — doing
+        // so
+        // would make the next vanilla connection switch them back on and discard the user's choice.
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
+        every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(false)
+
+        handleMyInfo(protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON))
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
+        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsAutoDisabledForEvent(any()) }
+    }
+
+    @Test
+    fun `handleMyInfo still auto-disables when node events are on`() = testScope.runTest {
+        // Guard against over-tightening the check above into never auto-disabling at all.
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
+        every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
+
+        handleMyInfo(protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON))
+        advanceUntilIdle()
+
+        verify { notificationPrefs.setNodeEventsEnabled(false) }
+        verify { notificationPrefs.setNodeEventsAutoDisabledForEvent(true) }
+    }
+
     // ---------- onHandshakeProgress ----------
 
     @Test

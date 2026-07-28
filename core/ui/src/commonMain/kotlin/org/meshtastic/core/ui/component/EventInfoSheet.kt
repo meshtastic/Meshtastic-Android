@@ -66,6 +66,7 @@ import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.brandHighlightOrNull
 import org.meshtastic.core.ui.util.brandPalette
+import org.meshtastic.core.ui.util.safeLinks
 
 /**
  * Bottom sheet shown when the user taps the event branding in [MainAppBar]. Surfaces the event metadata the bundled
@@ -125,7 +126,8 @@ private fun EventDetails(edition: EventFirmwareEdition, palette: List<Color>, on
         edition.location?.takeIf { it.isNotBlank() }?.let { InfoRow(MeshtasticIcons.Place, it, iconTint) }
         dateRange(edition)?.let { InfoRow(MeshtasticIcons.CalendarMonth, it, iconTint) }
 
-        val links = edition.links.filter { it.url.isNotBlank() }
+        // safeLinks() drops anything that isn't an https URL — the manifest is remote, and these go to the URI handler.
+        val links = edition.safeLinks()
         if (links.isNotEmpty()) {
             HorizontalDivider()
             links.forEach { link ->

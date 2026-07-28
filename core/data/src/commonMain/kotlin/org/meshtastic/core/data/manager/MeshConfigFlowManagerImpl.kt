@@ -494,16 +494,18 @@ class MeshConfigFlowManagerImpl(
     }
 
     private fun applyEventFirmwareNotificationDefaults(edition: FirmwareEdition) {
+        val autoDisabled = notificationPrefs.nodeEventsAutoDisabledForEvent.value
         if (edition != FirmwareEdition.VANILLA) {
-            if (!notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
+            // Only claim the restore if node events were actually on. Setting the flag when the user had already
+            // turned them off would make the vanilla branch below switch them back on — silently discarding a
+            // preference we never changed.
+            if (!autoDisabled && notificationPrefs.nodeEventsEnabled.value) {
                 notificationPrefs.setNodeEventsEnabled(false)
                 notificationPrefs.setNodeEventsAutoDisabledForEvent(true)
             }
-        } else {
-            if (notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
-                notificationPrefs.setNodeEventsEnabled(true)
-                notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
-            }
+        } else if (autoDisabled) {
+            notificationPrefs.setNodeEventsEnabled(true)
+            notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
         }
     }
 }

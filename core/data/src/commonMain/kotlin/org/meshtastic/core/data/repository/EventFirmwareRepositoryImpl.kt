@@ -17,6 +17,11 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -79,12 +84,26 @@ class EventFirmwareRepositoryImpl(
 
     override suspend fun getEdition(editionName: String): EventFirmwareEdition? = withContext(dispatchers.io) {
         ensureSeeded()
+        maybeRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+        localDataSource.getByEdition(editionName)?.asExternalModel()
+    }
+
+    override fun observeEdition(editionName: String): Flow<EventFirmwareEdition?> = flow {
+        ensureSeeded()
+        // Don't wait — the emissions below carry whatever the refresh writes, so blocking would only delay the
+        // cached value the caller could already be showing.
+        maybeRefresh(maxWaitMs = 0)
+        emitAll(localDataSource.observeByEdition(editionName).map { it?.asExternalModel() })
+    }
+        .flowOn(dispatchers.io)
+
+    /** Refreshes if the cache is stale and the retry cooldown has elapsed. See [lastAttemptMillis] for the cooldown. */
+    private suspend fun maybeRefresh(maxWaitMs: Long) {
         val stale = nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS
         val retryCooldownElapsed = nowMillis - lastAttemptMillis > REFRESH_RETRY_COOLDOWN_MS
         if (stale && retryCooldownElapsed) {
-            refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+            refresher.refresh(maxWaitMs = maxWaitMs)
         }
-        localDataSource.getByEdition(editionName)?.asExternalModel()
     }
 
     /** Seeds the table from the bundled snapshot if empty (fresh install, data clear). */

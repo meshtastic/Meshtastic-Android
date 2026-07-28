@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +30,10 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -81,6 +85,7 @@ import org.meshtastic.proto.SharedContact
  * shared contacts, channel sets, unread counts, etc.).
  */
 @KoinViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList", "TooManyFunctions")
 class UIViewModel(
     private val nodeDB: NodeRepository,
@@ -145,13 +150,14 @@ class UIViewModel(
 
     val eventEdition: StateFlow<EventFirmwareEdition?> =
         combine(firmwareEdition, connectionState) { edition, state ->
-            // combine's transform is suspending, so the repository lookup runs here directly.
-            if (state is ConnectionState.Connected) {
-                edition?.let { eventFirmwareRepository.getEdition(it.name) }
-            } else {
-                null
-            }
+            edition?.name?.takeIf { state is ConnectionState.Connected }
         }
+            .distinctUntilChanged()
+            // Observe rather than read once, so a manifest refresh that lands after connecting reaches the branding
+            // already on screen instead of waiting for a reconnect.
+            .flatMapLatest { editionName ->
+                editionName?.let { eventFirmwareRepository.observeEdition(it) } ?: flowOf(null)
+            }
             .stateInWhileSubscribed(initialValue = null)
 
     val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification

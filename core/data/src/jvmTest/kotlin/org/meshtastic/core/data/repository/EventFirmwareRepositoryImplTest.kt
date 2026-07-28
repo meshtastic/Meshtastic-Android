@@ -17,12 +17,17 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import okio.Buffer
 import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
@@ -130,6 +135,32 @@ class EventFirmwareRepositoryImplTest {
     }
 
     @Test
+    fun observeEditionReEmitsWhenTheCacheIsRefreshed() = runBlocking {
+        // The point of the observable: an edition absent at connect time — because the bundled seed predates it —
+        // must reach the UI when the refresh lands, without the caller re-subscribing.
+        seed.editions = listOf(edition("HAMVENTION"))
+
+        val emissions = mutableListOf<String?>()
+        val collector = launch { repository.observeEdition("DEFCON").collect { emissions += it?.displayName } }
+        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.isEmpty()) delay(EMISSION_POLL_MS) }
+        assertNull(emissions.first())
+
+        api.response = EventFirmwareResponse(editions = listOf(edition("DEFCON")))
+        local.upsertAll(listOf(edition("DEFCON").asEntity()))
+
+        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.last() == null) delay(EMISSION_POLL_MS) }
+        assertEquals("defcon", emissions.last())
+        collector.cancel()
+    }
+
+    @Test
+    fun observeEditionEmitsNullForUnknownEdition() = runBlocking {
+        seed.editions = listOf(edition("HAMVENTION"))
+
+        assertNull(repository.observeEdition("VANILLA").first())
+    }
+
+    @Test
     fun absentAssetYieldsNullWithoutCrashing() = runBlocking {
         seed.present = false
 
@@ -230,5 +261,11 @@ class EventFirmwareRepositoryImplTest {
             )
 
         assertEquals("hamvention", restarted.getEdition("HAMVENTION")?.displayName)
+    }
+
+    private companion object {
+        /** Room's invalidation tracker delivers asynchronously, so emission waits poll rather than assume immediacy. */
+        private const val EMISSION_TIMEOUT_MS = 10_000L
+        private const val EMISSION_POLL_MS = 20L
     }
 }

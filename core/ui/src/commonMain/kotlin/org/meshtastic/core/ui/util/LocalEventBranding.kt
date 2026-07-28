@@ -31,6 +31,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.EventFirmwareEdition
+import org.meshtastic.core.model.EventFirmwareLink
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.img_event_defcon
@@ -57,9 +58,28 @@ fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
 }
 
 /**
- * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present, falling back to the bundled
- * per-edition drawable ([eventIconFor]), and finally the Meshtastic logo. The fallback painter also backs Coil's
- * loading/error states so there is never an empty slot.
+ * Whether [url] is safe to fetch or open from event metadata: a well-formed absolute `https` URL with a host.
+ *
+ * The manifest is first-party but arrives over the network, and its URLs reach an image loader and the platform URI
+ * handler. A URI handler will honour whatever scheme it is given, so without this check a bad or tampered manifest
+ * entry could invoke arbitrary handlers on the device. Scheme comparison is case-insensitive; everything else is
+ * rejected, including protocol-relative (`//host`) and scheme-relative input.
+ */
+fun isSafeBrandUrl(url: String?): Boolean {
+    val trimmed = url?.trim().orEmpty()
+    if (!trimmed.startsWith(HTTPS_SCHEME, ignoreCase = true)) return false
+    val host = trimmed.removeRange(0, HTTPS_SCHEME.length).takeWhile { it != '/' && it != '?' && it != '#' }
+    // Reject an empty host ("https://") and userinfo ("https://user@evil.host"), which reads as a legitimate host.
+    return host.isNotEmpty() && '@' !in host
+}
+
+/** Links whose URL is safe to open — see [isSafeBrandUrl]. Unsafe or blank entries are dropped, not rendered. */
+fun EventFirmwareEdition.safeLinks(): List<EventFirmwareLink> = links.filter { isSafeBrandUrl(it.url) }
+
+/**
+ * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present *and* safe to fetch, falling back
+ * to the bundled per-edition drawable ([eventIconFor]), and finally the Meshtastic logo. The fallback painter also
+ * backs Coil's loading/error states so there is never an empty slot.
  */
 @Composable
 fun EventBrandingIcon(
@@ -70,7 +90,7 @@ fun EventBrandingIcon(
     val bundled = eventIconFor(edition.edition)
     val fallback =
         bundled?.let { painterResource(it) } ?: rememberVectorPainter(vectorResource(Res.drawable.ic_meshtastic))
-    val url = edition.iconUrl
+    val url = edition.iconUrl?.takeIf { isSafeBrandUrl(it) }
     if (url.isNullOrBlank()) {
         Image(
             painter = fallback,
@@ -141,6 +161,7 @@ fun EventFirmwareEdition.brandPalette(): List<Color> {
 fun EventFirmwareEdition.brandHighlightOrNull(): Color? =
     parseBrandColor(theme?.colors?.accent) ?: parseBrandColor(theme?.colors?.secondary)
 
+private const val HTTPS_SCHEME = "https://"
 private const val RGB_HEX_LENGTH = 6
 private const val HEX_RADIX = 16
 private const val RED_SHIFT = 16
