@@ -66,6 +66,9 @@ class DesktopNotificationManagerTest {
             nodeEventsAutoDisabledForEvent.value = disabled
         }
 
+        // Not exercised here; these tests only care about whether a category is enabled.
+        override fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean) = Unit
+
         override fun setLowBatteryEnabled(enabled: Boolean) {
             lowBatteryEnabled.value = enabled
         }

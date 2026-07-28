@@ -61,6 +61,30 @@ class NotificationPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_NODE_EVENTS_AUTO_DISABLED] = disabled } }
     }
 
+    override fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean) {
+        // One edit block: DataStore serializes edits, so the values read here are the same snapshot written below.
+        // Reading the StateFlows and calling the setters instead would race — they lag these writes.
+        scope.launch {
+            dataStore.edit { prefs ->
+                val enabled = prefs[KEY_NODE_EVENTS_ENABLED] ?: true
+                val autoDisabled = prefs[KEY_NODE_EVENTS_AUTO_DISABLED] ?: false
+                when {
+                    // Only claim the restore if node events were actually on — otherwise the vanilla branch would
+                    // later enable a preference the user turned off themselves.
+                    isEventFirmware && !autoDisabled && enabled -> {
+                        prefs[KEY_NODE_EVENTS_ENABLED] = false
+                        prefs[KEY_NODE_EVENTS_AUTO_DISABLED] = true
+                    }
+
+                    !isEventFirmware && autoDisabled -> {
+                        prefs[KEY_NODE_EVENTS_ENABLED] = true
+                        prefs[KEY_NODE_EVENTS_AUTO_DISABLED] = false
+                    }
+                }
+            }
+        }
+    }
+
     override val lowBatteryEnabled: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_LOW_BATTERY_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 

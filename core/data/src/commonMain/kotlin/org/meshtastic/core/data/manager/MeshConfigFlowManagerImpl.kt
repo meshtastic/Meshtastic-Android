@@ -493,20 +493,10 @@ class MeshConfigFlowManagerImpl(
         null
     }
 
+    // Whether to silence new-node notifications is a read-decide-write over two preferences, so it lives behind one
+    // atomic prefs operation rather than being assembled from setter calls here.
     private fun applyEventFirmwareNotificationDefaults(edition: FirmwareEdition) {
-        val autoDisabled = notificationPrefs.nodeEventsAutoDisabledForEvent.value
-        if (edition != FirmwareEdition.VANILLA) {
-            // Only claim the restore if node events were actually on. Setting the flag when the user had already
-            // turned them off would make the vanilla branch below switch them back on — silently discarding a
-            // preference we never changed.
-            if (!autoDisabled && notificationPrefs.nodeEventsEnabled.value) {
-                notificationPrefs.setNodeEventsEnabled(false)
-                notificationPrefs.setNodeEventsAutoDisabledForEvent(true)
-            }
-        } else if (autoDisabled) {
-            notificationPrefs.setNodeEventsEnabled(true)
-            notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
-        }
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = edition != FirmwareEdition.VANILLA)
     }
 }
 
