@@ -90,6 +90,9 @@ internal fun buildRecentTcpEntries(
 ): List<DeviceListEntry.Tcp> = recentAddresses
     .filterNot { discoveredAddresses.contains(it.address) }
     .map { DeviceListEntry.Tcp(it.name, it.address) }
+    // The persisted list is not guaranteed unique: only add() dedupes, and legacy blobs bypass it. The device list
+    // keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+    .distinctBy { it.fullAddress }
     .map { entry ->
         entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, nodeDb, databaseManager))
     }

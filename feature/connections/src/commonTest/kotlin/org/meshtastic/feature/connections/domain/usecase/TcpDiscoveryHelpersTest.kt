@@ -192,6 +192,23 @@ class TcpDiscoveryHelpersTest {
     }
 
     @Test
+    fun `buildRecentTcpEntries dedupes repeated addresses`() {
+        // A legacy recent-addresses blob is read back verbatim, so it can repeat an address that add() would have
+        // collapsed. Two rows with one fullAddress is a duplicate LazyColumn key, which is fatal.
+        val recentAddresses =
+            listOf(
+                RecentAddress("t192.168.1.50", "NodeA"),
+                RecentAddress("t192.168.1.50", "NodeA"),
+                RecentAddress("t192.168.1.51", "NodeB"),
+            )
+        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
+
+        val result = buildRecentTcpEntries(recentAddresses, emptySet(), emptyMap(), databaseManager)
+
+        result.map { it.fullAddress } shouldBe listOf("t192.168.1.50", "t192.168.1.51")
+    }
+
+    @Test
     fun `buildRecentTcpEntries matches node by suffix`() {
         val node = TestDataFactory.createTestNode(num = 1, userId = "!test1234")
         val recentAddresses = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))

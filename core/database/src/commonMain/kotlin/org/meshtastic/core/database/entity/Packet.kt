@@ -55,7 +55,15 @@ data class PacketEntity(
             status = data.status,
             routingError = routingError,
             packetId = packetId,
-            emojis = reactions.filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }.toReaction(getNode),
+            emojis =
+            reactions
+                .filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }
+                // myNodeNum is part of the reactions primary key, so the legacy 0 bucket can hold the same
+                // (user, emoji) as this node's. The UI keys reaction rows on that pair, so keep one — the
+                // current node's, which carries the live delivery status.
+                .sortedBy { it.myNodeNum == 0 }
+                .distinctBy { it.userId to it.emoji }
+                .toReaction(getNode),
             replyId = data.replyId,
             viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
