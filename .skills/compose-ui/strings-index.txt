@@ -268,6 +268,7 @@ config_security_is_managed
 config_security_private_key
 config_security_public_key
 config_security_serial_enabled
+configuration
 configure_bluetooth_permissions
 configure_critical_alerts
 configure_location_permissions

@@ -44,16 +44,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_functions_settings
 import org.meshtastic.core.resources.app_functions_settings_summary
+import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.device_links
-import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.help_and_documentation
@@ -70,14 +69,13 @@ import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
-import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.AppearanceSettingsContent
 import org.meshtastic.feature.settings.component.ExpressiveSection
-import org.meshtastic.feature.settings.component.PersistenceSection
-import org.meshtastic.feature.settings.component.PrivacySection
+import org.meshtastic.feature.settings.component.PersistenceSettingsContent
+import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -245,64 +243,45 @@ fun SettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
-                PrivacySection(
-                    analyticsAvailable = appFunctionsAvailable,
-                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
-                    onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                    provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
-                    onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                    homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
-                    onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                    startProvideLocation = { settingsViewModel.startProvidingLocation() },
-                    stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
-                )
-
-                AppearanceSection(
-                    onShowLanguagePicker = { showLanguagePickerDialog = true },
-                    onShowThemePicker = { showThemePickerDialog = true },
-                )
-
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+                    PrivacySettingsContent(
+                        analyticsAvailable = appFunctionsAvailable,
+                        analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
+                        onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
+                        provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                        onToggleLocation = { settingsViewModel.setProvideLocation(it) },
+                        homoglyphEnabled =
+                        viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                        onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                        startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                        stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                    )
+                    AppearanceSettingsContent(
+                        onShowLanguagePicker = { showLanguagePickerDialog = true },
+                        onShowThemePicker = { showThemePickerDialog = true },
+                    )
+                    PersistenceSettingsContent(
+                        cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                        nodeShortName = ourNode?.user?.short_name ?: "",
+                        onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                    )
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
                         leadingIcon = MeshtasticIcons.List,
                     ) {
                         onNavigate(SettingsRoute.NodeList)
                     }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
-                    ListItem(
-                        text = stringResource(Res.string.discovery_local_mesh),
-                        leadingIcon = MeshtasticIcons.PermScanWifi,
-                    ) {
-                        onNavigate(DiscoveryRoute.DiscoveryGraph)
-                    }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
                     }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
                     ListItem(
                         text = stringResource(Res.string.filter_settings),
                         leadingIcon = MeshtasticIcons.FilterList,
                     ) {
                         onNavigate(SettingsRoute.FilterSettings)
                     }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.device_links)) {
-                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
-                        onNavigate(SettingsRoute.DeviceLinks)
-                    }
-                }
-
-                if (appFunctionsAvailable) {
-                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings)) {
+                    if (appFunctionsAvailable) {
                         ListItem(
                             text = stringResource(Res.string.app_functions_settings),
                             supportingText = stringResource(Res.string.app_functions_settings_summary),
@@ -312,13 +291,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-
-                PersistenceSection(
-                    cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
-                    onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                    nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
-                )
 
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
@@ -335,6 +307,11 @@ fun SettingsScreen(
                     leadingIcon = MeshtasticIcons.HelpOutline,
                 ) {
                     onNavigate(SettingsRoute.HelpDocs)
+                }
+                if (state.isLocal) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
+                    }
                 }
             }
         }

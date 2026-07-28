@@ -20,6 +20,7 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,7 +58,7 @@ private val EXPORT_TIMESTAMP_FORMAT =
 
 /** Section for settings related to data persistence and exports. */
 @Composable
-fun PersistenceSection(
+internal fun ColumnScope.PersistenceSettingsContent(
     cacheLimit: Int,
     onSetCacheLimit: (Int) -> Unit,
     nodeShortName: String,
@@ -82,51 +83,58 @@ fun PersistenceSection(
             }
         }
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        val cacheItems = remember {
-            (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map { it.toLong() to it.toString() }
-        }
-        DropDownPreference(
-            title = stringResource(Res.string.device_db_cache_limit),
-            enabled = true,
-            items = cacheItems,
-            selectedItem = cacheLimit.toLong(),
-            onItemSelected = { selected -> onSetCacheLimit(selected.toInt()) },
-            summary = stringResource(Res.string.device_db_cache_limit_summary),
-        )
+    val cacheItems = remember {
+        (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map { it.toLong() to it.toString() }
+    }
+    DropDownPreference(
+        title = stringResource(Res.string.device_db_cache_limit),
+        enabled = true,
+        items = cacheItems,
+        selectedItem = cacheLimit.toLong(),
+        onItemSelected = { selected -> onSetCacheLimit(selected.toInt()) },
+        summary = stringResource(Res.string.device_db_cache_limit_summary),
+    )
 
-        ListItem(
-            text = stringResource(Res.string.save_rangetest),
-            leadingIcon = MeshtasticIcons.Output,
-            trailingIcon = null,
-        ) {
-            val intent =
-                Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/csv"
-                    putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeShortName}_$timestamp.csv")
-                }
-            exportRangeTestLauncher.launch(intent)
-        }
+    ListItem(
+        text = stringResource(Res.string.save_rangetest),
+        leadingIcon = MeshtasticIcons.Output,
+        trailingIcon = null,
+    ) {
+        val intent =
+            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/csv"
+                putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeShortName}_$timestamp.csv")
+            }
+        exportRangeTestLauncher.launch(intent)
+    }
 
-        ListItem(
-            text = stringResource(Res.string.export_data_csv),
-            leadingIcon = MeshtasticIcons.Output,
-            trailingIcon = null,
-        ) {
-            val intent =
-                Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/csv"
-                    putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeShortName}_$timestamp.csv")
-                }
-            exportDataLauncher.launch(intent)
-        }
+    ListItem(
+        text = stringResource(Res.string.export_data_csv),
+        leadingIcon = MeshtasticIcons.Output,
+        trailingIcon = null,
+    ) {
+        val intent =
+            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/csv"
+                putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeShortName}_$timestamp.csv")
+            }
+        exportDataLauncher.launch(intent)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PersistenceSectionPreview() {
-    AppTheme { PersistenceSection(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {}) }
+    AppTheme {
+        ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+            PersistenceSettingsContent(
+                cacheLimit = 100,
+                onSetCacheLimit = {},
+                nodeShortName = "TEST",
+                onExportData = {},
+            )
+        }
+    }
 }
