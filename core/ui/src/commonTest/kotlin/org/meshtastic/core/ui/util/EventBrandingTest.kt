@@ -130,6 +130,8 @@ class EventBrandingTest {
         assertTrue(isSafeBrandUrl("https://api.meshtastic.org/resource/eventFirmware/defcon34.png"))
         assertTrue(isSafeBrandUrl("HTTPS://defcon.org")) // scheme is case-insensitive
         assertTrue(isSafeBrandUrl("  https://defcon.org  ")) // surrounding whitespace tolerated
+        assertTrue(isSafeBrandUrl("https://defcon.org:8443/x.png")) // explicit port
+        assertTrue(isSafeBrandUrl("https://[2606:4700::1]/x.png")) // IPv6 literal
 
         assertFalse(isSafeBrandUrl("http://defcon.org")) // cleartext
         assertFalse(isSafeBrandUrl("//defcon.org")) // protocol-relative
@@ -138,6 +140,18 @@ class EventBrandingTest {
         assertFalse(isSafeBrandUrl("https:///path")) // empty host
         assertFalse(isSafeBrandUrl(null))
         assertFalse(isSafeBrandUrl(""))
+    }
+
+    @Test
+    fun safeBrandUrlRejectsMalformedAuthorities() {
+        // A non-empty authority is not the same as a valid host: each of these has an authority that is present but
+        // not a host, so the check has to match the authority whole rather than test it for emptiness.
+        assertFalse(isSafeBrandUrl("https://:443")) // port, no host
+        assertFalse(isSafeBrandUrl("https://[::1")) // unterminated IPv6 literal
+        assertFalse(isSafeBrandUrl("https://[]/x")) // empty IPv6 literal
+        assertFalse(isSafeBrandUrl("https://ho st/x")) // whitespace in host
+        assertFalse(isSafeBrandUrl("https://defcon.org:port")) // non-numeric port
+        assertFalse(isSafeBrandUrl("https://defcon.org:/x")) // empty port
     }
 
     @Test

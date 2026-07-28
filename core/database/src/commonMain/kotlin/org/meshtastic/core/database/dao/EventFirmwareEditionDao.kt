@@ -34,7 +34,7 @@ interface EventFirmwareEditionDao {
      * already-visible event branding: a one-shot read resolves once when the connection is established, so metadata
      * that lands afterwards would sit in the table unseen until the user reconnected.
      */
-    @Query("SELECT * FROM event_firmware_edition WHERE edition = :edition")
+    @Query("SELECT * FROM event_firmware_edition WHERE edition = :edition LIMIT 1")
     fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?>
 
     /**

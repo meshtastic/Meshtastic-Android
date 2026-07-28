@@ -58,19 +58,23 @@ fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
 }
 
 /**
- * Whether [url] is safe to fetch or open from event metadata: a well-formed absolute `https` URL with a host.
+ * Whether [url] is safe to fetch or open from event metadata: an absolute `https` URL whose authority is a valid host
+ * with an optional numeric port.
  *
  * The manifest is first-party but arrives over the network, and its URLs reach an image loader and the platform URI
  * handler. A URI handler will honour whatever scheme it is given, so without this check a bad or tampered manifest
  * entry could invoke arbitrary handlers on the device. Scheme comparison is case-insensitive; everything else is
  * rejected, including protocol-relative (`//host`) and scheme-relative input.
+ *
+ * The authority is matched whole rather than merely tested for emptiness, so a port with no host (`https://:443`),
+ * whitespace, a truncated IPv6 literal, and userinfo (`https://trusted.host@evil.example`, which wears a trusted
+ * prefix) are all rejected — none of those characters appear in the permitted set.
  */
 fun isSafeBrandUrl(url: String?): Boolean {
     val trimmed = url?.trim().orEmpty()
     if (!trimmed.startsWith(HTTPS_SCHEME, ignoreCase = true)) return false
-    val host = trimmed.removeRange(0, HTTPS_SCHEME.length).takeWhile { it != '/' && it != '?' && it != '#' }
-    // Reject an empty host ("https://") and userinfo ("https://user@evil.host"), which reads as a legitimate host.
-    return host.isNotEmpty() && '@' !in host
+    val authority = trimmed.drop(HTTPS_SCHEME.length).takeWhile { it != '/' && it != '?' && it != '#' }
+    return AUTHORITY_REGEX.matches(authority)
 }
 
 /** Links whose URL is safe to open — see [isSafeBrandUrl]. Unsafe or blank entries are dropped, not rendered. */
@@ -162,6 +166,9 @@ fun EventFirmwareEdition.brandHighlightOrNull(): Color? =
     parseBrandColor(theme?.colors?.accent) ?: parseBrandColor(theme?.colors?.secondary)
 
 private const val HTTPS_SCHEME = "https://"
+
+/** A registered name or bracketed IPv6 literal, plus an optional numeric port. See [isSafeBrandUrl]. */
+private val AUTHORITY_REGEX = Regex("""(?:[A-Za-z0-9._~-]+|\[[0-9A-Fa-f:.]+])(?::\d+)?""")
 private const val RGB_HEX_LENGTH = 6
 private const val HEX_RADIX = 16
 private const val RED_SHIFT = 16
