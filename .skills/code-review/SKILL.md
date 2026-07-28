@@ -3,6 +3,50 @@
 ## Description
 Perform comprehensive code reviews for `Meshtastic-Android`, ensuring changes adhere to KMP architecture, Kotlin Multiplatform conventions, MAD standards, and CMP best practices.
 
+## Recurring Defect Classes (check these first)
+
+These four classes account for most of the Major findings raised on recent PRs, and they recur because the compiler, `detekt`, and `spotless` cannot see any of them. Check them while *writing* the code, not only while reviewing it.
+
+### A. Presence vs. sentinel zero
+**A numeric field whose absence matters must be nullable. Never let `0` stand in for "not reported".**
+
+`0` is a legitimate reading for RSSI (0 dBm), SNR, temperature, and air-quality concentration, so a `0` default silently merges "no data" with a real measurement. Both directions are bugs: an absent value gets persisted and displayed as a real one, and a genuine `0` gets discarded by a `takeIf { it != 0 }` guard.
+
+- [ ] **Accumulators and defaults:** a field collected over time defaults to `null`, not `0`. Absence checks read `== null` and presence checks `!= null` — never `== 0` for either.
+- [ ] **Aggregates over empty sets:** median/mean/min helpers return `T?` and propagate `null` for an empty input. A `0` fallback biases the result in whichever direction the comparator sorts — under the higher-is-better RSSI ordering used for ranking, an empty set's `0` outranks a real `-80 dBm`; under a plain `min` it would instead win as the smallest. Either way the missing value competes as if measured.
+- [ ] **Comparators:** sort missing values explicitly last; do not let them fall through to a numeric default.
+- [ ] **No zero-guards on real scales:** `takeIf { it != 0 }` is only valid where `0` is genuinely impossible. On any signed or zero-inclusive scale it destroys data.
+- [ ] **Proto presence:** when a proto field gains explicit presence, adopt the nullable accessor everywhere rather than keeping a `0` comparison. Fields with *no* presence cannot be fixed app-side — say so rather than faking it.
+- [ ] **Tests:** a nullable numeric needs **both** a null case and a zero-value case. One without the other does not pin the distinction.
+
+### B. Read–decide–write across a suspend boundary
+**Read the current value, decide, and write inside a single `dataStore.edit { }` block.**
+
+Reading a `StateFlow` (or a prior `suspend` getter), branching on it, and then issuing separate writes leaves a window where a concurrent change interleaves — so a guard can fire against state that no longer exists and clobber a user preference. `NotificationPrefsImpl.setGeofenceAlertOptIn` (`core/prefs/…/notification/NotificationPrefsImpl.kt`) is the reference example: it parses, mutates, caps, and writes in one `edit`.
+
+- [ ] Any "if the flag is X, set Y and Z" transition happens inside one `edit`/`updateData` lambda.
+- [ ] The decision reads the block's own `prefs`/`current` snapshot, **not** a cached `StateFlow` value from outside.
+- [ ] Multi-key transitions are one `edit` call, not several `scope.launch` writes.
+- [ ] Radio-side config mutations go through a single `editSettings { }` transaction (see `AdminController.editSettings`).
+
+### C. Tests that pass for the wrong reason
+**Assert that the intended code path produced the result — not merely that the result exists.**
+
+Seeding a fake's backing store and then asserting the value comes back passes even if the production code under test is deleted. The test must fail when the path breaks.
+
+- [ ] **Prove the path ran:** assert the side effect that only the intended path produces (a call counter incremented, a request issued, a cache written) alongside the observed value.
+- [ ] **Don't pre-seed the answer:** drive the value in through the path being tested (a gated fake response) instead of injecting it directly into the cache.
+- [ ] **Isolate the variable:** a test for one field must not let a second differing field explain the assertion.
+- [ ] **Assert survivors, not just counts:** for dedup/merge logic, assert the identities that remain, not the size.
+- [ ] **No ordering assertions under `Dispatchers.Unconfined`:** emission order is not a stable contract there — assert final state.
+
+### D. Room schema bump without a migration test
+**Every schema-version increment ships a migration test that proves existing rows survive.**
+
+- [ ] A new `core/database/schemas/<n>.json` is accompanied by an `(n-1)→n` test in `core/database/src/androidHostTest/.../*MigrationTest.kt`.
+- [ ] The test inserts rows at the old version, migrates, and asserts **row count and column values** are preserved — not merely that the migration runs.
+- [ ] Columns going nullable assert that pre-existing values are retained and that the new `NULL` state is reachable (this is class A at the storage layer).
+
 ## Code Review Checklist
 
 When reviewing code, meticulously verify the following categories. Flag any deviations and propose the canonical project pattern as a fix.

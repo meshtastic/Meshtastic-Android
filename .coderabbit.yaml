@@ -13,6 +13,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    # Review once when the PR goes ready, then on demand via `@coderabbitai review`.
+    # Re-reviewing every push turned 6-commit PRs into 8 review rounds, because each
+    # fix commit reopened a full pass. Batch the fixes, push, then ask for one re-review.
+    auto_incremental_review: false
     ignore_usernames:
       - renovate
       - renovate[bot]
@@ -69,18 +73,20 @@ reviews:
     - path: feature/car/
       instructions: Run unit tests with `./gradlew :feature:car:testGoogleDebugUnitTest`, and keep Robolectric pinned to SDK 36 for this module.
 
-  # CI is the source of truth for detekt + spotless (Zero Lint Tolerance gate),
-  # so disable detekt here to avoid duplicate comments. Keep the security/CI/shell
-  # scanners CI doesn't run inline.
+  # Every CodeRabbit tool is enabled by default, so this block only ever needs to
+  # turn things OFF or configure them. detekt is off because CI owns it (Zero Lint
+  # Tolerance gate) and duplicate comments were the noise we removed. The scanners
+  # CI doesn't run — gitleaks, shellcheck, actionlint, zizmor, semgrep, trivy,
+  # presidio (PII), buf (protobuf) — are already on by default; don't re-list them.
   tools:
     detekt:
       enabled: false
-    gitleaks:
-      enabled: true
-    shellcheck:
-      enabled: true
-    actionlint:
-      enabled: true
+    # Custom AST rules mechanically enforce the recurring defect classes that prose
+    # can't. See .coderabbit/ast-grep-rules/ and .skills/code-review/SKILL.md.
+    # essential_rules stays on (default) — these are additive.
+    ast-grep:
+      rule_dirs:
+        - ".coderabbit/ast-grep-rules"
 
   # Auto-generated docstrings/tests/autofix are noisy for a repo with strict
   # human-authored KDoc and KMP-aware tests; leave finishing touches off.
@@ -91,12 +97,45 @@ reviews:
       enabled: false
 
   # No KDoc-coverage mandate in this repo; the default warning-at-80% check
-  # would nag every PR.
+  # would nag every PR. PR titles are already linted by CI
+  # (.github/workflows/pull-request-target.yml), so no title check here either.
   pre_merge_checks:
     docstrings:
       mode: "off"
+    # The two defect classes that survive review-by-prose because they are about
+    # what's ABSENT from a diff — a sibling call site left unfixed, or a test that
+    # would still pass with the fix reverted. Warning, not error: these are
+    # judgment calls and a false positive must not block a merge.
+    custom_checks:
+      - name: "Sibling call sites and presence semantics"
+        mode: "warning"
+        instructions: >-
+          When a diff changes how an absent value is represented — making a field nullable,
+          removing a zero-guard, or adding a presence check — verify EVERY call site of that
+          field was updated, not just the one the bug was reported against. Ambient temperature
+          was fixed in NodeItem.kt while its sibling NodeItemCompact.kt kept the zero-guard.
+          Name any unfixed sibling explicitly. Also flag a new field defaulting to 0 where 0 is
+          a physically reachable value on that scale (RSSI, temperature, current, voltage,
+          particulate concentration). Two exceptions, do NOT flag either: humidity, where 0 %RH
+          is unreachable and the guard is intentional and tested; and the proto `rx_snr`, which
+          has no presence upstream, so its 0f ambiguity cannot be fixed app-side. An app-level
+          SNR field that IS nullable is still in scope.
+      - name: "Tests prove the path, not the end state"
+        mode: "warning"
+        instructions: >-
+          For each added or changed test, decide whether it would still pass if the production
+          code it covers were reverted. Flag tests that seed a fake's backing store and then
+          assert the value comes back, tests that assert only a collection's size rather than
+          which items survived, and tests asserting emission ORDER under Dispatchers.Unconfined
+          (not a stable contract). A test must assert the side effect only the intended path
+          produces — a call counter, a request issued, a cache written.
 
 knowledge_base:
+  # Learnings are how a confirmed finding stops recurring on the next PR. Pin the
+  # scope to this repo: the default `auto` already resolves to `local` for public
+  # repos, but being explicit keeps it from shifting if visibility ever changes.
+  learnings:
+    scope: local
   # Feed CodeRabbit the same guidance human/AI contributors follow, including
   # the repo-specific .skills/ modules and Copilot path instructions it
   # wouldn't pick up by default.
