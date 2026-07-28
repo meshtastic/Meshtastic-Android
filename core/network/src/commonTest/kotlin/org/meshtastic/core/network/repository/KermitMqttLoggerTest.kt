@@ -67,10 +67,36 @@ class KermitMqttLoggerTest {
     }
 
     @Test
-    fun `an error with no throwable stays an error`() {
+    fun `an error with no throwable is downgraded to WARN`() {
+        // A bare message carries no stack or type to triage, so it must not count as an application error.
         mqttLogger.log(level = MqttLogLevel.ERROR, tag = "MqttClient", message = "boom", throwable = null)
 
-        assertEquals(Severity.Error, writer.entries.single().first)
+        assertEquals(Severity.Warn, writer.entries.single().first)
+    }
+
+    @Test
+    fun `a connection teardown log is not reported as an application error`() {
+        mqttLogger.log(
+            level = MqttLogLevel.ERROR,
+            tag = "MqttConnection",
+            message = "Fatal error — tearing down connection",
+            throwable = null,
+        )
+
+        assertEquals(Severity.Warn, writer.entries.single().first)
+    }
+
+    @Test
+    fun `a broker rejection is a user configuration problem rather than an application error`() {
+        // Surfaced to the user through MqttProbeStatus, so it is not an app defect.
+        mqttLogger.log(
+            level = MqttLogLevel.ERROR,
+            tag = "MqttConnection",
+            message = "Connection refused: BAD_USER_NAME_OR_PASSWORD",
+            throwable = null,
+        )
+
+        assertEquals(Severity.Warn, writer.entries.single().first)
     }
 
     @Test

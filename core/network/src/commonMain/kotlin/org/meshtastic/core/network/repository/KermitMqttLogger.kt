@@ -49,12 +49,11 @@ class KermitMqttLogger(
 
             MqttLogLevel.WARN -> logger.w(throwable) { message }
 
-            // The library reports a broker that closed the socket, an unreachable host, or Wi-Fi dropping mid-read at
-            // ERROR ("Read loop error: Not enough data available"), and the client then reconnects on its own. Those
-            // are expected for a mobile client and dominated our error tracking, so log them at WARN — diagnosable in
-            // a support session, but not counted as application errors.
+            // The library logs its connection lifecycle at ERROR — broker socket close, unreachable host, Wi-Fi drop —
+            // and reconnects itself; broker rejections arrive without a throwable and are user config, surfaced via
+            // MqttProbeStatus. Neither is an app defect, so both log at WARN. Real faults carry a throwable.
             MqttLogLevel.ERROR ->
-                if (throwable?.isExpectedConnectionFailure() == true) {
+                if (throwable == null || throwable.isExpectedConnectionFailure()) {
                     logger.w(throwable) { message }
                 } else {
                     logger.e(throwable) { message }
