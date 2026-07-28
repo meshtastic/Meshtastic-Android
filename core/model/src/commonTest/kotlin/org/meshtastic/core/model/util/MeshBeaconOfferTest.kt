@@ -194,6 +194,20 @@ class MeshBeaconOfferTest {
     }
 
     @Test
+    fun `encode then decode round-trips an absent rssi without collapsing it to zero`() {
+        val offer =
+            MeshBeaconOffer(
+                fromNodeNum = 42,
+                beacon = MeshBeacon(message = "Join us", offer_channel = ChannelSettings(name = "PartyNet")),
+                snr = 6.5f,
+                rssi = null,
+            )
+        val restored = MeshBeaconOffer.decode(offer.encode())
+        assertEquals(offer, restored)
+        assertNull(restored?.rssi)
+    }
+
+    @Test
     fun `decode returns null for a malformed record`() {
         assertNull(MeshBeaconOffer.decode("not-a-valid-record"))
     }

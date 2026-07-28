@@ -267,7 +267,8 @@ class DiscoveryScanEngine(
             val node = collectedNodes.getOrPut(fromNum) { CollectedNodeData(nodeNum = fromNum) }
             // Update signal info from the direct packet
             if (meshPacket.rx_snr != 0f) node.snr = meshPacket.rx_snr
-            if (meshPacket.rx_rssi != 0) node.rssi = meshPacket.rx_rssi
+            // Explicit presence: record a reported 0 dBm, skip only a genuinely absent one.
+            meshPacket.rx_rssi?.let { node.rssi = it }
             node.hopCount = dataPacket.hopsAway.coerceAtLeast(0)
 
             when (portNum) {

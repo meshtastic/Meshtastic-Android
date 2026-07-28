@@ -160,7 +160,8 @@ data class Message(
     val packetId: Int,
     val emojis: List<Reaction>,
     val snr: Float,
-    val rssi: Int,
+    /** Received signal strength, or null when the radio did not report one. 0 dBm is a valid reading. */
+    val rssi: Int?,
     val hopsAway: Int,
     val replyId: Int?,
     val originalMessage: Message? = null,

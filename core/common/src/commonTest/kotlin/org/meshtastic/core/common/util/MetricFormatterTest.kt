@@ -117,6 +117,11 @@ class MetricFormatterTest {
     }
 
     @Test
+    fun rssiAbsentIsNotRenderedAsZero() {
+        assertEquals("—", MetricFormatter.rssi(null))
+    }
+
+    @Test
     fun snrNegative() {
         assertEquals("-5.5 dB", MetricFormatter.snr(-5.5f))
     }

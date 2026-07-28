@@ -156,7 +156,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
     val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
     val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
-    val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != 0 } }
+    val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != null } }
     val hasSnr = remember(signalData) { signalData.any { !it.rx_snr.isNaN() } }
     val hasAnyLocalStats = state.localStats.isNotEmpty()
     val localStatsExportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveLocalStatsCSV(uri, localStatsData) }
@@ -311,7 +311,7 @@ private fun SignalMetricsChart(
         remember(noiseFloorData) {
             if (noiseFloorData.size > 1) listOf(noiseFloorData.first(), noiseFloorData.last()) else emptyList()
         }
-    val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != 0 } }
+    val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != null } }
     val snrData = remember(meshPackets) { meshPackets.filter { !it.rx_snr.isNaN() } }
     val legendData =
         remember(noiseFloorData, rssiData, snrData) {
@@ -353,7 +353,7 @@ private fun SignalMetricsChart(
                     lineModel { series(x = busyFloorData.map { it.time }, y = busyFloorData.map { BUSY_FLOOR_DBM }) }
                 }
                 if (rssiData.isNotEmpty()) {
-                    lineModel { series(x = rssiData.map { it.rx_time }, y = rssiData.map { it.rx_rssi }) }
+                    lineModel { series(x = rssiData.map { it.rx_time }, y = rssiData.mapNotNull { it.rx_rssi }) }
                 }
                 if (snrData.isNotEmpty()) {
                     /* Use a separate lineModel call to associate SNR with the right axis. */

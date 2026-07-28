@@ -276,7 +276,9 @@ internal fun ReactionDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val isLocalOrPreDbUpdateReaction = (reaction.rssi == 0)
+                    // Local reactions now carry a null rssi; pre-schema-51 rows stored 0, so a legacy
+                    // 0 dBm reading stays indistinguishable from "no reading" and remains hidden.
+                    val isLocalOrPreDbUpdateReaction = reaction.rssi == null || reaction.rssi == 0
                     if (!isLocalOrPreDbUpdateReaction) {
                         if (reaction.hopsAway == 0) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

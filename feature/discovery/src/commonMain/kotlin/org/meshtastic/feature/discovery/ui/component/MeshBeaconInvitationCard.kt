@@ -99,7 +99,7 @@ internal fun MeshBeaconInvitationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (offer.rssi != 0 || offer.snr != 0f) {
+            if (offer.rssi != null || offer.snr != 0f) {
                 Text(
                     text =
                     stringResource(

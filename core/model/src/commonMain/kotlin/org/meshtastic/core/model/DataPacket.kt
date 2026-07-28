@@ -52,7 +52,8 @@ data class DataPacket(
     var wantAck: Boolean = true, // If true, the receiver should send an ack back
     var hopStart: Int = 0,
     var snr: Float = 0f,
-    var rssi: Int = 0,
+    /** Received signal strength, or null when the radio did not report one. 0 dBm is a valid reading. */
+    var rssi: Int? = null,
     var replyId: Int? = null, // If this is a reply to a previous message, this is the ID of that message
     var relayNode: Int? = null,
     var relays: Int = 0,

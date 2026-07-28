@@ -173,8 +173,10 @@ fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = L
     )
 }
 
+/** Renders nothing when [rssi] is absent — 0 dBm is a real reading, so it must not stand in for "no reading". */
 @Composable
-fun Rssi(rssi: Int, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
+fun Rssi(rssi: Int?, modifier: Modifier = Modifier, label: String = stringResource(Res.string.rssi)) {
+    if (rssi == null) return
     val color: Color =
         if (rssi > RSSI_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()

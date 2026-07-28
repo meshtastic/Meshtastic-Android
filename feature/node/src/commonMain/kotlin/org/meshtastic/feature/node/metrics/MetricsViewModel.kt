@@ -454,7 +454,8 @@ open class MetricsViewModel(
             rows = data,
             epochSeconds = { it.rx_time.toLong() },
         ) { p ->
-            "\"${p.rx_rssi}\",\"${p.rx_snr}\""
+            // An absent rssi exports as an empty field, matching the other optional metrics above.
+            "\"${p.rx_rssi ?: ""}\",\"${p.rx_snr}\""
         }
     }
 

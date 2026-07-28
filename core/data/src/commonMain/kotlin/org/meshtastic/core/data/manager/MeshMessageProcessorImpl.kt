@@ -321,7 +321,8 @@ class MeshMessageProcessorImpl(
             viaMqtt = viaMqtt,
             lastTransport = packet.transport_mechanism.value,
             snr = if (updateRadioMetrics) packet.rx_snr else node.snr,
-            rssi = if (updateRadioMetrics) packet.rx_rssi else node.rssi,
+            // A packet carrying no rssi must not clobber the node's last real reading.
+            rssi = if (updateRadioMetrics) packet.rx_rssi ?: node.rssi else node.rssi,
             hopsAway = hopsAway,
         )
     }

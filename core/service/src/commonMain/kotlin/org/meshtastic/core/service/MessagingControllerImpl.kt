@@ -89,7 +89,8 @@ internal class MessagingControllerImpl(
                 emoji = emoji,
                 timestamp = nowMillis,
                 snr = 0f,
-                rssi = 0,
+                // Our own reaction was never received over the air, so it has no rssi reading.
+                rssi = null,
                 hopsAway = 0,
                 packetId = dataPacket.id,
                 status = MessageStatus.QUEUED,
