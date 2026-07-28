@@ -70,15 +70,24 @@ fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
  * whitespace, a truncated IPv6 literal, and userinfo (`https://trusted.host@evil.example`, which wears a trusted
  * prefix) are all rejected — none of those characters appear in the permitted set.
  */
-fun isSafeBrandUrl(url: String?): Boolean {
+fun safeBrandUrlOrNull(url: String?): String? {
     val trimmed = url?.trim().orEmpty()
-    if (!trimmed.startsWith(HTTPS_SCHEME, ignoreCase = true)) return false
+    if (!trimmed.startsWith(HTTPS_SCHEME, ignoreCase = true)) return null
     val authority = trimmed.drop(HTTPS_SCHEME.length).takeWhile { it != '/' && it != '?' && it != '#' }
-    return AUTHORITY_REGEX.matches(authority)
+    // Return the trimmed form, not the caller's original: consumers must use the string that was actually validated,
+    // or a padded-but-otherwise-valid URL passes here and then fails as a malformed URI at the image loader.
+    return trimmed.takeIf { AUTHORITY_REGEX.matches(authority) }
 }
 
-/** Links whose URL is safe to open — see [isSafeBrandUrl]. Unsafe or blank entries are dropped, not rendered. */
-fun EventFirmwareEdition.safeLinks(): List<EventFirmwareLink> = links.filter { isSafeBrandUrl(it.url) }
+/** Whether [url] is safe to fetch or open — see [safeBrandUrlOrNull], which callers should prefer for the value. */
+fun isSafeBrandUrl(url: String?): Boolean = safeBrandUrlOrNull(url) != null
+
+/**
+ * Links that are safe to open, carrying the normalized URL — see [safeBrandUrlOrNull]. Unsafe or blank entries are
+ * dropped rather than rendered and refused on tap.
+ */
+fun EventFirmwareEdition.safeLinks(): List<EventFirmwareLink> =
+    links.mapNotNull { link -> safeBrandUrlOrNull(link.url)?.let { link.copy(url = it) } }
 
 /**
  * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present *and* safe to fetch, falling back
@@ -94,7 +103,7 @@ fun EventBrandingIcon(
     val bundled = eventIconFor(edition.edition)
     val fallback =
         bundled?.let { painterResource(it) } ?: rememberVectorPainter(vectorResource(Res.drawable.ic_meshtastic))
-    val url = edition.iconUrl?.takeIf { isSafeBrandUrl(it) }
+    val url = safeBrandUrlOrNull(edition.iconUrl)
     if (url.isNullOrBlank()) {
         Image(
             painter = fallback,

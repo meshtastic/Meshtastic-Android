@@ -166,6 +166,26 @@ class EventBrandingTest {
     }
 
     @Test
+    fun safeBrandUrlReturnsTheValidatedFormNotTheOriginal() {
+        // Consumers hand this straight to the image loader / URI handler, so they must get the string that was
+        // validated — a padded URL that passed validation and then went out untrimmed would fail as a malformed URI.
+        assertEquals("https://defcon.org", safeBrandUrlOrNull("  https://defcon.org  "))
+        assertEquals("https://defcon.org", safeBrandUrlOrNull("https://defcon.org"))
+        assertNull(safeBrandUrlOrNull("http://defcon.org"))
+    }
+
+    @Test
+    fun safeLinksNormalizesTheUrlItKeeps() {
+        val edition =
+            EventFirmwareEdition(
+                edition = "DEFCON",
+                links = listOf(EventFirmwareLink("Padded", "\n https://defcon.org/schedule \t")),
+            )
+        assertEquals(listOf("https://defcon.org/schedule"), edition.safeLinks().map { it.url })
+        assertEquals(listOf("Padded"), edition.safeLinks().map { it.label }) // label preserved
+    }
+
+    @Test
     fun safeLinksDropsUnsafeEntriesAndKeepsOrder() {
         val edition =
             EventFirmwareEdition(

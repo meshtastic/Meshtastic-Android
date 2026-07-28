@@ -27,7 +27,6 @@ import okio.Buffer
 import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
-import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
@@ -137,19 +136,23 @@ class EventFirmwareRepositoryImplTest {
     @Test
     fun observeEditionReEmitsWhenTheCacheIsRefreshed() = runBlocking {
         // The point of the observable: an edition absent at connect time — because the bundled seed predates it —
-        // must reach the UI when the refresh lands, without the caller re-subscribing.
+        // must reach the UI when the refresh lands, without the caller re-subscribing. The new value therefore has to
+        // arrive *through the refresh path*; writing it into the cache by hand would still pass if observeEdition
+        // stopped refreshing at all.
         seed.editions = listOf(edition("HAMVENTION"))
+        api.response = EventFirmwareResponse(editions = listOf(edition("HAMVENTION"), edition("DEFCON")))
 
         val emissions = mutableListOf<String?>()
         val collector = launch { repository.observeEdition("DEFCON").collect { emissions += it?.displayName } }
-        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.isEmpty()) delay(EMISSION_POLL_MS) }
-        assertNull(emissions.first())
 
-        api.response = EventFirmwareResponse(editions = listOf(edition("DEFCON")))
-        local.upsertAll(listOf(edition("DEFCON").asEntity()))
-
-        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.last() == null) delay(EMISSION_POLL_MS) }
+        withTimeout(EMISSION_TIMEOUT_MS) { while (emissions.lastOrNull() == null) delay(EMISSION_POLL_MS) }
+        // DEFCON exists only in the network response, never in the seed, so observing it at all proves the value
+        // arrived via refresh → cache write → emission. Collection is what drove that fetch: nothing else in this test
+        // touches the network or the cache.
         assertEquals("defcon", emissions.last())
+        assertEquals(1, api.eventFirmwareCalls)
+        // Deliberately no assertion on the *first* emission: these tests run on Dispatchers.Unconfined, where the
+        // refresh can complete inline before emitAll starts, so whether the seed-only null is observed is timing.
         collector.cancel()
     }
 
