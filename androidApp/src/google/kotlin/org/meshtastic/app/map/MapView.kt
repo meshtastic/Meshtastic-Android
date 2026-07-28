@@ -164,6 +164,7 @@ import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
@@ -275,6 +276,7 @@ fun MapView(
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    var deletingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     var geofenceInfoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
@@ -698,8 +700,8 @@ fun MapView(
                         navigateToNodeDetails = navigateToNodeDetails,
                         displayableWaypoints = displayableWaypoints,
                         myNodeNum = myNodeNum,
-                        isConnected = isConnected,
                         onEditWaypointRequest = { editingWaypoint = it },
+                        onDeleteWaypointRequest = { deletingWaypoint = it },
                         onShowGeofenceInfo = { geofenceInfoWaypoint = it },
                         selectedWaypointId = selectedWaypointId,
                         mapLayers = mapLayers,
@@ -776,6 +778,24 @@ fun MapView(
                 )
             }
 
+            deletingWaypoint?.let { waypoint ->
+                DeleteWaypointDialog(
+                    canDeleteForEveryone = waypoint.isModifiableBy(myNodeNum) && isConnected && waypoint.id != 0,
+                    onDeleteForMe = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        deletingWaypoint = null
+                    },
+                    onDeleteForEveryone = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
+                        mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        deletingWaypoint = null
+                    },
+                    onDismissRequest = { deletingWaypoint = null },
+                )
+            }
+
             geofenceInfoWaypoint?.let { waypoint ->
                 val optIns by mapViewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
                 WaypointInfoDialog(
@@ -794,6 +814,13 @@ fun MapView(
                         }
                     } else {
                         null
+                    },
+                    // Dropping our local copy needs no mesh permission, so it's offered even when locked to its
+                    // creator.
+                    onDeleteForMe = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        geofenceInfoWaypoint = null
                     },
                 )
             }
@@ -1018,8 +1045,8 @@ private fun MainMapContent(
     navigateToNodeDetails: (Int) -> Unit,
     displayableWaypoints: List<Waypoint>,
     myNodeNum: Int?,
-    isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
+    onDeleteWaypointRequest: (Waypoint) -> Unit,
     onShowGeofenceInfo: (Waypoint) -> Unit,
     selectedWaypointId: Int?,
     mapLayers: List<MapLayerItem>,
@@ -1060,8 +1087,8 @@ private fun MainMapContent(
         displayableWaypoints = displayableWaypoints,
         mapFilterState = mapFilterState,
         myNodeNum = myNodeNum ?: 0,
-        isConnected = isConnected,
         onEditWaypointRequest = onEditWaypointRequest,
+        onDeleteWaypointRequest = onDeleteWaypointRequest,
         isMyWaypoint = mapViewModel::isMyWaypoint,
         onShowGeofenceInfo = onShowGeofenceInfo,
         selectedWaypointId = selectedWaypointId,

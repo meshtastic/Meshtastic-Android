@@ -109,8 +109,6 @@ import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.close
-import org.meshtastic.core.resources.delete_for_everyone
-import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
 import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.geofence_box_author_confirm
@@ -139,7 +137,6 @@ import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
@@ -156,6 +153,7 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
@@ -1030,53 +1028,32 @@ fun MapView(
             } else {
                 null
             },
+            // Dropping our local copy needs no mesh permission, so it's offered even for a locked foreign geofence.
+            onDeleteForMe = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showGeofenceInfoDialog = null
+            },
         )
     }
 
-    if (showDeleteWaypointDialog != null) {
-        val waypoint = showDeleteWaypointDialog ?: return
-        val canDeleteForEveryone = waypoint.isModifiableBy(mapViewModel.myNodeNum) && isConnected
-        androidx.compose.material3.AlertDialog(
+    showDeleteWaypointDialog?.let { waypoint ->
+        DeleteWaypointDialog(
+            canDeleteForEveryone = waypoint.isModifiableBy(mapViewModel.myNodeNum) && isConnected,
+            onDeleteForMe = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showDeleteWaypointDialog = null
+            },
+            onDeleteForEveryone = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
+                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showDeleteWaypointDialog = null
+            },
             onDismissRequest = {
                 Logger.d { "User canceled marker delete dialog" }
                 showDeleteWaypointDialog = null
-            },
-            title = { Text(stringResource(Res.string.waypoint_delete)) },
-            // Both deletes are confirmations; Cancel is the dismiss action (mirrors the old neutral button).
-            confirmButton = {
-                Column {
-                    TextButton(
-                        onClick = {
-                            Logger.d { "User deleted waypoint ${waypoint.id} for me" }
-                            mapViewModel.deleteWaypoint(waypoint.id)
-                            showDeleteWaypointDialog = null
-                        },
-                    ) {
-                        Text(stringResource(Res.string.delete_for_me))
-                    }
-                    if (canDeleteForEveryone) {
-                        TextButton(
-                            onClick = {
-                                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
-                                mapViewModel.deleteWaypoint(waypoint.id)
-                                showDeleteWaypointDialog = null
-                            },
-                        ) {
-                            Text(stringResource(Res.string.delete_for_everyone))
-                        }
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        Logger.d { "User canceled marker delete dialog" }
-                        showDeleteWaypointDialog = null
-                    },
-                ) {
-                    Text(stringResource(Res.string.cancel))
-                }
             },
         )
     }
