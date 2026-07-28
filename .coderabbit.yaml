@@ -115,9 +115,11 @@ reviews:
           field was updated, not just the one the bug was reported against. Ambient temperature
           was fixed in NodeItem.kt while its sibling NodeItemCompact.kt kept the zero-guard.
           Name any unfixed sibling explicitly. Also flag a new field defaulting to 0 where 0 is
-          a physically reachable value on that scale (RSSI, SNR, temperature, current, voltage,
-          particulate concentration); humidity is the one exception, where 0 %RH is unreachable
-          and the guard is intentional and tested.
+          a physically reachable value on that scale (RSSI, temperature, current, voltage,
+          particulate concentration). Two exceptions, do NOT flag either: humidity, where 0 %RH
+          is unreachable and the guard is intentional and tested; and the proto `rx_snr`, which
+          has no presence upstream, so its 0f ambiguity cannot be fixed app-side. An app-level
+          SNR field that IS nullable is still in scope.
       - name: "Tests prove the path, not the end state"
         mode: "warning"
         instructions: >-

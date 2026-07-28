@@ -13,7 +13,7 @@ These four classes account for most of the Major findings raised on recent PRs, 
 `0` is a legitimate reading for RSSI (0 dBm), SNR, temperature, and air-quality concentration, so a `0` default silently merges "no data" with a real measurement. Both directions are bugs: an absent value gets persisted and displayed as a real one, and a genuine `0` gets discarded by a `takeIf { it != 0 }` guard.
 
 - [ ] **Accumulators and defaults:** a field collected over time defaults to `null`, not `0`. Absence checks read `== null` and presence checks `!= null` — never `== 0` for either.
-- [ ] **Aggregates over empty sets:** median/mean/min helpers return `T?` and propagate `null` for an empty input. A `0` fallback ranks missing data as a perfect score — it outranks every real negative RSSI.
+- [ ] **Aggregates over empty sets:** median/mean/min helpers return `T?` and propagate `null` for an empty input. A `0` fallback biases the result in whichever direction the comparator sorts — under the higher-is-better RSSI ordering used for ranking, an empty set's `0` outranks a real `-80 dBm`; under a plain `min` it would instead win as the smallest. Either way the missing value competes as if measured.
 - [ ] **Comparators:** sort missing values explicitly last; do not let them fall through to a numeric default.
 - [ ] **No zero-guards on real scales:** `takeIf { it != 0 }` is only valid where `0` is genuinely impossible. On any signed or zero-inclusive scale it destroys data.
 - [ ] **Proto presence:** when a proto field gains explicit presence, adopt the nullable accessor everywhere rather than keeping a `0` comparison. Fields with *no* presence cannot be fixed app-side — say so rather than faking it.
