@@ -343,6 +343,7 @@ class MeshConfigFlowManagerImpl(
                 // this newer session. The async clear also rechecks transport authority before touching persistence.
                 clearGeneration = handshakeGeneration.incrementAndGet()
                 connectionManager.value.onHandshakeProgress()
+                connectionManager.value.onMyNodeInfoReceived(myInfo.my_node_num)
             }
         if (!admitted) {
             Logger.d { "[DeviceAssociation] discard stale MyNodeInfo gen=${session.generation}" }

@@ -134,6 +134,8 @@ class TAKMeshIntegrationTest {
             initFn: () -> AdminMessage,
         ) {}
 
+        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {}
+
         override suspend fun sendAdminAwait(
             destNum: Int,
             requestId: Int,

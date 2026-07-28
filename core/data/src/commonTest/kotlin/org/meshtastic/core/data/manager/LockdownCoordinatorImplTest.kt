@@ -114,6 +114,8 @@ class LockdownCoordinatorImplTest {
             initFn: () -> AdminMessage,
         ) = Unit
 
+        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) = Unit
+
         override suspend fun sendAdminAwait(
             destNum: Int,
             requestId: Int,
@@ -148,6 +150,8 @@ class LockdownCoordinatorImplTest {
         }
 
         override fun startNodeInfoOnly() = Unit
+
+        override fun onMyNodeInfoReceived(myNodeNum: Int) = Unit
 
         override suspend fun onNodeDbReady() = Unit
 

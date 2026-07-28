@@ -49,6 +49,13 @@ interface CommandSender {
     )
 
     /**
+     * Sends an admin message immediately, bypassing the outbound packet queue. The queue only drains while the
+     * connection state is Connected, so mid-handshake sends (e.g. set_time_only at MyNodeInfo) must use this path or
+     * they stall until the handshake finishes.
+     */
+    fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage)
+
+    /**
      * Sends an admin message and suspends until the radio acknowledges it.
      *
      * This is used when the caller needs to guarantee a packet has been accepted by the radio before proceeding, such
