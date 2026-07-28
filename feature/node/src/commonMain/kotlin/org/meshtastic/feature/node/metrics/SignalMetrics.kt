@@ -111,7 +111,14 @@ private val LEGEND_DATA =
         LegendData(nameRes = Res.string.snr, color = SignalMetric.SNR.color),
     )
 
-private sealed interface SignalLogEntry {
+/** Builds the combined signal log, newest first. Kept out of the composable so the LazyColumn keys are testable. */
+internal fun buildSignalLog(signalData: List<MeshPacket>, localStatsData: List<Telemetry>): List<SignalLogEntry> {
+    val localStats = localStatsData.mapIndexed { index, telemetry -> SignalLogEntry.LocalStatsEntry(telemetry, index) }
+    val packets = signalData.mapIndexed { index, packet -> SignalLogEntry.PacketEntry(packet, index) }
+    return (localStats + packets).sortedByDescending { it.timeSeconds }
+}
+
+internal sealed interface SignalLogEntry {
     val timeSeconds: Int
 
     /** Stable, collision-free identity for use as a LazyColumn item key across both entry types. */
@@ -128,9 +135,12 @@ private sealed interface SignalLogEntry {
         override val contentType: Any = "local_stats"
     }
 
-    data class PacketEntry(val meshPacket: MeshPacket) : SignalLogEntry {
+    data class PacketEntry(val meshPacket: MeshPacket, val index: Int) : SignalLogEntry {
         override val timeSeconds: Int = meshPacket.rx_time
-        override val key: Any = "packet_${meshPacket.id}"
+
+        // MeshPacket.id repeats: it is unique only per originating node, and retransmissions are stored per reception.
+        // The source-list index disambiguates, as it does for local stats.
+        override val key: Any = "packet_${meshPacket.id}_$index"
         override val contentType: Any = "signal_packet"
     }
 }
@@ -144,14 +154,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val threshold = timeFrame.timeThreshold()
     val signalData = state.signalMetrics.filter { it.rx_time.toLong() >= threshold }
     val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
-    val data =
-        remember(signalData, localStatsData) {
-            (
-                localStatsData.mapIndexed { index, telemetry -> SignalLogEntry.LocalStatsEntry(telemetry, index) } +
-                    signalData.map { SignalLogEntry.PacketEntry(it) }
-                )
-                .sortedByDescending { it.timeSeconds }
-        }
+    val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
     val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
     val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != 0 } }
     val hasSnr = remember(signalData) { signalData.any { !it.rx_snr.isNaN() } }
