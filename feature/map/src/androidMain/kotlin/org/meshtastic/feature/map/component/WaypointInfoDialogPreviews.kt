@@ -33,7 +33,7 @@ private fun sampleGeofence(lockedTo: Int) = Waypoint(
     locked_to = lockedTo,
 )
 
-/** Locked foreign geofence: read-only, opt-in off, no Edit affordance. */
+/** Locked foreign geofence: opt-in off, no Edit affordance — but the local delete is still offered. */
 @PreviewLightDark
 @Composable
 @Suppress("PreviewPublic")
@@ -46,6 +46,7 @@ fun WaypointInfoDialogReadOnlyPreview() {
             onToggleAlerts = {},
             onDismissRequest = {},
             onEdit = null,
+            onDeleteForMe = {},
         )
     }
 }
@@ -63,6 +64,7 @@ fun WaypointInfoDialogOptedInPreview() {
             onToggleAlerts = {},
             onDismissRequest = {},
             onEdit = {},
+            onDeleteForMe = {},
         )
     }
 }

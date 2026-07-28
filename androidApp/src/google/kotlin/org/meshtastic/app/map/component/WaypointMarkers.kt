@@ -20,9 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.LatLng
@@ -30,7 +28,6 @@ import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberComposeBitmapDescriptor
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.map.convertIntToEmoji
 import org.meshtastic.core.model.geofence.toGeofence
@@ -40,8 +37,6 @@ import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.geofence
-import org.meshtastic.core.resources.locked
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Waypoint
 
@@ -53,12 +48,11 @@ fun WaypointMarkers(
     myNodeNum: Int,
     isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
+    onDeleteWaypointRequest: (Waypoint) -> Unit,
     isMyWaypoint: (Int) -> Boolean,
     onShowGeofenceInfo: (Waypoint) -> Unit,
     selectedWaypointId: Int? = null,
 ) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     if (mapFilterState.showWaypoints) {
         displayableWaypoints.forEach { waypoint ->
             val markerState =
@@ -91,7 +85,7 @@ fun WaypointMarkers(
                 }
 
             // Lock cue in the info-window title (parity with the fdroid marker), so a locked waypoint is
-            // identifiable rather than only surfacing as a "locked" toast on tap.
+            // identifiable before it is tapped.
             val cleanName = waypoint.name.replace('\n', ' ').replace('\b', ' ')
             val title = if (waypoint.isLocked) "${convertIntToEmoji(LOCK)} $cleanName" else cleanName
 
@@ -108,7 +102,9 @@ fun WaypointMarkers(
 
                         waypoint.isModifiableBy(myNodeNum) || !isConnected -> onEditWaypointRequest(waypoint)
 
-                        else -> scope.launch { context.showToast(Res.string.locked) }
+                        // Locked to someone else: the editor would be pointless, but our local copy is still ours to
+                        // remove, so offer that instead of only reporting the lock.
+                        else -> onDeleteWaypointRequest(waypoint)
                     }
                 },
             )
