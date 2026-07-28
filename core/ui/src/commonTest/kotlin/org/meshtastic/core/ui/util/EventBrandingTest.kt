@@ -88,6 +88,20 @@ class EventBrandingTest {
     }
 
     @Test
+    fun brandPaletteDeDupesAuthoredEntriesPreservingOrder() {
+        // A repeated hex would become a repeated gradient stop, flattening the gradient over that span.
+        val edition =
+            EventFirmwareEdition(
+                edition = "X",
+                theme = EventFirmwareTheme(palette = listOf("#E0004E", "#0D294A", "#e0004e")),
+            )
+        assertEquals(
+            listOf(Color(red = 0xE0, green = 0x00, blue = 0x4E), Color(red = 0x0D, green = 0x29, blue = 0x4A)),
+            edition.brandPalette(),
+        )
+    }
+
+    @Test
     fun brandPaletteFallsBackToNamedColorsThenAccent() {
         val named =
             EventFirmwareEdition(

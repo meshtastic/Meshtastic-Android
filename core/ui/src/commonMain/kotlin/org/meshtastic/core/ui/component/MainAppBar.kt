@@ -19,11 +19,8 @@ package org.meshtastic.core.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,9 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,9 +61,6 @@ private const val EVENT_ACCENT_ALPHA = 0.12f
 
 /** Height of the event brand rule under the app bar. A hairline: brand presence without stealing vertical space. */
 private val EVENT_BRAND_RULE_HEIGHT = 3.dp
-
-/** A gradient needs two stops; a single-color palette is drawn as a flat rule instead. */
-private const val MIN_GRADIENT_STOPS = 2
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -142,27 +133,8 @@ fun MainAppBar(
                 )
             },
         )
-        EventBrandRule(palette = eventTheme?.palette.orEmpty())
+        EventPaletteStrip(palette = eventTheme?.palette.orEmpty(), height = EVENT_BRAND_RULE_HEIGHT)
     }
-}
-
-/**
- * Hairline of the event's full brand palette under the app bar. The accent wash alone can only carry one color, and for
- * editions whose primary is very dark (DEF CON's navy) it is nearly invisible against a dark surface — the rule is
- * where the rest of the palette actually shows up. Draws nothing when the edition publishes no colors.
- */
-@Composable
-private fun EventBrandRule(palette: List<Color>) {
-    if (palette.isEmpty()) return
-    val brush =
-        remember(palette) {
-            if (palette.size >= MIN_GRADIENT_STOPS) {
-                Brush.horizontalGradient(palette)
-            } else {
-                SolidColor(palette.first())
-            }
-        }
-    Box(Modifier.fillMaxWidth().height(EVENT_BRAND_RULE_HEIGHT).background(brush))
 }
 
 /** Reads [LocalEventBranding] to show event branding (tap → [EventInfoSheet]), or the default Meshtastic logo. */

@@ -125,7 +125,9 @@ fun EventFirmwareEdition.accentColorOrNull(): Color? = parseBrandColor(accentCol
  * so an edition that carries only one color still yields a usable, non-empty list where one exists.
  */
 fun EventFirmwareEdition.brandPalette(): List<Color> {
-    val fromPalette = theme?.palette.orEmpty().mapNotNull(::parseBrandColor)
+    // distinct() on both paths: a repeated hex would otherwise become a repeated gradient stop, flattening the
+    // gradient over that span. Order is preserved, so the authored reading order still holds.
+    val fromPalette = theme?.palette.orEmpty().mapNotNull(::parseBrandColor).distinct()
     if (fromPalette.isNotEmpty()) return fromPalette
     val named = listOfNotNull(theme?.colors?.primary, theme?.colors?.secondary, theme?.colors?.accent, accentColor)
     return named.mapNotNull(::parseBrandColor).distinct()

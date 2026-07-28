@@ -19,7 +19,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,9 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
@@ -204,17 +201,7 @@ private fun EventHeader(edition: EventFirmwareEdition, accent: Color?, palette: 
                     }
             }
         }
-        if (palette.isNotEmpty()) {
-            val brush =
-                remember(palette) {
-                    if (palette.size >= MIN_GRADIENT_STOPS) {
-                        Brush.horizontalGradient(palette)
-                    } else {
-                        SolidColor(palette.first())
-                    }
-                }
-            Box(Modifier.fillMaxWidth().height(PALETTE_STRIP_HEIGHT).background(brush))
-        }
+        EventPaletteStrip(palette = palette, height = PALETTE_STRIP_HEIGHT)
     }
 }
 
@@ -269,6 +256,3 @@ private const val THEME_NAME_ALPHA = 0.8f
 
 /** Height of the brand palette strip closing the header band. */
 private val PALETTE_STRIP_HEIGHT = 6.dp
-
-/** A gradient needs two stops; a single-color palette is drawn as a flat strip instead. */
-private const val MIN_GRADIENT_STOPS = 2
