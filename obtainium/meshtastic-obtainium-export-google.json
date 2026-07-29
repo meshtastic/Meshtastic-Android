@@ -1,0 +1,26 @@
+{
+    "apps": [
+        {
+            "id": "com.geeksville.mesh",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic",
+            "additionalSettings": "{\"apkFilterRegEx\":\"google-release\\\\.apk$\",\"appName\":\"Meshtastic\"}"
+        },
+        {
+            "id": "com.geeksville.mesh.google.debug",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic Snapshot (google)",
+            "additionalSettings": "{\"includePrereleases\":true,\"filterReleaseTitlesByRegEx\":\"^Snapshot\",\"useLatestAssetDateAsReleaseDate\":true,\"versionDetection\":false,\"releaseDateAsVersion\":true,\"apkFilterRegEx\":\"google-.*-debug-\\\\d+\\\\.apk$\",\"autoApkFilterByArch\":true,\"appName\":\"Meshtastic Snapshot (google)\"}"
+        },
+        {
+            "id": "com.geeksville.mesh.fdroid.debug",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic Snapshot (fdroid)",
+            "additionalSettings": "{\"includePrereleases\":true,\"filterReleaseTitlesByRegEx\":\"^Snapshot\",\"useLatestAssetDateAsReleaseDate\":true,\"versionDetection\":false,\"releaseDateAsVersion\":true,\"apkFilterRegEx\":\"fdroid-.*-debug-\\\\d+\\\\.apk$\",\"autoApkFilterByArch\":true,\"appName\":\"Meshtastic Snapshot (fdroid)\"}"
+        }
+    ],
+    "settings": null
+}

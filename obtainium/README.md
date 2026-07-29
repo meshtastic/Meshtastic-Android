@@ -6,15 +6,46 @@ config site expect. Setup instructions and channel reference live in
 [docs/en/developer/test-builds.md](../docs/en/developer/test-builds.md); this
 directory holds the machine-readable artifacts.
 
-| File | What it is |
-|---|---|
-| `com.geeksville.mesh.json` | Submission file for [apps.obtainium.imranr.dev](https://github.com/ImranR98/apps.obtainium.imranr.dev) — stable channel, both flavors |
-| `meshtastic-obtainium-export.json` | Obtainium **Import/Export → Obtainium import** file (stable + snapshot) |
-| `generate-links.py` | Emits `obtainium://app/…` one-tap links for every channel |
+| File | What it is | Generated? |
+|---|---|---|
+| `generate-links.py` | Source of truth for every channel/flavor config | — |
+| `meshtastic-obtainium-export-google.json` | **Import/Export → Obtainium import** file: `google` release + both snapshots | ✅ |
+| `meshtastic-obtainium-export-fdroid.json` | Same, with the `fdroid` release | ✅ |
+| the deep-link table in [test-builds.md](../docs/en/developer/test-builds.md) | `obtainium://app/…` one-tap links, every channel × both flavors | ✅ |
+| the deep-link table in [README.md](../README.md) | same links, narrowed to latest release + open beta × both flavors | ✅ |
+| `com.geeksville.mesh.json` | Submission file for [apps.obtainium.imranr.dev](https://github.com/ImranR98/apps.obtainium.imranr.dev) | hand-maintained |
+
+`generate-links.py` writes the three generated targets from one `CHANNELS` ×
+`FLAVORS` definition, so the links and the import files cannot disagree:
 
 ```bash
-python3 obtainium/generate-links.py
+python3 obtainium/generate-links.py          # regenerate
+python3 obtainium/generate-links.py --check  # verify, exits 1 on drift
 ```
+
+Run `--check` after editing anything in this directory. Editing a generated file
+by hand is always wrong — change `generate-links.py` and regenerate.
+
+### How many entries a user can have
+
+Obtainium keys apps by application ID, and that governs the whole layout:
+
+| | Application ID | Coexist? |
+|---|---|---|
+| Release builds — stable, open, closed, bleeding edge, either flavor | `com.geeksville.mesh` | **No**, one only |
+| Snapshot `google` | `com.geeksville.mesh.google.debug` | Yes |
+| Snapshot `fdroid` | `com.geeksville.mesh.fdroid.debug` | Yes |
+
+So each import file carries exactly **one** release entry — hence one file per
+flavor — plus **both** snapshots. Import is `saveApps()` keyed by `id`, so two
+release entries in one file would silently overwrite rather than error. The beta
+channels are deliberately left to the deep links for the same reason.
+
+Only the snapshot labels carry a flavor suffix (`Meshtastic Snapshot (fdroid)`),
+because only those can coexist and need telling apart. Labels are set via
+`appName`, not `name`: `App.finalName` is `additionalSettings['appName'] ?? name`,
+and without `appName` Obtainium falls back to the installed app's own label — a
+debug build shows up as "Google Debug".
 
 > `com.geeksville.mesh.json` is a **byte-identical mirror** of what we submitted
 > upstream as [apps.obtainium.imranr.dev#1566](https://github.com/ImranR98/apps.obtainium.imranr.dev/pull/1566)
@@ -56,18 +87,11 @@ Three distribution shapes, all carrying the same object:
   form. `categories` must come from
   [`public/data/categories.json`](https://github.com/ImranR98/apps.obtainium.imranr.dev/blob/main/public/data/categories.json)
   — `messaging` for us.
-- **Import/export file** — `{ "apps": [ … ], "settings": null }`. One entry per
-  package name, because Obtainium keys apps by `id`.
-
-  This is a real constraint on how many channels a user can follow at once.
-  Every non-debug channel — stable `google`, stable `fdroid`, open beta, closed
-  beta, bleeding edge — is `com.geeksville.mesh`, so **only one of them can be
-  tracked at a time**. Adding a second reuses that one entry and switches which
-  channel it follows; it does not create a parallel entry. That is why the
-  export ships stable plus snapshot and not stable plus a beta channel. Only
-  snapshot escapes it, via the `.debug` application-ID suffix
-  (`com.geeksville.mesh.google.debug`), so it can sit alongside a release
-  install.
+- **Import/export file** — `{ "apps": [ … ], "settings": null }`, one entry per
+  application ID (see [above](#how-many-entries-a-user-can-have)). The legacy
+  shape without `schemaVersion` is deliberate: Obtainium reads it through the
+  `schemaVersion`-absent branch, which avoids inventing `exportedAt`/`appVersion`
+  provenance for a file no Obtainium install actually produced.
 - **Deep link** — `obtainium://app/<percent-encoded config JSON>` adds the app
   with settings baked in. `obtainium://add/<url>` only prefills the Add-App page.
   Wrapping it as `https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/…`

@@ -200,6 +200,14 @@ jobs:
       # the Crowdin post-export processor.
       - name: Check for escaped quotes in base string resources
         run: python3 scripts/check-string-escapes.py
+      # The deep-link tables (README + developer guide) and both Obtainium import
+      # files are generated from CHANNELS x FLAVORS in obtainium/generate-links.py.
+      # Offline and deterministic, so drift can only come from a commit: this fails
+      # the PR that hand-edits a generated file or changes the script without
+      # regenerating. The network half (are the APK filters still matching real
+      # release assets?) is the --refresh probe in scheduled-updates.yml.
+      - name: Check Obtainium generated links are current
+        run: python3 obtainium/generate-links.py --check
       # Flathub/AppStream needs a <release> entry for the version being shipped; a stale
       # <releases> block degrades (or fails) the Flathub listing. Fails the PR that bumps
       # VERSION_NAME_BASE until the matching entry is added.
