@@ -323,10 +323,12 @@ class MQTTRepositoryImpl(
 
 /**
  * `true` only for CONNACK reason codes where retrying can never help — the broker examined our credentials or client
- * identity and refused them. The library also wraps transport-level connect failures (timeout, TLS, socket EOF) as
- * [MqttException.ConnectionRejected] with [ReasonCode.UNSPECIFIED_ERROR]; those are transient and must stay in the
- * retry loop, not permanently stop the proxy with a "check credentials" dialog. Public (not internal) so
- * `MqttManagerImpl` in `:core:data` can phrase its user-facing error from the same classification.
+ * identity and refused them.
+ *
+ * A [MqttException.ConnectionRejected] can still carry a *transient* broker verdict (`SERVER_BUSY`,
+ * `SERVER_UNAVAILABLE`, `CONNECTION_RATE_EXCEEDED`), which must stay in the retry loop rather than stop the proxy with
+ * a "check credentials" dialog. Public so `MqttManagerImpl` in `:core:data` can phrase its user-facing error from the
+ * same classification.
  */
 fun MqttException.ConnectionRejected.isCredentialRejection(): Boolean = when (reasonCode) {
     ReasonCode.BAD_USER_NAME_OR_PASSWORD,
