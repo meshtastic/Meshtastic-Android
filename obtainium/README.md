@@ -57,8 +57,17 @@ Three distribution shapes, all carrying the same object:
   [`public/data/categories.json`](https://github.com/ImranR98/apps.obtainium.imranr.dev/blob/main/public/data/categories.json)
   — `messaging` for us.
 - **Import/export file** — `{ "apps": [ … ], "settings": null }`. One entry per
-  package name; Obtainium keys apps by `id`, so the stable channels can't
-  coexist as separate entries.
+  package name, because Obtainium keys apps by `id`.
+
+  This is a real constraint on how many channels a user can follow at once.
+  Every non-debug channel — stable `google`, stable `fdroid`, open beta, closed
+  beta, bleeding edge — is `com.geeksville.mesh`, so **only one of them can be
+  tracked at a time**. Adding a second reuses that one entry and switches which
+  channel it follows; it does not create a parallel entry. That is why the
+  export ships stable plus snapshot and not stable plus a beta channel. Only
+  snapshot escapes it, via the `.debug` application-ID suffix
+  (`com.geeksville.mesh.google.debug`), so it can sit alongside a release
+  install.
 - **Deep link** — `obtainium://app/<percent-encoded config JSON>` adds the app
   with settings baked in. `obtainium://add/<url>` only prefills the Add-App page.
   Wrapping it as `https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/…`

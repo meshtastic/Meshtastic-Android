@@ -17,7 +17,7 @@ aliases:
 
 > **Heads up — signatures.** Builds from GitHub are signed with the project's release key (`CN=Kevin Hester, O=Geeksville Industries`), **not** Google Play's. If you already have Meshtastic installed from the Play Store, Android will refuse to update over it: **uninstall the Play Store version first** (this clears app data), then install via Obtainium and stay on Obtainium for updates.
 >
-> **Switching between the fdroid and google flavors is fine.** Both flavors in a given release carry the *same* release key, so Obtainium can move you from one to the other in place — verified by installing the google APK over an installed fdroid build. Only the *origin* of a build (Play vs GitHub) determines whether the signatures clash.
+> **Switching between the `fdroid` and `google` flavors is fine.** Both flavors in a given release carry the *same* release key, so Obtainium can move you from one to the other in place — verified by installing the `google` APK over an installed `fdroid` build. Only the *origin* of a build (Play vs GitHub) determines whether the signatures clash.
 
 ---
 
@@ -45,6 +45,8 @@ Prebuilt configurations live in [`obtainium/`](https://github.com/meshtastic/Mes
 ```bash
 python3 obtainium/generate-links.py
 ```
+
+Every channel except snapshot is the same `com.geeksville.mesh` package, and Obtainium keys apps by package name — so you can follow **one** of stable/open/closed/bleeding-edge at a time, plus snapshot alongside it. Tapping a second channel link switches the existing entry over rather than adding a new one.
 
 To set things up by hand instead, follow the rest of this page.
 
@@ -98,32 +100,34 @@ The APKs are named `…-debug-<versionCode>.apk` (not `-release.apk`), so use de
 
 | You want | Regex |
 |---|---|
-| Google flavor, most phones (arm64) | `google-arm64-v8a-debug-\d+\.apk` |
-| fdroid flavor, most phones (arm64) | `fdroid-arm64-v8a-debug-\d+\.apk` |
-| fdroid flavor, one-size-fits-all | `fdroid-universal-debug-\d+\.apk` |
+| `google` flavor, most phones (arm64) | `google-arm64-v8a-debug-\d+\.apk` |
+| `fdroid` flavor, most phones (arm64) | `fdroid-arm64-v8a-debug-\d+\.apk` |
+| `fdroid` flavor, one-size-fits-all | `fdroid-universal-debug-\d+\.apk` |
 
 Snapshot releases attach only the debug APKs — no `.aab` or desktop installers.
 
 > **If you build debug locally, uninstall your local build first.** CI signs snapshots with *its own* debug keystore, not yours (`07c16b98…` from CI versus `88914c61…` from a local machine, for example). Since both produce the same `com.geeksville.mesh.<flavor>.debug` package name, Android refuses the swap with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. The "installs as a separate app" note above holds against *release* builds, not against your own debug builds.
 
-> **Leave "Fallback to older releases" ON.** It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past releases that don't match — a config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" because production `v2.7.14` sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
+Two more things about release selection apply to every channel above, not just snapshot:
 
+> **Leave "Fallback to older releases" ON.** It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past releases that don't match — a config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" because production `v2.7.14` sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
+>
 > **If your channel filter still finds nothing:** that channel genuinely has no published release yet (common early in a version cycle, and always true for `-closed` once builds have moved to `-open`). Use the *Bleeding edge* form above to follow whichever channel is currently live.
 
 ---
 
 ## Picking the APK
 
-Each release attaches the **google** flavor APK, several **fdroid** flavor APKs, plus an `.aab` (not installable) and the desktop installers. Obtainium ignores non-APK assets on its own, but the two flavors share the `com.geeksville.mesh` package name, so exactly one must be pinned with **Filter APKs by regular expression**:
+Each release attaches the `google` flavor APK, several `fdroid` flavor APKs, plus an `.aab` (not installable) and the desktop installers. Obtainium ignores non-APK assets on its own, but the two flavors share the `com.geeksville.mesh` package name, so exactly one must be pinned with **Filter APKs by regular expression**:
 
 | You want | Regex |
 |---|---|
-| **Recommended for testing — Google flavor** | `google-release\.apk` |
-| fdroid flavor, most phones (arm64) | `fdroid-arm64-v8a-release\.apk` |
-| fdroid flavor, one-size-fits-all | `fdroid-universal-release\.apk` |
-| fdroid flavor, let Obtainium pick the ABI | `fdroid-.*-release\.apk` with **Auto-select by architecture** on |
+| **Recommended for testing — `google` flavor** | `google-release\.apk` |
+| `fdroid` flavor, most phones (arm64) | `fdroid-arm64-v8a-release\.apk` |
+| `fdroid` flavor, one-size-fits-all | `fdroid-universal-release\.apk` |
+| `fdroid` flavor, let Obtainium pick the ABI | `fdroid-.*-release\.apk` with **Auto-select by architecture** on |
 
-**Use the Google flavor while testing.** It ships Firebase Crashlytics and Datadog RUM, so the crashes and errors you hit get reported back to the team — which is the whole point of a test phase. It also has Google push (FCM) and Google Maps. Pick an fdroid flavor only if you'd rather not send that telemetry. You can change your mind later: both flavors share the release key, so Obtainium updates across the flavor boundary without an uninstall. Expect the google flavor to show its analytics-consent screen the first time it starts.
+**Use the `google` flavor while testing.** It ships Firebase Crashlytics and Datadog RUM, so the crashes and errors you hit get reported back to the team — which is the whole point of a test phase. It also has Google push (FCM) and Google Maps. Pick an `fdroid` flavor only if you'd rather not send that telemetry. You can change your mind later: both flavors share the release key, so Obtainium updates across the flavor boundary without an uninstall. Expect the `google` flavor to show its analytics-consent screen the first time it starts.
 
 ---
 
