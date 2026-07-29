@@ -454,11 +454,15 @@
     <string name="firmware_update_node_info_missing">Chybí informace o uživateli uzlu.</string>
     <string name="firmware_update_not_found_in_release">Firmware pro %1$s nebyl ve vydání nalezen.</string>
     <string name="firmware_update_ota_failed">Aktualizace OTA selhala: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">OTA zavaděč tohoto zařízení odmítl požadovaný způsob aktualizace: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Pro RAK WisBlock RAK4631 použijte sériový DFU nástroj výrobce (například adafruit-nrfutil dfu serial s dodaným .zip souborem bootloaderu). Pouhé zkopírování souboru .uf2 bootloader neaktualizuje.</string>
     <string name="firmware_update_rebooting">Restartuji do DFU...</string>
     <string name="firmware_update_release_notes">Poznámky k vydání</string>
     <string name="firmware_update_retrieval_failed">Nelze načíst soubor firmwaru.</string>
     <string name="firmware_update_retry">Zkusit znovu</string>
+    <string name="firmware_update_save_dfu_file">Uložte soubor .uf2 na DFU jednotku svého zařízení.</string>
     <string name="firmware_update_select_file">Vybrat soubor</string>
+    <string name="firmware_update_slow_bootloader_hint">Aktualizace jsou s bootloaderem tohoto zařízení pomalé. Nahráním bootloaderu OTAFIX výrazně urychlíte aktualizace přes Bluetooth (BLE).</string>
     <string name="firmware_update_source_local">Zdroj: lokální soubor</string>
     <string name="firmware_update_stable">Stabilní</string>
     <string name="firmware_update_starting_dfu">Spouštění DFU...</string>
@@ -690,6 +694,8 @@
     <string name="mqtt_config">Nastavení MQTT</string>
     <string name="mqtt_enabled">MQTT povoleno</string>
     <string name="mqtt_probe_success">Dosažitelný. Broker přijal přihlašovací údaje.</string>
+    <string name="mqtt_proxy_local">MQTT proxy na tomto telefonu</string>
+    <string name="mqtt_proxy_local_summary">Tento telefon přeposílá MQTT provoz pro připojené zařízení. Vypnutím okamžitě zastavíte přenos (relay), aniž byste museli měnit nastavení MQTT v zařízení — užitečné v případě, že MQTT provoz zahlcuje připojení. Opětovným zapnutím obnovíte přeposílání.</string>
     <string name="mqtt_status_connected">Připojeno</string>
     <string name="mqtt_status_disconnected">Odpojeno</string>
     <string name="mqtt_test_connection">Test připojení</string>
@@ -766,6 +772,7 @@
     <string name="node_list_help_node_details">Detaily uzlu</string>
     <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
     <string name="node_number">Číslo uzlu</string>
+    <string name="node_restarting">Restartování…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
     <string name="node_sort_channel">Kanál</string>
@@ -1058,6 +1065,7 @@
     <string name="server">Server</string>
     <string name="session_active">Relace aktivní</string>
     <string name="set_time">Nastavení času</string>
+    <string name="set_up_connection">Nastavit připojení</string>
     <string name="set_your_region">Nastavte svůj region</string>
     <string name="settings">nastavení</string>
     <!-- SHARE -->
