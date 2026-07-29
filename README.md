@@ -42,7 +42,18 @@ With Obtainium installed, tap a link below on your phone to set it up with every
 
 <!-- END GENERATED LINKS -->
 
-Closed-beta and per-commit snapshot channels, importable config files, and the setup details are in [Test Builds & Obtainium](docs/en/developer/test-builds.md). These links and files are generated — see [`obtainium/`](obtainium/).
+What those two channels point at right now:
+
+<!-- BEGIN GENERATED STATUS: obtainium/generate-links.py --refresh -->
+
+| Channel | Currently | Released |
+|---|---|---|
+| **Latest release** | `v2.7.14` | 2026-06-03 |
+| **Open beta** | `v2.8.0-open.6` | 2026-07-29 |
+
+<!-- END GENERATED STATUS -->
+
+Closed-beta and per-commit snapshot channels, importable config files, and the setup details are in [Test Builds & Obtainium](docs/en/developer/test-builds.md). These links, files and the table above are generated — see [`obtainium/`](obtainium/).
 
 Alternatively, these other providers are also available, but may be slower to update. 
 

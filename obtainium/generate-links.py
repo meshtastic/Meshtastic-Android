@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
 """Generate the Obtainium artifacts from one source of truth.
 
-This script owns two things:
+This script owns:
 
-  1. the one-tap deep-link table inside the developer guide, written between the
-     BEGIN/END GENERATED markers, and
-  2. the per-flavor Obtainium import files in this directory.
+  1. the one-tap deep-link tables in the project README and the developer guide,
+  2. the per-flavor Obtainium import files in this directory, and
+  3. with --refresh, the "currently published" channel table in the guide.
 
-Run it after changing CHANNELS or FLAVORS; run with --check to confirm nothing
-has drifted.
+Two kinds of staleness, two modes:
 
-    python3 obtainium/generate-links.py            # write the doc + export files
-    python3 obtainium/generate-links.py --check    # verify, exit 1 on drift
+    python3 obtainium/generate-links.py            # write offline targets
+    python3 obtainium/generate-links.py --check    # verify offline targets, exit 1 on drift
+    python3 obtainium/generate-links.py --refresh  # + hit the releases API (network)
+
+--check is deterministic and offline: the links and import files derive purely
+from CHANNELS x FLAVORS, so they can only drift when a commit changes them. That
+is a pull-request concern.
+
+--refresh is the part that goes stale on its own. It resolves each channel
+against the live GitHub releases and asserts every `apkFilterRegEx` still matches
+the assets our release workflows actually publish — so renaming a release asset
+fails loudly here instead of silently breaking every user's update check. It also
+records which channels are currently published, which changes as builds are
+promoted. That is a scheduled concern; see scheduled-updates.yml.
 
 `com.geeksville.mesh.json` is deliberately NOT generated here: it is a
 byte-identical mirror of what we submitted to apps.obtainium.imranr.dev and is
@@ -20,7 +31,11 @@ maintained by hand alongside that PR.
 
 import argparse
 import json
+import os
+import re
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 from urllib.parse import quote
 
@@ -34,6 +49,11 @@ OBTAINIUM_DIR = REPO_ROOT / "obtainium"
 
 BEGIN = "<!-- BEGIN GENERATED LINKS: obtainium/generate-links.py -->"
 END = "<!-- END GENERATED LINKS -->"
+
+STATUS_BEGIN = "<!-- BEGIN GENERATED STATUS: obtainium/generate-links.py --refresh -->"
+STATUS_END = "<!-- END GENERATED STATUS -->"
+
+RELEASES_API = "https://api.github.com/repos/meshtastic/Meshtastic-Android/releases?per_page=100"
 
 # The developer guide documents every channel; the project README only carries
 # the two channels a normal user should be choosing between.
@@ -173,11 +193,109 @@ def render_table(channels=None, label_of=None):
     return "\n".join(lines)
 
 
-def inject(path, body):
-    """Replace the marker-delimited block in `path` with `body`."""
-    text = path.read_text()
-    start, end = text.index(BEGIN), text.index(END) + len(END)
-    return text[:start] + body + text[end:]
+def replace_block(text, body, begin=BEGIN, end=END):
+    """Replace the marker-delimited block in `text` with `body`."""
+    start, stop = text.index(begin), text.index(end) + len(end)
+    return text[:start] + body + text[stop:]
+
+
+# --- live release data (--refresh only) -------------------------------------
+
+
+def fetch_releases():
+    request = urllib.request.Request(
+        RELEASES_API, headers={"Accept": "application/vnd.github+json"}
+    )
+    # Authenticate when a token is present purely for the rate limit; the data is
+    # public either way, so this still works locally with no token.
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        request.add_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return json.load(response)
+
+
+def resolve_release(releases, channel):
+    """The release a channel's filters select, or None if that channel is empty.
+
+    Mirrors the subset of Obtainium's selection we rely on: honour
+    includePrereleases, apply the release-title filter, skip drafts, and take the
+    newest match. Obtainium walks its own sorted list, but for a published-channel
+    probe "newest title match" is the same answer — confirmed on-device.
+    """
+    settings = channel["settings"]
+    include_prereleases = settings.get("includePrereleases", False)
+    title_filter = settings.get("filterReleaseTitlesByRegEx")
+    matches = []
+    for release in releases:
+        if release.get("draft"):
+            continue
+        if release.get("prerelease") and not include_prereleases:
+            continue
+        title = (release.get("name") or release.get("tag_name") or "").strip()
+        if title_filter and not re.search(title_filter, title):
+            continue
+        matches.append(release)
+    if not matches:
+        return None
+    return max(matches, key=lambda r: r.get("published_at") or "")
+
+
+def matching_assets(release, channel, flavor_key):
+    """Asset names in `release` that this channel/flavor's apkFilterRegEx selects."""
+    pattern = json.loads(config_for(channel, flavor_key)["additionalSettings"])[
+        "apkFilterRegEx"
+    ]
+    return [
+        asset["name"]
+        for asset in release.get("assets", [])
+        if asset["name"].lower().endswith((".apk", ".xapk", ".apkm", ".apks"))
+        and re.search(pattern, asset["name"])
+    ]
+
+
+def probe(releases):
+    """Resolve every channel/flavor against live releases.
+
+    Returns (rows, problems): rows feed the generated status table, problems are
+    regexes that no longer match anything in a release that does exist — i.e. the
+    release assets were renamed and these configs are broken.
+    """
+    rows, problems = [], []
+    for channel in CHANNELS:
+        release = resolve_release(releases, channel)
+        counts = {}
+        if release is not None:
+            for flavor_key in FLAVORS:
+                assets = matching_assets(release, channel, flavor_key)
+                counts[flavor_key] = len(assets)
+                if not assets:
+                    problems.append(
+                        f"{channel['key']}/{flavor_key}: apkFilterRegEx matched no "
+                        f"APK in {release.get('tag_name')} — release assets renamed?"
+                    )
+        rows.append({"channel": channel, "release": release, "counts": counts})
+    return rows, problems
+
+
+def render_status(rows):
+    """The live channel table. README only — never the archived/bundled guide."""
+    lines = [STATUS_BEGIN, "", "| Channel | Currently | Released |", "|---|---|---|"]
+    for row in rows:
+        channel, release = row["channel"], row["release"]
+        label = README_LABELS.get(channel["key"], channel["label"])
+        if release is None:
+            lines.append(f"| {label} | *none published right now* | — |")
+            continue
+        # Snapshot is rebuilt per push, so its tag is not a useful "version".
+        if channel.get("debug"):
+            version = "rolling, rebuilt on every push to `main`"
+        else:
+            version = f"`{release.get('tag_name', '?')}`"
+        date = (release.get("published_at") or "")[:10] or "—"
+        lines.append(f"| {label} | {version} | {date} |")
+    lines += ["", STATUS_END]
+    return "\n".join(lines)
 
 
 def render_export(flavor_key):
@@ -200,15 +318,33 @@ def export_path(flavor_key):
 README_LABELS = {"stable": "**Latest release**", "open": "**Open beta**"}
 
 
-def targets():
-    """Map of path -> expected full file content."""
+def targets(status_rows=None):
+    """Map of path -> expected full file content.
+
+    `status_rows` is supplied only by --refresh; without it the live status block
+    is left exactly as committed, so --check stays offline and deterministic.
+    """
     out = {export_path(k): render_export(k) for k in FLAVORS}
-    out[DOC] = inject(DOC, render_table())
+
+    # The guide is archived per release tag and bundled into the app, so it gets
+    # only the deep links — those derive from constants and never go stale. Live
+    # release state goes in the README alone, which GitHub always renders from the
+    # default branch.
+    out[DOC] = replace_block(DOC.read_text(), render_table())
+
     readme_channels = [c for c in CHANNELS if c["key"] in README_CHANNELS]
-    out[README] = inject(
-        README,
+    readme = replace_block(
+        README.read_text(),
         render_table(readme_channels, label_of=lambda c: README_LABELS[c["key"]]),
     )
+    if status_rows is not None:
+        readme = replace_block(
+            readme,
+            render_status([r for r in status_rows if r["channel"]["key"] in README_CHANNELS]),
+            STATUS_BEGIN,
+            STATUS_END,
+        )
+    out[README] = readme
     return out
 
 
@@ -217,12 +353,36 @@ def main():
     parser.add_argument(
         "--check", action="store_true", help="verify generated files are current"
     )
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="also probe the live releases API and refresh the channel status table",
+    )
     args = parser.parse_args()
 
+    status_rows = None
+    if args.refresh:
+        try:
+            releases = fetch_releases()
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as err:
+            # A flaky API must not be reported as "configs are broken"; leave the
+            # committed status block alone and let the next run pick it up.
+            print(f"::warning::releases API unreachable ({err}); skipping --refresh")
+            return 0
+        status_rows, problems = probe(releases)
+        for problem in problems:
+            print(f"::error::{problem}")
+        if problems:
+            print(
+                "An apkFilterRegEx no longer matches the published assets. Either the "
+                "release workflow renamed them, or FLAVORS needs updating."
+            )
+            return 1
+
     try:
-        expected = targets()
+        expected = targets(status_rows)
     except ValueError:
-        print(f"error: {DOC} is missing the BEGIN/END GENERATED LINKS markers")
+        print(f"error: {DOC} is missing the BEGIN/END GENERATED markers")
         return 1
 
     # A missing file counts as drifted rather than crashing, so --check works on

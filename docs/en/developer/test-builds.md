@@ -32,7 +32,11 @@ Meshtastic for Android promotes builds up a ladder: `closed → open → product
 | **closed** beta | Alpha (Closed) | published prerelease, tag `vX.Y.Z-closed.N` | ✅ Yes |
 | **snapshot** | — (not on Play) | rolling prerelease, tag `snapshot` | ✅ Yes |
 
-Each promotion cuts its **own** tag, and older ones stay published — `v2.8.0-open.1` through `v2.8.0-open.6` all exist as installable releases with APKs attached. So a channel accumulates releases during a version cycle rather than moving a single one forward, and the channel configs below pick the **newest** release whose title matches the channel.
+Each promotion cuts its **own** tag, and older ones stay published — a whole run of `vX.Y.Z-open.N` tags accumulates during a version cycle, each still installable with APKs attached. So a channel gathers releases rather than moving a single one forward, and the channel configs below pick the **newest** release whose title matches the channel.
+
+Which release each channel currently resolves to is deliberately **not** listed on this page: it is archived per release tag and bundled into the app, so a live version number here would be frozen at build time and wrong within weeks. The [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) carries the current state, refreshed automatically.
+
+A channel can legitimately be empty — most often `-closed`, early in a cycle before any build has been cut to it. The number of published `fdroid` ABI splits has also changed over time (2.7.14 shipped five, 2.8.0 ships three), which is why the filter matches every split rather than naming ABIs.
 
 **Snapshot** is different: it's an automated debug build of the latest commit on `main`, rebuilt and re-published under the single moving `snapshot` tag on every push. It never goes to Play. Because debug builds use a `.debug` application-ID suffix (`com.geeksville.mesh.fdroid.debug` / `com.geeksville.mesh.google.debug`) and the debug signing key, a snapshot installs as its **own separate app** — it sits alongside a Play/stable/beta install, so the uninstall-first warning above does **not** apply to it.
 
@@ -135,7 +139,7 @@ Two more things about release selection apply to every channel above, not just s
 
 > **Leave "Fallback to older releases" ON.** It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past releases that don't match — a config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" because production `v2.7.14` sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
 >
-> **If your channel filter still finds nothing:** that channel genuinely has no published release yet (common early in a version cycle, and always true for `-closed` once builds have moved to `-open`). Use the *Bleeding edge* form above to follow whichever channel is currently live.
+> **If your channel filter still finds nothing:** that channel has no published release yet — common early in a version cycle. Check the [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) for what is live, or use the *Bleeding edge* form to follow whichever of open/closed is newest.
 
 ---
 

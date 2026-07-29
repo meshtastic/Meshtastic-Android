@@ -161,6 +161,32 @@ jobs:
             fi
           fi
 
+      - name: Refresh Obtainium configs and deep links
+        id: obtainium
+        env:
+          # Only for the API rate limit; the releases endpoint is public.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Regenerates the deep-link tables and import files, then probes the live
+          # releases to confirm every apkFilterRegEx still matches published assets.
+          # A non-zero exit means an asset was renamed and the configs are broken —
+          # surface it as an error and skip the update rather than committing configs
+          # that resolve to nothing. Unreachable API exits 0 without touching files.
+          if python3 obtainium/generate-links.py --refresh; then
+            if git diff --quiet -- README.md docs/en/developer/test-builds.md obtainium; then
+              echo "No changes detected in Obtainium configs."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            else
+              echo "Obtainium configs or channel status changed."
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "::warning::Obtainium config refresh failed — see the error above."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=an apkFilterRegEx no longer matches the published release assets" >> "$GITHUB_OUTPUT"
+            git checkout -- README.md docs/en/developer/test-builds.md obtainium
+          fi
+
       - name: Sync with Crowdin
         uses: crowdin/github-action@v2
         with:
@@ -206,6 +232,8 @@ jobs:
           EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
           DEVICE_LINKS_STATUS: ${{ steps.device_links.outputs.status }}
           DEVICE_LINKS_DETAIL: ${{ steps.device_links.outputs.detail }}
+          OBTAINIUM_STATUS: ${{ steps.obtainium.outputs.status }}
+          OBTAINIUM_DETAIL: ${{ steps.obtainium.outputs.detail }}
         run: |
           firmware_status="$FIRMWARE_STATUS"
           firmware_detail="$FIRMWARE_DETAIL"
@@ -215,6 +243,8 @@ jobs:
           event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
           device_links_status="$DEVICE_LINKS_STATUS"
           device_links_detail="$DEVICE_LINKS_DETAIL"
+          obtainium_status="$OBTAINIUM_STATUS"
+          obtainium_detail="$OBTAINIUM_DETAIL"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -251,6 +281,14 @@ jobs:
             *)         body+=$'\n'"- ❓ \`device_links.json\` — unknown status." ;;
           esac
 
+          # Obtainium configs / deep links
+          case "$obtainium_status" in
+            updated)   body+=$'\n'"- ✅ Obtainium deep links and import files regenerated (channel status changed)." ;;
+            unchanged) body+=$'\n'"- ✔️ Obtainium configs checked against the live releases — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ Obtainium configs skipped — ${obtainium_detail}." ;;
+            *)         body+=$'\n'"- ❓ Obtainium configs — unknown status." ;;
+          esac
+
           # Crowdin (always attempted)
           body+=$'\n'"- Source strings were uploaded to Crowdin."
           body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
@@ -278,6 +316,7 @@ jobs:
             - Device links list
             - Crowdin source string uploads
             - Crowdin translation downloads
+            - Obtainium deep links and import files
           title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
           body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
@@ -291,6 +330,8 @@ jobs:
             fastlane/metadata/android/**
             **/strings.xml
             docs/**/*.md
+            README.md
+            obtainium/**
           labels: |
             automation
             l10n
