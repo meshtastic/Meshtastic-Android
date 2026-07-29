@@ -52,6 +52,7 @@ import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
+import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.mqtt.plus
 import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
@@ -199,17 +200,17 @@ class MQTTRepositoryImpl(
                     }
                     Logger.i { "MQTT connected and subscribed" }
                 }
+                val failure = result.exceptionOrNull()
                 when {
                     result.isSuccess -> return@launch
 
-                    result.exceptionOrNull() is MqttException.ConnectionRejected -> {
-                        Logger.e(result.exceptionOrNull()) { "MQTT connection rejected (unrecoverable), stopping" }
-                        close(result.exceptionOrNull()!!)
+                    failure is MqttException.ConnectionRejected && failure.isCredentialRejection() -> {
+                        Logger.e(failure) { "MQTT connection rejected (unrecoverable), stopping" }
+                        close(failure)
                         return@launch
                     }
 
                     else -> {
-                        val failure = result.exceptionOrNull()
                         // Broker- and network-side failures are what this retry loop exists to absorb — an
                         // unreachable host, a TLS problem, a dropped connection, or a broker that violates the
                         // MQTT 5 spec (e.g. the topic-alias limit). None are defects in this app, and reporting
@@ -321,6 +322,24 @@ class MQTTRepositoryImpl(
 }
 
 /**
+ * `true` only for CONNACK reason codes where retrying can never help — the broker examined our credentials or client
+ * identity and refused them. The library also wraps transport-level connect failures (timeout, TLS, socket EOF) as
+ * [MqttException.ConnectionRejected] with [ReasonCode.UNSPECIFIED_ERROR]; those are transient and must stay in the
+ * retry loop, not permanently stop the proxy with a "check credentials" dialog. Public (not internal) so
+ * `MqttManagerImpl` in `:core:data` can phrase its user-facing error from the same classification.
+ */
+fun MqttException.ConnectionRejected.isCredentialRejection(): Boolean = when (reasonCode) {
+    ReasonCode.BAD_USER_NAME_OR_PASSWORD,
+    ReasonCode.NOT_AUTHORIZED,
+    ReasonCode.BAD_AUTHENTICATION_METHOD,
+    ReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+    ReasonCode.BANNED,
+    -> true
+
+    else -> false
+}
+
+/**
  * `true` when an MQTT connect/subscribe failure is one the retry loop is designed to absorb, rather than a defect worth
  * reporting to Crashlytics/Datadog.
  *
@@ -387,8 +406,9 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
         transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         autoReconnect = true
-        username = setup.mqttConfig?.username
-        setup.mqttConfig?.password?.let { password(it) }
+        val (user, pass) = effectiveCredentials(setup.mqttConfig)
+        username = user
+        pass?.let { password(it) }
         logger = KermitMqttLogger()
         // WARN for production: the library emits endpoint addresses and topic strings at
         // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
@@ -397,7 +417,9 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
     },
 )
 
-private const val MQTT_KEEPALIVE_SECONDS = 30
+// Public (not internal/private) so MqttManagerImpl's probe in :core:data can mirror the live client —
+// some brokers reject a keepalive-0 CONNECT (misleadingly, as CLIENT_IDENTIFIER_NOT_VALID).
+const val MQTT_KEEPALIVE_SECONDS = 30
 private const val MQTT_PORT_PLAIN = 1883
 private const val MQTT_PORT_TLS = 8883
 
@@ -425,6 +447,26 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
 }
 
 private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
+
+// The public broker's well-known credentials, same values as the firmware's Default.h.
+private const val DEFAULT_MQTT_USERNAME = "meshdev"
+private const val DEFAULT_MQTT_PASSWORD = "large4cats"
+
+/**
+ * Mirrors the firmware's `PubSubConfig` rule: an empty `address` means "the public broker with its well-known
+ * credentials", substituting username and password together with the server — the stored username/password are ignored
+ * in that case, whatever they contain. Substituting only the address (as this repository does for the endpoint) while
+ * passing the stored empty credentials through makes the proxy connect anonymously, which the public broker rejects
+ * with BAD_USER_NAME_OR_PASSWORD — surfaced to the user as a bogus "check credentials" error on configs the firmware
+ * itself connects with happily. Empty-address configs occur in the wild: lockdown-enabled firmware hands
+ * unauthenticated clients a zeroed MQTTConfig.
+ */
+internal fun effectiveCredentials(config: ModuleConfig.MQTTConfig?): Pair<String?, String?> =
+    if (config?.address.isNullOrEmpty()) {
+        DEFAULT_MQTT_USERNAME to DEFAULT_MQTT_PASSWORD
+    } else {
+        config?.username to config?.password
+    }
 
 fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
     tlsEnabled || extractHost(address).equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)

@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -180,6 +181,40 @@ class MQTTRepositoryImplTest {
     @Test
     fun `custom server respects tlsEnabled true`() {
         assertEquals(true, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = true))
+    }
+
+    // endregion
+
+    // region effectiveCredentials — firmware-parity credential defaulting.
+
+    @Test
+    fun `empty address substitutes the public broker's well-known credentials`() {
+        // Mirrors firmware PubSubConfig: lockdown-redacted (zeroed) configs must not connect anonymously.
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "", password = ""))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `null config substitutes the public broker's well-known credentials`() {
+        assertEquals("meshdev" to "large4cats", effectiveCredentials(null))
+    }
+
+    @Test
+    fun `empty address ignores stored credentials entirely - firmware parity`() {
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "custom", password = "pw"))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `explicit address uses the stored credentials as-is`() {
+        val config = ModuleConfig.MQTTConfig(address = "broker.example.com", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
+    }
+
+    @Test
+    fun `explicit default server address uses the stored credentials as-is - firmware parity`() {
+        val config = ModuleConfig.MQTTConfig(address = "mqtt.meshtastic.org", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
     }
 
     // endregion
@@ -335,6 +370,74 @@ class MQTTRepositoryImplTest {
 
         collector.cancelAndJoin()
         runCurrent()
+    }
+
+    @Test
+    fun `transport failure wrapped as ConnectionRejected retries instead of stopping the proxy`() = runTest {
+        // The MQTT library wraps ANY connect failure — timeout, TLS, socket EOF — as
+        // ConnectionRejected with UNSPECIFIED_ERROR. Treating those as unrecoverable stopped
+        // the proxy permanently and showed users a bogus "check credentials" dialog.
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.UNSPECIFIED_ERROR, "Connection failed: Connection timed out"),
+        )
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `credential rejection stops the proxy permanently`() = runTest {
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.BAD_USER_NAME_OR_PASSWORD, "Connection refused"),
+        )
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(1, harness.client.connectCalls.size)
+        assertIs<MqttException.ConnectionRejected>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
+    fun `only credential and identity reason codes classify as credential rejections`() {
+        val fatal =
+            listOf(
+                ReasonCode.BAD_USER_NAME_OR_PASSWORD,
+                ReasonCode.NOT_AUTHORIZED,
+                ReasonCode.BAD_AUTHENTICATION_METHOD,
+                ReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                ReasonCode.BANNED,
+            )
+        val transient =
+            listOf(
+                ReasonCode.UNSPECIFIED_ERROR,
+                ReasonCode.SERVER_UNAVAILABLE,
+                ReasonCode.SERVER_BUSY,
+                ReasonCode.CONNECTION_RATE_EXCEEDED,
+            )
+
+        fatal.forEach { code ->
+            assertTrue(MqttException.ConnectionRejected(code, "x").isCredentialRejection(), "expected fatal: $code")
+        }
+        transient.forEach { code ->
+            assertFalse(
+                MqttException.ConnectionRejected(code, "x").isCredentialRejection(),
+                "expected transient: $code",
+            )
+        }
     }
 
     @Test

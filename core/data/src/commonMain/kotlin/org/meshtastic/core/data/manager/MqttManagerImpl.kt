@@ -31,15 +31,25 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
+import org.meshtastic.core.network.repository.isCredentialRejection
 import org.meshtastic.core.network.repository.mqttTlsConfig
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.mqtt_error_connection_lost
+import org.meshtastic.core.resources.mqtt_error_credentials_rejected
+import org.meshtastic.core.resources.mqtt_error_proxy_failed
+import org.meshtastic.core.resources.mqtt_error_rejected
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttException
@@ -80,12 +90,26 @@ class MqttManagerImpl(
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable ->
                         _proxyActive.value = false
+                        // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
+                        // compose-resources raises on headless JVM tests; production resolves the
+                        // localized string and the error is still surfaced either way.
                         val message =
-                            when (throwable) {
-                                is MqttException.ConnectionRejected -> "MQTT: connection rejected (check credentials)"
-                                is MqttException.ConnectionLost -> "MQTT: connection lost"
-                                else -> "MQTT proxy failed: ${throwable.message}"
+                            safeCatchingAll {
+                                when {
+                                    throwable is MqttException.ConnectionRejected &&
+                                        throwable.isCredentialRejection() ->
+                                        getStringSuspend(Res.string.mqtt_error_credentials_rejected)
+
+                                    throwable is MqttException.ConnectionRejected ->
+                                        getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
+
+                                    throwable is MqttException.ConnectionLost ->
+                                        getStringSuspend(Res.string.mqtt_error_connection_lost)
+
+                                    else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
+                                }
                             }
+                                .getOrDefault("")
                         serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
@@ -144,6 +168,9 @@ class MqttManagerImpl(
                 // including its scoped private-CA trust hook — otherwise a probe would fail where a connect succeeds.
                 val tls = mqttTlsConfig()
                 transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+                // Mirror the live client's keepalive too: the library default is 0 (no keepalive),
+                // which some brokers reject — misleadingly, as CLIENT_IDENTIFIER_NOT_VALID.
+                keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
                 // Per-connection random suffix: myId identifies the node (and is null →
                 // "unknown" before the node record loads), so two probes can collide on one
                 // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
@@ -188,3 +215,6 @@ class MqttManagerImpl(
         is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
     }
 }
+
+/** Failure detail for a user-facing message; a throwable without a message still needs a placeholder to substitute. */
+private suspend fun Throwable.detail(): String = message ?: getStringSuspend(Res.string.unknown)
