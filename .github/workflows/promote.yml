@@ -139,18 +139,21 @@ jobs:
       # Fail-open — a preflight error proceeds to supply, which uses the same
       # credentials and will surface any real failure.
       # The main checkout above is at the release tag, which predates this
-      # script — fetch it from the revision of THIS workflow file instead, so
-      # script and workflow always move in lockstep. Must not be a release
-      # input: any tag cut before this landed has no scripts/ entry, and a
-      # missing script exits 127 at the step level, bypassing the script's own
-      # fail-open path and hard-failing the promotion.
-      # workflow_sha (not github.sha) is the SHA of the workflow file being
-      # executed. Identical for today's local `uses: ./...` call; correct too
-      # if promote.yml is ever called cross-repo at a pinned ref.
-      - name: Checkout preflight script from workflow ref
+      # script — fetch it from the caller's commit instead, so script and
+      # workflow always move in lockstep. This is a local reusable-workflow
+      # call (`uses: ./.github/workflows/promote.yml`), so promote.yml is
+      # loaded from that same commit.
+      #
+      # Must NOT be a release input: any tag cut before this landed has no
+      # scripts/ entry, and a missing script exits 127 at the step level,
+      # bypassing the script's own fail-open path and hard-failing the
+      # promotion. workflow_sha is no better — the github context in a called
+      # reusable workflow is caller-associated, so it resolves to the caller's
+      # workflow too. A cross-repo caller would need explicit repo+ref inputs.
+      - name: Checkout preflight script from caller commit
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.sha }}
           path: .workflow-ref
           sparse-checkout: scripts
 
