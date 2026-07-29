@@ -85,6 +85,13 @@ class NodeItemZeroMetricsTest {
     }
 
     @Test
+    fun nodeItem_hidesOutOfRangeSoilMoisture() = runComposeUiTest {
+        // A sensor fault reporting 101% is not a reading — matches Node.getTelemetryStrings.
+        setNodeItem(EnvironmentMetrics(soil_moisture = 101))
+        onNodeWithText("101%").assertDoesNotExist()
+    }
+
+    @Test
     fun nodeItemCompact_showsZeroTemperature() = runComposeUiTest {
         setNodeItemCompact(EnvironmentMetrics(temperature = 0f))
         onNodeWithText("0.0°C").assertIsDisplayed()

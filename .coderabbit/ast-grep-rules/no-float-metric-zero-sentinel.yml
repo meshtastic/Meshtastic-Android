@@ -11,10 +11,17 @@ id: no-float-metric-zero-sentinel
 language: kotlin
 severity: error
 message: "0 is a real reading on this scale — use `?.let { }` instead of a zero-guard."
+# Every spelling of the zero-float literal is listed: a reformat from `0f` to `0.0f` must not slip past the rule.
 rule:
   any:
     - pattern: "($X ?: 0f) != 0f"
     - pattern: "($X ?: 0f) == 0f"
+    - pattern: "($X ?: 0F) != 0F"
+    - pattern: "($X ?: 0F) == 0F"
+    - pattern: "($X ?: 0.0f) != 0.0f"
+    - pattern: "($X ?: 0.0f) == 0.0f"
+    - pattern: "($X ?: 0.0F) != 0.0F"
+    - pattern: "($X ?: 0.0F) == 0.0F"
 constraints:
   X:
     regex: "(temperature|voltage|current|soil_moisture)$"

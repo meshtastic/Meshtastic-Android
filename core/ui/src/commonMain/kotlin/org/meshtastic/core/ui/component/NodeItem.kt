@@ -394,9 +394,15 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
         val temp = MetricFormatter.temperature(soilTemperature, tempInFahrenheit)
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
-    env.soil_moisture?.let { soilMoisture ->
-        items.add { SoilMoistureInfo(moisture = "$soilMoisture%", contentColor = contentColor) }
-    }
+    // Range-checked to match Node.getTelemetryStrings — a sensor fault reporting 101% is not a reading.
+    val soilMoistureRange = 0..100
+    env.soil_moisture
+        ?.takeIf { it in soilMoistureRange }
+        ?.let { soilMoisture ->
+            items.add {
+                SoilMoistureInfo(moisture = MetricFormatter.percent(soilMoisture), contentColor = contentColor)
+            }
+        }
     env.voltage?.let { voltage ->
         items.add {
             PowerInfo(
