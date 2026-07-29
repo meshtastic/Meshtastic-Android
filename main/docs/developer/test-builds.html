@@ -21,58 +21,43 @@
  **closed** beta | Alpha (Closed) | published prerelease, tag `vX.Y.Z-closed.N` | ✅ Yes |
  **snapshot** | — (not on Play) | rolling prerelease, tag `snapshot` | ✅ Yes |
 
-Each promotion cuts its **own** tag, and older ones stay published — `v2.8.0-open.1` through `v2.8.0-open.6` all exist as installable releases with APKs attached. So a channel accumulates releases during a version cycle rather than moving a single one forward, and the channel configs below pick the **newest** release whose title matches the channel.
+Each promotion cuts its **own** tag, and older ones stay published — a whole run of `vX.Y.Z-open.N` tags accumulates during a version cycle, each still installable with APKs attached. So a channel gathers releases rather than moving a single one forward, and the channel configs below pick the **newest** release whose title matches the channel.
+
+Which release each channel currently resolves to is deliberately **not** listed on this page: it is archived per release tag and bundled into the app, so a live version number here would be frozen at build time and wrong within weeks. The [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) carries the current state, refreshed automatically.
+
+A channel can legitimately be empty — most often `-closed`, early in a cycle before any build has been cut to it. The number of published `fdroid` ABI splits has also changed over time (2.7.14 shipped five, 2.8.0 ships three), which is why the filter matches every split rather than naming ABIs.
 
 **Snapshot** is different: it's an automated debug build of the latest commit on `main`, rebuilt and re-published under the single moving `snapshot` tag on every push. It never goes to Play. Because debug builds use a `.debug` application-ID suffix (`com.geeksville.mesh.fdroid.debug` / `com.geeksville.mesh.google.debug`) and the debug signing key, a snapshot installs as its **own separate app** — it sits alongside a Play/stable/beta install, so the uninstall-first warning above does **not** apply to it.
 
-## Manual setup
-
-1. Install Obtainium ([GitHub releases](https://github.com/ImranR98/Obtainium/releases) or [F-Droid / IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/dev.imranr.obtainium)).
-2. Tap **Add App**.
-3. **App Source URL:** `https://github.com/meshtastic/Meshtastic-Android`
-4. Set the options for the channel you want (below).
-5. Tap **Add**, then **Install**.
-
-### Stable
-
-- **Include prereleases:** off
-- *(optional, stricter)* **Verify the 'latest' tag:** on
-- **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
-
-### Open beta
-
-- **Include prereleases:** on
-- **Filter release titles by regular expression:** `-open`
-- **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
-
-### Closed beta
-
-- **Include prereleases:** on
-- **Filter release titles by regular expression:** `-closed`
-- **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
-
-### Bleeding edge (newest promoted test build, any channel)
-
-- **Include prereleases:** on
-- **Filter release titles by regular expression:** `-(closed|open)`
-- **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
-
-Obtainium installs the newest promoted prerelease — whatever is currently in open or closed. The title filter is required to skip the always-newer `snapshot` prerelease; without it Obtainium would follow snapshot instead.
-
-### Snapshot (latest commit on `main`)
-
-- **Include prereleases:** on
-- **Filter release titles by regular expression:** `^Snapshot`
-- **Use the latest asset date as the release date:** on
-- **Version detection:** off, with **Release date as version** on
-- **Filter APKs by regular expression:** debug-signed names, see below
-
-Follows `main` directly — updates on every push. These are **debug builds** (`.debug` package, debug key), so they install as a separate app and won't disturb a stable/beta install. The `snapshot` tag never changes, so there is no version string to compare — date-based pseudo-versioning is what makes updates detectable.
-
-The APKs are named `…-debug-&lt;versionCode&gt;.apk` (not `-release.apk`), so use debug-suffixed filters:
-
- You want | Regex |
 ---|---|
+ Stable | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%5C%22%7D%22%7D) |
+ Open beta | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-open%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-open%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) |
+ Closed beta | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Alpha%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-closed%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Alpha%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Alpha%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-closed%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Alpha%5C%22%7D%22%7D) |
+ Bleeding edge (newest promoted test build) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-%28closed%7Copen%29%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-%28closed%7Copen%29%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) |
+ Snapshot (latest commit on `main`) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh.google.debug%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Snapshot%20%28google%29%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5ESnapshot%5C%22%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Atrue%2C%5C%22versionDetection%5C%22%3Afalse%2C%5C%22releaseDateAsVersion%5C%22%3Atrue%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22google-.%2A-debug-%5C%5C%5C%5Cd%2B%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Snapshot%20%28google%29%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh.fdroid.debug%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Snapshot%20%28fdroid%29%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5ESnapshot%5C%22%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Atrue%2C%5C%22versionDetection%5C%22%3Afalse%2C%5C%22releaseDateAsVersion%5C%22%3Atrue%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-debug-%5C%5C%5C%5Cd%2B%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Snapshot%20%28fdroid%29%5C%22%7D%22%7D) |
+
+&lt;!-- END GENERATED LINKS --&gt;
+
+Prefer a file? Import one of these via **Import/Export → Obtainium import**. Pick the one matching the flavor you want for the *release* build; each also sets up **both** snapshot flavors, which can coexist:
+
+- [`meshtastic-obtainium-export-google.json`](https://github.com/meshtastic/Meshtastic-Android/blob/main/obtainium/meshtastic-obtainium-export-google.json) — `google` stable + both snapshots
+- [`meshtastic-obtainium-export-fdroid.json`](https://github.com/meshtastic/Meshtastic-Android/blob/main/obtainium/meshtastic-obtainium-export-fdroid.json) — `fdroid` stable + both snapshots
+
+### How many entries can you have at once?
+
+Obtainium keys apps by application ID, so the rule follows from ours:
+
+ | Application ID | Can coexist? |
+---|---|---|
+ Release builds — stable, open, closed, bleeding edge, either flavor | `com.geeksville.mesh` | **No** — pick exactly one |
+ Snapshot, `google` | `com.geeksville.mesh.google.debug` | Yes |
+ Snapshot, `fdroid` | `com.geeksville.mesh.fdroid.debug` | Yes |
+
+So one release entry, plus up to both snapshots, is the maximum. Tapping a second *release* link switches that single entry to the new channel or flavor instead of adding one, and importing both files in turn leaves you with whichever flavor's release entry came last. The snapshots are unaffected either way.
+
+To set things up by hand instead, follow the rest of this page.
+
+---|
  `google` flavor, most phones (arm64) | `google-arm64-v8a-debug-\d+\.apk` |
  `fdroid` flavor, most phones (arm64) | `fdroid-arm64-v8a-debug-\d+\.apk` |
  `fdroid` flavor, one-size-fits-all | `fdroid-universal-debug-\d+\.apk` |
@@ -85,7 +70,7 @@ Two more things about release selection apply to every channel above, not just s
 
 &gt; **Leave "Fallback to older releases" ON.** It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past releases that don't match — a config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" because production `v2.7.14` sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
 &gt;
-&gt; **If your channel filter still finds nothing:** that channel genuinely has no published release yet (common early in a version cycle, and always true for `-closed` once builds have moved to `-open`). Use the *Bleeding edge* form above to follow whichever channel is currently live.
+&gt; **If your channel filter still finds nothing:** that channel has no published release yet — common early in a version cycle. Check the [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) for what is live, or use the *Bleeding edge* form to follow whichever of open/closed is newest.
 
 ---|
  **Recommended for testing — `google` flavor** | `google-release\.apk` |
