@@ -141,10 +141,10 @@ jobs:
       # The main checkout above is at the release tag, which predates this
       # script — fetch it from the workflow's own ref so script and workflow
       # always move in lockstep.
-      - name: Checkout preflight script from promote.yml revision
+      - name: Checkout preflight script from workflow ref
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ github.sha }}
           path: .workflow-ref
           sparse-checkout: scripts
 
