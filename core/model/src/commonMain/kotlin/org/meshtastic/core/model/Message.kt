@@ -151,7 +151,8 @@ data class Message(
     val time: String,
     /**
      * Mesh time in epoch millis (the packet's `rx_time`) — the instant [time] renders. 0 when the radio never stamped
-     * one; read [displayTime] instead of this field so that case falls back to [receivedTime].
+     * one (the packet carried no arrival time, or an old-firmware 0); read [displayTime] instead of this field so that
+     * case falls back to [receivedTime].
      */
     val meshTime: Long = 0L,
     val read: Boolean,

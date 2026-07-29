@@ -21,6 +21,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
@@ -79,7 +80,8 @@ data class MetricsState(
     fun oldestTimestampSeconds(): Long? {
         val telemetryTimes =
             (deviceMetrics + localStats + powerMetrics + hostMetrics + airQualityMetrics).map { it.time.toLong() }
-        val signalTimes = signalMetrics.map { it.rx_time.toLong() }
+        // Unstamped packets carry no timestamp to compare — dropping them beats letting the epoch win the min.
+        val signalTimes = signalMetrics.mapNotNull { it.rxTimeOrNull()?.toLong() }
         val logTimes =
             (tracerouteRequests + tracerouteResults + neighborInfoRequests + neighborInfoResults + paxMetrics).map {
                 it.received_date / 1000L

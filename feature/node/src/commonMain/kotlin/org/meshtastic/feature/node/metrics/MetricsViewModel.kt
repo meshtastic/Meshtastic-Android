@@ -49,6 +49,7 @@ import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -452,7 +453,7 @@ open class MetricsViewModel(
             uri = uri,
             header = "\"date\",\"time\",\"rssi\",\"snr\"\n",
             rows = data,
-            epochSeconds = { it.rx_time.toLong() },
+            epochSeconds = { (it.rxTimeOrNull() ?: 0).toLong() },
         ) { p ->
             // An absent rssi exports as an empty field, matching the other optional metrics above.
             "\"${p.rx_rssi ?: ""}\",\"${p.rx_snr}\""

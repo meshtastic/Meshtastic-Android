@@ -100,8 +100,17 @@ fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMe
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3
 
+/**
+ * Arrival time in epoch seconds, or null when the radio had no clock at reception.
+ *
+ * Firmware that gained explicit presence omits the field; older firmware still sends 0 for the same state. Both mean
+ * unknown — a 1970 arrival time is never a genuine reading.
+ */
+fun MeshPacket.rxTimeOrNull(): Int? = rx_time?.takeIf { it != 0 }
+
 /** Returns true if this packet is a direct LoRa signal (not MQTT, and hop count matches). */
-fun MeshPacket.isDirectSignal(): Boolean = rx_time > 0 && hop_start == hop_limit && via_mqtt != true && isLora()
+fun MeshPacket.isDirectSignal(): Boolean =
+    rxTimeOrNull() != null && hop_start == hop_limit && via_mqtt != true && isLora()
 
 /** Returns true if this telemetry packet contains valid, plot-able environment metrics. */
 fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
