@@ -16,6 +16,17 @@ directory holds the machine-readable artifacts.
 python3 obtainium/generate-links.py
 ```
 
+> `com.geeksville.mesh.json` is a **byte-identical mirror** of what we submitted
+> upstream as [apps.obtainium.imranr.dev#1566](https://github.com/ImranR98/apps.obtainium.imranr.dev/pull/1566)
+> (`public/data/apps/complex/com.geeksville.mesh.json`). Change it here and
+> upstream together, or the config site and this repo will disagree. Their
+> formatting conventions are load-bearing for review: 4-space indent, trailing
+> newline, top-level key order `configs, icon, categories, description`, config
+> key order `id, url, author, name, additionalSettings, altLabel` (`altLabel`
+> last), and short lowercase `altLabel`s. Verify with `diff` against their tree
+> rather than by eye. No formatter in this repo touches it — spotless only
+> targets `*.kt` and `*.gradle.kts`.
+
 ## The format
 
 An Obtainium app configuration is a flat JSON object. Four keys are required:

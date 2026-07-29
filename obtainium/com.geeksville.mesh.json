@@ -5,16 +5,16 @@
             "url": "https://github.com/meshtastic/Meshtastic-Android",
             "author": "meshtastic",
             "name": "Meshtastic",
-            "altLabel": "google flavor (FCM, Google Maps)",
-            "additionalSettings": "{\"apkFilterRegEx\":\"google-release\\\\.apk$\"}"
+            "additionalSettings": "{\"apkFilterRegEx\":\"google-release\\\\.apk$\"}",
+            "altLabel": "google (FCM, Maps)"
         },
         {
             "id": "com.geeksville.mesh",
             "url": "https://github.com/meshtastic/Meshtastic-Android",
             "author": "meshtastic",
             "name": "Meshtastic",
-            "altLabel": "fdroid flavor (no Google services)",
-            "additionalSettings": "{\"apkFilterRegEx\":\"fdroid-.*-release\\\\.apk$\",\"autoApkFilterByArch\":true}"
+            "additionalSettings": "{\"apkFilterRegEx\":\"fdroid-.*-release\\\\.apk$\",\"autoApkFilterByArch\":true}",
+            "altLabel": "fdroid (no Google services)"
         }
     ],
     "icon": "https://github.com/meshtastic/Meshtastic-Android/raw/main/fastlane/metadata/android/en-US/images/icon.png",
