@@ -7,23 +7,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
-
-#### 🖥️ Desktop
-* fix(event): honor disabled node events, gate brand URLs, observe the manifest by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6499
-#### 🛠️ Fixes
-* fix(node): disambiguate signal-log packet keys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6492
-* fix(mqtt): log throwable-less client errors at warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6493
-* fix(connections): dedupe recent-TCP and reaction list keys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6494
-* fix(map): allow local deletion of any waypoint, locked or not by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6497
-* fix(model): rssi explicit presence for protobufs 2.7.26.138 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6498
-* fix(connections): send set_time_only at MyNodeInfo instead of onNodeDbReady by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6503
-* fix(ui): stop discarding measured-zero sensor and RSSI readings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6507
-* fix(mqtt): stop reporting transport failures as credential rejections by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6506
-#### 📝 Other Changes
-* chore(deps): update org.meshtastic:mqtt-client to v0.8.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6508
-
-### Open Beta (v2.8.0-open.5)
+### Open Beta (v2.8.0-open.6)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -94,6 +78,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(database): make DB updates atomic across device switches by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6256
 * fix(ci): defer desktop packaging toolchain resolution by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6401
 * fix(settings): retain config session across navigation by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6449
+* fix(event): honor disabled node events, gate brand URLs, observe the manifest by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6499
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -226,6 +211,14 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(network): resync stream framing and stop reporting expected disconnects as errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6469
 * fix(notifications): guard blank conversation-shortcut labels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6472
 * fix(service): guarantee startForeground is reached or MeshService stops itself by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6471
+* fix(node): disambiguate signal-log packet keys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6492
+* fix(mqtt): log throwable-less client errors at warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6493
+* fix(connections): dedupe recent-TCP and reaction list keys by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6494
+* fix(map): allow local deletion of any waypoint, locked or not by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6497
+* fix(model): rssi explicit presence for protobufs 2.7.26.138 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6498
+* fix(connections): send set_time_only at MyNodeInfo instead of onNodeDbReady by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6503
+* fix(ui): stop discarding measured-zero sensor and RSSI readings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6507
+* fix(mqtt): stop reporting transport failures as credential rejections by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6506
 #### 📝 Other Changes
 * refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
 * refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
@@ -244,6 +237,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * perf(docs): skip Dokka when no API sources changed, drop test modules from aggregation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6412
 * fix(desktop): restore eager JBR javaHome pin for ProGuard packaging by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6414
 * Clean up configuration menus by @pdxlocations in https://github.com/meshtastic/Meshtastic-Android/pull/6478
+* chore(deps): update org.meshtastic:mqtt-client to v0.8.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6508
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
