@@ -139,12 +139,18 @@ jobs:
       # Fail-open — a preflight error proceeds to supply, which uses the same
       # credentials and will surface any real failure.
       # The main checkout above is at the release tag, which predates this
-      # script — fetch it from the workflow's own ref so script and workflow
-      # always move in lockstep.
+      # script — fetch it from the revision of THIS workflow file instead, so
+      # script and workflow always move in lockstep. Must not be a release
+      # input: any tag cut before this landed has no scripts/ entry, and a
+      # missing script exits 127 at the step level, bypassing the script's own
+      # fail-open path and hard-failing the promotion.
+      # workflow_sha (not github.sha) is the SHA of the workflow file being
+      # executed. Identical for today's local `uses: ./...` call; correct too
+      # if promote.yml is ever called cross-repo at a pinned ref.
       - name: Checkout preflight script from workflow ref
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.workflow_sha }}
           path: .workflow-ref
           sparse-checkout: scripts
 
