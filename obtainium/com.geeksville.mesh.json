@@ -1,0 +1,27 @@
+{
+    "configs": [
+        {
+            "id": "com.geeksville.mesh",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic",
+            "altLabel": "google flavor (FCM, Google Maps)",
+            "additionalSettings": "{\"apkFilterRegEx\":\"google-release\\\\.apk$\"}"
+        },
+        {
+            "id": "com.geeksville.mesh",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic",
+            "altLabel": "fdroid flavor (no Google services)",
+            "additionalSettings": "{\"apkFilterRegEx\":\"fdroid-.*-release\\\\.apk$\",\"autoApkFilterByArch\":true}"
+        }
+    ],
+    "icon": "https://github.com/meshtastic/Meshtastic-Android/raw/main/fastlane/metadata/android/en-US/images/icon.png",
+    "categories": [
+        "messaging"
+    ],
+    "description": {
+        "en": "The official app for Meshtastic, an open-source, off-grid, mesh radio."
+    }
+}

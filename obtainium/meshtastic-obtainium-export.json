@@ -1,0 +1,19 @@
+{
+    "apps": [
+        {
+            "id": "com.geeksville.mesh",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic",
+            "additionalSettings": "{\"apkFilterRegEx\":\"google-release\\\\.apk$\"}"
+        },
+        {
+            "id": "com.geeksville.mesh.google.debug",
+            "url": "https://github.com/meshtastic/Meshtastic-Android",
+            "author": "meshtastic",
+            "name": "Meshtastic Snapshot",
+            "additionalSettings": "{\"includePrereleases\":true,\"filterReleaseTitlesByRegEx\":\"^Snapshot\",\"useLatestAssetDateAsReleaseDate\":true,\"versionDetection\":false,\"releaseDateAsVersion\":true,\"apkFilterRegEx\":\"google-.*-debug-\\\\d+\\\\.apk$\",\"autoApkFilterByArch\":true}"
+        }
+    ],
+    "settings": null
+}

@@ -39,6 +39,7 @@ import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.Rssi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SignalCellular3Bar
+import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.WavingHand
 import org.meshtastic.feature.docs.model.DocPage
 
@@ -109,6 +110,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
     "contributing" -> MeshtasticIcons.Group
 
     "measurement" -> MeshtasticIcons.Chart
+
+    "test-builds" -> MeshtasticIcons.SystemUpdate
 
     else -> MeshtasticIcons.Notes
 }
