@@ -596,7 +596,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             10,
             listOf("obtainium", "beta", "snapshot", "apk", "install", "channel", "prerelease"),
             listOf("test-builds", "obtainium", "beta", "snapshot"),
-            11600,
+            17400,
             "test-builds",
         ),
     )
