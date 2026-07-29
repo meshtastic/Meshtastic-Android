@@ -1085,6 +1085,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT asetukset</string>
     <string name="mqtt_enabled">MQTT käytössä</string>
+    <string name="mqtt_error_connection_lost">MQTT: yhteys katkesi</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: yhteys hylättiin (tarkista tunnistetiedot)</string>
+    <string name="mqtt_error_proxy_failed">MQTT-välityspalvelin epäonnistui: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: yhteys hylätty: %1$s</string>
     <string name="mqtt_probe_dns_failure">Palvelinta ei löytynyt</string>
     <string name="mqtt_probe_other_failure">Yhdistäminen epäonnistui</string>
     <string name="mqtt_probe_rejected">Välityspalvelin ei hyväksynyt: %1$s</string>

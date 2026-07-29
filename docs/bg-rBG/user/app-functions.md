@@ -32,13 +32,13 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ### Write Functions
 
-| Function         | What it does                                                                                                            |
+| Функция          | Какво прави                                                                                                             |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | **Send Message** | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. |
 
 ### Read Functions
 
-| Function                | What it returns                                             |
+| Функция                 | What it returns                                             |
 | ----------------------- | ----------------------------------------------------------- |
 | **Get Mesh Status**     | Overall mesh status.                        |
 | **Get Node List**       | The list of nodes on your mesh.             |
@@ -49,11 +49,11 @@ The functions are grouped into a **Write** section (functions that change someth
 | **Get Unread Summary**  | A summary of unread messages.               |
 | **Get Mesh Metrics**    | Telemetry and metrics from your mesh.       |
 
-## Privacy
+## Поверителност
 
 > 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
 
-## Related Topics
+## Свързани теми
 
 - [Messages & Channels](messages-and-channels) — sending messages directly in the app
 - [Nodes](nodes) — the node list the read functions draw from

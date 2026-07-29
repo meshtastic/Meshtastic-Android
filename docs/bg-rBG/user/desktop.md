@@ -26,12 +26,12 @@ The Meshtastic Desktop application shares its core codebase with Android via Kot
 ### macOS
 
 - Download the `.dmg` package from releases
-- Or build from source
+- Или изградете от изходния код
 
 ### Windows
 
 - Download the `.msi` installer from releases
-- Or build from source
+- Или изградете от изходния код
 
 ## Connecting Your Radio
 
@@ -82,11 +82,11 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
-### Keyboard Shortcuts
+### Клавишни комбинации
 
 Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
 
-| Shortcut     | Action                 |
+| Пряк път     | Действие               |
 | ------------ | ---------------------- |
 | **⌘/Ctrl+Q** | Quit the application   |
 | **⌘/Ctrl+,** | Open Settings          |
@@ -129,19 +129,19 @@ cd Meshtastic-Android
 ./gradlew :desktopApp:run
 ```
 
-Requirements:
+Изисквания:
 
 - JDK 21
 - No Android SDK required for desktop-only builds
 
-## Known Limitations
+## Известни ограничения
 
 - The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 - BLE bonding is not yet supported on desktop (pairing works without bonding)
 
-## Related Topics
+## Свързани теми
 
 - [Connections](connections) — connection methods overview
 - [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android

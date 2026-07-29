@@ -75,7 +75,7 @@ After the firmware is written, the app verifies the update and waits for the dev
 
 ![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+След като актуализацията е успешна:
 
 - Радиото ще се рестартира автоматично
 - Bluetooth връзката ще се възстанови
@@ -96,7 +96,7 @@ If the update appears frozen:
 
 ![Грешка при актуализация на фърмуера](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### Устройството не се стартира след актуализация
 
 If your device fails to boot:
 
@@ -105,7 +105,7 @@ If your device fails to boot:
 3. Flash a known-good firmware version
 4. Check the Meshtastic Discord for device-specific recovery steps
 
-### Compatibility Warnings
+### Предупреждения за съвместимост
 
 The app may show warnings when:
 
@@ -115,7 +115,7 @@ The app may show warnings when:
 
 > ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
 
-## Related Topics
+## Свързани теми
 
 - [Connections](connections) — reconnecting after a firmware update
 - [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org

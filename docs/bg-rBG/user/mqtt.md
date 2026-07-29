@@ -136,7 +136,7 @@ Understanding the layered encryption model:
 - **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
 - **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
 
-## Related Topics
+## Свързани теми
 
 - [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
 - [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
