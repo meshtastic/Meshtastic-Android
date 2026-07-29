@@ -1905,24 +1905,24 @@
   },"272": {
     "doc": "App Functions",
     "title": "Enabling App Functions",
-    "content": "App Functions are controlled from Settings → System AI (the in-app screen is labeled “System AI”). The screen has: . | A master toggle labeled “Allow AI access”, with the subtitle “Let system AI assistants (e.g. Gemini) discover and use mesh functions”. When off, no functions are exposed to the system. | An individual toggle for each function, so you can expose only the capabilities you want. | . The functions are grouped into a Write section (functions that change something or send data to your mesh) and a Read section (functions that only return information). Write Functions . | Function | What it does | . | Send Message | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. | . Read Functions . | Function | What it returns | . | Get Mesh Status | Overall mesh status. | . | Get Node List | The list of nodes on your mesh. | . | Get Channel Info | Information about your channels. | . | Get Device Status | Status of your connected radio. | . | Get Node Details | Detailed information about a specific node. | . | Get Recent Messages | Recent messages from your conversations. | . | Get Unread Summary | A summary of unread messages. | . | Get Mesh Metrics | Telemetry and metrics from your mesh. | . ",
+    "content": "App Functions are controlled from Settings → System AI (the in-app screen is labeled “System AI”). The screen has: . | A master toggle labeled “Allow AI access”, with the subtitle “Let system AI assistants (e.g. Gemini) discover and use mesh functions”. When off, no functions are exposed to the system. | An individual toggle for each function, so you can expose only the capabilities you want. | . The functions are grouped into a Write section (functions that change something or send data to your mesh) and a Read section (functions that only return information). Write Functions . | Функция | Какво прави | . | Send Message | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. | . Read Functions . | Функция | What it returns | . | Get Mesh Status | Overall mesh status. | . | Get Node List | The list of nodes on your mesh. | . | Get Channel Info | Information about your channels. | . | Get Device Status | Status of your connected radio. | . | Get Node Details | Detailed information about a specific node. | . | Get Recent Messages | Recent messages from your conversations. | . | Get Unread Summary | A summary of unread messages. | . | Get Mesh Metrics | Telemetry and metrics from your mesh. | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/app-functions.html#enabling-app-functions",
     
     "relUrl": "/bg-rBG/user/app-functions.html#enabling-app-functions"
   },"273": {
     "doc": "App Functions",
-    "title": "Privacy",
+    "title": "Поверителност",
     "content": "🔒 Privacy: The Send Message function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you’re comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once. ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/app-functions.html#privacy",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/app-functions.html#%D0%BF%D0%BE%D0%B2%D0%B5%D1%80%D0%B8%D1%82%D0%B5%D0%BB%D0%BD%D0%BE%D1%81%D1%82",
     
-    "relUrl": "/bg-rBG/user/app-functions.html#privacy"
+    "relUrl": "/bg-rBG/user/app-functions.html#поверителност"
   },"274": {
     "doc": "App Functions",
-    "title": "Related Topics",
+    "title": "Свързани теми",
     "content": ". | Messages &amp; Channels — sending messages directly in the app | Nodes — the node list the read functions draw from | Node Metrics — the telemetry behind Get Mesh Metrics | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/app-functions.html#related-topics",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/app-functions.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/app-functions.html#related-topics"
+    "relUrl": "/bg-rBG/user/app-functions.html#свързани-теми"
   },"275": {
     "doc": "App Functions",
     "title": "App Functions",
@@ -3235,7 +3235,7 @@
   },"462": {
     "doc": "Връзки",
     "title": "TCP/IP (Network)",
-    "content": "Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app. Connecting over the Network . | Make sure the radio is on the same local network as your phone/desktop. | On the Connect screen, select Network in the transport selector. | Choose the radio one of two ways: . | Scan for network devices — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / _meshtastic._tcp). Discovered devices appear in the list; tap one to connect. | Add device manually… — enter the radio’s IP address (or hostname) and port (default: 4403). | . | Previously-used network addresses are remembered under Recent Network Devices for quick reconnection (long-press to remove one). | . 💡 Tip: Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP. When to Use TCP . | Radio is on the same local network | Testing with a simulated radio | Environments where Bluetooth has interference issues | . ",
+    "content": "Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app. Свързване през мрежата . | Make sure the radio is on the same local network as your phone/desktop. | On the Connect screen, select Network in the transport selector. | Choose the radio one of two ways: . | Scan for network devices — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / _meshtastic._tcp). Discovered devices appear in the list; tap one to connect. | Add device manually… — enter the radio’s IP address (or hostname) and port (default: 4403). | . | Previously-used network addresses are remembered under Recent Network Devices for quick reconnection (long-press to remove one). | . 💡 Tip: Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP. When to Use TCP . | Radio is on the same local network | Testing with a simulated radio | Environments where Bluetooth has interference issues | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/connections.html#tcpip-network",
     
     "relUrl": "/bg-rBG/user/connections.html#tcpip-network"
@@ -6994,7 +6994,7 @@
   },"999": {
     "doc": "Настолно приложение",
     "title": "Инсталация",
-    "content": "Linux . | Download the .deb or .AppImage package from the releases page | Or build from source using ./gradlew :desktopApp:run | . macOS . | Download the .dmg package from releases | Or build from source | . Windows . | Download the .msi installer from releases | Or build from source | . ",
+    "content": "Linux . | Download the .deb or .AppImage package from the releases page | Or build from source using ./gradlew :desktopApp:run | . macOS . | Download the .dmg package from releases | Или изградете от изходния код | . Windows . | Download the .msi installer from releases | Или изградете от изходния код | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#%D0%B8%D0%BD%D1%81%D1%82%D0%B0%D0%BB%D0%B0%D1%86%D0%B8%D1%8F",
     
     "relUrl": "/bg-rBG/user/desktop.html#инсталация"
@@ -7015,7 +7015,7 @@
   },"1002": {
     "doc": "Настолно приложение",
     "title": "UI Differences",
-    "content": "The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction. Keyboard Shortcuts . Shortcuts use ⌘ (Command) on macOS and Ctrl on Windows and Linux. (The Super / Windows key is not bound.) . | Shortcut | Action | . | ⌘/Ctrl+Q | Quit the application | . | ⌘/Ctrl+, | Open Settings | . | ⌘/Ctrl+1 | Switch to Messages tab | . | ⌘/Ctrl+2 | Switch to Nodes tab | . | ⌘/Ctrl+3 | Switch to Map tab | . | ⌘/Ctrl+4 | Switch to Connect tab | . | ⌘/Ctrl+/ | Open About | . Window &amp; System Tray . | Window resizing — responsive layout adapts to window dimensions | System tray — minimize to system tray for background mesh operation | Tray menu — right-click the tray icon to show window or quit | Mouse interaction — hover states and standard desktop navigation | . Notification Preferences . The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from Settings → Notifications within the app. ",
+    "content": "The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction. Клавишни комбинации . Shortcuts use ⌘ (Command) on macOS and Ctrl on Windows and Linux. (The Super / Windows key is not bound.) . | Пряк път | Действие | . | ⌘/Ctrl+Q | Quit the application | . | ⌘/Ctrl+, | Open Settings | . | ⌘/Ctrl+1 | Switch to Messages tab | . | ⌘/Ctrl+2 | Switch to Nodes tab | . | ⌘/Ctrl+3 | Switch to Map tab | . | ⌘/Ctrl+4 | Switch to Connect tab | . | ⌘/Ctrl+/ | Open About | . Window &amp; System Tray . | Window resizing — responsive layout adapts to window dimensions | System tray — minimize to system tray for background mesh operation | Tray menu — right-click the tray icon to show window or quit | Mouse interaction — hover states and standard desktop navigation | . Notification Preferences . The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from Settings → Notifications within the app. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#ui-differences",
     
     "relUrl": "/bg-rBG/user/desktop.html#ui-differences"
@@ -7029,24 +7029,24 @@
   },"1004": {
     "doc": "Настолно приложение",
     "title": "Building from Source",
-    "content": "git clone https://github.com/meshtastic/Meshtastic-Android.git cd Meshtastic-Android ./gradlew :desktopApp:run . Requirements: . | JDK 21 | No Android SDK required for desktop-only builds | . ",
+    "content": "git clone https://github.com/meshtastic/Meshtastic-Android.git cd Meshtastic-Android ./gradlew :desktopApp:run . Изисквания: . | JDK 21 | No Android SDK required for desktop-only builds | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#building-from-source",
     
     "relUrl": "/bg-rBG/user/desktop.html#building-from-source"
   },"1005": {
     "doc": "Настолно приложение",
-    "title": "Known Limitations",
+    "title": "Известни ограничения",
     "content": ". | The interactive map view is Android-only — the Map tab is present but does not render a map on desktop | Some Android-specific features (widgets, specific notification channels) are unavailable | Performance may vary on low-spec hardware running Compose Desktop | BLE bonding is not yet supported on desktop (pairing works without bonding) | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#known-limitations",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#%D0%B8%D0%B7%D0%B2%D0%B5%D1%81%D1%82%D0%BD%D0%B8-%D0%BE%D0%B3%D1%80%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D0%BD%D0%B8%D1%8F",
     
-    "relUrl": "/bg-rBG/user/desktop.html#known-limitations"
+    "relUrl": "/bg-rBG/user/desktop.html#известни-ограничения"
   },"1006": {
     "doc": "Настолно приложение",
-    "title": "Related Topics",
+    "title": "Свързани теми",
     "content": ". | Connections — connection methods overview | Firmware Updates — USB, BLE, and Wi-Fi update all work the same as on Android | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#related-topics",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/desktop.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/desktop.html#related-topics"
+    "relUrl": "/bg-rBG/user/desktop.html#свързани-теми"
   },"1007": {
     "doc": "桌面版應用程式",
     "title": "桌面版應用程式",
@@ -11768,24 +11768,24 @@
   },"1681": {
     "doc": "Актуализации на фърмуера",
     "title": "След актуализация",
-    "content": "After the firmware is written, the app verifies the update and waits for the device to come back online: . Once the update succeeds: . | Радиото ще се рестартира автоматично | Bluetooth връзката ще се възстанови | Проверете дали настройките ви са непокътнати | Confirm the new version under Currently Installed on the Firmware Update screen — it’s also shown on the node’s detail page and the Connections screen | . ",
+    "content": "After the firmware is written, the app verifies the update and waits for the device to come back online: . След като актуализацията е успешна: . | Радиото ще се рестартира автоматично | Bluetooth връзката ще се възстанови | Проверете дали настройките ви са непокътнати | Confirm the new version under Currently Installed on the Firmware Update screen — it’s also shown on the node’s detail page and the Connections screen | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/firmware.html#%D1%81%D0%BB%D0%B5%D0%B4-%D0%B0%D0%BA%D1%82%D1%83%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F",
     
     "relUrl": "/bg-rBG/user/firmware.html#след-актуализация"
   },"1682": {
     "doc": "Актуализации на фърмуера",
     "title": "Отстраняване на неизправности",
-    "content": "Update Stuck . If the update appears frozen: . | Изчакайте поне 5 минути, преди да се намесите | If truly stuck, power-cycle the radio | Опитайте актуализацията отново | . Device Won’t Boot After Update . If your device fails to boot: . | Try connecting via USB to a computer | Use the web flasher in recovery/DFU mode | Flash a known-good firmware version | Check the Meshtastic Discord for device-specific recovery steps | . Compatibility Warnings . The app may show warnings when: . | Connected radio firmware is below minimum supported version | Major version mismatch between app and firmware | Deprecated features need migration | . ⚠️ Important: Always update the Meshtastic app before or alongside firmware updates to ensure compatibility. ",
+    "content": "Update Stuck . If the update appears frozen: . | Изчакайте поне 5 минути, преди да се намесите | If truly stuck, power-cycle the radio | Опитайте актуализацията отново | . Устройството не се стартира след актуализация . If your device fails to boot: . | Try connecting via USB to a computer | Use the web flasher in recovery/DFU mode | Flash a known-good firmware version | Check the Meshtastic Discord for device-specific recovery steps | . Предупреждения за съвместимост . The app may show warnings when: . | Connected radio firmware is below minimum supported version | Major version mismatch between app and firmware | Deprecated features need migration | . ⚠️ Important: Always update the Meshtastic app before or alongside firmware updates to ensure compatibility. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/firmware.html#%D0%BE%D1%82%D1%81%D1%82%D1%80%D0%B0%D0%BD%D1%8F%D0%B2%D0%B0%D0%BD%D0%B5-%D0%BD%D0%B0-%D0%BD%D0%B5%D0%B8%D0%B7%D0%BF%D1%80%D0%B0%D0%B2%D0%BD%D0%BE%D1%81%D1%82%D0%B8",
     
     "relUrl": "/bg-rBG/user/firmware.html#отстраняване-на-неизправности"
   },"1683": {
     "doc": "Актуализации на фърмуера",
-    "title": "Related Topics",
+    "title": "Свързани теми",
     "content": ". | Connections — reconnecting after a firmware update | Flashing firmware guide — full firmware flashing walkthrough on meshtastic.org | Supported devices — check firmware compatibility by device | FAQ — common questions on meshtastic.org | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/firmware.html#related-topics",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/firmware.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/firmware.html#related-topics"
+    "relUrl": "/bg-rBG/user/firmware.html#свързани-теми"
   },"1684": {
     "doc": "韌體更新",
     "title": "韌體更新",
@@ -13888,11 +13888,11 @@
     "relUrl": "/bg-rBG/user/help-and-docs.html#chirpy--the-ai-assistant"
   },"1984": {
     "doc": "Help & In-App Docs",
-    "title": "Related Topics",
-    "content": ". | Translate the App — how these pages get localized into other languages | App Functions — the separate system-AI integration (distinct from Chirpy) | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/help-and-docs.html#related-topics",
+    "title": "Свързани теми",
+    "content": ". | Превод на приложението — как тези страници се локализират на други езици | App Functions — the separate system-AI integration (distinct from Chirpy) | . ",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/help-and-docs.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/help-and-docs.html#related-topics"
+    "relUrl": "/bg-rBG/user/help-and-docs.html#свързани-теми"
   },"1985": {
     "doc": "Help & In-App Docs",
     "title": "Help & In-App Docs",
@@ -16240,11 +16240,11 @@
     "relUrl": "/bg-rBG/user/map-and-waypoints.html#map-sources"
   },"2320": {
     "doc": "Map & Waypoints",
-    "title": "Related Topics",
+    "title": "Свързани теми",
     "content": ". | Nodes — view and filter your node list | Node Metrics — signal quality and position history for individual nodes | Discovery — traceroute and neighbor info for understanding mesh topology | Units &amp; Locale — distance and coordinate display formats | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/map-and-waypoints.html#related-topics",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/map-and-waypoints.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/map-and-waypoints.html#related-topics"
+    "relUrl": "/bg-rBG/user/map-and-waypoints.html#свързани-теми"
   },"2321": {
     "doc": "Map & Waypoints",
     "title": "Map & Waypoints",
@@ -20580,11 +20580,11 @@
     "relUrl": "/bg-rBG/user/mqtt.html#отстраняване-на-неизправности"
   },"2940": {
     "doc": "MQTT",
-    "title": "Related Topics",
+    "title": "Свързани теми",
     "content": ". | Settings — Modules &amp; Admin — MQTT module configuration reference | Messages &amp; Channels — channel encryption and PSK setup | MQTT integration guide — detailed MQTT documentation on meshtastic.org | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/mqtt.html#related-topics",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/mqtt.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
     
-    "relUrl": "/bg-rBG/user/mqtt.html#related-topics"
+    "relUrl": "/bg-rBG/user/mqtt.html#свързани-теми"
   },"2941": {
     "doc": "MQTT",
     "title": "MQTT",
@@ -33426,7 +33426,7 @@
   },"4775": {
     "doc": "Как работает измеритель сигнала Meshtastic",
     "title": "Связанные темы",
-    "content": ". | Узлы — там, где в списке нод появляются индикаторы сигнала | Метрики ноды — история SNR/RSSI и эталон качества сигнала для каждой ноды | Настройки — Радио и Пользователь — пресеты модема и их пределы SNR | . ",
+    "content": ". | Ноды — там, где в списке нод появляются индикаторы сигнала | Метрики ноды — история SNR/RSSI и эталон качества сигнала для каждой ноды | Настройки — Радио и Пользователь — пресеты модема и их пределы SNR | . ",
     "url": "/Meshtastic-Android/main/ru-rRU/user/signal-meter.html#%D1%81%D0%B2%D1%8F%D0%B7%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D1%82%D0%B5%D0%BC%D1%8B",
     
     "relUrl": "/ru-rRU/user/signal-meter.html#связанные-темы"
