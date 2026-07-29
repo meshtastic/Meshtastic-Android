@@ -29,7 +29,7 @@ Highlights from the 2.8.0 release:
 
 ## Get Meshtastic
 
-The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically.
+The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically — ready-made configurations for every channel (stable, beta, snapshot) are in [`obtainium/`](obtainium/), and [Test Builds & Obtainium](docs/en/developer/test-builds.md) explains the setup.
 
 Alternatively, these other providers are also available, but may be slower to update. 
 
