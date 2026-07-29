@@ -37,6 +37,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
@@ -182,13 +183,8 @@ class MeshMessageProcessorImpl(
 
     /** Test seam for packet-only fixtures with explicit transport authority. */
     internal suspend fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?, session: RadioSessionContext) {
-        val rxTime =
-            if (packet.rx_time == 0) {
-                nowSeconds.toInt()
-            } else {
-                packet.rx_time
-            }
-        val preparedPacket = packet.copy(rx_time = rxTime)
+        // Single normalization point: every consumer downstream of this copy sees a stamped packet.
+        val preparedPacket = packet.copy(rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt())
 
         // Require myNodeNum to be known before storing: processReceivedMeshPacket only keys a local packet under
         // NODE_NUM_LOCAL when packet.from == myNodeNum. If myNodeNum is still null (early in a (re)connect, before
@@ -317,7 +313,8 @@ class MeshMessageProcessorImpl(
                 else -> packet.hop_start - packet.hop_limit
             }
         return node.copy(
-            lastHeard = clampTimestampToNow(packet.rx_time),
+            // Packets reach here normalized, but an unstamped one must not reset lastHeard to the epoch.
+            lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
             viaMqtt = viaMqtt,
             lastTransport = packet.transport_mechanism.value,
             snr = if (updateRadioMetrics) packet.rx_snr else node.snr,
