@@ -30,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -85,7 +85,8 @@ fun CurrentlyConnectedInfo(
     modifier: Modifier = Modifier,
     bleDevice: DeviceListEntry.Ble? = null,
 ) {
-    var rssi by remember { mutableIntStateOf(0) }
+    // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
+    var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
     LaunchedEffect(bleDevice) {
         if (bleDevice == null) return@LaunchedEffect
         while (bleDevice.device.isConnected) {

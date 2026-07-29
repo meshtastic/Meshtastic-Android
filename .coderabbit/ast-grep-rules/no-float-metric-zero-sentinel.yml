@@ -1,0 +1,27 @@
+# Recurring defect class A — see "Presence vs sentinel zero" in .skills/code-review/SKILL.md.
+#
+# The protobuf models are Wire-generated, so presence IS nullability: EnvironmentMetrics.temperature and friends are
+# declared `Float? = null` and there is no hasX() accessor. A `(x ?: 0f) != 0f` guard collapses "absent" and
+# "measured zero" into one state and silently discards a real reading. Use `x?.let { ... }` instead — see
+# `gatherSensors` in core/ui/.../NodeItem.kt for the reference pattern.
+#
+# Humidity is the deliberate exception: 0 %RH is not physically reachable, so relative_humidity / co2_humidity keep
+# their zero-guards and are not listed here. Same for barometric_pressure (0 hPa is a vacuum).
+id: no-float-metric-zero-sentinel
+language: kotlin
+severity: error
+message: "0 is a real reading on this scale — use `?.let { }` instead of a zero-guard."
+# Every spelling of the zero-float literal is listed: a reformat from `0f` to `0.0f` must not slip past the rule.
+rule:
+  any:
+    - pattern: "($X ?: 0f) != 0f"
+    - pattern: "($X ?: 0f) == 0f"
+    - pattern: "($X ?: 0F) != 0F"
+    - pattern: "($X ?: 0F) == 0F"
+    - pattern: "($X ?: 0.0f) != 0.0f"
+    - pattern: "($X ?: 0.0f) == 0.0f"
+    - pattern: "($X ?: 0.0F) != 0.0F"
+    - pattern: "($X ?: 0.0F) == 0.0F"
+constraints:
+  X:
+    regex: "(temperature|voltage|current|soil_moisture)$"

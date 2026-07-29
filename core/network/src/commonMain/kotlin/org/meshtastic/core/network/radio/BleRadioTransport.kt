@@ -506,7 +506,10 @@ class BleRadioTransport(
         try {
             bleConnection.deviceFlow.first()?.let { device ->
                 val rssi = retryBleOperation(tag = address) { device.readRssi() }
-                Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
+                Logger.d {
+                    "[${address.anonymize()}] Connection confirmed. " +
+                        "Initial RSSI: ${rssi?.let { "$it dBm" } ?: "unknown"}"
+                }
             }
         } catch (e: CancellationException) {
             throw e

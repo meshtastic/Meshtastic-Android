@@ -37,7 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -82,13 +82,15 @@ fun DeviceListItem(
     onDelete: (() -> Unit)? = null,
     rssi: Int? = null,
 ) {
-    // Throttle the RSSI updates to match the connected device polling rate
-    var displayedRssi by remember { mutableIntStateOf(rssi ?: 0) }
+    // Throttle the RSSI updates to match the connected device polling rate. The value stays nullable end-to-end:
+    // 0 dBm is the strongest reading on this scale, so defaulting to it would render an unknown signal as excellent.
+    // Keyed by address so a recycled list slot drops the previous device's reading instead of showing it for a tick.
+    var displayedRssi by remember(device.address) { mutableStateOf(rssi) }
     val currentRssi by rememberUpdatedState(rssi)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(device.address) {
         while (true) {
             delay(RSSI_UPDATE_RATE_MS)
-            displayedRssi = currentRssi ?: 0
+            displayedRssi = currentRssi
         }
     }
 

@@ -449,8 +449,10 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
     val env = thatNode.environmentMetrics
     val segments =
         buildList<@Composable () -> Unit> {
-            if ((env.temperature ?: 0f) != 0f) {
-                val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
+            // Temperature carries presence, so `null` already means "no sensor" — testing against 0 hid an ordinary
+            // 0 °C reading. Mirrors the fix already made in NodeItem's gatherSensors.
+            env.temperature?.let { temperature ->
+                val temp = MetricFormatter.temperature(temperature, tempInFahrenheit)
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Temperature,

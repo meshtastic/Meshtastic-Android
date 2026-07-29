@@ -29,9 +29,9 @@ import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays power metrics for a node: for every channel reporting a non-zero voltage, its voltage and — when the channel
- * reports one — its current are stacked in a single vertical column so the pair stays visually grouped and the columns
- * flow side by side.
+ * Displays power metrics for a node: for every channel reporting a voltage, its voltage and — when the channel reports
+ * one — its current are stacked in a single vertical column so the pair stays visually grouped and the columns flow
+ * side by side.
  */
 @Composable
 internal fun PowerMetrics(node: Node) {
@@ -43,15 +43,21 @@ internal fun PowerMetrics(node: Node) {
                 Triple(Res.string.channel_3, ch3_voltage, ch3_current),
             )
         }
-            .filter { (_, voltage, _) -> (voltage ?: 0f) != 0f }
-            .map { (label, voltage, current) ->
-                // A reported current of 0mA is a real reading and is shown; only an absent one is hidden.
-                listOfNotNull(
-                    VectorMetricInfo(label, "${NumberFormatter.format(voltage ?: 0f, 2)}V", MeshtasticIcons.Voltage),
-                    current?.let {
-                        VectorMetricInfo(label, "${NumberFormatter.format(it, 1)}mA", MeshtasticIcons.PowerSupply)
-                    },
-                )
+            .mapNotNull { (label, voltage, current) ->
+                // Voltage and current both carry presence: an absent reading is hidden, but a reported 0V / 0mA is a
+                // real measurement and is shown.
+                voltage?.let { volts ->
+                    listOfNotNull(
+                        VectorMetricInfo(label, "${NumberFormatter.format(volts, 2)}V", MeshtasticIcons.Voltage),
+                        current?.let { milliAmps ->
+                            VectorMetricInfo(
+                                label,
+                                "${NumberFormatter.format(milliAmps, 1)}mA",
+                                MeshtasticIcons.PowerSupply,
+                            )
+                        },
+                    )
+                }
             }
 
     MetricCardFlow(groups = channels)

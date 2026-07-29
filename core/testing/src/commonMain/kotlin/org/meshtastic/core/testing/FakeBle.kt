@@ -56,7 +56,7 @@ class FakeBleDevice(
     override val isConnected: Boolean
         get() = _state.value == BleConnectionState.Connected
 
-    override suspend fun readRssi(): Int = DEFAULT_RSSI
+    override suspend fun readRssi(): Int? = rssi
 
     override suspend fun bond() {
         _isBonded.value = true
@@ -64,10 +64,6 @@ class FakeBleDevice(
 
     fun setState(newState: BleConnectionState) {
         _state.value = newState
-    }
-
-    companion object {
-        private const val DEFAULT_RSSI = -60
     }
 }
 
