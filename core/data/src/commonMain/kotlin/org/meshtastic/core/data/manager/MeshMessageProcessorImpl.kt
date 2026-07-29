@@ -313,7 +313,9 @@ class MeshMessageProcessorImpl(
                 else -> packet.hop_start - packet.hop_limit
             }
         return node.copy(
-            // Packets reach here normalized, but an unstamped one must not reset lastHeard to the epoch.
+            // Packets reach here already stamped, so the fallback is unreachable by design and must stay that way:
+            // a packet that just arrived SHOULD refresh lastHeard, using the phone's clock when the radio had no
+            // time source. The fallback only guards a future caller that skips normalization from writing the epoch.
             lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
             viaMqtt = viaMqtt,
             lastTransport = packet.transport_mechanism.value,

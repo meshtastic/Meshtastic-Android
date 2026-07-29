@@ -153,7 +153,13 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val threshold = timeFrame.timeThreshold()
-    val signalData = state.signalMetrics.filter { (it.rxTimeOrNull() ?: 0).toLong() >= threshold }
+    // An unstamped packet has no place on a time axis. Dropping it here is the invariant every downstream
+    // `rxTimeOrNull() ?: 0` in this file relies on, so none of them can render or plot 1970.
+    val signalData =
+        state.signalMetrics.filter { packet ->
+            val rxTime = packet.rxTimeOrNull() ?: return@filter false
+            rxTime.toLong() >= threshold
+        }
     val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
     val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
     val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
