@@ -183,11 +183,11 @@
       },
       "firmware": {
         "slug": "defcon34",
-        "version": "2.8.0.b00d76f",
-        "id": "v2.8.0.b00d76f",
-        "title": "Meshtastic Firmware 2.8.0.b00d76f",
-        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/defcon34/firmware-2.8.0.b00d76f.zip",
-        "releaseNotes": "> ⚠️ **Preview Build:** This is a preview release for DEF CON 34 and may change before the event.\n\n## Welcome to DEF CON 34! 💀\n\nThis firmware has been customized for DEF CON 34 with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the DEF CON mode.\n\n**Happy meshing from Las Vegas!**"
+        "version": "2.8.0.8adc7c3",
+        "id": "v2.8.0.8adc7c3",
+        "title": "Meshtastic Firmware 2.8.0.8adc7c3",
+        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/defcon34/firmware-2.8.0.8adc7c3.zip",
+        "releaseNotes": "## Welcome to DEF CON 34! 💀\n\nThis firmware has been customized for DEF CON 34 with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the DEF CON mode.\n\n**Happy meshing from Las Vegas!**"
       }
     },
     {
