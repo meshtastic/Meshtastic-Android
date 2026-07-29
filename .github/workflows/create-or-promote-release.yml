@@ -20,6 +20,11 @@ on:
         required: true
         type: boolean
         default: false
+      no_review_in_flight:
+        description: 'Promotions only: I checked Publishing overview > Submission activity and no submission is In review. Every promotion creates a new Play submission, which CANCELS and RESTARTS any review in flight.'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -44,6 +49,15 @@ jobs:
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
     steps:
+      # Internal releases are exempt: Play internal testing skips full review,
+      # so only promotions (closed/open/production) can clobber an in-flight
+      # review. Dry runs never reach Play.
+      - name: Require review-in-flight confirmation for promotions
+        if: ${{ !inputs.dry_run && inputs.channel != 'internal' && !inputs.no_review_in_flight }}
+        run: |
+          echo "::error::Promotion blocked: confirm no Play review is in flight. Check Play Console > Publishing overview > Submission activity — if a submission shows 'In review', WAIT (a new promotion cancels it and restarts the clock). If clear, re-dispatch with 'no_review_in_flight' checked."
+          exit 1
+
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:

@@ -55,9 +55,13 @@ on:
       HOMEBREW_TAP_TOKEN:
         required: false
 
+# Never cancel a promotion mid-flight: being killed between the Play edit
+# commit and the GitHub release/tag update leaves the two disagreeing. The
+# caller's queue-only concurrency serializes dispatches; this group (keyed by
+# channel + tag) is a second line of defense that queues rather than cancels.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.tag_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ inputs.channel }}-${{ inputs.tag_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -128,7 +132,42 @@ jobs:
       - name: Decode Play Store credentials
         run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
 
+      # A re-dispatched promotion whose versionCode is already live on the
+      # target track must no-op: every redundant `supply` commit creates a new
+      # Play submission, and each submission cancels + restarts any review in
+      # flight (this reset the v2.8.0 review clock repeatedly, Jul 2026).
+      # Fail-open — a preflight error proceeds to supply, which uses the same
+      # credentials and will surface any real failure.
+      # The main checkout above is at the release tag, which predates this
+      # script — fetch it from the caller's commit instead, so script and
+      # workflow always move in lockstep. This is a local reusable-workflow
+      # call (`uses: ./.github/workflows/promote.yml`), so promote.yml is
+      # loaded from that same commit.
+      #
+      # Must NOT be a release input: any tag cut before this landed has no
+      # scripts/ entry, and a missing script exits 127 at the step level,
+      # bypassing the script's own fail-open path and hard-failing the
+      # promotion. workflow_sha is no better — the github context in a called
+      # reusable workflow is caller-associated, so it resolves to the caller's
+      # workflow too. A cross-repo caller would need explicit repo+ref inputs.
+      - name: Checkout preflight script from caller commit
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-ref
+          sparse-checkout: scripts
+
+      - name: Preflight — is this versionCode already on the target track?
+        id: preflight
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
+          bash .workflow-ref/scripts/play-track-preflight.sh \
+            fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE"
+
       - name: Promote to next channel
+        if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
         run: |
           bundle exec fastlane supply \
             --track "$FROM_TRACK" \
