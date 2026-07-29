@@ -31,7 +31,7 @@ Highlights from the 2.8.0 release:
 
 The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically.
 
-With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google push (FCM) and Google Maps; `fdroid` has no Google dependencies.
+With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google Crashlytics and Google Maps; `fdroid` has no Google dependencies.
 
 <!-- BEGIN GENERATED LINKS: obtainium/generate-links.py -->
 
