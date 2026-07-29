@@ -111,7 +111,7 @@
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="tableheader">Types</h2>
@@ -454,6 +454,25 @@
           </div>
         </div>
       </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="584656198%2FProperties%2F-1825752930" anchor-label="MQTT_KEEPALIVE_SECONDS" id="584656198%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-q-t-t_-k-e-e-p-a-l-i-v-e_-s-e-c-o-n-d-s.html"><span>MQTT_</span><wbr><span>KEEPALIVE_</span><wbr><span>SECONDS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="584656198%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-q-t-t_-k-e-e-p-a-l-i-v-e_-s-e-c-o-n-d-s.html">MQTT_KEEPALIVE_SECONDS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">30</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
         <div class="table"><a data-name="1829087834%2FFunctions%2F-1825752930" anchor-label="effectiveTlsEnabled" id="1829087834%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
@@ -467,6 +486,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="effective-tls-enabled.html"><span class="token function">effectiveTlsEnabled</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tlsEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="427581977%2FFunctions%2F-1825752930" anchor-label="isCredentialRejection" id="427581977%2FFunctions%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-credential-rejection.html"><span>is</span><wbr><span>Credential</span><wbr><span><span>Rejection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="427581977%2FFunctions%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.mqtt/MqttException.ConnectionRejected///PointingToDeclaration/">MqttException.ConnectionRejected</span><span class="token punctuation">.</span><a href="is-credential-rejection.html"><span class="token function">isCredentialRejection</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph"><code class="lang-kotlin">true</code> only for CONNACK reason codes where retrying can never help — the broker examined our credentials or client identity and refused them. The library also wraps transport-level connect failures (timeout, TLS, socket EOF) as <span data-unresolved-link="org.meshtastic.mqtt/MqttException.ConnectionRejected///PointingToDeclaration/">MqttException.ConnectionRejected</span> with <span data-unresolved-link="org.meshtastic.mqtt/ReasonCode.UNSPECIFIED_ERROR///PointingToDeclaration/{&quot;org.jetbrains.dokka.links.EnumEntryDRIExtra&quot;:{&quot;key&quot;:&quot;org.jetbrains.dokka.links.EnumEntryDRIExtra&quot;}}">ReasonCode.UNSPECIFIED_ERROR</span>; those are transient and must stay in the retry loop, not permanently stop the proxy with a "check credentials" dialog. Public (not internal) so <code class="lang-kotlin">MqttManagerImpl</code> in <code class="lang-kotlin">:core:data</code> can phrase its user-facing error from the same classification.</p></div></div></div>
                 </div>
               </div>
             </div>
