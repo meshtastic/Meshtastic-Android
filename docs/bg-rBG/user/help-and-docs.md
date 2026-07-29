@@ -41,9 +41,9 @@ A page open in the browser:
 
 > ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
 
-## Related Topics
+## Свързани теми
 
-- [Translate the App](translate) — how these pages get localized into other languages
+- [Превод на приложението](translate) — как тези страници се локализират на други езици
 - [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
 
 ---

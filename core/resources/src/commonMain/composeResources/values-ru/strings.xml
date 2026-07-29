@@ -1092,6 +1092,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Настройка MQTT</string>
     <string name="mqtt_enabled">MQTT включен</string>
+    <string name="mqtt_error_connection_lost">MQTT: соединение потеряно</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: соединение отклонено (проверьте учетные данные)</string>
+    <string name="mqtt_error_proxy_failed">Сбой MQTT-прокси: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: Соединение отклонено: %1$s</string>
     <string name="mqtt_probe_dns_failure">Узел не найден</string>
     <string name="mqtt_probe_other_failure">Соединение не удалось</string>
     <string name="mqtt_probe_rejected">Брокер отклонен: %1$s</string>

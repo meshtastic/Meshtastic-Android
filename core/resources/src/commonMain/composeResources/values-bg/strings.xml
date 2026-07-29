@@ -80,6 +80,7 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Добър</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="audio">Аудио</string>
@@ -194,6 +195,7 @@
     <string name="config_network_wifi_enabled_summary">Активирането на WiFi ще деактивира Bluetooth връзката с приложението.</string>
     <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
+    <string name="config_saved_restarting">Възелът се рестартира и ще бъде за кратко недостъпен.</string>
     <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
     <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
@@ -426,6 +428,8 @@
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
     <string name="firmware_update_almost_there">Почти е готово...</string>
     <string name="firmware_update_alpha">Алфа</string>
+    <string name="firmware_update_archive_missing_target">Не е намерен фърмуер за %2$s (%3$s) в "%1$s".</string>
+    <string name="firmware_update_available">Налична е актуализация на фърмуера</string>
     <string name="firmware_update_battery_low">Батерията е твърде изтощена (%1$d%). Моля, заредете устройството си преди актуализиране.</string>
     <string name="firmware_update_checking">Проверка за актуализации...</string>
     <string name="firmware_update_connecting_attempt">Свързване с устройството (опит %1$d/%2$d)...</string>
@@ -757,7 +761,10 @@
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
     <string name="no_usb_devices_seen">Не са открити USB устройства</string>
     <!-- NODE -->
+    <string name="node_count_online">Онлайн %1$d</string>
+    <string name="node_count_shown">Показани %1$d</string>
     <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
+    <string name="node_count_total">Общо %1$d</string>
     <string name="node_filter_exclude_infrastructure">Изключване на инфраструктурата</string>
     <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
@@ -790,6 +797,7 @@
     <string name="node_list_help_node_details">Детайли за възела</string>
     <string name="node_list_help_title">Помощ за списъка с възли</string>
     <string name="node_number">Номер на възела</string>
+    <string name="node_restarting">Рестартиране…</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_channel">Канал</string>
@@ -943,6 +951,7 @@
     <!-- REMOVE -->
     <string name="remove">Изтрий</string>
     <string name="remove_favorite">Премахване от любими</string>
+    <string name="remove_filter">Премахване на филтъра</string>
     <string name="remove_ignored">Премахване от игнорирани</string>
     <string name="remove_layer">Премахване на слой</string>
     <string name="remove_node_text">Този възел ще бъде премахнат от вашия списък, докато вашият възел не получи данни от него отново.</string>
@@ -1004,7 +1013,8 @@
     <string name="rsyslog_server">rsyslog сървър</string>
     <string name="sats">Сат</string>
     <!-- SAVE -->
-    <string name="save">Запис</string>
+    <string name="save">Запазване</string>
+    <string name="save_and_restart">Запазване &amp; рестартиране</string>
     <string name="save_changes">Запис</string>
     <string name="save_csv_in_storage_esp32_only">Запазване на .CSV в хранилище (само за ESP32)</string>
     <!-- SCAN -->
@@ -1038,6 +1048,8 @@
     <string name="security_icon_warning_precise_mqtt">Предупреждение: Несигурно, точно местоположение &amp; MQTT Uplink</string>
     <string name="security_signed_message_info">Проверено с ключа на подателя.</string>
     <string name="security_signed_node">Подписан възел</string>
+    <string name="security_signed_node_desc">Проверено автоматично</string>
+    <string name="security_signed_verified">Подписано · проверено</string>
     <string name="select">Изберете</string>
     <string name="select_all">Избери всички</string>
     <string name="selected">Избрани</string>
@@ -1076,6 +1088,9 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
     <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Усилване на антената (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Височина на антената (м)</string>
+    <string name="site_planner_frequency_mhz">Честота (MHz)</string>
     <string name="site_planner_section_display">Дисплей</string>
     <string name="skip">Пропускане</string>
     <string name="slot">Слот</string>
@@ -1084,6 +1099,7 @@
     <string name="snr_definition">Съотношение сигнал/шум, мярка, използвана в комуникациите за количествено определяне на нивото на желания сигнал спрямо нивото на фоновия шум. В Meshtastic и други безжични системи, по-високото съотношение сигнал/шум показва по-ясен сигнал, който може да подобри надеждността и качеството на предаване на данни.</string>
     <string name="speed">Скорост</string>
     <string name="speed_kmh">%1$d Km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="ssid">SSID</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
     <string name="subnet">Подмрежа</string>
@@ -1160,10 +1176,12 @@
     <!-- TRANSLATION -->
     <string name="transmit_over_lora">Предаване през LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="two_days">48 часа</string>

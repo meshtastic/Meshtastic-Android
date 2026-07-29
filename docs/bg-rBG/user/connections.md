@@ -74,7 +74,7 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 
 Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-### Connecting over the Network
+### Свързване през мрежата
 
 1. Make sure the radio is on the same local network as your phone/desktop.
 2. On the Connect screen, select **Network** in the transport selector.

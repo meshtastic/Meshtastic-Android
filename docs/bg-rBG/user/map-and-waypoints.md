@@ -123,7 +123,7 @@ The base map depends on your app flavor: **Google Play** builds use Google Maps,
 - Satellite imagery (where available)
 - Offline tiles (download map areas for offline use)
 
-## Related Topics
+## Свързани теми
 
 - [Nodes](nodes) — view and filter your node list
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
