@@ -242,10 +242,43 @@ class UsbMaintenanceGateTest {
         assertNotNull(otafixUf2ForBoardId(parseUf2BoardId(seeedL1Info)!!))
     }
 
+    /** Verbatim `INFO_UF2.TXT` from a RAK4631 running OTAFIX 2.2-BP1.3 (hwModel 9), captured 2026-07-30. */
+    private val rak4631OtafixInfo =
+        "UF2 Bootloader 0.9.2-OTAFIX2.2-BP1.3 lib/nrfx (v2.0.0) lib/tinyusb (0.12.0-145-g9775e7691) " +
+            "lib/uf2 (remotes/origin/configupdate-9-gadbb8c7)\r\n" +
+            "Model: WisBlock RAK4631 Board\r\n" +
+            "Board-ID: WisBlock-RAK4631-Board\r\n" +
+            "Date: Apr 13 2026\r\n" +
+            "SoftDevice: S140 6.1.1\r\n"
+
+    @Test
+    fun `both variants are parsed from real captured bootloader payloads`() {
+        // The two sides of the split, each from hardware: an OTAFIX RAK4631 and a stock Seeed L1.
+        assertEquals(SoftDeviceVariant.S140_6_1_1, parseUf2SoftDevice(rak4631OtafixInfo))
+        assertEquals(SoftDeviceVariant.S140_7_3_0, parseUf2SoftDevice(seeedL1Info))
+
+        assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId(rak4631OtafixInfo))
+        assertNotNull(
+            otafixUf2ForBoardId(parseUf2BoardId(rak4631OtafixInfo)!!),
+            "An OTAFIX-flashed device must still resolve its own image, so re-running the upgrade is idempotent",
+        )
+    }
+
     @Test
     fun `softdevice line is parsed for both shipped variants`() {
         assertEquals(SoftDeviceVariant.S140_6_1_1, parseUf2SoftDevice("SoftDevice: S140 6.1.1\r\n"))
         assertEquals(SoftDeviceVariant.S140_7_3_0, parseUf2SoftDevice("SoftDevice: S140 7.3.0\r\n"))
+    }
+
+    @Test
+    fun `each erase image targets the app start of the softdevice it is linked for`() {
+        // Verified against hardware 2026-07-30: on a 6.1.1 RAK4631 the app vector table sits at 0x26000
+        // (sp=0x20040000, top of nRF52840 RAM), and 0x27000 is mid-application. On a 7.3.0 device the app starts at
+        // 0x27000, which makes 0x26000 the SoftDevice's last page — the direction that corrupts.
+        assertEquals(0x26000L, APP_START_S140_6_1_1)
+        assertEquals(0x27000L, APP_START_S140_7_3_0)
+        assertEquals(APP_START_S140_6_1_1, eraseUf2ForVariant(SoftDeviceVariant.S140_6_1_1).expectedFirstTargetAddress)
+        assertEquals(APP_START_S140_7_3_0, eraseUf2ForVariant(SoftDeviceVariant.S140_7_3_0).expectedFirstTargetAddress)
     }
 
     @Test
