@@ -251,6 +251,34 @@ class UsbMaintenanceGateTest {
             "Date: Apr 13 2026\r\n" +
             "SoftDevice: S140 6.1.1\r\n"
 
+    /**
+     * Verbatim `INFO_UF2.TXT` from a RAK4631 on a stock 0.4.3 bootloader (May 2023), captured 2026-07-30.
+     *
+     * Two things this vintage proves: the `SoftDevice:` line goes back at least this far, so the bundled-map fallback is
+     * belt-and-braces rather than the common path; and older bootloaders emit an extra `Ver:` line that 0.9.x dropped,
+     * which the line-scanning parser must tolerate.
+     */
+    private val rak4631StockInfo =
+        "UF2 Bootloader 0.4.3\r\n" +
+            "Model: WisBlock RAK4631 Board\r\n" +
+            "Board-ID: WisBlock-RAK4631-Board\r\n" +
+            "Date: May 20 2023\r\n" +
+            "Ver: 0.4.3\r\n" +
+            "SoftDevice: S140 6.1.1\r\n"
+
+    @Test
+    fun `an old bootloader vintage still reports its softdevice and board id`() {
+        assertEquals(SoftDeviceVariant.S140_6_1_1, parseUf2SoftDevice(rak4631StockInfo))
+        assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId(rak4631StockInfo))
+    }
+
+    @Test
+    fun `board id is stable across bootloader vintages for the same board`() {
+        // A stock 0.4.3 RAK and an OTAFIX 2.2 RAK report the same Board-ID, so the OTAFIX veto resolves correctly on a
+        // device that has never been upgraded — the case that decides whether the upgrade is offerable at all.
+        assertEquals(parseUf2BoardId(rak4631StockInfo), parseUf2BoardId(rak4631OtafixInfo))
+    }
+
     @Test
     fun `both variants are parsed from real captured bootloader payloads`() {
         // The two sides of the split, each from hardware: an OTAFIX RAK4631 and a stock Seeed L1.
