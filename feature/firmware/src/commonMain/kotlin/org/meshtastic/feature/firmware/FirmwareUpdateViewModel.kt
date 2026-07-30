@@ -185,6 +185,11 @@ class FirmwareUpdateViewModel(
         super.onCleared()
         prepareJob?.cancel()
         prepareJob = null
+        // A maintenance sequence's lock must not outlive this ViewModel: the user may abandon the flow between
+        // passes (e.g. navigating away after the erase leg but before picking the firmware save location), and a
+        // leaked lock would permanently suppress the radio transport's auto-reconnect for the rest of the app
+        // session — see startFactoryErase/advancePastPass. A no-op if no sequence was in flight.
+        firmwareMaintenanceLock.release()
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
         // context keeps cleanup running even if something tries to cancel it mid-flight.
@@ -684,6 +689,13 @@ class FirmwareUpdateViewModel(
                 _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
             } finally {
                 cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                // This is also the terminal pass of a USB maintenance sequence when the FromVolume leg has already
+                // completed: the Prepared firmware artifact is saved through this pre-existing single-pass path
+                // rather than writeMaintenancePass/advancePastPass, so releasing here is the only place that
+                // sequence's lock gets freed. A no-op for a plain single-pass update, which never acquires the lock.
+                firmwareMaintenanceLock.release()
+                pendingUsbPasses = emptyList()
+                maintenanceHardware = null
             }
         }
     }

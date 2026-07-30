@@ -841,4 +841,57 @@ class FirmwareUpdateViewModelFileTest {
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         assertFalse(firmwareMaintenanceLock.isActive, "a failed preparation must not leak the lock")
     }
+
+    @Test
+    fun `completing the firmware pass of a maintenance sequence releases the lock`() = runTest {
+        // Regression: the FromVolume (erase) pass releases the lock through advancePastPass, but the sequence's
+        // final Prepared (firmware) pass is saved through the pre-existing saveDfuFile — which had no idea the lock
+        // existed. That left every SUCCESSFUL erase/upgrade leaking the lock forever, permanently suppressing the
+        // radio transport's auto-reconnect for the rest of the app session (see SharedRadioInterfaceService).
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+
+        val firmwareArtifact =
+            FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
+        val eraseArtifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/erase.uf2"), fileName = "erase.uf2")
+        everySuspend { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) } returns firmwareArtifact
+        everySuspend { firmwareRetriever.retrieveMaintenanceUf2(any(), any()) } returns eraseArtifact
+
+        // No SoftDevice line on the volume — falls back to the (resolved) map variant, matching every other case
+        // this suite already covers for that fallback.
+        everySuspend { fileHandler.isRemovableDestination(any()) } returns true
+        everySuspend { fileHandler.readSiblingText(any(), any()) } returns "Board-ID: Test-Board\r\n"
+        everySuspend { fileHandler.createDocumentInTree(any(), any(), any()) } returns
+            CommonUri.parse("content://tree/1234-5678%3A/document/erase.uf2")
+        everySuspend { fileHandler.copyToUri(any(), any()) } returns 1024L
+        every { usbManager.deviceDetachFlow() } returns flowOf(Unit)
+        everySuspend { usbManager.serialPortKeys() } returns emptySet()
+        everySuspend { usbManager.unblockCdcPort(any(), any(), any()) } returns true
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        viewModel.startFactoryErase()
+        advanceUntilIdle()
+
+        // First pass (erase image) — writes through writeMaintenancePass.
+        val awaitingErase = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+        assertEquals(UsbFileSaveStep.FactoryErase, awaitingErase.step)
+        viewModel.writeMaintenancePass(CommonUri.parse("content://tree/1234-5678%3A"))
+        advanceUntilIdle()
+
+        assertTrue(firmwareMaintenanceLock.isActive, "the lock must still be held between passes")
+        val awaitingFirmware = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+        assertEquals(UsbFileSaveStep.Firmware, awaitingFirmware.step)
+        assertNotNull(awaitingFirmware.uf2Artifact, "the terminal pass must carry its artifact")
+
+        // Second, terminal pass (firmware image) — writes through the pre-existing saveDfuFile.
+        viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
+        advanceUntilIdle()
+
+        assertFalse(
+            firmwareMaintenanceLock.isActive,
+            "completing the sequence's terminal pass must release the lock, or auto-reconnect stays suppressed forever",
+        )
+    }
 }
