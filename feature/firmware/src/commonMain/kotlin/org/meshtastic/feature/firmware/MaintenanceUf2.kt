@@ -257,10 +257,83 @@ internal fun parseUf2BoardId(infoUf2Text: String): String? = infoUf2Text
     ?.trim()
     ?.takeIf { it.isNotEmpty() }
 
+/**
+ * Extracts the installed SoftDevice from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
+ *
+ * `uf2_init()` appends this line at boot from `SD_ID_GET(MBR_SIZE)`/`SD_VERSION_GET(MBR_SIZE)` — i.e. read out of the
+ * MBR's registers — formatted as `SoftDevice: S<id> <major>.<minor>.<patch>`. Present in upstream Adafruit and in
+ * OTAFIX, and verified on a stock Seeed bootloader (`SoftDevice: S140 7.3.0`).
+ *
+ * This is the **authoritative** answer to the question the bundled map only estimates: not what the firmware was built
+ * against, but which SoftDevice is actually in flash. Returns `null` when the line is absent (very old bootloader), when
+ * no SoftDevice is installed, or when the id/version is not one we ship an erase image for.
+ */
+internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
+    val value =
+        infoUf2Text
+            .lineSequence()
+            .firstOrNull { it.trimStart().startsWith(UF2_SOFTDEVICE_PREFIX, ignoreCase = true) }
+            ?.substringAfter(':')
+            ?.trim()
+            ?: return null
+
+    val parts = value.split(' ').filter { it.isNotBlank() }
+    if (parts.size < 2 || !parts[0].equals(SUPPORTED_SOFTDEVICE_ID, ignoreCase = true)) return null
+    return SoftDeviceVariant.fromWire(parts[1])
+}
+
+/** Which erase image a given variant needs. Total over the enum, so a new variant cannot silently reuse an old image. */
+internal fun eraseUf2ForVariant(variant: SoftDeviceVariant): MaintenanceUf2 = when (variant) {
+    SoftDeviceVariant.S140_6_1_1 -> ERASE_S140_6_1_1
+    SoftDeviceVariant.S140_7_3_0 -> ERASE_S140_7_3_0
+}
+
+/** Outcome of reconciling the SoftDevice the drive reports against the bundled map. */
+internal sealed interface EraseImageResolution {
+    /** Safe to write [asset]; [variant] is the SoftDevice it is linked for. */
+    data class Resolved(val asset: MaintenanceUf2, val variant: SoftDeviceVariant) : EraseImageResolution
+
+    /**
+     * The drive and the bundled map disagree. Always a refusal: one of the two is wrong and we cannot tell which, and
+     * guessing writes an erase image into a SoftDevice. Also the signal that a map row needs correcting.
+     */
+    data class Conflict(val reported: SoftDeviceVariant, val mapped: SoftDeviceVariant) : EraseImageResolution
+
+    /** Neither source produced a variant. */
+    data object Unresolved : EraseImageResolution
+}
+
+/**
+ * Picks the nRF erase image, preferring what the device reports over what the bundled map predicted.
+ *
+ * The map ([DeviceHardware.softDeviceVariant]) is a pre-flight hint — it decides whether the action is offered before any
+ * drive is mounted. Once the drive is readable its own report wins, because it comes from the MBR rather than from a
+ * hand-authored table. A disagreement refuses rather than picking a side.
+ */
+internal fun resolveNrfEraseImage(
+    mapped: SoftDeviceVariant?,
+    reportedFromDrive: SoftDeviceVariant?,
+): EraseImageResolution = when {
+    reportedFromDrive != null && mapped != null && reportedFromDrive != mapped ->
+        EraseImageResolution.Conflict(reported = reportedFromDrive, mapped = mapped)
+
+    reportedFromDrive != null -> EraseImageResolution.Resolved(eraseUf2ForVariant(reportedFromDrive), reportedFromDrive)
+
+    // No SoftDevice line: a bootloader older than the uf2_init that emits it. Fall back to the bundled hint.
+    mapped != null -> EraseImageResolution.Resolved(eraseUf2ForVariant(mapped), mapped)
+
+    else -> EraseImageResolution.Unresolved
+}
+
 /** The file every Adafruit-family UF2 bootloader exposes on its mass-storage volume. */
 internal const val INFO_UF2_FILE_NAME = "INFO_UF2.TXT"
 
 private const val UF2_BOARD_ID_PREFIX = "Board-ID:"
+
+private const val UF2_SOFTDEVICE_PREFIX = "SoftDevice:"
+
+/** All Meshtastic nRF52840 boards run the S140 SoftDevice; anything else is out of scope and refuses. */
+private const val SUPPORTED_SOFTDEVICE_ID = "S140"
 
 /** UF2 block size, per the UF2 specification. */
 internal const val UF2_BLOCK_BYTES = 512

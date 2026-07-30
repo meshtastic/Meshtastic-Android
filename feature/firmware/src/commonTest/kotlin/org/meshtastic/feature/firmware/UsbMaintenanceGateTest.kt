@@ -223,6 +223,81 @@ class UsbMaintenanceGateTest {
         assertNull(parseUf2BoardId(""), "A volume with no INFO_UF2.TXT is not a UF2 bootloader drive")
     }
 
+    // ── SoftDevice read from the drive: the authoritative gate (R4) ───────────
+
+    /** Verbatim `INFO_UF2.TXT` from a stock Seeed Wio Tracker L1 (hwModel 99), captured 2026-07-30. */
+    private val seeedL1Info =
+        "UF2 Bootloader 0.9.2-dirty lib/nrfx (v2.0.0) lib/tinyusb (0.12.0-145-g9775e7691) " +
+            "lib/uf2 (remotes/origin/configupdate-9-gadbb8c7)\r\n" +
+            "Model: Seeed TRACKER L1\r\n" +
+            "Board-ID: TRACKER L1\r\n" +
+            "Date: May 15 2025\r\n" +
+            "SoftDevice: S140 7.3.0\r\n"
+
+    @Test
+    fun `softdevice and board id are both read from a real stock bootloader payload`() {
+        assertEquals(SoftDeviceVariant.S140_7_3_0, parseUf2SoftDevice(seeedL1Info))
+        assertEquals("TRACKER L1", parseUf2BoardId(seeedL1Info))
+        // The stock Seeed bootloader reports the same Board-ID as OTAFIX's build for this board.
+        assertNotNull(otafixUf2ForBoardId(parseUf2BoardId(seeedL1Info)!!))
+    }
+
+    @Test
+    fun `softdevice line is parsed for both shipped variants`() {
+        assertEquals(SoftDeviceVariant.S140_6_1_1, parseUf2SoftDevice("SoftDevice: S140 6.1.1\r\n"))
+        assertEquals(SoftDeviceVariant.S140_7_3_0, parseUf2SoftDevice("SoftDevice: S140 7.3.0\r\n"))
+    }
+
+    @Test
+    fun `unsupported softdevice ids and absent lines yield null`() {
+        assertNull(parseUf2SoftDevice("SoftDevice: S132 7.3.0\r\n"), "S132 is not an nRF52840 SoftDevice")
+        assertNull(parseUf2SoftDevice("SoftDevice: S140 9.9.9\r\n"), "No erase image exists for an unknown version")
+        assertNull(parseUf2SoftDevice("SoftDevice: \r\n"), "The bootloader omits the value when no SD is installed")
+        assertNull(parseUf2SoftDevice("Board-ID: TRACKER L1\r\n"), "Absent line")
+    }
+
+    @Test
+    fun `the drive outranks the bundled map`() {
+        // The map says 6.1.1, the device says 7.3.0 with nothing else to go on — but they disagree, so refuse.
+        val conflict = resolveNrfEraseImage(mapped = SoftDeviceVariant.S140_6_1_1, reportedFromDrive = SoftDeviceVariant.S140_7_3_0)
+        assertTrue(conflict is EraseImageResolution.Conflict, "Disagreement must refuse, not pick a side")
+    }
+
+    @Test
+    fun `agreement resolves to the reported variant's image`() {
+        val resolved =
+            resolveNrfEraseImage(
+                mapped = SoftDeviceVariant.S140_7_3_0,
+                reportedFromDrive = SoftDeviceVariant.S140_7_3_0,
+            )
+
+        assertTrue(resolved is EraseImageResolution.Resolved)
+        assertEquals("nrf_erase_sd7_3.uf2", resolved.asset.fileName)
+        assertEquals(APP_START_S140_7_3_0, resolved.asset.expectedFirstTargetAddress)
+    }
+
+    @Test
+    fun `an old bootloader with no softdevice line falls back to the bundled map`() {
+        val resolved = resolveNrfEraseImage(mapped = SoftDeviceVariant.S140_6_1_1, reportedFromDrive = null)
+
+        assertTrue(resolved is EraseImageResolution.Resolved)
+        assertEquals("nrf_erase2.uf2", resolved.asset.fileName)
+    }
+
+    @Test
+    fun `a drive report rescues an unmapped model`() {
+        // THINKNODE_M8 has no firmware variant on master and so no map row; the drive can still answer.
+        val resolved = resolveNrfEraseImage(mapped = null, reportedFromDrive = SoftDeviceVariant.S140_6_1_1)
+
+        assertTrue(resolved is EraseImageResolution.Resolved)
+        assertEquals(SoftDeviceVariant.S140_6_1_1, resolved.variant)
+    }
+
+    @Test
+    fun `neither source resolving means unresolved`() {
+        assertEquals(EraseImageResolution.Unresolved, resolveNrfEraseImage(mapped = null, reportedFromDrive = null))
+    }
+
     // ── UF2 header parsing (R8) ──────────────────────────────────────────────
 
     @Test
