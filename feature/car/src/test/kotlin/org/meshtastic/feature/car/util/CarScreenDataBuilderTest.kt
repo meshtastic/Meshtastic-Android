@@ -71,6 +71,26 @@ class CarScreenDataBuilderTest {
     }
 
     @Test
+    fun `buildNodeUi resolves an unset node snr to unknown`() {
+        // Exercises the production path: fails if buildNodeUi reverts to reading node.snr, which would feed the
+        // Float.MAX_VALUE sentinel into the bands and rate a node with no reading as EXCELLENT.
+        val node = Node(num = 1)
+
+        val ui = CarScreenDataBuilder.buildNodeUi(node, ModemPreset.LONG_FAST)
+
+        assertEquals(SignalQuality.UNKNOWN, ui.signalQuality)
+    }
+
+    @Test
+    fun `buildNodeUi rates a zero node snr reading`() {
+        val node = Node(num = 1, snr = 0f)
+
+        val ui = CarScreenDataBuilder.buildNodeUi(node, ModemPreset.LONG_FAST)
+
+        assertEquals(SignalQuality.EXCELLENT, ui.signalQuality)
+    }
+
+    @Test
     fun `determineSignalQuality returns excellent well above the preset floor`() {
         // LongFast floor -17.5; -10 is 7.5 dB above it (> floor + 5.5 margin).
         val quality = CarScreenDataBuilder.determineSignalQuality(snr = -10f, modemPreset = ModemPreset.LONG_FAST)

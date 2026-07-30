@@ -24,6 +24,13 @@ import kotlin.test.assertNotNull
 /**
  * Guards the presence policy for `rx_snr`: absent means null and nothing else. Unlike [rxTimeOrNull], a zero must never
  * be folded into "unknown" — 0 dB is a real measurement. See [snrOrNull].
+ *
+ * The proto-absent case is not asserted here because it is not yet constructible: `rx_snr` is still a non-null `float`
+ * upstream, so [snrOrNull] cannot return null for any packet this test could build. What these tests do lock down is
+ * the half that can regress today — that a zero is never folded — which is exactly what breaks if the [rxTimeOrNull]
+ * pattern is copied over. Null *handling* is covered where a null is representable: `MetricFormatterTest`
+ * (`snrAbsentIsUnknown`) and `LoraSignalIndicatorUiTest` (`snrRendersNothingWhenAbsent`,
+ * `loraSignalIndicatorShowsUnknownWhenSnrIsAbsent`).
  */
 class SnrExtensionsTest {
 
