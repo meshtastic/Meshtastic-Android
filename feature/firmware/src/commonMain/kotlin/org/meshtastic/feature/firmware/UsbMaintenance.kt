@@ -19,6 +19,15 @@ package org.meshtastic.feature.firmware
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.SoftDeviceVariant
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_maintenance_no_release
+import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
+import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
+import org.meshtastic.core.resources.firmware_maintenance_unknown_board
+import org.meshtastic.core.resources.firmware_maintenance_unknown_softdevice
+import org.meshtastic.core.resources.firmware_maintenance_unsupported_device
+import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 
 /**
  * Which leg of a multi-pass USB/UF2 sequence a file-save prompt belongs to.
@@ -87,6 +96,32 @@ enum class UsbMaintenanceRefusal {
 
     /** No OTAFIX image is published for the Board-ID this volume reports. */
     UnknownBoardId,
+}
+
+/**
+ * The single mapping from [UsbMaintenanceRefusal] to user-facing copy.
+ *
+ * Shared by the ViewModel (wraps it in [org.meshtastic.feature.firmware.FirmwareUpdateState.Error] for a refusal raised
+ * mid-flow) and the pre-flight card (resolves it via [UiText.asString] next to the disabled button) so the two call
+ * sites can never drift out of sync with each other.
+ */
+internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText = when (reason) {
+    UsbMaintenanceRefusal.UnknownSoftDevice -> UiText.Resource(Res.string.firmware_maintenance_unknown_softdevice)
+
+    UsbMaintenanceRefusal.UnsupportedArchitecture ->
+        UiText.Resource(Res.string.firmware_maintenance_unsupported_device)
+
+    UsbMaintenanceRefusal.NoFirmwareRelease -> UiText.Resource(Res.string.firmware_maintenance_no_release)
+
+    UsbMaintenanceRefusal.DestinationNotRemovable ->
+        UiText.Resource(Res.string.firmware_maintenance_wrong_destination)
+
+    UsbMaintenanceRefusal.NotABootloaderVolume ->
+        UiText.Resource(Res.string.firmware_maintenance_not_a_bootloader_volume)
+
+    UsbMaintenanceRefusal.SoftDeviceConflict -> UiText.Resource(Res.string.firmware_maintenance_softdevice_conflict)
+
+    UsbMaintenanceRefusal.UnknownBoardId -> UiText.Resource(Res.string.firmware_maintenance_unknown_board)
 }
 
 /**

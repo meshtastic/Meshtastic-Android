@@ -256,7 +256,7 @@ internal val otafixBoardIds: Set<String>
  */
 internal fun parseUf2BoardId(infoUf2Text: String): String? = infoUf2Text
     .lineSequence()
-    .firstOrNull { it.startsWith(UF2_BOARD_ID_PREFIX, ignoreCase = true) }
+    .firstOrNull { it.trimStart().startsWith(UF2_BOARD_ID_PREFIX, ignoreCase = true) }
     ?.substringAfter(':')
     ?.trim()
     ?.takeIf { it.isNotEmpty() }

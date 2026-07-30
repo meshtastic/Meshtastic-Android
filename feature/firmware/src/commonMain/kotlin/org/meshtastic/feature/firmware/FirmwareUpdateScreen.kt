@@ -98,17 +98,10 @@ import org.meshtastic.core.resources.firmware_maintenance_erase_action
 import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_button
 import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_text
 import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_title
-import org.meshtastic.core.resources.firmware_maintenance_no_release
-import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
 import org.meshtastic.core.resources.firmware_maintenance_select_drive
-import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
-import org.meshtastic.core.resources.firmware_maintenance_unknown_board
-import org.meshtastic.core.resources.firmware_maintenance_unknown_softdevice
-import org.meshtastic.core.resources.firmware_maintenance_unsupported_device
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_bootloader_action
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_text
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_title
-import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
@@ -839,30 +832,14 @@ internal fun UsbMaintenanceCard(
 }
 
 /**
- * Copy for a pre-flight refusal shown on the card.
+ * Copy for a pre-flight refusal shown inline next to the disabled button.
  *
- * Mirrors the ViewModel's mapping for refusals raised mid-flow; the two exist separately because this one renders
- * inline next to a disabled button while that one becomes an error state.
+ * Resolves the same [usbMaintenanceRefusalMessage] mapping the ViewModel uses for a refusal raised mid-flow, so the two
+ * call sites can never drift out of sync with each other.
  */
 @Composable
-private fun usbMaintenanceRefusalText(refusal: UsbMaintenanceRefusal): String = when (refusal) {
-    UsbMaintenanceRefusal.UnknownSoftDevice -> stringResource(Res.string.firmware_maintenance_unknown_softdevice)
-
-    UsbMaintenanceRefusal.UnsupportedArchitecture ->
-        stringResource(Res.string.firmware_maintenance_unsupported_device)
-
-    UsbMaintenanceRefusal.NoFirmwareRelease -> stringResource(Res.string.firmware_maintenance_no_release)
-
-    UsbMaintenanceRefusal.DestinationNotRemovable ->
-        stringResource(Res.string.firmware_maintenance_wrong_destination)
-
-    UsbMaintenanceRefusal.NotABootloaderVolume ->
-        stringResource(Res.string.firmware_maintenance_not_a_bootloader_volume)
-
-    UsbMaintenanceRefusal.SoftDeviceConflict -> stringResource(Res.string.firmware_maintenance_softdevice_conflict)
-
-    UsbMaintenanceRefusal.UnknownBoardId -> stringResource(Res.string.firmware_maintenance_unknown_board)
-}
+private fun usbMaintenanceRefusalText(refusal: UsbMaintenanceRefusal): String =
+    usbMaintenanceRefusalMessage(refusal).asString()
 
 @Composable
 private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDevice: () -> Unit) {

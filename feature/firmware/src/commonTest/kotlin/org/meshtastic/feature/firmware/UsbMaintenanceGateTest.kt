@@ -230,6 +230,11 @@ class UsbMaintenanceGateTest {
         assertNull(parseUf2BoardId(""), "A volume with no INFO_UF2.TXT is not a UF2 bootloader drive")
     }
 
+    @Test
+    fun `board id tolerates leading whitespace on its line just like the softdevice line`() {
+        assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId("  Board-ID: WisBlock-RAK4631-Board\r\n"))
+    }
+
     // ── SoftDevice read from the drive: the authoritative gate (R4) ───────────
 
     /** Verbatim `INFO_UF2.TXT` from a stock Seeed Wio Tracker L1 (hwModel 99), captured 2026-07-30. */

@@ -65,12 +65,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_maintenance_cdc_unblock_failed
 import org.meshtastic.core.resources.firmware_maintenance_copy_failed
-import org.meshtastic.core.resources.firmware_maintenance_no_release
-import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
-import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
-import org.meshtastic.core.resources.firmware_maintenance_unknown_board
-import org.meshtastic.core.resources.firmware_maintenance_unknown_softdevice
-import org.meshtastic.core.resources.firmware_maintenance_unsupported_device
 import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_archive_missing_target
@@ -514,14 +508,14 @@ class FirmwareUpdateViewModel(
         when (request) {
             UsbMaintenanceRequest.FactoryErase ->
                 gate.eraseRefusal?.let {
-                    _state.value = FirmwareUpdateState.Error(usbMaintenanceRefusalError(it))
+                    _state.value = FirmwareUpdateState.Error(usbMaintenanceRefusalMessage(it))
                     return
                 }
 
             UsbMaintenanceRequest.BootloaderUpgrade ->
                 if (!gate.showBootloaderUpgrade) {
                     _state.value =
-                        FirmwareUpdateState.Error(usbMaintenanceRefusalError(UsbMaintenanceRefusal.UnknownBoardId))
+                        FirmwareUpdateState.Error(usbMaintenanceRefusalMessage(UsbMaintenanceRefusal.UnknownBoardId))
                     return
                 }
         }
@@ -598,7 +592,7 @@ class FirmwareUpdateViewModel(
     private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) = when (result) {
         UsbPassResult.Written -> advancePastPass(pass)
 
-        is UsbPassResult.Refused -> reofferOrFail(pass, usbMaintenanceRefusalError(result.reason))
+        is UsbPassResult.Refused -> reofferOrFail(pass, usbMaintenanceRefusalMessage(result.reason))
 
         UsbPassResult.ImageDownloadFailed ->
             reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_retrieval_failed))
@@ -654,27 +648,6 @@ class FirmwareUpdateViewModel(
         },
         unblockCdc = { wait, hold -> usbManager.unblockCdcPort(portsBefore, wait, hold) },
     )
-
-    private fun usbMaintenanceRefusalError(reason: UsbMaintenanceRefusal): UiText = when (reason) {
-        UsbMaintenanceRefusal.UnknownSoftDevice ->
-            UiText.Resource(Res.string.firmware_maintenance_unknown_softdevice)
-
-        UsbMaintenanceRefusal.UnsupportedArchitecture ->
-            UiText.Resource(Res.string.firmware_maintenance_unsupported_device)
-
-        UsbMaintenanceRefusal.NoFirmwareRelease -> UiText.Resource(Res.string.firmware_maintenance_no_release)
-
-        UsbMaintenanceRefusal.DestinationNotRemovable ->
-            UiText.Resource(Res.string.firmware_maintenance_wrong_destination)
-
-        UsbMaintenanceRefusal.NotABootloaderVolume ->
-            UiText.Resource(Res.string.firmware_maintenance_not_a_bootloader_volume)
-
-        UsbMaintenanceRefusal.SoftDeviceConflict ->
-            UiText.Resource(Res.string.firmware_maintenance_softdevice_conflict)
-
-        UsbMaintenanceRefusal.UnknownBoardId -> UiText.Resource(Res.string.firmware_maintenance_unknown_board)
-    }
 
     fun saveDfuFile(uri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
