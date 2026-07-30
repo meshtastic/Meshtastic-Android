@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>NodeSignalQuality</title>
+    <title>snrOrNull</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:model/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:model/commonMain" data-filter=":core:model/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-ui::org.meshtastic.core.ui.component//NodeSignalQuality/#kotlin.Float#kotlin.Int?#androidx.compose.ui.Modifier#org.meshtastic.proto.Config.LoRaConfig.ModemPreset?/PointingToDeclaration//-920980536">
-  <div class="breadcrumbs"><a href="../index.html">core-ui</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.core.ui.component</a><span class="delimiter">/</span><span class="current">NodeSignalQuality</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-model::org.meshtastic.core.model.util//snrOrNull/org.meshtastic.proto.MeshPacket#/PointingToDeclaration//394437785">
+  <div class="breadcrumbs"><a href="../index.html">core-model</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.core.model.util</a><span class="delimiter">/</span><span class="current">snrOrNull</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Node</span><wbr><span>Signal</span><wbr><span><span>Quality</span></span></h1>
+    <h1 class="cover"><span>snr</span><wbr><span>Or</span><wbr><span><span>Null</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-node-signal-quality.html"><span class="token function">NodeSignalQuality</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">snr<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">rssi<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">modemPreset<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Config.LoRaConfig.ModemPreset///PointingToDeclaration/">Config.LoRaConfig.ModemPreset</span><span class="token operator">?</span><span class="token operator"> = </span>LocalModemPreset.current</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/LoraSignalIndicator.kt#L97">source</a>)</span></span></div><p class="paragraph">Displays the <code class="lang-kotlin">snr</code> and <code class="lang-kotlin">rssi</code> color coded based on the signal quality, along with a human readable description and related icon.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span><span class="token punctuation">.</span><a href="snr-or-null.html"><span class="token function">snrOrNull</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator">?</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/util/Extensions.kt#L125">source</a>)</span></span></div><p class="paragraph">Signal-to-noise ratio in dB for this reception, or null when the packet carries no SNR measurement (it did not arrive over LoRa, or the radio reported none).</p><p class="paragraph">Deliberately does NOT fold 0 the way <a href="rx-time-or-null.html">rxTimeOrNull</a> does: 0 dB is a genuine, common reading — a signal at the noise floor, comfortably demodulable on every preset — so treating it as "absent" would hide real measurements and, worse, discard the only zero that can ever reach us. Under proto3 implicit presence a field at its zero value is never put on the wire, so an SNR-less packet from firmware predating the optional conversion already decodes to null for free. A 0 that survives to this accessor was written explicitly and means 0 dB.</p><p class="paragraph">Presence cannot be inferred from <a href="is-lora.html">isLora</a> instead: <code class="lang-kotlin">transport_mechanism</code> defaults to <code class="lang-kotlin">TRANSPORT_INTERNAL</code> (0), so firmware that never sets it would have every reading suppressed.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
