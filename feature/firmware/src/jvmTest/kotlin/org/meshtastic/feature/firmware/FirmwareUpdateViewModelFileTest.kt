@@ -39,6 +39,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -85,6 +86,7 @@ class FirmwareUpdateViewModelFileTest {
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
+    private val firmwareMaintenanceLock = FirmwareMaintenanceLock()
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -139,6 +141,7 @@ class FirmwareUpdateViewModelFileTest {
         usbManager,
         fileHandler,
         firmwareRetriever,
+        firmwareMaintenanceLock,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
     )
@@ -804,4 +807,38 @@ class FirmwareUpdateViewModelFileTest {
         activelySupported = true,
         softDeviceVariant = softDevice,
     )
+
+    @Test
+    fun `a refused erase never takes the maintenance lock`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(softDevice = null))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        viewModel.startFactoryErase()
+        advanceUntilIdle()
+
+        assertFalse(
+            firmwareMaintenanceLock.isActive,
+            "refusing before the sequence starts must leave the radio transport unblocked",
+        )
+    }
+
+    @Test
+    fun `a failed preparation releases the maintenance lock`() = runTest {
+        // The lock suppresses transport restarts; leaking it would leave the app unable to reconnect at all.
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+        everySuspend { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) } returns null
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        viewModel.startFactoryErase()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        assertFalse(firmwareMaintenanceLock.isActive, "a failed preparation must not leak the lock")
+    }
 }

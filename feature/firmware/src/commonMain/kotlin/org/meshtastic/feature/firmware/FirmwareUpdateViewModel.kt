@@ -39,6 +39,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
@@ -122,6 +123,7 @@ class FirmwareUpdateViewModel(
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
     private val firmwareRetriever: FirmwareRetriever,
+    private val firmwareMaintenanceLock: FirmwareMaintenanceLock,
     private val applicationScope: ApplicationCoroutineScope,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
 ) : ViewModel() {
@@ -511,6 +513,9 @@ class FirmwareUpdateViewModel(
         originalDeviceAddress = radioPrefs.devAddr.value
         maintenanceHardware = currentState.deviceHardware
         destructiveWriteDone = false
+        // Held until the sequence finishes or fails. Without it the environmental-recovery listeners restart the radio
+        // transport mid-sequence and bind it to the erase firmware's bare CDC port.
+        firmwareMaintenanceLock.acquire()
 
         viewModelScope.launch {
             if (!checkBatteryLevel()) return@launch
@@ -536,6 +541,9 @@ class FirmwareUpdateViewModel(
                     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                         Logger.e(e) { "USB maintenance preparation failed" }
                         _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                    } finally {
+                        // Preparation that produced no passes never reached the device; hand the transport back.
+                        if (pendingUsbPasses.isEmpty()) firmwareMaintenanceLock.release()
                     }
                 }
         }
@@ -595,6 +603,8 @@ class FirmwareUpdateViewModel(
 
         val next = pendingUsbPasses.firstOrNull()
         if (next == null) {
+            // Sequence complete: hand the device back before verifying, so the normal reconnect can run.
+            firmwareMaintenanceLock.release()
             verifyUpdateResult(originalDeviceAddress)
         } else {
             _state.value = next.toAwaitingFileSave()
@@ -609,12 +619,13 @@ class FirmwareUpdateViewModel(
      * deliberately.
      */
     private fun reofferOrFail(pass: UsbFileSavePass, message: UiText) {
-        _state.value =
-            if (destructiveWriteDone) {
-                pass.toAwaitingFileSave(retryMessage = message)
-            } else {
-                FirmwareUpdateState.Error(message)
-            }
+        if (destructiveWriteDone) {
+            // Still mid-sequence — hold the lock, the user is being asked to retry this pass.
+            _state.value = pass.toAwaitingFileSave(retryMessage = message)
+        } else {
+            firmwareMaintenanceLock.release()
+            _state.value = FirmwareUpdateState.Error(message)
+        }
     }
 
     private fun usbPassWriter(portsBefore: Set<String>) = UsbPassWriter(
