@@ -24,6 +24,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
@@ -44,6 +45,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.RadioPrefs
@@ -715,4 +717,91 @@ class FirmwareUpdateViewModelFileTest {
         assertNull(viewModel.pendingLocalFirmwareFile.value)
         verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
     }
+
+    // ── USB maintenance gating (factory erase / bootloader upgrade) ────────────────────────────────
+
+    @Test
+    fun `maintenance is offered for an nrf device over usb with a resolved softdevice`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertTrue(ready.maintenance.show, "nRF over USB should offer maintenance")
+        assertEquals(null, ready.maintenance.eraseRefusal, "a resolved SoftDevice must not refuse")
+    }
+
+    @Test
+    fun `maintenance refuses erase when the softdevice is unresolved`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(softDevice = null))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertTrue(ready.maintenance.show, "the action stays visible so the refusal can be explained")
+        assertEquals(UsbMaintenanceRefusal.UnknownSoftDevice, ready.maintenance.eraseRefusal)
+    }
+
+    @Test
+    fun `maintenance is hidden over bluetooth`() = runTest {
+        // The flow needs the UF2 mass-storage volume, which only exists on a USB connection.
+        every { radioPrefs.devAddr } returns MutableStateFlow("x11:22:33:44:55:66")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertFalse(ready.maintenance.show)
+    }
+
+    @Test
+    fun `starting a refused erase performs no reboot and no download`() = runTest {
+        // Defence in depth behind the disabled button: a refused erase must not touch the device.
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(softDevice = null))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+
+        viewModel.startFactoryErase()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        // performUsbMaintenance downloads the firmware before it reboots to DFU, so proving no download was attempted
+        // also proves the device was never rebooted. FakeRadioController.rebootToDfu records nothing to assert on.
+        verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) }
+    }
+
+    @Test
+    fun `writeMaintenancePass is ignored when no sequence is running`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val before = viewModel.state.value
+
+        viewModel.writeMaintenancePass(CommonUri.parse("content://tree/1234-5678%3A"))
+        advanceUntilIdle()
+
+        assertEquals(before, viewModel.state.value, "a stray volume pick must not change state")
+    }
+
+    private fun nrfHardware(softDevice: SoftDeviceVariant?) = DeviceHardware(
+        hwModel = 9,
+        hwModelSlug = "RAK4631",
+        platformioTarget = "rak4631",
+        architecture = "nrf52840",
+        displayName = "RAK4631",
+        activelySupported = true,
+        softDeviceVariant = softDevice,
+    )
 }
