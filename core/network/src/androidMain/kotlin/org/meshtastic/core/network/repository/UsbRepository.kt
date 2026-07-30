@@ -106,12 +106,13 @@ class UsbRepository(
     /**
      * Opens [driver]'s port, asserts DTR/RTS for [holdMillis], and closes it again.
      *
-     * Exists because some firmware waits for a host before it will run: the nRF52 factory-erase image blocks in
-     * `while (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately does not
-     * go through [createSerialConnection], which welds the assertion to a `SerialInputOutputManager` reader thread and a
+     * Exists because some firmware waits for a host before it will run: the nRF52 factory-erase image blocks in `while
+     * (!Serial)` before formatting, and `Serial` only becomes truthy once DTR is asserted. Deliberately does not go
+     * through [createSerialConnection], which welds the assertion to a `SerialInputOutputManager` reader thread and a
      * mandatory listener — there is no Meshtastic protocol on the other end here, just a blocked `setup()`.
      *
-     * @return true when the port was opened and DTR held; false if permission is missing or the port could not be opened.
+     * @return true when the port was opened and DTR held; false if permission is missing or the port could not be
+     *   opened.
      */
     suspend fun pokeDtr(driver: UsbSerialDriver, holdMillis: Long): Boolean = withContext(dispatchers.io) {
         val manager = usbManagerLazy.value ?: return@withContext false

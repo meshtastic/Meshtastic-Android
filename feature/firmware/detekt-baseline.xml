@@ -12,7 +12,7 @@
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun CheckingState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun ErrorState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun VerifyingState</ID>
-    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun AwaitingFileSaveState</ID>
+    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun AwaitingFileSaveState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun VerificationFailedState</ID>
     <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun CheckingStatePreview</ID>
     <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun DisclaimerDialogPreview</ID>

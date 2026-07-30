@@ -59,11 +59,8 @@ internal sealed interface UsbFileSavePass {
     ) : UsbFileSavePass
 
     /** Already downloaded and verified. */
-    data class Prepared(
-        override val step: UsbFileSaveStep,
-        val artifact: FirmwareArtifact,
-        val fileName: String,
-    ) : UsbFileSavePass
+    data class Prepared(override val step: UsbFileSaveStep, val artifact: FirmwareArtifact, val fileName: String) :
+        UsbFileSavePass
 }
 
 /**
@@ -72,9 +69,10 @@ internal sealed interface UsbFileSavePass {
  *
  * Ordering is deliberate. The **application** image is downloaded and verified *before* `rebootToDfu`, because it is
  * what restores the device after a destructive write — we never erase without already holding the firmware to put back.
- * The **maintenance** image cannot be fetched this early: erase and bootloader images are selected from the Board-ID and
- * SoftDevice the mounted volume reports, and no volume exists until the device has rebooted. It is fetched later, after
- * the volume is vetted but still before anything is written, so a failure there costs a message rather than a device.
+ * The **maintenance** image cannot be fetched this early: erase and bootloader images are selected from the Board-ID
+ * and SoftDevice the mounted volume reports, and no volume exists until the device has rebooted. It is fetched later,
+ * after the volume is vetted but still before anything is written, so a failure there costs a message rather than a
+ * device.
  *
  * @return The ordered passes, or an empty list when preparation failed (state has already been set to an error).
  */
@@ -212,33 +210,9 @@ internal class UsbPassWriter(
             }
 
         val artifact =
-            when (pass) {
-                is UsbFileSavePass.Prepared -> pass.artifact
-
-                is UsbFileSavePass.FromVolume -> {
-                    when (val choice = chooseMaintenanceImage(pass.request, hardware, volume)) {
-                        is MaintenanceImageChoice.Refused -> return UsbPassResult.Refused(choice.reason)
-                        is MaintenanceImageChoice.Resolved -> {
-                            val downloadingMsg =
-                                getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
-                            updateState(
-                                FirmwareUpdateState.Downloading(
-                                    ProgressState(message = UiText.DynamicString(downloadingMsg)),
-                                ),
-                            )
-                            retrieveMaintenanceUf2(choice.asset) { progress ->
-                                updateState(
-                                    FirmwareUpdateState.Downloading(
-                                        ProgressState(
-                                            message = UiText.DynamicString(downloadingMsg),
-                                            progress = progress,
-                                        ),
-                                    ),
-                                )
-                            } ?: return UsbPassResult.ImageDownloadFailed
-                        }
-                    }
-                }
+            when (val resolved = resolveImage(pass, hardware, volume, updateState)) {
+                is ImageResolution.Failed -> return resolved.result
+                is ImageResolution.Ready -> resolved.artifact
             }
 
         val fileName = artifact.fileName ?: return UsbPassResult.CopyFailed
@@ -279,6 +253,49 @@ internal class UsbPassWriter(
         }
 
         return UsbPassResult.Written
+    }
+
+    /** Either the image to write, or the result to return instead. */
+    private sealed interface ImageResolution {
+        data class Ready(val artifact: FirmwareArtifact) : ImageResolution
+
+        data class Failed(val result: UsbPassResult) : ImageResolution
+    }
+
+    /**
+     * Produces the image for [pass]: already downloaded for the application pass, or chosen from what [volume] reports
+     * and fetched now for a maintenance pass.
+     */
+    private suspend fun resolveImage(
+        pass: UsbFileSavePass,
+        hardware: DeviceHardware,
+        volume: MaintenanceVolume,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): ImageResolution = when (pass) {
+        is UsbFileSavePass.Prepared -> ImageResolution.Ready(pass.artifact)
+
+        is UsbFileSavePass.FromVolume ->
+            when (val choice = chooseMaintenanceImage(pass.request, hardware, volume)) {
+                is MaintenanceImageChoice.Refused -> ImageResolution.Failed(UsbPassResult.Refused(choice.reason))
+
+                is MaintenanceImageChoice.Resolved -> {
+                    val downloadingMsg =
+                        getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
+                    val artifact =
+                        retrieveMaintenanceUf2(choice.asset) { progress ->
+                            updateState(
+                                FirmwareUpdateState.Downloading(
+                                    ProgressState(
+                                        message = UiText.DynamicString(downloadingMsg),
+                                        progress = progress,
+                                    ),
+                                ),
+                            )
+                        }
+                    artifact?.let { ImageResolution.Ready(it) }
+                        ?: ImageResolution.Failed(UsbPassResult.ImageDownloadFailed)
+                }
+            }
     }
 }
 

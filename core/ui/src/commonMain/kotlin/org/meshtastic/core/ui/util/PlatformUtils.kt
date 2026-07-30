@@ -54,7 +54,7 @@ expect fun rememberSaveFileLauncher(
  * single-document URI does not. Needed where the app must inspect a volume before writing to it — for example reading a
  * UF2 bootloader's `INFO_UF2.TXT` to confirm which board it is and that the volume really is a bootloader drive.
  */
-@Composable expect fun rememberOpenDocumentTreeLauncher(onTreeUriReceived: (CommonUri?) -> Unit): () -> Unit
+@Composable expect fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit
 
 /**
  * Returns a suspend function that reads up to [maxChars] characters of text from a [CommonUri]. Returns `null` if the

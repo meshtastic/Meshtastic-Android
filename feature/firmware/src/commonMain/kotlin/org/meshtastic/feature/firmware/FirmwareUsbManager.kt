@@ -22,11 +22,11 @@ interface FirmwareUsbManager {
     fun deviceDetachFlow(): Flow<Unit>
 
     /**
-     * Records which serial ports are present, so a port that appears *after* a UF2 write can be told apart from one that
-     * was already there.
+     * Records which serial ports are present, so a port that appears *after* a UF2 write can be told apart from one
+     * that was already there.
      *
-     * Snapshot-then-diff rather than matching a VID/PID table: bootloader-mode ids are per-board and collide (four OTAFIX
-     * boards share `239A/0029`), and identifying by serial number needs a permission grant we may not hold yet.
+     * Snapshot-then-diff rather than matching a VID/PID table: bootloader-mode ids are per-board and collide (four
+     * OTAFIX boards share `239A/0029`), and identifying by serial number needs a permission grant we may not hold yet.
      */
     suspend fun serialPortKeys(): Set<String>
 

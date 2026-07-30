@@ -495,6 +495,7 @@ class FirmwareUpdateViewModel(
 
     fun startBootloaderUpgrade() = startUsbMaintenance(UsbMaintenanceRequest.BootloaderUpgrade)
 
+    @Suppress("ReturnCount") // preconditions; each missing one must abort before the device is rebooted
     private fun startUsbMaintenance(request: UsbMaintenanceRequest) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
@@ -543,10 +544,11 @@ class FirmwareUpdateViewModel(
     /**
      * Resumes a maintenance sequence once the user has pointed at the device's UF2 volume.
      *
-     * Distinct from [saveDfuFile] because the URI kinds differ: this takes a *tree* URI, which grants the sibling access
-     * needed to read `INFO_UF2.TXT` and vet the volume before writing. Each pass re-picks, because the device
+     * Distinct from [saveDfuFile] because the URI kinds differ: this takes a *tree* URI, which grants the sibling
+     * access needed to read `INFO_UF2.TXT` and vet the volume before writing. Each pass re-picks, because the device
      * re-enumerates between passes and the previous grant no longer refers to the mounted volume.
      */
+    @Suppress("ReturnCount") // preconditions guarding a destructive write
     fun writeMaintenancePass(treeUri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
         val pass = pendingUsbPasses.firstOrNull() ?: return
@@ -555,10 +557,10 @@ class FirmwareUpdateViewModel(
 
         viewModelScope.launch {
             try {
-                // Capture the ports present before the write so the erase image's port can be told from pre-existing ones.
+                // Capture the ports present before the write so the erase image's port can be told from pre-existing
+                // ones.
                 val portsBefore = usbManager.serialPortKeys()
-                val result =
-                    usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
+                val result = usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
                 handlePassResult(pass, result)
             } catch (e: CancellationException) {
                 throw e
@@ -577,7 +579,8 @@ class FirmwareUpdateViewModel(
         UsbPassResult.ImageDownloadFailed ->
             reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_retrieval_failed))
 
-        UsbPassResult.CopyFailed -> reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_copy_failed))
+        UsbPassResult.CopyFailed ->
+            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_copy_failed))
 
         UsbPassResult.WriteDidNotLand ->
             reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_wrong_destination))
@@ -601,19 +604,24 @@ class FirmwareUpdateViewModel(
     /**
      * Re-offers the same pass with an explanation, or fails outright when nothing destructive has happened yet.
      *
-     * Once an erase or bootloader image has been written the device has no application, so dropping the user on an error
-     * screen is the worst available outcome — the flow keeps offering the pass until it succeeds or they leave
+     * Once an erase or bootloader image has been written the device has no application, so dropping the user on an
+     * error screen is the worst available outcome — the flow keeps offering the pass until it succeeds or they leave
      * deliberately.
      */
     private fun reofferOrFail(pass: UsbFileSavePass, message: UiText) {
         _state.value =
-            if (destructiveWriteDone) pass.toAwaitingFileSave(retryMessage = message)
-            else FirmwareUpdateState.Error(message)
+            if (destructiveWriteDone) {
+                pass.toAwaitingFileSave(retryMessage = message)
+            } else {
+                FirmwareUpdateState.Error(message)
+            }
     }
 
     private fun usbPassWriter(portsBefore: Set<String>) = UsbPassWriter(
         fileHandler = fileHandler,
-        retrieveMaintenanceUf2 = { asset, onProgress -> firmwareRetriever.retrieveMaintenanceUf2(asset, onProgress) },
+        retrieveMaintenanceUf2 = { asset, onProgress ->
+            firmwareRetriever.retrieveMaintenanceUf2(asset, onProgress)
+        },
         awaitDeviceDetach = { timeout ->
             withTimeoutOrNull(timeout) { usbManager.deviceDetachFlow().first() } != null
         },
@@ -638,8 +646,7 @@ class FirmwareUpdateViewModel(
         UsbMaintenanceRefusal.SoftDeviceConflict ->
             UiText.Resource(Res.string.firmware_maintenance_softdevice_conflict)
 
-        UsbMaintenanceRefusal.UnknownBoardId ->
-            UiText.Resource(Res.string.firmware_maintenance_unknown_board)
+        UsbMaintenanceRefusal.UnknownBoardId -> UiText.Resource(Res.string.firmware_maintenance_unknown_board)
     }
 
     fun saveDfuFile(uri: CommonUri) {

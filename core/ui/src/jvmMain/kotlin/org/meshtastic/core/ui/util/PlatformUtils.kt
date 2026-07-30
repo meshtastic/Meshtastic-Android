@@ -91,13 +91,13 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 /** JVM — Opens a native dialog to pick a directory. */
 @Composable
-actual fun rememberOpenDocumentTreeLauncher(onTreeUriReceived: (CommonUri?) -> Unit): () -> Unit = {
+actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {
     // AWT FileDialog cannot select directories portably; JFileChooser can.
     val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
     if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-        onTreeUriReceived(CommonUri.parse(chooser.selectedFile.toURI().toString()))
+        onTreeUriSelect(CommonUri.parse(chooser.selectedFile.toURI().toString()))
     } else {
-        onTreeUriReceived(null)
+        onTreeUriSelect(null)
     }
 }
 

@@ -93,14 +93,15 @@ sealed interface FirmwareUpdateState {
     /**
      * Waiting for the user to point the app at the device's UF2 drive (USB flow).
      *
-     * @property uf2Artifact The image to write, when it is already downloaded and verified. `null` on a maintenance pass:
-     *   erase and bootloader images are chosen from what the mounted volume reports about itself, so the image cannot be
-     *   known until the volume has been picked.
+     * @property uf2Artifact The image to write, when it is already downloaded and verified. `null` on a maintenance
+     *   pass: erase and bootloader images are chosen from what the mounted volume reports about itself, so the image
+     *   cannot be known until the volume has been picked.
      * @property fileName Display name of [uf2Artifact], or `null` for the same reason.
      * @property step Which leg of a multi-pass sequence this is. Also the recomposition key for the instruction dialog,
      *   so each pass re-shows its own instructions.
      * @property retryMessage Set when a previous attempt at *this* pass failed. Once a destructive image has been
-     *   written the flow never abandons the user on an error screen — it re-publishes the same pass with an explanation.
+     *   written the flow never abandons the user on an error screen — it re-publishes the same pass with an
+     *   explanation.
      */
     data class AwaitingFileSave(
         val uf2Artifact: FirmwareArtifact?,

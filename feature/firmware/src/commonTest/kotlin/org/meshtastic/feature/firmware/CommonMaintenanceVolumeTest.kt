@@ -42,8 +42,7 @@ abstract class CommonMaintenanceVolumeTest {
         softDeviceVariant = variant,
     )
 
-    private fun rp2040() =
-        DeviceHardware(hwModelSlug = "RPI_PICO", platformioTarget = "pico", architecture = "rp2040")
+    private fun rp2040() = DeviceHardware(hwModelSlug = "RPI_PICO", platformioTarget = "pico", architecture = "rp2040")
 
     private val rakInfo =
         "UF2 Bootloader 0.4.3\r\nModel: WisBlock RAK4631 Board\r\n" +
@@ -52,10 +51,8 @@ abstract class CommonMaintenanceVolumeTest {
     /** RP2040 BOOTSEL volumes expose an INFO_UF2.TXT too, with no SoftDevice line. */
     private val picoInfo = "UF2 Bootloader v3.0\r\nModel: Raspberry Pi RP2\r\nBoard-ID: RPI-RP2\r\n"
 
-    private class FakeVolume(
-        private val removable: Boolean = true,
-        private val info: String? = null,
-    ) : NoopFirmwareFileHandler() {
+    private class FakeVolume(private val removable: Boolean = true, private val info: String? = null) :
+        NoopFirmwareFileHandler() {
         var readCount = 0
             private set
 
@@ -80,7 +77,8 @@ abstract class CommonMaintenanceVolumeTest {
 
     @Test
     fun `an rp2040 bootsel volume is accepted with no softdevice`() = runTest {
-        val accepted = assertIs<VolumeInspection.Accepted>(inspectMaintenanceVolume(treeUri, FakeVolume(info = picoInfo)))
+        val accepted =
+            assertIs<VolumeInspection.Accepted>(inspectMaintenanceVolume(treeUri, FakeVolume(info = picoInfo)))
 
         assertEquals("RPI-RP2", accepted.volume.boardId)
         assertEquals(null, accepted.volume.softDevice, "RP2040 has no SoftDevice to report")
@@ -181,7 +179,7 @@ abstract class CommonMaintenanceVolumeTest {
     }
 
     @Test
-    fun `bootloader upgrade resolves from the volume's board id, not the build target`() {
+    fun `bootloader upgrade resolves from the volume board id rather than the build target`() {
         // Hardware reports itself as a T-Echo while the catalog target says rak4631: the volume wins, because it is the
         // thing physically in front of us.
         val choice =

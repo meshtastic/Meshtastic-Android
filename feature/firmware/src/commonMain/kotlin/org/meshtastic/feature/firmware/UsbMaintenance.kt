@@ -28,7 +28,9 @@ import org.meshtastic.core.model.SoftDeviceVariant
  * consecutive identical steps would need a pass index added here.
  */
 enum class UsbFileSaveStep {
-    /** The release firmware image — the only pass in a plain update, and the last pass of every maintenance sequence. */
+    /**
+     * The release firmware image — the only pass in a plain update, and the last pass of every maintenance sequence.
+     */
     Firmware,
 
     /** The factory-erase image, which wipes the internal filesystem and re-enters UF2 DFU. */
@@ -36,6 +38,7 @@ enum class UsbFileSaveStep {
 
     /** An OTAFIX bootloader self-update image. */
     BootloaderUpgrade,
+
     ;
 
     /**
@@ -56,8 +59,8 @@ enum class UsbMaintenanceRequest {
 @Suppress("UndocumentedPublicProperty")
 enum class UsbMaintenanceRefusal {
     /**
-     * The device's SoftDevice variant could not be resolved, so no erase image can be chosen safely. Covers an absent or
-     * malformed metadata asset, an unmapped hardware model, and a device reporting a target we have no mapping for.
+     * The device's SoftDevice variant could not be resolved, so no erase image can be chosen safely. Covers an absent
+     * or malformed metadata asset, an unmapped hardware model, and a device reporting a target we have no mapping for.
      */
     UnknownSoftDevice,
 
@@ -77,8 +80,8 @@ enum class UsbMaintenanceRefusal {
     NotABootloaderVolume,
 
     /**
-     * The volume's reported SoftDevice contradicts the bundled map. One of the two is wrong and we cannot tell which, so
-     * refuse — and treat the map row as suspect.
+     * The volume's reported SoftDevice contradicts the bundled map. One of the two is wrong and we cannot tell which,
+     * so refuse — and treat the map row as suspect.
      */
     SoftDeviceConflict,
 
@@ -160,18 +163,15 @@ internal sealed interface VolumeInspection {
  * drive, where a removability heuristic only makes "somewhere on internal storage" less likely. This is what stops the
  * common mis-tap (saving into Downloads) from being indistinguishable from a successful flash.
  */
-internal suspend fun inspectMaintenanceVolume(
-    treeUri: CommonUri,
-    fileHandler: FirmwareFileHandler,
-): VolumeInspection {
+@Suppress("ReturnCount") // two independent vetting gates, each of which must reject immediately
+internal suspend fun inspectMaintenanceVolume(treeUri: CommonUri, fileHandler: FirmwareFileHandler): VolumeInspection {
     if (!fileHandler.isRemovableDestination(treeUri)) {
         return VolumeInspection.Rejected(UsbMaintenanceRefusal.DestinationNotRemovable)
     }
     val info =
         fileHandler.readSiblingText(treeUri, INFO_UF2_FILE_NAME)
             ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
-    val boardId =
-        parseUf2BoardId(info) ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
+    val boardId = parseUf2BoardId(info) ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
 
     return VolumeInspection.Accepted(MaintenanceVolume(boardId = boardId, softDevice = parseUf2SoftDevice(info)))
 }
@@ -199,6 +199,7 @@ internal fun chooseMaintenanceImage(
         if (hardware.isNrf52Arc) {
             when (val resolution = resolveNrfEraseImage(hardware.softDeviceVariant, volume.softDevice)) {
                 is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
+
                 is EraseImageResolution.Conflict ->
                     MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.SoftDeviceConflict)
 
@@ -207,13 +208,11 @@ internal fun chooseMaintenanceImage(
             }
         } else {
             // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile.
-            eraseUf2For(hardware)
-                ?.let { MaintenanceImageChoice.Resolved(it) }
+            eraseUf2For(hardware)?.let { MaintenanceImageChoice.Resolved(it) }
                 ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnsupportedArchitecture)
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(volume.boardId)
-            ?.let { MaintenanceImageChoice.Resolved(it) }
+        otafixUf2ForBoardId(volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
             ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

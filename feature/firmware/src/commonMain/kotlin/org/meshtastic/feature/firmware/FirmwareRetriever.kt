@@ -29,6 +29,9 @@ private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", 
 
 private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
+/** Radix for the hex flash addresses in maintenance-image diagnostics. */
+private const val HEX_RADIX = 16
+
 /** OTA partition role in .mt.json manifests — the main application firmware. */
 private const val OTA_PART_NAME = "app0"
 
@@ -88,7 +91,11 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      *
      * @return The verified [FirmwareArtifact], or `null` when the download failed or verification did not pass.
      */
-    internal open suspend fun retrieveMaintenanceUf2(asset: MaintenanceUf2, onProgress: (Float) -> Unit): FirmwareArtifact? {
+    @Suppress("ReturnCount") // guard clauses: every failure path must abort before a destructive write
+    internal open suspend fun retrieveMaintenanceUf2(
+        asset: MaintenanceUf2,
+        onProgress: (Float) -> Unit,
+    ): FirmwareArtifact? {
         val artifact =
             try {
                 fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
@@ -100,7 +107,9 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val bytes = fileHandler.readBytes(artifact)
         val actualDigest = FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(bytes))
         if (!actualDigest.equals(asset.sha256, ignoreCase = true)) {
-            Logger.e { "Maintenance image ${asset.fileName} digest mismatch (expected ${asset.sha256}, got $actualDigest)" }
+            Logger.e {
+                "Maintenance image ${asset.fileName} digest mismatch (expected ${asset.sha256}, got $actualDigest)"
+            }
             fileHandler.deleteFile(artifact)
             return null
         }
@@ -110,10 +119,11 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             val actualAddress = uf2FirstTargetAddress(bytes)
             if (actualAddress != expectedAddress) {
                 // The digest proved which file arrived; this proves the pinned row itself isn't mismatched — a swapped
-                // URL/digest pair is the one authoring error a digest cannot catch, and the one that erases a SoftDevice.
+                // URL/digest pair is the one authoring error a digest cannot catch, and the one that erases a
+                // SoftDevice.
                 Logger.e {
-                    "Maintenance image ${asset.fileName} targets ${actualAddress?.toString(16)}, " +
-                        "expected ${expectedAddress.toString(16)} — refusing to write"
+                    "Maintenance image ${asset.fileName} targets ${actualAddress?.toString(HEX_RADIX)}, " +
+                        "expected ${expectedAddress.toString(HEX_RADIX)} — refusing to write"
                 }
                 fileHandler.deleteFile(artifact)
                 return null

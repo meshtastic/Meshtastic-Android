@@ -40,6 +40,7 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
 
     override suspend fun serialPortKeys(): Set<String> = usbRepository.serialDevices.value.keys
 
+    @Suppress("ReturnCount") // each failed precondition must abort without poking an arbitrary port
     override suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean {
         // The erase image enumerates a moment after the write, so poll rather than sampling once.
         val driver =
@@ -57,7 +58,8 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
 
         // device_filter.xml lists no bootloader-mode ids (and none at all for Seeed's 0x2886), so no implicit grant
         // exists here — an explicit request is the only route.
-        if (!usbRepository.hasPermission(driver.device) &&
+        if (
+            !usbRepository.hasPermission(driver.device) &&
             usbRepository.requestPermission(driver.device).first() != true
         ) {
             Logger.w { "USB permission denied; cannot unblock the erase image" }
@@ -66,6 +68,7 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
 
         return usbRepository.pokeDtr(driver, holdMillis)
     }
+
     /** Observe when a USB device is detached. */
     override fun deviceDetachFlow(): Flow<Unit> = callbackFlow {
         val receiver =

@@ -49,9 +49,9 @@ enum class SoftDeviceVariant {
         /**
          * Maps the wire value to a variant, returning `null` for anything unrecognized.
          *
-         * The asset carries a `String?` rather than this enum because the shared `Json` sets `coerceInputValues = true`,
-         * which would silently coerce a typo'd enum value to a default. An unrecognized string lands on `null` instead,
-         * and `null` refuses.
+         * The asset carries a `String?` rather than this enum because the shared `Json` sets `coerceInputValues =
+         * true`, which would silently coerce a typo'd enum value to a default. An unrecognized string lands on `null`
+         * instead, and `null` refuses.
          */
         fun fromWire(value: String?): SoftDeviceVariant? = when (value) {
             "6.1.1" -> S140_6_1_1

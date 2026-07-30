@@ -198,8 +198,8 @@ class DeviceHardwareRepositoryImpl(
      * Deliberately stricter than [applyBootloaderQuirk] and deliberately not routed through [disambiguate]: both of
      * those fall back to "close enough" (`firstOrNull()`), which is right for an advisory warning and wrong here.
      * `hwModel` is not unique — hwModel 94 (`HELTEC_MESH_POCKET`) has two nRF52840 targets — and a plausible-but-wrong
-     * variant writes an erase image into the SoftDevice. Every unresolvable case (asset absent, asset malformed,
-     * model unmapped, reported target not in the row) therefore lands on `null`, and callers must refuse on `null`.
+     * variant writes an erase image into the SoftDevice. Every unresolvable case (asset absent, asset malformed, model
+     * unmapped, reported target not in the row) therefore lands on `null`, and callers must refuse on `null`.
      */
     private fun applySoftDeviceVariant(
         hwModel: Int,
@@ -207,7 +207,8 @@ class DeviceHardwareRepositoryImpl(
         entries: List<SoftDeviceVariantEntry>,
         reportedTarget: String?,
     ): DeviceHardware? = base?.let { hw ->
-        // applyBootloaderQuirk has already overwritten platformioTarget with the reported target when one was given.
+        // applyBootloaderQuirk has already overwritten platformioTarget with the reported target when one was
+        // given.
         val effectiveTarget = reportedTarget?.takeIf { it.isNotBlank() } ?: hw.platformioTarget
         val matched =
             entries.firstOrNull { entry ->
@@ -236,12 +237,10 @@ class DeviceHardwareRepositoryImpl(
     // Quirks are best-effort: swallow any parse/IO error and fall back to an empty asset rather than failing hardware
     // lookup. Safe for the advisory bootloader warning, and safe for the SoftDevice map too because an empty map
     // resolves to a null variant, which refuses.
-    private fun loadQuirksAsset(): BootloaderOtaQuirksResponse = runCatching {
-        assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json)
-    }
-        .onFailure { e -> Logger.w(e) { "Failed to load device_bootloader_ota_quirks.json" } }
-        .getOrNull()
-        ?: BootloaderOtaQuirksResponse()
+    private fun loadQuirksAsset(): BootloaderOtaQuirksResponse =
+        runCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
+            .onFailure { e -> Logger.w(e) { "Failed to load device_bootloader_ota_quirks.json" } }
+            .getOrNull() ?: BootloaderOtaQuirksResponse()
 
     private fun applyBootloaderQuirk(
         hwModel: Int,

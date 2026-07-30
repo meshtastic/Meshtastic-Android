@@ -155,7 +155,14 @@ class UsbMaintenanceGateTest {
     fun `otafix is not offered for products that merely share a supported build target`() {
         // WISMESH Hub/Tap, Nomadstar Meteor Pro and RAK3401 all build against wiscore_rak4631, and T-Echo Plus/Lite
         // against t-echo, but OTAFIX ships no bootloader for those products.
-        listOf("rak2560", "rak_wismeshtap", "rak4631_nomadstar_meteor_pro", "rak3401-1watt", "t-echo-plus", "t-echo-lite")
+        listOf(
+            "rak2560",
+            "rak_wismeshtap",
+            "rak4631_nomadstar_meteor_pro",
+            "rak3401-1watt",
+            "t-echo-plus",
+            "t-echo-lite",
+        )
             .forEach { target ->
                 assertFalse(
                     usbMaintenanceGate(nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
@@ -175,7 +182,7 @@ class UsbMaintenanceGateTest {
     }
 
     @Test
-    fun `board id selects the image, not the build target`() {
+    fun `board id selects the image rather than the build target`() {
         val rak = otafixUf2ForBoardId("WisBlock-RAK4631-Board")
         val techo = otafixUf2ForBoardId("nRF52840-TEcho-v1")
 
@@ -254,9 +261,9 @@ class UsbMaintenanceGateTest {
     /**
      * Verbatim `INFO_UF2.TXT` from a RAK4631 on a stock 0.4.3 bootloader (May 2023), captured 2026-07-30.
      *
-     * Two things this vintage proves: the `SoftDevice:` line goes back at least this far, so the bundled-map fallback is
-     * belt-and-braces rather than the common path; and older bootloaders emit an extra `Ver:` line that 0.9.x dropped,
-     * which the line-scanning parser must tolerate.
+     * Two things this vintage proves: the `SoftDevice:` line goes back at least this far, so the bundled-map fallback
+     * is belt-and-braces rather than the common path; and older bootloaders emit an extra `Ver:` line that 0.9.x
+     * dropped, which the line-scanning parser must tolerate.
      */
     private val rak4631StockInfo =
         "UF2 Bootloader 0.4.3\r\n" +
@@ -320,7 +327,11 @@ class UsbMaintenanceGateTest {
     @Test
     fun `the drive outranks the bundled map`() {
         // The map says 6.1.1, the device says 7.3.0 with nothing else to go on — but they disagree, so refuse.
-        val conflict = resolveNrfEraseImage(mapped = SoftDeviceVariant.S140_6_1_1, reportedFromDrive = SoftDeviceVariant.S140_7_3_0)
+        val conflict =
+            resolveNrfEraseImage(
+                mapped = SoftDeviceVariant.S140_6_1_1,
+                reportedFromDrive = SoftDeviceVariant.S140_7_3_0,
+            )
         assertTrue(conflict is EraseImageResolution.Conflict, "Disagreement must refuse, not pick a side")
     }
 

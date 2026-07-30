@@ -392,7 +392,8 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         withContext(ioDispatcher) {
             runCatching {
                 val tree = treeUri.toAndroidUri()
-                val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+                val parent =
+                    DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
                 DocumentsContract.createDocument(context.contentResolver, parent, mimeType, fileName)?.let {
                     CommonUri.parse(it.toString())
                 }

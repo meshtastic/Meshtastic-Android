@@ -22,8 +22,8 @@ import org.meshtastic.core.model.SoftDeviceVariant
 /**
  * A pinned, content-verified UF2 image used by a maintenance flow (factory erase, bootloader upgrade).
  *
- * Unlike release firmware — which `FirmwareRetriever` resolves against a versioned release folder — these images have no
- * versioned upstream. `meshtastic/nrf52_factory_erase` has cut no GitHub releases, so the flasher serves them from a
+ * Unlike release firmware — which `FirmwareRetriever` resolves against a versioned release folder — these images have
+ * no versioned upstream. `meshtastic/nrf52_factory_erase` has cut no GitHub releases, so the flasher serves them from a
  * mutable `public/uf2/` path. Pinning the URL to a commit and verifying [sha256] before any write is what turns that
  * mutable path back into an immutable one.
  *
@@ -68,25 +68,28 @@ internal const val APP_START_S140_6_1_1 = 0x26000L
 /** S140 7.3.0 application start — the address `nrf_erase_sd7_3.uf2` is linked for. */
 internal const val APP_START_S140_7_3_0 = 0x27000L
 
-private val ERASE_S140_6_1_1 = MaintenanceUf2(
-    url = "$ERASE_UF2_BASE/nrf_erase2.uf2",
-    fileName = "nrf_erase2.uf2",
-    sha256 = "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
-    expectedFirstTargetAddress = APP_START_S140_6_1_1,
-)
+private val ERASE_S140_6_1_1 =
+    MaintenanceUf2(
+        url = "$ERASE_UF2_BASE/nrf_erase2.uf2",
+        fileName = "nrf_erase2.uf2",
+        sha256 = "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
+        expectedFirstTargetAddress = APP_START_S140_6_1_1,
+    )
 
-private val ERASE_S140_7_3_0 = MaintenanceUf2(
-    url = "$ERASE_UF2_BASE/nrf_erase_sd7_3.uf2",
-    fileName = "nrf_erase_sd7_3.uf2",
-    sha256 = "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
-    expectedFirstTargetAddress = APP_START_S140_7_3_0,
-)
+private val ERASE_S140_7_3_0 =
+    MaintenanceUf2(
+        url = "$ERASE_UF2_BASE/nrf_erase_sd7_3.uf2",
+        fileName = "nrf_erase_sd7_3.uf2",
+        sha256 = "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
+        expectedFirstTargetAddress = APP_START_S140_7_3_0,
+    )
 
-private val PICO_ERASE = MaintenanceUf2(
-    url = "$ERASE_UF2_BASE/pico_erase.uf2",
-    fileName = "pico_erase.uf2",
-    sha256 = "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853",
-)
+private val PICO_ERASE =
+    MaintenanceUf2(
+        url = "$ERASE_UF2_BASE/pico_erase.uf2",
+        fileName = "pico_erase.uf2",
+        sha256 = "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853",
+    )
 
 private fun otafixAsset(board: String, sha256: String): MaintenanceUf2 {
     val name = "update-${board}_bootloader-${OTAFIX_RELEASE_TAG}_nosd.uf2"
@@ -107,78 +110,76 @@ private fun otafixAsset(board: String, sha256: String): MaintenanceUf2 {
  * This is also the only way to resolve the XIAO nRF52840 BLE / BLE Sense split that OTAFIX's own README calls out: the
  * two differ only by Board-ID, and installing the wrong one over UF2 is exactly what that note warns against.
  */
-private val OTAFIX_BY_BOARD_ID: Map<String, MaintenanceUf2> = mapOf(
-    "HT-n5262" to
-        otafixAsset(
-            board = "heltec_t114",
-            sha256 = "d7a51ef7e41e7ba3b5906c162e8926ca0bc88a5010436a3589991d5a99741220",
-        ),
-    "MinewSemi-MX25LE01" to
-        otafixAsset(
-            board = "minewsemi_mx25le01",
-            sha256 = "3d2039b3e22e0b350b49a8456e30709d2f8be440a239d2ed864091b1c4abc3ae",
-        ),
-    "TRACKER L1" to
-        otafixAsset(
-            board = "wio_tracker_l1",
-            sha256 = "efe1fc16f64f04deb26d171b9a3f6d81b32767ff01c40fe894924b8c682a2964",
-        ),
-    "WisBlock-RAK4631-Board" to
-        otafixAsset(
-            board = "wiscore_rak4631_board",
-            sha256 = "3509c8b01296bc6473acf5a9422f9aec857a5bbb47e80000f9b98e15b046e46a",
-        ),
-    "WisMesh-Tag" to
-        otafixAsset(
-            board = "wismesh_tag",
-            sha256 = "e1701badf22d9684d953cb5274d5d9241c3bf776c2524b935ef21a607c0bca4a",
-        ),
-    "nRF52840-SeeedSenseCAPSolarP1-v1" to
-        otafixAsset(
-            board = "sensecap_solar_p1",
-            sha256 = "efe28af706a4a3e5604390d3bf5bcbeb7470aadc957e191c7e26e8fadc2ed4e5",
-        ),
-    "nRF52840-SeeedXiao-v1" to
-        otafixAsset(
-            board = "xiao_nrf52840_ble",
-            sha256 = "49364762fb9992334fe55b3bea7f2d30e14dce4433de6c31e90036f6ec95d2a4",
-        ),
-    "nRF52840-SeeedXiaoSense-v1" to
-        otafixAsset(
-            board = "xiao_nrf52840_ble_sense",
-            sha256 = "fc492fc2e30f2f75789217c0ead68ad64917de0844e6011269755fddfe532c36",
-        ),
-    "nRF52840-T1000-E-v1" to
-        otafixAsset(
-            board = "t1000_e",
-            sha256 = "c1dd30cce0f250eb7ad21e8c065cef6692b53e7efcba0578371bedcfd2493cc9",
-        ),
-    "nRF52840-TEcho-v1" to
-        otafixAsset(
-            board = "lilygo_techo",
-            sha256 = "244c3ea9a783dbcfd9fabfa95d5f8bae3a52246bbe41c5414b2b6657683025c9",
-        ),
-    "nRF52840-ThinkNode-M3-v1" to
-        otafixAsset(
-            board = "thinknode_m3",
-            sha256 = "073a6b6acf1bb0ca9ea4e8f7ca3c8df1cf3992aced06650b85c00aba5fa3ff13",
-        ),
-    "nRF52840-ThinkNodeM1-v1" to
-        otafixAsset(
-            board = "thinknode_m1",
-            sha256 = "315d36a189b30bbc09c7846031483caea669b1d0c7237da9221ab2794757498f",
-        ),
-    "nRF52840-ThinkNodeM6-v1" to
-        otafixAsset(
-            board = "thinknode_m6",
-            sha256 = "a7e977a8af02946559a8c703f1d2f27e22fd1cbedf61a9bc7af3472eb86fe99f",
-        ),
-    "nRF52840-promicro" to
-        otafixAsset(
-            board = "promicro_nrf52840",
-            sha256 = "5ceb9ad4a8092f1319fc5371649eeae55b47c5ff2acd647972558017ba51dccb",
-        ),
-)
+private val OTAFIX_BY_BOARD_ID: Map<String, MaintenanceUf2> =
+    mapOf(
+        "HT-n5262" to
+            otafixAsset(
+                board = "heltec_t114",
+                sha256 = "d7a51ef7e41e7ba3b5906c162e8926ca0bc88a5010436a3589991d5a99741220",
+            ),
+        "MinewSemi-MX25LE01" to
+            otafixAsset(
+                board = "minewsemi_mx25le01",
+                sha256 = "3d2039b3e22e0b350b49a8456e30709d2f8be440a239d2ed864091b1c4abc3ae",
+            ),
+        "TRACKER L1" to
+            otafixAsset(
+                board = "wio_tracker_l1",
+                sha256 = "efe1fc16f64f04deb26d171b9a3f6d81b32767ff01c40fe894924b8c682a2964",
+            ),
+        "WisBlock-RAK4631-Board" to
+            otafixAsset(
+                board = "wiscore_rak4631_board",
+                sha256 = "3509c8b01296bc6473acf5a9422f9aec857a5bbb47e80000f9b98e15b046e46a",
+            ),
+        "WisMesh-Tag" to
+            otafixAsset(
+                board = "wismesh_tag",
+                sha256 = "e1701badf22d9684d953cb5274d5d9241c3bf776c2524b935ef21a607c0bca4a",
+            ),
+        "nRF52840-SeeedSenseCAPSolarP1-v1" to
+            otafixAsset(
+                board = "sensecap_solar_p1",
+                sha256 = "efe28af706a4a3e5604390d3bf5bcbeb7470aadc957e191c7e26e8fadc2ed4e5",
+            ),
+        "nRF52840-SeeedXiao-v1" to
+            otafixAsset(
+                board = "xiao_nrf52840_ble",
+                sha256 = "49364762fb9992334fe55b3bea7f2d30e14dce4433de6c31e90036f6ec95d2a4",
+            ),
+        "nRF52840-SeeedXiaoSense-v1" to
+            otafixAsset(
+                board = "xiao_nrf52840_ble_sense",
+                sha256 = "fc492fc2e30f2f75789217c0ead68ad64917de0844e6011269755fddfe532c36",
+            ),
+        "nRF52840-T1000-E-v1" to
+            otafixAsset(board = "t1000_e", sha256 = "c1dd30cce0f250eb7ad21e8c065cef6692b53e7efcba0578371bedcfd2493cc9"),
+        "nRF52840-TEcho-v1" to
+            otafixAsset(
+                board = "lilygo_techo",
+                sha256 = "244c3ea9a783dbcfd9fabfa95d5f8bae3a52246bbe41c5414b2b6657683025c9",
+            ),
+        "nRF52840-ThinkNode-M3-v1" to
+            otafixAsset(
+                board = "thinknode_m3",
+                sha256 = "073a6b6acf1bb0ca9ea4e8f7ca3c8df1cf3992aced06650b85c00aba5fa3ff13",
+            ),
+        "nRF52840-ThinkNodeM1-v1" to
+            otafixAsset(
+                board = "thinknode_m1",
+                sha256 = "315d36a189b30bbc09c7846031483caea669b1d0c7237da9221ab2794757498f",
+            ),
+        "nRF52840-ThinkNodeM6-v1" to
+            otafixAsset(
+                board = "thinknode_m6",
+                sha256 = "a7e977a8af02946559a8c703f1d2f27e22fd1cbedf61a9bc7af3472eb86fe99f",
+            ),
+        "nRF52840-promicro" to
+            otafixAsset(
+                board = "promicro_nrf52840",
+                sha256 = "5ceb9ad4a8092f1319fc5371649eeae55b47c5ff2acd647972558017ba51dccb",
+            ),
+    )
 
 /**
  * Meshtastic `platformioTarget`s whose products OTAFIX lists as supported.
@@ -191,28 +192,29 @@ private val OTAFIX_BY_BOARD_ID: Map<String, MaintenanceUf2> = mapOf(
  * supported one — WISMESH Hub/Tap, Nomadstar Meteor Pro and RAK3401 all build against `wiscore_rak4631`, and T-Echo
  * Plus/Lite against `t-echo`, but OTAFIX ships no bootloader for them.
  */
-private val OTAFIX_SUPPORTED_TARGETS: Set<String> = setOf(
-    "rak4631",
-    "rak_wismeshtag",
-    "t-echo",
-    "heltec-mesh-node-t114",
-    "nrf52_promicro_diy_tcxo",
-    "thinknode_m1",
-    "thinknode_m3",
-    "thinknode_m6",
-    "tracker-t1000-e",
-    "seeed_wio_tracker_L1",
-    "seeed_wio_tracker_L1_eink",
-    "seeed_solar_node",
-    "seeed_xiao_nrf52840_kit",
-)
+private val OTAFIX_SUPPORTED_TARGETS: Set<String> =
+    setOf(
+        "rak4631",
+        "rak_wismeshtag",
+        "t-echo",
+        "heltec-mesh-node-t114",
+        "nrf52_promicro_diy_tcxo",
+        "thinknode_m1",
+        "thinknode_m3",
+        "thinknode_m6",
+        "tracker-t1000-e",
+        "seeed_wio_tracker_L1",
+        "seeed_wio_tracker_L1_eink",
+        "seeed_solar_node",
+        "seeed_xiao_nrf52840_kit",
+    )
 
 /**
  * The factory-erase image for [hardware], or `null` when none can be resolved safely.
  *
  * nRF52840 requires a resolved [DeviceHardware.softDeviceVariant]: the two images are linked for different application
- * start addresses, and the UF2 bootloader's write guard begins at `MBR_SIZE`, so the wrong one erases a SoftDevice page.
- * There is deliberately no default branch.
+ * start addresses, and the UF2 bootloader's write guard begins at `MBR_SIZE`, so the wrong one erases a SoftDevice
+ * page. There is deliberately no default branch.
  */
 internal fun eraseUf2For(hardware: DeviceHardware): MaintenanceUf2? = when {
     hardware.isRp2040Arc -> PICO_ERASE
@@ -227,7 +229,9 @@ internal fun eraseUf2For(hardware: DeviceHardware): MaintenanceUf2? = when {
     else -> null
 }
 
-/** True when OTAFIX lists a bootloader for [platformioTarget]'s product. UX gate only — see [OTAFIX_SUPPORTED_TARGETS]. */
+/**
+ * True when OTAFIX lists a bootloader for [platformioTarget]'s product. UX gate only — see [OTAFIX_SUPPORTED_TARGETS].
+ */
 internal fun otafixSupportsTarget(platformioTarget: String): Boolean = platformioTarget in OTAFIX_SUPPORTED_TARGETS
 
 /**
@@ -265,24 +269,26 @@ internal fun parseUf2BoardId(infoUf2Text: String): String? = infoUf2Text
  * OTAFIX, and verified on a stock Seeed bootloader (`SoftDevice: S140 7.3.0`).
  *
  * This is the **authoritative** answer to the question the bundled map only estimates: not what the firmware was built
- * against, but which SoftDevice is actually in flash. Returns `null` when the line is absent (very old bootloader), when
- * no SoftDevice is installed, or when the id/version is not one we ship an erase image for.
+ * against, but which SoftDevice is actually in flash. Returns `null` when the line is absent (very old bootloader),
+ * when no SoftDevice is installed, or when the id/version is not one we ship an erase image for.
  */
+@Suppress("ReturnCount") // guard clauses; an unparseable line must yield null rather than a guess
 internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
     val value =
         infoUf2Text
             .lineSequence()
             .firstOrNull { it.trimStart().startsWith(UF2_SOFTDEVICE_PREFIX, ignoreCase = true) }
             ?.substringAfter(':')
-            ?.trim()
-            ?: return null
+            ?.trim() ?: return null
 
     val parts = value.split(' ').filter { it.isNotBlank() }
     if (parts.size < 2 || !parts[0].equals(SUPPORTED_SOFTDEVICE_ID, ignoreCase = true)) return null
     return SoftDeviceVariant.fromWire(parts[1])
 }
 
-/** Which erase image a given variant needs. Total over the enum, so a new variant cannot silently reuse an old image. */
+/**
+ * Which erase image a given variant needs. Total over the enum, so a new variant cannot silently reuse an old image.
+ */
 internal fun eraseUf2ForVariant(variant: SoftDeviceVariant): MaintenanceUf2 = when (variant) {
     SoftDeviceVariant.S140_6_1_1 -> ERASE_S140_6_1_1
     SoftDeviceVariant.S140_7_3_0 -> ERASE_S140_7_3_0
@@ -306,9 +312,9 @@ internal sealed interface EraseImageResolution {
 /**
  * Picks the nRF erase image, preferring what the device reports over what the bundled map predicted.
  *
- * The map ([DeviceHardware.softDeviceVariant]) is a pre-flight hint — it decides whether the action is offered before any
- * drive is mounted. Once the drive is readable its own report wins, because it comes from the MBR rather than from a
- * hand-authored table. A disagreement refuses rather than picking a side.
+ * The map ([DeviceHardware.softDeviceVariant]) is a pre-flight hint — it decides whether the action is offered before
+ * any drive is mounted. Once the drive is readable its own report wins, because it comes from the MBR rather than from
+ * a hand-authored table. A disagreement refuses rather than picking a side.
  */
 internal fun resolveNrfEraseImage(
     mapped: SoftDeviceVariant?,
@@ -317,7 +323,8 @@ internal fun resolveNrfEraseImage(
     reportedFromDrive != null && mapped != null && reportedFromDrive != mapped ->
         EraseImageResolution.Conflict(reported = reportedFromDrive, mapped = mapped)
 
-    reportedFromDrive != null -> EraseImageResolution.Resolved(eraseUf2ForVariant(reportedFromDrive), reportedFromDrive)
+    reportedFromDrive != null ->
+        EraseImageResolution.Resolved(eraseUf2ForVariant(reportedFromDrive), reportedFromDrive)
 
     // No SoftDevice line: a bootloader older than the uf2_init that emits it. Fall back to the bundled hint.
     mapped != null -> EraseImageResolution.Resolved(eraseUf2ForVariant(mapped), mapped)
@@ -343,11 +350,19 @@ internal const val UF2_TARGET_ADDR_OFFSET = 12
 
 private const val UF2_MAGIC_START0 = 0x0A324655
 
+/** Bytes in a little-endian 32-bit field, and the mask/shift used to reassemble one. */
+private const val UINT32_BYTES = 4
+
+private const val BITS_PER_BYTE = 8
+
+private const val BYTE_MASK = 0xFFL
+
 /**
  * Reads the target flash address of the first UF2 block in [bytes], or `null` when the payload is not a UF2 image.
  *
  * Used to cross-check a pinned erase image against the resolved SoftDevice variant before it is written.
  */
+@Suppress("ReturnCount") // guard clauses over a binary header
 internal fun uf2FirstTargetAddress(bytes: ByteArray): Long? {
     if (bytes.size < UF2_BLOCK_BYTES) return null
     if (readLittleEndianUInt32(bytes, 0) != UF2_MAGIC_START0.toLong()) return null
@@ -356,8 +371,8 @@ internal fun uf2FirstTargetAddress(bytes: ByteArray): Long? {
 
 private fun readLittleEndianUInt32(bytes: ByteArray, offset: Int): Long {
     var value = 0L
-    for (i in 3 downTo 0) {
-        value = (value shl 8) or (bytes[offset + i].toLong() and 0xFF)
+    for (i in UINT32_BYTES - 1 downTo 0) {
+        value = (value shl BITS_PER_BYTE) or (bytes[offset + i].toLong() and BYTE_MASK)
     }
     return value
 }

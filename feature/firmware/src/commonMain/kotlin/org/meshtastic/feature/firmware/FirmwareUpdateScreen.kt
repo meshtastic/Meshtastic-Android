@@ -192,7 +192,9 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     // Maintenance passes pick the whole volume, not a filename, so the app can read INFO_UF2.TXT and confirm it really
     // is the device's update drive before writing anything to it.
-    val volumePickerLauncher = rememberOpenDocumentTreeLauncher { uri -> uri?.let { viewModel.writeMaintenancePass(it) } }
+    val volumePickerLauncher = rememberOpenDocumentTreeLauncher { uri ->
+        uri?.let { viewModel.writeMaintenancePass(it) }
+    }
 
     val actions =
         remember(viewModel, onNavigateUp) {
@@ -420,7 +422,11 @@ private fun FirmwareUpdateContent(
                 SuccessState(onDone = actions.onDone, wasLowSpeedTransfer = state.wasLowSpeedTransfer)
 
             is FirmwareUpdateState.AwaitingFileSave ->
-                AwaitingFileSaveState(state = state, onSaveFile = actions.onSaveFile, onPickVolume = actions.onPickVolume)
+                AwaitingFileSaveState(
+                    state = state,
+                    onSaveFile = actions.onSaveFile,
+                    onPickVolume = actions.onPickVolume,
+                )
         }
     }
 }
