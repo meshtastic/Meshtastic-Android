@@ -205,6 +205,17 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             destinationFile.length()
         }
 
+    /**
+     * Always false on desktop: there is no Storage Access Framework to classify a volume with, and the multi-pass UF2
+     * maintenance flow is Android-only. Refusing is the fail-closed answer, consistent with
+     * [DesktopFirmwareUsbManager] reporting the CDC unblock unsupported.
+     */
+    override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = false
+
+    override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean = withContext(ioDispatcher) {
+        destinationUri.toLocalFileOrNull()?.canRead() == true
+    }
+
     @Suppress("NestedBlockDepth", "ReturnCount")
     private fun extractFromZipFile(
         zipFile: File,

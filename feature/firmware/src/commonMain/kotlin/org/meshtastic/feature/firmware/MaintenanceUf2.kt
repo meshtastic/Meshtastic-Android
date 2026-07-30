@@ -140,10 +140,12 @@ internal fun eraseUf2For(hardware: DeviceHardware): MaintenanceUf2? = when {
 internal fun otafixUf2For(platformioTarget: String): MaintenanceUf2? = OTAFIX_BY_TARGET[platformioTarget]
 
 /** UF2 block size, per the UF2 specification. */
-private const val UF2_BLOCK_SIZE = 512
+internal const val UF2_BLOCK_BYTES = 512
+
+/** Byte offset of `targetAddr` within a UF2 block header. */
+internal const val UF2_TARGET_ADDR_OFFSET = 12
 
 private const val UF2_MAGIC_START0 = 0x0A324655
-private const val UF2_TARGET_ADDR_OFFSET = 12
 
 /**
  * Reads the target flash address of the first UF2 block in [bytes], or `null` when the payload is not a UF2 image.
@@ -151,7 +153,7 @@ private const val UF2_TARGET_ADDR_OFFSET = 12
  * Used to cross-check a pinned erase image against the resolved SoftDevice variant before it is written.
  */
 internal fun uf2FirstTargetAddress(bytes: ByteArray): Long? {
-    if (bytes.size < UF2_BLOCK_SIZE) return null
+    if (bytes.size < UF2_BLOCK_BYTES) return null
     if (readLittleEndianUInt32(bytes, 0) != UF2_MAGIC_START0.toLong()) return null
     return readLittleEndianUInt32(bytes, UF2_TARGET_ADDR_OFFSET)
 }

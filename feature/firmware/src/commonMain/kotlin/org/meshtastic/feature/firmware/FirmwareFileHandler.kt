@@ -70,6 +70,26 @@ interface FirmwareFileHandler {
     /** Copy [source] to the platform URI [destinationUri], returning the number of bytes written. */
     suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long
 
+    /**
+     * Best-effort check that [destinationUri] names a location on removable storage — i.e. plausibly a mounted UF2
+     * bootloader drive rather than internal storage.
+     *
+     * Used to reject the Downloads mistake *before* writing, which matters only once a write is destructive: in a
+     * multi-pass maintenance sequence a mis-saved pass leaves the device with no application, and nothing else in the
+     * flow can tell a landed write from a lost one. The plain single-pass update path deliberately does not consult
+     * this — its worst case is "nothing happened, replug".
+     */
+    suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean
+
+    /**
+     * True when [destinationUri] can still be opened for reading.
+     *
+     * The success signal for a UF2 write is inverted: a UF2 bootloader consumes the image, reboots, and its volume
+     * disappears, so a destination that is *still* readable afterwards means the bytes landed somewhere persistent —
+     * the wrong place. Used as the tiebreaker when the detach broadcast is missed.
+     */
+    suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean
+
     // ── Zip / extraction ─────────────────────────────────────────────────
 
     /**

@@ -77,6 +77,54 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
     )
 
     /**
+     * Download a pinned maintenance image (factory erase, bootloader upgrade) and verify it before returning.
+     *
+     * The module's only absolute-URL entry point. Unlike release artifacts, these images have no versioned upstream —
+     * `nrf52_factory_erase` has cut no releases — so the URL is commit/tag-pinned and the content is the real contract.
+     *
+     * A digest or address mismatch is **terminal**: the file is deleted and `null` is returned with no fallback. The
+     * release-zip fallback the other retrievers use would be actively wrong here, because the payload is destructive
+     * and "some other file with the right name" is precisely the failure being guarded against.
+     *
+     * @return The verified [FirmwareArtifact], or `null` when the download failed or verification did not pass.
+     */
+    internal suspend fun retrieveMaintenanceUf2(asset: MaintenanceUf2, onProgress: (Float) -> Unit): FirmwareArtifact? {
+        val artifact =
+            try {
+                fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Maintenance image download failed: ${asset.fileName}" }
+                null
+            } ?: return null
+
+        val bytes = fileHandler.readBytes(artifact)
+        val actualDigest = FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(bytes))
+        if (!actualDigest.equals(asset.sha256, ignoreCase = true)) {
+            Logger.e { "Maintenance image ${asset.fileName} digest mismatch (expected ${asset.sha256}, got $actualDigest)" }
+            fileHandler.deleteFile(artifact)
+            return null
+        }
+
+        val expectedAddress = asset.expectedFirstTargetAddress
+        if (expectedAddress != null) {
+            val actualAddress = uf2FirstTargetAddress(bytes)
+            if (actualAddress != expectedAddress) {
+                // The digest proved which file arrived; this proves the pinned row itself isn't mismatched — a swapped
+                // URL/digest pair is the one authoring error a digest cannot catch, and the one that erases a SoftDevice.
+                Logger.e {
+                    "Maintenance image ${asset.fileName} targets ${actualAddress?.toString(16)}, " +
+                        "expected ${expectedAddress.toString(16)} — refusing to write"
+                }
+                fileHandler.deleteFile(artifact)
+                return null
+            }
+        }
+
+        Logger.i { "Maintenance image ${asset.fileName} verified (${bytes.size} bytes)" }
+        return artifact
+    }
+
+    /**
      * Download the ESP32 OTA firmware binary. Tries in order:
      * 1. `.mt.json` manifest resolution (2.7.17+) — the authoritative `app0` partition image.
      * 2. `firmware-<target>-<version>-update.bin` — the bare app image. Preferred over the plain `.bin` because on
