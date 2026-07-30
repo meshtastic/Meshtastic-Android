@@ -47,6 +47,16 @@ expect fun rememberSaveFileLauncher(
 @Composable expect fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit
 
 /**
+ * Returns a launcher that prompts the user to pick a *directory*. The callback receives a tree URI, or `null` if the
+ * user cancelled.
+ *
+ * Distinct from [rememberSaveFileLauncher] because a tree URI grants access to the picked directory's contents, which a
+ * single-document URI does not. Needed where the app must inspect a volume before writing to it — for example reading a
+ * UF2 bootloader's `INFO_UF2.TXT` to confirm which board it is and that the volume really is a bootloader drive.
+ */
+@Composable expect fun rememberOpenDocumentTreeLauncher(onTreeUriReceived: (CommonUri?) -> Unit): () -> Unit
+
+/**
  * Returns a suspend function that reads up to [maxChars] characters of text from a [CommonUri]. Returns `null` if the
  * file is empty or cannot be read.
  */

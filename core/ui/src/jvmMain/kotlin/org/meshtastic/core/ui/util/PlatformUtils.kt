@@ -29,6 +29,7 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import java.net.URI
+import javax.swing.JFileChooser
 
 /** JVM stub — NFC settings are not available on Desktop. */
 @Composable
@@ -85,6 +86,18 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
     if (file != null && dir != null) {
         val path = File(dir, file)
         onUriReceived(CommonUri.parse(path.toURI().toString()))
+    }
+}
+
+/** JVM — Opens a native dialog to pick a directory. */
+@Composable
+actual fun rememberOpenDocumentTreeLauncher(onTreeUriReceived: (CommonUri?) -> Unit): () -> Unit = {
+    // AWT FileDialog cannot select directories portably; JFileChooser can.
+    val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
+    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        onTreeUriReceived(CommonUri.parse(chooser.selectedFile.toURI().toString()))
+    } else {
+        onTreeUriReceived(null)
     }
 }
 
