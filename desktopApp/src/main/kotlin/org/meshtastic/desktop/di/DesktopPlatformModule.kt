@@ -144,7 +144,7 @@ fun desktopPlatformModule() = module {
     single(named(PROCESS_LIFECYCLE)) { DesktopProcessLifecycleOwner().lifecycle }
 }
 
-/** Named [DataStore]<[Preferences]> instances for all preference domains. */
+/** Typed preference-datastore singletons for each preference domain. */
 private fun desktopPreferencesDataStoreModule() = module {
     single<AnalyticsDataStore> { prefsStore("analytics", get()).asAnalyticsDataStore() }
     single<HomoglyphEncodingDataStore> { prefsStore("homoglyph_encoding", get()).asHomoglyphEncodingDataStore() }
