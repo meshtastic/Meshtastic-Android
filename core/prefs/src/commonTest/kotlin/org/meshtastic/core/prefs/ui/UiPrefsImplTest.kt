@@ -29,6 +29,7 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.prefs.di.asUiDataStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -55,7 +56,7 @@ class UiPrefsImplTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        prefs = UiPrefsImpl(dataStore, dispatchers)
+        prefs = UiPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest

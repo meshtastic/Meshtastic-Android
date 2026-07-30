@@ -18,14 +18,13 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -116,7 +115,7 @@ class MeshDataHandlerImpl(
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : MeshDataHandler {
 
     private val rememberDataType =

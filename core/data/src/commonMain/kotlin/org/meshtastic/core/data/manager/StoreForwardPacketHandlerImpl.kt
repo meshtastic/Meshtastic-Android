@@ -17,11 +17,10 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import okio.ByteString.Companion.toByteString
 import okio.IOException
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -47,7 +46,7 @@ class StoreForwardPacketHandlerImpl(
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : StoreForwardPacketHandler {
 
     override fun handleStoreAndForward(

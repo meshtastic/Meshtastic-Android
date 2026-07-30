@@ -14,21 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.di
+package org.meshtastic.app.map.prefs.di
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
-import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.di.CoroutineDispatchers
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 
-@Module
-@ComponentScan("org.meshtastic.core.service")
-class CoreServiceModule {
-    @Single
-    fun provideServiceScope(dispatchers: CoroutineDispatchers): ServiceScope =
-        CoroutineScope(dispatchers.default + SupervisorJob()).asServiceScope()
-}
+/**
+ * Google Maps preferences, google flavor only. A type rather than a Koin qualifier so the compiler tells it apart from
+ * every other `DataStore<Preferences>`.
+ */
+interface GoogleMapsDataStore : DataStore<Preferences>
+
+/** Presents an existing store as [GoogleMapsDataStore]; the wrapper adds nothing but identity. */
+fun DataStore<Preferences>.asGoogleMapsDataStore(): GoogleMapsDataStore =
+    object : GoogleMapsDataStore, DataStore<Preferences> by this {}

@@ -38,6 +38,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -76,7 +77,8 @@ class NodeManagerImplTest {
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope)
+        nodeManager =
+            NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope.asServiceScope())
         // Override the compose-resources formatter so notification dispatch is deterministic in the
         // plain-JVM test env (getStringSuspend does not resolve here). Tests that assert "no dispatch"
         // still hold: the override only changes the title, not whether dispatch fires.

@@ -20,18 +20,17 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.dataStoreFile
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import kotlinx.coroutines.CoroutineScope
 import okio.FileSystem
+import okio.Path
 import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
@@ -47,94 +46,78 @@ private const val USER_PREFERENCES_NAME = "user_preferences"
 @Module
 class PreferencesDataStoreModule {
     @Single
-    @Named("CorePreferencesDataStore")
-    fun providePreferencesDataStore(
-        context: Context,
-        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
-    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-        migrations =
-        listOf(SharedPreferencesMigration(context = context, sharedPreferencesName = USER_PREFERENCES_NAME)),
-        scope = scope,
-        produceFile = { context.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
-    )
+    fun providePreferencesDataStore(context: Context, scope: DataStoreScope): CorePreferencesDataStore =
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+            migrations =
+            listOf(
+                SharedPreferencesMigration(context = context, sharedPreferencesName = USER_PREFERENCES_NAME),
+            ),
+            scope = scope,
+            produceFile = { context.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
+        )
+            .asCorePreferencesDataStore()
 }
 
 @Module
 class LocalConfigDataStoreModule {
     @Single
-    @Named("CoreLocalConfigDataStore")
-    fun provideLocalConfigDataStore(
-        context: Context,
-        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
-    ): DataStore<LocalConfig> = DataStoreFactory.create(
-        storage =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
-            serializer = LocalConfigSerializer,
-            producePath = { context.dataStoreFile("local_config.pb").toOkioPath() },
-        ),
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
+    fun provideLocalConfigDataStore(context: Context, scope: DataStoreScope): CoreLocalConfigDataStore = protoStore(
+        serializer = LocalConfigSerializer,
+        producePath = { context.dataStoreFile("local_config.pb").toOkioPath() },
+        produceNewData = { LocalConfig() },
         scope = scope,
     )
+        .asCoreLocalConfigDataStore()
 }
 
 @Module
 class ModuleConfigDataStoreModule {
     @Single
-    @Named("CoreModuleConfigDataStore")
-    fun provideModuleConfigDataStore(
-        context: Context,
-        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
-    ): DataStore<LocalModuleConfig> = DataStoreFactory.create(
-        storage =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
-            serializer = ModuleConfigSerializer,
-            producePath = { context.dataStoreFile("module_config.pb").toOkioPath() },
-        ),
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
+    fun provideModuleConfigDataStore(context: Context, scope: DataStoreScope): CoreModuleConfigDataStore = protoStore(
+        serializer = ModuleConfigSerializer,
+        producePath = { context.dataStoreFile("module_config.pb").toOkioPath() },
+        produceNewData = { LocalModuleConfig() },
         scope = scope,
     )
+        .asCoreModuleConfigDataStore()
 }
 
 @Module
 class ChannelSetDataStoreModule {
     @Single
-    @Named("CoreChannelSetDataStore")
-    fun provideChannelSetDataStore(
-        context: Context,
-        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
-    ): DataStore<ChannelSet> = DataStoreFactory.create(
-        storage =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
-            serializer = ChannelSetSerializer,
-            producePath = { context.dataStoreFile("channel_set.pb").toOkioPath() },
-        ),
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
+    fun provideChannelSetDataStore(context: Context, scope: DataStoreScope): CoreChannelSetDataStore = protoStore(
+        serializer = ChannelSetSerializer,
+        producePath = { context.dataStoreFile("channel_set.pb").toOkioPath() },
+        produceNewData = { ChannelSet() },
         scope = scope,
     )
+        .asCoreChannelSetDataStore()
 }
 
 @Module
 class LocalStatsDataStoreModule {
     @Single
-    @Named("CoreLocalStatsDataStore")
-    fun provideLocalStatsDataStore(
-        context: Context,
-        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
-    ): DataStore<LocalStats> = DataStoreFactory.create(
-        storage =
-        OkioStorage(
-            fileSystem = FileSystem.SYSTEM,
-            serializer = LocalStatsSerializer,
-            producePath = { context.dataStoreFile("local_stats.pb").toOkioPath() },
-        ),
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
+    fun provideLocalStatsDataStore(context: Context, scope: DataStoreScope): CoreLocalStatsDataStore = protoStore(
+        serializer = LocalStatsSerializer,
+        producePath = { context.dataStoreFile("local_stats.pb").toOkioPath() },
+        produceNewData = { LocalStats() },
         scope = scope,
     )
+        .asCoreLocalStatsDataStore()
 }
+
+/** [producePath] is an on-disk identity — changing it orphans existing user data. */
+private fun <T> protoStore(
+    serializer: OkioSerializer<T>,
+    producePath: () -> Path,
+    produceNewData: () -> T,
+    scope: DataStoreScope,
+): DataStore<T> = DataStoreFactory.create(
+    storage = OkioStorage(fileSystem = FileSystem.SYSTEM, serializer = serializer, producePath = producePath),
+    corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { produceNewData() }),
+    scope = scope,
+)
 
 @Module(
     includes =

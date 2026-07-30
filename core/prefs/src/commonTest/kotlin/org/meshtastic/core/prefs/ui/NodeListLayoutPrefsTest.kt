@@ -26,6 +26,7 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NodeListDensity
+import org.meshtastic.core.prefs.di.asUiDataStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -51,7 +52,7 @@ class NodeListLayoutPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        prefs = UiPrefsImpl(dataStore, dispatchers)
+        prefs = UiPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest

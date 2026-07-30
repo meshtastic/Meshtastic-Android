@@ -27,14 +27,14 @@ class KoinConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = libs.plugin("koin-compiler").get().pluginId)
 
-            // Configure Koin K2 Compiler Plugin (0.4.0+)
+            // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Meshtastic uses dependency inversion across KMP modules — interfaces in
-                // commonMain, implementations wired at the composition root. Koin's compileSafety
-                // flag enables A1 per-module checks that treat every module as self-contained,
-                // which breaks this pattern. There is no separate flag for A3 full-graph
-                // validation. Until Koin exposes granular safety levels we keep this disabled;
-                // runtime graph verification is handled by KoinVerificationTest instead.
+                // 1.1.0 moved validation to the entry points, which suits this graph's shape, but
+                // its definition index still can't resolve two structural patterns here: modules
+                // reached through FlavorModule's nested `includes` are invisible to it, and DSL
+                // declarations (desktopApp's whole root, workManagerFactory()) are never indexed at
+                // all. Every entry point therefore fails on definitions that exist. Runtime graph
+                // verification is handled by KoinVerificationTest instead.
                 compileSafety.set(false)
             }
 

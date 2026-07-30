@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 
 /**
  * Android implementation of [SerialDevicePresence] backed by [UsbRepository.serialDevices].
@@ -31,10 +32,8 @@ import org.koin.core.annotation.Single
  * on the Android-only [android.hardware.usb.UsbDevice] / [com.hoho.android.usbserial.driver.UsbSerialDriver] types.
  */
 @Single
-class AndroidSerialDevicePresence(
-    usbRepository: UsbRepository,
-    @Named("ProcessLifecycle") processLifecycle: Lifecycle,
-) : SerialDevicePresence {
+class AndroidSerialDevicePresence(usbRepository: UsbRepository, @Named(PROCESS_LIFECYCLE) processLifecycle: Lifecycle) :
+    SerialDevicePresence {
     override val deviceKeys =
         usbRepository.serialDevices
             .map { it.keys.toSet() }

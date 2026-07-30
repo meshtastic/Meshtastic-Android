@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -71,7 +72,7 @@ class PacketHandlerImplTest {
                 radioInterfaceService,
                 lazy { meshLogRepository },
                 serviceRepository,
-                testScope,
+                testScope.asServiceScope(),
             )
     }
 

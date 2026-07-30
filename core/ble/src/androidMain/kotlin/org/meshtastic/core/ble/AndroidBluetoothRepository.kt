@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
@@ -55,7 +56,7 @@ internal const val BOND_FAILED_OR_REJECTED_MESSAGE = "Bonding failed or rejected
 class AndroidBluetoothRepository(
     private val context: Context,
     private val dispatchers: CoroutineDispatchers,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
 ) : BluetoothRepository {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter

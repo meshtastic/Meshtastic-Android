@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.repository.NotificationPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -54,7 +55,7 @@ class NotificationPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
+        notificationPrefs = NotificationPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest

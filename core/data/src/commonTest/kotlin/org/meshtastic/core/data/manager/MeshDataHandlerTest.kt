@@ -38,6 +38,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -169,11 +170,11 @@ class MeshDataHandlerTest {
                     crossingStore = GeofenceCrossingStore(),
                     notificationPrefs = FakeNotificationPrefs(),
                     radioInterfaceService = radioInterfaceService,
-                    scope = geofenceScope,
+                    scope = geofenceScope.asServiceScope(),
                 ),
                 meshBeaconRepository = meshBeaconRepository,
                 radioInterfaceService = radioInterfaceService,
-                scope = testScope,
+                scope = testScope.asServiceScope(),
             )
 
         everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls

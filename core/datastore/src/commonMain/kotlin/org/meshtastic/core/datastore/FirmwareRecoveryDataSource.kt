@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
@@ -25,8 +23,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 
 /**
@@ -34,9 +32,7 @@ import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
  * bootloader mode. Only the most recent trigger is retained (updates are one-device-at-a-time in practice).
  */
 @Single
-open class FirmwareRecoveryDataSource(
-    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
-) {
+open class FirmwareRecoveryDataSource(private val dataStore: CorePreferencesDataStore) {
 
     private object PreferencesKeys {
         val PENDING_RECOVERY = stringPreferencesKey("pending-firmware-recovery")

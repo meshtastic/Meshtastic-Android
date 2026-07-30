@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
@@ -25,13 +23,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 
 @Single
-open class BootloaderWarningDataSource(
-    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
-) {
+open class BootloaderWarningDataSource(private val dataStore: CorePreferencesDataStore) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")

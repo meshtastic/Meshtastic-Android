@@ -17,13 +17,12 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.geofence.geofencesToMonitor
@@ -70,7 +69,7 @@ class GeofenceMonitor(
     private val crossingStore: GeofenceCrossingStore,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) {
 
     private data class PositionSample(

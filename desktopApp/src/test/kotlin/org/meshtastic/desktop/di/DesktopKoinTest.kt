@@ -20,6 +20,7 @@ import androidx.lifecycle.SavedStateHandle
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.test.verify.verify
@@ -41,6 +42,10 @@ class DesktopKoinTest {
                 listOf(
                     SavedStateHandle::class,
                     CoroutineDispatcher::class,
+                    // MeshBeaconRepository is built by a factory function that supplies an
+                    // ApplicationCoroutineScope. Koin Verify introspects the class constructor anyway, so its
+                    // plain CoroutineScope parameter has to be declared even though nothing resolves it.
+                    CoroutineScope::class,
                     HttpClient::class,
                     HttpClientEngine::class,
                     // BleLoggingConfig is a data class assembled by a factory function. Koin Verify

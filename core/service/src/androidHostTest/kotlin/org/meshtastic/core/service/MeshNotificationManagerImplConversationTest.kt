@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
@@ -90,7 +91,7 @@ class MeshNotificationManagerImplConversationTest {
             )
         },
         radioConfigRepository = lazy { radioConfigRepository },
-        scope = scope,
+        scope = scope.asServiceScope(),
     )
 
     @Before

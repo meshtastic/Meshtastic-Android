@@ -23,14 +23,13 @@ import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.common.util.handledLaunch
@@ -87,7 +86,7 @@ class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
     private val notificationManager: NotificationManager,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : NodeManager {
 
     // Fixed stripes bound mutex lifetime while preserving same-node persistence ordering. Hash collisions only reduce

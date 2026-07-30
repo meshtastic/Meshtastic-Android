@@ -17,12 +17,11 @@
 package org.meshtastic.core.service.di
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
@@ -78,7 +77,7 @@ class CoreServiceAndroidModule {
         notificationManager: NotificationManager,
         messageProcessor: Lazy<MeshMessageProcessor>,
         radioConfigRepository: RadioConfigRepository,
-        @Named("ServiceScope") scope: CoroutineScope,
+        scope: ServiceScope,
     ): RadioController = RadioControllerImpl(
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,

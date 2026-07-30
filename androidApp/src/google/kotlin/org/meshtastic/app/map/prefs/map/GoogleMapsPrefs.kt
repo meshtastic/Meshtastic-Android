@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.map.prefs.map
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -31,8 +30,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.app.map.prefs.di.GoogleMapsDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
@@ -59,10 +58,8 @@ data class GoogleCameraPosition(
 )
 
 @Single
-class GoogleMapsPrefsImpl(
-    @Named("GoogleMapsDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : GoogleMapsPrefs {
+class GoogleMapsPrefsImpl(private val dataStore: GoogleMapsDataStore, dispatchers: CoroutineDispatchers) :
+    GoogleMapsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val selectedGoogleMapType: StateFlow<String?> =

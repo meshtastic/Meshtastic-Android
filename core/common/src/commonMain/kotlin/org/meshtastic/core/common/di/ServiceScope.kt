@@ -14,21 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.di
+package org.meshtastic.core.common.di
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
-import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.di.CoroutineDispatchers
 
-@Module
-@ComponentScan("org.meshtastic.core.service")
-class CoreServiceModule {
-    @Single
-    fun provideServiceScope(dispatchers: CoroutineDispatchers): ServiceScope =
-        CoroutineScope(dispatchers.default + SupervisorJob()).asServiceScope()
-}
+/**
+ * Process-lifetime scope owned by the mesh service, distinct from [ApplicationCoroutineScope] and from the DataStore
+ * scope. Backed by a `SupervisorJob` so one failed child does not tear down the rest of the service.
+ *
+ * A type rather than a Koin qualifier so the compiler tells it apart from every other [CoroutineScope].
+ */
+interface ServiceScope : CoroutineScope
+
+/** Presents an existing scope as [ServiceScope]; the wrapper adds nothing but identity. */
+fun CoroutineScope.asServiceScope(): ServiceScope = object : ServiceScope, CoroutineScope by this {}

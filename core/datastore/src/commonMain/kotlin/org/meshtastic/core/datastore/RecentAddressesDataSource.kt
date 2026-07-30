@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
@@ -32,12 +30,12 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
 
 @Single
-open class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class RecentAddressesDataSource(private val dataStore: CorePreferencesDataStore) {
     private object PreferencesKeys {
         val RECENT_IP_ADDRESSES = stringPreferencesKey("recent-ip-addresses")
     }

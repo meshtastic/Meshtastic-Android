@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.discovery
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -29,16 +27,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.DiscoveryPrefs
 
 @Single
-class DiscoveryPrefsImpl(
-    @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : DiscoveryPrefs {
+class DiscoveryPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : DiscoveryPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val dwellMinutes: StateFlow<Int> =

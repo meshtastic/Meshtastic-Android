@@ -14,21 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.di
+package org.meshtastic.core.common.di
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
-import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.di.asServiceScope
-import org.meshtastic.core.di.CoroutineDispatchers
+// The two bindings that cannot be told apart by type: `Lifecycle` is an abstract class, so it cannot be wrapped by
+// delegation, and the flavor flag is a `Boolean`. Everything else uses a distinct type instead of a qualifier — see
+// [ServiceScope]. Reference the constant, since a misspelled literal resolves to nothing and fails at runtime.
 
-@Module
-@ComponentScan("org.meshtastic.core.service")
-class CoreServiceModule {
-    @Single
-    fun provideServiceScope(dispatchers: CoroutineDispatchers): ServiceScope =
-        CoroutineScope(dispatchers.default + SupervisorJob()).asServiceScope()
-}
+/** `androidx.lifecycle.Lifecycle` of the whole process, not of any single Activity. */
+const val PROCESS_LIFECYCLE = "ProcessLifecycle"
+
+/** Whether Google Play services are present — `true` in the google flavor, `false` in fdroid. */
+const val GOOGLE_SERVICES_AVAILABLE = "googleServicesAvailable"

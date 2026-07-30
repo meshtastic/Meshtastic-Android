@@ -19,11 +19,10 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
@@ -62,7 +61,7 @@ class MeshConfigFlowManagerImpl(
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : MeshConfigFlowManager {
     private val wantConfigDelay = 100L
 
