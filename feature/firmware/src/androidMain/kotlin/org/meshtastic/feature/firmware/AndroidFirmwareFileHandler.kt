@@ -337,7 +337,10 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         runCatching {
             val androidUri = destinationUri.toAndroidUri()
             if (androidUri.authority != EXTERNAL_STORAGE_AUTHORITY) return@runCatching false
-            val documentId = DocumentsContract.getDocumentId(androidUri)
+            // Accepts either a tree URI (the maintenance flow picks the volume) or a single document URI.
+            val documentId =
+                runCatching { DocumentsContract.getTreeDocumentId(androidUri) }.getOrNull()
+                    ?: DocumentsContract.getDocumentId(androidUri)
             val volumeId = documentId.substringBefore(':', missingDelimiterValue = "")
             volumeId.isNotBlank() && !volumeId.equals(PRIMARY_VOLUME_ID, ignoreCase = true)
         }
@@ -349,6 +352,54 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         runCatching { context.contentResolver.openInputStream(destinationUri.toAndroidUri())?.use { true } == true }
             .getOrDefault(false)
     }
+
+    override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = withContext(ioDispatcher) {
+        runCatching {
+            val tree = treeUri.toAndroidUri()
+            val treeDocumentId = DocumentsContract.getTreeDocumentId(tree)
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, treeDocumentId)
+            val documentId =
+                context.contentResolver
+                    .query(
+                        childrenUri,
+                        arrayOf(
+                            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                        ),
+                        null,
+                        null,
+                        null,
+                    )
+                    ?.use { cursor ->
+                        var found: String? = null
+                        while (cursor.moveToNext()) {
+                            if (cursor.getString(1).equals(fileName, ignoreCase = true)) {
+                                found = cursor.getString(0)
+                                break
+                            }
+                        }
+                        found
+                    } ?: return@runCatching null
+
+            val documentUri = DocumentsContract.buildDocumentUriUsingTree(tree, documentId)
+            context.contentResolver.openInputStream(documentUri)?.use { it.readBytes().decodeToString() }
+        }
+            .onFailure { Logger.w(it) { "Could not read $fileName from $treeUri" } }
+            .getOrNull()
+    }
+
+    override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+        withContext(ioDispatcher) {
+            runCatching {
+                val tree = treeUri.toAndroidUri()
+                val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+                DocumentsContract.createDocument(context.contentResolver, parent, mimeType, fileName)?.let {
+                    CommonUri.parse(it.toString())
+                }
+            }
+                .onFailure { Logger.w(it) { "Could not create $fileName in $treeUri" } }
+                .getOrNull()
+        }
 
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
         withContext(ioDispatcher) {

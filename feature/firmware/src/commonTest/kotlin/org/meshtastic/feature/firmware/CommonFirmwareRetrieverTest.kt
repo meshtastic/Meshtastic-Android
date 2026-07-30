@@ -643,5 +643,10 @@ abstract class CommonFirmwareRetrieverTest {
         override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = true
 
         override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean = false
+
+        override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = null
+
+        override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+            null
     }
 }
