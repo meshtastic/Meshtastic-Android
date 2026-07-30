@@ -786,6 +786,27 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
+    fun `starting a bootloader upgrade the gate would not offer performs no reboot and no download`() = runTest {
+        // Defence in depth: an ESP32 has no bootloader-upgrade action to show in the first place
+        // (showBootloaderUpgrade is nRF-only), so a stray call must refuse before touching the device.
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam"))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertFalse(ready.maintenance.showBootloaderUpgrade)
+
+        viewModel.startBootloaderUpgrade()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend(mode = VerifyMode.not) { firmwareRetriever.retrieveUsbFirmware(any(), any(), any()) }
+        assertFalse(firmwareMaintenanceLock.isActive, "a refused request must never take the maintenance lock")
+    }
+
+    @Test
     fun `writeMaintenancePass is ignored when no sequence is running`() = runTest {
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
         viewModel = createViewModel()

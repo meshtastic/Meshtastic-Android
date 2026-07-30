@@ -507,12 +507,23 @@ class FirmwareUpdateViewModel(
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
 
-        // Defence in depth: the screen already disables a refused erase, but never start one on a device whose
-        // SoftDevice we could not resolve.
-        val refusal = currentState.maintenance.eraseRefusal
-        if (request == UsbMaintenanceRequest.FactoryErase && refusal != null) {
-            _state.value = FirmwareUpdateState.Error(usbMaintenanceRefusalError(refusal))
-            return
+        // Defence in depth: the screen already disables a refused erase and hides an unmapped bootloader upgrade,
+        // but never reboot a device into DFU for a request the gate would not have offered — that costs the user a
+        // pointless reboot cycle before the write-time check in chooseMaintenanceImage refuses it anyway.
+        val gate = currentState.maintenance
+        when (request) {
+            UsbMaintenanceRequest.FactoryErase ->
+                gate.eraseRefusal?.let {
+                    _state.value = FirmwareUpdateState.Error(usbMaintenanceRefusalError(it))
+                    return
+                }
+
+            UsbMaintenanceRequest.BootloaderUpgrade ->
+                if (!gate.showBootloaderUpgrade) {
+                    _state.value =
+                        FirmwareUpdateState.Error(usbMaintenanceRefusalError(UsbMaintenanceRefusal.UnknownBoardId))
+                    return
+                }
         }
 
         originalDeviceAddress = radioPrefs.devAddr.value
