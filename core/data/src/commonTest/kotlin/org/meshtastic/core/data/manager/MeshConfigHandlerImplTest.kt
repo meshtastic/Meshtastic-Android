@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
@@ -98,7 +99,7 @@ class MeshConfigHandlerImplTest {
         nodeManager = nodeManager,
         connectionManager = lazy { this.connectionManager },
         radioInterfaceService = radioInterfaceService,
-        scope = scope,
+        scope = scope.asServiceScope(),
     )
 
     // ---------- start and flow wiring ----------

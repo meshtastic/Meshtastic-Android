@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.repository.TakPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -53,7 +54,7 @@ class TakPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        takPrefs = TakPrefsImpl(dataStore, dispatchers)
+        takPrefs = TakPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest

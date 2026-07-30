@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
@@ -27,9 +26,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.di.SERVICE_SCOPE
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -67,7 +65,7 @@ class MeshMessageProcessorImpl(
     private val dataHandler: Lazy<MeshDataHandler>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : MeshMessageProcessor {
 
     /**

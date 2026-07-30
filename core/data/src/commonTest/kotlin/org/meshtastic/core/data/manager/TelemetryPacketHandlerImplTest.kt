@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -89,7 +90,7 @@ class TelemetryPacketHandlerImplTest {
                 connectionManager = lazy { connectionManager },
                 notificationManager = notificationManager,
                 radioInterfaceService = radioInterfaceService,
-                scope = testScope,
+                scope = testScope.asServiceScope(),
             )
     }
 

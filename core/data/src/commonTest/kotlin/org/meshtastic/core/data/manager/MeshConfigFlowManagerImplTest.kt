@@ -40,6 +40,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
@@ -162,7 +163,7 @@ class MeshConfigFlowManagerImplTest {
                 heartbeatSender = DataLayerHeartbeatSender(packetHandler),
                 notificationPrefs = notificationPrefs,
                 radioInterfaceService = radioInterfaceService,
-                scope = testScope,
+                scope = testScope.asServiceScope(),
             )
     }
 

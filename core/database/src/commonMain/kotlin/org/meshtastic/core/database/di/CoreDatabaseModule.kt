@@ -19,25 +19,18 @@ package org.meshtastic.core.database.di
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.createDatabaseDataStore
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.SwitchingDiscoveryDao
 
-/**
- * Qualifier for this module's `DataStore<Preferences>`. Reference the constant rather than repeating the string — a
- * typo resolves to nothing and fails at runtime, not at compile time.
- */
-const val DATABASE_DATASTORE = "DatabaseDataStore"
-
 @Module
 @ComponentScan("org.meshtastic.core.database")
 class CoreDatabaseModule {
     @Single
-    @Named(DATABASE_DATASTORE)
-    fun provideDatabaseDataStore() = createDatabaseDataStore("db-manager-prefs")
+    fun provideDatabaseDataStore(): DatabaseDataStore =
+        createDatabaseDataStore("db-manager-prefs").asDatabaseDataStore()
 
     /**
      * Long-lived consumers (discovery ViewModels, the scan engine) hold this DAO across device/DB switches, so hand

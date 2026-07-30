@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.data.repository
 
-import androidx.datastore.core.DataStore
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
@@ -31,11 +30,11 @@ import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
+import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
+import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.FileInfo
-import org.meshtastic.proto.LocalConfig
-import org.meshtastic.proto.LocalModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -56,8 +55,8 @@ class RadioConfigRepositoryImplTest {
                 default = Dispatchers.Unconfined,
             ),
         )
-    private val localConfigDataSource = LocalConfigDataSource(mock<DataStore<LocalConfig>>(MockMode.autofill))
-    private val moduleConfigDataSource = ModuleConfigDataSource(mock<DataStore<LocalModuleConfig>>(MockMode.autofill))
+    private val localConfigDataSource = LocalConfigDataSource(mock<CoreLocalConfigDataStore>(MockMode.autofill))
+    private val moduleConfigDataSource = ModuleConfigDataSource(mock<CoreModuleConfigDataStore>(MockMode.autofill))
 
     private fun createRepository() =
         RadioConfigRepositoryImpl(nodeDB, channelSetDataSource, localConfigDataSource, moduleConfigDataSource)

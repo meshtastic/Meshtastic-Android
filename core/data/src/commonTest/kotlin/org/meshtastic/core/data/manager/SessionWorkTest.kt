@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import kotlin.test.Test
@@ -45,7 +46,11 @@ class SessionWorkTest {
         var rejected = false
 
         service
-            .launchSessionWork(scope = backgroundScope, session = retiredSession, onRejected = { rejected = true }) {
+            .launchSessionWork(
+                scope = backgroundScope.asServiceScope(),
+                session = retiredSession,
+                onRejected = { rejected = true },
+            ) {
                 executed = true
             }
             .join()

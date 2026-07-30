@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.database
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -51,11 +50,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.di.DATABASE_DATASTORE
+import org.meshtastic.core.database.di.DatabaseDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
@@ -75,10 +73,8 @@ internal fun pendingRouteDbNames(preferences: Preferences): Set<String> = prefer
 @Single(binds = [DatabaseProvider::class, SharedDatabaseManager::class])
 @Suppress("TooManyFunctions", "LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager(
-    @Named(DATABASE_DATASTORE) private val datastore: DataStore<Preferences>,
-    private val dispatchers: CoroutineDispatchers,
-) : DatabaseProvider,
+open class DatabaseManager(private val datastore: DatabaseDataStore, private val dispatchers: CoroutineDispatchers) :
+    DatabaseProvider,
     SharedDatabaseManager {
 
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)

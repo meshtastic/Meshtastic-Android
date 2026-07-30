@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.common.di
+package org.meshtastic.app.map.prefs.di
 
-// The two bindings that cannot be told apart by type: `Lifecycle` is an abstract class, so it cannot be wrapped by
-// delegation, and the flavor flag is a `Boolean`. Everything else uses a distinct type instead of a qualifier — see
-// [ServiceScope]. Reference the constant, since a misspelled literal resolves to nothing and fails at runtime.
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 
-/** `androidx.lifecycle.Lifecycle` of the whole process, not of any single Activity. */
-const val PROCESS_LIFECYCLE = "ProcessLifecycle"
+/**
+ * Google Maps preferences, google flavor only. A type rather than a Koin qualifier so the compiler tells it apart from
+ * every other `DataStore<Preferences>`.
+ */
+interface GoogleMapsDataStore : DataStore<Preferences>
 
-/** Whether Google Play services are present — `true` in the google flavor, `false` in fdroid. */
-const val GOOGLE_SERVICES_AVAILABLE = "googleServicesAvailable"
+/** Presents an existing store as [GoogleMapsDataStore]; the wrapper adds nothing but identity. */
+fun DataStore<Preferences>.asGoogleMapsDataStore(): GoogleMapsDataStore =
+    object : GoogleMapsDataStore, DataStore<Preferences> by this {}

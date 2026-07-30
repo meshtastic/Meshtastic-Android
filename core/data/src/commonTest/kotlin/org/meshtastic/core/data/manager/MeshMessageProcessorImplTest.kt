@@ -38,6 +38,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
@@ -142,7 +143,7 @@ class MeshMessageProcessorImplTest {
         dataHandler = lazy { dataHandler },
         fromRadioDispatcher = fromRadioDispatcher,
         radioInterfaceService = radioInterfaceService,
-        scope = scope,
+        scope = scope.asServiceScope(),
     )
 
     private fun frame(bytes: ByteArray, frameSession: RadioSessionContext = session) =

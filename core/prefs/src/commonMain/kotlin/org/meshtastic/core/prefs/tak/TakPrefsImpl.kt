@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.tak
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
@@ -27,17 +25,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.UI_DATASTORE
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.TakPrefs
 
 @Single(binds = [TakPrefs::class])
-class TakPrefsImpl(
-    @Named(UI_DATASTORE) private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : TakPrefs {
+class TakPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : TakPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val isTakServerEnabled: StateFlow<Boolean> =

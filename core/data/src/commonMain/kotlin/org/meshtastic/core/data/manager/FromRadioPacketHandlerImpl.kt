@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
@@ -160,7 +161,7 @@ class FromRadioPacketHandlerImpl(
             return
         }
         radioInterfaceService.launchSessionWork(
-            scope = scope,
+            scope = scope.asServiceScope(),
             session = session,
             onRejected = { Logger.d { "Skipping client alert from stale transport session" } },
         ) {

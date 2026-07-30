@@ -35,6 +35,8 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
 import okio.FileSystem
 import okio.Path
+import org.meshtastic.core.database.di.DatabaseDataStore
+import org.meshtastic.core.database.di.asDatabaseDataStore
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.test.assertEquals
@@ -85,7 +87,8 @@ abstract class DatabaseManagerTestFixture {
         FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
-    protected fun createManager(): TestDatabaseManager = TestDatabaseManager(armableDs, dispatchers).also(managers::add)
+    protected fun createManager(): TestDatabaseManager =
+        TestDatabaseManager(armableDs.asDatabaseDataStore(), dispatchers).also(managers::add)
 
     /**
      * A callback that started on one pool must never be replayed after an active-database switch. The first invocation
@@ -135,7 +138,7 @@ abstract class DatabaseManagerTestFixture {
      * [dbCache][DatabaseManager.dbCache] entries for different names are genuinely separate databases.
      */
     protected class TestDatabaseManager(
-        datastore: DataStore<Preferences>,
+        datastore: DatabaseDataStore,
         private val testDispatchers: CoroutineDispatchers,
     ) : DatabaseManager(datastore, testDispatchers) {
         val builtDatabases = mutableListOf<MeshtasticDatabase>()

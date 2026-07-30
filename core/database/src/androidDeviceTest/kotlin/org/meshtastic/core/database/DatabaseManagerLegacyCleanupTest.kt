@@ -31,6 +31,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.ContextServices
+import org.meshtastic.core.database.di.asDatabaseDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @RunWith(AndroidJUnit4::class)
@@ -40,7 +41,7 @@ class DatabaseManagerLegacyCleanupTest {
         val app = ApplicationProvider.getApplicationContext<Application>()
         ContextServices.app = app
         val datastoreName = "db-manager-prefs-test-${System.nanoTime()}"
-        val datastore = createDatabaseDataStore(datastoreName)
+        val datastore = createDatabaseDataStore(datastoreName).asDatabaseDataStore()
 
         // Reset the one-time flag
         val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)

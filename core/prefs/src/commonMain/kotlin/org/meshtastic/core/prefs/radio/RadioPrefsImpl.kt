@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.radio
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
@@ -27,17 +25,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.RADIO_DATASTORE
+import org.meshtastic.core.prefs.di.RadioDataStore
 import org.meshtastic.core.repository.RadioPrefs
 
 @Single
-class RadioPrefsImpl(
-    @Named(RADIO_DATASTORE) private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : RadioPrefs {
+class RadioPrefsImpl(private val dataStore: RadioDataStore, dispatchers: CoroutineDispatchers) : RadioPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val devAddr: StateFlow<String?> =

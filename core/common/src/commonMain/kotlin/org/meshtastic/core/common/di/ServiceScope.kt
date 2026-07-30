@@ -16,12 +16,15 @@
  */
 package org.meshtastic.core.common.di
 
-// The two bindings that cannot be told apart by type: `Lifecycle` is an abstract class, so it cannot be wrapped by
-// delegation, and the flavor flag is a `Boolean`. Everything else uses a distinct type instead of a qualifier — see
-// [ServiceScope]. Reference the constant, since a misspelled literal resolves to nothing and fails at runtime.
+import kotlinx.coroutines.CoroutineScope
 
-/** `androidx.lifecycle.Lifecycle` of the whole process, not of any single Activity. */
-const val PROCESS_LIFECYCLE = "ProcessLifecycle"
+/**
+ * Process-lifetime scope owned by the mesh service, distinct from [ApplicationCoroutineScope] and from the DataStore
+ * scope. Backed by a `SupervisorJob` so one failed child does not tear down the rest of the service.
+ *
+ * A type rather than a Koin qualifier so the compiler tells it apart from every other [CoroutineScope].
+ */
+interface ServiceScope : CoroutineScope
 
-/** Whether Google Play services are present — `true` in the google flavor, `false` in fdroid. */
-const val GOOGLE_SERVICES_AVAILABLE = "googleServicesAvailable"
+/** Presents an existing scope as [ServiceScope]; the wrapper adds nothing but identity. */
+fun CoroutineScope.asServiceScope(): ServiceScope = object : ServiceScope, CoroutineScope by this {}

@@ -19,6 +19,7 @@ package org.meshtastic.desktop.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -35,29 +36,47 @@ import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.database.desktopDataDir
-import org.meshtastic.core.datastore.di.CORE_CHANNEL_SET_DATASTORE
-import org.meshtastic.core.datastore.di.CORE_LOCAL_CONFIG_DATASTORE
-import org.meshtastic.core.datastore.di.CORE_LOCAL_STATS_DATASTORE
-import org.meshtastic.core.datastore.di.CORE_MODULE_CONFIG_DATASTORE
-import org.meshtastic.core.datastore.di.CORE_PREFERENCES_DATASTORE
-import org.meshtastic.core.datastore.di.DATASTORE_SCOPE
+import org.meshtastic.core.datastore.di.CoreChannelSetDataStore
+import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
+import org.meshtastic.core.datastore.di.CoreLocalStatsDataStore
+import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
+import org.meshtastic.core.datastore.di.CorePreferencesDataStore
+import org.meshtastic.core.datastore.di.DataStoreScope
+import org.meshtastic.core.datastore.di.asCoreChannelSetDataStore
+import org.meshtastic.core.datastore.di.asCoreLocalConfigDataStore
+import org.meshtastic.core.datastore.di.asCoreLocalStatsDataStore
+import org.meshtastic.core.datastore.di.asCoreModuleConfigDataStore
+import org.meshtastic.core.datastore.di.asCorePreferencesDataStore
+import org.meshtastic.core.datastore.di.asDataStoreScope
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.ANALYTICS_DATASTORE
-import org.meshtastic.core.prefs.di.APP_DATASTORE
-import org.meshtastic.core.prefs.di.CUSTOM_EMOJI_DATASTORE
-import org.meshtastic.core.prefs.di.FILTER_DATASTORE
-import org.meshtastic.core.prefs.di.HOMOGLYPH_ENCODING_DATASTORE
-import org.meshtastic.core.prefs.di.MAP_CONSENT_DATASTORE
-import org.meshtastic.core.prefs.di.MAP_DATASTORE
-import org.meshtastic.core.prefs.di.MAP_TILE_PROVIDER_DATASTORE
-import org.meshtastic.core.prefs.di.MESH_DATASTORE
-import org.meshtastic.core.prefs.di.MESH_LOG_DATASTORE
-import org.meshtastic.core.prefs.di.RADIO_DATASTORE
-import org.meshtastic.core.prefs.di.UI_DATASTORE
+import org.meshtastic.core.prefs.di.AnalyticsDataStore
+import org.meshtastic.core.prefs.di.AppDataStore
+import org.meshtastic.core.prefs.di.CustomEmojiDataStore
+import org.meshtastic.core.prefs.di.FilterDataStore
+import org.meshtastic.core.prefs.di.HomoglyphEncodingDataStore
+import org.meshtastic.core.prefs.di.MapConsentDataStore
+import org.meshtastic.core.prefs.di.MapDataStore
+import org.meshtastic.core.prefs.di.MapTileProviderDataStore
+import org.meshtastic.core.prefs.di.MeshDataStore
+import org.meshtastic.core.prefs.di.MeshLogDataStore
+import org.meshtastic.core.prefs.di.RadioDataStore
+import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.di.asAnalyticsDataStore
+import org.meshtastic.core.prefs.di.asAppDataStore
+import org.meshtastic.core.prefs.di.asCustomEmojiDataStore
+import org.meshtastic.core.prefs.di.asFilterDataStore
+import org.meshtastic.core.prefs.di.asHomoglyphEncodingDataStore
+import org.meshtastic.core.prefs.di.asMapConsentDataStore
+import org.meshtastic.core.prefs.di.asMapDataStore
+import org.meshtastic.core.prefs.di.asMapTileProviderDataStore
+import org.meshtastic.core.prefs.di.asMeshDataStore
+import org.meshtastic.core.prefs.di.asMeshLogDataStore
+import org.meshtastic.core.prefs.di.asRadioDataStore
+import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
@@ -65,7 +84,7 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
 
 /** Creates a file-backed [DataStore]<[Preferences]> at the given path under the data directory. */
-private fun createPreferencesDataStore(name: String, scope: CoroutineScope): DataStore<Preferences> {
+private fun prefsStore(name: String, scope: DataStoreScope): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
     FileSystem.SYSTEM.createDirectories(dir.toPath())
     return PreferenceDataStoreFactory.createWithPath(
@@ -105,7 +124,7 @@ fun desktopPlatformModule() = module {
     // Ensure it is an application-scoped context that is not canceled by UI lifecycle events."
     // DataStore has no close() API — the in-memory cache is released only when this Job is cancelled
     // (at process exit). Using SupervisorJob so a single store's failure doesn't cascade.
-    single<CoroutineScope>(named(DATASTORE_SCOPE)) { CoroutineScope(get<CoroutineDispatchers>().io + SupervisorJob()) }
+    single<DataStoreScope> { CoroutineScope(get<CoroutineDispatchers>().io + SupervisorJob()).asDataStoreScope() }
 
     includes(desktopPreferencesDataStoreModule(), desktopProtoDataStoreModule())
 
@@ -127,100 +146,54 @@ fun desktopPlatformModule() = module {
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
 private fun desktopPreferencesDataStoreModule() = module {
-    single<DataStore<Preferences>>(named(ANALYTICS_DATASTORE)) {
-        createPreferencesDataStore("analytics", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(HOMOGLYPH_ENCODING_DATASTORE)) {
-        createPreferencesDataStore("homoglyph_encoding", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(APP_DATASTORE)) {
-        createPreferencesDataStore("app", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(CUSTOM_EMOJI_DATASTORE)) {
-        createPreferencesDataStore("custom_emoji", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(MAP_DATASTORE)) {
-        createPreferencesDataStore("map", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(MAP_CONSENT_DATASTORE)) {
-        createPreferencesDataStore("map_consent", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(MAP_TILE_PROVIDER_DATASTORE)) {
-        createPreferencesDataStore("map_tile_provider", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(MESH_DATASTORE)) {
-        createPreferencesDataStore("mesh", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(RADIO_DATASTORE)) {
-        createPreferencesDataStore("radio", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(UI_DATASTORE)) {
-        createPreferencesDataStore("ui", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(MESH_LOG_DATASTORE)) {
-        createPreferencesDataStore("meshlog", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(FILTER_DATASTORE)) {
-        createPreferencesDataStore("filter", get(named(DATASTORE_SCOPE)))
-    }
-    single<DataStore<Preferences>>(named(CORE_PREFERENCES_DATASTORE)) {
-        createPreferencesDataStore("core_preferences", get(named(DATASTORE_SCOPE)))
-    }
+    single<AnalyticsDataStore> { prefsStore("analytics", get()).asAnalyticsDataStore() }
+    single<HomoglyphEncodingDataStore> { prefsStore("homoglyph_encoding", get()).asHomoglyphEncodingDataStore() }
+    single<AppDataStore> { prefsStore("app", get()).asAppDataStore() }
+    single<CustomEmojiDataStore> { prefsStore("custom_emoji", get()).asCustomEmojiDataStore() }
+    single<MapDataStore> { prefsStore("map", get()).asMapDataStore() }
+    single<MapConsentDataStore> { prefsStore("map_consent", get()).asMapConsentDataStore() }
+    single<MapTileProviderDataStore> { prefsStore("map_tile_provider", get()).asMapTileProviderDataStore() }
+    single<MeshDataStore> { prefsStore("mesh", get()).asMeshDataStore() }
+    single<RadioDataStore> { prefsStore("radio", get()).asRadioDataStore() }
+    single<UiDataStore> { prefsStore("ui", get()).asUiDataStore() }
+    single<MeshLogDataStore> { prefsStore("meshlog", get()).asMeshLogDataStore() }
+    single<FilterDataStore> { prefsStore("filter", get()).asFilterDataStore() }
+    single<CorePreferencesDataStore> { prefsStore("core_preferences", get()).asCorePreferencesDataStore() }
 }
+
+/** The path is an on-disk identity — changing it orphans existing user data. */
+private fun <T> protoStore(
+    serializer: OkioSerializer<T>,
+    path: String,
+    produceNewData: () -> T,
+    scope: DataStoreScope,
+): DataStore<T> = DataStoreFactory.create(
+    storage = OkioStorage(fileSystem = FileSystem.SYSTEM, serializer = serializer, producePath = { path.toPath() }),
+    corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { produceNewData() }),
+    scope = scope,
+)
 
 /** Proto [DataStore] instances (OkioStorage-backed). */
 private fun desktopProtoDataStoreModule() = module {
     val protoDir = desktopDataDir() + "/datastore"
 
-    single<DataStore<LocalConfig>>(named(CORE_LOCAL_CONFIG_DATASTORE)) {
-        DataStoreFactory.create(
-            storage =
-            OkioStorage(
-                fileSystem = FileSystem.SYSTEM,
-                serializer = LocalConfigSerializer,
-                producePath = { "$protoDir/local_config.pb".toPath() },
-            ),
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
-            scope = get(named(DATASTORE_SCOPE)),
-        )
+    single<CoreLocalConfigDataStore> {
+        protoStore(LocalConfigSerializer, "$protoDir/local_config.pb", { LocalConfig() }, get())
+            .asCoreLocalConfigDataStore()
     }
 
-    single<DataStore<LocalModuleConfig>>(named(CORE_MODULE_CONFIG_DATASTORE)) {
-        DataStoreFactory.create(
-            storage =
-            OkioStorage(
-                fileSystem = FileSystem.SYSTEM,
-                serializer = ModuleConfigSerializer,
-                producePath = { "$protoDir/module_config.pb".toPath() },
-            ),
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
-            scope = get(named(DATASTORE_SCOPE)),
-        )
+    single<CoreModuleConfigDataStore> {
+        protoStore(ModuleConfigSerializer, "$protoDir/module_config.pb", { LocalModuleConfig() }, get())
+            .asCoreModuleConfigDataStore()
     }
 
-    single<DataStore<ChannelSet>>(named(CORE_CHANNEL_SET_DATASTORE)) {
-        DataStoreFactory.create(
-            storage =
-            OkioStorage(
-                fileSystem = FileSystem.SYSTEM,
-                serializer = ChannelSetSerializer,
-                producePath = { "$protoDir/channel_set.pb".toPath() },
-            ),
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
-            scope = get(named(DATASTORE_SCOPE)),
-        )
+    single<CoreChannelSetDataStore> {
+        protoStore(ChannelSetSerializer, "$protoDir/channel_set.pb", { ChannelSet() }, get())
+            .asCoreChannelSetDataStore()
     }
 
-    single<DataStore<LocalStats>>(named(CORE_LOCAL_STATS_DATASTORE)) {
-        DataStoreFactory.create(
-            storage =
-            OkioStorage(
-                fileSystem = FileSystem.SYSTEM,
-                serializer = LocalStatsSerializer,
-                producePath = { "$protoDir/local_stats.pb".toPath() },
-            ),
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
-            scope = get(named(DATASTORE_SCOPE)),
-        )
+    single<CoreLocalStatsDataStore> {
+        protoStore(LocalStatsSerializer, "$protoDir/local_stats.pb", { LocalStats() }, get())
+            .asCoreLocalStatsDataStore()
     }
 }

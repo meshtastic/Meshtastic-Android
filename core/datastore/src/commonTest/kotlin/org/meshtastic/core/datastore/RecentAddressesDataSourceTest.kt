@@ -32,6 +32,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
+import org.meshtastic.core.datastore.di.asCorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -57,7 +58,7 @@ class RecentAddressesDataSourceTest {
                 scope = testScope,
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
-        dataSource = RecentAddressesDataSource(dataStore)
+        dataSource = RecentAddressesDataSource(dataStore.asCorePreferencesDataStore())
     }
 
     @AfterTest
