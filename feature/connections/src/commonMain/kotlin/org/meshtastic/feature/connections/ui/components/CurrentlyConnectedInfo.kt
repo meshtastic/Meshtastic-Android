@@ -37,6 +37,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
@@ -58,7 +61,7 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_DELAY = 2
+private const val RSSI_DELAY = 3
 private const val RSSI_TIMEOUT = 1
 
 /**
@@ -87,19 +90,23 @@ fun CurrentlyConnectedInfo(
 ) {
     // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
     var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
-    LaunchedEffect(bleDevice) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(bleDevice, lifecycle) {
         if (bleDevice == null) return@LaunchedEffect
-        while (bleDevice.device.isConnected) {
-            try {
-                rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
-            } catch (_: TimeoutCancellationException) {
-                Logger.d { "RSSI read timed out" }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.d(e) { "Failed to read RSSI ${e.message}" }
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (bleDevice.device.isConnected) {
+                try {
+                    val latestRssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
+                    if (latestRssi != rssi) rssi = latestRssi
+                } catch (_: TimeoutCancellationException) {
+                    Logger.d { "RSSI read timed out" }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.d(e) { "Failed to read RSSI" }
+                }
+                delay(RSSI_DELAY.seconds)
             }
-            delay(RSSI_DELAY.seconds)
         }
     }
     Column(modifier = modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
