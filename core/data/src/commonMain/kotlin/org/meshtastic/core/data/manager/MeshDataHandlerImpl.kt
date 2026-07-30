@@ -44,6 +44,7 @@ import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
@@ -250,7 +251,13 @@ class MeshDataHandlerImpl(
         // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
         if (beacon?.offer_channel == null) return
         val offer =
-            MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon, snr = packet.rx_snr, rssi = packet.rx_rssi)
+            MeshBeaconOffer(
+                fromNodeNum = packet.from,
+                beacon = beacon,
+                // [MeshBeaconOffer.snr] is not nullable, so absent narrows to 0f. See [snrOrNull].
+                snr = packet.snrOrNull() ?: 0f,
+                rssi = packet.rx_rssi,
+            )
         if (meshBeaconRepository.add(offer)) {
             radioInterfaceService.launchSessionWork(scope, session) {
                 notificationManager.dispatch(
@@ -583,7 +590,8 @@ class MeshDataHandlerImpl(
                     user = fromNode.user,
                     emoji = emoji,
                     timestamp = nowMillis,
-                    snr = packet.rx_snr,
+                    // [Reaction.snr] is not nullable, so absent narrows to 0f here. See [snrOrNull].
+                    snr = packet.snrOrNull() ?: 0f,
                     rssi = packet.rx_rssi,
                     hopsAway =
                     if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {

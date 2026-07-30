@@ -38,6 +38,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.model.util.rxTimeOrNull
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
@@ -319,7 +320,8 @@ class MeshMessageProcessorImpl(
             lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
             viaMqtt = viaMqtt,
             lastTransport = packet.transport_mechanism.value,
-            snr = if (updateRadioMetrics) packet.rx_snr else node.snr,
+            // A packet carrying no snr must not clobber the node's last real reading either.
+            snr = if (updateRadioMetrics) packet.snrOrNull() ?: node.snr else node.snr,
             // A packet carrying no rssi must not clobber the node's last real reading.
             rssi = if (updateRadioMetrics) packet.rx_rssi ?: node.rssi else node.rssi,
             hopsAway = hopsAway,

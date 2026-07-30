@@ -45,7 +45,12 @@ object MetricFormatter {
 
     fun pressure(hPa: Float, decimalPlaces: Int = 1): String = "${NumberFormatter.format(hPa, decimalPlaces)} hPa"
 
-    fun snr(value: Float, decimalPlaces: Int = 1): String = "${NumberFormatter.format(value, decimalPlaces)} dB"
+    /**
+     * Formats a signal-to-noise ratio, or [UNKNOWN_VALUE] when the packet carried no measurement. 0 dB is a legitimate
+     * reading, so it must never stand in for a missing one.
+     */
+    fun snr(value: Float?, decimalPlaces: Int = 1): String =
+        if (value == null) UNKNOWN_VALUE else "${NumberFormatter.format(value, decimalPlaces)} dB"
 
     /**
      * Formats a received signal strength, or [UNKNOWN_VALUE] when the radio reported none. 0 dBm is a legitimate

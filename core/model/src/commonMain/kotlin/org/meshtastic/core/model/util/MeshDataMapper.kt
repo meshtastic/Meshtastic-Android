@@ -44,7 +44,9 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
             channel = if (packet.pki_encrypted == true) NodeAddress.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack == true,
             hopStart = packet.hop_start,
-            snr = packet.rx_snr,
+            // Narrows absent to 0f because [DataPacket.snr] is not nullable; a genuine 0 dB reading and "no reading"
+            // become indistinguishable past this point. See [snrOrNull].
+            snr = packet.snrOrNull() ?: 0f,
             rssi = packet.rx_rssi,
             replyId = decoded.reply_id,
             relayNode = packet.relay_node,

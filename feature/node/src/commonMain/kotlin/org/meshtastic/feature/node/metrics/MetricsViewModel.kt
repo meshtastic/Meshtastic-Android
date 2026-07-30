@@ -50,6 +50,7 @@ import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.rxTimeOrNull
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -455,8 +456,9 @@ open class MetricsViewModel(
             rows = data,
             epochSeconds = { (it.rxTimeOrNull() ?: 0).toLong() },
         ) { p ->
-            // An absent rssi exports as an empty field, matching the other optional metrics above.
-            "\"${p.rx_rssi ?: ""}\",\"${p.rx_snr}\""
+            // An absent rssi or snr exports as an empty field, matching the other optional metrics above. An empty
+            // field and "0" must stay distinguishable: 0 dB is a real reading.
+            "\"${p.rx_rssi ?: ""}\",\"${p.snrOrNull() ?: ""}\""
         }
     }
 
