@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.firmware
 
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.SoftDeviceVariant
 
 /**
  * Which leg of a multi-pass USB/UF2 sequence a file-save prompt belongs to.
@@ -51,6 +53,7 @@ enum class UsbMaintenanceRequest {
 }
 
 /** Why a maintenance action cannot run. Surfaced as explanatory copy rather than silently hiding the action. */
+@Suppress("UndocumentedPublicProperty")
 enum class UsbMaintenanceRefusal {
     /**
      * The device's SoftDevice variant could not be resolved, so no erase image can be chosen safely. Covers an absent or
@@ -63,6 +66,24 @@ enum class UsbMaintenanceRefusal {
 
     /** No release firmware is selected, so there would be nothing to re-flash after erasing. */
     NoFirmwareRelease,
+
+    /** The picked destination is not on removable storage, so it cannot be a mounted bootloader volume. */
+    DestinationNotRemovable,
+
+    /**
+     * The picked volume exposes no readable `INFO_UF2.TXT`, so it is not an Adafruit-family UF2 bootloader drive. Also
+     * the outcome when a device rebooted into CDC-only bootloader mode, where no mass-storage volume exists at all.
+     */
+    NotABootloaderVolume,
+
+    /**
+     * The volume's reported SoftDevice contradicts the bundled map. One of the two is wrong and we cannot tell which, so
+     * refuse — and treat the map row as suspect.
+     */
+    SoftDeviceConflict,
+
+    /** No OTAFIX image is published for the Board-ID this volume reports. */
+    UnknownBoardId,
 }
 
 /**
@@ -113,4 +134,86 @@ internal fun usbMaintenanceGate(
         // — which image gets written is decided later from the Board-ID the drive reports.
         showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(hardware.effectiveTarget),
     )
+}
+
+/**
+ * What a mounted UF2 bootloader volume says about itself, read from its `INFO_UF2.TXT`.
+ *
+ * @property boardId The `Board-ID:` line — unique per board, and stable across bootloader vintages.
+ * @property softDevice The installed SoftDevice, when the bootloader reports one. `null` on RP2040 (no SoftDevice
+ *   exists) and on bootloaders predating the `uf2_init` that appends the line.
+ */
+internal data class MaintenanceVolume(val boardId: String, val softDevice: SoftDeviceVariant?)
+
+/** Outcome of vetting a user-picked volume before anything is written to it. */
+internal sealed interface VolumeInspection {
+    data class Accepted(val volume: MaintenanceVolume) : VolumeInspection
+
+    data class Rejected(val reason: UsbMaintenanceRefusal) : VolumeInspection
+}
+
+/**
+ * Vets [treeUri] as a UF2 bootloader volume before it is written to.
+ *
+ * Two independent checks, cheapest first: the volume must be removable, and it must expose a readable `INFO_UF2.TXT`
+ * with a `Board-ID:` line. The second is the load-bearing one — it is positive proof of an Adafruit-family bootloader
+ * drive, where a removability heuristic only makes "somewhere on internal storage" less likely. This is what stops the
+ * common mis-tap (saving into Downloads) from being indistinguishable from a successful flash.
+ */
+internal suspend fun inspectMaintenanceVolume(
+    treeUri: CommonUri,
+    fileHandler: FirmwareFileHandler,
+): VolumeInspection {
+    if (!fileHandler.isRemovableDestination(treeUri)) {
+        return VolumeInspection.Rejected(UsbMaintenanceRefusal.DestinationNotRemovable)
+    }
+    val info =
+        fileHandler.readSiblingText(treeUri, INFO_UF2_FILE_NAME)
+            ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
+    val boardId =
+        parseUf2BoardId(info) ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
+
+    return VolumeInspection.Accepted(MaintenanceVolume(boardId = boardId, softDevice = parseUf2SoftDevice(info)))
+}
+
+/** Which image to write, or why not. */
+internal sealed interface MaintenanceImageChoice {
+    data class Resolved(val asset: MaintenanceUf2) : MaintenanceImageChoice
+
+    data class Refused(val reason: UsbMaintenanceRefusal) : MaintenanceImageChoice
+}
+
+/**
+ * Chooses the image for [request], preferring what the mounted [volume] reports over what the bundled map predicted.
+ *
+ * Total over both requests and every refusal, with no default image on any path. Called only after
+ * [inspectMaintenanceVolume] accepts, and always before anything is written — so a refusal here costs the user a
+ * message, never a half-flashed device.
+ */
+internal fun chooseMaintenanceImage(
+    request: UsbMaintenanceRequest,
+    hardware: DeviceHardware,
+    volume: MaintenanceVolume,
+): MaintenanceImageChoice = when (request) {
+    UsbMaintenanceRequest.FactoryErase ->
+        if (hardware.isNrf52Arc) {
+            when (val resolution = resolveNrfEraseImage(hardware.softDeviceVariant, volume.softDevice)) {
+                is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
+                is EraseImageResolution.Conflict ->
+                    MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.SoftDeviceConflict)
+
+                EraseImageResolution.Unresolved ->
+                    MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownSoftDevice)
+            }
+        } else {
+            // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile.
+            eraseUf2For(hardware)
+                ?.let { MaintenanceImageChoice.Resolved(it) }
+                ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnsupportedArchitecture)
+        }
+
+    UsbMaintenanceRequest.BootloaderUpgrade ->
+        otafixUf2ForBoardId(volume.boardId)
+            ?.let { MaintenanceImageChoice.Resolved(it) }
+            ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }
