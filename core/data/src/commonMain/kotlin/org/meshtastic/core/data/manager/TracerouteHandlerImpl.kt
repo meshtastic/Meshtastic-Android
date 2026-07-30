@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
@@ -62,7 +61,7 @@ class TracerouteHandlerImpl(
         if (forwardRoute.isEmpty() || returnRoute.isEmpty()) return
 
         radioInterfaceService.launchSessionWork(
-            scope = scope.asServiceScope(),
+            scope = scope,
             session = session,
             onRejected = { Logger.d { "Dropped traceroute work from a retired transport session" } },
         ) {

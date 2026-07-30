@@ -21,7 +21,6 @@ import okio.ByteString.Companion.toByteString
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
-import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -128,7 +127,7 @@ class StoreForwardPacketHandlerImpl(
                 "to=${sfpp.encapsulated_to} myNodeNum=${nodeManager.myNodeNum.value} status=$status"
         }
         radioInterfaceService.launchSessionWork(
-            scope = scope.asServiceScope(),
+            scope = scope,
             session = session,
             onRejected = { Logger.d { "Dropped SF++ work from a retired transport session" } },
         ) {
@@ -146,7 +145,7 @@ class StoreForwardPacketHandlerImpl(
 
     private fun handleCanonAnnounce(sfpp: StoreForwardPlusPlus, session: RadioSessionContext?) {
         radioInterfaceService.launchSessionWork(
-            scope = scope.asServiceScope(),
+            scope = scope,
             session = session,
             onRejected = { Logger.d { "Dropped SF++ work from a retired transport session" } },
         ) {
