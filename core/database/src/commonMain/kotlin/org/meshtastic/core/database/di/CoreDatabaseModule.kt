@@ -26,11 +26,17 @@ import org.meshtastic.core.database.createDatabaseDataStore
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.SwitchingDiscoveryDao
 
+/**
+ * Qualifier for this module's `DataStore<Preferences>`. Reference the constant rather than repeating the string — a
+ * typo resolves to nothing and fails at runtime, not at compile time.
+ */
+const val DATABASE_DATASTORE = "DatabaseDataStore"
+
 @Module
 @ComponentScan("org.meshtastic.core.database")
 class CoreDatabaseModule {
     @Single
-    @Named("DatabaseDataStore")
+    @Named(DATABASE_DATASTORE)
     fun provideDatabaseDataStore() = createDatabaseDataStore("db-manager-prefs")
 
     /**

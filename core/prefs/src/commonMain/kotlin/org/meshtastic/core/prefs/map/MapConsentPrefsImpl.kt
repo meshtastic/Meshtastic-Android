@@ -33,11 +33,12 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.MAP_CONSENT_DATASTORE
 import org.meshtastic.core.repository.MapConsentPrefs
 
 @Single
 class MapConsentPrefsImpl(
-    @Named("MapConsentDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(MAP_CONSENT_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

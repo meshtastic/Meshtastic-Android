@@ -55,6 +55,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.database.di.DATABASE_DATASTORE
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
@@ -75,7 +76,7 @@ internal fun pendingRouteDbNames(preferences: Preferences): Set<String> = prefer
 @Suppress("TooManyFunctions", "LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
 open class DatabaseManager(
-    @Named("DatabaseDataStore") private val datastore: DataStore<Preferences>,
+    @Named(DATABASE_DATASTORE) private val datastore: DataStore<Preferences>,
     private val dispatchers: CoroutineDispatchers,
 ) : DatabaseProvider,
     SharedDatabaseManager {

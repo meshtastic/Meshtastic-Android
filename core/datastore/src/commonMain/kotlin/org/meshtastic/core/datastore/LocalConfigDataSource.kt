@@ -23,12 +23,13 @@ import kotlinx.coroutines.flow.catch
 import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_LOCAL_CONFIG_DATASTORE
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
 /** Class that handles saving and retrieving [LocalConfig] data. */
 @Single
-class LocalConfigDataSource(@Named("CoreLocalConfigDataStore") private val localConfigStore: DataStore<LocalConfig>) {
+class LocalConfigDataSource(@Named(CORE_LOCAL_CONFIG_DATASTORE) private val localConfigStore: DataStore<LocalConfig>) {
     val localConfigFlow: Flow<LocalConfig> =
         localConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

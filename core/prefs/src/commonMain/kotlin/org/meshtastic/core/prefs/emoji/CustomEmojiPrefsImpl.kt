@@ -31,11 +31,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.CUSTOM_EMOJI_DATASTORE
 import org.meshtastic.core.repository.CustomEmojiPrefs
 
 @Single
 class CustomEmojiPrefsImpl(
-    @Named("CustomEmojiDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(CUSTOM_EMOJI_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : CustomEmojiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

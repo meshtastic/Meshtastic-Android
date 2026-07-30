@@ -30,12 +30,13 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.APP_DATASTORE
 import org.meshtastic.core.repository.AppFunctionsPrefs
 
 @Single
 @Suppress("TooManyFunctions")
 class AppFunctionsPrefsImpl(
-    @Named("AppDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(APP_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : AppFunctionsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

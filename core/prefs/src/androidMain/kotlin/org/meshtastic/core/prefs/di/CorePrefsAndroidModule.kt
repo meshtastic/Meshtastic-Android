@@ -40,7 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class CorePrefsAndroidModule {
 
     @Single
-    @Named("AnalyticsDataStore")
+    @Named(ANALYTICS_DATASTORE)
     fun provideAnalyticsDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "analytics-prefs")),
@@ -49,7 +49,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("HomoglyphEncodingDataStore")
+    @Named(HOMOGLYPH_ENCODING_DATASTORE)
     fun provideHomoglyphEncodingDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "homoglyph-encoding-prefs")),
@@ -58,7 +58,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("AppDataStore")
+    @Named(APP_DATASTORE)
     fun provideAppDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "prefs")),
@@ -67,7 +67,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("CustomEmojiDataStore")
+    @Named(CUSTOM_EMOJI_DATASTORE)
     fun provideCustomEmojiDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "org.geeksville.emoji.prefs")),
@@ -76,7 +76,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("MapDataStore")
+    @Named(MAP_DATASTORE)
     fun provideMapDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "map_prefs")),
@@ -85,7 +85,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("MapConsentDataStore")
+    @Named(MAP_CONSENT_DATASTORE)
     fun provideMapConsentDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "map_consent_preferences")),
@@ -94,7 +94,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("MapTileProviderDataStore")
+    @Named(MAP_TILE_PROVIDER_DATASTORE)
     fun provideMapTileProviderDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "map_tile_provider_prefs")),
@@ -103,7 +103,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("MeshDataStore")
+    @Named(MESH_DATASTORE)
     fun provideMeshDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "mesh-prefs")),
@@ -112,7 +112,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("RadioDataStore")
+    @Named(RADIO_DATASTORE)
     fun provideRadioDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "radio-prefs")),
@@ -121,7 +121,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("UiDataStore")
+    @Named(UI_DATASTORE)
     fun provideUiDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "ui-prefs")),
@@ -130,7 +130,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("MeshLogDataStore")
+    @Named(MESH_LOG_DATASTORE)
     fun provideMeshLogDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "meshlog-prefs")),
@@ -139,7 +139,7 @@ class CorePrefsAndroidModule {
         )
 
     @Single
-    @Named("FilterDataStore")
+    @Named(FILTER_DATASTORE)
     fun provideFilterDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "filter-prefs")),

@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
@@ -62,7 +63,7 @@ class MeshConfigFlowManagerImpl(
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
     private val wantConfigDelay = 100L
 

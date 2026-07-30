@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.catch
 import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_LOCAL_STATS_DATASTORE
 import org.meshtastic.proto.LocalStats
 
 /** Interface that handles saving and retrieving [LocalStats] data. */
@@ -37,7 +38,7 @@ interface LocalStatsDataSource {
 /** Implementation of [LocalStatsDataSource] using DataStore. */
 @Single
 open class LocalStatsDataSourceImpl(
-    @Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>,
+    @Named(CORE_LOCAL_STATS_DATASTORE) private val localStatsStore: DataStore<LocalStats>,
 ) : LocalStatsDataSource {
     override val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->

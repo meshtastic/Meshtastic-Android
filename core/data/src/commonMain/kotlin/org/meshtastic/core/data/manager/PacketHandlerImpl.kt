@@ -32,6 +32,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
@@ -61,7 +62,7 @@ class PacketHandlerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val connectionStateProvider: ConnectionStateProvider,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : PacketHandler {
 
     companion object {

@@ -34,10 +34,11 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_PREFERENCES_DATASTORE
 import org.meshtastic.core.datastore.model.RecentAddress
 
 @Single
-open class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class RecentAddressesDataSource(@Named(CORE_PREFERENCES_DATASTORE) private val dataStore: DataStore<Preferences>) {
     private object PreferencesKeys {
         val RECENT_IP_ADDRESSES = stringPreferencesKey("recent-ip-addresses")
     }

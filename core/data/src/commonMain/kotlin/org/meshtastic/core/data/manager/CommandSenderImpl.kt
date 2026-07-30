@@ -26,6 +26,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -73,7 +74,7 @@ class CommandSenderImpl(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val sessionManager: SessionManager,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
 

@@ -22,13 +22,14 @@ import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @Module
 @ComponentScan("org.meshtastic.core.service")
 class CoreServiceModule {
     @Single
-    @Named("ServiceScope")
+    @Named(SERVICE_SCOPE)
     fun provideServiceScope(dispatchers: CoroutineDispatchers): CoroutineScope =
         CoroutineScope(dispatchers.default + SupervisorJob())
 }

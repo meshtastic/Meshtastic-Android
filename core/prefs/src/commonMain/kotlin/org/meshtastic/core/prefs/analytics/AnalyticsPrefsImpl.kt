@@ -31,13 +31,15 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.ANALYTICS_DATASTORE
+import org.meshtastic.core.prefs.di.APP_DATASTORE
 import org.meshtastic.core.repository.AnalyticsPrefs
 import kotlin.uuid.Uuid
 
 @Single
 class AnalyticsPrefsImpl(
-    @Named("AnalyticsDataStore") private val analyticsDataStore: DataStore<Preferences>,
-    @Named("AppDataStore") private val appDataStore: DataStore<Preferences>,
+    @Named(ANALYTICS_DATASTORE) private val analyticsDataStore: DataStore<Preferences>,
+    @Named(APP_DATASTORE) private val appDataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : AnalyticsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.app.map.prefs.di.GOOGLE_MAPS_DATASTORE
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
@@ -60,7 +61,7 @@ data class GoogleCameraPosition(
 
 @Single
 class GoogleMapsPrefsImpl(
-    @Named("GoogleMapsDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(GOOGLE_MAPS_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : GoogleMapsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

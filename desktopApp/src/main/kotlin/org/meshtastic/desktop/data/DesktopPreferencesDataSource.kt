@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_PREFERENCES_DATASTORE
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /**
@@ -39,7 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
  */
 @Single
 class DesktopPreferencesDataSource(
-    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(CORE_PREFERENCES_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) {
 

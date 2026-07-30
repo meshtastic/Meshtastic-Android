@@ -26,6 +26,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -115,7 +116,7 @@ class MeshDataHandlerImpl(
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
     private val rememberDataType =

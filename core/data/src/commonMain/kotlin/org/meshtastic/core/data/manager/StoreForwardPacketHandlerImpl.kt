@@ -22,6 +22,7 @@ import okio.ByteString.Companion.toByteString
 import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -47,7 +48,7 @@ class StoreForwardPacketHandlerImpl(
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : StoreForwardPacketHandler {
 
     override fun handleStoreAndForward(

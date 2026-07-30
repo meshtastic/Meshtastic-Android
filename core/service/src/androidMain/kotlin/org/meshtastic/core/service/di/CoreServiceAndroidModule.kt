@@ -23,6 +23,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
@@ -78,7 +79,7 @@ class CoreServiceAndroidModule {
         notificationManager: NotificationManager,
         messageProcessor: Lazy<MeshMessageProcessor>,
         radioConfigRepository: RadioConfigRepository,
-        @Named("ServiceScope") scope: CoroutineScope,
+        @Named(SERVICE_SCOPE) scope: CoroutineScope,
     ): RadioController = RadioControllerImpl(
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,

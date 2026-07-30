@@ -31,6 +31,19 @@ import org.meshtastic.core.common.util.ioDispatcher
  */
 const val DATASTORE_SCOPE = "DataStoreScope"
 
+// Qualifiers for the [DataStore] instances this module provides. Reference the constant rather than repeating the
+// string — a misspelled literal resolves to nothing and fails at runtime, not at compile time.
+
+const val CORE_PREFERENCES_DATASTORE = "CorePreferencesDataStore"
+
+const val CORE_CHANNEL_SET_DATASTORE = "CoreChannelSetDataStore"
+
+const val CORE_LOCAL_CONFIG_DATASTORE = "CoreLocalConfigDataStore"
+
+const val CORE_LOCAL_STATS_DATASTORE = "CoreLocalStatsDataStore"
+
+const val CORE_MODULE_CONFIG_DATASTORE = "CoreModuleConfigDataStore"
+
 @Module
 @ComponentScan("org.meshtastic.core.datastore")
 class CoreDatastoreModule {

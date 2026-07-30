@@ -30,11 +30,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.RADIO_DATASTORE
 import org.meshtastic.core.repository.RadioPrefs
 
 @Single
 class RadioPrefsImpl(
-    @Named("RadioDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(RADIO_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : RadioPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

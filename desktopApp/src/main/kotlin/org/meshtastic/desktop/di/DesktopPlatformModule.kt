@@ -33,13 +33,31 @@ import okio.Path.Companion.toPath
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.datastore.di.CORE_CHANNEL_SET_DATASTORE
+import org.meshtastic.core.datastore.di.CORE_LOCAL_CONFIG_DATASTORE
+import org.meshtastic.core.datastore.di.CORE_LOCAL_STATS_DATASTORE
+import org.meshtastic.core.datastore.di.CORE_MODULE_CONFIG_DATASTORE
+import org.meshtastic.core.datastore.di.CORE_PREFERENCES_DATASTORE
 import org.meshtastic.core.datastore.di.DATASTORE_SCOPE
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.ANALYTICS_DATASTORE
+import org.meshtastic.core.prefs.di.APP_DATASTORE
+import org.meshtastic.core.prefs.di.CUSTOM_EMOJI_DATASTORE
+import org.meshtastic.core.prefs.di.FILTER_DATASTORE
+import org.meshtastic.core.prefs.di.HOMOGLYPH_ENCODING_DATASTORE
+import org.meshtastic.core.prefs.di.MAP_CONSENT_DATASTORE
+import org.meshtastic.core.prefs.di.MAP_DATASTORE
+import org.meshtastic.core.prefs.di.MAP_TILE_PROVIDER_DATASTORE
+import org.meshtastic.core.prefs.di.MESH_DATASTORE
+import org.meshtastic.core.prefs.di.MESH_LOG_DATASTORE
+import org.meshtastic.core.prefs.di.RADIO_DATASTORE
+import org.meshtastic.core.prefs.di.UI_DATASTORE
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
@@ -104,48 +122,48 @@ fun desktopPlatformModule() = module {
     }
 
     // -- Process Lifecycle (stays RESUMED forever on desktop) --
-    single(named("ProcessLifecycle")) { DesktopProcessLifecycleOwner().lifecycle }
+    single(named(PROCESS_LIFECYCLE)) { DesktopProcessLifecycleOwner().lifecycle }
 }
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
 private fun desktopPreferencesDataStoreModule() = module {
-    single<DataStore<Preferences>>(named("AnalyticsDataStore")) {
+    single<DataStore<Preferences>>(named(ANALYTICS_DATASTORE)) {
         createPreferencesDataStore("analytics", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("HomoglyphEncodingDataStore")) {
+    single<DataStore<Preferences>>(named(HOMOGLYPH_ENCODING_DATASTORE)) {
         createPreferencesDataStore("homoglyph_encoding", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("AppDataStore")) {
+    single<DataStore<Preferences>>(named(APP_DATASTORE)) {
         createPreferencesDataStore("app", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("CustomEmojiDataStore")) {
+    single<DataStore<Preferences>>(named(CUSTOM_EMOJI_DATASTORE)) {
         createPreferencesDataStore("custom_emoji", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MapDataStore")) {
+    single<DataStore<Preferences>>(named(MAP_DATASTORE)) {
         createPreferencesDataStore("map", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MapConsentDataStore")) {
+    single<DataStore<Preferences>>(named(MAP_CONSENT_DATASTORE)) {
         createPreferencesDataStore("map_consent", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MapTileProviderDataStore")) {
+    single<DataStore<Preferences>>(named(MAP_TILE_PROVIDER_DATASTORE)) {
         createPreferencesDataStore("map_tile_provider", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MeshDataStore")) {
+    single<DataStore<Preferences>>(named(MESH_DATASTORE)) {
         createPreferencesDataStore("mesh", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("RadioDataStore")) {
+    single<DataStore<Preferences>>(named(RADIO_DATASTORE)) {
         createPreferencesDataStore("radio", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("UiDataStore")) {
+    single<DataStore<Preferences>>(named(UI_DATASTORE)) {
         createPreferencesDataStore("ui", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MeshLogDataStore")) {
+    single<DataStore<Preferences>>(named(MESH_LOG_DATASTORE)) {
         createPreferencesDataStore("meshlog", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("FilterDataStore")) {
+    single<DataStore<Preferences>>(named(FILTER_DATASTORE)) {
         createPreferencesDataStore("filter", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("CorePreferencesDataStore")) {
+    single<DataStore<Preferences>>(named(CORE_PREFERENCES_DATASTORE)) {
         createPreferencesDataStore("core_preferences", get(named(DATASTORE_SCOPE)))
     }
 }
@@ -154,7 +172,7 @@ private fun desktopPreferencesDataStoreModule() = module {
 private fun desktopProtoDataStoreModule() = module {
     val protoDir = desktopDataDir() + "/datastore"
 
-    single<DataStore<LocalConfig>>(named("CoreLocalConfigDataStore")) {
+    single<DataStore<LocalConfig>>(named(CORE_LOCAL_CONFIG_DATASTORE)) {
         DataStoreFactory.create(
             storage =
             OkioStorage(
@@ -167,7 +185,7 @@ private fun desktopProtoDataStoreModule() = module {
         )
     }
 
-    single<DataStore<LocalModuleConfig>>(named("CoreModuleConfigDataStore")) {
+    single<DataStore<LocalModuleConfig>>(named(CORE_MODULE_CONFIG_DATASTORE)) {
         DataStoreFactory.create(
             storage =
             OkioStorage(
@@ -180,7 +198,7 @@ private fun desktopProtoDataStoreModule() = module {
         )
     }
 
-    single<DataStore<ChannelSet>>(named("CoreChannelSetDataStore")) {
+    single<DataStore<ChannelSet>>(named(CORE_CHANNEL_SET_DATASTORE)) {
         DataStoreFactory.create(
             storage =
             OkioStorage(
@@ -193,7 +211,7 @@ private fun desktopProtoDataStoreModule() = module {
         )
     }
 
-    single<DataStore<LocalStats>>(named("CoreLocalStatsDataStore")) {
+    single<DataStore<LocalStats>>(named(CORE_LOCAL_STATS_DATASTORE)) {
         DataStoreFactory.create(
             storage =
             OkioStorage(

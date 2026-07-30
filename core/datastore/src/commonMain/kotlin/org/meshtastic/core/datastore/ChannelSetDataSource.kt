@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.catch
 import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_CHANNEL_SET_DATASTORE
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -30,7 +31,7 @@ import org.meshtastic.proto.Config
 
 /** Class that handles saving and retrieving [ChannelSet] data. */
 @Single
-class ChannelSetDataSource(@Named("CoreChannelSetDataStore") private val channelSetStore: DataStore<ChannelSet>) {
+class ChannelSetDataSource(@Named(CORE_CHANNEL_SET_DATASTORE) private val channelSetStore: DataStore<ChannelSet>) {
     val channelSetFlow: Flow<ChannelSet> =
         channelSetStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

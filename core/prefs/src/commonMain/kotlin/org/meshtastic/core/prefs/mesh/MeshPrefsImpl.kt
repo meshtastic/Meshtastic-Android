@@ -35,11 +35,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.MESH_DATASTORE
 import org.meshtastic.core.repository.MeshPrefs
 
 @Single
 class MeshPrefsImpl(
-    @Named("MeshDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(MESH_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

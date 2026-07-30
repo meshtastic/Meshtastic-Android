@@ -31,11 +31,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.FILTER_DATASTORE
 import org.meshtastic.core.repository.FilterPrefs
 
 @Single
 class FilterPrefsImpl(
-    @Named("FilterDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(FILTER_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : FilterPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

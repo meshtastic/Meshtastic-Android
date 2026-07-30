@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -49,7 +50,7 @@ class MeshConfigHandlerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : MeshConfigHandler {
 
     private val _localConfig = MutableStateFlow(LocalConfig())

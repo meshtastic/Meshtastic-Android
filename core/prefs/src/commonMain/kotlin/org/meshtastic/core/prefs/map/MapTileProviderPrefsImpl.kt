@@ -30,11 +30,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MAP_TILE_PROVIDER_DATASTORE
 import org.meshtastic.core.repository.MapTileProviderPrefs
 
 @Single
 class MapTileProviderPrefsImpl(
-    @Named("MapTileProviderDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(MAP_TILE_PROVIDER_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapTileProviderPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

@@ -36,12 +36,13 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.UI_DATASTORE
 import org.meshtastic.core.repository.UiPrefs
 
 @Single
 @Suppress("TooManyFunctions")
 class UiPrefsImpl(
-    @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(UI_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : UiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

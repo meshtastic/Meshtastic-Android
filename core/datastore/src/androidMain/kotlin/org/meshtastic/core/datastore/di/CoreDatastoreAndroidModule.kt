@@ -47,7 +47,7 @@ private const val USER_PREFERENCES_NAME = "user_preferences"
 @Module
 class PreferencesDataStoreModule {
     @Single
-    @Named("CorePreferencesDataStore")
+    @Named(CORE_PREFERENCES_DATASTORE)
     fun providePreferencesDataStore(
         context: Context,
         @Named(DATASTORE_SCOPE) scope: CoroutineScope,
@@ -63,7 +63,7 @@ class PreferencesDataStoreModule {
 @Module
 class LocalConfigDataStoreModule {
     @Single
-    @Named("CoreLocalConfigDataStore")
+    @Named(CORE_LOCAL_CONFIG_DATASTORE)
     fun provideLocalConfigDataStore(
         context: Context,
         @Named(DATASTORE_SCOPE) scope: CoroutineScope,
@@ -82,7 +82,7 @@ class LocalConfigDataStoreModule {
 @Module
 class ModuleConfigDataStoreModule {
     @Single
-    @Named("CoreModuleConfigDataStore")
+    @Named(CORE_MODULE_CONFIG_DATASTORE)
     fun provideModuleConfigDataStore(
         context: Context,
         @Named(DATASTORE_SCOPE) scope: CoroutineScope,
@@ -101,7 +101,7 @@ class ModuleConfigDataStoreModule {
 @Module
 class ChannelSetDataStoreModule {
     @Single
-    @Named("CoreChannelSetDataStore")
+    @Named(CORE_CHANNEL_SET_DATASTORE)
     fun provideChannelSetDataStore(
         context: Context,
         @Named(DATASTORE_SCOPE) scope: CoroutineScope,
@@ -120,7 +120,7 @@ class ChannelSetDataStoreModule {
 @Module
 class LocalStatsDataStoreModule {
     @Single
-    @Named("CoreLocalStatsDataStore")
+    @Named(CORE_LOCAL_STATS_DATASTORE)
     fun provideLocalStatsDataStore(
         context: Context,
         @Named(DATASTORE_SCOPE) scope: CoroutineScope,

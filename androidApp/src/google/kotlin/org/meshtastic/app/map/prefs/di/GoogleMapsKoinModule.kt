@@ -30,12 +30,18 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 
+/**
+ * Qualifier for this module's `DataStore<Preferences>`. Reference the constant rather than repeating the string — a
+ * typo resolves to nothing and fails at runtime, not at compile time.
+ */
+const val GOOGLE_MAPS_DATASTORE = "GoogleMapsDataStore"
+
 @Module
 @ComponentScan("org.meshtastic.app.map")
 class GoogleMapsKoinModule {
 
     @Single
-    @Named("GoogleMapsDataStore")
+    @Named(GOOGLE_MAPS_DATASTORE)
     fun provideGoogleMapsDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             migrations = listOf(SharedPreferencesMigration(context, "google_maps_prefs")),

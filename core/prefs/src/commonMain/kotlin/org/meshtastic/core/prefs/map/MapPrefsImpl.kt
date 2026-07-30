@@ -35,13 +35,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MAP_DATASTORE
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
 
 @Single
 @Suppress("TooManyFunctions")
 class MapPrefsImpl(
-    @Named("MapDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(MAP_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

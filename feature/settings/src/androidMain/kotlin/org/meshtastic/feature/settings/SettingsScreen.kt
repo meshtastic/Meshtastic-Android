@@ -43,6 +43,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
+import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -96,7 +97,7 @@ fun SettingsScreen(
     onNavigate: (Route) -> Unit = {},
     onBack: (() -> Unit)? = null,
 ) {
-    val appFunctionsAvailable: Boolean = koinInject(qualifier = named("googleServicesAvailable"))
+    val appFunctionsAvailable: Boolean = koinInject(qualifier = named(GOOGLE_SERVICES_AVAILABLE))
     val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()

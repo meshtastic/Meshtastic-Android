@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.geofence.geofencesToMonitor
@@ -70,7 +71,7 @@ class GeofenceMonitor(
     private val crossingStore: GeofenceCrossingStore,
     private val notificationPrefs: NotificationPrefs,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) {
 
     private data class PositionSample(

@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -52,7 +53,7 @@ class TelemetryPacketHandlerImpl(
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val notificationManager: NotificationManager,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : TelemetryPacketHandler {
 
     private val batteryMutex = Mutex()

@@ -31,6 +31,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -94,7 +95,7 @@ class MeshConnectionManagerImpl(
     private val appWidgetUpdater: AppWidgetUpdater,
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val lockdownCoordinator: LockdownCoordinator,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
     private val nodeRestartTracker: NodeRestartTracker,
 ) : MeshConnectionManager {
     /**

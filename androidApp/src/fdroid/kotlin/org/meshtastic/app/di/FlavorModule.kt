@@ -19,12 +19,13 @@ package org.meshtastic.app.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.ui.theme.EventFontResolver
 
 @Module(includes = [FdroidAiModule::class])
 class FlavorModule {
     @Single
-    @Named("googleServicesAvailable")
+    @Named(GOOGLE_SERVICES_AVAILABLE)
     fun googleServicesAvailable(): Boolean = false
 
     /** No Play Services font provider on F-Droid — event fonts stay off; UI falls back to the app typeface. */

@@ -27,10 +27,11 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CORE_PREFERENCES_DATASTORE
 
 @Single
 open class BootloaderWarningDataSource(
-    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(CORE_PREFERENCES_DATASTORE) private val dataStore: DataStore<Preferences>,
 ) {
 
     private object PreferencesKeys {

@@ -31,6 +31,7 @@ import org.meshtastic.core.ble.di.CoreBleAndroidModule
 import org.meshtastic.core.ble.di.CoreBleModule
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.di.CoreCommonModule
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.data.di.CoreDataAndroidModule
 import org.meshtastic.core.data.di.CoreDataModule
 import org.meshtastic.core.database.di.CoreDatabaseAndroidModule
@@ -99,7 +100,7 @@ import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
 )
 class AppKoinModule {
     @Single
-    @Named("ProcessLifecycle")
+    @Named(PROCESS_LIFECYCLE)
     fun provideProcessLifecycle(): Lifecycle = ProcessLifecycleOwner.get().lifecycle
 
     @Single

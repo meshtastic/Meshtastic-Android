@@ -31,11 +31,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MESH_LOG_DATASTORE
 import org.meshtastic.core.repository.MeshLogPrefs
 
 @Single
 class MeshLogPrefsImpl(
-    @Named("MeshLogDataStore") private val dataStore: DataStore<Preferences>,
+    @Named(MESH_LOG_DATASTORE) private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshLogPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
@@ -42,7 +43,7 @@ class TracerouteHandlerImpl(
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : TracerouteHandler {
 
     private val requestTimer = RequestTimer()

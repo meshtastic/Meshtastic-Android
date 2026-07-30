@@ -28,6 +28,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.RadioController
@@ -56,7 +57,7 @@ open class EnsureRemoteAdminSessionUseCase(
     private val sessionManager: SessionManager,
     private val radioController: RadioController,
     private val serviceRepository: ServiceRepository,
-    @Named("ServiceScope") private val serviceScope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val serviceScope: CoroutineScope,
 ) {
     private val mutex = Mutex()
     private val inFlight = mutableMapOf<Int, Deferred<EnsureSessionResult>>()

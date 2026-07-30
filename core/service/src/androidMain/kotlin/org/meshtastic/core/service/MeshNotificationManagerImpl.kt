@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.SERVICE_SCOPE
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -123,7 +124,7 @@ class MeshNotificationManagerImpl(
     private val nodeRepository: Lazy<NodeRepository>,
     private val conversationShortcutPublisher: Lazy<ConversationShortcutPublisher>,
     private val radioConfigRepository: Lazy<RadioConfigRepository>,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    @Named(SERVICE_SCOPE) private val scope: CoroutineScope,
 ) : MeshNotificationManager {
 
     private val notificationManager =
