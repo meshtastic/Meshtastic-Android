@@ -51,7 +51,8 @@ data class DataPacket(
     var channel: Int = 0, // channel index
     var wantAck: Boolean = true, // If true, the receiver should send an ack back
     var hopStart: Int = 0,
-    var snr: Float = 0f,
+    /** Signal-to-noise ratio in dB, or null when the packet carried no measurement. 0 dB is a valid reading. */
+    var snr: Float? = null,
     /** Received signal strength, or null when the radio did not report one. 0 dBm is a valid reading. */
     var rssi: Int? = null,
     var replyId: Int? = null, // If this is a reply to a previous message, this is the ID of that message
