@@ -7,6 +7,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* fix(ui): give rx_snr real presence semantics end to end by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6523
+
 ### Open Beta (v2.8.0-open.6)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
