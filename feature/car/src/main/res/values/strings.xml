@@ -19,6 +19,7 @@
     <string name="car_signal_fair">Fair</string>
     <string name="car_signal_good">Good</string>
     <string name="car_signal_none">None</string>
+    <string name="car_signal_unknown">Unknown</string>
     <string name="car_status_battery">Battery</string>
     <string name="car_status_last_heard">Last Heard</string>
     <string name="car_status_offline">Offline</string>

@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
@@ -548,7 +549,9 @@ class DebugViewModel(
             if (info.neighbors.isNotEmpty()) {
                 appendLine("  neighbors:")
                 info.neighbors.forEach {
-                    appendLine("    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${it.snr}")
+                    appendLine(
+                        "    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${MetricFormatter.snr(it.snr)}",
+                    )
                 }
             }
         }

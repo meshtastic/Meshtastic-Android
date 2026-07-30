@@ -23,6 +23,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.PortNum
@@ -76,9 +77,12 @@ constructor(
                     }
                 }
 
+                // Rows are limited to receptions that carried an SNR measurement. Gating on `snrOrNull()` rather than
+                // `rx_snr != 0f` keeps a genuine 0 dB reading in the export.
+                val rxSnrOrNull = proto.snrOrNull()
                 if (
                     (filterPortnum == null || (proto.decoded?.portnum?.value ?: 0) == filterPortnum) &&
-                    proto.rx_snr != 0.0f
+                    rxSnrOrNull != null
                 ) {
                     val timeZone = TimeZone.currentSystemDefault()
                     val rxDateTimeObj = Instant.fromEpochMilliseconds(packet.received_date).toLocalDateTime(timeZone)
@@ -97,7 +101,7 @@ constructor(
                     val rxLat = rxPos?.latitude ?: ""
                     val rxLong = rxPos?.longitude ?: ""
                     val rxAlt = rxPos?.altitude ?: ""
-                    val rxSnr = proto.rx_snr
+                    val rxSnr = rxSnrOrNull
 
                     val dist =
                         if (senderPos == null || rxPos == null) {

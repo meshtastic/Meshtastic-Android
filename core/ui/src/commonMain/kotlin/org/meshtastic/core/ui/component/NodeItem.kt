@@ -145,8 +145,7 @@ fun NodeItem(
                 hopsAway = thatNode.hopsAway,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snr,
-                rssi = thatNode.rssi,
+                snr = thatNode.snrOrNull,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 modemPreset = modemPreset,
@@ -312,9 +311,9 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                 if (thatNode.hopsAway > 0) {
                     add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    val showSnr = thatNode.snr < 100f
-                    val showRssi = thatNode.rssi < 0
-                    if (showSnr || showRssi) {
+                    val snr = thatNode.snrOrNull
+                    val rssi = thatNode.rssiOrNull
+                    if (snr != null || rssi != null) {
                         signalChip = {
                             // Full-width row: SNR left, RSSI center, quality right.
                             Row(
@@ -322,10 +321,10 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                if (showSnr) Snr(thatNode.snr)
-                                if (showRssi) Rssi(thatNode.rssi)
-                                if (showSnr && showRssi) {
-                                    val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                                Snr(snr)
+                                Rssi(rssi)
+                                if (snr != null) {
+                                    val quality = determineSignalQuality(snr, LocalModemPreset.current)
                                     IconInfo(
                                         icon = vectorResource(quality.icon),
                                         contentDescription = stringResource(Res.string.signal_quality),

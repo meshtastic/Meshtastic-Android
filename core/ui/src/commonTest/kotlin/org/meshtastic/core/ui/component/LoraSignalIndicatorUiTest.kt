@@ -35,6 +35,29 @@ class LoraSignalIndicatorUiTest {
     }
 
     @Test
+    fun snrRendersAZeroReading() = runComposeUiTest {
+        // 0 dB is a measurement and must be shown, not suppressed as "no reading".
+        setContent { AppTheme { Snr(snr = 0f) } }
+
+        onNodeWithText("SNR 0.00 dB").assertIsDisplayed()
+    }
+
+    @Test
+    fun snrRendersNothingWhenAbsent() = runComposeUiTest {
+        setContent { AppTheme { Snr(snr = null) } }
+
+        onNodeWithText("SNR 0.00 dB").assertDoesNotExist()
+    }
+
+    @Test
+    fun loraSignalIndicatorShowsUnknownWhenSnrIsAbsent() = runComposeUiTest {
+        // Absence must not render as "Signal None" — that band means a measured, undemodulable signal.
+        setContent { AppTheme { LoraSignalIndicator(snr = null) } }
+
+        onNodeWithText("Signal Unknown").assertIsDisplayed()
+    }
+
+    @Test
     fun batteryUsesCallerProvidedUnknownLabel() = runComposeUiTest {
         setContent { AppTheme { MaterialBatteryInfo(level = null, unknownLabel = "Unavailable") } }
 

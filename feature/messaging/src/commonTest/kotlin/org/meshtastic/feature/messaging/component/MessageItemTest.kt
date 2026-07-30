@@ -75,6 +75,68 @@ class MessageItemTest {
     }
 
     @Test
+    fun directMessageWithoutSnrDoesNotFabricateAZeroReading() = runComposeUiTest {
+        // Before DataPacket/Message.snr became nullable, an absent SNR narrowed to 0f on the way through the mapper
+        // and this row rendered "SNR 0.00 dB" — a measurement the radio never took.
+        val testNode = NodePreviewParameterProvider().minnieMouse
+        val message = directMessage(node = testNode, snr = null)
+
+        setContent {
+            MessageItem(
+                message = message,
+                node = testNode,
+                selected = false,
+                onClick = {},
+                onLongClick = {},
+                onStatusClick = {},
+                ourNode = testNode,
+            )
+        }
+
+        onNodeWithText("SNR 0.00 dB", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun directMessageWithZeroSnrShowsTheReading() = runComposeUiTest {
+        // The other half: 0 dB is a real, strong reading and must still render.
+        val testNode = NodePreviewParameterProvider().minnieMouse
+        val message = directMessage(node = testNode, snr = 0f)
+
+        setContent {
+            MessageItem(
+                message = message,
+                node = testNode,
+                selected = false,
+                onClick = {},
+                onLongClick = {},
+                onStatusClick = {},
+                ourNode = testNode,
+            )
+        }
+
+        onNodeWithText("SNR 0.00 dB", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    private fun directMessage(node: Node, snr: Float?) = Message(
+        text = "Direct message",
+        time = "10:00",
+        fromLocal = false,
+        status = MessageStatus.RECEIVED,
+        snr = snr,
+        rssi = -90,
+        hopsAway = 0,
+        uuid = 1L,
+        receivedTime = nowMillis,
+        node = node,
+        read = false,
+        routingError = 0,
+        packetId = 1234,
+        emojis = listOf(),
+        replyId = null,
+        viaMqtt = false,
+    )
+
+    @Test
     fun mqttIconIsNotDisplayedWhenViaMqttIsFalse() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().minnieMouse
         val messageWithoutMqtt =

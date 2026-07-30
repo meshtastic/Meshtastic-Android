@@ -46,6 +46,7 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshPrefs
@@ -267,8 +268,8 @@ class DiscoveryScanEngine(
         mutex.withLock {
             val node = collectedNodes.getOrPut(fromNum) { CollectedNodeData(nodeNum = fromNum) }
             // Update signal info from the direct packet
-            if (meshPacket.rx_snr != 0f) node.snr = meshPacket.rx_snr
-            // Explicit presence: record a reported 0 dBm, skip only a genuinely absent one.
+            // Explicit presence: record a reported 0 dB/0 dBm, skip only a genuinely absent one.
+            meshPacket.snrOrNull()?.let { node.snr = it }
             meshPacket.rx_rssi?.let { node.rssi = it }
             node.hopCount = dataPacket.hopsAway.coerceAtLeast(0)
 

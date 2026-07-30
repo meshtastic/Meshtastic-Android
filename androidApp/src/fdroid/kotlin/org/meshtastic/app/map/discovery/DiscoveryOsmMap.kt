@@ -122,7 +122,7 @@ fun DiscoveryOsmMap(
                         position = nodeGeoPoint
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         title = node.longName ?: node.shortName ?: "Unknown"
-                        snippet = "SNR: ${node.snr} dB / RSSI: ${MetricFormatter.rssi(node.rssi)}"
+                        snippet = "SNR: ${MetricFormatter.snr(node.snr)} / RSSI: ${MetricFormatter.rssi(node.rssi)}"
 
                         val drawableId =
                             if (node.isSensorNode) {
