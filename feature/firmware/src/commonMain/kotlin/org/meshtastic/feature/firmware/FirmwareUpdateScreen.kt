@@ -94,6 +94,7 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_maintenance_select_drive
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
@@ -155,6 +156,7 @@ import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.KeepScreenOn
+import org.meshtastic.core.ui.util.rememberOpenDocumentTreeLauncher
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
@@ -188,6 +190,10 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
+    // Maintenance passes pick the whole volume, not a filename, so the app can read INFO_UF2.TXT and confirm it really
+    // is the device's update drive before writing anything to it.
+    val volumePickerLauncher = rememberOpenDocumentTreeLauncher { uri -> uri?.let { viewModel.writeMaintenancePass(it) } }
+
     val actions =
         remember(viewModel, onNavigateUp) {
             FirmwareUpdateActions(
@@ -198,7 +204,10 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                         filePickerLauncher("*/*")
                     }
                 },
-                onSaveFile = { fileName -> saveFileLauncher(fileName, "application/octet-stream") },
+                onSaveFile = { fileName -> saveFileLauncher(fileName, UF2_MIME_TYPE) },
+                onPickVolume = volumePickerLauncher,
+                onFactoryErase = viewModel::startFactoryErase,
+                onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
@@ -410,7 +419,8 @@ private fun FirmwareUpdateContent(
             is FirmwareUpdateState.Success ->
                 SuccessState(onDone = actions.onDone, wasLowSpeedTransfer = state.wasLowSpeedTransfer)
 
-            is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
+            is FirmwareUpdateState.AwaitingFileSave ->
+                AwaitingFileSaveState(state = state, onSaveFile = actions.onSaveFile, onPickVolume = actions.onPickVolume)
         }
     }
 }
@@ -869,8 +879,19 @@ private fun ProgressContent(
 }
 
 @Composable
-private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, onSaveFile: (String) -> Unit) {
-    var showDialog by remember { mutableStateOf(true) }
+internal fun AwaitingFileSaveState(
+    state: FirmwareUpdateState.AwaitingFileSave,
+    onSaveFile: (String) -> Unit,
+    onPickVolume: () -> Unit,
+) {
+    // Keyed on the step so each leg of a multi-pass sequence re-shows its own instructions. An unkeyed remember would
+    // leave the second pass with no dialog at all, since the branch stays in composition across the transition.
+    var showDialog by remember(state.step) { mutableStateOf(true) }
+
+    // A maintenance pass has no artifact yet: the image is chosen from what the volume reports, so the user points at
+    // the drive and the app names the file.
+    val fileName = state.fileName
+    val launchPicker = { if (fileName != null) onSaveFile(fileName) else onPickVolume() }
 
     if (showDialog) {
         MeshtasticDialog(
@@ -879,9 +900,17 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
             confirmText = stringResource(Res.string.okay),
             onConfirm = {
                 showDialog = false
-                onSaveFile(state.fileName)
+                launchPicker()
             },
-            text = { Text(stringResource(Res.string.firmware_update_usb_instruction_text)) },
+            text = {
+                Text(
+                    if (fileName != null) {
+                        stringResource(Res.string.firmware_update_usb_instruction_text)
+                    } else {
+                        stringResource(Res.string.firmware_maintenance_select_drive)
+                    },
+                )
+            },
             dismissable = false,
         )
     }
@@ -894,9 +923,19 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
         textAlign = TextAlign.Center,
     )
 
+    state.retryMessage?.let { retry ->
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = retry.asString(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center,
+        )
+    }
+
     if (!showDialog) {
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { onSaveFile(state.fileName) }) { Text(stringResource(Res.string.save)) }
+        Button(onClick = launchPicker) { Text(stringResource(Res.string.save)) }
     }
 }
 

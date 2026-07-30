@@ -76,6 +76,7 @@ class FirmwareUpdateViewModelTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -136,6 +137,7 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        firmwareRetriever,
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
     )

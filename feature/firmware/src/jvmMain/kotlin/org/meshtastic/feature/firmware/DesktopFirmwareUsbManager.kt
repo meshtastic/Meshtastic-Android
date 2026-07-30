@@ -23,4 +23,12 @@ import org.koin.core.annotation.Single
 @Single
 class DesktopFirmwareUsbManager : FirmwareUsbManager {
     override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
+
+    /**
+     * Desktop has no UF2 maintenance flow — there is no Storage Access Framework to vet a volume with, so
+     * `isRemovableDestination` refuses before anything reaches here.
+     */
+    override suspend fun serialPortKeys(): Set<String> = emptySet()
+
+    override suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean = false
 }

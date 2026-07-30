@@ -62,6 +62,15 @@ import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_maintenance_cdc_unblock_failed
+import org.meshtastic.core.resources.firmware_maintenance_copy_failed
+import org.meshtastic.core.resources.firmware_maintenance_no_release
+import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
+import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
+import org.meshtastic.core.resources.firmware_maintenance_unknown_board
+import org.meshtastic.core.resources.firmware_maintenance_unknown_softdevice
+import org.meshtastic.core.resources.firmware_maintenance_unsupported_device
+import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_archive_missing_target
 import org.meshtastic.core.resources.firmware_update_battery_low
@@ -81,6 +90,7 @@ import org.meshtastic.core.resources.firmware_update_node_info_missing
 import org.meshtastic.core.resources.firmware_update_requires_bin
 import org.meshtastic.core.resources.firmware_update_requires_ota_zip
 import org.meshtastic.core.resources.firmware_update_requires_uf2
+import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_unknown_error
 import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_unsupported_update_method
@@ -111,6 +121,7 @@ class FirmwareUpdateViewModel(
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
+    private val firmwareRetriever: FirmwareRetriever,
     private val applicationScope: ApplicationCoroutineScope,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
 ) : ViewModel() {
@@ -146,6 +157,18 @@ class FirmwareUpdateViewModel(
 
     /** Set when [checkForUpdates] enters recovery mode (disconnected + a saved record); consumed by [startUpdate]. */
     private var pendingRecovery: PendingFirmwareRecovery? = null
+
+    /** Remaining legs of an in-flight USB maintenance sequence, head first. Empty outside a maintenance flow. */
+    private var pendingUsbPasses: List<UsbFileSavePass> = emptyList()
+
+    /** Hardware the running maintenance sequence targets; needed to choose images once a volume is read. */
+    private var maintenanceHardware: DeviceHardware? = null
+
+    /**
+     * True once an erase or bootloader image has been written, which is the point the device stops having a working
+     * application. From then on failures re-offer the pass instead of surfacing a dead end.
+     */
+    private var destructiveWriteDone = false
 
     init {
         // Cleanup potential leftovers
@@ -254,6 +277,12 @@ class FirmwareUpdateViewModel(
                                     radioPrefs.isBle(),
                                 updateMethod = firmwareUpdateMethod,
                                 currentFirmwareVersion = ourNode.firmwareVersion,
+                                maintenance =
+                                usbMaintenanceGate(
+                                    hardware = deviceHardware,
+                                    updateMethod = firmwareUpdateMethod,
+                                    hasRelease = release != null,
+                                ),
                             )
                     }
                 }
@@ -460,9 +489,163 @@ class FirmwareUpdateViewModel(
             }
     }
 
+    // ── USB maintenance (factory erase / bootloader upgrade) ────────────────────────────────────────
+
+    fun startFactoryErase() = startUsbMaintenance(UsbMaintenanceRequest.FactoryErase)
+
+    fun startBootloaderUpgrade() = startUsbMaintenance(UsbMaintenanceRequest.BootloaderUpgrade)
+
+    private fun startUsbMaintenance(request: UsbMaintenanceRequest) {
+        val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
+        val release = currentState.release ?: return
+
+        // Defence in depth: the screen already disables a refused erase, but never start one on a device whose
+        // SoftDevice we could not resolve.
+        val refusal = currentState.maintenance.eraseRefusal
+        if (request == UsbMaintenanceRequest.FactoryErase && refusal != null) {
+            _state.value = FirmwareUpdateState.Error(usbMaintenanceRefusalError(refusal))
+            return
+        }
+
+        originalDeviceAddress = radioPrefs.devAddr.value
+        maintenanceHardware = currentState.deviceHardware
+        destructiveWriteDone = false
+
+        viewModelScope.launch {
+            if (!checkBatteryLevel()) return@launch
+            updateJob?.cancel()
+            updateJob =
+                viewModelScope.launch {
+                    try {
+                        pendingUsbPasses =
+                            performUsbMaintenance(
+                                request = request,
+                                release = release,
+                                hardware = currentState.deviceHardware,
+                                radioController = radioController,
+                                nodeRepository = nodeRepository,
+                                updateState = { _state.value = it },
+                                retrieveUsbFirmware = firmwareRetriever::retrieveUsbFirmware,
+                            )
+                        // The firmware image is the last pass, so it is also what must be cleaned up if the flow dies.
+                        tempFirmwareFile =
+                            pendingUsbPasses.filterIsInstance<UsbFileSavePass.Prepared>().lastOrNull()?.artifact
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        Logger.e(e) { "USB maintenance preparation failed" }
+                        _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                    }
+                }
+        }
+    }
+
+    /**
+     * Resumes a maintenance sequence once the user has pointed at the device's UF2 volume.
+     *
+     * Distinct from [saveDfuFile] because the URI kinds differ: this takes a *tree* URI, which grants the sibling access
+     * needed to read `INFO_UF2.TXT` and vet the volume before writing. Each pass re-picks, because the device
+     * re-enumerates between passes and the previous grant no longer refers to the mounted volume.
+     */
+    fun writeMaintenancePass(treeUri: CommonUri) {
+        val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
+        val pass = pendingUsbPasses.firstOrNull() ?: return
+        if (pass.step != currentState.step) return
+        val hardware = maintenanceHardware ?: return
+
+        viewModelScope.launch {
+            try {
+                // Capture the ports present before the write so the erase image's port can be told from pre-existing ones.
+                val portsBefore = usbManager.serialPortKeys()
+                val result =
+                    usbPassWriter(portsBefore).write(pass, treeUri, hardware) { _state.value = it }
+                handlePassResult(pass, result)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Writing ${pass.step} failed" }
+                reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_failed))
+            }
+        }
+    }
+
+    private suspend fun handlePassResult(pass: UsbFileSavePass, result: UsbPassResult) = when (result) {
+        UsbPassResult.Written -> advancePastPass(pass)
+
+        is UsbPassResult.Refused -> reofferOrFail(pass, usbMaintenanceRefusalError(result.reason))
+
+        UsbPassResult.ImageDownloadFailed ->
+            reofferOrFail(pass, UiText.Resource(Res.string.firmware_update_retrieval_failed))
+
+        UsbPassResult.CopyFailed -> reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_copy_failed))
+
+        UsbPassResult.WriteDidNotLand ->
+            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_wrong_destination))
+
+        UsbPassResult.CdcUnblockFailed ->
+            reofferOrFail(pass, UiText.Resource(Res.string.firmware_maintenance_cdc_unblock_failed))
+    }
+
+    private suspend fun advancePastPass(pass: UsbFileSavePass) {
+        if (pass.step.isDestructive) destructiveWriteDone = true
+        pendingUsbPasses = pendingUsbPasses.drop(1)
+
+        val next = pendingUsbPasses.firstOrNull()
+        if (next == null) {
+            verifyUpdateResult(originalDeviceAddress)
+        } else {
+            _state.value = next.toAwaitingFileSave()
+        }
+    }
+
+    /**
+     * Re-offers the same pass with an explanation, or fails outright when nothing destructive has happened yet.
+     *
+     * Once an erase or bootloader image has been written the device has no application, so dropping the user on an error
+     * screen is the worst available outcome — the flow keeps offering the pass until it succeeds or they leave
+     * deliberately.
+     */
+    private fun reofferOrFail(pass: UsbFileSavePass, message: UiText) {
+        _state.value =
+            if (destructiveWriteDone) pass.toAwaitingFileSave(retryMessage = message)
+            else FirmwareUpdateState.Error(message)
+    }
+
+    private fun usbPassWriter(portsBefore: Set<String>) = UsbPassWriter(
+        fileHandler = fileHandler,
+        retrieveMaintenanceUf2 = { asset, onProgress -> firmwareRetriever.retrieveMaintenanceUf2(asset, onProgress) },
+        awaitDeviceDetach = { timeout ->
+            withTimeoutOrNull(timeout) { usbManager.deviceDetachFlow().first() } != null
+        },
+        unblockCdc = { wait, hold -> usbManager.unblockCdcPort(portsBefore, wait, hold) },
+    )
+
+    private fun usbMaintenanceRefusalError(reason: UsbMaintenanceRefusal): UiText = when (reason) {
+        UsbMaintenanceRefusal.UnknownSoftDevice ->
+            UiText.Resource(Res.string.firmware_maintenance_unknown_softdevice)
+
+        UsbMaintenanceRefusal.UnsupportedArchitecture ->
+            UiText.Resource(Res.string.firmware_maintenance_unsupported_device)
+
+        UsbMaintenanceRefusal.NoFirmwareRelease -> UiText.Resource(Res.string.firmware_maintenance_no_release)
+
+        UsbMaintenanceRefusal.DestinationNotRemovable ->
+            UiText.Resource(Res.string.firmware_maintenance_wrong_destination)
+
+        UsbMaintenanceRefusal.NotABootloaderVolume ->
+            UiText.Resource(Res.string.firmware_maintenance_not_a_bootloader_volume)
+
+        UsbMaintenanceRefusal.SoftDeviceConflict ->
+            UiText.Resource(Res.string.firmware_maintenance_softdevice_conflict)
+
+        UsbMaintenanceRefusal.UnknownBoardId ->
+            UiText.Resource(Res.string.firmware_maintenance_unknown_board)
+    }
+
     fun saveDfuFile(uri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
-        val firmwareArtifact = currentState.uf2Artifact
+        // A maintenance pass carries no artifact — it goes through writeMaintenancePass with a tree URI instead.
+        val firmwareArtifact = currentState.uf2Artifact ?: return
 
         viewModelScope.launch {
             try {

@@ -40,14 +40,14 @@ private val manifestJson = Json {
 
 /** Retrieves firmware files, either by direct download or by extracting from a release asset zip. */
 @Single
-class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
+open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     /**
      * Download the OTA firmware zip for a Nordic (nRF52) DFU update.
      *
      * @return The downloaded `-ota.zip` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
-    suspend fun retrieveOtaFirmware(
+    open suspend fun retrieveOtaFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
@@ -64,7 +64,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      *
      * @return The downloaded `.uf2` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
-    suspend fun retrieveUsbFirmware(
+    open suspend fun retrieveUsbFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
@@ -88,7 +88,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      *
      * @return The verified [FirmwareArtifact], or `null` when the download failed or verification did not pass.
      */
-    internal suspend fun retrieveMaintenanceUf2(asset: MaintenanceUf2, onProgress: (Float) -> Unit): FirmwareArtifact? {
+    internal open suspend fun retrieveMaintenanceUf2(asset: MaintenanceUf2, onProgress: (Float) -> Unit): FirmwareArtifact? {
         val artifact =
             try {
                 fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
@@ -137,7 +137,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      * @return The downloaded `.bin` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
     @Suppress("ReturnCount")
-    suspend fun retrieveEsp32Firmware(
+    open suspend fun retrieveEsp32Firmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
