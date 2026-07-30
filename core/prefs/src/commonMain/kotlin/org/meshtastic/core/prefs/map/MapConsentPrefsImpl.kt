@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.map
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import kotlinx.atomicfu.atomic
@@ -29,17 +27,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.MapConsentDataStore
 import org.meshtastic.core.repository.MapConsentPrefs
 
 @Single
-class MapConsentPrefsImpl(
-    @Named("MapConsentDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MapConsentPrefs {
+class MapConsentPrefsImpl(private val dataStore: MapConsentDataStore, dispatchers: CoroutineDispatchers) :
+    MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     private val consentFlows = atomic(persistentMapOf<Int?, Lazy<StateFlow<Boolean>>>())

@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.filter
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -28,16 +26,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.FilterDataStore
 import org.meshtastic.core.repository.FilterPrefs
 
 @Single
-class FilterPrefsImpl(
-    @Named("FilterDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : FilterPrefs {
+class FilterPrefsImpl(private val dataStore: FilterDataStore, dispatchers: CoroutineDispatchers) : FilterPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val filterEnabled: StateFlow<Boolean> =

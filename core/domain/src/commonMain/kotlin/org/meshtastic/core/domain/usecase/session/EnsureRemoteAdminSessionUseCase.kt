@@ -17,7 +17,6 @@
 package org.meshtastic.core.domain.usecase.session
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -26,8 +25,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.RadioController
@@ -56,7 +55,7 @@ open class EnsureRemoteAdminSessionUseCase(
     private val sessionManager: SessionManager,
     private val radioController: RadioController,
     private val serviceRepository: ServiceRepository,
-    @Named("ServiceScope") private val serviceScope: CoroutineScope,
+    private val serviceScope: ServiceScope,
 ) {
     private val mutex = Mutex()
     private val inFlight = mutableMapOf<Int, Deferred<EnsureSessionResult>>()

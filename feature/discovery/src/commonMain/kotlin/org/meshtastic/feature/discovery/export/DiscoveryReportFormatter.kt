@@ -58,7 +58,7 @@ internal object DiscoveryReportFormatter {
     fun formatNodeLine(node: DiscoveredNodeEntity): String = buildString {
         append(node.longName ?: node.shortName ?: "!${node.nodeNum.toString(radix = 16)}")
         append(" | ${node.neighborType}")
-        append(" | SNR: ${NumberFormatter.format(node.snr, 1)}")
+        append(" | SNR: ${MetricFormatter.snr(node.snr)}")
         append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")
         val distance = node.distanceFromUser
         if (distance != null) {

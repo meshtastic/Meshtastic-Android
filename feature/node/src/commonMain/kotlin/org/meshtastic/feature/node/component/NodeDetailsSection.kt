@@ -290,20 +290,22 @@ private fun UserAndUptimeRow(node: Node) {
 @Composable
 private fun SignalRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.snr != Float.MAX_VALUE) {
+        val snr = node.snrOrNull
+        if (snr != null) {
             InfoItem(
                 label = stringResource(Res.string.snr),
-                value = MetricFormatter.snr(node.snr),
+                value = MetricFormatter.snr(snr),
                 icon = MeshtasticIcons.Snr,
                 modifier = Modifier.weight(1f),
             )
         } else {
             Spacer(Modifier.weight(1f))
         }
-        if (node.rssi != Int.MAX_VALUE) {
+        val rssi = node.rssiOrNull
+        if (rssi != null) {
             InfoItem(
                 label = stringResource(Res.string.rssi),
-                value = MetricFormatter.rssi(node.rssi),
+                value = MetricFormatter.rssi(rssi),
                 icon = MeshtasticIcons.Rssi,
                 modifier = Modifier.weight(1f),
             )

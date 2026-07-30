@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -121,7 +122,7 @@ class GeofenceMonitorTest {
                 GeofenceCrossingStore(),
                 m.notificationPrefs,
                 mock<RadioInterfaceService>(MockMode.autofill),
-                scope,
+                scope.asServiceScope(),
             )
         scope.advanceUntilIdle() // collect the active-geofence snapshot
 

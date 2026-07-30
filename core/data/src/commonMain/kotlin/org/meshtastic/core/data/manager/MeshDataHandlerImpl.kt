@@ -18,14 +18,13 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -44,6 +43,7 @@ import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
@@ -115,7 +115,7 @@ class MeshDataHandlerImpl(
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : MeshDataHandler {
 
     private val rememberDataType =
@@ -250,7 +250,13 @@ class MeshDataHandlerImpl(
         // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
         if (beacon?.offer_channel == null) return
         val offer =
-            MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon, snr = packet.rx_snr, rssi = packet.rx_rssi)
+            MeshBeaconOffer(
+                fromNodeNum = packet.from,
+                beacon = beacon,
+                // [MeshBeaconOffer.snr] is not nullable, so absent narrows to 0f. See [snrOrNull].
+                snr = packet.snrOrNull() ?: 0f,
+                rssi = packet.rx_rssi,
+            )
         if (meshBeaconRepository.add(offer)) {
             radioInterfaceService.launchSessionWork(scope, session) {
                 notificationManager.dispatch(
@@ -583,7 +589,8 @@ class MeshDataHandlerImpl(
                     user = fromNode.user,
                     emoji = emoji,
                     timestamp = nowMillis,
-                    snr = packet.rx_snr,
+                    // [Reaction.snr] is not nullable, so absent narrows to 0f here. See [snrOrNull].
+                    snr = packet.snrOrNull() ?: 0f,
                     rssi = packet.rx_rssi,
                     hopsAway =
                     if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {

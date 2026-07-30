@@ -155,8 +155,7 @@ fun NodeItemCompact(
                 hopsAway = thatNode.hopsAway,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snr,
-                rssi = thatNode.rssi,
+                snr = thatNode.snrOrNull,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
@@ -350,10 +349,10 @@ private fun CompactHealthRow(
             )
         }
 
-        // Signal quality
-        val hasDirectSignal = thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
-        if (showSignal && hasDirectSignal) {
-            val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+        // Signal quality, rated from SNR alone — RSSI is not part of the rating (#5446), so it must not gate it.
+        val directSnr = thatNode.snrOrNull?.takeIf { thatNode.hopsAway == 0 && !thatNode.viaMqtt }
+        if (showSignal && directSnr != null) {
+            val quality = determineSignalQuality(directSnr, LocalModemPreset.current)
             add(
                 @Composable {
                     IconInfo(

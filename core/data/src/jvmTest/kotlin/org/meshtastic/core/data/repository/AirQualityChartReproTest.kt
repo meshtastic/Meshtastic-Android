@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.manager.MeshMessageProcessorImpl
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -237,7 +238,7 @@ class AirQualityChartReproTest {
                     dataHandler = lazy { mock<MeshDataHandler>(MockMode.autofill) },
                     fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill),
                     radioInterfaceService = radioInterfaceService,
-                    scope = backgroundScope,
+                    scope = backgroundScope.asServiceScope(),
                 )
 
             // Arrives before MyNodeInfo resolves -> buffered, NOT written to the log table (so not orphaned in the DB).

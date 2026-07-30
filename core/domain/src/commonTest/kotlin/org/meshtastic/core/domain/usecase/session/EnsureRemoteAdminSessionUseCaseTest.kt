@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.RadioController
@@ -73,7 +74,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
                 sessionManager,
                 controller,
                 connectedRepo(ConnectionState.Disconnected),
-                this,
+                this.asServiceScope(),
             )
 
         val result = useCase(destNum)
@@ -86,7 +87,8 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val active = SessionStatus.Active(Clock.System.now())
         val sessionManager = stubSessionManager(initialStatus = active)
         val controller = mock<RadioController>(MockMode.autofill)
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this)
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
         val result = useCase(destNum)
 
@@ -105,7 +107,8 @@ class EnsureRemoteAdminSessionUseCaseTest {
                 Unit
             }
 
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this)
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
         val result = useCase(destNum)
 
@@ -120,7 +123,8 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val controller = mock<RadioController>(MockMode.autofill)
         everySuspend { controller.refreshMetadata(any()) } returns Unit
 
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this)
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
 
         var observed: EnsureSessionResult? = null
         val job = launch { observed = useCase(destNum) }

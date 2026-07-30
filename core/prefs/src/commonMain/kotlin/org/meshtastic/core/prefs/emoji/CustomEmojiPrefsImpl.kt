@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.emoji
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -28,16 +26,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.CustomEmojiDataStore
 import org.meshtastic.core.repository.CustomEmojiPrefs
 
 @Single
-class CustomEmojiPrefsImpl(
-    @Named("CustomEmojiDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : CustomEmojiPrefs {
+class CustomEmojiPrefsImpl(private val dataStore: CustomEmojiDataStore, dispatchers: CoroutineDispatchers) :
+    CustomEmojiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customEmojiFrequency: StateFlow<String?> =

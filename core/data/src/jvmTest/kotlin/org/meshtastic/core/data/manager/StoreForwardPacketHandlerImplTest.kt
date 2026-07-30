@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HistoryManager
@@ -76,7 +77,7 @@ class StoreForwardPacketHandlerImplTest {
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
                 radioInterfaceService = radioInterfaceService,
-                scope = testScope,
+                scope = testScope.asServiceScope(),
             )
     }
 

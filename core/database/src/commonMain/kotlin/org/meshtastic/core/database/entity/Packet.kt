@@ -102,7 +102,8 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
     /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
     @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
@@ -162,7 +163,8 @@ data class ReactionEntity(
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
     val timestamp: Long,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
     /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
     @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,

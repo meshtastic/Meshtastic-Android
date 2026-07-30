@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.map
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -32,18 +30,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MapDataStore
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
 
 @Single
 @Suppress("TooManyFunctions")
-class MapPrefsImpl(
-    @Named("MapDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MapPrefs {
+class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDispatchers) : MapPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val mapStyle: StateFlow<Int> =

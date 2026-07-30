@@ -27,10 +27,15 @@ import org.meshtastic.proto.MeshBeacon
  *
  * @param fromNodeNum The node that broadcast the beacon (informational only — beacons are unsigned).
  * @param beacon The decoded advertisement, carrying the display [message][MeshBeacon.message] and the join offer.
- * @param snr Signal-to-noise ratio of the received beacon packet, in dB (0 when unknown).
+ * @param snr Signal-to-noise ratio of the received beacon packet, in dB, or null when the radio reported none.
  * @param rssi Received signal strength of the beacon packet, in dBm, or null when the radio reported none.
  */
-data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val snr: Float = 0f, val rssi: Int? = null) {
+data class MeshBeaconOffer(
+    val fromNodeNum: Int,
+    val beacon: MeshBeacon,
+    val snr: Float? = null,
+    val rssi: Int? = null,
+) {
     /** Stable identity for dedup/dismiss: a given sender advertising a given channel is one standing invitation. */
     val key: String
         get() = "$fromNodeNum:${beacon.offer_channel?.name.orEmpty()}"
@@ -55,9 +60,10 @@ data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val snr
 
         /**
          * Inverse of [encode]; returns null for a structurally malformed record (wrong field count, unparseable node
-         * number, or an undecodable beacon payload). An unparseable snr falls back to 0 and an unparseable rssi to
-         * absent — they are non-critical display metrics, not identity, so a bad numeric there does not discard an
-         * otherwise-valid invitation. An absent rssi encodes as `null`, which [String.toIntOrNull] round-trips back.
+         * number, or an undecodable beacon payload). An unparseable snr or rssi falls back to absent — they are
+         * non-critical display metrics, not identity, so a bad numeric there does not discard an otherwise-valid
+         * invitation. An absent value encodes as `null`, which [String.toFloatOrNull]/[String.toIntOrNull] round-trip
+         * back to null.
          */
         @Suppress("ReturnCount")
         fun decode(record: String): MeshBeaconOffer? {
@@ -66,7 +72,7 @@ data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val snr
             val node = parts[0].toIntOrNull() ?: return null
             val beaconBytes = parts.last().decodeBase64()?.toByteArray() ?: return null
             val beacon = runCatching { MeshBeacon.ADAPTER.decode(beaconBytes) }.getOrNull() ?: return null
-            return MeshBeaconOffer(node, beacon, parts[1].toFloatOrNull() ?: 0f, parts[2].toIntOrNull())
+            return MeshBeaconOffer(node, beacon, parts[1].toFloatOrNull(), parts[2].toIntOrNull())
         }
     }
 }

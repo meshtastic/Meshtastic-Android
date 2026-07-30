@@ -54,6 +54,7 @@ import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
@@ -160,7 +161,7 @@ class SharedRadioInterfaceService(
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
     private val serialDevicePresence: SerialDevicePresence,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val transportFactory: RadioTransportFactory,
     private val analytics: PlatformAnalytics,

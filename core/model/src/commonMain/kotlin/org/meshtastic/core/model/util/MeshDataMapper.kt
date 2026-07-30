@@ -44,7 +44,7 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
             channel = if (packet.pki_encrypted == true) NodeAddress.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack == true,
             hopStart = packet.hop_start,
-            snr = packet.rx_snr,
+            snr = packet.snrOrNull(),
             rssi = packet.rx_rssi,
             replyId = decoded.reply_id,
             relayNode = packet.relay_node,

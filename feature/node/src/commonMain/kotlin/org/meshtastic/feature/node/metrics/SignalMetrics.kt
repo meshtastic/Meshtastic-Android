@@ -59,6 +59,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.model.util.rxTimeOrNull
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.busy_noise_floor
 import org.meshtastic.core.resources.clear
@@ -164,7 +165,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
     val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
     val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != null } }
-    val hasSnr = remember(signalData) { signalData.any { !it.rx_snr.isNaN() } }
+    val hasSnr = remember(signalData) { signalData.any { it.snrOrNull() != null } }
     val hasAnyLocalStats = state.localStats.isNotEmpty()
     val localStatsExportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveLocalStatsCSV(uri, localStatsData) }
     val signalExportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveSignalMetricsCSV(uri, signalData) }
@@ -319,7 +320,7 @@ private fun SignalMetricsChart(
             if (noiseFloorData.size > 1) listOf(noiseFloorData.first(), noiseFloorData.last()) else emptyList()
         }
     val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != null } }
-    val snrData = remember(meshPackets) { meshPackets.filter { !it.rx_snr.isNaN() } }
+    val snrData = remember(meshPackets) { meshPackets.filter { it.snrOrNull() != null } }
     val legendData =
         remember(noiseFloorData, rssiData, snrData) {
             LEGEND_DATA.filter { legend ->
@@ -366,7 +367,9 @@ private fun SignalMetricsChart(
                 }
                 if (snrData.isNotEmpty()) {
                     /* Use a separate lineModel call to associate SNR with the right axis. */
-                    lineModel { series(x = snrData.map { it.rxTimeOrNull() ?: 0 }, y = snrData.map { it.rx_snr }) }
+                    lineModel {
+                        series(x = snrData.map { it.rxTimeOrNull() ?: 0 }, y = snrData.mapNotNull { it.snrOrNull() })
+                    }
                 }
             }
         }
@@ -583,14 +586,17 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MetricValueRow(color = SignalMetric.RSSI.color, text = MetricFormatter.rssi(meshPacket.rx_rssi))
                         Spacer(Modifier.width(12.dp))
-                        MetricValueRow(color = SignalMetric.SNR.color, text = MetricFormatter.snr(meshPacket.rx_snr))
+                        MetricValueRow(
+                            color = SignalMetric.SNR.color,
+                            text = MetricFormatter.snr(meshPacket.snrOrNull()),
+                        )
                     }
                 }
             }
 
             /* Signal Indicator */
             Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                LoraSignalIndicator(snr = meshPacket.rx_snr)
+                LoraSignalIndicator(snr = meshPacket.snrOrNull())
             }
         }
     }

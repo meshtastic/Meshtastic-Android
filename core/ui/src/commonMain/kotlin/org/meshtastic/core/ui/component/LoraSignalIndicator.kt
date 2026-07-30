@@ -20,11 +20,7 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -56,6 +52,7 @@ import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -88,60 +85,22 @@ enum class Quality(
     GOOD(Res.string.good, Res.drawable.ic_signal_cellular_4_bar, { colorScheme.StatusGreen }),
 }
 
-/**
- * Displays the `snr` and `rssi` color coded based on the signal quality, along with a human readable description and
- * related icon.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun NodeSignalQuality(
-    snr: Float,
-    rssi: Int?,
-    modifier: Modifier = Modifier,
-    modemPreset: ModemPreset? = LocalModemPreset.current,
-) {
-    val quality = determineSignalQuality(snr, modemPreset)
-    FlowRow(
-        modifier = modifier,
-        itemVerticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Snr(snr, modemPreset = modemPreset)
-        Rssi(rssi)
-        Text(
-            text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
-            style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
-        )
-        Icon(
-            modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = vectorResource(quality.icon),
-            contentDescription = stringResource(Res.string.signal_quality),
-            tint = quality.color(),
-        )
-    }
-}
-
 private const val SIZE_ICON_DP = 16
 
-/** Displays the `snr` and `rssi` with color depending on the values respectively. */
-@Composable
-fun SnrAndRssi(snr: Float, rssi: Int?, modemPreset: ModemPreset? = LocalModemPreset.current) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Snr(snr, modemPreset = modemPreset)
-        Rssi(rssi)
-    }
-}
-
-/** Displays a human readable description and icon representing the signal quality. */
+/**
+ * Displays a human readable description and icon representing the signal quality.
+ *
+ * A null [snr] means the packet carried no measurement, which is rendered as "Unknown" in a neutral tint. It must not
+ * fall through to [Quality.NONE] — that band means "measured, and too weak to demodulate", a different claim.
+ */
 @Composable
 fun LoraSignalIndicator(
-    snr: Float,
+    snr: Float?,
     modifier: Modifier = Modifier,
     modemPreset: ModemPreset? = LocalModemPreset.current,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val quality = determineSignalQuality(snr, modemPreset)
+    val quality = snr?.let { determineSignalQuality(it, modemPreset) }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -149,20 +108,22 @@ fun LoraSignalIndicator(
     ) {
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = vectorResource(quality.icon),
+            imageVector = vectorResource(quality?.icon ?: Res.drawable.ic_signal_cellular_alt),
             contentDescription = stringResource(Res.string.signal_quality),
-            tint = quality.color(),
+            tint = quality?.color?.invoke() ?: MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
+            text = "${stringResource(Res.string.signal)} " + stringResource(quality?.nameRes ?: Res.string.unknown),
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
         )
     }
 }
 
+/** Renders nothing when [snr] is absent — 0 dB is a real reading, so it must not stand in for "no reading". */
 @Composable
-fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = LocalModemPreset.current) {
+fun Snr(snr: Float?, modifier: Modifier = Modifier, modemPreset: ModemPreset? = LocalModemPreset.current) {
+    if (snr == null) return
     val color: Color = determineSignalQuality(snr, modemPreset).color.invoke()
 
     Text(

@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.meshlog
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -28,16 +26,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MeshLogDataStore
 import org.meshtastic.core.repository.MeshLogPrefs
 
 @Single
-class MeshLogPrefsImpl(
-    @Named("MeshLogDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MeshLogPrefs {
+class MeshLogPrefsImpl(private val dataStore: MeshLogDataStore, dispatchers: CoroutineDispatchers) : MeshLogPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val retentionDays: StateFlow<Int> =

@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asMapDataStore
 import org.meshtastic.core.repository.MapCameraPosition
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -51,7 +52,11 @@ class MapPrefsImplTest {
                 scope = testScope,
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
-        prefs = MapPrefsImpl(dataStore, CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher))
+        prefs =
+            MapPrefsImpl(
+                dataStore.asMapDataStore(),
+                CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
+            )
     }
 
     @AfterTest

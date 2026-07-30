@@ -25,6 +25,7 @@ import androidx.work.WorkerParameters
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import org.koin.plugin.module.dsl.koinApplication
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
@@ -53,6 +54,10 @@ class KoinVerificationTest {
                     WorkerParameters::class,
                     WorkManager::class,
                     CoroutineDispatcher::class,
+                    // MeshBeaconRepository is built by a factory function that supplies an
+                    // ApplicationCoroutineScope. Koin Verify introspects the class constructor anyway, so its
+                    // plain CoroutineScope parameter has to be declared even though nothing resolves it.
+                    CoroutineScope::class,
                     NodeIdLookup::class,
                     HttpClient::class,
                     HttpClientEngine::class,

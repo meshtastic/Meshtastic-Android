@@ -22,6 +22,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
 import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
+import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.data.ai.AiFunctionProvider
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.AppFunctionsPrefs
@@ -44,6 +45,6 @@ class AppFunctionsModule {
     ): AppFunctionStateSync = AppFunctionStateSync(context, prefs, dispatchers)
 
     @Single
-    @Named("googleServicesAvailable")
+    @Named(GOOGLE_SERVICES_AVAILABLE)
     fun googleServicesAvailable(): Boolean = true
 }

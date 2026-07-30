@@ -108,6 +108,29 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    @Test
+    fun snrColumnsGoNullableWithoutLosingRows() = runTest {
+        helper.createDatabase(SNR_NULLABLE_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO packet (uuid, myNodeNum, port_num, contact_key, received_time, read, data, snr, rssi) " +
+                    "VALUES (1, 42, 1, '0^all', 1000, 1, '{}', 0.0, -70)",
+            )
+            connection.execSQL(
+                "INSERT INTO reactions (myNodeNum, reply_id, user_id, emoji, timestamp, snr, rssi) " +
+                    "VALUES (42, 7, '!abc', 'X', 2000, -12.5, -70)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(SNR_NULLABLE_TO_VERSION, emptyList()).use { connection ->
+            // A stored 0 dB must survive the recreate as 0, not become NULL: it is a real reading.
+            assertEquals(listOf("0.0"), queryColumn(connection, "SELECT snr FROM packet"))
+            assertEquals(listOf("-12.5"), queryColumn(connection, "SELECT snr FROM reactions"))
+            // A NULL is now storable where the column was previously NOT NULL DEFAULT 0.
+            connection.execSQL("UPDATE packet SET snr = NULL WHERE uuid = 1")
+            assertEquals(listOf(null), queryColumn(connection, "SELECT snr FROM packet"))
+        }
+    }
+
     /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
@@ -130,5 +153,7 @@ class MeshtasticDatabaseMigrationTest {
         const val EARLIEST_SCHEMA_VERSION = 3
         const val RSSI_NULLABLE_FROM_VERSION = 50
         const val RSSI_NULLABLE_TO_VERSION = 51
+        const val SNR_NULLABLE_FROM_VERSION = 51
+        const val SNR_NULLABLE_TO_VERSION = 52
     }
 }

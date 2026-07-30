@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -52,7 +53,7 @@ private const val DATA_BITS_8 = 8
 class UsbRepository(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val usbBroadcastReceiverLazy: Lazy<UsbBroadcastReceiver>,
     private val usbManagerLazy: Lazy<UsbManager?>,
     private val usbSerialProberLazy: Lazy<UsbSerialProber>,
