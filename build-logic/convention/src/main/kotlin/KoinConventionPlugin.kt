@@ -30,12 +30,11 @@ class KoinConventionPlugin : Plugin<Project> {
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
                 // 1.1.0 moved validation to the entry points, which suits this graph's shape, but
-                // its definition index can't resolve ours: qualified definitions collide on the
-                // erased type (one of 19 @Named DataStore bindings survives, one of 2
-                // CoroutineScope), modules reached through FlavorModule's nested `includes` are
-                // invisible, and DSL declarations (desktopApp's whole root, workManagerFactory())
-                // are never indexed at all. Every entry point therefore fails on definitions that
-                // exist. Runtime graph verification is handled by KoinVerificationTest instead.
+                // its definition index still can't resolve two structural patterns here: modules
+                // reached through FlavorModule's nested `includes` are invisible to it, and DSL
+                // declarations (desktopApp's whole root, workManagerFactory()) are never indexed at
+                // all. Every entry point therefore fails on definitions that exist. Runtime graph
+                // verification is handled by KoinVerificationTest instead.
                 compileSafety.set(false)
             }
 

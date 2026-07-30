@@ -176,6 +176,7 @@ private fun <T> protoStore(
 /** Proto [DataStore] instances (OkioStorage-backed). */
 private fun desktopProtoDataStoreModule() = module {
     val protoDir = desktopDataDir() + "/datastore"
+    FileSystem.SYSTEM.createDirectories(protoDir.toPath())
 
     single<CoreLocalConfigDataStore> {
         protoStore(LocalConfigSerializer, "$protoDir/local_config.pb", { LocalConfig() }, get())
