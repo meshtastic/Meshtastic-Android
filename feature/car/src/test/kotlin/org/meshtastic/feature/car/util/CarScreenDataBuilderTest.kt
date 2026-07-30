@@ -56,10 +56,18 @@ class CarScreenDataBuilderTest {
     // determineSignalQuality() — preset-relative SNR, RSSI not used (issue #5446)
 
     @Test
-    fun `determineSignalQuality returns none when snr is max value`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(Float.MAX_VALUE, ModemPreset.LONG_FAST)
+    fun `determineSignalQuality returns unknown when snr is absent`() {
+        // Absence is UNKNOWN, not NONE: NONE claims a measured link too weak to demodulate.
+        val quality = CarScreenDataBuilder.determineSignalQuality(null, ModemPreset.LONG_FAST)
 
-        assertEquals(SignalQuality.NONE, quality)
+        assertEquals(SignalQuality.UNKNOWN, quality)
+    }
+
+    @Test
+    fun `determineSignalQuality rates a zero snr reading`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(0f, ModemPreset.LONG_FAST)
+
+        assertEquals(SignalQuality.EXCELLENT, quality)
     }
 
     @Test

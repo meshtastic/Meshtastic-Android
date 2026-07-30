@@ -127,9 +127,9 @@ data class GetNodeDetailsResponse(
     /** Firmware version string. */
     val firmwareVersion: String,
     /** Signal-to-noise ratio of strongest signal. */
-    val snr: Float,
+    val snr: Float?,
     /** Received signal strength indicator in dB. */
-    val rssi: Int,
+    val rssi: Int?,
     /** Number of hops away from local node (-1 if unknown). */
     val hopsAway: Int,
     /** Channel index this node is on. */

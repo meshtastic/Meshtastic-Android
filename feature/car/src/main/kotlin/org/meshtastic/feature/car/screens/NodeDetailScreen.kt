@@ -105,6 +105,7 @@ class NodeDetailScreen(
         SignalQuality.FAIR -> carContext.getString(R.string.car_signal_fair)
         SignalQuality.BAD -> carContext.getString(R.string.car_signal_bad)
         SignalQuality.NONE -> carContext.getString(R.string.car_signal_none)
+        SignalQuality.UNKNOWN -> carContext.getString(R.string.car_signal_unknown)
     }
 
     private fun formatLastHeard(epochMillis: Long): String {

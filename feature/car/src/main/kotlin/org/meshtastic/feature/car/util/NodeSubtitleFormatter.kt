@@ -70,6 +70,7 @@ object NodeSubtitleFormatter {
         SignalQuality.FAIR -> context.getString(R.string.car_signal_fair)
         SignalQuality.BAD -> context.getString(R.string.car_signal_bad)
         SignalQuality.NONE -> context.getString(R.string.car_signal_none)
+        SignalQuality.UNKNOWN -> context.getString(R.string.car_signal_unknown)
     }
 
     fun signalColor(quality: SignalQuality): CarColor = when (quality) {
@@ -78,5 +79,6 @@ object NodeSubtitleFormatter {
         SignalQuality.FAIR -> CarColor.YELLOW
         SignalQuality.BAD -> CarColor.RED
         SignalQuality.NONE -> CarColor.SECONDARY
+        SignalQuality.UNKNOWN -> CarColor.SECONDARY
     }
 }

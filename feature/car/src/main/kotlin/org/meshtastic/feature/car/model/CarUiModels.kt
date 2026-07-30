@@ -63,7 +63,12 @@ enum class SignalQuality {
     GOOD,
     FAIR,
     BAD,
+
+    /** Measured, but too weak to demodulate. Distinct from [UNKNOWN]. */
     NONE,
+
+    /** No SNR reading for this node, so link quality cannot be rated. */
+    UNKNOWN,
 }
 
 data class TopologyHeader(val totalNodes: Int, val onlineNodes: Int, val meshName: String?)

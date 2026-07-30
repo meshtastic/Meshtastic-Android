@@ -92,6 +92,20 @@ data class Node(
     val mismatchKey
         get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
 
+    /**
+     * Last measured SNR in dB, or null when this node has no reading yet ([snr] still holds [SNR_UNSET]).
+     *
+     * Every read of [snr] should go through this: 0 dB is a real, good reading, and the raw sentinel rates as an
+     * *excellent* signal if it reaches the preset-relative quality bands. Threshold comparisons such as `snr < 100f`
+     * are not equivalent — they also discard any genuine reading at or above the threshold.
+     */
+    val snrOrNull: Float?
+        get() = snr.takeIf { it != SNR_UNSET }
+
+    /** Last measured RSSI in dBm, or null when this node has no reading yet. 0 dBm is a real reading. */
+    val rssiOrNull: Int?
+        get() = rssi.takeIf { it != RSSI_UNSET }
+
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics()
 
@@ -177,6 +191,14 @@ data class Node(
 
         /** Size (in bytes) of a Curve25519 public key as used by meshtastic firmware. */
         const val PUBLIC_KEY_SIZE: Int = 32
+
+        /**
+         * Sentinels stored when a node has no radio-metric reading. They exist because [snr]/[rssi] are not nullable
+         * (the Room columns behind them are NOT NULL); resolve them with [snrOrNull]/[rssiOrNull] rather than comparing
+         * against them at call sites.
+         */
+        const val SNR_UNSET: Float = Float.MAX_VALUE
+        const val RSSI_UNSET: Int = Int.MAX_VALUE
 
         val ERROR_BYTE_STRING: ByteString = ByteArray(PUBLIC_KEY_SIZE) { 0 }.toByteString()
 

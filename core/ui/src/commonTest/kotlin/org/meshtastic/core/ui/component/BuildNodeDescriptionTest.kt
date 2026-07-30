@@ -48,8 +48,7 @@ class BuildNodeDescriptionTest {
         hopsAway: Int = 0,
         batteryLevel: Int? = null,
         distance: String? = null,
-        snr: Float = Float.MAX_VALUE,
-        rssi: Int = 0,
+        snr: Float? = null,
         viaMqtt: Boolean = false,
         lastHeardIsRelative: Boolean = true,
     ): String = buildNodeDescription(
@@ -62,7 +61,6 @@ class BuildNodeDescriptionTest {
         batteryLevel = batteryLevel,
         distance = distance,
         snr = snr,
-        rssi = rssi,
         viaMqtt = viaMqtt,
         strings = testStrings,
         lastHeardIsRelative = lastHeardIsRelative,
@@ -157,32 +155,33 @@ class BuildNodeDescriptionTest {
     // ---- Signal ----
 
     @Test
-    fun signal_hidden_when_snr_is_max_float() {
-        val result = describe(snr = Float.MAX_VALUE, rssi = -100, hopsAway = 0, viaMqtt = false)
+    fun signal_hidden_when_snr_is_absent() {
+        val result = describe(snr = null, hopsAway = 0, viaMqtt = false)
         assertFalse(result.contains("signal"))
     }
 
     @Test
     fun signal_hidden_when_via_mqtt() {
-        val result = describe(snr = -5f, rssi = -100, hopsAway = 0, viaMqtt = true)
+        val result = describe(snr = -5f, hopsAway = 0, viaMqtt = true)
         assertFalse(result.contains("signal"))
     }
 
     @Test
     fun signal_hidden_when_hops_greater_than_zero() {
-        val result = describe(snr = -5f, rssi = -100, hopsAway = 1, viaMqtt = false)
+        val result = describe(snr = -5f, hopsAway = 1, viaMqtt = false)
         assertFalse(result.contains("signal"))
     }
 
     @Test
-    fun signal_hidden_when_rssi_not_negative() {
-        val result = describe(snr = -5f, rssi = 0, hopsAway = 0, viaMqtt = false)
-        assertFalse(result.contains("signal"))
+    fun signal_shown_for_a_zero_snr_reading() {
+        // 0 dB is a real, strong reading. It was previously announced only when RSSI happened to be negative.
+        val result = describe(snr = 0f, hopsAway = 0, viaMqtt = false)
+        assertContains(result, "signal")
     }
 
     @Test
     fun signal_shown_when_direct_and_valid_values() {
-        val result = describe(snr = -5f, rssi = -100, hopsAway = 0, viaMqtt = false)
+        val result = describe(snr = -5f, hopsAway = 0, viaMqtt = false)
         assertContains(result, "signal")
     }
 }

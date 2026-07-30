@@ -126,7 +126,7 @@ fun DiscoveryGoogleMap(
             MarkerComposable(
                 state = rememberUpdatedMarkerState(position = nodeLatLng),
                 title = node.longName ?: node.shortName ?: "Unknown",
-                snippet = "SNR: ${node.snr} dB / RSSI: ${MetricFormatter.rssi(node.rssi)}",
+                snippet = "SNR: ${MetricFormatter.snr(node.snr)} / RSSI: ${MetricFormatter.rssi(node.rssi)}",
             ) {
                 DiscoveryMarkerChip(label = node.shortName ?: "?", color = markerColor, icon = nodeIcon)
             }
