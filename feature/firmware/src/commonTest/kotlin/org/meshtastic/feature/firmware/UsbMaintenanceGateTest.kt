@@ -139,38 +139,88 @@ class UsbMaintenanceGateTest {
     // ── OTAFIX bootloader image resolution (R5) ──────────────────────────────
 
     @Test
-    fun `otafix is offered only for mapped boards`() {
+    fun `otafix is offered only for supported targets`() {
         assertTrue(
             usbMaintenanceGate(nrf(target = "rak4631"), FirmwareUpdateMethod.Usb, hasRelease = true)
                 .showBootloaderUpgrade,
         )
-        assertFalse(
+        assertTrue(
             usbMaintenanceGate(nrf(target = "heltec-mesh-node-t114"), FirmwareUpdateMethod.Usb, hasRelease = true)
                 .showBootloaderUpgrade,
-            "An unmapped board hides the action rather than guessing a bootloader built for other hardware",
+            "T114 is on OTAFIX's supported list even though the project names differ",
         )
     }
 
     @Test
-    fun `otafix images are board specific`() {
-        val rak = otafixUf2For("rak4631")
-        val t1000 = otafixUf2For("tracker-t1000-e")
+    fun `otafix is not offered for products that merely share a supported build target`() {
+        // WISMESH Hub/Tap, Nomadstar Meteor Pro and RAK3401 all build against wiscore_rak4631, and T-Echo Plus/Lite
+        // against t-echo, but OTAFIX ships no bootloader for those products.
+        listOf("rak2560", "rak_wismeshtap", "rak4631_nomadstar_meteor_pro", "rak3401-1watt", "t-echo-plus", "t-echo-lite")
+            .forEach { target ->
+                assertFalse(
+                    usbMaintenanceGate(nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
+                        .showBootloaderUpgrade,
+                    "$target is not an OTAFIX-supported product",
+                )
+            }
+    }
 
-        assertNotNull(rak)
-        assertNotNull(t1000)
-        assertTrue(rak.fileName.contains("wiscore_rak4631_board"))
-        assertTrue(t1000.fileName.contains("t1000_e"))
-        assertTrue(rak.sha256 != t1000.sha256, "Distinct boards must not share a bootloader digest")
+    // ── Board-ID resolution: the actual safety gate (R5) ─────────────────────
+
+    @Test
+    fun `every shipped otafix image has a unique board id and matching filename`() {
+        assertEquals(14, otafixBoardIds.size, "OTAFIX 2.2-BP1.3 ships 14 update images")
+        val digests = otafixBoardIds.mapNotNull { otafixUf2ForBoardId(it)?.sha256 }
+        assertEquals(digests.size, digests.toSet().size, "No two boards may share a bootloader digest")
     }
 
     @Test
-    fun `otafix rejects boards that merely share the rak4631 build target`() {
-        // WISMESH Hub/Tap/Tag, Nomadstar Meteor Pro and RAK3401 all build against the wiscore_rak4631 board, but they
-        // are different products. Matching at board level would offer one product's bootloader to the others.
-        listOf("rak2560", "rak_wismeshtap", "rak_wismeshtag", "rak4631_nomadstar_meteor_pro", "rak3401-1watt")
-            .forEach { target ->
-                assertNull(otafixUf2For(target), "$target must not resolve the RAK4631 bootloader")
-            }
+    fun `board id selects the image, not the build target`() {
+        val rak = otafixUf2ForBoardId("WisBlock-RAK4631-Board")
+        val techo = otafixUf2ForBoardId("nRF52840-TEcho-v1")
+
+        assertNotNull(rak)
+        assertNotNull(techo)
+        assertTrue(rak.fileName.contains("wiscore_rak4631_board"))
+        assertTrue(techo.fileName.contains("lilygo_techo"))
+        // Both boards report USB 239A/0029 in bootloader mode, so USB identity could not have told them apart.
+        assertTrue(rak.sha256 != techo.sha256)
+    }
+
+    @Test
+    fun `xiao sense is distinguished from plain xiao only by board id`() {
+        val plain = otafixUf2ForBoardId("nRF52840-SeeedXiao-v1")
+        val sense = otafixUf2ForBoardId("nRF52840-SeeedXiaoSense-v1")
+
+        assertNotNull(plain)
+        assertNotNull(sense)
+        assertTrue(plain.fileName.contains("xiao_nrf52840_ble_bootloader"))
+        assertTrue(sense.fileName.contains("xiao_nrf52840_ble_sense"))
+        assertTrue(plain.sha256 != sense.sha256, "OTAFIX's README warns these must not be interchanged")
+    }
+
+    @Test
+    fun `an unrecognized board id refuses rather than falling back`() {
+        assertNull(otafixUf2ForBoardId("SomeOtherBoard-v9"))
+        assertNull(otafixUf2ForBoardId(""))
+    }
+
+    @Test
+    fun `board id is parsed from an INFO_UF2 payload and tolerates surrounding lines`() {
+        val info =
+            "UF2 Bootloader 0.9.2-OTAFIX2.2-BP1.3\r\n" +
+                "Model: WisBlock RAK4631 Board\r\n" +
+                "Board-ID: WisBlock-RAK4631-Board\r\n" +
+                "Date: Apr 13 2026\r\n"
+
+        assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId(info))
+        assertNotNull(parseUf2BoardId(info)?.let { otafixUf2ForBoardId(it) })
+    }
+
+    @Test
+    fun `a payload without a board id line yields null`() {
+        assertNull(parseUf2BoardId("UF2 Bootloader 0.2.6\r\nModel: Something\r\n"))
+        assertNull(parseUf2BoardId(""), "A volume with no INFO_UF2.TXT is not a UF2 bootloader drive")
     }
 
     // ── UF2 header parsing (R8) ──────────────────────────────────────────────

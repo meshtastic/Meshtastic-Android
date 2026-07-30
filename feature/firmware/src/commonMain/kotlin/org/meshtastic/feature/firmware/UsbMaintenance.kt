@@ -109,7 +109,8 @@ internal fun usbMaintenanceGate(
     return UsbMaintenanceGate(
         show = true,
         eraseRefusal = eraseRefusal,
-        // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply.
-        showBootloaderUpgrade = hardware.isNrf52Arc && otafixUf2For(hardware.effectiveTarget) != null,
+        // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
+        // — which image gets written is decided later from the Board-ID the drive reports.
+        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(hardware.effectiveTarget),
     )
 }
