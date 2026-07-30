@@ -83,3 +83,64 @@ fun SuccessStatePreview() {
 fun DisclaimerDialogPreview() {
     AppTheme { Surface { DisclaimerDialog(updateMethod = FirmwareUpdateMethod.Ble, onDismiss = {}, onConfirm = {}) } }
 }
+
+@PreviewLightDark
+@Composable
+internal fun UsbMaintenanceCardPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp)) {
+                UsbMaintenanceCard(
+                    gate = UsbMaintenanceGate(show = true, showBootloaderUpgrade = true),
+                    deviceName = "RAK4631",
+                    onFactoryErase = {},
+                    onBootloaderUpgrade = {},
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+internal fun UsbMaintenanceCardRefusedPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp)) {
+                UsbMaintenanceCard(
+                    gate =
+                    UsbMaintenanceGate(
+                        show = true,
+                        eraseRefusal = UsbMaintenanceRefusal.UnknownSoftDevice,
+                        showBootloaderUpgrade = false,
+                    ),
+                    deviceName = "ThinkNode M8",
+                    onFactoryErase = {},
+                    onBootloaderUpgrade = {},
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+internal fun AwaitingEraseFileSavePreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                AwaitingFileSaveState(
+                    state =
+                    FirmwareUpdateState.AwaitingFileSave(
+                        uf2Artifact = null,
+                        fileName = null,
+                        step = UsbFileSaveStep.FactoryErase,
+                        retryMessage = UiText.DynamicString("That location isn't the device's update drive."),
+                    ),
+                    onSaveFile = {},
+                    onPickVolume = {},
+                )
+            }
+        }
+    }
+}

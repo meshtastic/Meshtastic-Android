@@ -94,7 +94,21 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_maintenance_erase_action
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_button
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_text
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_title
+import org.meshtastic.core.resources.firmware_maintenance_no_release
+import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
 import org.meshtastic.core.resources.firmware_maintenance_select_drive
+import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
+import org.meshtastic.core.resources.firmware_maintenance_unknown_board
+import org.meshtastic.core.resources.firmware_maintenance_unknown_softdevice
+import org.meshtastic.core.resources.firmware_maintenance_unsupported_device
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_bootloader_action
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_text
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_title
+import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
@@ -381,6 +395,11 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     is FirmwareUpdateState.Verifying,
     -> true
 
+    // A maintenance pass is mid-sequence: the device may already have no application, and the pass queue lives in
+    // the
+    // ViewModel, so letting the screen sleep (and the ViewModel clear) would strand the device.
+    is FirmwareUpdateState.AwaitingFileSave -> state.step.isDestructive || state.retryMessage != null
+
     else -> false
 }
 
@@ -488,6 +507,16 @@ private fun ReadyState(
 
     if (state.showBootloaderWarning) {
         BootloaderWarningCard(deviceHardware = device, onDismissForDevice = actions.onDismissBootloaderWarning)
+        Spacer(Modifier.height(16.dp))
+    }
+
+    if (state.maintenance.show) {
+        UsbMaintenanceCard(
+            gate = state.maintenance,
+            deviceName = device.displayName,
+            onFactoryErase = actions.onFactoryErase,
+            onBootloaderUpgrade = actions.onBootloaderUpgrade,
+        )
         Spacer(Modifier.height(16.dp))
     }
 
@@ -732,6 +761,107 @@ private fun DeviceInfoCard(
             )
         }
     }
+}
+
+/**
+ * Offers factory erase and, where available, an OTAFIX bootloader upgrade.
+ *
+ * Both are destructive, so both sit behind a confirmation and are rendered as low-emphasis error-tinted text buttons
+ * rather than anything that competes with the primary update action — the same treatment [BootloaderWarningCard] uses.
+ *
+ * An erase that cannot run safely stays **visible but disabled with its reason shown**, because the reason is the
+ * useful part: it tells the user this app can't confirm their device's SoftDevice and points them at the web flasher. A
+ * missing bootloader image is different and is simply absent — that is a coverage gap, not something a user can act on.
+ */
+@Composable
+internal fun UsbMaintenanceCard(
+    gate: UsbMaintenanceGate,
+    deviceName: String,
+    onFactoryErase: () -> Unit,
+    onBootloaderUpgrade: () -> Unit,
+) {
+    var showEraseConfirmation by remember { mutableStateOf(false) }
+    var showUpgradeConfirmation by remember { mutableStateOf(false) }
+
+    if (showEraseConfirmation) {
+        MeshtasticDialog(
+            onDismiss = { showEraseConfirmation = false },
+            title = stringResource(Res.string.firmware_maintenance_erase_confirm_title),
+            message = stringResource(Res.string.firmware_maintenance_erase_confirm_text, deviceName),
+            confirmText = stringResource(Res.string.firmware_maintenance_erase_confirm_button),
+            onConfirm = {
+                showEraseConfirmation = false
+                onFactoryErase()
+            },
+            dismissText = stringResource(Res.string.cancel),
+        )
+    }
+
+    if (showUpgradeConfirmation) {
+        MeshtasticDialog(
+            onDismiss = { showUpgradeConfirmation = false },
+            title = stringResource(Res.string.firmware_maintenance_upgrade_confirm_title),
+            message = stringResource(Res.string.firmware_maintenance_upgrade_confirm_text, deviceName),
+            confirmText = stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action),
+            onConfirm = {
+                showUpgradeConfirmation = false
+                onBootloaderUpgrade()
+            },
+            dismissText = stringResource(Res.string.cancel),
+        )
+    }
+
+    Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TextButton(
+                onClick = { showEraseConfirmation = true },
+                enabled = gate.eraseRefusal == null,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text(stringResource(Res.string.firmware_maintenance_erase_action))
+            }
+
+            gate.eraseRefusal?.let { refusal ->
+                Text(
+                    text = usbMaintenanceRefusalText(refusal),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            if (gate.showBootloaderUpgrade) {
+                TextButton(onClick = { showUpgradeConfirmation = true }) {
+                    Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Copy for a pre-flight refusal shown on the card.
+ *
+ * Mirrors the ViewModel's mapping for refusals raised mid-flow; the two exist separately because this one renders
+ * inline next to a disabled button while that one becomes an error state.
+ */
+@Composable
+private fun usbMaintenanceRefusalText(refusal: UsbMaintenanceRefusal): String = when (refusal) {
+    UsbMaintenanceRefusal.UnknownSoftDevice -> stringResource(Res.string.firmware_maintenance_unknown_softdevice)
+
+    UsbMaintenanceRefusal.UnsupportedArchitecture ->
+        stringResource(Res.string.firmware_maintenance_unsupported_device)
+
+    UsbMaintenanceRefusal.NoFirmwareRelease -> stringResource(Res.string.firmware_maintenance_no_release)
+
+    UsbMaintenanceRefusal.DestinationNotRemovable ->
+        stringResource(Res.string.firmware_maintenance_wrong_destination)
+
+    UsbMaintenanceRefusal.NotABootloaderVolume ->
+        stringResource(Res.string.firmware_maintenance_not_a_bootloader_volume)
+
+    UsbMaintenanceRefusal.SoftDeviceConflict -> stringResource(Res.string.firmware_maintenance_softdevice_conflict)
+
+    UsbMaintenanceRefusal.UnknownBoardId -> stringResource(Res.string.firmware_maintenance_unknown_board)
 }
 
 @Composable
