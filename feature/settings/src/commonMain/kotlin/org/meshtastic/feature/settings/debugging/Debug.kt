@@ -92,7 +92,9 @@ import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 
-private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
+// No end-of-line anchor: Wire's toString is single-line, so annotations land mid-line
+// (`from=-1897181963 (!8ee6c775), to=…`), not at line ends as protobuf-java's format did.
+private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)")
 
 // Suppressions match this screen's pre-existing detekt baseline entries; editing the body reset the baseline hashes.
 @Suppress("LongMethod", "ViewModelForwarding", "ModifierMissing")
