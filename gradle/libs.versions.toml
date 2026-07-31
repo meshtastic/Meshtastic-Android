@@ -74,7 +74,7 @@ mlkit-translate = "17.0.3"
 camerax = "1.6.1"
 
 # Networking
-ktor = "3.5.1"
+ktor = "3.5.2"
 
 # Other
 aboutlibraries = "15.0.4"
