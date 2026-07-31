@@ -132,6 +132,9 @@
     <string name="backup_restore">Backup &amp; Restore</string>
     <string name="bad">Bad</string>
     <string name="bandwidth">Bandwidth</string>
+    <string name="bandwidth_option_khz">%1$s kHz</string>
+    <string name="bandwidth_unsupported">Unsupported (%1$s)</string>
+    <string name="bandwidth_unsupported_summary">This bandwidth is not supported by the connected radio in the selected region. Choose a supported value before saving.</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Battery</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
