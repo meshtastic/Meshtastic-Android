@@ -44,8 +44,10 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnect
@@ -94,18 +96,24 @@ fun CurrentlyConnectedInfo(
     LaunchedEffect(bleDevice, lifecycle) {
         if (bleDevice == null) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            while (bleDevice.device.isConnected) {
-                try {
-                    val latestRssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
-                    if (latestRssi != rssi) rssi = latestRssi
-                } catch (_: TimeoutCancellationException) {
-                    Logger.d { "RSSI read timed out" }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Logger.d(e) { "Failed to read RSSI" }
+            bleDevice.device.state.collectLatest { state ->
+                if (state != BleConnectionState.Connected) {
+                    if (rssi != null) rssi = null
+                    return@collectLatest
                 }
-                delay(RSSI_DELAY.seconds)
+                while (true) {
+                    try {
+                        val latestRssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
+                        if (latestRssi != rssi) rssi = latestRssi
+                    } catch (_: TimeoutCancellationException) {
+                        Logger.d { "RSSI read timed out" }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Logger.d(e) { "Failed to read RSSI" }
+                    }
+                    delay(RSSI_DELAY.seconds)
+                }
             }
         }
     }
