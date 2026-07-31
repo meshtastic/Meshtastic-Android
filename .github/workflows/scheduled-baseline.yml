@@ -33,6 +33,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Update Graphs

@@ -48,11 +48,7 @@ on:
         required: true
       GRADLE_ENCRYPTION_KEY:
         required: true
-      GRADLE_CACHE_URL:
-        required: false
-      GRADLE_CACHE_USERNAME:
-        required: false
-      GRADLE_CACHE_PASSWORD:
+      DEVELOCITY_ACCESS_KEY:
         required: false
       APPLE_SIGNING_IDENTITY:
         required: false
@@ -94,10 +90,6 @@ jobs:
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -133,10 +125,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     needs: [prepare-build-info]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -149,6 +137,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Load secrets
@@ -218,10 +207,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     needs: [prepare-build-info]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -234,6 +219,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Load secrets
@@ -284,9 +270,6 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
       # Secrets aren't readable in step `if:` expressions, so surface presence here.
       SIGN_WINDOWS: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT != '' && 'true' || 'false' }}
     steps:
@@ -301,6 +284,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
           install_jetbrains_jdk: 'true'
 
@@ -443,10 +427,6 @@ jobs:
         # No .deb host-coupling here (pure-Java uber jar + URL manifest) — free to track
         # the current LTS image.
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -459,6 +439,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'true'
           install_jetbrains_jdk: 'true'
 

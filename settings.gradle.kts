@@ -33,6 +33,7 @@ pluginManagement {
 
 plugins {
     id("com.gradle.develocity") version "4.5.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
     id("org.meshtastic.flatpak.sources.settings") version "0.1.5"
 }
@@ -70,22 +71,20 @@ rootProject.name = "MeshtasticAndroid"
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-// Build Cache configuration (HTTP remote cache + local)
-apply(from = "gradle/build-cache.settings.gradle")
+val isCI = System.getenv("CI") != null
 
-// Build Scans — publish in CI only for debugging and performance profiling.
 develocity {
+    server = "https://community.develocity.cloud"
+    projectId = "meshtastic"
     buildScan {
-        capture {
-            fileFingerprints = true
-        }
-        val isCi = providers.environmentVariable("CI").isPresent
-        publishing.onlyIf { isCi }
-        uploadInBackground = !isCi
-        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
-        termsOfUseAgree = "yes"
+        uploadInBackground = !isCI
+        publishing.onlyIf { it.isAuthenticated }
+        obfuscation { ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } } }
     }
 }
+
+// Build Cache configuration (Develocity remote cache + local)
+apply(from = "gradle/build-cache.settings.gradle")
 
 @Suppress("UnstableApiUsage")
 toolchainManagement {

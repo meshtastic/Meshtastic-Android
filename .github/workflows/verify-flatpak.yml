@@ -46,6 +46,8 @@ jobs:
           token: ${{ github.token }}
 
       - uses: gradle/actions/setup-gradle@v6
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Generate flatpak-sources.json
         run: |
