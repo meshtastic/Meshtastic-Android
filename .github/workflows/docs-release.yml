@@ -83,6 +83,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

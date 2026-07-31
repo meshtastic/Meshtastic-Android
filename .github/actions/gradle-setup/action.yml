@@ -13,6 +13,9 @@ inputs:
   gradle_encryption_key:
     description: 'Encryption key for Gradle remote cache'
     required: false
+  develocity_access_key:
+    description: 'Access key for the OSS Community Develocity Instance (Build Scan publishing and remote cache writes)'
+    required: false
 runs:
   using: composite
   steps:
@@ -86,6 +89,7 @@ runs:
       with:
         cache-read-only: ${{ inputs.cache_read_only }}
         cache-encryption-key: ${{ inputs.gradle_encryption_key }}
+        develocity-access-key: ${{ inputs.develocity_access_key }}
         # Cache cleanup is broken on Windows with setup-gradle v6's "enhanced
         # caching" provider: it deletes the whole Gradle User Home instead of
         # just unused entries (1739 files "excluded from the cache" here vs 25

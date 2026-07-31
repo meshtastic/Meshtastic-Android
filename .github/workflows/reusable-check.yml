@@ -30,6 +30,8 @@ on:
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
+      DEVELOCITY_ACCESS_KEY:
+        required: false
       CODECOV_TOKEN:
         required: false
       DATADOG_APPLICATION_ID:
@@ -38,21 +40,12 @@ on:
         required: false
       GOOGLE_MAPS_API_KEY:
         required: false
-      GRADLE_CACHE_URL:
-        required: false
-      GRADLE_CACHE_USERNAME:
-        required: false
-      GRADLE_CACHE_PASSWORD:
-        required: false
 
 env:
   DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
   DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
   MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
   GITHUB_TOKEN: ${{ github.token }}
-  GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-  GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-  GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
   # Merge-queue and main-branch runs write to the Gradle caches; every other
   # context (PRs, release tags) is a read-only consumer.
   GRADLE_CACHE_READ_ONLY: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'merge_group') && 'false' || 'true' }}
@@ -98,6 +91,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
           install_jetbrains_jdk: 'true'
 
@@ -125,6 +119,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
 
       - name: Screenshot Test Validation
@@ -160,6 +155,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'true'
 
       - name: Verify Reproducible Build (fdroid)
@@ -435,6 +431,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
@@ -496,6 +493,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
 
       - name: Tag main-branch builds as -SNAPSHOT
@@ -548,6 +546,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
           install_jetbrains_jdk: 'true'
 
@@ -590,6 +589,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: true
           install_jetbrains_jdk: 'true'
 
