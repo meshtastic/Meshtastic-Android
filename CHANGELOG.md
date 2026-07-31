@@ -255,6 +255,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @CatSu-OSM made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6351
 * @dzmpr made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6369
 * @pdxlocations made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6478
+* @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
