@@ -28,13 +28,6 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
@@ -59,12 +52,19 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.Position as ProtoPosition
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
 class NodeManagerImplTest {
 
@@ -195,103 +195,99 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `updateNodeAndPersist awaits the repository write`() =
-        testScope.runTest {
-            val nodeNum = 1234
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setAllowNodeDbWrites(true)
-            val writeStarted = CompletableDeferred<Unit>()
-            val releaseWrite = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.upsert(any()) } calls
-                {
-                    writeStarted.complete(Unit)
-                    releaseWrite.await()
-                }
+    fun `updateNodeAndPersist awaits the repository write`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        val writeStarted = CompletableDeferred<Unit>()
+        val releaseWrite = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.upsert(any()) } calls
+            {
+                writeStarted.complete(Unit)
+                releaseWrite.await()
+            }
 
-            val update = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) } }
-            writeStarted.await()
-            assertFalse(update.isCompleted)
-            releaseWrite.complete(Unit)
-            update.await()
+        val update = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) } }
+        writeStarted.await()
+        assertFalse(update.isCompleted)
+        releaseWrite.complete(Unit)
+        update.await()
 
-            verifySuspend { nodeRepository.upsert(any()) }
-            assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
-        }
+        verifySuspend { nodeRepository.upsert(any()) }
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
 
     @Test
-    fun `same-node persistence cannot finish with an older snapshot`() =
-        testScope.runTest {
-            val nodeNum = 1234
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setAllowNodeDbWrites(true)
-            val firstWriteStarted = CompletableDeferred<Unit>()
-            val secondWriteStarted = CompletableDeferred<Unit>()
-            val releaseFirstWrite = CompletableDeferred<Unit>()
-            val persisted = mutableListOf<Node>()
-            var invocation = 0
-            everySuspend { nodeRepository.upsert(any()) } calls
-                {
-                    val node = it.arg<Node>(0)
-                    invocation++
-                    when (invocation) {
-                        1 -> {
-                            firstWriteStarted.complete(Unit)
-                            releaseFirstWrite.await()
-                        }
-
-                        2 -> secondWriteStarted.complete(Unit)
+    fun `same-node persistence cannot finish with an older snapshot`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        val firstWriteStarted = CompletableDeferred<Unit>()
+        val secondWriteStarted = CompletableDeferred<Unit>()
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        val persisted = mutableListOf<Node>()
+        var invocation = 0
+        everySuspend { nodeRepository.upsert(any()) } calls
+            {
+                val node = it.arg<Node>(0)
+                invocation++
+                when (invocation) {
+                    1 -> {
+                        firstWriteStarted.complete(Unit)
+                        releaseFirstWrite.await()
                     }
-                    persisted += node
+
+                    2 -> secondWriteStarted.complete(Unit)
                 }
+                persisted += node
+            }
 
-            val first = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 1) } }
-            firstWriteStarted.await()
-            val second =
-                async(start = CoroutineStart.UNDISPATCHED) {
-                    nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 2) }
-                }
-            runCurrent()
-            assertFalse(
-                secondWriteStarted.isCompleted,
-                "the second upsert must not enter while the first owns its lane",
-            )
+        val first = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 1) } }
+        firstWriteStarted.await()
+        val second =
+            async(start = CoroutineStart.UNDISPATCHED) {
+                nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 2) }
+            }
+        runCurrent()
+        assertFalse(
+            secondWriteStarted.isCompleted,
+            "the second upsert must not enter while the first owns its lane",
+        )
 
-            releaseFirstWrite.complete(Unit)
-            first.await()
-            second.await()
+        releaseFirstWrite.complete(Unit)
+        first.await()
+        second.await()
 
-            assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
-            assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
-        }
+        assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
+        assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
 
     @Test
-    fun `session-bound node persistence from a retired generation is rejected`() =
-        testScope.runTest {
-            val nodeNum = 1234
-            val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setAllowNodeDbWrites(true)
-            everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+    fun `session-bound node persistence from a retired generation is rejected`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
 
-            nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 42) }
-            runCurrent()
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 42) }
+        runCurrent()
 
-            assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
-            verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
-        }
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
+    }
 
     @Test
-    fun `node persistence is suppressed while database writes are disabled`() =
-        testScope.runTest {
-            val nodeNum = 1234
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setAllowNodeDbWrites(false)
+    fun `node persistence is suppressed while database writes are disabled`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(false)
 
-            nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) }
+        nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) }
 
-            verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
-            assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
-        }
+        verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
 
     @Test
     fun `handleReceivedUser preserves existing user if incoming is default`() {
@@ -810,19 +806,18 @@ class NodeManagerImplTest {
     private fun ByteString.noncanonicalNum(preferred: Int): Int =
         if (preferred != canonicalNum()) preferred else preferred + 1
 
-    private fun makeKnownNode(num: Int, pk: ByteString, name: String = "Known"): Node =
-        Node(
-            num = num,
-            user =
-                User(
-                    id = "!${num.toString(16)}",
-                    long_name = name,
-                    short_name = name.take(3),
-                    hw_model = HardwareModel.TLORA_V2,
-                    public_key = pk,
-                ),
-            publicKey = pk,
-        )
+    private fun makeKnownNode(num: Int, pk: ByteString, name: String = "Known"): Node = Node(
+        num = num,
+        user =
+        User(
+            id = "!${num.toString(16)}",
+            long_name = name,
+            short_name = name.take(3),
+            hw_model = HardwareModel.TLORA_V2,
+            public_key = pk,
+        ),
+        publicKey = pk,
+    )
 
     private fun enableDbWrites() {
         nodeManager.setNodeDbReady(true)
@@ -856,14 +851,14 @@ class NodeManagerImplTest {
             ProtoNodeInfo(
                 num = retiredNum,
                 user =
-                    User(
-                        id = "!retired",
-                        long_name = "Retired",
-                        short_name = "RET",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = validPk,
-                    ),
-            )
+                User(
+                    id = "!retired",
+                    long_name = "Retired",
+                    short_name = "RET",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = validPk,
+                ),
+            ),
         )
         nodeManager.insertMetadata(retiredNum, DeviceMetadata(firmware_version = "2.7.0"))
         testScope.advanceUntilIdle()
@@ -1035,13 +1030,13 @@ class NodeManagerImplTest {
             Node(
                 num = oldNum,
                 user =
-                    User(
-                        id = defaultId,
-                        long_name = "Meshtastic ${defaultId.takeLast(4)}",
-                        short_name = defaultId.takeLast(4),
-                        hw_model = HardwareModel.UNSET,
-                        public_key = placeholderKey,
-                    ),
+                User(
+                    id = defaultId,
+                    long_name = "Meshtastic ${defaultId.takeLast(4)}",
+                    short_name = defaultId.takeLast(4),
+                    hw_model = HardwareModel.UNSET,
+                    public_key = placeholderKey,
+                ),
                 publicKey = placeholderKey,
                 position = ProtoPosition(latitude_i = 123, longitude_i = 456),
                 channel = 7,
@@ -1245,10 +1240,10 @@ class NodeManagerImplTest {
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
     }
 
-    // 6. Genuine new node
+    // 6. New-node notification admission
 
     @Test
-    fun `initial node database replay installs nodes without new-node notifications`() {
+    fun `user packet before node-db ready installs without persistence or notification`() {
         val replayedNodeNum = 2999
         val replayedKey = ByteArray(32) { (it + 90).toByte() }.toByteString()
         val replayedUser =
@@ -1260,6 +1255,7 @@ class NodeManagerImplTest {
                 public_key = replayedKey,
             )
 
+        nodeManager.setAllowNodeDbWrites(true)
         nodeManager.handleReceivedUser(replayedNodeNum, replayedUser)
         testScope.advanceUntilIdle()
 
@@ -1271,7 +1267,7 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `initial-sync packet stays notification-suppressed across a CAS retry`() {
+    fun `pre-ready user packet stays notification-suppressed across a CAS retry`() {
         val replayedNodeNum = 2998
         val replayedUser =
             User(
@@ -1281,10 +1277,13 @@ class NodeManagerImplTest {
                 hw_model = HardwareModel.TLORA_V2,
                 public_key = ByteArray(32) { (it + 91).toByte() }.toByteString(),
             )
+        var reductionCount = 0
         nodeManager.receivedUserReductionHook = {
-            nodeManager.receivedUserReductionHook = null
-            nodeManager.setNodeDbReady(true)
-            nodeManager.setMyNodeNum(1234)
+            reductionCount += 1
+            if (reductionCount == 1) {
+                nodeManager.setNodeDbReady(true)
+                nodeManager.setMyNodeNum(1234)
+            }
         }
 
         nodeManager.handleReceivedUser(replayedNodeNum, replayedUser)
@@ -1293,6 +1292,7 @@ class NodeManagerImplTest {
         assertEquals("Retried Baseline Node", nodeManager.nodeDBbyNodeNum[replayedNodeNum]?.user?.long_name)
         assertEquals(1234, nodeManager.myNodeNum.value)
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        assertEquals(2, reductionCount, "the forced CAS mismatch must execute the reducer twice")
     }
 
     @Test
@@ -1486,13 +1486,13 @@ class NodeManagerImplTest {
             Node(
                 num = newNum,
                 user =
-                    User(
-                        id = sharedUserId,
-                        long_name = "Canonical",
-                        short_name = "CAN",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = validPk,
-                    ),
+                User(
+                    id = sharedUserId,
+                    long_name = "Canonical",
+                    short_name = "CAN",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = validPk,
+                ),
                 publicKey = validPk,
             )
         }
@@ -1500,13 +1500,13 @@ class NodeManagerImplTest {
             Node(
                 num = oldNum,
                 user =
-                    User(
-                        id = sharedUserId,
-                        long_name = "Stale",
-                        short_name = "STL",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = validPk,
-                    ),
+                User(
+                    id = sharedUserId,
+                    long_name = "Stale",
+                    short_name = "STL",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = validPk,
+                ),
                 publicKey = validPk,
             )
         }
@@ -1625,13 +1625,13 @@ class NodeManagerImplTest {
             Node(
                 num = conflictNum,
                 user =
-                    User(
-                        id = "!conflict",
-                        long_name = "Conflict",
-                        short_name = "CON",
-                        hw_model = HardwareModel.UNSET,
-                        public_key = conflictKey,
-                    ),
+                User(
+                    id = "!conflict",
+                    long_name = "Conflict",
+                    short_name = "CON",
+                    hw_model = HardwareModel.UNSET,
+                    public_key = conflictKey,
+                ),
                 publicKey = conflictKey,
             )
         }
@@ -1739,7 +1739,7 @@ class NodeManagerImplTest {
             Node(
                 num = survivorNum,
                 user =
-                    User(id = oldUserId, long_name = "Survivor", short_name = "SUR", hw_model = HardwareModel.TLORA_V2),
+                User(id = oldUserId, long_name = "Survivor", short_name = "SUR", hw_model = HardwareModel.TLORA_V2),
             )
         }
 
@@ -1777,7 +1777,12 @@ class NodeManagerImplTest {
                 node2 to
                     Node(
                         num = node2,
-                        user = User(id = userId, long_name = "N2", short_name = "N2", hw_model = HardwareModel.TLORA_V2),
+                        user = User(
+                            id = userId,
+                            long_name = "N2",
+                            short_name = "N2",
+                            hw_model = HardwareModel.TLORA_V2,
+                        ),
                     ),
             )
         val nodes21 =
@@ -1785,7 +1790,12 @@ class NodeManagerImplTest {
                 node2 to
                     Node(
                         num = node2,
-                        user = User(id = userId, long_name = "N2", short_name = "N2", hw_model = HardwareModel.TLORA_V2),
+                        user = User(
+                            id = userId,
+                            long_name = "N2",
+                            short_name = "N2",
+                            hw_model = HardwareModel.TLORA_V2,
+                        ),
                     ),
                 node1 to
                     Node(
@@ -1817,13 +1827,13 @@ class NodeManagerImplTest {
             Node(
                 num = competingNum,
                 user =
-                    User(
-                        id = userId,
-                        long_name = "Fallback Winner",
-                        short_name = "FBK",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = competingKey,
-                    ),
+                User(
+                    id = userId,
+                    long_name = "Fallback Winner",
+                    short_name = "FBK",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = competingKey,
+                ),
                 publicKey = competingKey,
             )
         }
@@ -1831,13 +1841,13 @@ class NodeManagerImplTest {
             Node(
                 num = preferredNum,
                 user =
-                    User(
-                        id = userId,
-                        long_name = "Preferred",
-                        short_name = "PRE",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = canonicalKey,
-                    ),
+                User(
+                    id = userId,
+                    long_name = "Preferred",
+                    short_name = "PRE",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = canonicalKey,
+                ),
                 publicKey = canonicalKey,
             )
         }
@@ -1845,13 +1855,13 @@ class NodeManagerImplTest {
             Node(
                 num = staleNum,
                 user =
-                    User(
-                        id = userId,
-                        long_name = "Stale",
-                        short_name = "STL",
-                        hw_model = HardwareModel.TLORA_V2,
-                        public_key = canonicalKey,
-                    ),
+                User(
+                    id = userId,
+                    long_name = "Stale",
+                    short_name = "STL",
+                    hw_model = HardwareModel.TLORA_V2,
+                    public_key = canonicalKey,
+                ),
                 publicKey = canonicalKey,
             )
         }
@@ -1928,7 +1938,7 @@ class NodeManagerImplTest {
                     category = Notification.Category.NodeEvent,
                     id = nodeNum,
                     deepLinkUri = "meshtastic://meshtastic/nodes/$nodeNum",
-                )
+                ),
             )
         }
     }
@@ -1948,12 +1958,12 @@ class NodeManagerImplTest {
             Node(
                 num = canonicalNum,
                 user =
-                    User(
-                        id = placeholderId,
-                        long_name = "Meshtastic ${placeholderId.takeLast(4)}",
-                        short_name = placeholderId.takeLast(4),
-                        hw_model = HardwareModel.UNSET,
-                    ),
+                User(
+                    id = placeholderId,
+                    long_name = "Meshtastic ${placeholderId.takeLast(4)}",
+                    short_name = placeholderId.takeLast(4),
+                    hw_model = HardwareModel.UNSET,
+                ),
                 publicKey = ByteString.EMPTY,
                 position = ProtoPosition(latitude_i = 111, longitude_i = 222),
                 channel = 4,
@@ -2129,6 +2139,34 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `User packet is discarded when clear starts a new session before CAS`() = testScope.runTest {
+        val num = 123456789
+        val key = ByteArray(32) { (it + 41).toByte() }.toByteString()
+        nodeManager.setNodeDbReady(true)
+        nodeManager.receivedUserReductionHook = {
+            nodeManager.receivedUserReductionHook = null
+            nodeManager.clear()
+        }
+
+        nodeManager.handleReceivedUser(
+            num,
+            User(
+                id = "!session-reset",
+                long_name = "Previous Session",
+                short_name = "OLD",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = key,
+            ),
+        )
+        testScope.advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[num])
+        assertFalse(nodeManager.isNodeDbReady.value)
+        verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
+        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
     fun `reverse ID and public-key indexes stay consistent across put replacement and remove`() {
         val keyA = ByteArray(32) { 11 }.toByteString()
         val keyB = ByteArray(32) { 12 }.toByteString()
@@ -2160,224 +2198,214 @@ class NodeManagerImplTest {
 
     private fun Int.toHex(): String = this.toString(16).padStart(8, '0')
 
-    private fun userWithKey(key: ByteString, longName: String, shortName: String): User =
-        User(
-            id = key.hex(),
-            long_name = longName,
-            short_name = shortName,
-            hw_model = HardwareModel.TLORA_V2,
-            public_key = key,
-        )
+    private fun userWithKey(key: ByteString, longName: String, shortName: String): User = User(
+        id = key.hex(),
+        long_name = longName,
+        short_name = shortName,
+        hw_model = HardwareModel.TLORA_V2,
+        public_key = key,
+    )
 
     // ---------- Retired-node notification behavior ----------
 
     @Test
-    fun `applyTrustedIdentityMigrations cancels notifications for each retired number`() =
-        testScope.runTest {
-            // Setup: create nodes with distinct identities
-            val num1 = 1230588578
-            val num2 = 1111111111
-            val key1 = ByteArray(32) { 0x01 }.toByteString()
-            val key2 = ByteArray(32) { 0x02 }.toByteString()
-            nodeManager.handleReceivedUser(num1, userWithKey(key1, "Node1", "N1"), manuallyVerified = false)
-            nodeManager.handleReceivedUser(num2, userWithKey(key2, "Node2", "N2"), manuallyVerified = false)
-            advanceUntilIdle()
+    fun `applyTrustedIdentityMigrations cancels notifications for each retired number`() = testScope.runTest {
+        // Setup: create nodes with distinct identities
+        val num1 = 1230588578
+        val num2 = 1111111111
+        val key1 = ByteArray(32) { 0x01 }.toByteString()
+        val key2 = ByteArray(32) { 0x02 }.toByteString()
+        nodeManager.handleReceivedUser(num1, userWithKey(key1, "Node1", "N1"), manuallyVerified = false)
+        nodeManager.handleReceivedUser(num2, userWithKey(key2, "Node2", "N2"), manuallyVerified = false)
+        advanceUntilIdle()
 
-            // Act
-            nodeManager.applyTrustedIdentityMigrations(listOf(num1, num2))
-            advanceUntilIdle()
+        // Act
+        nodeManager.applyTrustedIdentityMigrations(listOf(num1, num2))
+        advanceUntilIdle()
 
-            // Assert
-            verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num1) }
-            verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num2) }
-        }
-
-    @Test
-    fun `trusted migration commits retirement before notification cancellation`() =
-        testScope.runTest {
-            val num = 310000000
-            val key = ByteArray(32) { 0x12 }.toByteString()
-            nodeManager.handleReceivedUser(num, userWithKey(key, "Retiring", "RT"), manuallyVerified = false)
-            advanceUntilIdle()
-            var nodePresentAtCancellation: Boolean? = null
-            every { notificationManager.cancel(num) } calls
-                {
-                    nodePresentAtCancellation = num in nodeManager.nodeDBbyNodeNum
-                }
-
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-
-            assertEquals(false, nodePresentAtCancellation, "retirement must commit before cancellation side effects")
-            assertNull(nodeManager.nodeDBbyNodeNum[num])
-            verify(VerifyMode.exactly(1)) { notificationManager.cancel(num) }
-        }
+        // Assert
+        verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num1) }
+        verify(VerifyMode.atLeast(1)) { notificationManager.cancel(num2) }
+    }
 
     @Test
-    fun `notification skipped when number retired between select and dispatch`() =
-        testScope.runTest {
-            nodeManager.setNodeDbReady(true)
-            val num = 4000000000.toInt()
-            val key = ByteArray(32) { 0x03 }.toByteString()
-            val titleStarted = CompletableDeferred<Unit>()
-            val releaseTitle = CompletableDeferred<Unit>()
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.notificationTitleFormatter = { shortName ->
-                titleStarted.complete(Unit)
-                releaseTitle.await()
-                "New node seen: $shortName"
+    fun `trusted migration commits retirement before notification cancellation`() = testScope.runTest {
+        val num = 310000000
+        val key = ByteArray(32) { 0x12 }.toByteString()
+        nodeManager.handleReceivedUser(num, userWithKey(key, "Retiring", "RT"), manuallyVerified = false)
+        advanceUntilIdle()
+        var nodePresentAtCancellation: Boolean? = null
+        every { notificationManager.cancel(num) } calls
+            {
+                nodePresentAtCancellation = num in nodeManager.nodeDBbyNodeNum
             }
 
-            nodeManager.handleReceivedUser(num, userWithKey(key, "NewNode", "NN"), manuallyVerified = false)
-            titleStarted.await()
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-            releaseTitle.complete(Unit)
-            advanceUntilIdle()
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
 
-            assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
-        }
+        assertEquals(false, nodePresentAtCancellation, "retirement must commit before cancellation side effects")
+        assertNull(nodeManager.nodeDBbyNodeNum[num])
+        verify(VerifyMode.exactly(1)) { notificationManager.cancel(num) }
+    }
 
     @Test
-    fun `notification skipped when number becomes local node before dispatch`() =
-        testScope.runTest {
-            nodeManager.setNodeDbReady(true)
-            val num = 5000000000.toInt()
-            val key = ByteArray(32) { 0x04 }.toByteString()
-            val titleStarted = CompletableDeferred<Unit>()
-            val releaseTitle = CompletableDeferred<Unit>()
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.notificationTitleFormatter = { shortName ->
-                titleStarted.complete(Unit)
-                releaseTitle.await()
-                "New node seen: $shortName"
-            }
-
-            nodeManager.handleReceivedUser(num, userWithKey(key, "NewNode", "NN"), manuallyVerified = false)
-            titleStarted.await()
-            nodeManager.setMyNodeNum(num)
-            releaseTitle.complete(Unit)
-            advanceUntilIdle()
-
-            assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
+    fun `notification skipped when number retired between select and dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
+        val num = 4000000000.toInt()
+        val key = ByteArray(32) { 0x03 }.toByteString()
+        val titleStarted = CompletableDeferred<Unit>()
+        val releaseTitle = CompletableDeferred<Unit>()
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.notificationTitleFormatter = { shortName ->
+            titleStarted.complete(Unit)
+            releaseTitle.await()
+            "New node seen: $shortName"
         }
+
+        nodeManager.handleReceivedUser(num, userWithKey(key, "NewNode", "NN"), manuallyVerified = false)
+        titleStarted.await()
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
+        releaseTitle.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
+    }
 
     @Test
-    fun `notification skipped when identity changed before dispatch`() =
-        testScope.runTest {
-            nodeManager.setNodeDbReady(true)
-            val num = 6000000000.toInt()
-            val key1 = ByteArray(32) { 0x05 }.toByteString()
-            val key2 = ByteArray(32) { 0x06 }.toByteString()
-            val titleStarted = CompletableDeferred<Unit>()
-            val releaseTitle = CompletableDeferred<Unit>()
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.notificationTitleFormatter = { shortName ->
-                titleStarted.complete(Unit)
-                releaseTitle.await()
-                "New node seen: $shortName"
-            }
-
-            nodeManager.handleReceivedUser(num, userWithKey(key1, "First", "F1"), manuallyVerified = false)
-            titleStarted.await()
-            nodeManager.updateNode(num) { makeKnownNode(num, key2, "Other") }
-            releaseTitle.complete(Unit)
-            advanceUntilIdle()
-
-            val node = nodeManager.nodeDBbyNodeNum[num]
-            assertEquals("Other", node?.user?.long_name)
-            assertTrue(dispatched.none { it.message == "First" }, "notification for 'First' must be suppressed")
+    fun `notification skipped when number becomes local node before dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
+        val num = 5000000000.toInt()
+        val key = ByteArray(32) { 0x04 }.toByteString()
+        val titleStarted = CompletableDeferred<Unit>()
+        val releaseTitle = CompletableDeferred<Unit>()
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.notificationTitleFormatter = { shortName ->
+            titleStarted.complete(Unit)
+            releaseTitle.await()
+            "New node seen: $shortName"
         }
+
+        nodeManager.handleReceivedUser(num, userWithKey(key, "NewNode", "NN"), manuallyVerified = false)
+        titleStarted.await()
+        nodeManager.setMyNodeNum(num)
+        releaseTitle.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(dispatched.none { it.id == num && it.message == "NewNode" })
+    }
 
     @Test
-    fun `retired number with same key suppressed even without canonical key candidate`() =
-        testScope.runTest {
-            val oldNum = 7000000000.toInt()
-            val key = ByteArray(32) { 0x07 }.toByteString()
-            // Create node at oldNum with key, then retire it via migration
-            nodeManager.handleReceivedUser(oldNum, userWithKey(key, "OldNode", "ON"), manuallyVerified = false)
-            advanceUntilIdle()
-            nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
-            advanceUntilIdle()
-            val replayDispatches = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(replayDispatches)) } returns true
-            // Now replay: the canonical number (crc32(key)) has NOT appeared yet
-            nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
-            advanceUntilIdle()
-            // The replayed node should NOT appear in nodeDBbyNodeNum at oldNum
-            assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
-            assertTrue(replayDispatches.none { it.id == oldNum })
+    fun `notification skipped when identity changed before dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
+        val num = 6000000000.toInt()
+        val key1 = ByteArray(32) { 0x05 }.toByteString()
+        val key2 = ByteArray(32) { 0x06 }.toByteString()
+        val titleStarted = CompletableDeferred<Unit>()
+        val releaseTitle = CompletableDeferred<Unit>()
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.notificationTitleFormatter = { shortName ->
+            titleStarted.complete(Unit)
+            releaseTitle.await()
+            "New node seen: $shortName"
         }
+
+        nodeManager.handleReceivedUser(num, userWithKey(key1, "First", "F1"), manuallyVerified = false)
+        titleStarted.await()
+        nodeManager.updateNode(num) { makeKnownNode(num, key2, "Other") }
+        releaseTitle.complete(Unit)
+        advanceUntilIdle()
+
+        val node = nodeManager.nodeDBbyNodeNum[num]
+        assertEquals("Other", node?.user?.long_name)
+        assertTrue(dispatched.none { it.message == "First" }, "notification for 'First' must be suppressed")
+    }
 
     @Test
-    fun `keyless retired number rejects an unrepresented valid key for the session`() =
-        testScope.runTest {
-            val num = 7100000000.toInt()
-            val incomingKey = ByteArray(32) { 0x17 }.toByteString()
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-
-            nodeManager.handleReceivedUser(
-                num,
-                userWithKey(incomingKey, "Untrusted Reuse", "UR"),
-                manuallyVerified = false,
-            )
-            advanceUntilIdle()
-
-            assertNull(nodeManager.nodeDBbyNodeNum[num])
-            verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
-        }
-
-    @Test
-    fun `retired number with different valid key can be legitimately reused`() =
-        testScope.runTest {
-            val num = 8000000000.toInt()
-            val oldKey = ByteArray(32) { 0x08 }.toByteString()
-            val newKey = ByteArray(32) { 0x09 }.toByteString()
-            // Create and retire with old key
-            nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Old", "OD"), manuallyVerified = false)
-            advanceUntilIdle()
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-            advanceUntilIdle()
-            // Capture dispatches to verify the reuse notification specifically,
-            // not the initial sighting from the setup above.
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.setNodeDbReady(true)
-            // Replay with different key — should be allowed as legitimate reuse
-            nodeManager.handleReceivedUser(num, userWithKey(newKey, "New", "NW"), manuallyVerified = false)
-            advanceUntilIdle()
-            val newNode = nodeManager.nodeDBbyNodeNum[num]
-            assertNotNull(newNode)
-            assertEquals("New", newNode.user.long_name)
-            assertEquals(
-                1,
-                dispatched.count { it.id == num && it.message == "New" },
-                "exactly one notification for the reuse at $num",
-            )
-        }
+    fun `retired number with same key suppressed even without canonical key candidate`() = testScope.runTest {
+        val oldNum = 7000000000.toInt()
+        val key = ByteArray(32) { 0x07 }.toByteString()
+        // Create node at oldNum with key, then retire it via migration
+        nodeManager.handleReceivedUser(oldNum, userWithKey(key, "OldNode", "ON"), manuallyVerified = false)
+        advanceUntilIdle()
+        nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
+        advanceUntilIdle()
+        val replayDispatches = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(replayDispatches)) } returns true
+        // Now replay: the canonical number (crc32(key)) has NOT appeared yet
+        nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
+        advanceUntilIdle()
+        // The replayed node should NOT appear in nodeDBbyNodeNum at oldNum
+        assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
+        assertTrue(replayDispatches.none { it.id == oldNum })
+    }
 
     @Test
-    fun `legitimate reuse clears prior retirement hint before a later keyless retirement`() =
-        testScope.runTest {
-            val num = 8100000000.toInt()
-            val oldKey = ByteArray(32) { 0x18 }.toByteString()
-            val reuseKey = ByteArray(32) { 0x19 }.toByteString()
-            val untrustedKey = ByteArray(32) { 0x1a }.toByteString()
-            nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Old", "OD"), manuallyVerified = false)
-            advanceUntilIdle()
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-            nodeManager.handleReceivedUser(num, userWithKey(reuseKey, "Reuse", "RE"), manuallyVerified = false)
-            advanceUntilIdle()
-            assertEquals("Reuse", nodeManager.nodeDBbyNodeNum[num]?.user?.long_name)
+    fun `keyless retired number rejects an unrepresented valid key for the session`() = testScope.runTest {
+        val num = 7100000000.toInt()
+        val incomingKey = ByteArray(32) { 0x17 }.toByteString()
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
 
-            nodeManager.removeByNodenum(num)
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-            nodeManager.handleReceivedUser(num, userWithKey(untrustedKey, "Untrusted", "UN"), manuallyVerified = false)
-            advanceUntilIdle()
+        nodeManager.handleReceivedUser(
+            num,
+            userWithKey(incomingKey, "Untrusted Reuse", "UR"),
+            manuallyVerified = false,
+        )
+        advanceUntilIdle()
 
-            assertNull(nodeManager.nodeDBbyNodeNum[num], "an absent trusted migration must not retain an obsolete hint")
-        }
+        assertNull(nodeManager.nodeDBbyNodeNum[num])
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
+    fun `retired number with different valid key can be legitimately reused`() = testScope.runTest {
+        val num = 8000000000.toInt()
+        val oldKey = ByteArray(32) { 0x08 }.toByteString()
+        val newKey = ByteArray(32) { 0x09 }.toByteString()
+        // Create and retire with old key
+        nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Old", "OD"), manuallyVerified = false)
+        advanceUntilIdle()
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
+        advanceUntilIdle()
+        // Capture dispatches to verify the reuse notification specifically,
+        // not the initial sighting from the setup above.
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.setNodeDbReady(true)
+        // Replay with different key — should be allowed as legitimate reuse
+        nodeManager.handleReceivedUser(num, userWithKey(newKey, "New", "NW"), manuallyVerified = false)
+        advanceUntilIdle()
+        val newNode = nodeManager.nodeDBbyNodeNum[num]
+        assertNotNull(newNode)
+        assertEquals("New", newNode.user.long_name)
+        assertEquals(
+            1,
+            dispatched.count { it.id == num && it.message == "New" },
+            "exactly one notification for the reuse at $num",
+        )
+    }
+
+    @Test
+    fun `legitimate reuse clears prior retirement hint before a later keyless retirement`() = testScope.runTest {
+        val num = 8100000000.toInt()
+        val oldKey = ByteArray(32) { 0x18 }.toByteString()
+        val reuseKey = ByteArray(32) { 0x19 }.toByteString()
+        val untrustedKey = ByteArray(32) { 0x1a }.toByteString()
+        nodeManager.handleReceivedUser(num, userWithKey(oldKey, "Old", "OD"), manuallyVerified = false)
+        advanceUntilIdle()
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
+        nodeManager.handleReceivedUser(num, userWithKey(reuseKey, "Reuse", "RE"), manuallyVerified = false)
+        advanceUntilIdle()
+        assertEquals("Reuse", nodeManager.nodeDBbyNodeNum[num]?.user?.long_name)
+
+        nodeManager.removeByNodenum(num)
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
+        nodeManager.handleReceivedUser(num, userWithKey(untrustedKey, "Untrusted", "UN"), manuallyVerified = false)
+        advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[num], "an absent trusted migration must not retain an obsolete hint")
+    }
 
     @Test
     fun `public key diagnostics use a one-way fingerprint`() {
@@ -2389,281 +2417,273 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `complete 2_7 to 2_8 renumbering produces no old number notification`() =
-        testScope.runTest {
-            val oldNum = -297114191
-            val newNum = 1230588578
-            val key = ByteArray(32) { 0x0a }.toByteString()
-            // Simulate: old 2.7 local node identity
-            nodeManager.setMyNodeNum(oldNum)
-            nodeManager.handleReceivedUser(oldNum, userWithKey(key, "OldLocal", "OL"), manuallyVerified = false)
-            advanceUntilIdle()
-            // Trusted migration retires old number, canonical identity moves to newNum
-            nodeManager.setMyNodeNum(newNum)
-            nodeManager.handleReceivedUser(newNum, userWithKey(key, "NewLocal", "NL"), manuallyVerified = false)
-            nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
-            advanceUntilIdle()
-            // Early replay of old number User packet — should be suppressed
-            val dispatchedBefore = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatchedBefore)) } returns true
-            nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
-            advanceUntilIdle()
-            // The old number should NOT be in nodeDB
-            assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
-            // No notification should have been dispatched for the old number replay
-            // (the notification dispatch was captured; check none is for oldNum)
-            val oldNumNotifications = dispatchedBefore.filter { it.id == oldNum }
-            assertTrue(oldNumNotifications.isEmpty(), "No notification should be dispatched for retired oldNum")
-        }
+    fun `complete 2_7 to 2_8 renumbering produces no old number notification`() = testScope.runTest {
+        val oldNum = -297114191
+        val newNum = 1230588578
+        val key = ByteArray(32) { 0x0a }.toByteString()
+        // Simulate: old 2.7 local node identity
+        nodeManager.setMyNodeNum(oldNum)
+        nodeManager.handleReceivedUser(oldNum, userWithKey(key, "OldLocal", "OL"), manuallyVerified = false)
+        advanceUntilIdle()
+        // Trusted migration retires old number, canonical identity moves to newNum
+        nodeManager.setMyNodeNum(newNum)
+        nodeManager.handleReceivedUser(newNum, userWithKey(key, "NewLocal", "NL"), manuallyVerified = false)
+        nodeManager.applyTrustedIdentityMigrations(listOf(oldNum))
+        advanceUntilIdle()
+        // Early replay of old number User packet — should be suppressed
+        val dispatchedBefore = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatchedBefore)) } returns true
+        nodeManager.handleReceivedUser(oldNum, userWithKey(key, "Replay", "RP"), manuallyVerified = false)
+        advanceUntilIdle()
+        // The old number should NOT be in nodeDB
+        assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
+        // No notification should have been dispatched for the old number replay
+        // (the notification dispatch was captured; check none is for oldNum)
+        val oldNumNotifications = dispatchedBefore.filter { it.id == oldNum }
+        assertTrue(oldNumNotifications.isEmpty(), "No notification should be dispatched for retired oldNum")
+    }
 
     @Test
-    fun `genuine remote first sighting emits exactly one notification`() =
-        testScope.runTest {
-            nodeManager.setNodeDbReady(true)
-            val num = 9000000000.toInt()
-            val key = ByteArray(32) { 0x0b }.toByteString()
-            nodeManager.setMyNodeNum(1230588578)
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.handleReceivedUser(num, userWithKey(key, "Genuine Remote", "GR"), manuallyVerified = false)
-            advanceUntilIdle()
-            val numNotifications = dispatched.filter { it.id == num }
-            assertEquals(1, numNotifications.size, "Exactly one notification for genuine new node")
-        }
+    fun `genuine remote first sighting emits exactly one notification`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
+        val num = 9000000000.toInt()
+        val key = ByteArray(32) { 0x0b }.toByteString()
+        nodeManager.setMyNodeNum(1230588578)
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.handleReceivedUser(num, userWithKey(key, "Genuine Remote", "GR"), manuallyVerified = false)
+        advanceUntilIdle()
+        val numNotifications = dispatched.filter { it.id == num }
+        assertEquals(1, numNotifications.size, "Exactly one notification for genuine new node")
+    }
 
     // ── Phase 8 — session-safe node cache loading & trusted-hint survival ─────────
 
     @Test
-    fun `direct snapshot returns only the newly selected DB after a currentDb switch`() =
-        testScope.runTest {
-            // Simulate the race that motivated Phase 6: the process-wide nodeDBbyNum StateFlow (a stateIn cache) still
-            // holds the PREVIOUS database's node map right after a currentDb switch, but the direct snapshot read
-            // returns
-            // only the newly selected DB's nodes.
-            val staleNum = 1001
-            val freshNum = 2002
-            val staleNode = makeKnownNode(staleNum, validPk, "Old DB")
-            val freshNode = makeKnownNode(freshNum, validPk, "New DB")
+    fun `direct snapshot returns only the newly selected DB after a currentDb switch`() = testScope.runTest {
+        // Simulate the race that motivated Phase 6: the process-wide nodeDBbyNum StateFlow (a stateIn cache) still
+        // holds the PREVIOUS database's node map right after a currentDb switch, but the direct snapshot read
+        // returns
+        // only the newly selected DB's nodes.
+        val staleNum = 1001
+        val freshNum = 2002
+        val staleNode = makeKnownNode(staleNum, validPk, "Old DB")
+        val freshNode = makeKnownNode(freshNum, validPk, "New DB")
 
-            // Stale StateFlow cache (old DB still reflected) vs. the direct snapshot (new DB only).
-            every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(staleNum to staleNode))
-            everySuspend { nodeRepository.getNodeDbSnapshot() } returns mapOf(freshNum to freshNode)
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+        // Stale StateFlow cache (old DB still reflected) vs. the direct snapshot (new DB only).
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(staleNum to staleNode))
+        everySuspend { nodeRepository.getNodeDbSnapshot() } returns mapOf(freshNum to freshNode)
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
-            nodeManager.loadCachedNodeDB()
-            advanceUntilIdle()
+        nodeManager.loadCachedNodeDB()
+        advanceUntilIdle()
 
-            // The cache loader consumed the direct snapshot, so staleNum never entered the live index and freshNum did.
-            assertNull(nodeManager.nodeDBbyNodeNum[staleNum], "stale-DB row must not leak into the live index")
-            val loaded = nodeManager.nodeDBbyNodeNum[freshNum]
-            assertNotNull(loaded)
-            assertEquals("New DB", loaded!!.user.long_name)
-        }
+        // The cache loader consumed the direct snapshot, so staleNum never entered the live index and freshNum did.
+        assertNull(nodeManager.nodeDBbyNodeNum[staleNum], "stale-DB row must not leak into the live index")
+        val loaded = nodeManager.nodeDBbyNodeNum[freshNum]
+        assertNotNull(loaded)
+        assertEquals("New DB", loaded!!.user.long_name)
+    }
 
     @Test
-    fun `loadCachedNodeDB result is discarded when clear starts a new session mid-load`() =
-        testScope.runTest {
-            // Pause the load after the snapshot read so we can race a clear() against it before commit. We use the
-            // repository snapshot call as the suspension point.
-            val oldNum = 3003
-            val oldNode = makeKnownNode(oldNum, validPk, "Old")
-            val snapshotRead = CompletableDeferred<Unit>()
-            val snapshotRelease = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.getNodeDbSnapshot() } calls
-                {
-                    snapshotRead.complete(Unit)
-                    snapshotRelease.await()
-                    mapOf(oldNum to oldNode)
-                }
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+    fun `loadCachedNodeDB result is discarded when clear starts a new session mid-load`() = testScope.runTest {
+        // Pause the load after the snapshot read so we can race a clear() against it before commit. We use the
+        // repository snapshot call as the suspension point.
+        val oldNum = 3003
+        val oldNode = makeKnownNode(oldNum, validPk, "Old")
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                mapOf(oldNum to oldNode)
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
-            nodeManager.loadCachedNodeDB()
-            snapshotRead.await()
-            // While the load is paused after its read, a new session starts. This must discard the old snapshot.
-            nodeManager.clear()
-            // Add a node AFTER clear so we can verify the discarded load did not wipe it on commit.
-            val liveNum = 4004
-            nodeManager.updateNode(liveNum) { makeKnownNode(liveNum, validPk, "Live After Clear") }
-            snapshotRelease.complete(Unit)
-            advanceUntilIdle()
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        // While the load is paused after its read, a new session starts. This must discard the old snapshot.
+        nodeManager.clear()
+        // Add a node AFTER clear so we can verify the discarded load did not wipe it on commit.
+        val liveNum = 4004
+        nodeManager.updateNode(liveNum) { makeKnownNode(liveNum, validPk, "Live After Clear") }
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
 
-            // The old-DB snapshot was discarded completely: oldNum is absent, liveNum survives.
-            assertNull(
-                nodeManager.nodeDBbyNodeNum[oldNum],
-                "stale snapshot from the previous session must be discarded",
+        // The old-DB snapshot was discarded completely: oldNum is absent, liveNum survives.
+        assertNull(
+            nodeManager.nodeDBbyNodeNum[oldNum],
+            "stale snapshot from the previous session must be discarded",
+        )
+        val live = nodeManager.nodeDBbyNodeNum[liveNum]
+        assertNotNull(live)
+        assertEquals("Live After Clear", live!!.user.long_name)
+    }
+
+    @Test
+    fun `live node update during the load window is not overwritten by the snapshot`() = testScope.runTest {
+        val num = 5005
+        val staleSnapshotNode = makeKnownNode(num, validPk, "Stale Snapshot").copy(lastHeard = 100)
+        val liveUpdatedNode = makeKnownNode(num, validPk, "Live Updated").copy(lastHeard = 200)
+
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                mapOf(num to staleSnapshotNode)
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        // A live update arrives between the snapshot capture and its commit. The live value (with fresher fields)
+        // must win over the snapshot row at the same num.
+        nodeManager.updateNode(num) { liveUpdatedNode }
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
+
+        val result = nodeManager.nodeDBbyNodeNum[num]
+        assertNotNull(result)
+        assertEquals("Live Updated", result!!.user.long_name)
+        assertEquals(200, result.lastHeard, "live mutation field must not be overwritten by the snapshot")
+    }
+
+    @Test
+    fun `trusted migration during the load window retires absent number and suppresses replay`() = testScope.runTest {
+        val num = 6006
+        val snapshotNode = makeKnownNode(num, validPk, "Pre-migration")
+
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                mapOf(num to snapshotNode)
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        // Trusted migration runs while the load is suspended. The migrated number is absent at this point, so its
+        // hint is captured as "absent" — but the retirement must still survive and suppress a stale replay even
+        // after
+        // the load commits.
+        nodeManager.applyTrustedIdentityMigrations(listOf(num))
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
+
+        assertNull(
+            nodeManager.nodeDBbyNodeNum[num],
+            "retired number absent at migration time stays retired post-load",
+        )
+
+        // Stale same-key replay still suppressed, no notification dispatched for the retired old number.
+        val dispatched = mutableListOf<Notification>()
+        everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.handleReceivedUser(num, userWithKey(validPk, "Replay", "RP"), manuallyVerified = false)
+        advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[num])
+        assertTrue(dispatched.none { it.id == num }, "no notification for retired-number replay")
+    }
+
+    @Test
+    fun `persisted local node fills null identity when live nodes change during load`() = testScope.runTest {
+        val persistedNum = 7007
+        val liveNum = 8008
+        val liveKey = ByteArray(32) { (it + 90).toByte() }.toByteString()
+        val persistedInfo =
+            MyNodeInfo(
+                myNodeNum = persistedNum,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = "2.5.0",
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0L,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 0,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
             )
-            val live = nodeManager.nodeDBbyNodeNum[liveNum]
-            assertNotNull(live)
-            assertEquals("Live After Clear", live!!.user.long_name)
-        }
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                mapOf(persistedNum to makeKnownNode(persistedNum, validPk, "Persisted"))
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(persistedInfo)
+
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        nodeManager.updateNode(liveNum) { makeKnownNode(liveNum, liveKey, "Live") }
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(
+            persistedNum,
+            nodeManager.myNodeNum.value,
+            "the merge path must restore persisted local identity",
+        )
+        assertNotNull(nodeManager.nodeDBbyNodeNum[liveNum], "the concurrent live update must also survive")
+    }
 
     @Test
-    fun `live node update during the load window is not overwritten by the snapshot`() =
-        testScope.runTest {
-            val num = 5005
-            val staleSnapshotNode = makeKnownNode(num, validPk, "Stale Snapshot").copy(lastHeard = 100)
-            val liveUpdatedNode = makeKnownNode(num, validPk, "Live Updated").copy(lastHeard = 200)
-
-            val snapshotRead = CompletableDeferred<Unit>()
-            val snapshotRelease = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.getNodeDbSnapshot() } calls
-                {
-                    snapshotRead.complete(Unit)
-                    snapshotRelease.await()
-                    mapOf(num to staleSnapshotNode)
-                }
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-
-            nodeManager.loadCachedNodeDB()
-            snapshotRead.await()
-            // A live update arrives between the snapshot capture and its commit. The live value (with fresher fields)
-            // must win over the snapshot row at the same num.
-            nodeManager.updateNode(num) { liveUpdatedNode }
-            snapshotRelease.complete(Unit)
-            advanceUntilIdle()
-
-            val result = nodeManager.nodeDBbyNodeNum[num]
-            assertNotNull(result)
-            assertEquals("Live Updated", result!!.user.long_name)
-            assertEquals(200, result.lastHeard, "live mutation field must not be overwritten by the snapshot")
-        }
-
-    @Test
-    fun `trusted migration during the load window retires absent number and suppresses replay`() =
-        testScope.runTest {
-            val num = 6006
-            val snapshotNode = makeKnownNode(num, validPk, "Pre-migration")
-
-            val snapshotRead = CompletableDeferred<Unit>()
-            val snapshotRelease = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.getNodeDbSnapshot() } calls
-                {
-                    snapshotRead.complete(Unit)
-                    snapshotRelease.await()
-                    mapOf(num to snapshotNode)
-                }
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-
-            nodeManager.loadCachedNodeDB()
-            snapshotRead.await()
-            // Trusted migration runs while the load is suspended. The migrated number is absent at this point, so its
-            // hint is captured as "absent" — but the retirement must still survive and suppress a stale replay even
-            // after
-            // the load commits.
-            nodeManager.applyTrustedIdentityMigrations(listOf(num))
-            snapshotRelease.complete(Unit)
-            advanceUntilIdle()
-
-            assertNull(
-                nodeManager.nodeDBbyNodeNum[num],
-                "retired number absent at migration time stays retired post-load",
+    fun `local-node identity learned during the load window survives snapshot commit`() = testScope.runTest {
+        val persistedNum = 7007
+        val persistedInfo =
+            MyNodeInfo(
+                myNodeNum = persistedNum,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = "2.5.0",
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0L,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 0,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
             )
+        val liveLearnedNum = 8008
 
-            // Stale same-key replay still suppressed, no notification dispatched for the retired old number.
-            val dispatched = mutableListOf<Notification>()
-            everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
-            nodeManager.handleReceivedUser(num, userWithKey(validPk, "Replay", "RP"), manuallyVerified = false)
-            advanceUntilIdle()
+        val snapshotRead = CompletableDeferred<Unit>()
+        val snapshotRelease = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.getNodeDbSnapshot() } calls
+            {
+                snapshotRead.complete(Unit)
+                snapshotRelease.await()
+                // Persisted DB still references the old persistedNum row.
+                mapOf(persistedNum to makeKnownNode(persistedNum, validPk, "Persisted"))
+            }
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(persistedInfo)
 
-            assertNull(nodeManager.nodeDBbyNodeNum[num])
-            assertTrue(dispatched.none { it.id == num }, "no notification for retired-number replay")
-        }
+        nodeManager.loadCachedNodeDB()
+        snapshotRead.await()
+        // The live session has learned a DIFFERENT local node number during the load window. The persisted value
+        // must NOT clobber it on commit.
+        nodeManager.setMyNodeNum(liveLearnedNum)
+        snapshotRelease.complete(Unit)
+        advanceUntilIdle()
 
-    @Test
-    fun `persisted local node fills null identity when live nodes change during load`() =
-        testScope.runTest {
-            val persistedNum = 7007
-            val liveNum = 8008
-            val liveKey = ByteArray(32) { (it + 90).toByte() }.toByteString()
-            val persistedInfo =
-                MyNodeInfo(
-                    myNodeNum = persistedNum,
-                    hasGPS = false,
-                    model = null,
-                    firmwareVersion = "2.5.0",
-                    couldUpdate = false,
-                    shouldUpdate = false,
-                    currentPacketId = 0L,
-                    messageTimeoutMsec = 0,
-                    minAppVersion = 0,
-                    maxChannels = 0,
-                    hasWifi = false,
-                    channelUtilization = 0f,
-                    airUtilTx = 0f,
-                    deviceId = null,
-                )
-            val snapshotRead = CompletableDeferred<Unit>()
-            val snapshotRelease = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.getNodeDbSnapshot() } calls
-                {
-                    snapshotRead.complete(Unit)
-                    snapshotRelease.await()
-                    mapOf(persistedNum to makeKnownNode(persistedNum, validPk, "Persisted"))
-                }
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(persistedInfo)
-
-            nodeManager.loadCachedNodeDB()
-            snapshotRead.await()
-            nodeManager.updateNode(liveNum) { makeKnownNode(liveNum, liveKey, "Live") }
-            snapshotRelease.complete(Unit)
-            advanceUntilIdle()
-
-            assertEquals(
-                persistedNum,
-                nodeManager.myNodeNum.value,
-                "the merge path must restore persisted local identity",
-            )
-            assertNotNull(nodeManager.nodeDBbyNodeNum[liveNum], "the concurrent live update must also survive")
-        }
-
-    @Test
-    fun `local-node identity learned during the load window survives snapshot commit`() =
-        testScope.runTest {
-            val persistedNum = 7007
-            val persistedInfo =
-                MyNodeInfo(
-                    myNodeNum = persistedNum,
-                    hasGPS = false,
-                    model = null,
-                    firmwareVersion = "2.5.0",
-                    couldUpdate = false,
-                    shouldUpdate = false,
-                    currentPacketId = 0L,
-                    messageTimeoutMsec = 0,
-                    minAppVersion = 0,
-                    maxChannels = 0,
-                    hasWifi = false,
-                    channelUtilization = 0f,
-                    airUtilTx = 0f,
-                    deviceId = null,
-                )
-            val liveLearnedNum = 8008
-
-            val snapshotRead = CompletableDeferred<Unit>()
-            val snapshotRelease = CompletableDeferred<Unit>()
-            everySuspend { nodeRepository.getNodeDbSnapshot() } calls
-                {
-                    snapshotRead.complete(Unit)
-                    snapshotRelease.await()
-                    // Persisted DB still references the old persistedNum row.
-                    mapOf(persistedNum to makeKnownNode(persistedNum, validPk, "Persisted"))
-                }
-            every { nodeRepository.myNodeInfo } returns MutableStateFlow(persistedInfo)
-
-            nodeManager.loadCachedNodeDB()
-            snapshotRead.await()
-            // The live session has learned a DIFFERENT local node number during the load window. The persisted value
-            // must NOT clobber it on commit.
-            nodeManager.setMyNodeNum(liveLearnedNum)
-            snapshotRelease.complete(Unit)
-            advanceUntilIdle()
-
-            assertEquals(
-                liveLearnedNum,
-                nodeManager.myNodeNum.value,
-                "live local-node info wins over persisted snapshot",
-            )
-        }
+        assertEquals(
+            liveLearnedNum,
+            nodeManager.myNodeNum.value,
+            "live local-node info wins over persisted snapshot",
+        )
+    }
 
     @Test
     fun `repeated trusted migration preserves original hint and still permits distinct-key reuse`() =
