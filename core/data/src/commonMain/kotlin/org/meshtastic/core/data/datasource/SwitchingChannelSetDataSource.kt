@@ -18,7 +18,6 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -51,8 +50,8 @@ class SwitchingChannelSetDataSource(
     private val writeMutex = Mutex()
 
     val channelSetFlow: Flow<ChannelSet> =
-        dbManager.currentDb
-            .flatMapLatest { db -> db.channelSetDao().observe() }
+        dbManager
+            .observeCurrentDb { db -> db.channelSetDao().observe() }
             .map { entity -> entity?.channelSet ?: ChannelSet() }
             .distinctUntilChanged()
 
