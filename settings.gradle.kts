@@ -79,6 +79,10 @@ develocity {
     buildScan {
         uploadInBackground = !isCI
         publishing.onlyIf { it.isAuthenticated }
+        // File fingerprints are what let Develocity's build comparison explain a cache miss
+        // down to the individual changed input. That is a CI-debugging tool, and the extra
+        // scan payload is not worth paying for on every local build.
+        capture { fileFingerprints = isCI }
         obfuscation { ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } } }
     }
 }

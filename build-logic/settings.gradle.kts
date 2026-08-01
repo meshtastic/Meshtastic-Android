@@ -30,6 +30,12 @@ pluginManagement {
     }
 }
 
+plugins {
+    // Version duplicated from the root settings.gradle.kts: a settings `plugins {}`
+    // block is evaluated before the version catalog exists, so it cannot use `libs`.
+    id("com.gradle.develocity") version "4.5.0"
+}
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
@@ -50,7 +56,19 @@ dependencyResolutionManagement {
     }
 }
 
-// Build Cache configuration (HTTP remote cache + local)
+// build-logic is a plugin-included build with its own settings, so it does NOT inherit the
+// root build's Develocity configuration. Without this block the shared build-cache script
+// below finds no `develocity` extension and silently falls back to local-cache-only —
+// `./gradlew help --info` then reports "Using local directory build cache for build
+// ':build-logic'" with no matching remote line, while the root build gets both. Mirror the
+// root's server/project so the convention plugins share one remote cache with everything else.
+develocity {
+    server = "https://community.develocity.cloud"
+    projectId = "meshtastic"
+    buildScan { publishing.onlyIf { it.isAuthenticated } }
+}
+
+// Build Cache configuration (Develocity remote cache + local)
 apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
