@@ -24,6 +24,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
@@ -39,11 +40,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -57,6 +64,11 @@ import org.meshtastic.core.database.di.DatabaseDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
+
+internal const val MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES = 3
+
+/** Allows two recovered failure streaks while hard-bounding Flow-created detached pools for this manager lifetime. */
+internal const val MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME = MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES * 2
 
 /** Returns database names that form either side of an unfinished, crash-recoverable association route. */
 internal fun pendingRouteDbNames(preferences: Preferences): Set<String> = preferences
@@ -88,6 +100,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         OPEN,
         CLOSING,
         CLOSED,
+    }
+
+    private enum class ReopenOrigin {
+        BOUNDED_OPERATION,
+        FLOW_OBSERVER,
     }
 
     @Volatile private var lifecycleState = LifecycleState.OPEN
@@ -194,6 +211,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     /** Replaced pools that remain live for consumers of an earlier [currentDb] emission until orderly shutdown. */
     private val detachedDatabases = mutableListOf<NamedDatabase>()
 
+    /** Guarded by [mutex]; counts successful automatic Flow-triggered replacements for this manager's lifetime. */
+    private var flowPoolRecoveriesThisLifetime = 0
+
     /** Databases merged and logically retired but kept open — app-wide consumers may still hold references. */
     private val logicallyRetired = mutableSetOf<String>()
 
@@ -272,6 +292,60 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     override val currentDb: StateFlow<MeshtasticDatabase>
         get() = _currentDb
+
+    /**
+     * Re-latches long-lived DAO flows on database switches and recovers the active Room pool after a reader/writer
+     * acquisition timeout. A failed query is never replayed on the same pool; publishing the replacement causes
+     * [flatMapLatest] to start a fresh DAO flow. Concurrent failing collectors converge on the same replacement.
+     *
+     * Each collector stops after [MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES] replacements without a successful emission,
+     * while the manager permits at most [MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME] successful Flow-triggered
+     * replacements for its lifetime. The second bound prevents intermittent wedge/recover/emission cycles from
+     * retaining an unbounded number of detached Room instances before orderly shutdown can reclaim them.
+     */
+    override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = flow {
+        val consecutivePoolRecoveries = atomic(0)
+        emitAll(
+            currentDb.flatMapLatest { database ->
+                flow { emitAll(query(database).onEach { consecutivePoolRecoveries.value = 0 }) }
+                    .catch { failure ->
+                        if (failure is CancellationException) throw failure
+                        val exception = failure as? Exception ?: throw failure
+                        if (!isDbPoolAcquireTimeoutException(exception)) throw failure
+                        if (
+                            consecutivePoolRecoveries.value >= MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES &&
+                            shouldRethrowFlowFailure(database)
+                        ) {
+                            throw exception
+                        }
+                        consecutivePoolRecoveries.incrementAndGet()
+
+                        val reopened =
+                            try {
+                                // Once a timeout is classified, finish or reject the manager-level ownership transfer
+                                // atomically even if this collector is cancelled. A cancellable reopen could otherwise
+                                // build a replacement and abandon the cache/publication handoff halfway through.
+                                withContext(NonCancellable) { reopenFlowDatabaseIfStillCurrent(database) }
+                            } catch (@Suppress("TooGenericExceptionCaught") recoveryFailure: Exception) {
+                                exception.addSuppressed(recoveryFailure)
+                                Logger.w(recoveryFailure) { "Failed to recover active DB after a Flow pool timeout" }
+                                throw exception
+                            }
+                        if (reopened != null) {
+                            Logger.w { "Reopened active DB after a Room Flow connection-pool timeout" }
+                        } else if (shouldRethrowFlowFailure(database)) {
+                            throw exception
+                        }
+                    }
+            },
+        )
+    }
+
+    /** Checks flow ownership without lazily rebuilding [currentDb] while shutdown is clearing its publication. */
+    private fun shouldRethrowFlowFailure(database: MeshtasticDatabase): Boolean {
+        val isStillCurrent = synchronized(initializationLock) { currentDbState?.value === database }
+        return isStillCurrent || lifecycleState != LifecycleState.OPEN
+    }
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
@@ -798,14 +872,34 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      *
      * Returns the reopened DB, or null if another coroutine switched databases or shutdown has started.
      */
+    private suspend fun reopenFlowDatabaseIfStillCurrent(expectedDb: MeshtasticDatabase): MeshtasticDatabase? {
+        val expectedDbName =
+            mutex.withLock {
+                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== expectedDb) return null
+                currentDbName
+            }
+        return reopenActiveDatabaseIfStillCurrent(expectedDb, expectedDbName, ReopenOrigin.FLOW_OBSERVER)
+    }
+
     @Suppress("ReturnCount")
     private suspend fun reopenActiveDatabaseIfStillCurrent(
         expectedDb: MeshtasticDatabase,
         expectedDbName: String,
+        origin: ReopenOrigin,
     ): MeshtasticDatabase? = withManagerOperation {
         mutex.withLock {
             if (lifecycleState != LifecycleState.OPEN) return@withManagerOperation null
             if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return@withManagerOperation null
+            if (
+                origin == ReopenOrigin.FLOW_OBSERVER &&
+                flowPoolRecoveriesThisLifetime >= MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME
+            ) {
+                Logger.w {
+                    "Flow DB recovery limit reached ($flowPoolRecoveriesThisLifetime); refusing another automatic " +
+                        "replacement"
+                }
+                return@withManagerOperation null
+            }
 
             val registered =
                 dbCache[expectedDbName]
@@ -815,7 +909,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                         null
                     }
             if (registered !== expectedDb) {
-                Logger.w { "withDb: active DB registration changed before reopen; skipping active DB reopen" }
+                Logger.w { "DB recovery: active registration changed before reopen; skipping active DB reopen" }
                 return@withManagerOperation null
             }
 
@@ -835,6 +929,9 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 synchronized(initializationLock) { initializedDefaultDb = reopened }
             }
             _currentDb.value = reopened
+            if (origin == ReopenOrigin.FLOW_OBSERVER) {
+                flowPoolRecoveriesThisLifetime += 1
+            }
             if (detachedDatabases.none { it.database === expectedDb }) {
                 detachedDatabases.add(NamedDatabase(expectedDbName, expectedDb))
             }
@@ -1106,7 +1203,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             if (currentDb === db && isDbPoolAcquireTimeoutException(e)) {
                 val reopened =
                     try {
-                        reopenActiveDatabaseIfStillCurrent(db, active)
+                        reopenActiveDatabaseIfStillCurrent(db, active, ReopenOrigin.BOUNDED_OPERATION)
                     } catch (recoveryCancel: CancellationException) {
                         throw recoveryCancel
                     } catch (recoveryFailure: Exception) {

@@ -22,7 +22,6 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -53,12 +52,11 @@ import org.meshtastic.core.repository.PacketRepository as SharedPacketRepository
 class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val dispatchers: CoroutineDispatchers) :
     SharedPacketRepository {
 
-    override fun getWaypoints(): Flow<List<DataPacket>> = dbManager.currentDb
-        .flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
-        .map { list -> list.map { it.data } }
+    override fun getWaypoints(): Flow<List<DataPacket>> =
+        dbManager.observeCurrentDb { db -> db.packetDao().getAllWaypointsFlow() }.map { list -> list.map { it.data } }
 
-    override fun getContacts(): Flow<Map<String, DataPacket>> = dbManager.currentDb
-        .flatMapLatest { db -> db.packetDao().getContactKeys() }
+    override fun getContacts(): Flow<Map<String, DataPacket>> = dbManager
+        .observeCurrentDb { db -> db.packetDao().getContactKeys() }
         .map { map -> map.mapValues { it.value.data } }
 
     override fun getContactsPaged(): Flow<PagingData<Pair<String, DataPacket>>> = Pager(
@@ -80,16 +78,16 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(contact) }
 
     override fun getUnreadCountFlow(contact: String): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountFlow(contact) }
+        dbManager.observeCurrentDb { db -> db.packetDao().getUnreadCountFlow(contact) }
 
     override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(contact) }
+        dbManager.observeCurrentDb { db -> db.packetDao().getFirstUnreadMessageUuid(contact) }
 
     override fun hasUnreadMessages(contact: String): Flow<Boolean> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().hasUnreadMessages(contact) }
+        dbManager.observeCurrentDb { db -> db.packetDao().hasUnreadMessages(contact) }
 
     override fun getUnreadCountTotal(): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
+        dbManager.observeCurrentDb { db -> db.packetDao().getUnreadCountTotal() }
 
     // One-shot writes go through withDb so they register with the cross-transport merge drain barrier. The callback
     // is never replayed after it starts; callers needing retries must make that policy explicit where idempotency is
@@ -361,8 +359,8 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().update(packet) } }
     }
 
-    override fun getContactSettings(): Flow<Map<String, ContactSettings>> = dbManager.currentDb
-        .flatMapLatest { db -> db.packetDao().getContactSettings() }
+    override fun getContactSettings(): Flow<Map<String, ContactSettings>> = dbManager
+        .observeCurrentDb { db -> db.packetDao().getContactSettings() }
         .map { map -> map.mapValues { it.value.toShared() } }
 
     override suspend fun getContactSettings(contact: String): ContactSettings = withContext(dispatchers.io) {
@@ -382,7 +380,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     }
 
     override fun getFilteredCountFlow(contactKey: String): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFilteredCountFlow(contactKey) }
+        dbManager.observeCurrentDb { db -> db.packetDao().getFilteredCountFlow(contactKey) }
 
     override suspend fun getFilteredCount(contactKey: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(contactKey) }
@@ -442,7 +440,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     override fun searchMessages(query: String, contactKey: String?, getNode: (String?) -> Node): Flow<List<Message>> {
         val sanitized = sanitizeFtsQuery(query)
         if (sanitized.isBlank()) return flowOf(emptyList())
-        return dbManager.currentDb.flatMapLatest { db ->
+        return dbManager.observeCurrentDb { db ->
             kotlinx.coroutines.flow.flow {
                 val dao = db.packetDao()
                 val packets =

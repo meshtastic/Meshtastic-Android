@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -32,7 +31,7 @@ class QuickChatActionRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : QuickChatActionRepository {
     override fun getAllActions(): Flow<List<QuickChatAction>> =
-        dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
+        dbManager.observeCurrentDb { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
     // Writes go through withDb so they register with the cross-transport merge drain barrier (see DatabaseProvider).
     override suspend fun upsert(action: QuickChatAction) {

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.database
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -30,11 +31,15 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * One-shot DAO *reads* use [withReadDb]. They stay out of writer admission and the serialized containment lane; the
  * logical-retirement guarantee in [DatabaseManager] keeps a captured published pool alive for the process lifetime.
- * [currentDb] itself remains the right latch for Flow/Paging factories, which must re-latch on database switches.
+ * Long-lived DAO Flows use [observeCurrentDb] so each implementation must make its database-switch/recovery policy
+ * explicit. [currentDb] remains the synchronous ownership source and the backing latch for existing Paging factories.
  */
 interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */
     val currentDb: StateFlow<MeshtasticDatabase>
+
+    /** Re-latches [query] whenever the active database changes. Production also recovers a wedged Room pool. */
+    fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T>
 
     /**
      * Execute one bounded read against the synchronously published current database without writer admission. The read

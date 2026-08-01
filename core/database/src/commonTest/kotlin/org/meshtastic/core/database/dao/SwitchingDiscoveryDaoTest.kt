@@ -16,9 +16,12 @@
  */
 package org.meshtastic.core.database.dao
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
@@ -87,9 +90,13 @@ class SwitchingDiscoveryDaoTest {
     }
 
     /** Minimal [DatabaseProvider] whose active DB the test can swap, mirroring a device/DB switch. */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private class TestProvider(db: MeshtasticDatabase) : DatabaseProvider {
         private val _currentDb = MutableStateFlow(db)
         override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
+
+        override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> =
+            currentDb.flatMapLatest(query)
 
         override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(_currentDb.value)
 
