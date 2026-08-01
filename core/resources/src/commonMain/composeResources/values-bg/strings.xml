@@ -80,6 +80,7 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Добър</string>
+    <string name="aqi_hazardous">Опасно</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
@@ -129,8 +130,8 @@
     <string name="channel_3">Канал 3</string>
     <string name="channel_4">Канал 4</string>
     <string name="channel_5">Канал 5</string>
-    <string name="channel_6">Channel 6</string>
-    <string name="channel_7">/*Канал 7</string>
+    <string name="channel_6">Канал 6</string>
+    <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="channel_label">Канал</string>

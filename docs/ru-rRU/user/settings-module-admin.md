@@ -89,17 +89,17 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
-### Range Test Module
+### Модуль проверки дальности
 
-Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
-| Настройка                              | Описание                          |
-| -------------------------------------- | --------------------------------- |
-| Включено                               | Activate range testing            |
-| Sender Interval (s) | Time between test transmissions   |
-| Save CSV                               | Log received test data to SD card |
+| Настройка                                | Описание                          |
+| ---------------------------------------- | --------------------------------- |
+| Включено                                 | Активировать проверку дальности   |
+| Интервал отправки (с) | Время между передачами проверок   |
+| Сохранить в CSV                          | Log received test data to SD card |
 
-### Telemetry Module
+### Модуль телеметрии
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
@@ -112,7 +112,7 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
-### Canned Message Module
+### Модуль шаблонных сообщений
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
@@ -124,7 +124,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 | Rotary Encoder     | Enable rotary encoder input                                              |
 | Up/Down/Press Pins | GPIO pin assignments for input                                           |
 
-### Audio Module
+### Звуковой модуль
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
@@ -142,27 +142,27 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
-| Настройка            | Описание                                                        |
-| -------------------- | --------------------------------------------------------------- |
-| Включено             | Activate remote GPIO access                                     |
-| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
-| Available Pins       | Up to 4 GPIO pins this node exposes for remote read/write       |
+| Настройка                     | Описание                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| Включено                      | Activate remote GPIO access                                                    |
+| Разрешить неопределенные пины | Разрешить доступ к любому GPIO-пину (риск для безопасности) |
+| Доступные пины                | Up to 4 GPIO pins this node exposes for remote read/write                      |
 
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Включать только на выделенных GPIO-нодах.
 
-### Neighbor Info Module
+### Модуль информации о соседях
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Настройка                              | Описание                                                                                                                             |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Включено                               | Activate neighbor broadcasting                                                                                                       |
-| Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
-| Transmit Over LoRa                     | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
+| Настройка                                  | Описание                                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Включено                                   | Activate neighbor broadcasting                                                                                                       |
+| Интервал обновления (с) | How often to broadcast neighbor list                                                                                                 |
+| Передача через LoRa                        | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Ambient Lighting Module
+### Модуль окружающего освещения
 
 Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
 
@@ -206,12 +206,12 @@ Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [T
 
 ### Удаленное администрирование
 
-Remotely configure nodes that share your admin key:
+Удалённо настраивай ноды, которые используют твой ключ администрирования:
 
-1. Select the target node in the node list.
-2. Navigate to **Settings** for that node.
-3. Modify configuration.
-4. Tap **Save** — changes are sent over the mesh.
+1. Выбери целевую ноду в списке нод.
+2. Перейди в **Настройки** этой ноды.
+3. Измени конфигурацию.
+4. Нажми **Сохранить** — изменения отправляются через сеть.
 
 > ⚠️ **Requires:** Admin key configured on both your node and the target node.
 
@@ -219,9 +219,9 @@ Remotely configure nodes that share your admin key:
 
 Removes stale nodes from your local database that haven't been heard in a configurable time window.
 
-### Factory Reset
+### Сброс к заводским настройкам
 
-Resets all settings to factory defaults. **This cannot be undone.**
+Сбрасывает все настройки к заводским. **Это действие нельзя отменить.**
 
 ### Перезагрузка
 
@@ -234,10 +234,10 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 ### Troubleshooting Remote Admin
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
-- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Can't see remote settings** — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.
+- **Изменения не применены** — чтобы некоторые настройки вступили в силу, нужно перезагрузить устройство. Попробуй перезагрузить после сохранения.
+- **Не видны настройки удалённой ноды** — убедись, что твоя нода имеет админ-ключ для целевой ноды. Админ-канал настраивается автоматически, когда задан ключ администратора.
 
-## Related Topics
+## Связанные темы
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
