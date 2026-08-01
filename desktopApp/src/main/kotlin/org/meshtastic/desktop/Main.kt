@@ -71,6 +71,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -126,20 +127,29 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 }
 
 @OptIn(ExperimentalCoilApi::class)
-fun main(args: Array<String>) = application {
-    val koinApp = remember {
-        // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
-        Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
-        Logger.i { "Meshtastic Desktop — Starting" }
-        startKoin { modules(desktopPlatformModule(), desktopModule()) }
-    }
-    val systemLocale = remember { Locale.getDefault() }
-    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-    val httpClient = remember { koinApp.koin.get<HttpClient>() }
+fun main(args: Array<String>) {
+    application {
+        val koinApp = remember {
+            // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
+            Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+            Logger.i { "Meshtastic Desktop — Starting" }
+            startKoin { modules(desktopPlatformModule(), desktopModule()) }
+        }
+        val systemLocale = remember { Locale.getDefault() }
+        val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+        val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-    DeepLinkHandler(args, uiViewModel)
-    MeshServiceLifecycle()
-    ThemeAndLocaleProvider(uiViewModel)
+        DeepLinkHandler(args, uiViewModel)
+        MeshServiceLifecycle()
+        ThemeAndLocaleProvider(uiViewModel)
+    }
+
+    // `application {}` returns once the last window closes or exitApplication() is called, so this runs on the main
+    // thread with the UI already gone. Closing the container fires the `onClose` callbacks that release native
+    // handles — currently libnotify's process-wide state in LinuxNotificationSender. Guarded because a teardown
+    // failure must not turn a clean quit into a non-zero exit.
+    runCatching { stopKoin() }.onFailure { Logger.w(it) { "stopKoin() failed during shutdown" } }
+    Logger.i { "Meshtastic Desktop — Stopped" }
 }
 
 // ----- Deep link handling -----
