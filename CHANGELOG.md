@@ -7,7 +7,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-*No changes yet.*
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* fix(ui): give rx_snr real presence semantics end to end by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6523
+* fix(debug): restore node ID hex annotations broken by the Wire migration by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6532
+
+## New Contributors
+* @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
