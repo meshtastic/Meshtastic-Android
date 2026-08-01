@@ -66,6 +66,10 @@ class KoinVerificationTest {
                     // declared as known types even though they're never resolved from the graph.
                     BleLogLevel::class,
                     BleLogFormat::class,
+                    // CompanionPresenceCoordinator is assembled by a provider fun that hands it the
+                    // selected-address StateFlow directly (so its tests need nothing but a
+                    // MutableStateFlow); Verify still introspects the constructor param.
+                    kotlinx.coroutines.flow.StateFlow::class,
                     okio.Path::class,
                     okio.FileSystem::class,
                 ),

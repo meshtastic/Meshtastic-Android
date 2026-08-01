@@ -206,6 +206,58 @@ class CompanionAssociationRepositoryTest {
 
     // endregion
 
+    // region presence observation
+
+    @Test
+    // sdk 34, not 31: same production branch (everything below 36 takes the String overload), but Robolectric's
+    // ShadowCompanionDeviceManager only implements startObservingDevicePresence from sdk 33.
+    @Config(sdk = [34])
+    fun `presence observation uses the string API before 36`() {
+        val repository = newRepository()
+        bond(MAC)
+        shadowOf(companionDeviceManager).addAssociation(MAC)
+
+        repository.startObservingPresence(MAC)
+
+        assertEquals(MAC, shadowOf(companionDeviceManager).lastObservingDevicePresenceDeviceAddress)
+    }
+
+    @Test
+    @Config(sdk = [30])
+    fun `presence observation is a no-op before API 31`() {
+        val repository = newRepository()
+        bond(MAC)
+        shadowOf(companionDeviceManager).addAssociation(MAC)
+
+        repository.startObservingPresence(MAC)
+
+        assertNull(shadowOf(companionDeviceManager).lastObservingDevicePresenceDeviceAddress)
+    }
+
+    @Test
+    @Config(sdk = [34])
+    fun `presence observation is a no-op without the companion feature`() {
+        val repository = newRepository(featurePresent = false)
+
+        repository.startObservingPresence(MAC)
+
+        assertNull(shadowOf(companionDeviceManager).lastObservingDevicePresenceDeviceAddress)
+    }
+
+    @Test
+    @Config(sdk = [34])
+    fun `association ids resolve back to the radio mac`() {
+        val repository = newRepository()
+        bond(MAC)
+        shadowOf(companionDeviceManager).addAssociation(MAC)
+
+        val id = companionDeviceManager.myAssociations.single().id
+        assertEquals(MAC.lowercase(), repository.macForAssociationId(id)?.lowercase())
+        assertNull(repository.macForAssociationId(id + 1))
+    }
+
+    // endregion
+
     // region bond reconciliation ("disassociate when the radio is removed")
 
     @Test

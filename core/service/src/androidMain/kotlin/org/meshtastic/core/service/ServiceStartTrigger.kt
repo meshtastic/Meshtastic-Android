@@ -44,4 +44,11 @@ enum class ServiceStartTrigger {
      * restriction.
      */
     BootCompleted,
+
+    /**
+     * The associated radio came back into range: the system bound `MeshCompanionDeviceService` and delivered a
+     * device-appeared event. Only exists on API 31+ (Companion Device Manager presence), and by construction the device
+     * holds an association — which is precisely the companion-device exemption to the background-start restriction.
+     */
+    CompanionDevicePresent,
 }

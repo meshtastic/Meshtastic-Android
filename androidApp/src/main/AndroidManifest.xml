@@ -82,6 +82,12 @@
     -->
     <uses-permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
 
+    <!--
+      API 31+: lets MeshCompanionDeviceService receive presence (appeared/disappeared) events for the
+      associated radio, so the mesh service can restart when the radio comes back into range.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE" />
+
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -201,6 +207,20 @@
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location"
             android:exported="false" />
+
+        <!--
+          Companion Device Manager presence service: the system binds it (reviving the process if needed) when the
+          associated radio appears or disappears, on API 31+ only — older platforms never bind it, so the API-31
+          superclass is safe to declare here. Exported with the platform-signature BIND permission per CDM contract.
+        -->
+        <service
+            android:name="org.meshtastic.core.service.MeshCompanionDeviceService"
+            android:exported="true"
+            android:permission="android.permission.BIND_COMPANION_DEVICE_SERVICE">
+            <intent-filter>
+                <action android:name="android.companion.CompanionDeviceService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
