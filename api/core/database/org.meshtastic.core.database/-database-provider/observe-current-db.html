@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>DeviceLinkLocalDataSource</title>
+    <title>observeCurrentDb</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:data/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:database/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:data/commonMain" data-filter=":core:data/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:database/commonMain" data-filter=":core:database/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-data::org.meshtastic.core.data.datasource/DeviceLinkLocalDataSource/DeviceLinkLocalDataSource/#org.meshtastic.core.database.DatabaseProvider/PointingToDeclaration//-367135906">
-  <div class="breadcrumbs"><a href="../../index.html">core-data</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.data.datasource</a><span class="delimiter">/</span><a href="index.html">DeviceLinkLocalDataSource</a><span class="delimiter">/</span><span class="current">DeviceLinkLocalDataSource</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-database::org.meshtastic.core.database/DatabaseProvider/observeCurrentDb/#kotlin.Function1[org.meshtastic.core.database.MeshtasticDatabase,kotlinx.coroutines.flow.Flow[TypeParam(bounds=[kotlin.Any?])]]/PointingToDeclaration//-475033937">
+  <div class="breadcrumbs"><a href="../../index.html">core-database</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.database</a><span class="delimiter">/</span><a href="index.html">DatabaseProvider</a><span class="delimiter">/</span><span class="current">observeCurrentDb</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Device</span><wbr><span>Link</span><wbr><span>Local</span><wbr><span>Data</span><wbr><span><span>Source</span></span></h1>
+    <h1 class="cover"><span>observe</span><wbr><span>Current</span><wbr><span><span>Db</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/data/src/commonMain/kotlin/org/meshtastic/core/data/datasource/DeviceLinkLocalDataSource.kt#L26">source</a>)</span></span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:database/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt; </span><a href="observe-current-db.html"><span class="token function">observeCurrentDb</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">query<span class="token operator">: </span><span class="token punctuation">(</span><a href="../-meshtastic-database/index.html">MeshtasticDatabase</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="observe-current-db.html">T</a><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/database/src/commonMain/kotlin/org/meshtastic/core/database/DatabaseProvider.kt#L42">source</a>)</span></span></div><p class="paragraph">Re-latches <a href="observe-current-db.html">query</a> whenever the active database changes. Production also recovers a wedged Room pool.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
