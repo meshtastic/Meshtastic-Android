@@ -62,10 +62,24 @@ dependencyResolutionManagement {
 // `./gradlew help --info` then reports "Using local directory build cache for build
 // ':build-logic'" with no matching remote line, while the root build gets both. Mirror the
 // root's server/project so the convention plugins share one remote cache with everything else.
+val isCI = System.getenv("CI") != null
+
 develocity {
     server = "https://community.develocity.cloud"
     projectId = "meshtastic"
-    buildScan { publishing.onlyIf { it.isAuthenticated } }
+    buildScan {
+        publishing.onlyIf { it.isAuthenticated }
+        // Mirrors the root settings. Only reachable via a standalone `-p build-logic` run —
+        // when included, the root build publishes the scan — but the leak would be identical,
+        // so don't leave the gap open.
+        obfuscation {
+            ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
+            if (!isCI) {
+                username { "local-dev" }
+                hostname { "local-machine" }
+            }
+        }
+    }
 }
 
 // Build Cache configuration (Develocity remote cache + local)

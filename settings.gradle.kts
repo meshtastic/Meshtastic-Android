@@ -83,7 +83,17 @@ develocity {
         // down to the individual changed input. That is a CI-debugging tool, and the extra
         // scan payload is not worth paying for on every local build.
         capture { fileFingerprints = isCI }
-        obfuscation { ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } } }
+        // community.develocity.cloud is a public OSS instance — the README badge links its
+        // scan list. CI runners are disposable and their identity is already public in the
+        // Actions log, but a contributor's workstation is not: without this, every local
+        // build would publish their OS username and machine hostname.
+        obfuscation {
+            ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
+            if (!isCI) {
+                username { "local-dev" }
+                hostname { "local-machine" }
+            }
+        }
     }
 }
 
