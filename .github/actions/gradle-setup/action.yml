@@ -101,3 +101,13 @@ runs:
         gradle-home-cache-includes: |
           caches
           notifications
+        # `caches` sweeps in caches/build-cache-1, the LOCAL build cache — which since the
+        # Develocity onboarding (#6531) duplicates the remote cache at
+        # community.develocity.cloud. Shipping both means paying tarball upload/download
+        # for entries the remote already serves, on every one of the ~14 jobs that call
+        # this action, against a 10 GB repo-wide Actions cache quota that evicts under
+        # pressure. Dependency and transform caches (the expensive part) still ship.
+        # Effect is measurable in the Build Scan cache-performance view; revert if remote
+        # cache latency turns out to cost more than the restore it replaced.
+        gradle-home-cache-excludes: |
+          caches/build-cache-1

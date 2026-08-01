@@ -64,6 +64,11 @@ firebase-debug.log
 # Firebase Studio / Antigravity auto-provisioned skills — not used by this project
 .agents/
 
+# JVM crash dumps (desktopApp test runs) — regenerable, and untracked paths leak into public Build Scans
+hs_err_pid*.log
+replay_pid*.log
+.attach_pid*
+
 # Local library development clones
 /coil/
 /kable/

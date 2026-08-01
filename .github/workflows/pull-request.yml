@@ -112,6 +112,38 @@ jobs:
 
           print('check-changes filter is aligned with settings.gradle module roots.')
           PY
+      # Drift guard: the Develocity settings plugin is applied in TWO settings
+      # files — the root build and the build-logic included build — because a
+      # settings `plugins {}` block cannot be sourced from an `apply(from = ...)`
+      # script, so the version literal is unavoidably duplicated. Two copies of a
+      # version string drift silently; this makes that a build failure instead.
+      - name: Verify Develocity plugin version matches across settings files
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          PATTERN = r'id\("com\.gradle\.develocity"\)\s+version\s+"([^"]+)"'
+          FILES = ('settings.gradle.kts', 'build-logic/settings.gradle.kts')
+
+          found = {}
+          for name in FILES:
+              matches = re.findall(PATTERN, Path(name).read_text())
+              if len(matches) != 1:
+                  print(f'{name}: expected exactly one com.gradle.develocity version '
+                        f'declaration, found {len(matches)}')
+                  raise SystemExit(1)
+              found[name] = matches[0]
+
+          if len(set(found.values())) != 1:
+              print('Develocity plugin version drift detected:')
+              for name, version in found.items():
+                  print(f'  {name}: {version}')
+              print('Both settings files must apply the same version.')
+              raise SystemExit(1)
+
+          print(f'Develocity plugin version is consistent: {next(iter(found.values()))}')
+          PY
       # Second drift guard: the shard task lists in reusable-check.yml are
       # hand-maintained and have silently dropped modules before (discovery,
       # docs, wifi-provision, car, datastore, konsist had tests that never ran
