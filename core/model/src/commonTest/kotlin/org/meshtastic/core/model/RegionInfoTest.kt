@@ -100,6 +100,7 @@ class RegionInfoTest {
 
         // ITU3_2M: 144-148 MHz -> 200 slots, default slot 33 (144.650 MHz).
         val itu3 = lora(RegionCode.ITU3_2M, ModemPreset.TINY_FAST)
+        assertEquals(200, itu3.numChannels)
         assertEquals(144.6508f, itu3.radioFreq(itu3.channelNum("TinyFast")), 0.001f)
     }
 
@@ -119,6 +120,7 @@ class RegionInfoTest {
 
         // ITU3_70CM: 430-450 MHz -> 200 slots, default slot 37 (433.650 MHz).
         val itu370cm = lora(RegionCode.ITU3_70CM, ModemPreset.NARROW_SLOW)
+        assertEquals(200, itu370cm.numChannels)
         assertEquals(433.65f, itu370cm.radioFreq(itu370cm.channelNum("NarrowSlow")), 0.001f)
 
         // ITU2_125CM: 220-225 MHz -> 50 slots, default slot 37 (223.650 MHz).
