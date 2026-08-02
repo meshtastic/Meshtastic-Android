@@ -37,7 +37,7 @@ testRetry = "1.6.5"
 turbine = "1.2.1"
 
 # Compose Screenshot Testing
-compose-screenshot = "0.0.1-alpha15"
+compose-screenshot = "0.0.1-alpha16"
 
 # Baseline Profiles / Macrobenchmark
 # `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
