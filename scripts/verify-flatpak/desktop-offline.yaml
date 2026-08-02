@@ -73,8 +73,9 @@ modules:
       - desktop-file-edit --set-key="Exec" --set-value="meshtastic-wrapper.sh %U"
         /app/share/applications/org.meshtastic.MeshtasticDesktop.desktop
       - install -Dm644 -t /app/share/metainfo desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml
-      # Redirect the Gradle wrapper to the bundled distribution (no network).
-      - sed -i 's|distributionUrl=.*|distributionUrl=gradle-all.zip|' gradle/wrapper/gradle-wrapper.properties
+      # Point the wrapper at the bundled zip. distributionSha256Sum stays — the vendored
+      # zip is the identical -bin artifact, so wrapper verification still passes.
+      - sed -i 's|distributionUrl=.*|distributionUrl=gradle-bin.zip|' gradle/wrapper/gradle-wrapper.properties
       - echo "org.gradle.java.installations.auto-detect=false" >> gradle.properties
       - echo "org.gradle.java.installations.auto-download=false" >> gradle.properties
       - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk25/jvm/openjdk-25" >> gradle.properties
@@ -96,10 +97,10 @@ modules:
       - type: dir
         path: meshtastic-android
       - type: file
-        # Must match the version in gradle/wrapper/gradle-wrapper.properties.
-        # Bumping the wrapper? Update both the URL and sha256 here.
-        url: https://services.gradle.org/distributions/gradle-9.6.1-all.zip
-        sha256: 61ba77b3ff7167e60962763eb4bae79db7120c189b9544358d0ade3c1e712a83
+        # Must be the EXACT distribution from gradle-wrapper.properties (version AND
+        # -bin flavor) — distributionSha256Sum verifies this file. Update together.
+        url: https://services.gradle.org/distributions/gradle-9.6.1-bin.zip
+        sha256: 9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14
         dest: "gradle/wrapper"
-        dest-filename: "gradle-all.zip"
+        dest-filename: "gradle-bin.zip"
       - flatpak-sources.json

@@ -16,6 +16,7 @@
  */
 
 pluginManagement {
+    includeBuild("settings-plugin")
     repositories {
         mavenCentral()
         gradlePluginPortal()
@@ -31,13 +32,8 @@ pluginManagement {
 }
 
 plugins {
-    // Version duplicated from the root settings.gradle.kts: a settings `plugins {}`
-    // block is evaluated before the version catalog exists, so it cannot use `libs`.
-    // A CI drift guard in .github/workflows/pull-request.yml keeps the two in sync.
-    id("com.gradle.develocity") version "4.5.0"
+    id("meshtastic.develocity")
 }
-
-val isCI = System.getenv("CI") != null
 
 dependencyResolutionManagement {
     repositories {
@@ -58,37 +54,6 @@ dependencyResolutionManagement {
         }
     }
 }
-
-// build-logic is a plugin-included build with its own settings, so it does NOT inherit the
-// root build's Develocity configuration. Without this block the shared build-cache script
-// below finds no `develocity` extension and silently falls back to local-cache-only —
-// `./gradlew help --info` then reports "Using local directory build cache for build
-// ':build-logic'" with no matching remote line, while the root build gets both. Mirror the
-// root's server/project so the convention plugins share one remote cache with everything else.
-develocity {
-    server = "https://community.develocity.cloud"
-    projectId = "meshtastic"
-    buildScan {
-        publishing.onlyIf { it.isAuthenticated }
-        // Mirrors the root settings — see the rationale there. Only reachable via a standalone
-        // `-p build-logic` run (when included, the root build publishes the scan), but the
-        // exposure would be identical, so don't leave the gap open.
-        // The `if` stays outside the lambdas — see the root settings for why.
-        obfuscation {
-            ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
-            if (isCI) {
-                username { "ci" }
-                hostname { "ci-runner" }
-            } else {
-                username { "local-dev" }
-                hostname { "local-machine" }
-            }
-        }
-    }
-}
-
-// Build Cache configuration (Develocity remote cache + local)
-apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")

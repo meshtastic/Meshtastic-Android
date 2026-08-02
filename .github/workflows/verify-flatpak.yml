@@ -116,7 +116,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
         run: |
-          flatpak build-bundle repo org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak \
+          flatpak build-bundle repo "org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak" \
             org.meshtastic.MeshtasticDesktop \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
           echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"

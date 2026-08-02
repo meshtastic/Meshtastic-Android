@@ -66,9 +66,11 @@ jobs:
           [ "$CLOSED_SHA" = "$PROD_SHA" ] && CLOSED="" && CLOSED_SHA=""
           [ "$OPEN_SHA" = "$PROD_SHA" ] && OPEN="" && OPEN_SHA=""
 
-          echo "internal=${INTERNAL:-}" >> "$GITHUB_OUTPUT"
-          echo "closed=${CLOSED:-}" >> "$GITHUB_OUTPUT"
-          echo "open=${OPEN:-}" >> "$GITHUB_OUTPUT"
+          {
+            echo "internal=${INTERNAL:-}"
+            echo "closed=${CLOSED:-}"
+            echo "open=${OPEN:-}"
+          } >> "$GITHUB_OUTPUT"
 
           echo "Tags after dedup: prod=$PROD internal=$INTERNAL closed=$CLOSED open=$OPEN"
 
@@ -148,9 +150,9 @@ jobs:
             for ((j=i+1; j<N; j++)); do
               # If TAG_SHAS[j] is an ancestor of TAG_SHAS[i], swap (ancestor goes first)
               if git merge-base --is-ancestor "${TAG_SHAS[$j]}" "${TAG_SHAS[$i]}" 2>/dev/null; then
-                TMP_L="${TAG_LABELS[$i]}"; TAG_LABELS[$i]="${TAG_LABELS[$j]}"; TAG_LABELS[$j]="$TMP_L"
-                TMP_N="${TAG_NAMES[$i]}"; TAG_NAMES[$i]="${TAG_NAMES[$j]}"; TAG_NAMES[$j]="$TMP_N"
-                TMP_S="${TAG_SHAS[$i]}"; TAG_SHAS[$i]="${TAG_SHAS[$j]}"; TAG_SHAS[$j]="$TMP_S"
+                TMP_L="${TAG_LABELS[i]}"; TAG_LABELS[i]="${TAG_LABELS[j]}"; TAG_LABELS[j]="$TMP_L"
+                TMP_N="${TAG_NAMES[i]}"; TAG_NAMES[i]="${TAG_NAMES[j]}"; TAG_NAMES[j]="$TMP_N"
+                TMP_S="${TAG_SHAS[i]}"; TAG_SHAS[i]="${TAG_SHAS[j]}"; TAG_SHAS[j]="$TMP_S"
               fi
             done
           done

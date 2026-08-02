@@ -53,6 +53,9 @@ class BleAddressLoggingTest {
      */
     private fun scannedFiles() = Konsist.scopeFromProject()
         .files
+        // scopeFromProject sweeps .claude/worktrees/ checkouts too; stale copies there
+        // resurface long-fixed lines as phantom offenders (paths match "/core/ble/").
+        .filterNot { "/.claude/" in it.path }
         .filter { file -> scannedPathFragments.any { it in file.path } }
         .filterNot { file -> identityUseAllowlist.any { file.path.endsWith(it) } }
 
@@ -98,6 +101,7 @@ class BleAddressLoggingTest {
         val offenders =
             Konsist.scopeFromProject()
                 .files
+                .filterNot { "/.claude/" in it.path } // see scannedFiles()
                 .filter { "/core/ble/" in it.path }
                 .flatMap { file ->
                     file.text.lines().withIndex().mapNotNull { (index, line) ->

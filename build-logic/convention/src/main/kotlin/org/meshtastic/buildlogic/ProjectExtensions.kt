@@ -16,6 +16,7 @@
  */
 package org.meshtastic.buildlogic
 
+import com.gradle.develocity.agent.gradle.test.DevelocityTestConfiguration
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ExternalModuleDependencyBundle
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
@@ -29,7 +30,6 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
-import org.gradle.testretry.TestRetryTaskExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -122,14 +122,12 @@ internal fun Project.configureTestOptions() {
     // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
     tasks.withType<AbstractTestTask>().configureEach { failOnNoDiscoveredTests.set(false) }
 
-    // Configure test retry if the plugin is applied
-    pluginManager.withPlugin("org.gradle.test-retry") {
-        tasks.withType<Test>().configureEach {
-            extensions.configure<TestRetryTaskExtension> {
-                maxRetries.set(MAX_TEST_RETRIES)
-                maxFailures.set(MAX_TEST_FAILURES)
-                failOnPassedAfterRetry.set(false)
-            }
+    // Develocity-native test retry; findByType no-ops if the settings plugin isn't applied.
+    tasks.withType<Test>().configureEach {
+        extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
+            maxRetries.set(MAX_TEST_RETRIES)
+            maxFailures.set(MAX_TEST_FAILURES)
+            failOnPassedAfterRetry.set(false)
         }
     }
 }

@@ -16,6 +16,28 @@ inputs:
   develocity_access_key:
     description: 'Access key for the OSS Community Develocity Instance (Build Scan publishing and remote cache writes)'
     required: false
+  job_summary_pr_comment:
+    description: |
+      Job summary as a PR comment: never | always | on-failure. Needs `pull-requests: write`;
+      no-ops on fork PRs (read-only token).
+    default: 'never'
+  dependency_graph:
+    description: |
+      Dependency graph mode: disabled | generate | generate-and-submit | generate-and-upload |
+      download-and-submit. Submit needs `contents: write`. Never combine with
+      cache_configuration_cache — a CC-hit build generates NO graph.
+    default: 'disabled'
+  cache_configuration_cache:
+    description: |
+      Persist .gradle/configuration-cache. Opt-in: only pays off when config inputs are
+      commit-stable (the VERSION_CODE-pinned jobs). Real-versionCode jobs would restore,
+      miss, and never re-save.
+    default: 'false'
+  cache_key_suffix:
+    description: |
+      Extra CC-key discriminator for matrix legs running different task graphs (test-shards).
+      Runner-only matrices don't need it — os/arch are already in the key.
+    default: ''
 runs:
   using: composite
   steps:
@@ -98,6 +120,8 @@ runs:
         # Skip cleanup there — a slightly larger cache beats no cache at all.
         cache-cleanup: ${{ runner.os == 'Windows' && 'never' || 'on-success' }}
         add-job-summary: always
+        add-job-summary-as-pr-comment: ${{ inputs.job_summary_pr_comment }}
+        dependency-graph: ${{ inputs.dependency_graph }}
         gradle-home-cache-includes: |
           caches
           notifications
@@ -111,3 +135,18 @@ runs:
         # cache latency turns out to cost more than the restore it replaced.
         gradle-home-cache-excludes: |
           caches/build-cache-1
+
+    # CC entries live in the project dir; setup-gradle only caches the Gradle User Home —
+    # Develocity measured 100% CC miss (~52s config/build) before this. Runs after Setup
+    # Gradle so GRADLE_ENCRYPTION_KEY is exported. No sha in the key: unchanged build files
+    # hit exactly and skip the save; restore-keys is the self-heal for stale entries.
+    - name: Cache Gradle configuration-cache
+      # Gates: opted in; key present (undecryptable otherwise — keeps keyless fork PRs off
+      # these entries); not merge_group (throwaway cache scope).
+      if: inputs.cache_configuration_cache == 'true' && inputs.gradle_encryption_key != '' && github.event_name != 'merge_group'
+      uses: actions/cache@v6
+      with:
+        path: ${{ github.workspace }}/.gradle/configuration-cache
+        key: gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-${{ hashFiles('settings.gradle.kts', '**/build.gradle.kts', 'build-logic/**', 'gradle/*.gradle', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', 'gradle.properties', 'config.properties', '.github/ci-gradle.properties') }}
+        restore-keys: |
+          gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-

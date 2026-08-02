@@ -61,7 +61,7 @@ dependencies {
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
-    compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly(libs.develocity.gradlePlugin)
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)

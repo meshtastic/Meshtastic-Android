@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-def develocityExtension = extensions.findByName("develocity")
+// Minimal on purpose: this build PROVIDES meshtastic.develocity, so it can't apply it to
+// itself. Its own rare builds go unscanned/uncached.
 
-buildCache {
-    local {
-        enabled = true
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("../../offline-repository") }
     }
+}
 
-    if (develocityExtension != null) {
-        remote(develocityExtension.buildCache) {
-            enabled = true
-            def accessKey = System.getenv("DEVELOCITY_ACCESS_KEY")?.trim()
-            push = System.getenv("CI") != null && accessKey
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("../../offline-repository") }
+    }
+    versionCatalogs {
+        create("libs") {
+            from(files("../../gradle/libs.versions.toml"))
         }
     }
 }
+
+rootProject.name = "settings-plugin"

@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.api.dsl.LibraryExtension
+import com.gradle.develocity.agent.gradle.test.DevelocityTestConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
-import org.gradle.testretry.TestRetryTaskExtension
 import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
@@ -28,7 +28,7 @@ import org.meshtastic.buildlogic.libs
  * Convention for Compose Screenshot Testing modules (`:screenshot-tests`, `:docs-screenshots`).
  *
  * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the test-retry opt-out (CST's custom
- * runner is incompatible with test-retry), and the Compose Multiplatform + screenshot-validation dependencies.
+ * runner is incompatible with test retry), and the Compose Multiplatform + screenshot-validation dependencies.
  * Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and `com.android.compose.screenshot`,
  * which the module declares itself. The `screenshotTests { imageDifferenceThreshold }` block stays in the module
  * scripts — it is a DSL extension of the screenshot plugin, reachable there via generated accessors only.
@@ -41,11 +41,11 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                     experimentalProperties["android.experimental.enableScreenshotTest"] = true
                 }
 
-                // CST screenshot tests use a custom runner incompatible with test-retry
-                pluginManager.withPlugin("org.gradle.test-retry") {
-                    tasks.withType<Test>().configureEach {
-                        if (name.contains("ScreenshotTest", ignoreCase = true)) {
-                            extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
+                // CST screenshot tests use a custom runner incompatible with test retry
+                tasks.withType<Test>().configureEach {
+                    if (name.contains("ScreenshotTest", ignoreCase = true)) {
+                        extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
+                            maxRetries.set(0)
                         }
                     }
                 }
