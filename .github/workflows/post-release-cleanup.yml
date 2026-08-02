@@ -127,7 +127,7 @@ jobs:
           fi
 
           for d in "${stale[@]}"; do
-            rm -rf "$work/$d"
+            rm -rf "${work:?}/$d"
           done
 
           # Rebuild versions.json (and the root placeholder) from what remains,

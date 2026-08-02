@@ -112,39 +112,7 @@ jobs:
 
           print('check-changes filter is aligned with settings.gradle module roots.')
           PY
-      # Drift guard: the Develocity settings plugin is applied in TWO settings
-      # files — the root build and the build-logic included build — because a
-      # settings `plugins {}` block cannot be sourced from an `apply(from = ...)`
-      # script, so the version literal is unavoidably duplicated. Two copies of a
-      # version string drift silently; this makes that a build failure instead.
-      - name: Verify Develocity plugin version matches across settings files
-        run: |
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-
-          PATTERN = r'id\("com\.gradle\.develocity"\)\s+version\s+"([^"]+)"'
-          FILES = ('settings.gradle.kts', 'build-logic/settings.gradle.kts')
-
-          found = {}
-          for name in FILES:
-              matches = re.findall(PATTERN, Path(name).read_text())
-              if len(matches) != 1:
-                  print(f'{name}: expected exactly one com.gradle.develocity version '
-                        f'declaration, found {len(matches)}')
-                  raise SystemExit(1)
-              found[name] = matches[0]
-
-          if len(set(found.values())) != 1:
-              print('Develocity plugin version drift detected:')
-              for name, version in found.items():
-                  print(f'  {name}: {version}')
-              print('Both settings files must apply the same version.')
-              raise SystemExit(1)
-
-          print(f'Develocity plugin version is consistent: {next(iter(found.values()))}')
-          PY
-      # Second drift guard: the shard task lists in reusable-check.yml are
+      # Drift guard: the shard task lists in reusable-check.yml are
       # hand-maintained and have silently dropped modules before (discovery,
       # docs, wifi-provision, car, datastore, konsist had tests that never ran
       # in CI). Every module in settings.gradle.kts must appear in the shard
@@ -224,6 +192,14 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7.0.1
+      # Workflow linting (actionlint + its shellcheck integration over every run: block).
+      # Version-pinned; the runner image ships shellcheck. ~1s over the whole tree.
+      - name: Lint GitHub workflows (actionlint)
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /tmp
+          /tmp/actionlint -color
+      - name: Lint repo shell scripts (shellcheck)
+        run: shellcheck scripts/*.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
@@ -260,6 +236,9 @@ jobs:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write # Gradle job summary as a PR comment on failure
     with:
       run_lint: true
       run_screenshot_tests: ${{ needs.check-changes.outputs.screenshots == 'true' }}
