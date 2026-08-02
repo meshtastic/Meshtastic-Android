@@ -15,46 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Deliberately minimal: this build PROVIDES the `meshtastic.develocity` settings plugin,
+// so it is the one build that cannot apply it to itself. Its own (rare, tiny) builds go
+// unscanned and uncached — that is the accepted cost of breaking the chicken-and-egg.
+
 pluginManagement {
-    includeBuild("settings-plugin")
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
-        maven { url = uri("../offline-repository") }
+        maven { url = uri("../../offline-repository") }
     }
-}
-
-plugins {
-    // Shared with the root settings; versions come from the catalog via settings-plugin.
-    id("meshtastic.develocity")
 }
 
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
-        maven { url = uri("../offline-repository") }
+        maven { url = uri("../../offline-repository") }
     }
     versionCatalogs {
         create("libs") {
-            from(files("../gradle/libs.versions.toml"))
+            from(files("../../gradle/libs.versions.toml"))
         }
     }
 }
 
-rootProject.name = "build-logic"
-include(":convention")
+rootProject.name = "settings-plugin"

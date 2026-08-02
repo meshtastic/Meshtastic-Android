@@ -127,12 +127,12 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 - **Robolectric SDK caching:** The `gradle-setup` composite action caches `~/.m2/repository/org/robolectric` to prevent flaky `SocketException` on SDK downloads. Cache key is `robolectric-{version}-sdk{level}` — update when bumping version or SDK level.
 - **`mavenLocal()` gated:** Disabled by default to prevent CI cache poisoning. Pass `-PuseMavenLocal` for local JitPack testing.
 - **JUnit parallel execution:** Enabled project-wide with classes running sequentially (`junit.jupiter.execution.parallel.mode.classes.default=same_thread`) to avoid `Dispatchers.setMain()` races. Cross-module parallelism comes from Gradle forks (`maxParallelForks`).
-- **`test-retry` plugin:** Applied to all module types (maxRetries=2, maxFailures=10).
+- **Test retry:** Develocity plugin's native retry (`develocity.testRetry` on each Test task), configured in `ProjectExtensions.kt` (maxRetries=2, maxFailures=10). Screenshot tests opt out (maxRetries=0). The standalone `org.gradle.test-retry` plugin was removed.
 - **`fail-fast: false`:** Test sharding does not cancel other shards on failure.
 - **Explicit Gradle task paths:** Prefer `app:lintFdroidDebug` over shorthand `lintDebug` in CI.
 - **Pull request CI:** Main-only (`.github/workflows/pull-request.yml` targets `main`).
 - **Merge queue hygiene:** `merge-queue.yml` cancels superseded runs for the same PR (GitHub does not auto-cancel destroyed merge-group runs) and skips the heavy pipeline for docs-only entries (`docs/**`, `*.md`). `rb-check` runs ONLY in the merge queue. `main-check.yml` passes `run_lint: false` — every main commit is a merge-queue-verified merge commit, so main pushes only rebuild the debug APKs for the snapshot release.
-- **Cache writes:** Trusted on `main` and merge queue runs; other refs use read-only cache.
+- **Cache writes:** Trusted on `main` only; merge-queue cache scopes are throwaway branches (writes unrecoverable), so the queue reads only, like all other refs.
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.
 
