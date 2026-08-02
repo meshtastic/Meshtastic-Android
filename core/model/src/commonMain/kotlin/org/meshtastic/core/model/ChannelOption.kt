@@ -21,7 +21,7 @@ package org.meshtastic.core.model
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
-import kotlin.math.floor
+import kotlin.math.round
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
 private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
@@ -66,6 +66,13 @@ private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
     }
 }
 
+/**
+ * Width of one frequency slot: modem bandwidth plus the region's per-side padding and inter-slot spacing (firmware
+ * `RadioInterface::applyModemConfig`).
+ */
+private fun LoRaConfig.freqSlotWidth(regionInfo: RegionInfo): Float =
+    regionInfo.spacing + regionInfo.padding * 2 + bandwidth(regionInfo)
+
 val LoRaConfig.numChannels: Int
     get() {
         val regionInfo = RegionInfo.fromRegionCode(region)
@@ -74,27 +81,35 @@ val LoRaConfig.numChannels: Int
         val bw = bandwidth(regionInfo)
         if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
 
-        val num = floor((regionInfo.freqEnd - regionInfo.freqStart) / bw)
-        // If the regional frequency range is smaller than the bandwidth, the firmware would
+        val num = round((regionInfo.freqEnd - regionInfo.freqStart + regionInfo.spacing) / freqSlotWidth(regionInfo))
+        // If the regional frequency range is smaller than the slot width, the firmware would
         // fall back to a default preset. In the app, we return 1 to avoid a crash.
         return if (num > 0) num.toInt() else 1
     }
 
-internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
-    channel_num != 0 -> channel_num
-    numChannels == 0 -> 0
-    else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+internal fun LoRaConfig.channelNum(primaryName: String): Int {
+    val overrideSlot = RegionInfo.fromRegionCode(region)?.overrideSlot ?: 0
+    return when {
+        channel_num != 0 -> channel_num
+        numChannels == 0 -> 0
+        overrideSlot > 0 -> overrideSlot
+        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+    }
 }
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     if (override_frequency != 0f) return override_frequency + frequency_offset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
-        (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)
+        (regionInfo.freqStart + bandwidth(regionInfo) / 2 + regionInfo.padding) +
+            (channelNum - 1) * freqSlotWidth(regionInfo)
     } else {
         0f
     }
 }
+
+/** The firmware release that introduced the EU Lite/Narrow and amateur-band ITU regions. */
+private val FIRMWARE_2_8 = DeviceVersion("2.8.0")
 
 /**
  * Regulatory regions for radio usage
@@ -104,6 +119,14 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
  * @property freqStart The starting frequency in MHz
  * @property freqEnd The ending frequency in MHz
  * @property wideLora Whether the region uses wide Lora
+ * @property spacing Gap between frequency slots (and at the start of the band) in MHz, from the firmware's region
+ *   profile
+ * @property padding Gap at each side of a frequency slot in MHz, from the firmware's region profile (coerces the modem
+ *   bandwidth up to the region's slot width, e.g. ham 15.625 kHz -> 20 kHz)
+ * @property overrideSlot The region's fixed default frequency slot (1-based), or 0 to derive the slot from the primary
+ *   channel-name hash as usual
+ * @property minFirmware The first firmware release whose region table contains this region, or null for regions all
+ *   supported firmware knows; [Capabilities.supportsRegion] gates the picker with it
  * @see
  *   [LoRaWAN Regional Parameters](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf)
  */
@@ -114,6 +137,10 @@ enum class RegionInfo(
     val freqStart: Float,
     val freqEnd: Float,
     val wideLora: Boolean = false,
+    val spacing: Float = 0f,
+    val padding: Float = 0f,
+    val overrideSlot: Int = 0,
+    val minFirmware: DeviceVersion? = null,
 ) {
     /**
      * United States
@@ -290,6 +317,132 @@ enum class RegionInfo(
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
      */
     BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
+
+    /**
+     * European Union 865-868MHz (Lite): four 600 kHz slots at 865.7/866.3/866.9/867.5 MHz, 2.5% duty cycle.
+     *
+     * @see
+     *   [ETSI EN 300 220-2 V3.1.1](https://www.etsi.org/deliver/etsi_en/300200_300299/30022002/03.01.01_60/en_30022002v030101p.pdf)
+     */
+    EU_866(
+        RegionCode.EU_866,
+        "European Union 866MHz",
+        865.6f,
+        867.6f,
+        spacing = 0.4f,
+        padding = 0.0375f,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /** European Union 868MHz using the narrow presets; same band as [EU_868]. */
+    EU_N_868(
+        RegionCode.EU_N_868,
+        "European Union 868MHz (Narrow)",
+        869.4f,
+        869.65f,
+        padding = 0.0104f,
+        overrideSlot = 1,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 1 (Europe, Africa, Middle East, former USSR) amateur 2m allocation. Licensed operators only.
+     *
+     * @see [IARU Region 1 Band Plan](https://www.iaru-r1.org/on-the-air/band-plans/)
+     */
+    ITU1_2M(
+        RegionCode.ITU1_2M,
+        "ITU Region 1 / Amateur 2m",
+        144.0f,
+        146.0f,
+        padding = 0.0022f,
+        overrideSlot = 26,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 2m allocation. Licensed operators only.
+     *
+     * @see [ARRL Band Plan](https://www.arrl.org/band-plan)
+     */
+    ITU2_2M(
+        RegionCode.ITU2_2M,
+        "ITU Region 2 / Amateur 2m",
+        144.0f,
+        148.0f,
+        padding = 0.0022f,
+        overrideSlot = 51,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 3 (Asia/Pacific) amateur 2m allocation. Licensed operators only.
+     *
+     * @see
+     *   [IARU Region 3 Band Plan](https://www.iaru.org/wp-content/uploads/2020/01/R3-004-IARU-Region-3-Bandplan-rev.2.pdf)
+     */
+    ITU3_2M(
+        RegionCode.ITU3_2M,
+        "ITU Region 3 / Amateur 2m",
+        144.0f,
+        148.0f,
+        padding = 0.0022f,
+        overrideSlot = 33,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 1.25m '125cm' allocation. Licensed operators only. Some countries do not allocate
+     * 220-222 MHz (e.g. USA, Canada) — check local law.
+     */
+    ITU2_125CM(
+        RegionCode.ITU2_125CM,
+        "ITU Region 2 / Amateur 1.25m",
+        220.0f,
+        225.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /** ITU Region 1 (Europe, Africa, Middle East, former USSR) amateur 70cm allocation. Licensed operators only. */
+    ITU1_70CM(
+        RegionCode.ITU1_70CM,
+        "ITU Region 1 / Amateur 70cm",
+        430.0f,
+        440.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 70cm allocation. Licensed operators only. Some countries do not allocate 420-430
+     * MHz or 440-450 MHz — check local law.
+     */
+    ITU2_70CM(
+        RegionCode.ITU2_70CM,
+        "ITU Region 2 / Amateur 70cm",
+        420.0f,
+        450.0f,
+        padding = 0.01875f,
+        overrideSlot = 137,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 3 (Asia/Pacific) amateur 70cm allocation. Licensed operators only. Some countries do not allocate
+     * 440-450 MHz — check local law.
+     */
+    ITU3_70CM(
+        RegionCode.ITU3_70CM,
+        "ITU Region 3 / Amateur 70cm",
+        430.0f,
+        450.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
 
     /** This needs to be last. Same as US. */
     UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),

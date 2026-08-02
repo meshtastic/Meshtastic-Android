@@ -97,6 +97,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
      */
     val supportsMeshBeacon = atLeast(V2_8_0)
 
+    /**
+     * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
+     * [RegionInfo.minFirmware]; older firmware would treat an unknown region code as UNSET, so the picker hides it.
+     */
+    fun supportsRegion(region: RegionInfo): Boolean = region.minFirmware?.let { atLeast(it) } ?: true
+
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
         private val V2_6_9 = DeviceVersion("2.6.9")

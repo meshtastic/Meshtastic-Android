@@ -104,6 +104,15 @@ private fun buildPresetItems(
     }
 }
 
+/**
+ * Builds the region dropdown items: hide regions the target firmware's region table doesn't have yet
+ * ([Capabilities.supportsRegion]), but never hide the device's current selection.
+ */
+private fun buildRegionItems(capabilities: Capabilities, selectedRegion: RegionCode): List<Pair<RegionCode, String>> =
+    RegionInfo.entries
+        .filter { capabilities.supportsRegion(it) || it.regionCode == selectedRegion }
+        .map { it.regionCode to it.description }
+
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -158,7 +167,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.region_frequency_plan),
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
-                    items = RegionInfo.entries.map { it.regionCode to it.description },
+                    items =
+                    remember(capabilities, formState.value.region) {
+                        buildRegionItems(capabilities, formState.value.region)
+                    },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
                         val freshSetup = formState.value.region == RegionCode.UNSET
