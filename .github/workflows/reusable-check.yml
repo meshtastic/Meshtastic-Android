@@ -46,13 +46,10 @@ env:
   DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
   MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
   GITHUB_TOKEN: ${{ github.token }}
-  # Main-branch runs write to the Gradle caches; every other context is a read-only consumer.
-  # merge_group used to write too, but gradle/actions documents those writes as unrecoverable:
-  # a queue run's cache scope is a temporary branch that "won't be available on subsequent Merge
-  # Queue executions" — so it was upload cost with no reader.
+  # Only main writes the Gradle caches. merge_group scopes are throwaway branches
+  # (per gradle/actions docs) — writes there had no reader.
   GRADLE_CACHE_READ_ONLY: ${{ github.ref == 'refs/heads/main' && 'false' || 'true' }}
-  # Gradle's job summary — Build Scan link included — as a PR comment when a job fails.
-  # Only meaningful on pull_request; fork PRs carry a read-only token so it no-ops there.
+  # Job summary as a PR comment on failure; no-ops on fork PRs (read-only token).
   GRADLE_PR_COMMENT: ${{ github.event_name == 'pull_request' && 'on-failure' || 'never' }}
 
 jobs:
@@ -298,8 +295,7 @@ jobs:
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
           cache_configuration_cache: 'true' # VERSION_CODE pinned -> entries actually reuse
-          # Shards share a `github.job` but run different task graphs, so each needs its own
-          # entry — and kover flips the graph again, so coverage runs get their own too.
+          # Shards run different task graphs; kover flips the graph again.
           cache_key_suffix: ${{ matrix.shard.name }}${{ inputs.run_coverage && '-kover' || '' }}
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
@@ -346,14 +342,11 @@ jobs:
           retention-days: 7
 
   # ── Android Build ────────────────────────────────────────────────────
-  # Also carries dependency-graph generation: it assembles both flavors, so it resolves the
-  # widest configuration set of any job here. `contents: write` is what submission needs; on
-  # pull_request the token is read-only, hence the upload-then-submit split below.
+  # Also generates the dependency graph — assembling both flavors resolves the widest set.
   android-check:
     runs-on: ubuntu-24.04
-    # Deliberately no `permissions:` block — it inherits the caller's. main-check grants
-    # contents: write so the graph can be submitted; pull-request.yml grants only read, which
-    # is all `generate-and-upload` needs. A pinned block here would force one or the other.
+    # No permissions block on purpose: inherits the caller's. main grants contents: write
+    # (graph submit); PRs grant read (upload only).
     timeout-minutes: 60
     if: inputs.run_android_build == true
 
@@ -372,8 +365,7 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          # main pushes submit directly; PRs can only upload, because a fork PR's token has no
-          # `contents: write` — dependency-graph-submit.yml submits those from a trusted context.
+          # main submits; PRs upload (no contents: write), dependency-graph-submit.yml finishes.
           dependency_graph: ${{ github.event_name == 'pull_request' && 'generate-and-upload' || (github.ref == 'refs/heads/main' && 'generate-and-submit' || 'disabled') }}
 
       - name: Tag main-branch builds as -SNAPSHOT

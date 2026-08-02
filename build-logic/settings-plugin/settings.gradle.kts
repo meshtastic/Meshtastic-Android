@@ -15,9 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Deliberately minimal: this build PROVIDES the `meshtastic.develocity` settings plugin,
-// so it is the one build that cannot apply it to itself. Its own (rare, tiny) builds go
-// unscanned and uncached — that is the accepted cost of breaking the chicken-and-egg.
+// Minimal on purpose: this build PROVIDES meshtastic.develocity, so it can't apply it to
+// itself. Its own rare builds go unscanned/uncached.
 
 pluginManagement {
     repositories {

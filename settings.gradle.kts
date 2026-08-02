@@ -33,8 +33,7 @@ pluginManagement {
 }
 
 plugins {
-    // Develocity + CCUD + build cache, deduplicated with build-logic's settings; versions
-    // come from the catalog via the settings-plugin included build.
+    // Develocity + CCUD + build cache; shared with build-logic, versions from the catalog.
     id("meshtastic.develocity")
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
     id("org.meshtastic.flatpak.sources.settings") version "0.1.5"
@@ -73,8 +72,6 @@ rootProject.name = "MeshtasticAndroid"
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-// Develocity configuration (scan publishing, obfuscation, build cache) lives in
-// build-logic/settings-plugin — shared with build-logic's own settings.
 
 @Suppress("UnstableApiUsage")
 toolchainManagement {

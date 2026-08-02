@@ -32,7 +32,6 @@ pluginManagement {
 }
 
 plugins {
-    // Shared with the root settings; versions come from the catalog via settings-plugin.
     id("meshtastic.develocity")
 }
 

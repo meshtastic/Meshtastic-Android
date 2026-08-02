@@ -1,26 +1,12 @@
 #!/usr/bin/env bash
-# Comprehensive reproducible-build verification for F-Droid/IzzyOnDroid.
-# Based on: https://izzyondroid.org/docs/reproducibleBuilds/DebugFailedRBs/
-# Catches regressions that have historically broken reproducibility:
-#   1. aboutlibraries.json non-determinism (network fetching)
-#   2. Datadog buildId leaking into fdroid APK
-#   3. Google/Firebase/GMS/MLKit classes in fdroid APK
-#   4. DEPENDENCY_INFO_BLOCK in signing block
-#   5. Native library stripping (NDK version mismatch)
-#   6. aboutlibraries "generated" timestamp in res/M7.json
-#   7. baseline.prof determinism (flaky builds)
-# See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
-#
-# Run from the repo root (CI: the rb-check job in reusable-check.yml).
-# VERSION_CODE must be exported; the Gradle build reads it.
-#
-# Deliberately no `set -o pipefail`: `unzip -l | grep -q` ends the pipe at the
-# first match, so unzip dies with SIGPIPE and pipefail would turn that into a
-# spurious failure.
+# Reproducible-build verification for F-Droid/IzzyOnDroid.
+# https://izzyondroid.org/docs/reproducibleBuilds/DebugFailedRBs/
+# https://github.com/meshtastic/Meshtastic-Android/issues/3231
+# Run from repo root with VERSION_CODE exported (CI: rb-check).
+# No pipefail on purpose: `unzip -l | grep -q` SIGPIPEs unzip on first match.
 set -eu
 
-# Private workdir, created BEFORE any Gradle run: fixed /tmp paths could be
-# pre-claimed (symlinked) by build logic executing in between the copies.
+# Created BEFORE any Gradle run — fixed /tmp paths could be symlink-squatted by build logic.
 WORKDIR=$(mktemp -d)
 trap 'rm -rf "$WORKDIR"' EXIT
 
@@ -78,11 +64,8 @@ fi
 echo "✅ No proprietary libraries in fdroid APK"
 
 echo "── Step 5: Check for DEPENDENCY_INFO_BLOCK (signing block blob) ──"
-# Parse the APK Signing Block structure to find the dependency info pair.
-# Naive byte scans produce false positives in large APKs.
-# Exit codes: 0 = clean, 2 = block found, anything else = parser crashed.
-# (The pre-extraction version of this check passed the APK path through a
-# quoted heredoc, so it never expanded, always crashed, and always "passed".)
+# Parse the signing block properly; naive byte scans false-positive.
+# Exit codes: 0 clean, 2 found, else parser crash.
 rc=0
 python3 - "$APK" <<'PYEOF' || rc=$?
 import struct, sys
@@ -122,15 +105,12 @@ echo "✅ No DEPENDENCY_INFO_BLOCK in signing block"
 echo "── Step 6: Check native libraries have debug symbols (not stripped) ──"
 STRIPPED_LIBS=""
 while IFS= read -r -d '' so; do
-  # If .symtab section is missing, the library was stripped
+  # no .symtab = stripped
   if ! readelf -S "$so" 2>/dev/null | grep -q "\.symtab"; then
-    # Libraries without symtab are stripped — this is only a problem
-    # if keepDebugSymbols is not working as expected
     STRIPPED_LIBS="${STRIPPED_LIBS} $(basename "$so")"
   fi
 done < <(find "$APK_DIR" -name "*.so" -print0 2>/dev/null)
-# Note: Some third-party .so files arrive pre-stripped, which is OK.
-# We only warn here; a hard failure would be too aggressive.
+# some third-party .so arrive pre-stripped — warn only
 if [ -n "$STRIPPED_LIBS" ]; then
   echo "::warning::Some native libraries appear stripped (may cause NDK-version-dependent RB failures):${STRIPPED_LIBS}"
 else
@@ -138,13 +118,11 @@ else
 fi
 
 echo "── Step 7: Check aboutlibraries 'generated' timestamp not in APK ──"
-# The M7.json (or aboutlibraries.json in Java resources) should NOT contain
-# a "generated" field, which introduces a build-time timestamp.
+# "generated" field = build-time timestamp
 ABOUT_JSON=""
 if [ -f "$APK_DIR/aboutlibraries.json" ]; then
   ABOUT_JSON="$APK_DIR/aboutlibraries.json"
 else
-  # May be in res/ as M7.json or similar
   ABOUT_JSON=$(find "$APK_DIR/res" -name "*.json" -exec grep -l "aboutLibraries" {} \; 2>/dev/null | head -1)
 fi
 if [ -n "$ABOUT_JSON" ] && grep -q '"generated"' "$ABOUT_JSON"; then

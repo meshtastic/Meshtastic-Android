@@ -21,7 +21,7 @@ plugins { `kotlin-dsl` }
 
 group = "org.meshtastic.buildlogic"
 
-// Match build-logic/convention: target JDK 21 regardless of the launcher JDK.
+// Match build-logic/convention: target JDK 21.
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21

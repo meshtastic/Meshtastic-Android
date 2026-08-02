@@ -1,11 +1,8 @@
 name: Submit Dependency Graph
 
-# PR builds can only *generate and upload* a dependency graph: a pull request from a fork gets a
-# read-only GITHUB_TOKEN, and submission needs `contents: write`. This workflow runs in the base
-# repository's trusted context on completion of Pull Request CI and submits what that run saved.
-#
-# It never checks out or executes PR code — the only input is the snapshot artifact, downloaded by
-# gradle/actions itself.
+# PR runs can only generate-and-upload (fork tokens lack contents: write). This submits what
+# they saved, from the base repo's trusted context. Never checks out PR code — the snapshot
+# artifact is the only input.
 on:
   workflow_run:
     workflows: ['Pull Request CI']
@@ -22,13 +19,12 @@ concurrency:
 
 jobs:
   submit-dependency-graph:
-    # conclusion guard: a failed CI run may have no (or a partial) graph; skip rather than submit it.
+    # failed runs may have partial graphs; skip
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     steps:
-      # Runs where android-check was skipped (docs-only changes, bot branches) upload no
-      # snapshot; download-and-submit would fail red on every such PR without this probe.
+      # skipped android-check (docs-only/bot PRs) uploads nothing — don't fail red on that
       - name: Check the run saved a dependency graph
         id: probe
         env:

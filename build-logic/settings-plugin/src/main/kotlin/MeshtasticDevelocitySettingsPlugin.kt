@@ -20,13 +20,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 
 /**
- * Single source of truth for Develocity: scan publishing, obfuscation, and the build cache.
- *
- * Applied from BOTH settings files (root and `build-logic`) — an included build does not
- * inherit the root's Develocity configuration, and without its own, build-logic silently
- * falls back to local-cache-only. Before this plugin the two settings files hand-mirrored
- * the config and a CI drift guard policed them; now the version lives once in the catalog
- * and the config once here.
+ * Develocity in one place: scan publishing, obfuscation, build cache. Applied from BOTH
+ * settings files — included builds don't inherit the root's config, and without its own,
+ * build-logic silently drops to local-cache-only. Versions live in the catalog.
  */
 class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
     override fun apply(settings: Settings): Unit = with(settings) {
@@ -41,15 +37,11 @@ class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
         develocity.buildScan {
             uploadInBackground.set(!isCI)
             publishing.onlyIf { it.isAuthenticated }
-            // File fingerprints power Develocity's cache-miss comparison — a CI-debugging
-            // tool; the extra scan payload is not worth paying on every local build.
+            // Fingerprints power cache-miss comparison (CI debugging); skip the payload locally.
             capture { fileFingerprints.set(isCI) }
-            // community.develocity.cloud is a public OSS instance, so no machine identity is
-            // published: without this, every local build would publish the contributor's OS
-            // username, hostname, and busiest process names. Constants, not descriptive
-            // values — the scan already records OS and CPU count, and CCUD adds CI metadata.
-            // The `if` stays OUTSIDE the lambdas so each stays a capture-free constant the
-            // configuration cache can serialize.
+            // Public instance: no machine identity. Constants on purpose — scans already
+            // record OS/CPU and CCUD adds CI metadata. Keep the `if` OUTSIDE the lambdas:
+            // capture-free lambdas are what the config cache can serialize.
             obfuscation {
                 ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
                 externalProcessName { "external-process" }
@@ -64,9 +56,7 @@ class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
         }
 
         buildCache {
-            // Gradle's guidance: disable the local cache where a remote is available. On CI
-            // ours was write-then-discard (ephemeral runners; build-cache-1 excluded from the
-            // Actions cache), so every hit already comes from the remote.
+            // Off on CI: runners are ephemeral and every hit comes from the remote anyway.
             local { isEnabled = !isCI }
             remote(develocity.buildCache) {
                 isEnabled = true

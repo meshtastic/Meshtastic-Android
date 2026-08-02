@@ -122,10 +122,7 @@ internal fun Project.configureTestOptions() {
     // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
     tasks.withType<AbstractTestTask>().configureEach { failOnNoDiscoveredTests.set(false) }
 
-    // Test retry comes from the Develocity plugin's own `develocity` extension on each Test task
-    // (the manual recommends it over the standalone org.gradle.test-retry plugin). The extension is
-    // contributed by the settings plugin, so look it up by type and no-op when it is absent rather
-    // than assuming it is there.
+    // Develocity-native test retry; findByType no-ops if the settings plugin isn't applied.
     tasks.withType<Test>().configureEach {
         extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
             maxRetries.set(MAX_TEST_RETRIES)

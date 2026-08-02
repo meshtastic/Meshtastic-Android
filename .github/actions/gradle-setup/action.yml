@@ -18,32 +18,25 @@ inputs:
     required: false
   job_summary_pr_comment:
     description: |
-      Post the Gradle job summary (Build Scan links included) as a PR comment: never | always |
-      on-failure. Requires `pull-requests: write` on the calling job. Fork PRs get a read-only
-      token, so it silently no-ops there.
+      Job summary as a PR comment: never | always | on-failure. Needs `pull-requests: write`;
+      no-ops on fork PRs (read-only token).
     default: 'never'
   dependency_graph:
     description: |
-      GitHub dependency graph mode: disabled | generate | generate-and-submit |
-      generate-and-upload | download-and-submit. Submitting requires `contents: write`.
-      Do NOT combine with cache_configuration_cache: a build whose configuration is loaded
-      from the configuration cache generates NO graph (verified locally), so a submit from
-      a CC-hit build would wipe the repo's Dependabot graph with an empty snapshot.
+      Dependency graph mode: disabled | generate | generate-and-submit | generate-and-upload |
+      download-and-submit. Submit needs `contents: write`. Never combine with
+      cache_configuration_cache — a CC-hit build generates NO graph.
     default: 'disabled'
   cache_configuration_cache:
     description: |
-      Persist .gradle/configuration-cache across runs. Opt-in: an entry only ever reuses when
-      every configuration input is stable across commits, which here means the jobs that pin
-      VERSION_CODE (lint, screenshots, test shards). Jobs deriving the real versionCode from
-      git history configure differently on every commit — for them a persisted entry restores,
-      misses, and (the exact key having hit) is never replaced: dead weight, or worse with
-      dependency_graph (see above).
+      Persist .gradle/configuration-cache. Opt-in: only pays off when config inputs are
+      commit-stable (the VERSION_CODE-pinned jobs). Real-versionCode jobs would restore,
+      miss, and never re-save.
     default: 'false'
   cache_key_suffix:
     description: |
-      Extra discriminator for the configuration-cache key. Matrix legs share one `github.job`,
-      so legs running different task graphs (test-shards) must pass their name. Legs varying
-      only by runner need nothing — runner.os/arch are already in the key.
+      Extra CC-key discriminator for matrix legs running different task graphs (test-shards).
+      Runner-only matrices don't need it — os/arch are already in the key.
     default: ''
 runs:
   using: composite
@@ -143,23 +136,13 @@ runs:
         gradle-home-cache-excludes: |
           caches/build-cache-1
 
-    # Configuration-cache entries live in the project's .gradle/, which setup-gradle does not
-    # cache (it covers Gradle User Home only) — hence Develocity's 100% config-cache MISS at
-    # ~52 s of configuration per CI build. Must run after Setup Gradle, which exports
-    # GRADLE_ENCRYPTION_KEY so entries are decryptable on a different runner.
-    #
-    # Keyed per job because an entry is tied to its task graph; hashFiles covers what actually
-    # invalidates one. Source changes don't, which is where the win is: repeat pushes to a PR
-    # branch hit. No github.sha in the key, so unchanged build logic hits exactly and skips the
-    # save (one entry per job per branch, not per push). restore-keys is the self-heal: a stale
-    # entry fails Gradle's fingerprint check, Gradle rewrites it, and the missed exact key
-    # means the post step saves the fresh one.
+    # CC entries live in the project dir; setup-gradle only caches the Gradle User Home —
+    # Develocity measured 100% CC miss (~52s config/build) before this. Runs after Setup
+    # Gradle so GRADLE_ENCRYPTION_KEY is exported. No sha in the key: unchanged build files
+    # hit exactly and skip the save; restore-keys is the self-heal for stale entries.
     - name: Cache Gradle configuration-cache
-      # Three gates: opted in (see the input's rationale); an encryption key, without which no
-      # GRADLE_ENCRYPTION_KEY is exported and a restored entry can't be decrypted (fork PRs get
-      # no secrets but can read base-branch caches — this keeps them off entries they can't
-      # use); and not merge_group, whose cache scope is a throwaway branch (same reason it no
-      # longer writes the Gradle User Home cache).
+      # Gates: opted in; key present (undecryptable otherwise — keeps keyless fork PRs off
+      # these entries); not merge_group (throwaway cache scope).
       if: inputs.cache_configuration_cache == 'true' && inputs.gradle_encryption_key != '' && github.event_name != 'merge_group'
       uses: actions/cache@v6
       with:
