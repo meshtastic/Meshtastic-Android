@@ -77,9 +77,9 @@ private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
 
 /**
- * Builds the modem-preset dropdown items: hide the 2.8-only TINY presets on firmware without
- * [Capabilities.supportsLoraRegionPresetMap], restrict to the region's legal presets (R7), then always keep the current
- * selection present (disabled) so the field is never blank when the device's preset is illegal for the region.
+ * Builds the modem-preset dropdown items: hide presets the target firmware's preset table doesn't have yet
+ * ([Capabilities.supportsPreset]), restrict to the region's legal presets (R7), then always keep the current selection
+ * present (disabled) so the field is never blank when the device's preset is illegal for the region.
  */
 private fun buildPresetItems(
     presetConstraint: RegionPresetConstraint?,
@@ -89,10 +89,7 @@ private fun buildPresetItems(
 ): List<DropDownItem<ModemPreset>> {
     val items =
         ChannelOption.entries
-            .filter { option ->
-                capabilities.supportsLoraRegionPresetMap ||
-                    (option != ChannelOption.TINY_FAST && option != ChannelOption.TINY_SLOW)
-            }
+            .filter { option -> capabilities.supportsPreset(option) }
             .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
             .map { option ->
                 DropDownItem(value = option.modemPreset, label = option.modemPreset.name, enabled = !presetsGated)
@@ -103,6 +100,15 @@ private fun buildPresetItems(
         items + DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
     }
 }
+
+/**
+ * Builds the region dropdown items: hide regions the target firmware's region table doesn't have yet
+ * ([Capabilities.supportsRegion]), but never hide the device's current selection.
+ */
+private fun buildRegionItems(capabilities: Capabilities, selectedRegion: RegionCode): List<Pair<RegionCode, String>> =
+    RegionInfo.entries
+        .filter { capabilities.supportsRegion(it) || it.regionCode == selectedRegion }
+        .map { it.regionCode to it.description }
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -158,7 +164,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.region_frequency_plan),
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
-                    items = RegionInfo.entries.map { it.regionCode to it.description },
+                    items =
+                    remember(capabilities, formState.value.region) {
+                        buildRegionItems(capabilities, formState.value.region)
+                    },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
                         val freshSetup = formState.value.region == RegionCode.UNSET
