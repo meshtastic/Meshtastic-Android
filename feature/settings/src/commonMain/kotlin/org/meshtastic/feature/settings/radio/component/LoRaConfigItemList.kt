@@ -77,9 +77,9 @@ private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
 
 /**
- * Builds the modem-preset dropdown items: hide the 2.8-only TINY presets on firmware without
- * [Capabilities.supportsLoraRegionPresetMap], restrict to the region's legal presets (R7), then always keep the current
- * selection present (disabled) so the field is never blank when the device's preset is illegal for the region.
+ * Builds the modem-preset dropdown items: hide presets the target firmware's preset table doesn't have yet
+ * ([Capabilities.supportsPreset]), restrict to the region's legal presets (R7), then always keep the current selection
+ * present (disabled) so the field is never blank when the device's preset is illegal for the region.
  */
 private fun buildPresetItems(
     presetConstraint: RegionPresetConstraint?,
@@ -89,10 +89,7 @@ private fun buildPresetItems(
 ): List<DropDownItem<ModemPreset>> {
     val items =
         ChannelOption.entries
-            .filter { option ->
-                capabilities.supportsLoraRegionPresetMap ||
-                    (option != ChannelOption.TINY_FAST && option != ChannelOption.TINY_SLOW)
-            }
+            .filter { option -> capabilities.supportsPreset(option) }
             .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
             .map { option ->
                 DropDownItem(value = option.modemPreset, label = option.modemPreset.name, enabled = !presetsGated)

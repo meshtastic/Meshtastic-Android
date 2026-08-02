@@ -78,8 +78,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsEsp32Ota = atLeast(V2_7_18)
 
     /**
-     * Support for the LoRa region→preset compatibility map and TINY presets. Supported since firmware v2.8.0. Older
-     * firmware never sends the map, so the UI keeps the preset list unconstrained and hides the new presets.
+     * Support for the LoRa region→preset compatibility map. Supported since firmware v2.8.0. Older firmware never sends
+     * the map, so the UI keeps the preset list unconstrained (preset *availability* is [supportsPreset]).
      */
     val supportsLoraRegionPresetMap = atLeast(V2_8_0)
 
@@ -102,6 +102,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
      * [RegionInfo.minFirmware]; older firmware would treat an unknown region code as UNSET, so the picker hides it.
      */
     fun supportsRegion(region: RegionInfo): Boolean = region.minFirmware?.let { atLeast(it) } ?: true
+
+    /**
+     * Whether this firmware's preset table contains [preset] ([ChannelOption.minFirmware]); older firmware silently
+     * falls back to LONG_FAST when sent an unknown preset, so the picker hides it.
+     */
+    fun supportsPreset(preset: ChannelOption): Boolean = preset.minFirmware?.let { atLeast(it) } ?: true
 
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")

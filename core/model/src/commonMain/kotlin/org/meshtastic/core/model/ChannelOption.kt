@@ -108,7 +108,11 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     }
 }
 
-/** The firmware release that introduced the EU Lite/Narrow and amateur-band ITU regions. */
+/**
+ * The firmware release that introduced the EU Lite/Narrow and amateur-band ITU regions and the LITE/NARROW/TINY/
+ * MEDIUM_TURBO presets. NB: the LITE/NARROW *enum values* were vendored into v2.7.23's protobufs, but the radio support
+ * (`modemPresetToParams` cases, preset tables, EU regions — firmware#10120) is untagged and ships in 2.8.
+ */
 private val FIRMWARE_2_8 = DeviceVersion("2.8.0")
 
 /**
@@ -453,9 +457,16 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float, val snrLimit: Float) {
+enum class ChannelOption(
+    val modemPreset: ModemPreset,
+    val bandwidth: Float,
+    val snrLimit: Float,
+    val minFirmware: DeviceVersion? = null,
+) {
     // Grouped by range and speed for better readability.
     // snrLimit = demodulation floor for the preset's spreading factor (see [ModemPreset.snrLimit]).
+    // minFirmware = first firmware release whose preset table has the entry ([Capabilities.supportsPreset]);
+    // older firmware silently falls back to LONG_FAST when sent an unknown preset.
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f, snrLimit = -20f), // SF12
     LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, snrLimit = -12.5f), // SF9
     LONG_FAST(ModemPreset.LONG_FAST, 0.250f, snrLimit = -17.5f), // SF11
@@ -466,19 +477,19 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float, val
     LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, snrLimit = -20f), // SF12
     MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f, snrLimit = -12.5f), // SF9
     MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f, snrLimit = -15f), // SF10
-    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, 0.500f, snrLimit = -12.5f), // SF9
+    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, 0.500f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8), // SF9
     SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, snrLimit = -7.5f), // SF7
     SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, snrLimit = -10f), // SF8
     SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, snrLimit = -7.5f), // SF7
-    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, snrLimit = -12.5f),
-    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, snrLimit = -15f),
-    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, snrLimit = -10f),
-    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, snrLimit = -12.5f),
+    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8),
+    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, snrLimit = -15f, minFirmware = FIRMWARE_2_8),
+    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, snrLimit = -10f, minFirmware = FIRMWARE_2_8),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8),
 
     // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
     // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
-    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, snrLimit = -7.5f), // SF7
-    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, snrLimit = -10f), // SF8
+    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, snrLimit = -7.5f, minFirmware = FIRMWARE_2_8), // SF7
+    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, snrLimit = -10f, minFirmware = FIRMWARE_2_8), // SF8
     ;
 
     companion object {

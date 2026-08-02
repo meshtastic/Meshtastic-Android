@@ -125,6 +125,37 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsPreset_gates_2_8_presets_but_not_established_ones() {
+        // LITE/NARROW enum values were vendored into v2.7.23 protobufs, but their radio support
+        // (modemPresetToParams cases — firmware#10120) ships in 2.8 like TINY and MEDIUM_TURBO.
+        val gated =
+            setOf(
+                ChannelOption.TINY_FAST,
+                ChannelOption.TINY_SLOW,
+                ChannelOption.MEDIUM_TURBO,
+                ChannelOption.LITE_FAST,
+                ChannelOption.LITE_SLOW,
+                ChannelOption.NARROW_FAST,
+                ChannelOption.NARROW_SLOW,
+            )
+        assertEquals(gated, ChannelOption.entries.filter { it.minFirmware != null }.toSet())
+
+        val old = caps("2.7.26")
+        val new = caps("2.8.0")
+        gated.forEach { preset ->
+            assertFalse(old.supportsPreset(preset), "${preset.name} should be hidden on 2.7 firmware")
+            assertTrue(new.supportsPreset(preset), "${preset.name} should be shown on 2.8 firmware")
+        }
+        // Established presets are never gated, even with unknown firmware.
+        assertTrue(caps(null).supportsPreset(ChannelOption.LONG_FAST))
+        // Unknown firmware hides gated presets; debug forceEnableAll shows them.
+        assertFalse(caps(null).supportsPreset(ChannelOption.MEDIUM_TURBO))
+        assertTrue(
+            Capabilities(firmwareVersion = null, forceEnableAll = true).supportsPreset(ChannelOption.MEDIUM_TURBO),
+        )
+    }
+
+    @Test
     fun nullFirmware_returns_all_false() {
         val c = caps(null)
         assertFalse(c.canMuteNode)
