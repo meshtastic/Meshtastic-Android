@@ -34,8 +34,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          count=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
-            --jq '[.artifacts[] | select(.name | startswith("dependency-graph"))] | length')
+          count=$(gh api --paginate "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts?per_page=100" \
+            --jq '[.artifacts[] | select(.name | startswith("dependency-graph"))] | length' | paste -sd+ | bc)
           echo "count=$count" >> "$GITHUB_OUTPUT"
 
       - name: Download and submit dependency graph

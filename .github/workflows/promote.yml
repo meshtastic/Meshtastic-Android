@@ -102,10 +102,15 @@ jobs:
 
       - name: Calculate Version Code from Git Commit Count
         id: calculate_version_code
+        env:
+          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
           echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
         shell: bash
 

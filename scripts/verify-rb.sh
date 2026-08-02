@@ -19,18 +19,23 @@
 # spurious failure.
 set -eu
 
+# Private workdir, created BEFORE any Gradle run: fixed /tmp paths could be
+# pre-claimed (symlinked) by build logic executing in between the copies.
+WORKDIR=$(mktemp -d)
+trap 'rm -rf "$WORKDIR"' EXIT
+
 echo "── Step 1: Verify aboutlibraries.json determinism ──"
 rm -f androidApp/src/main/resources/aboutlibraries.json
 ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache
-cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
+cp androidApp/src/main/resources/aboutlibraries.json "$WORKDIR/aboutlibraries-run1.json"
 
 rm -f androidApp/src/main/resources/aboutlibraries.json
 ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
-cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
+cp androidApp/src/main/resources/aboutlibraries.json "$WORKDIR/aboutlibraries-run2.json"
 
-if ! diff -q /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json; then
+if ! diff -q "$WORKDIR/aboutlibraries-run1.json" "$WORKDIR/aboutlibraries-run2.json"; then
   echo "::error::aboutlibraries.json is NOT deterministic across runs!"
-  diff /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json | head -20
+  diff "$WORKDIR/aboutlibraries-run1.json" "$WORKDIR/aboutlibraries-run2.json" | head -20
   exit 1
 fi
 echo "✅ aboutlibraries.json is deterministic"
@@ -53,12 +58,12 @@ fi
 echo "✅ No datadog.buildId in fdroid APK"
 
 echo "── Step 4: Check for proprietary libraries (dex scan) ──"
-WORKDIR=$(mktemp -d)
-trap 'rm -rf "$WORKDIR"' EXIT
-unzip -q "$APK" -d "$WORKDIR"
+APK_DIR="$WORKDIR/apk"
+mkdir "$APK_DIR"
+unzip -q "$APK" -d "$APK_DIR"
 OFFENDERS=""
 for pattern in "com/google/firebase" "com/google/android/gms" "com/crashlytics" "com/google/mlkit" "com/google/android/datatransport" "androidx/privacysandbox/ads"; do
-  for dex in "$WORKDIR"/classes*.dex; do
+  for dex in "$APK_DIR"/classes*.dex; do
     if [ -f "$dex" ] && strings "$dex" | grep -q "L${pattern}/"; then
       OFFENDERS="${OFFENDERS}\n  - $pattern"
       break
@@ -123,7 +128,7 @@ while IFS= read -r -d '' so; do
     # if keepDebugSymbols is not working as expected
     STRIPPED_LIBS="${STRIPPED_LIBS} $(basename "$so")"
   fi
-done < <(find "$WORKDIR" -name "*.so" -print0 2>/dev/null)
+done < <(find "$APK_DIR" -name "*.so" -print0 2>/dev/null)
 # Note: Some third-party .so files arrive pre-stripped, which is OK.
 # We only warn here; a hard failure would be too aggressive.
 if [ -n "$STRIPPED_LIBS" ]; then
@@ -136,11 +141,11 @@ echo "── Step 7: Check aboutlibraries 'generated' timestamp not in APK ─�
 # The M7.json (or aboutlibraries.json in Java resources) should NOT contain
 # a "generated" field, which introduces a build-time timestamp.
 ABOUT_JSON=""
-if [ -f "$WORKDIR/aboutlibraries.json" ]; then
-  ABOUT_JSON="$WORKDIR/aboutlibraries.json"
+if [ -f "$APK_DIR/aboutlibraries.json" ]; then
+  ABOUT_JSON="$APK_DIR/aboutlibraries.json"
 else
   # May be in res/ as M7.json or similar
-  ABOUT_JSON=$(find "$WORKDIR/res" -name "*.json" -exec grep -l "aboutLibraries" {} \; 2>/dev/null | head -1)
+  ABOUT_JSON=$(find "$APK_DIR/res" -name "*.json" -exec grep -l "aboutLibraries" {} \; 2>/dev/null | head -1)
 fi
 if [ -n "$ABOUT_JSON" ] && grep -q '"generated"' "$ABOUT_JSON"; then
   echo "::error::aboutlibraries contains 'generated' timestamp field — add excludeFields = listOf(\"generated\") to build config"
@@ -149,8 +154,8 @@ fi
 echo "✅ No 'generated' timestamp in aboutlibraries data"
 
 echo "── Step 8: Verify build from clean tree (version-control-info) ──"
-if [ -f "$WORKDIR/META-INF/version-control-info.textproto" ]; then
-  if grep -q "modified: true" "$WORKDIR/META-INF/version-control-info.textproto"; then
+if [ -f "$APK_DIR/META-INF/version-control-info.textproto" ]; then
+  if grep -q "modified: true" "$APK_DIR/META-INF/version-control-info.textproto"; then
     echo "::warning::APK built from dirty tree (version-control-info shows modified:true). Release builds must use a clean tree."
   else
     echo "✅ Built from clean tree"
