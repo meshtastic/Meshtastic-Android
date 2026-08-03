@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ble
 
+import app.cash.turbine.test
 import com.juul.kable.Advertisement
 import dev.mokkery.MockMode
 import dev.mokkery.mock
@@ -176,9 +177,10 @@ class KableBleConnectionTest {
                 ),
             )
 
-        val result = scanner.scan(timeout = 1.seconds, address = wanted).toList()
-
-        assertEquals(listOf(wanted), result.map { it.address })
+        scanner.scan(timeout = 1.seconds, address = wanted).test {
+            assertEquals(wanted, awaitItem().address)
+            awaitComplete()
+        }
     }
 
     @Test
@@ -194,9 +196,10 @@ class KableBleConnectionTest {
                 ),
             )
 
-        val result = scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").toList()
-
-        assertEquals(listOf("aa:bb:cc:dd:ee:ff"), result.map { it.address })
+        scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").test {
+            assertEquals("aa:bb:cc:dd:ee:ff", awaitItem().address)
+            awaitComplete()
+        }
     }
 
     @Test
@@ -210,9 +213,11 @@ class KableBleConnectionTest {
                 ),
             )
 
-        val result = scanner.scan(timeout = 1.seconds).toList()
-
-        assertEquals(listOf("11:22:33:44:55:66", "77:88:99:AA:BB:CC"), result.map { it.address })
+        scanner.scan(timeout = 1.seconds).test {
+            assertEquals("11:22:33:44:55:66", awaitItem().address)
+            assertEquals("77:88:99:AA:BB:CC", awaitItem().address)
+            awaitComplete()
+        }
     }
 
     @Test
