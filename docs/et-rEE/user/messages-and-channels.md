@@ -59,15 +59,15 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste sissetulevate sõnumite puhul olekumärgist ei kuvata):
 
-| Olek                                | Tähendus                                                                                                                                           |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending…                            | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
-| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
-| Kärgvõrku kohale jõudnud            | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
-| Relayed, not confirmed by recipient | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
-| Marsruutimine SF++ ahela kaudu…     | Being routed/buffered by the Store & Forward Plus Plus chain                                                                   |
-| Kinnitatud SF++ ahel                | Confirmed delivered via the SF++ chain                                                                                                             |
-| Tõrge                               | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                            |
+| Olek                              | Tähendus                                                                                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sending…                          | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
+| Delivered to recipient            | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
+| Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
+| Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
+| Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store & Forward Plus Plus chain                                                                   |
+| Kinnitatud SF++ ahel              | Confirmed delivered via the SF++ chain                                                                                                             |
+| Tõrge                             | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                            |
 
 ### Delivery Errors
 

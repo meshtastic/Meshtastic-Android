@@ -46,7 +46,7 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
 | Klient-baas                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                                      |
 | Vaikne klient                    | Receives but doesn't retransmit                                                                                                                                         |
 | Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                                             |
-| Ruuter                           | Prioritizes message forwarding; stays awake to relay                                                                                                                    |
+| Ruuter                           | Prioriseerib sõnumi edastamist; jääb edastamiseks ärkvele                                                                                                               |
 | Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)                                |
 | ~~Router Client~~                | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.3.15) — enam mitte valitav; kasuta hoopis ruuterint või kliendina |
 | ~~Repeater~~                     | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
