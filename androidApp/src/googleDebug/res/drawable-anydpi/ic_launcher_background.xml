@@ -4,8 +4,14 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#FFC802"
+        android:fillColor="#9BA8E0"
         android:pathData="M0,0h108v108h-108z" />
+
+    <path
+        android:strokeColor="#000000"
+        android:strokeAlpha="0.15"
+        android:strokeWidth="0.75"
+        android:pathData="M13.5,0L13.5,108M27,0L27,108M40.5,0L40.5,108M54,0L54,108M67.5,0L67.5,108M81,0L81,108M94.5,0L94.5,108M0,13.5L108,13.5M0,27L108,27M0,40.5L108,40.5M0,54L108,54M0,67.5L108,67.5M0,81L108,81M0,94.5L108,94.5M0,0L108,108M0,108L108,0M6,54A48,48 0 1,0 102,54A48,48 0 1,0 6,54M21,54A33,33 0 1,0 87,54A33,33 0 1,0 21,54M36,54A18,18 0 1,0 72,54A18,18 0 1,0 36,54" />
 
     <path
         android:fillAlpha="0.3"
