@@ -53,7 +53,7 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 The app can also run a **local TAK server** so ATAK/iTAK on the **same device** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open **Settings → Module Config → TAK → TAK Server**:
 
-![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
+![Kohaliku TAK-serveri seaded koos lubamise lüliti ja ekspordi valikuga](../../assets/screenshots/tak_server_enabled.png)
 
 - **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
 - **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
@@ -128,7 +128,7 @@ Kui on seadistatud:
 
 - [Seaded — moodulid ja admin](settings-module-admin) — TAK mooduli konf
 - [Sõlmed](nodes) — TAK ja TAK jälgimisseade rollid sõlmede loendis
-- [Map & Waypoints](map-and-waypoints) — node positions on the map
+- [Kaart ja teekonnapunktid](map-and-waypoints) — sõlmede asukohad kaardil
 - [ATAK plugina juhend](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — üksikasjalik ATAK seadistamine aadressil meshtastic.org
 
 ---

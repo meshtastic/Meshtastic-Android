@@ -97,6 +97,6 @@ docs/
 
 ## 質問がありますか？
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
+特定の文字列のコンテキストについて質問がある場合や、始め方について助けが必要な場合は、[Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) のページでディスカッションを作成してください。
 
 Meshtastic の普及にご協力いただき、ありがとうございます！

@@ -41,20 +41,20 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 
 ![MQTT lüliti](/assets/screenshots/settings_switch.png)
 
-| Sätted           | Kirjeldus                                                                                  | Vaikimisi                                           |
-| ---------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| Server Address   | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
-| Kasutajatunnus   | Broker authentication                                                                      | meshdev                                             |
-| Parool           | Broker authentication                                                                      | large4cats                                          |
-| Root Topic       | Base topic for messages                                                                    | msh                                                 |
-| Encryption       | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
-| ~~JSON väljund~~ | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
-| TLS              | Secure connection to broker                                                                | Keelatud                                            |
-| Map Reporting    | Report position to public map                                                              | Keelatud                                            |
+| Sätted                     | Kirjeldus                                                                                  | Vaikimisi                                           |
+| -------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Server Address             | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
+| Kasutajatunnus             | Broker authentication                                                                      | meshdev                                             |
+| Parool                     | Broker authentication                                                                      | large4cats                                          |
+| Root Topic                 | Base topic for messages                                                                    | msh                                                 |
+| Encryption                 | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
+| ~~JSON väljund~~           | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
+| TLS                        | Secure connection to broker                                                                | Keelatud                                            |
+| Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                           | Keelatud                                            |
 
-### MQTT Proxy on This Phone
+### MQTT puhverserver sellel telefonil
 
-If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+Kui sõlmel puudub oma internetiühendus, saab see kasutada ühendatud telefoni MQTT-lüüsina: luba mooduli konfiguratsioonis **MQTT** ja **Proksi kliendiga lubatud** ning rakendus edastab MQTT-liikluse raadio ja maakleri vahel telefoni internetiühenduse kaudu.
 
 MQTT sätete ekraani ülaosas olev lüliti **MQTT puhverserver sellel telefonil** näitab, kas see relee töötab praegu, ja võimaldab selle kohe välja lülitada (või taaskäivitada) – ilma seadme MQTT konfiguratsiooni muutmata ja uuesti salvestamata.
 
@@ -76,11 +76,11 @@ Parema privaatsuse ja kontrolli tagamiseks saad hallata oma MQTT maaklerit:
 
 Configure your node to point to your private broker with appropriate credentials.
 
-## Map Reporting
+## Kaardiaruannete koostamine
 
 Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnakaardil:
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
+- Nähtav aadressil [meshmap.net](https://meshmap.net) ja sarnastes kogukonna kaarditeenustes
 - Only position and node info are shared
 - Disable this if you don't want your location publicly visible
 

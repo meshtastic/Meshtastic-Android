@@ -49,7 +49,7 @@ Grant both permissions when prompted. Ilma sinihambata peate kasutama USB- või 
 
 Meshtastic kasutab sinu asukohta ka järgmiseks:
 
-- Showing your position on the mesh map
+- Kuvatakse asukoht kärgvõrgu kaardil
 - Calculating distances to other nodes
 - Sharing your GPS coordinates with other mesh members (if enabled)
 
@@ -92,7 +92,7 @@ Kui raadioga on ühendus loodud, uuri:
 - [Ühendused(connections) — seo oma esimene raadioseade
 - [Sõnumid ja kanalid](messages-and-channels) — saada oma esimene sõnum
 - [Seadmed](nodes) — vaata, kes on sinu võrgus
-- [Map & Waypoints](map-and-waypoints) — view node positions
+- [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede asukohti
 - [Settings](settings-radio-user) — configure your radio and user profile
 
 Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja esimest võrgu seadistamist.

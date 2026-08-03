@@ -51,11 +51,11 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 
 ### ローカル TAK サーバー
 
-The app can also run a **local TAK server** so ATAK/iTAK on the **same device** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. 「**設定 → モジュール設定 → TAK → TAK サーバー**」を開きます：
+アプリは**ローカル TAK サーバー**を実行することもでき、**同じデバイス**上の ATAK／iTAK が、リモートの TAK サーバーなしで直接接続できます。 サーバーは localhost のみ（`127.0.0.1:8089`）にバインドし、相互証明書認証（mTLS）による TLS を使用するため、ネットワーク上の他のデバイスからは到達できません。 「**設定 → モジュール設定 → TAK → TAK サーバー**」を開きます：
 
 ![有効化トグルとエクスポートオプションを備えたローカル TAK サーバーの設定](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
+- **ローカル TAK サーバーを有効化**：同じデバイスからの ATAK／iTAK 接続用に、ポート **8089** でループバック専用の mTLS サーバーを起動します。
 - **TAK データパッケージをエクスポート**：ATAK／iTAK がこのサーバーに接続するためにインポートできる `.zip` データパッケージを生成します。
 
 ## TAK の役割
@@ -129,7 +129,7 @@ Meshtastic は 2 つの TAK ワイヤ形式に対応しており、接続中の�
 - [設定：モジュールと管理](settings-module-admin)：TAK モジュールの設定
 - [ノード](nodes)：ノードリストの TAK と TAK Tracker の役割
 - [マップとウェイポイント](map-and-waypoints)：マップ上のノードの位置
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
+- [ATAK プラグインガイド](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/)：meshtastic.org にある詳細な ATAK セットアップ
 
 ---
 

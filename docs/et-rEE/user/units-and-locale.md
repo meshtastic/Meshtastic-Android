@@ -26,7 +26,7 @@ On Android, your measurement preferences are determined by your system **Languag
 
 Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![Keskkonna mõõdikud koos temperatuuriga](../../assets/screenshots/nodes_environment_metrics.png)
 
 | Sinu sätted | Teadmiseks |
 | ----------- | ---------- |
@@ -39,7 +39,7 @@ This affects all temperature displays throughout the app: node environment telem
 
 Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
 
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
+![Vahemaa info kuvamine](../../assets/screenshots/nodes_distance_info.png)
 
 | Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
 | -------------------------------- | -------------- | ---------------------- | -------- |

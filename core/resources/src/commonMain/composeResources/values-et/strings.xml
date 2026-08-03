@@ -115,7 +115,12 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Hea</string>
+    <string name="aqi_hazardous">Ohtlik</string>
+    <string name="aqi_moderate">Mõõdukas</string>
+    <string name="aqi_unhealthy">Ebatervislik</string>
+    <string name="aqi_unhealthy_sensitive">Tundlikele gruppidele ebatervislik</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Väga ebatervislik</string>
     <string name="are_you_sure">Oled kindel?</string>
     <string name="are_you_sure_change_default">Kas oled kindel, et soovid vaikekanalit muuta?</string>
     <string name="audio">Heli</string>
@@ -144,6 +149,7 @@
     <string name="bluetooth_feature_discovery">Avastamine</string>
     <string name="bluetooth_feature_discovery_description">Leia ja tuvasta lähedal asuvad Meshtastic seadmed.</string>
     <string name="bluetooth_permission">Sinihammas</string>
+    <string name="bluetooth_scan_location_services_disabled">Asukohateenused on välja lülitatud. Lähedalasuvate seadmete otsimiseks lülita need sisse.</string>
     <string name="bluetooth_scan_missing_permission">Sinihamba ​​skannimiseks on vaja luba. Andke seadmete leidmiseks lähedalasuvatele seadmetele (või asukohale) luba.</string>
     <string name="bluetooth_scan_start_failed">Sinihamba otsingut ei õnnestunud alustada. Proovi uuesti või lülita sinihammas sisse/välja, kui probleem püsib.</string>
     <plurals name="bluetooth_scan_too_frequent">
@@ -806,6 +812,7 @@
     <string name="ignore_remove">Eemaldada '%1$s' eiramis loendist?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Lae sätted</string>
+    <string name="import_export_label">Import/Eksport</string>
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="import_label">Lae</string>
     <string name="import_shared_contact">Impordi jagatud kontakt?</string>
@@ -1070,6 +1077,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT sätted</string>
     <string name="mqtt_enabled">MQTT lubatud</string>
+    <string name="mqtt_error_connection_lost">MQTT: ühendus katkes</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: ühendus lükati tagasi (kontrolli volitusi)</string>
+    <string name="mqtt_error_proxy_failed">MQTT puhverserveri töö ebaõnnestus: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: ühendus lükati tagasi: %1$s</string>
     <string name="mqtt_probe_dns_failure">Hosti ei leitud</string>
     <string name="mqtt_probe_other_failure">Ühendus ebaõnnestus</string>
     <string name="mqtt_probe_rejected">Vahendaja lükkas tagasi: %1$s</string>
@@ -1248,6 +1259,7 @@
     <string name="pa_fan_disabled">PA ventilaator keelatud</string>
     <!-- PACKET -->
     <string name="packet_authenticity_strict_confirmation">Strict ignoreerib kõiki krüptograafiliselt autentimata kaugvõrgu pakette. Vanem püsivara, litsentsitud või PKI-võtmeteta amatööride sõlmed ja ülisuured paketid võivad kaduda. PKI-autentitud otsesõnumid jäävad kättesaadavaks.</string>
+    <string name="packet_authenticity_strict_summary">Kuva ja töötle ainult krüptograafiliselt autentitud kärgvõrgu pakette. Vanemad sõlmed ja ülisuured paketid võivad kaduda.</string>
     <string name="pairing_mode">Sidumine</string>
     <string name="password">Parool</string>
     <!-- PAX -->
@@ -1531,8 +1543,10 @@
     <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
     <string name="show_iaq_legend">Näita õhukvaliteedi ajalugu</string>
     <string name="show_layer">Näita kiht</string>
+    <string name="show_original">Näita originaali</string>
     <string name="show_password">Kuva parool</string>
     <string name="show_precision_circle">Näita täpsusringid</string>
+    <string name="show_translation">Näita tõlget</string>
     <string name="show_waypoints">Kuva teekonnapunktid</string>
     <string name="shutdown">Lülita välja</string>
     <string name="shutdown_node_name">Sõlm: %1$s</string>
@@ -1541,13 +1555,25 @@
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
     <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Antenni võimendus (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Antenni kõrgus (m)</string>
+    <string name="site_planner_color_scale">Värvipalett</string>
+    <string name="site_planner_estimate">Hinnanguline katvus</string>
+    <string name="site_planner_estimating">Katvuse hindamine…</string>
+    <string name="site_planner_failed">Katvuse hindamine ebaõnnestus</string>
+    <string name="site_planner_frequency_mhz">Sagedus (MHz)</string>
+    <string name="site_planner_high_resolution">Kõrg-haljastusega maastik</string>
     <string name="site_planner_invalid_latitude">Sisesta −90 kuni 90</string>
     <string name="site_planner_invalid_longitude">Sisesta −180 to 180</string>
+    <string name="site_planner_invalid_positive">Peab olema suurem kui 0</string>
     <string name="site_planner_invalid_rx_sensitivity">Sisesta −150 to −30 dBm</string>
     <string name="site_planner_max_range_km">Maks leviulatus (km)</string>
     <string name="site_planner_rx_height_meters">Vastuvõtja kõrgus (m)</string>
     <string name="site_planner_rx_sensitivity_dbm">Vastuvõtja tundlikkus (dBm)</string>
     <string name="site_planner_section_display">Ekraan</string>
+    <string name="site_planner_section_receiver">Vastuvõtja</string>
+    <string name="site_planner_section_transmitter">Asupaik / saatja</string>
+    <string name="site_planner_subtitle">Saatja raadiosagedusliku leviala hindamine</string>
     <string name="site_planner_tx_power_watts">TX võimsus (W)</string>
     <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
     <string name="skip">Jäta vahele</string>

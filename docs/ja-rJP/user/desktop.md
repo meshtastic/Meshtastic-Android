@@ -84,7 +84,7 @@ Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブ�
 
 ### キーボードショートカット
 
-Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
+ショートカットは、macOS では **⌘**（Command）、Windows と Linux では **Ctrl** を使用します。 （Super／Windows キーは割り当てられていません。）
 
 | ショートカット      | 操作           |
 | ------------ | ------------ |

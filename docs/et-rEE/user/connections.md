@@ -46,7 +46,7 @@ Sinihamba, võrgu ja USB-transpordi vahel vahetamiseks (üks on korraga aktiivne
 
 Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
 
-![Connecting status](../../assets/screenshots/connections_connecting.png)
+![Ühenduse olek](../../assets/screenshots/connections_connecting.png)
 
 Kui seadmeid ei leita, kuvab rakendus tühja oleku koos juhistega:
 
@@ -97,7 +97,7 @@ The app reconnects to the **last selected device** on startup. Transporti saab �
 
 Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
 
-![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
+![Katkesta ühendus raadioga](../../assets/screenshots/connections_disconnect.png)
 
 ## Desktop Connections
 

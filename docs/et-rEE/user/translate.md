@@ -18,11 +18,11 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 ## Mida tõlgitakse
 
-| Resource          | Source Location                                                     | Sõnumid                                                                |
-| ----------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                   |
-| User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help & Documentation |
-| Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
+| Resource          | Source Location                                                     | Sõnumid                                                                   |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                      |
+| User Guide pages  | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
+| Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
 
 > ⚠️ **Märkus:** Arendaja juhend ainult inglise keeles. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 

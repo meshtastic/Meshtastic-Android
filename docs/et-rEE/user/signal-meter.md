@@ -23,7 +23,7 @@ Most consumer devices simply measure how "loud" a signal is. Kuna Meshtastic kas
 
 Every time the LoRa radio chip receives a message, it reports two measurements:
 
-- **RSSI (Received Signal Strength Indicator):** The **loudness** of the raw power hitting your antenna.
+- **RSSI (vastuvõetud signaali tugevuse indikaator):** Antennile langeva toore võimsuse **valjus**.
 - **SNR (Signal-to-Noise Ratio):** The **clarity** of the signal compared to the background static.
 
 > 💡 **Vihje:** Siin on analoogia – kujuta ette, et sa üritad kuulda sõpra sinuga rääkimas.
@@ -38,7 +38,7 @@ Kui su sõber karjub sulle kõrvulukustava rokkkontserdi ajal, on signaal uskuma
 
 ## 2. The Magic of LoRa: Hearing "Below the Noise Floor"
 
-For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
+Standardraadiote (nt FM või WiFi) puhul, kui taustamüra on signaalist valjem (negatiivne signaali-müra suhe), kuuleb vastuvõtja ainult staatilist müra.
 
 LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
 
@@ -50,7 +50,7 @@ Sõltuvalt sellest, millist Meshtastic eelhäälestust kasutad (nt `PikkKauge` v
 
 The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, measured relative to the preset's SNR Limit** — the demodulation floor described above. It deliberately does **not** factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)
 
-Kuna hinnang on eelseadistatud piirangu suhtes suhteline, võib _sama_ signaali-müra suhe erinevatel eelseadistustel olla erinev – „-15 dB” on „LongSlow” puhul kasutatav, kuid „ShortFast” puhul mittekasutatav. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
+Kuna hinnang on eelseadistatud piirangu suhtes suhteline, võib _sama_ signaali-müra suhe erinevatel eelseadistustel olla erinev – „-15 dB” on „LongSlow” puhul kasutatav, kuid „ShortFast” puhul mittekasutatav. Kui aktiivse eelseadistuse signaali ja müra piiranguks on `limit`, valib rakendus ribad (või värvi) järgmiselt:
 
 | Level    | Bars | Criteria                               | Meaning                                                                                  |
 | -------- | ---- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -69,18 +69,18 @@ Kuna Meshtasticu mõõdik toimib **"selguse mõõturina"**, käitub see erineval
 
 > 💡 **Vihje:** Ära paanitse madala RSSI pärast. You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. Aga kui sinu seadme signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
 
-> ⚠️ **Warning:** Watch out for local noise. If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
+> ⚠️ **Warning:** Watch out for local noise. Kui ühendad tohutu antenni ja näed suurepärast RSSI-d (nt „-90 dBm”), aga signaalimõõtur näitab ainult **1 tulpa (halb)**, on sul probleem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
 
 ## Where Signal Information Appears
 
-In the app, signal data is shown in several places:
+Rakenduses kuvatakse signaaliandmeid mitmes kohas:
 
 - **Node list** — signal bars icon next to each node
 - **Node detail** — SNR, RSSI, and signal quality in the device metrics section
 - **Traceroute** — iga vahendussõlme signaali kvaliteet hüppe kohta
 - **Signal metrics** — historical SNR and RSSI data in the metrics charts
 
-![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)
+![Sõlme kirje, mis näitab signaali ja signaali suhet SNR, RSSI väärtusi ja värvilisi signaaliribasid](../../assets/screenshots/nodes_signal_info.png)
 
 ## Related Topics
 
