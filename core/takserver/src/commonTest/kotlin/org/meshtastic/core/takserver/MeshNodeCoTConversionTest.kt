@@ -161,8 +161,10 @@ class MeshNodeCoTConversionTest {
             rssi = rssi,
             deviceMetrics =
             org.meshtastic.proto.DeviceMetrics(
+                // Exact tenths so NumberFormatter's rounding can't introduce ambiguity here —
+                // rounding behavior itself belongs to NumberFormatterTest, not this class.
                 battery_level = 76,
-                voltage = 3.95f,
+                voltage = 3.9f,
                 channel_utilization = 12.5f,
                 air_util_tx = 4.2f,
             ),

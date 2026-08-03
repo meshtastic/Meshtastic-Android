@@ -116,8 +116,9 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
                 Logger.i { "TAK Server started" }
             } else {
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
-                // Clear onMessage if start failed so we don't hold a reference unnecessarily
+                // Clear both callbacks if start failed so we don't hold a reference unnecessarily
                 takServer.onMessage = null
+                takServer.onClientConnected = null
             }
         }
     }
@@ -130,6 +131,7 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
         _isRunning.value = false
         scope = null
         takServer.onMessage = null
+        takServer.onClientConnected = null
         takServer.stop()
         Logger.i { "TAK Server stopped" }
     }

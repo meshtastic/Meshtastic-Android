@@ -16,12 +16,6 @@
  */
 package org.meshtastic.core.takserver
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -38,30 +32,8 @@ import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 class MeshToCotBroadcasterTest {
-
-    private class FakeTAKServerManager : TAKServerManager {
-        override val isRunning = MutableStateFlow(true)
-        val connections = MutableStateFlow(0)
-        override val connectionCount: StateFlow<Int> = connections
-        override val inboundMessages: SharedFlow<InboundCoTMessage> = MutableSharedFlow()
-
-        private val _clientConnected = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
-        override val clientConnected: SharedFlow<Unit> = _clientConnected.asSharedFlow()
-
-        val broadcasts = mutableListOf<CoTMessage>()
-
-        suspend fun emitClientConnected() = _clientConnected.emit(Unit)
-
-        override fun start(scope: CoroutineScope) = Unit
-
-        override fun stop() = Unit
-
-        override fun broadcast(cotMessage: CoTMessage) {
-            broadcasts.add(cotMessage)
-        }
-
-        override fun broadcastRawXml(xml: String) = Unit
-    }
+    // FakeTAKServerManager lives in its own file in this source set, shared with TAKMeshIntegrationTest.
+    // It never touches isRunning; MeshToCotBroadcaster only reads connectionCount.
 
     private class Harness(val scope: TestScope) {
         val serverManager = FakeTAKServerManager()

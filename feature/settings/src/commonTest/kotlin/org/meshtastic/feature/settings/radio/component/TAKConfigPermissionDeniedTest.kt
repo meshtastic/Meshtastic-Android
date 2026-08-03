@@ -17,10 +17,8 @@
 package org.meshtastic.feature.settings.radio.component
 
 import app.cash.turbine.test
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.testing.FakeTakPrefs
 import kotlin.test.Test
 import kotlin.test.assertFalse
 
@@ -36,26 +34,10 @@ import kotlin.test.assertFalse
  */
 class TAKConfigPermissionDeniedTest {
 
-    /** Minimal TakPrefs that tracks calls to setTakServerEnabled. */
-    private class FakeTakPrefs : TakPrefs {
-        private val _isTakServerEnabled = MutableStateFlow(true)
-        override val isTakServerEnabled: StateFlow<Boolean> = _isTakServerEnabled
-
-        override fun setTakServerEnabled(enabled: Boolean) {
-            _isTakServerEnabled.value = enabled
-        }
-
-        private val _isMeshToCotEnabled = MutableStateFlow(false)
-        override val isMeshToCotEnabled: StateFlow<Boolean> = _isMeshToCotEnabled
-
-        override fun setMeshToCotEnabled(enabled: Boolean) {
-            _isMeshToCotEnabled.value = enabled
-        }
-    }
-
     @Test
     fun `permission denied disables TAK server`() = runTest {
         val prefs = FakeTakPrefs()
+        prefs.isTakServerEnabled.value = true // Scenario starts with the server already enabled.
 
         // Simulate the exact logic from TAKConfigItemList.kt:
         // onPermissionResult = { granted -> if (!granted && isTakServerEnabled) takPrefs.setTakServerEnabled(false) }
@@ -86,6 +68,7 @@ class TAKConfigPermissionDeniedTest {
     @Test
     fun `permission granted does not disable TAK server`() = runTest {
         val prefs = FakeTakPrefs()
+        prefs.isTakServerEnabled.value = true // Scenario starts with the server already enabled.
 
         // Simulate permission granted
         val granted = true

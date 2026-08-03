@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.takserver
 
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.onlineTimeThreshold
@@ -68,10 +69,10 @@ internal fun Node.cotCallsign(): String {
 internal fun Node.cotRemarks(): String? {
     val parts = buildList {
         batteryLevel?.let { add("Battery: $it%") }
-        voltage?.let { add("Voltage: ${formatOneDecimal(it)}V") }
-        deviceMetrics.channel_utilization?.let { add("ChUtil: ${formatOneDecimal(it)}%") }
-        deviceMetrics.air_util_tx?.let { add("AirUtilTx: ${formatOneDecimal(it)}%") }
-        snrOrNull?.let { add("SNR: ${formatOneDecimal(it)}dB") }
+        voltage?.let { add("Voltage: ${NumberFormatter.format(it, 1)}V") }
+        deviceMetrics.channel_utilization?.let { add("ChUtil: ${NumberFormatter.format(it, 1)}%") }
+        deviceMetrics.air_util_tx?.let { add("AirUtilTx: ${NumberFormatter.format(it, 1)}%") }
+        snrOrNull?.let { add("SNR: ${NumberFormatter.format(it, 1)}dB") }
         rssiOrNull?.let { add("RSSI: ${it}dBm") }
     }
     return parts.joinToString(" | ").ifEmpty { null }
@@ -93,19 +94,3 @@ internal fun Node.toCoTMessage(): CoTMessage = user.toCoTMessage(
     staleMinutes = MESH_NODE_STALE_MINUTES,
     remarks = cotRemarks(),
 )
-
-/** Tenths scaling for [formatOneDecimal] — one fractional digit. */
-private const val ONE_DECIMAL_SCALE = 10
-
-/**
- * One-decimal formatting without `java.*` or platform locale, which would put a comma in the separator on some devices
- * and corrupt the remarks text.
- */
-private fun formatOneDecimal(value: Float): String {
-    val scaled = (value * ONE_DECIMAL_SCALE).toLong()
-    val absScaled = if (scaled < 0) -scaled else scaled
-    // Sign applied to the formatted whole, not via integer division: -5 / 10 == 0, which would
-    // silently render -0.5 as "0.5".
-    val sign = if (scaled < 0) "-" else ""
-    return "$sign${absScaled / ONE_DECIMAL_SCALE}.${absScaled % ONE_DECIMAL_SCALE}"
-}

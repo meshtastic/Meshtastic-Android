@@ -17,14 +17,10 @@
 package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
@@ -77,48 +73,7 @@ import kotlin.time.Duration.Companion.minutes
 class TAKMeshIntegrationTest {
 
     // ── Fakes ────────────────────────────────────────────────────────────────
-
-    private class FakeTAKServerManager : TAKServerManager {
-        private val _isRunning = MutableStateFlow(false)
-        override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-        val connections = MutableStateFlow(0)
-        override val connectionCount: StateFlow<Int> = connections
-
-        private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
-        override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
-
-        private val _clientConnected = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
-        override val clientConnected: SharedFlow<Unit> = _clientConnected.asSharedFlow()
-
-        suspend fun emitClientConnected() = _clientConnected.emit(Unit)
-
-        val broadcasts = mutableListOf<CoTMessage>()
-        val rawBroadcasts = mutableListOf<String>()
-        var startCount = 0
-        var stopped = false
-
-        override fun start(scope: CoroutineScope) {
-            startCount++
-            _isRunning.value = true
-        }
-
-        override fun stop() {
-            stopped = true
-            _isRunning.value = false
-        }
-
-        override fun broadcast(cotMessage: CoTMessage) {
-            broadcasts.add(cotMessage)
-        }
-
-        override fun broadcastRawXml(xml: String) {
-            rawBroadcasts.add(xml)
-        }
-
-        suspend fun emitInbound(cotMessage: CoTMessage, clientInfo: TAKClientInfo? = null) {
-            _inboundMessages.emit(InboundCoTMessage(cotMessage, clientInfo))
-        }
-    }
+    // FakeTAKServerManager lives in its own file in this source set, shared with MeshToCotBroadcasterTest.
 
     private class FakeCommandSender : CommandSender {
         val sentPackets = mutableListOf<DataPacket>()
