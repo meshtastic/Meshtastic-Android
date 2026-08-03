@@ -1645,6 +1645,8 @@
     <string name="tak_server_enabled_desc">Avaa paikallisen salatun TLS-palvelinyhteyden porttiin 8089, jotta ATAK/iTAK voi yhdistää siihen</string>
     <string name="tak_server_export_data_package_desc">Luo .zip-asetustiedosto ATAK/iTAK-sovellukselle, jotta se voi yhdistää tähän palvelimeen</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
+    <string name="tak_server_mesh_to_cot_desc">Näytä Meshtastic radiot ATAK/iTAK -kartalla kontakteina</string>
     <string name="tak_server_section">Palvelin</string>
     <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
     <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
