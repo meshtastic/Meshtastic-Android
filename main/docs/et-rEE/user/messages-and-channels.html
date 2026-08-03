@@ -58,11 +58,11 @@ Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste
  Olek                              | Tähendus                                                                                                                                           |
  --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
  Sending…                          | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
- Delivered to recipient            | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
+ Saajale kätte toimetatud          | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
  Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
  Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
  Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store &amp; Forward Plus Plus chain                                                                   |
- Kinnitatud SF++ ahel              | Confirmed delivered via the SF++ chain                                                                                                             |
+ Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                       |
  Tõrge                             | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                            |
 
 ### Delivery Errors
@@ -72,7 +72,7 @@ Kui sõnumit ei õnnestu kohale toimetada, näitab veaindikaator, mis valesti l�
  Tõrge            | Meaning                                  | What to Do                                                                                                                                                                  |
  ---------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  No Route         | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
- Got NAK          | Järgmise-hüppe sõlm keeldus edastamast   | The relay node may be congested. Wait and retry.                                                                                            |
+ Got NAK          | Järgmise-hüppe sõlm keeldus edastamast   | Vahendussõlm võib olla ülekoormatud. Wait and retry.                                                                                        |
  Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna.                                       |
  Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
  Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Proovi teist kanalit või oota, kuni olukord paraneb.                                                           |

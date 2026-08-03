@@ -48,21 +48,21 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
  ~~Repeater~~                     | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
  Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                                   |
  Andur                            | Optimized for telemetry reporting                                                                                                                                       |
- TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                                  |
- Jälgitav TAK                     | TAK position reporting only                                                                                                                                             |
+ TAK                              | Ühildub TAK süsteemidega (saadab/võtab vastu CoT)                                                                                                    |
+ Jälgitav TAK                     | Ainult TAK asukoha aruandlus                                                                                                                                            |
  Lost &amp; Found | Pidev asukoha majakas taastamiseks                                                                                                                                      |
 
 ### Choosing a Role
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
+- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
 - **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
-- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
+- **Baas klient** – käsitleb lemmiksõlmedesse suunduvat ja sealt tulevaid liiklusi ruuteri hilinemise prioriteediga (tagades, et need sõnumid saavad täiendava edastuskatte), samal ajal kui kõike muud käsitletakse tavalise kliendina.
+- **Kliendi vaigistatud** — Soovid vastu võtta võrguliiklust, aga mitte edastamisse panustada. Useful for monitoring-only devices or to reduce congestion in dense areas.
 - **Jälgimisseade** – järelevalveta seade, mille ainus eesmärk on oma GPS asukoha levitamine (nt sõiduk, lemmikloom või vara). Aku säästmiseks magab saadete vahel.
 - **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
-- **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. See [TAK Integration](tak) for details.
+- **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. Üksikasjade saamiseks vaata [TAK integratsioon](tak).
 
 &gt; 💡 **Vihje:** Kärgvõrk töötab kõige paremini, kui enamik sõlmi on **klient** või **ruuter**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
@@ -122,7 +122,7 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
 ## Sõlme hüppe kohta
 
-Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
+Puuduta sõlmede loendi rakenduse ribal hüppehistogrammi ikooni, et avada tulpdiagramm, mis näitab, mitu sõlme asub igal hüppekaugusel (0 = otse, 1 = ühe relee kaugusel jne). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
 
 ## Node Detail
 
