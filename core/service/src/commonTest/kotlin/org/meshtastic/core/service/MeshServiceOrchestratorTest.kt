@@ -86,6 +86,7 @@ class MeshServiceOrchestratorTest {
     private val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun createOrchestrator(
         receivedData: MutableSharedFlow<ReceivedRadioFrame> = MutableSharedFlow(),
         connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
@@ -119,7 +120,10 @@ class MeshServiceOrchestratorTest {
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
-        val testDispatcher = UnconfinedTestDispatcher()
+        // Deliberately its own dispatcher, not the class-level testDispatcher: the broadcaster's
+        // scheduler doesn't need to be the same one driving this test, and a distinct name keeps
+        // that from reading as though the two are linked.
+        val broadcasterTestDispatcher = UnconfinedTestDispatcher()
         val takMeshIntegration =
             TAKMeshIntegration(
                 takServerManager = takServerManager,
@@ -133,7 +137,11 @@ class MeshServiceOrchestratorTest {
                     nodeRepository = nodeRepository,
                     takPrefs = takPrefs,
                     dispatchers =
-                    CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                    CoroutineDispatchers(
+                        io = broadcasterTestDispatcher,
+                        main = broadcasterTestDispatcher,
+                        default = broadcasterTestDispatcher,
+                    ),
                 ),
             )
 

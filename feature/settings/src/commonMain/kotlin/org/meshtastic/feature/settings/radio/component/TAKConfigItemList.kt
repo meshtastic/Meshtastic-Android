@@ -166,6 +166,16 @@ internal fun TakConfigCard(
 // ── TAK Server Screen (Settings → Advanced) ─────────────────────────────────
 // App-local TAK server controls: enable/disable, export data package, debug test harness.
 
+/**
+ * Extracted from [TakServerScreen]'s [TakPermissionHandler] callback so tests can drive the exact function production
+ * calls, rather than duplicating its conditional.
+ */
+internal fun handleTakPermissionResult(granted: Boolean, isTakServerEnabled: Boolean, takPrefs: TakPrefs) {
+    if (!granted && isTakServerEnabled) {
+        takPrefs.setTakServerEnabled(false)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TakServerScreen(onBack: () -> Unit) {
@@ -176,11 +186,7 @@ fun TakServerScreen(onBack: () -> Unit) {
 
     TakPermissionHandler(
         isTakServerEnabled = isTakServerEnabled,
-        onPermissionResult = { granted ->
-            if (!granted && isTakServerEnabled) {
-                takPrefs.setTakServerEnabled(false)
-            }
-        },
+        onPermissionResult = { granted -> handleTakPermissionResult(granted, isTakServerEnabled, takPrefs) },
     )
 
     Scaffold(

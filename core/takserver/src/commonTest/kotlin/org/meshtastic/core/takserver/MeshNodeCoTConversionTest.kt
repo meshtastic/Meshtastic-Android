@@ -91,9 +91,13 @@ class MeshNodeCoTConversionTest {
 
     @Test
     fun `zero is preserved as a real telemetry reading`() {
-        val node = meshNode(snr = 0f, rssi = 0)
+        val node = meshNode(batteryLevel = 0, voltage = 0f, channelUtilization = 0f, airUtilTx = 0f, snr = 0f, rssi = 0)
         val remarks = node.cotRemarks()
-        assertTrue(remarks!!.contains("SNR: 0.0dB"), remarks)
+        assertTrue(remarks!!.contains("Battery: 0%"), remarks)
+        assertTrue(remarks.contains("Voltage: 0.0V"), remarks)
+        assertTrue(remarks.contains("ChUtil: 0.0%"), remarks)
+        assertTrue(remarks.contains("AirUtilTx: 0.0%"), remarks)
+        assertTrue(remarks.contains("SNR: 0.0dB"), remarks)
         assertTrue(remarks.contains("RSSI: 0dBm"), remarks)
     }
 
@@ -152,22 +156,27 @@ class MeshNodeCoTConversionTest {
             lastHeard: Int = RECENT_LAST_HEARD,
             snr: Float = 8.5f,
             rssi: Int = -92,
-        ) = Node(
-            num = NODE_NUM,
-            user = user(shortName, longName, hwModel),
-            position = position(latitudeI, longitudeI),
-            lastHeard = lastHeard,
-            snr = snr,
-            rssi = rssi,
-            deviceMetrics =
-            org.meshtastic.proto.DeviceMetrics(
-                // Exact tenths so NumberFormatter's rounding can't introduce ambiguity here —
-                // rounding behavior itself belongs to NumberFormatterTest, not this class.
-                battery_level = 76,
-                voltage = 3.9f,
-                channel_utilization = 12.5f,
-                air_util_tx = 4.2f,
-            ),
-        )
+            // Exact tenths so NumberFormatter's rounding can't introduce ambiguity here —
+            // rounding behavior itself belongs to NumberFormatterTest, not this class.
+            batteryLevel: Int = 76,
+            voltage: Float = 3.9f,
+            channelUtilization: Float = 12.5f,
+            airUtilTx: Float = 4.2f,
+        ) =
+            Node(
+                num = NODE_NUM,
+                user = user(shortName, longName, hwModel),
+                position = position(latitudeI, longitudeI),
+                lastHeard = lastHeard,
+                snr = snr,
+                rssi = rssi,
+                deviceMetrics =
+                org.meshtastic.proto.DeviceMetrics(
+                    battery_level = batteryLevel,
+                    voltage = voltage,
+                    channel_utilization = channelUtilization,
+                    air_util_tx = airUtilTx,
+                ),
+            )
     }
 }
