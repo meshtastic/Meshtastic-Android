@@ -61,6 +61,8 @@ private interface LibNotify : Library {
 
     fun g_object_unref(obj: Pointer)
 
+    fun g_error_free(error: Pointer)
+
     fun g_variant_new_boolean(value: Boolean): Pointer
 
     fun g_variant_new_string(string: String): Pointer
@@ -103,9 +105,15 @@ private object NotifyUrgency {
 class LinuxNotificationSender(
     private val appName: String = "Meshtastic",
     private val desktopEntry: String = appName.lowercase(),
-) : NativeNotificationSender {
+) : NativeNotificationSender,
+    AutoCloseable {
 
-    private val lib: LibNotify?
+    /**
+     * Cleared by [close]. Volatile so a [close] on the shutdown path is visible to any thread that is about to call
+     * [send]; a send already past its null check will still complete against the old handle, which is why [close] is
+     * documented as "once sends have stopped".
+     */
+    @Volatile private var lib: LibNotify?
 
     init {
         var loadedLib: LibNotify? = null
@@ -154,8 +162,30 @@ class LinuxNotificationSender(
             }
             shown
         } finally {
+            // On failure libnotify hands us ownership of a GError; nothing else frees it, so without this every
+            // failed send leaks the struct and its message. Freed here rather than in the `if (!shown)` branch so
+            // it is released even if `show()` reports success while still having set an error. The message is read
+            // above, before the free — GErrorStruct dereferences the pointer.
+            errorRef.value?.let { libnotify.g_error_free(it) }
             libnotify.g_object_unref(ptr)
         }
+    }
+
+    /**
+     * Releases libnotify's process-wide state — the D-Bus proxy and cached app name allocated by `notify_init()`.
+     *
+     * Idempotent: the second and later calls are no-ops. Afterwards [isAvailable] is false and [send] returns false
+     * rather than calling into a torn-down library.
+     *
+     * Call this once sends have stopped. `notify_uninit()` is resolved through the libnotify handle, so it runs against
+     * the same GLib instance that allocated the state — see the [LibNotify] KDoc for why that matters.
+     */
+    @Synchronized
+    override fun close() {
+        val libnotify = lib ?: return
+        lib = null
+        runCatching { libnotify.notify_uninit() }
+            .onFailure { Logger.w(it) { "notify_uninit() failed during shutdown" } }
     }
 
     private fun applyMetadata(libnotify: LibNotify, ptr: Pointer, notification: Notification) {

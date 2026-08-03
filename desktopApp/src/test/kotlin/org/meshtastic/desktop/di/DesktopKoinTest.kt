@@ -22,11 +22,14 @@ import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.dsl.koinApplication
 import org.koin.dsl.module
+import org.koin.dsl.onClose
 import org.koin.test.verify.verify
 import org.meshtastic.core.ble.BleLogFormat
 import org.meshtastic.core.ble.BleLogLevel
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @OptIn(KoinExperimentalAPI::class)
 class DesktopKoinTest {
@@ -55,5 +58,21 @@ class DesktopKoinTest {
                     BleLogFormat::class,
                 ),
             )
+    }
+
+    @Test
+    fun `closing a koin container fires onClose for instantiated singles`() {
+        // Pins the mechanism desktopModule() relies on: LinuxNotificationSender's native teardown
+        // (notify_uninit) runs only because Koin invokes onClose when the container closes, which
+        // Main.kt triggers via stopKoin() once the Compose application loop returns. A Koin upgrade
+        // that changed this would silently reinstate the leak, so it is asserted rather than assumed.
+        var closed = false
+        val app = koinApplication {
+            modules(module { single<AutoCloseable> { AutoCloseable { closed = true } }.onClose { it?.close() } })
+        }
+        app.koin.get<AutoCloseable>() // onClose only fires for singles that were actually instantiated
+        app.close()
+
+        assertTrue(closed, "Expected Koin to invoke onClose when the container is closed")
     }
 }
