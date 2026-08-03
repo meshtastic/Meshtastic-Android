@@ -1,0 +1,161 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.takserver
+
+import org.meshtastic.core.model.Node
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.minutes
+
+class MeshNodeCoTConversionTest {
+
+    @Test
+    fun `eligible node passes the filter`() {
+        assertTrue(meshNode().isEligibleForCot(ourNodeNum = OTHER_NODE_NUM, lastHeardThreshold = STALE_THRESHOLD))
+    }
+
+    @Test
+    fun `own node is excluded`() {
+        assertFalse(meshNode().isEligibleForCot(ourNodeNum = NODE_NUM, lastHeardThreshold = STALE_THRESHOLD))
+    }
+
+    @Test
+    fun `node without user info is excluded`() {
+        val node = meshNode(hwModel = org.meshtastic.proto.HardwareModel.UNSET)
+        assertFalse(node.isEligibleForCot(ourNodeNum = OTHER_NODE_NUM, lastHeardThreshold = STALE_THRESHOLD))
+    }
+
+    @Test
+    fun `node heard outside the window is excluded`() {
+        val node = meshNode(lastHeard = STALE_THRESHOLD - 1)
+        assertFalse(node.isEligibleForCot(ourNodeNum = OTHER_NODE_NUM, lastHeardThreshold = STALE_THRESHOLD))
+    }
+
+    @Test
+    fun `node without a valid position is excluded`() {
+        val node = meshNode(latitudeI = 0, longitudeI = 0)
+        assertFalse(node.isEligibleForCot(ourNodeNum = OTHER_NODE_NUM, lastHeardThreshold = STALE_THRESHOLD))
+    }
+
+    @Test
+    fun `uid is derived from the node number and stays stable`() {
+        // ATAK keys a contact by uid; a uid that drifts spawns duplicate markers.
+        assertEquals("MESHTASTIC-a1b2c3d4", meshNode().cotUid())
+        assertEquals(meshNode().cotUid(), meshNode(shortName = "DIFF", longName = "Renamed").cotUid())
+    }
+
+    @Test
+    fun `callsign is short and long name joined`() {
+        assertEquals("WOLF - Wolf Ridge Relay", meshNode().cotCallsign())
+    }
+
+    @Test
+    fun `callsign falls back when a name is missing`() {
+        assertEquals("WOLF", meshNode(longName = "").cotCallsign())
+        assertEquals("Wolf Ridge Relay", meshNode(shortName = "").cotCallsign())
+        assertEquals("!a1b2c3d4", meshNode(shortName = "", longName = "").cotCallsign())
+    }
+
+    @Test
+    fun `remarks carry the reported telemetry`() {
+        val remarks = meshNode().cotRemarks()
+        assertEquals(
+            "Battery: 76% | Voltage: 3.9V | ChUtil: 12.5% | AirUtilTx: 4.2% | SNR: 8.5dB | RSSI: -92dBm",
+            remarks,
+        )
+    }
+
+    @Test
+    fun `remarks omit unreported telemetry rather than reporting zero`() {
+        // A missing reading must not render as "0" — zero is a real value for every one of these.
+        val node = Node(num = NODE_NUM, user = user(), position = position(), lastHeard = RECENT_LAST_HEARD)
+        assertNull(node.cotRemarks())
+    }
+
+    @Test
+    fun `zero is preserved as a real telemetry reading`() {
+        val node = meshNode(snr = 0f, rssi = 0)
+        val remarks = node.cotRemarks()
+        assertTrue(remarks!!.contains("SNR: 0.0dB"), remarks)
+        assertTrue(remarks.contains("RSSI: 0dBm"), remarks)
+    }
+
+    @Test
+    fun `cot event matches the cross-platform contract`() {
+        val cot = meshNode().toCoTMessage()
+
+        assertEquals("MESHTASTIC-a1b2c3d4", cot.uid)
+        assertEquals(DEFAULT_PLI_COT_TYPE, cot.type)
+        assertEquals("WOLF - Wolf Ridge Relay", cot.contact?.callsign)
+        assertEquals(MESH_NODE_TAK_TEAM, cot.group?.name)
+        assertEquals(DEFAULT_TAK_ROLE_NAME, cot.group?.role)
+        assertEquals(76, cot.status?.battery)
+        assertEquals(MESH_NODE_STALE_MINUTES.minutes, cot.stale - cot.time)
+        assertEquals(37.7749, cot.latitude, absoluteTolerance = 1e-6)
+        assertEquals(-122.4194, cot.longitude, absoluteTolerance = 1e-6)
+    }
+
+    private companion object {
+        const val NODE_NUM = 0xa1b2c3d4.toInt()
+        const val OTHER_NODE_NUM = 0x11111111
+        const val STALE_THRESHOLD = 1_000_000
+        const val RECENT_LAST_HEARD = STALE_THRESHOLD + 1_000
+
+        fun user(
+            shortName: String = "WOLF",
+            longName: String = "Wolf Ridge Relay",
+            hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.TBEAM,
+        ) = org.meshtastic.proto.User(
+            id = "!a1b2c3d4",
+            short_name = shortName,
+            long_name = longName,
+            hw_model = hwModel,
+        )
+
+        fun position(latitudeI: Int = 377_749_000, longitudeI: Int = -1_224_194_000) =
+            org.meshtastic.proto.Position(latitude_i = latitudeI, longitude_i = longitudeI)
+
+        @Suppress("LongParameterList")
+        fun meshNode(
+            shortName: String = "WOLF",
+            longName: String = "Wolf Ridge Relay",
+            hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.TBEAM,
+            latitudeI: Int = 377_749_000,
+            longitudeI: Int = -1_224_194_000,
+            lastHeard: Int = RECENT_LAST_HEARD,
+            snr: Float = 8.5f,
+            rssi: Int = -92,
+        ) = Node(
+            num = NODE_NUM,
+            user = user(shortName, longName, hwModel),
+            position = position(latitudeI, longitudeI),
+            lastHeard = lastHeard,
+            snr = snr,
+            rssi = rssi,
+            deviceMetrics =
+            org.meshtastic.proto.DeviceMetrics(
+                battery_level = 76,
+                voltage = 3.95f,
+                channel_utilization = 12.5f,
+                air_util_tx = 4.2f,
+            ),
+        )
+    }
+}

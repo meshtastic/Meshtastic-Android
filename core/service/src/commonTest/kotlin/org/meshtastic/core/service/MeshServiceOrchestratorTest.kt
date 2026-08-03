@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.proto.FromRadio
@@ -113,10 +114,12 @@ class MeshServiceOrchestratorTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
+        every { takPrefs.isMeshToCotEnabled } returns MutableStateFlow(false)
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
+        val testDispatcher = UnconfinedTestDispatcher()
         val takMeshIntegration =
             TAKMeshIntegration(
                 takServerManager = takServerManager,
@@ -124,6 +127,14 @@ class MeshServiceOrchestratorTest {
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
+                meshToCotBroadcaster =
+                MeshToCotBroadcaster(
+                    takServerManager = takServerManager,
+                    nodeRepository = nodeRepository,
+                    takPrefs = takPrefs,
+                    dispatchers =
+                    CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher),
+                ),
             )
 
         return MeshServiceOrchestrator(

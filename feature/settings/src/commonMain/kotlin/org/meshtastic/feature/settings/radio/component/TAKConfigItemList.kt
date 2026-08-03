@@ -62,6 +62,8 @@ import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_server_export_data_package_desc
 import org.meshtastic.core.resources.tak_server_loading
+import org.meshtastic.core.resources.tak_server_mesh_to_cot
+import org.meshtastic.core.resources.tak_server_mesh_to_cot_desc
 import org.meshtastic.core.resources.tak_server_section
 import org.meshtastic.core.resources.tak_server_test_card_title
 import org.meshtastic.core.resources.tak_server_test_idle
@@ -169,6 +171,7 @@ internal fun TakConfigCard(
 fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
+    val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
     val exportLauncher = rememberDataPackageExporter { TAKDataPackageGenerator.generateDataPackage() }
 
     TakPermissionHandler(
@@ -209,6 +212,8 @@ fun TakServerScreen(onBack: () -> Unit) {
             TakServerSection(
                 isTakServerEnabled = isTakServerEnabled,
                 onEnabledChange = { takPrefs.setTakServerEnabled(it) },
+                isMeshToCotEnabled = isMeshToCotEnabled,
+                onMeshToCotChange = { takPrefs.setMeshToCotEnabled(it) },
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
             )
             TakMeshTestCard()
@@ -218,7 +223,13 @@ fun TakServerScreen(onBack: () -> Unit) {
 
 /** Stateless TAK server enable/disable section — previewable without DI. */
 @Composable
-internal fun TakServerSection(isTakServerEnabled: Boolean, onEnabledChange: (Boolean) -> Unit, onExport: () -> Unit) {
+internal fun TakServerSection(
+    isTakServerEnabled: Boolean,
+    onEnabledChange: (Boolean) -> Unit,
+    isMeshToCotEnabled: Boolean,
+    onMeshToCotChange: (Boolean) -> Unit,
+    onExport: () -> Unit,
+) {
     TitledCard(title = stringResource(Res.string.tak_server_section)) {
         SwitchPreference(
             title = stringResource(Res.string.tak_server_enabled),
@@ -228,6 +239,14 @@ internal fun TakServerSection(isTakServerEnabled: Boolean, onEnabledChange: (Boo
             onCheckedChange = onEnabledChange,
         )
         if (isTakServerEnabled) {
+            HorizontalDivider()
+            SwitchPreference(
+                title = stringResource(Res.string.tak_server_mesh_to_cot),
+                summary = stringResource(Res.string.tak_server_mesh_to_cot_desc),
+                checked = isMeshToCotEnabled,
+                enabled = true,
+                onCheckedChange = onMeshToCotChange,
+            )
             HorizontalDivider()
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),

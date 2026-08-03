@@ -132,7 +132,15 @@ core:takserver
 
 ## Local TAK Server Feature
 
-The Local TAK Server can be enabled from the app's Settings screen. When running, ATAK/iTAK clients on the same network can connect to `<device-ip>:8089` and their position reports are automatically bridged onto the mesh. Mesh node positions are broadcast to all connected TAK clients in real time.
+The Local TAK Server can be enabled from the app's Settings screen. When running, ATAK/iTAK clients on the same network can connect to `<device-ip>:8089` and their position reports are automatically bridged onto the mesh. CoT arriving from the mesh on ports 72/78 is forwarded to every connected TAK client.
+
+### Mesh to CoT (node contacts)
+
+Separately opt-in (`TakPrefs.isMeshToCotEnabled`, default off, shown as "Mesh to CoT Converter" under the server toggle). When enabled alongside the server, `MeshToCotBroadcaster` synthesizes a CoT contact for each node in the node database so regular Meshtastic nodes appear on the ATAK map without the legacy Meshtastic TAK Plugin — which cannot work at all since the AIDL API was removed in app 2.8.0.
+
+Nodes qualify when they have identified themselves, were heard inside the online window, and hold a valid position; the local node is excluded because ATAK renders it as self. Output (uid, callsign, team, role, stale, remarks) mirrors Meshtastic-Apple's `TAKMeshtasticBridge` so the same physical node presents identically on both platforms.
+
+Nothing on this path crosses the mesh, so none of it is subject to the LoRa MTU or the TAKPacket wire format. Three behaviours are load-bearing: broadcasts are suppressed while no client is attached (they would otherwise evict real mesh CoT from the 50-entry offline queue), a connecting client triggers a full replay, and every node is re-sent periodically so stationary markers do not expire at `MESH_NODE_STALE_MINUTES`.
 
 ## TAKPacket-SDK consumer & version-bump playbook
 

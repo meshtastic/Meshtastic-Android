@@ -41,7 +41,15 @@ class TakPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDis
         scope.launch { dataStore.edit { prefs -> prefs[KEY_TAK_SERVER_ENABLED] = enabled } }
     }
 
+    override val isMeshToCotEnabled: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_TAK_MESH_TO_COT] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setMeshToCotEnabled(enabled: Boolean) {
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_TAK_MESH_TO_COT] = enabled } }
+    }
+
     companion object {
         val KEY_TAK_SERVER_ENABLED = booleanPreferencesKey("tak_server_enabled")
+        val KEY_TAK_MESH_TO_COT = booleanPreferencesKey("tak_mesh_to_cot")
     }
 }

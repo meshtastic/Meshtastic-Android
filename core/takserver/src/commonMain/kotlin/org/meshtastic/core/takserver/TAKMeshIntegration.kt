@@ -70,6 +70,7 @@ class TAKMeshIntegration(
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
     private val nodeRepository: NodeRepository,
+    private val meshToCotBroadcaster: MeshToCotBroadcaster,
 ) {
     private val isRunning = AtomicBoolean(false)
 
@@ -142,6 +143,9 @@ class TAKMeshIntegration(
             )
 
         jobs = newJobs
+        // Node -> CoT contacts. Self-gates on its own opt-in pref; starting it here means it can
+        // only ever run while the TAK server is enabled.
+        meshToCotBroadcaster.start(scope)
         val fw = nodeRepository.myNodeInfo.value?.firmwareVersion
         val proto = if (Capabilities(fw).supportsTakV2) "v2 (port 78, zstd)" else "v1 (port 72, legacy)"
         Logger.i { "TAK Mesh Integration started — firmware=$fw, outbound=$proto" }
@@ -152,6 +156,7 @@ class TAKMeshIntegration(
         val toCancel = jobs
         jobs = emptyList()
         toCancel.forEach(Job::cancel)
+        meshToCotBroadcaster.stop()
         takServerManager.stop()
         Logger.i { "TAK Mesh Integration stopped" }
     }

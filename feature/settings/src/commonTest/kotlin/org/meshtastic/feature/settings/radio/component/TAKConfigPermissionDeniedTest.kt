@@ -44,6 +44,13 @@ class TAKConfigPermissionDeniedTest {
         override fun setTakServerEnabled(enabled: Boolean) {
             _isTakServerEnabled.value = enabled
         }
+
+        private val _isMeshToCotEnabled = MutableStateFlow(false)
+        override val isMeshToCotEnabled: StateFlow<Boolean> = _isMeshToCotEnabled
+
+        override fun setMeshToCotEnabled(enabled: Boolean) {
+            _isMeshToCotEnabled.value = enabled
+        }
     }
 
     @Test

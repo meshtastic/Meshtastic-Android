@@ -346,6 +346,14 @@ interface TakPrefs {
     val isTakServerEnabled: StateFlow<Boolean>
 
     fun setTakServerEnabled(enabled: Boolean)
+
+    /**
+     * Whether mesh nodes are synthesized into CoT contacts for connected TAK clients. Opt-in and default off; only
+     * takes effect while [isTakServerEnabled] is also true.
+     */
+    val isMeshToCotEnabled: StateFlow<Boolean>
+
+    fun setMeshToCotEnabled(enabled: Boolean)
 }
 
 /** Reactive interface for App Functions (system AI integration) preferences. */
