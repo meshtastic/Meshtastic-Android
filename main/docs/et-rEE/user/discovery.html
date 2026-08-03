@@ -14,7 +14,7 @@ Avastamistööriistad aitavad mõista, **kuidas** kärgvõrk on ühendatud – m
 The app offers two complementary approaches:
 
 - **Kohalik kärgvõrgu avastaja (skanner)** – automaatne režiim, mis perioodiliselt skaneerib ühendatud raadiol läbi erinevate LoRa eelhäälestuste, kuulab igaüht neist ja järjestab, milline eelhäälestus sinu asukohas kõige paremini toimib.
-- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
+- **Manuaalne uurimine** – traceroute, naabri info ja sõlmede loend, mida saate igal ajal kasutada konkreetsete teede ja topoloogia uurimiseks.
 
 ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  **LoRa preset picker** | Select one or more presets to scan. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                                      |
@@ -91,12 +91,12 @@ You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Targe
 
 Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
- What to look for                                                                  | What it means                                                               |
- --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
- All hops show Good SNR (≥ −7 dB, green)                        | Healthy path — messages flow reliably                                       |
- One hop shows Bad SNR (&lt; −15 dB, red) | Kehv ühendus – see releesegment on habras                                   |
- Mitu hüppet (4+)                                               | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
- Different path on retry                                                           | Mesh is adapting — multiple routes exist (this is good!) |
+ What to look for                                                                                         | What it means                                                               |
+ -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+ Kõik hüpped näitavad head signaali-müra suhet (≥ −7 dB, roheline)                     | Healthy path — messages flow reliably                                       |
+ Üks hüpe näitab halba signaali-müra suhet (&lt; −15 dB, punane) | Kehv ühendus – see releesegment on habras                                   |
+ Mitu hüppet (4+)                                                                      | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
+ Different path on retry                                                                                  | Mesh is adapting — multiple routes exist (this is good!) |
 
 &gt; 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 

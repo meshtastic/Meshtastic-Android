@@ -13,13 +13,13 @@ The Nodes screen displays all devices visible on your mesh network.
 
 ## Node List
 
-The node list shows every node your radio has heard, including:
+Sõlmede loend näitab kõiki sõlmi, mida raadio on kuulnud, sealhulgas:
 
 - **Sõlme nimi** — kasutaja pandud pikk nimi
 - **Lühinimi** — 4-tähemärgiline identifikaator
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
+- **Vahemaa** — hinnanguline vahemaa (kui positsioone jagatakse)
 - **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
 ### Node Status Indicators
@@ -101,12 +101,12 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
  Filtreeri                  | Kirjeldus                                                                            |
  -------------------------- | ------------------------------------------------------------------------------------ |
- **Only online**            | Show only nodes heard within the last 2 hours                                        |
- **Only direct**            | Show only nodes with direct (non-relayed) connections             |
- **Include unknown**        | Show nodes that haven't sent user info yet                                           |
+ **Only online**            | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                   |
+ **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi         |
+ **Include unknown**        | Näita sõlmi, mis pole veel kasutajainfot saatnud                                     |
  **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
  **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                              |
- **Show ignored**           | Show nodes you've previously dismissed or muted                                      |
+ **Kuva ignoreeritud**      | Kuva sõlmed, mille olete varem sulgenud või vaigistanud                              |
 
 ### Sort Options
 
@@ -136,13 +136,13 @@ The detail screen includes device info, position, and action buttons:
 
 Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
- Indicator       | Screenshot                                                    |
- --------------- | ------------------------------------------------------------- |
- Signal quality  | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
- Aku tase        | ![Aku](../../assets/screenshots/nodes_battery_info.png)       |
- Hüppete loendur | ![Hüpet](../../assets/screenshots/nodes_hops_info.png)        |
- Viimati kuuldud | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
- Kaugus          | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+ Indicator       | Screenshot                                                        |
+ --------------- | ----------------------------------------------------------------- |
+ Signal quality  | ![Signaal](../../assets/screenshots/nodes_signal_info.png)        |
+ Aku tase        | ![Aku](../../assets/screenshots/nodes_battery_info.png)           |
+ Hüppete loendur | ![Hüpet](../../assets/screenshots/nodes_hops_info.png)            |
+ Viimati kuuldud | ![Viimati kuuldud](../../assets/screenshots/nodes_last_heard.png) |
+ Kaugus          | ![Kaugus](../../assets/screenshots/nodes_distance_info.png)       |
 
 ### Seadme lingid ("Soovin ühte")
 
@@ -154,7 +154,7 @@ A full, browsable directory of every link is also available under **Settings →
 
 - [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
 - [Sõnumid ja kanalid](messages-and-channels) — saada otsesõnum sõlmele
-- [Map &amp; Waypoints](map-and-waypoints) — view node positions geographically
+- [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede geograafilisi asukohti
 - [Avasta](Discovery) - traceroute ja naabri-info kärgvõrgu topoloogia uurimiseks
 - [Signal Meter](signal-meter) — understand what the signal bars mean
 
