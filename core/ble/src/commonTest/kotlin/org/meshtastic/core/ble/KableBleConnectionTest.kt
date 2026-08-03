@@ -132,22 +132,82 @@ class KableBleConnectionTest {
     }
 
     @Test
-    fun `address filter is applied`() = runTest {
-        val scanner = TestKableBleScanner(scanResults = emptyFlow())
+    fun `address filter is used natively only where the platform supports it`() {
+        val address = "AA:BB:CC:DD:EE:FF"
 
-        scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").toList()
-
-        assertEquals(KableScanFilter.Address("AA:BB:CC:DD:EE:FF"), scanner.lastFilter)
+        assertEquals(
+            KableScanFilter.Address(address),
+            resolveKableScanFilter(serviceUuid = null, address = address, supportsAddressFilter = true),
+        )
+        // Without native support the scan must stay unfiltered rather than carry a filter that matches nothing.
+        assertEquals(
+            KableScanFilter.None,
+            resolveKableScanFilter(serviceUuid = null, address = address, supportsAddressFilter = false),
+        )
     }
 
     @Test
-    fun `address filter takes priority over service uuid`() = runTest {
+    fun `service uuid wins over address when the platform cannot filter by address`() {
         val serviceUuid = Uuid.parse("12345678-1234-1234-1234-1234567890ab")
-        val scanner = TestKableBleScanner(scanResults = emptyFlow())
+        val address = "AA:BB:CC:DD:EE:FF"
 
-        scanner.scan(timeout = 1.seconds, serviceUuid = serviceUuid, address = "AA:BB:CC:DD:EE:FF").toList()
+        assertEquals(
+            KableScanFilter.Address(address),
+            resolveKableScanFilter(serviceUuid = serviceUuid, address = address, supportsAddressFilter = true),
+        )
+        // Kable's btleplug backend matches address filters against a hardcoded null, so an address filter here would
+        // silently yield no advertisements at all and BLE connect could never find the device.
+        assertEquals(
+            KableScanFilter.ServiceUuid(serviceUuid),
+            resolveKableScanFilter(serviceUuid = serviceUuid, address = address, supportsAddressFilter = false),
+        )
+    }
 
-        assertEquals(KableScanFilter.Address("AA:BB:CC:DD:EE:FF"), scanner.lastFilter)
+    @Test
+    fun `scan narrows to the requested address regardless of the native filter`() = runTest {
+        val wanted = "AA:BB:CC:DD:EE:FF"
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "Other", advertisement = null),
+                    KableScanResult(identifier = wanted, name = "Meshtastic", advertisement = null),
+                    KableScanResult(identifier = "77:88:99:AA:BB:CC", name = "Another", advertisement = null),
+                ),
+            )
+
+        val result = scanner.scan(timeout = 1.seconds, address = wanted).toList()
+
+        assertEquals(listOf(wanted), result.map { it.address })
+    }
+
+    @Test
+    fun `scan matches the requested address case-insensitively`() = runTest {
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(KableScanResult(identifier = "aa:bb:cc:dd:ee:ff", name = "Meshtastic", advertisement = null)),
+            )
+
+        val result = scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").toList()
+
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun `scan without an address emits every advertisement`() = runTest {
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "One", advertisement = null),
+                    KableScanResult(identifier = "77:88:99:AA:BB:CC", name = "Two", advertisement = null),
+                ),
+            )
+
+        val result = scanner.scan(timeout = 1.seconds).toList()
+
+        assertEquals(2, result.size)
     }
 
     @Test

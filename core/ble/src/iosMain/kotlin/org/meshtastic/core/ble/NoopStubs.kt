@@ -19,6 +19,9 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
+// Kable's `Filter.Address` throws UnsupportedOperationException on Apple.
+internal actual val supportsNativeAddressScanFilter: Boolean = false
+
 /** No-op stubs for iOS target in core:ble. */
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
     // No-op for stubs

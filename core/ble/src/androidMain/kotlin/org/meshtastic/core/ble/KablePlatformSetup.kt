@@ -24,6 +24,9 @@ import com.juul.kable.PooledThreadingStrategy
 import com.juul.kable.toIdentifier
 import org.meshtastic.core.model.util.anonymize
 
+/** Android's scanner filters on address in hardware, so Kable's `Filter.Address` works natively here. */
+internal actual val supportsNativeAddressScanFilter: Boolean = true
+
 /**
  * Shared thread pool for Kable BLE connections.
  *
