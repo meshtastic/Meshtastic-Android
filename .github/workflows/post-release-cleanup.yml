@@ -163,14 +163,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           # Same rationale as the release-cleanup step above: match the
           # internal/open/closed pre-release tag SHAPE across all versions, not just
           # tags prefixed with this dispatch's base_version.
           TAG_PATTERN='^v[0-9]+\.[0-9]+\.[0-9]+-(internal|open|closed)\.[0-9]+$'
           echo "Searching for any remaining remote pre-release tags matching pattern '$TAG_PATTERN'."
 
-          # This finds all remote tags matching the pattern. Some may have been deleted in the previous step.
-          TAGS_TO_DELETE=$(git ls-remote --tags origin "refs/tags/v*" | awk '{print $2}' | sed 's|refs/tags/||' | grep -E "$TAG_PATTERN" || true)
+          # This finds all remote tags. Look them up on their own first so a
+          # failure here (e.g. a network blip) fails the step loudly, instead of
+          # being swallowed by the trailing `|| true` a downstream grep needs
+          # (grep exits non-zero on zero matches, which is not itself an error).
+          REMOTE_TAGS=$(git ls-remote --tags origin "refs/tags/v*" | awk '{print $2}' | sed 's|refs/tags/||')
+
+          # Some tags may have been deleted already by the previous 'release delete' step.
+          TAGS_TO_DELETE=$(grep -E "$TAG_PATTERN" <<<"$REMOTE_TAGS" || true)
 
           if [ -z "$TAGS_TO_DELETE" ]; then
             echo "No dangling pre-release tags found."
