@@ -1,6 +1,8 @@
 {
-  "latest": null,
-  "versions": [],
+  "latest": "2.8.0",
+  "versions": [
+    "2.8.0"
+  ],
   "prereleases": [],
   "hasMain": true
 }

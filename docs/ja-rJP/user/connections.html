@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja-rJP" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>コネクション</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="connections" data-locale="ja-rJP">
+<pre class="markdown-content"># コネクション
+
+Meshtastic は、スマートフォン／デスクトップと無線機ノード間の通信に複数の接続方式をサポートしています。
+
+## Bluetooth（BLE）
+
+Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方法です。
+
+### デバイスをペアリングする
+
+1. Meshtastic 無線機の電源が入っていて、ペアリングモードになっていることを確認します。
+2. アプリを開き、「**接続**」タブに移動します。
+3. 「**Bluetooth デバイスをスキャン**」をタップすると、近くの Meshtastic 無線機が表示されます。
+4. リストからデバイスを選択します。
+5. Bluetooth のペアリング確認が表示されたら承認します。
+
+![Bluetooth デバイスをスキャンし、見つかった無線機がリストに表示されている様子](../../assets/screenshots/connections_bluetooth_scan.png)
+
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+
+&gt; 💡 **ヒント：** デバイスが表示されない場合は、Bluetooth と位置情報の権限が許可されているか、また無線機が別のデバイスにすでに接続されていないかを確認してください。
+
+### 接続ステータス
+
+ アイコン | 状態  | 説明             |
+ ---- | --- | -------------- |
+ 🟢   | 接続済 | 無線リンクが確立しています  |
+ 🟡   | 接続中 | ハンドシェイク中       |
+ 🔴   | 切断  | 接続がありません       |
+ ⚪    | 未設定 | デバイスが選択されていません |
+
+接続時には、ステータスインジケーターが現在の接続状態を表示します：
+
+![接続中のステータス](../../assets/screenshots/connections_connecting.png)
+
+デバイスが見つからない場合、アプリは操作手順とともに空の状態を表示します：
+
+![デバイスが見つからない状態](../../assets/screenshots/connections_empty_state.png)
+
+### Bluetooth のトラブルシューティング
+
+- **デバイスが見つからない：** Bluetooth をオフ／オンし、位置情報が有効になっていることを確認します。
+- **接続が切れる：** 無線機に近づき、電波干渉がないか確認します。
+- **ペアリングが拒否される：** Android の Bluetooth 設定でデバイスの登録を解除し、やり直します。
+
+## USB シリアル
+
+USB 接続は有線での代替手段で、デスクトップや Bluetooth が使えない場合に便利です。
+
+### セットアップ
+
+1. USB ケーブルで無線機をデバイスに接続します。
+2. アプリが USB の使用許可を求めるので、「**許可**」をタップします。
+3. 接続が自動的に確立されます。
+
+&gt; ⚠️ **注意：** USB 接続には、Android デバイスの OTG 対応が必要です。
+
+## TCP/IP（ネットワーク）
+
+一部の Meshtastic 無線機は WiFi／Ethernet 接続に対応しており、ローカルネットワーク経由の TCP 接続が可能です。 まず、無線機自身の WiFi 設定（ファームウェアのウェブインターフェースや別の接続方法を使用）で無線機をネットワークに接続し、その後アプリから接続します。
+
+### ネットワーク経由で接続する
+
+1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
+2. On the Connect screen, select **Network** in the transport selector.
+3. 無線機は次の 2 通りの方法で選べます：
+   - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
+   - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
+4. 以前使用したネットワークアドレスは「**最近のネットワークデバイス**」に記憶され、すばやく再接続できます（長押しで削除できます）。
+
+&gt; 💡 **ヒント：** ネットワーク探索は mDNS を使用するため、両方のデバイスが同じサブネット上にある場合にのみ機能します。 Android 17 以降では、スキャンにローカルネットワークの権限が必要です。探索で何も見つからない場合は、IP アドレスでデバイスを手動追加してください。
+
+### TCP を使う場面
+
+- 無線機が同じローカルネットワーク上にある
+- シミュレートされた無線機でテストする
+- Bluetooth の電波干渉が問題になる環境
+
+## 再接続の動作
+
+アプリは起動時に「**最後に選択したデバイス**」へ再接続します。 接続方式は、接続画面からいつでも切り替えられます。
+
+切断するには、接続画面の切断ボタンをタップします：
+
+![無線機から切断](../../assets/screenshots/connections_disconnect.png)
+
+## デスクトップでの接続
+
+デスクトップ（Linux／macOS／Windows）では、アプリは次の接続方式に対応しています：
+
+- **Bluetooth（BLE）：** Kable ライブラリを使用。macOS、Linux、Windows で動作します
+- **USB シリアル：** 主要な有線接続方法
+- **TCP/IP：** ネットワーク接続された無線機向け
+
+プラットフォームごとの詳細やキーボードショートカットについては、[デスクトップアプリ](desktop) を参照してください。
+
+## 関連トピック
+
+- [はじめに](onboarding)：初回起動時のセットアップと権限
+- [設定：無線機とユーザー](settings-radio-user)：Bluetooth とネットワークの設定
+- [デスクトップアプリ](desktop)：デスクトップ固有の接続に関する詳細
+- [対応デバイス](https://meshtastic.org/docs/hardware/devices)：meshtastic.org にある互換無線機の一覧
+
+---
+
+</pre>
+</body>
+</html>

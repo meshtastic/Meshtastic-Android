@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko-rKR" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Screen Widget</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="widget" data-locale="ko-rKR">
+<pre class="markdown-content"># Home Screen Widget
+
+On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+
+## What It Shows
+
+The widget displays the **connected radio's** current local stats:
+
+- **Battery** — the radio's battery level, or _Powered_ when running on external power
+- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
+- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
+- **Traffic** — packets transmitted / received, and duplicates seen
+- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+
+Tap the widget to open the app, or use its refresh control to request fresh stats.
+
+&gt; 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+
+## Adding the Widget
+
+1. Long-press an empty area of your Android home screen.
+2. Tap **Widgets**.
+3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
+4. Resize it as needed — the layout adapts to the available space.
+
+&gt; ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+
+## Related Topics
+
+- [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
+- [Connections](connections) — connect to a radio so the widget has stats to show
+- [Discovery](discovery) — channel and airtime utilization across the mesh
+
+---
+</pre>
+</body>
+</html>
