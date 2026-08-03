@@ -88,7 +88,12 @@ class TakPrefsTest {
 
     @Test
     fun `mesh to CoT is independent of the server toggle`() = testScope.runTest {
+        takPrefs.setMeshToCotEnabled(true)
+
         takPrefs.setTakServerEnabled(true)
-        assertFalse(takPrefs.isMeshToCotEnabled.value)
+        assertTrue(takPrefs.isMeshToCotEnabled.value)
+
+        takPrefs.setTakServerEnabled(false)
+        assertTrue(takPrefs.isMeshToCotEnabled.value)
     }
 }

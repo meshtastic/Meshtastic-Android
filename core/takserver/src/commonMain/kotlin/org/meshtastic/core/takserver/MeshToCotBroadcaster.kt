@@ -30,6 +30,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.TakPrefs
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Instant
 
 /**
@@ -41,12 +43,15 @@ import kotlin.time.Instant
  * Opt-in via [TakPrefs.isMeshToCotEnabled] and additionally gated on the TAK server running, because the owning
  * [TAKMeshIntegration] is itself only started while the server is enabled.
  */
+@OptIn(ExperimentalAtomicApi::class)
 class MeshToCotBroadcaster(
     private val takServerManager: TAKServerManager,
     private val nodeRepository: NodeRepository,
     private val takPrefs: TakPrefs,
     private val dispatchers: CoroutineDispatchers,
 ) {
+    private val isRunning = AtomicBoolean(false)
+
     @Volatile private var job: Job? = null
 
     // Last CoT sent per node number, time-normalized (see normalizeForDedup) so an unchanged node
@@ -55,28 +60,40 @@ class MeshToCotBroadcaster(
     private val sentMutex = Mutex()
 
     fun start(scope: CoroutineScope) {
-        if (job != null) return
+        // CAS, not a job-null check: two concurrent start() calls must not both launch, and a
+        // dead job left by a cancelled scope must not block every future start().
+        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
         job =
             scope.launch(dispatchers.default) {
-                takPrefs.isMeshToCotEnabled.collectLatest { enabled ->
-                    if (!enabled) {
-                        clearSent()
-                        return@collectLatest
+                try {
+                    takPrefs.isMeshToCotEnabled.collectLatest { enabled ->
+                        if (!enabled) return@collectLatest
+                        Logger.i { "Mesh-to-CoT enabled — publishing node contacts to TAK clients" }
+                        runEnabled()
                     }
-                    Logger.i { "Mesh-to-CoT enabled — publishing node contacts to TAK clients" }
-                    runEnabled()
+                } finally {
+                    // Owning scope cancelled without stop(): release the guard so a later start()
+                    // on a fresh scope isn't refused forever.
+                    isRunning.store(false)
                 }
             }
     }
 
     fun stop() {
+        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+        // lastSent is deliberately NOT cleared here: cancel() doesn't join, so a still-finishing
+        // publish() on another thread may hold sentMutex, and clearing unsynchronized would race
+        // it. runEnabled() drops the state on the next enable instead.
         job?.cancel()
         job = null
-        lastSent.clear()
         Logger.i { "Mesh-to-CoT stopped" }
     }
 
     private suspend fun runEnabled() = coroutineScope {
+        // Fresh dedup state per enable cycle, so nothing carried over from a previous run (or a
+        // previous device) suppresses the initial publish.
+        clearSent()
+
         // A newly attached client has none of our prior broadcasts, so drop the dedup state
         // and replay every eligible node. Uses the live snapshot rather than the nodeDBbyNum
         // cache, which can briefly hold the previous transport's map after a device switch.
@@ -103,13 +120,13 @@ class MeshToCotBroadcaster(
     private suspend fun publish(nodes: Collection<Node>, reason: String) {
         // Without a connected client every broadcast() would land in TAKServerManager's 50-entry
         // offline queue and evict genuine mesh CoT. Nothing is lost by skipping: connecting a
-        // client triggers a full replay.
-        if (takServerManager.connectionCount.value <= 0) return
-
+        // client triggers a full replay. Re-checked per node because a client can disconnect
+        // mid-replay, and the inter-message spacing makes a large replay take whole seconds.
         val ourNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
         val eligible = nodes.filter { it.isEligibleForCot(ourNodeNum) }
         var sent = 0
         for (node in eligible) {
+            if (takServerManager.connectionCount.value <= 0) return
             val cot = node.toCoTMessage()
             if (!admit(node.num, cot)) continue
             takServerManager.broadcast(cot)

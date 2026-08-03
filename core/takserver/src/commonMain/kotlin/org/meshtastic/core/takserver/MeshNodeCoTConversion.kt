@@ -103,6 +103,9 @@ private const val ONE_DECIMAL_SCALE = 10
  */
 private fun formatOneDecimal(value: Float): String {
     val scaled = (value * ONE_DECIMAL_SCALE).toLong()
-    val fraction = (if (scaled < 0) -scaled else scaled) % ONE_DECIMAL_SCALE
-    return "${scaled / ONE_DECIMAL_SCALE}.$fraction"
+    val absScaled = if (scaled < 0) -scaled else scaled
+    // Sign applied to the formatted whole, not via integer division: -5 / 10 == 0, which would
+    // silently render -0.5 as "0.5".
+    val sign = if (scaled < 0) "-" else ""
+    return "$sign${absScaled / ONE_DECIMAL_SCALE}.${absScaled % ONE_DECIMAL_SCALE}"
 }

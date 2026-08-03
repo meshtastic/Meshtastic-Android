@@ -98,6 +98,16 @@ class MeshNodeCoTConversionTest {
     }
 
     @Test
+    fun `negative fractional readings keep their sign`() {
+        // -5 / 10 truncates to 0 in integer division; naive formatting rendered -0.5 as "0.5".
+        val remarks = meshNode(snr = -0.5f).cotRemarks()
+        assertTrue(remarks!!.contains("SNR: -0.5dB"), remarks)
+
+        val belowMinusOne = meshNode(snr = -12.5f).cotRemarks()
+        assertTrue(belowMinusOne!!.contains("SNR: -12.5dB"), belowMinusOne)
+    }
+
+    @Test
     fun `cot event matches the cross-platform contract`() {
         val cot = meshNode().toCoTMessage()
 
