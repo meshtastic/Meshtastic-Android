@@ -20,6 +20,10 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.toIdentifier
 
+// Kable's btleplug backend evaluates scan filters with a hardcoded `address = null`, so an address filter matches
+// nothing and the scan yields no advertisements at all.
+internal actual val supportsNativeAddressScanFilter: Boolean = false
+
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
     // Desktop Kable uses direct connections without needing autoConnect.
 }

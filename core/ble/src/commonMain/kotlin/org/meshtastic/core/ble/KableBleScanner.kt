@@ -24,6 +24,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
@@ -42,8 +43,19 @@ internal sealed interface KableScanFilter {
 
 internal data class KableScanResult(val identifier: String, val name: String?, val advertisement: Advertisement?)
 
-internal fun resolveKableScanFilter(serviceUuid: Uuid?, address: String?): KableScanFilter = when {
-    address != null -> KableScanFilter.Address(address)
+/**
+ * Picks the native filter to hand Kable: address only where the platform honours it
+ * ([supportsNativeAddressScanFilter]), otherwise the service UUID, since a filter the platform ignores matches nothing.
+ * [KableBleScanner.scan] narrows to the address client-side either way.
+ *
+ * [supportsAddressFilter] is a parameter so both platform behaviours are reachable from commonTest.
+ */
+internal fun resolveKableScanFilter(
+    serviceUuid: Uuid?,
+    address: String?,
+    supportsAddressFilter: Boolean = supportsNativeAddressScanFilter,
+): KableScanFilter = when {
+    address != null && supportsAddressFilter -> KableScanFilter.Address(address)
     serviceUuid != null -> KableScanFilter.ServiceUuid(serviceUuid)
     else -> KableScanFilter.None
 }
@@ -78,7 +90,7 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
     // common supertype below Exception, so merging them would mean catching Exception broadly instead.
     @Suppress("ThrowsCount")
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
-        val filter = resolveKableScanFilter(serviceUuid = serviceUuid, address = address)
+        val nativeFilter = resolveKableScanFilter(serviceUuid = serviceUuid, address = address)
 
         // Kable's Scanner doesn't enforce timeout internally, it runs until the Flow is cancelled.
         // By wrapping it in a channelFlow with a timeout, we enforce the BleScanner contract cleanly.
@@ -86,15 +98,20 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
             withTimeoutOrNull(timeout) {
                 reserveScanStart()
                 try {
-                    advertisements(filter).collect { advertisement ->
-                        send(
-                            MeshtasticBleDevice(
-                                address = advertisement.identifier,
-                                name = advertisement.name,
-                                advertisement = advertisement.advertisement,
-                            ),
-                        )
-                    }
+                    // Re-check the address even when the native filter already covers it: callers such as
+                    // NymeaWifiService take the first emission without their own address check, so an unsupported
+                    // native address filter must never widen the scan to other devices.
+                    advertisements(nativeFilter)
+                        .filter { address == null || it.identifier.equals(address, ignoreCase = true) }
+                        .collect { advertisement ->
+                            send(
+                                MeshtasticBleDevice(
+                                    address = advertisement.identifier,
+                                    name = advertisement.name,
+                                    advertisement = advertisement.advertisement,
+                                ),
+                            )
+                        }
                 } catch (ex: CancellationException) {
                     throw ex
                 } catch (ex: UnmetRequirementException) {

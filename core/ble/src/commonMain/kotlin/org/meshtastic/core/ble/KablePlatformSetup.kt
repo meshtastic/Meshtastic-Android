@@ -19,6 +19,12 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
+/**
+ * Whether Kable honours a scan filter on device address here. Android only: `Filter.Address` throws on Apple/JS, and
+ * the JVM/btleplug backend evaluates predicates with a hardcoded null address so it matches nothing.
+ */
+internal expect val supportsNativeAddressScanFilter: Boolean
+
 /** Platform-specific configuration for the Peripheral builder based on device type. */
 internal expect fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean)
 
