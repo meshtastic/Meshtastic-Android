@@ -591,6 +591,7 @@
     <string name="ethernet_config">Etherneti valikud</string>
     <string name="ethernet_enabled">Ethernet lubatud</string>
     <string name="ethernet_ip">Etherneti IP-aadress:</string>
+    <string name="event_use_event_theme">Kasuta sündmuse teemat</string>
     <string name="exchange_position">Jaga asukohta</string>
     <string name="expand_chart">Laienda diagrammi</string>
     <string name="expanded">Laiendatud</string>
@@ -1058,6 +1059,7 @@
     <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
     <string name="message_status_enroute">Saadan...</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
+    <string name="message_status_recipient_delivered">Saajale kätte toimetatud</string>
     <string name="message_status_relayed_not_confirmed">Vahendatud, saaja pole kinnitanud</string>
     <string name="message_status_sfpp_confirmed">Kinnitatud SF++ ahel</string>
     <string name="message_status_sfpp_routing">Marsruutimine SF++ ahela kaudu…</string>
@@ -1260,8 +1262,18 @@
     <string name="override_frequency_mhz">Tühista sagedus</string>
     <string name="pa_fan_disabled">PA ventilaator keelatud</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">Paketi autentsus</string>
+    <string name="packet_authenticity_balanced">Tasakaalustatud — eelista autentitud</string>
+    <string name="packet_authenticity_balanced_summary">Soovitatav. Keeldu allkirjastamata madalamale versioonile ülemineku katsetest sõlmedelt, mis teadaolevalt allkirjastavad.</string>
+    <string name="packet_authenticity_compatible">Ühildub – aktsepteeri allkirjastamata</string>
+    <string name="packet_authenticity_compatible_summary">Autentige pakette võimaluse korral, kuid maksimaalse ühilduvuse tagamiseks aktsepteerige allkirjastamata liiklust.</string>
+    <string name="packet_authenticity_level">Kaitsetase</string>
+    <string name="packet_authenticity_strict">Range – nõuab autentimist</string>
+    <string name="packet_authenticity_strict_confirm">Luba range</string>
     <string name="packet_authenticity_strict_confirmation">Strict ignoreerib kõiki krüptograafiliselt autentimata kaugvõrgu pakette. Vanem püsivara, litsentsitud või PKI-võtmeteta amatööride sõlmed ja ülisuured paketid võivad kaduda. PKI-autentitud otsesõnumid jäävad kättesaadavaks.</string>
     <string name="packet_authenticity_strict_summary">Kuva ja töötle ainult krüptograafiliselt autentitud kärgvõrgu pakette. Vanemad sõlmed ja ülisuured paketid võivad kaduda.</string>
+    <string name="packet_authenticity_strict_title">Kas lubada range autentimine?</string>
+    <string name="packet_authenticity_unsupported">See ühendatud seade ei toeta pakettallkirja kontrollimist.</string>
     <string name="pairing_mode">Sidumine</string>
     <string name="password">Parool</string>
     <!-- PAX -->
@@ -1536,6 +1548,7 @@
     <string name="share_channels_qr">Jaga kanalite QR koodi</string>
     <string name="share_contact">Jaga kontakti</string>
     <string name="share_location">Jaga asukohta</string>
+    <string name="share_location_description">Kasuta oma telefoni GPS asukoha saatmiseks oma sõlmele, selle asemel, et kasutada sõlme riistvaralist GPS.</string>
     <string name="share_to">Jaga…</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="short_name">Lühi nimi</string>
@@ -1594,6 +1607,7 @@
     <string name="status_message">Oleku teavitus</string>
     <string name="status_message_config">Olekuteate sätted</string>
     <string name="stay_connected_anywhere">Igal pool ühenduses</string>
+    <string name="stop_connecting">Peata ühendamine</string>
     <string name="store_forward">Salvesa &amp; edasta</string>
     <string name="store_forward_config">Salvesta &amp; edasta sätted</string>
     <string name="store_forward_enabled">Salvesta &amp; edastamine lubatud</string>
@@ -1622,6 +1636,8 @@
     <string name="tak_server_enabled_desc">Käivitab ATAK/iTAK-ühenduste jaoks kohaliku TLS serveri, pordil 8089</string>
     <string name="tak_server_export_data_package_desc">Genereeri selle serveriga ühendumiseks ATAK/iTAK-il .zip fail</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Kärgvõrgust CoTi konverter</string>
+    <string name="tak_server_mesh_to_cot_desc">Kuva Meshtastici sõlmed ATAK/iTAK kaardil kontaktidena</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_test_card_title">TAK kärgvõrgu test (arendaja)</string>
     <string name="tak_server_test_idle">Saada kõik %1$d testkinnitust kärgvõrku</string>

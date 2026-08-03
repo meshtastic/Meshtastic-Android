@@ -21,7 +21,7 @@ The widget displays the **connected radio's** current local stats:
 - **Aku** – raadio aku tase või _Toitel_, kui see töötab välise toiteallikaga
 - **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
 - **AirUtil** — eetriaega (kui suurt osa töötsüklist raadio edastab)
-- **Traffic** — packets transmitted / received, and duplicates seen
+- **Liiklus** — edastatud/vastuvõetud paketid ja nähtud duplikaadid
 - **Vahendajad** — edastatud paketid ja edastuste tühistamised (kuvatakse raadio vahendusprotsessi ajal)
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.

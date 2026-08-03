@@ -37,7 +37,7 @@ This affects all temperature displays throughout the app: node environment telem
 
 ## Distance & Altitude
 
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
+Sõlmede vahelised kaugused ja GPS kõrgused edastatakse **meetrites** ning skaleeritakse ja teisendatakse automaatselt.
 
 ![Vahemaa info kuvamine](../../assets/screenshots/nodes_distance_info.png)
 
@@ -93,7 +93,7 @@ Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenem
 | Baromeetrii rõhk            | hPa                            | International meteorological standard |
 | Heading / bearing           | ° (degrees) | Universal navigation convention       |
 | Radiatsioon                 | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates             | decimal degrees                | Universal geographic standard         |
+| GPS koordinaadid            | decimal degrees                | Universal geographic standard         |
 | Niiskus, aku, mulla niiskus | %                              | Universal                             |
 
 ## Date & Time

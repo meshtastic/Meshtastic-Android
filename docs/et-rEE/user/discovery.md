@@ -51,14 +51,14 @@ The **Start** button stays disabled — with an explanation of why — until the
 
 Skanni ajal näitab Discovery selle praegust etappi:
 
-| Stage                                                 | What's happening                                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Preparing**                                         | Praeguste sätete salvestamine ja skannimiseks valmistumine.                            |
-| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
-| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
-| **Kuulamine**                                         | Listening on the current preset to collect packets, with a countdown to the next step. |
-| **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
-| **Restoring**                                         | Algsete LoRa seadete taastamine.                                                       |
+| Stage                                                 | What's happening                                                                                                |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Preparing**                                         | Praeguste sätete salvestamine ja skannimiseks valmistumine.                                     |
+| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                                 |
+| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                         |
+| **Kuulamine**                                         | Kuulatakse praegust eelseadistust pakettide kogumiseks ja järgmise sammuni on oodata loendurit. |
+| **Analysis**                                          | Kogutud pakettide töötlemine ja eelseadete järjestamine.                                        |
+| **Restoring**                                         | Algsete LoRa seadete taastamine.                                                                |
 
 ![Kuulamis loendur näitab praeguse eelseadistuse järelejäänud aega](../../assets/screenshots/discovery_dwell_progress.png)
 
@@ -70,13 +70,13 @@ Kui skann on lõppenud, kuvab Discovery iga testitud eelseadistuse kohta tulemus
 
 Metrics include:
 
-| Meetriline                               | What it tells you                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| RF health                                | Overall quality of the radio environment on that preset.                       |
-| Kanali kasutus                           | Kui hõivatud olid eetrisagedused kuulamise ajal.                               |
-| Airtime                                  | Transmission time observed.                                                    |
-| Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
-| Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
+| Meetriline                | What it tells you                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| RF health                 | Overall quality of the radio environment on that preset.             |
+| Kanali kasutus            | Kui hõivatud olid eetrisagedused kuulamise ajal.                     |
+| Airtime                   | Transmission time observed.                                          |
+| Otse- ja vahendussõlmed   | Kui mitu võrgusõlme kuuldi otse, võrreldes vahendaja kaudu.          |
+| Halvad / duplikaatpaketid | Rikutud ja korduvate pakettide arv, mis näitab ummikuid või häireid. |
 
 Additional features available from the results:
 
@@ -113,7 +113,7 @@ The tools below are available at any time from the node list and node detail scr
 
 ## Marsruudi
 
-Traceroute reveals the exact path a message takes from your node to any other node on the mesh. See on kõige kasulikum tööriist ühenduvusprobleemide tõrkeotsinguks.
+Traceroute näitab täpset teed, mida sõnum sõlmest mis tahes teise kärgvõrgu sõlme kulgeb. See on kõige kasulikum tööriist ühenduvusprobleemide tõrkeotsinguks.
 
 ### Running a Traceroute
 
@@ -145,7 +145,7 @@ Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values a
 
 - **"Marsruuti ei leitud"** — Sihtsõlm võib olla võrguühenduseta, leviulatusest väljas või teisel kanalil. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
 - **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
-- **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
+- **Asümmeetrilised teed** – Jälgimismarsruut teelt A→B võib minna teist teed kui teelt B→A. This is normal — radio propagation is not always symmetric.
 
 ---
 

@@ -51,7 +51,7 @@ Meshtastic kasutab sinu asukohta ka järgmiseks:
 
 - Kuvatakse asukoht kärgvõrgu kaardil
 - Calculating distances to other nodes
-- Sharing your GPS coordinates with other mesh members (if enabled)
+- GPS koordinaatide jagamine teiste võrgusilma liikmetega (kui lubatud)
 
 Grant **"While using the app"** or **"Always"** depending on your preference:
 

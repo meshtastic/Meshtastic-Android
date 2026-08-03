@@ -23,7 +23,7 @@ Ava **Arendajapaneel**, valides **Seaded → Täpsemad → Arendajapaneel**.
 
 Arendajapaneelil on kaks vahekaarti:
 
-- **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
+- **Paketid** – dekodeeritud võrguliiklus, mida raadio on saatnud ja vastu võtnud (protokollitasemel sõnumid). Useful for diagnosing mesh and routing behavior.
 - **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
 
 Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
