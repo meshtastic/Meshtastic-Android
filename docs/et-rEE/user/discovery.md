@@ -9,7 +9,7 @@ aliases:
   - kohalik-avastamine
   - network-scan
   - traceroute
-  - neighbor-info
+  - naabri-info
 ---
 
 # Avastamine
@@ -19,7 +19,7 @@ Avastamistööriistad aitavad mõista, **kuidas** kärgvõrk on ühendatud – m
 The app offers two complementary approaches:
 
 - **Kohalik kärgvõrgu avastaja (skanner)** – automaatne režiim, mis perioodiliselt skaneerib ühendatud raadiol läbi erinevate LoRa eelhäälestuste, kuulab igaüht neist ja järjestab, milline eelhäälestus sinu asukohas kõige paremini toimib.
-- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
+- **Manuaalne uurimine** – traceroute, naabri info ja sõlmede loend, mida saate igal ajal kasutada konkreetsete teede ja topoloogia uurimiseks.
 
 ---
 
@@ -29,7 +29,7 @@ Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida 
 
 Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
-> ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Your device must be connected to run a scan.
+> ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Skannimise käivitamiseks peab seade olema ühendatud.
 
 ### Setting Up a Scan
 
@@ -97,13 +97,13 @@ Configure it under **Settings → Module Config → Mesh Beacon**:
 - **Listen for beacons** — receive invitations broadcast by other nodes.
 - **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
 
-Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Igal kaardil kuvatakse saatja sõnum koos pakutava kanali, piirkonna, eelseadistuse ja signaali kvaliteedi ning järgmiste toimingutega:
 
-- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
-- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Liitu** — lülitu pakutavale kanalile ja seadista see eelhäälestamisega (häälestab raadio uuesti ja taaskäivitab selle). Kui pakkumine sobib praeguse sageduspesaga, lisab toiming **Lisa kanal** selle taaskäivituseta.
+- **Avasta** – sisesta pakutud eelseadistusega avastusskannimisskeem, et saaksid enne liitumist seda võrku uurida (kuvatakse ainult siis, kui signaalijaam pakub eelseadistust).
 - **Dismiss** — ignore the invitation.
 
-Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+Majakate poolt reklaamitud kanalid kuvatakse skannimise seadistuses ka **Majakakanalitena** – valige üks, et see skannimise sihtmärgina lisada.
 
 ---
 
@@ -132,12 +132,12 @@ You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Targe
 
 Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
-| What to look for                                                                  | What it means                                                               |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (≥ −7 dB, green)                        | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< −15 dB, red) | Kehv ühendus – see releesegment on habras                                   |
-| Mitu hüppet (4+)                                               | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
-| Different path on retry                                                           | Mesh is adapting — multiple routes exist (this is good!) |
+| What to look for                                                                                         | What it means                                                               |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Kõik hüpped näitavad head signaali-müra suhet (≥ −7 dB, roheline)                     | Healthy path — messages flow reliably                                       |
+| Üks hüpe näitab halba signaali-müra suhet (< −15 dB, punane) | Kehv ühendus – see releesegment on habras                                   |
+| Mitu hüppet (4+)                                                                      | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
+| Different path on retry                                                                                  | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
@@ -151,9 +151,9 @@ Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values a
 
 ## Naabruse teave
 
-Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida see **otse kuuleb** (üksik-hüpe). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
+Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida see **otse kuuleb** (üksik-hüpe). Kui mitu sõlme jagavad oma naaberloendeid, saate kokku panna kogu võrgu topoloogiakaardi.
 
-### Enabling Neighbor Info
+### Naabriinfo lubamine
 
 1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabriinfo**.
 2. Luba moodul.
@@ -161,11 +161,11 @@ Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida se
 
 Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
 
-### Viewing Neighbor Data
+### Naabri andmete vaatamine
 
-- Open any node's detail screen and look for the **Neighbors** section.
-- Each neighbor entry shows the node that was directly heard and its signal quality.
-- Combine neighbor data from multiple nodes to understand the full mesh topology.
+- Ava suvalise sõlme detailvaade ja otsi üles jaotis **Naabrid**.
+- Iga naabri-kirje näitab otse kuuldud sõlme ja selle signaali kvaliteeti.
+- Kogu kärgvõrgu topoloogia mõistmiseks kombineerige mitme sõlme naaberandmeid.
 
 > ⚠️ **Märkus:** Naabriinfo suurendab eetriaega, kuna iga lubatud sõlm levitab perioodiliselt oma naabrite nimekirja. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
 
