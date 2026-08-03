@@ -25,6 +25,8 @@ fun org.meshtastic.proto.Position.toCoTMessage(
     team: String = DEFAULT_TAK_TEAM_NAME,
     role: String = DEFAULT_TAK_ROLE_NAME,
     battery: Int = DEFAULT_TAK_BATTERY,
+    staleMinutes: Int = DEFAULT_TAK_STALE_MINUTES,
+    remarks: String? = null,
 ): CoTMessage {
     val lat = (latitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
     val lon = (longitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
@@ -43,7 +45,8 @@ fun org.meshtastic.proto.Position.toCoTMessage(
         team = team,
         role = role,
         battery = battery,
-        staleMinutes = DEFAULT_TAK_STALE_MINUTES,
+        staleMinutes = staleMinutes,
+        remarks = remarks,
     )
 }
 
@@ -52,21 +55,34 @@ fun org.meshtastic.proto.User.toCoTMessage(
     team: String = DEFAULT_TAK_TEAM_NAME,
     role: String = DEFAULT_TAK_ROLE_NAME,
     battery: Int = DEFAULT_TAK_BATTERY,
+    uid: String = id,
+    callsign: String = toTakCallsign(),
+    staleMinutes: Int = DEFAULT_TAK_STALE_MINUTES,
+    remarks: String? = null,
 ): CoTMessage = if (position != null) {
-    position.toCoTMessage(uid = id, callsign = toTakCallsign(), team = team, role = role, battery = battery)
+    position.toCoTMessage(
+        uid = uid,
+        callsign = callsign,
+        team = team,
+        role = role,
+        battery = battery,
+        staleMinutes = staleMinutes,
+        remarks = remarks,
+    )
 } else {
     val now = Clock.System.now()
     CoTMessage(
-        uid = id,
-        type = "a-f-G-U-C",
+        uid = uid,
+        type = DEFAULT_PLI_COT_TYPE,
         time = now,
         start = now,
-        stale = now + DEFAULT_TAK_STALE_MINUTES.minutes,
+        stale = now + staleMinutes.minutes,
         how = "m-g",
         latitude = 0.0,
         longitude = 0.0,
-        contact = CoTContact(callsign = toTakCallsign(), endpoint = DEFAULT_TAK_ENDPOINT),
+        contact = CoTContact(callsign = callsign, endpoint = DEFAULT_TAK_ENDPOINT),
         group = CoTGroup(name = team, role = role),
         status = CoTStatus(battery = battery),
+        remarks = remarks,
     )
 }

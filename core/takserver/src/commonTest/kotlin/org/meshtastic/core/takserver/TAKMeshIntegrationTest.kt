@@ -17,17 +17,14 @@
 package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
@@ -42,6 +39,7 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeTakPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -75,42 +73,7 @@ import kotlin.time.Duration.Companion.minutes
 class TAKMeshIntegrationTest {
 
     // ── Fakes ────────────────────────────────────────────────────────────────
-
-    private class FakeTAKServerManager : TAKServerManager {
-        private val _isRunning = MutableStateFlow(false)
-        override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-        override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
-
-        private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
-        override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
-
-        val broadcasts = mutableListOf<CoTMessage>()
-        val rawBroadcasts = mutableListOf<String>()
-        var startCount = 0
-        var stopped = false
-
-        override fun start(scope: CoroutineScope) {
-            startCount++
-            _isRunning.value = true
-        }
-
-        override fun stop() {
-            stopped = true
-            _isRunning.value = false
-        }
-
-        override fun broadcast(cotMessage: CoTMessage) {
-            broadcasts.add(cotMessage)
-        }
-
-        override fun broadcastRawXml(xml: String) {
-            rawBroadcasts.add(xml)
-        }
-
-        suspend fun emitInbound(cotMessage: CoTMessage, clientInfo: TAKClientInfo? = null) {
-            _inboundMessages.emit(InboundCoTMessage(cotMessage, clientInfo))
-        }
-    }
+    // FakeTAKServerManager lives in its own file in this source set, shared with MeshToCotBroadcasterTest.
 
     private class FakeCommandSender : CommandSender {
         val sentPackets = mutableListOf<DataPacket>()
@@ -343,7 +306,13 @@ class TAKMeshIntegrationTest {
         val serviceRepository: FakeServiceRepository = FakeServiceRepository(),
         val meshConfigHandler: FakeMeshConfigHandler = FakeMeshConfigHandler(),
         val nodeRepository: FakeNodeRepository = FakeNodeRepository(),
+        val takPrefs: FakeTakPrefs = FakeTakPrefs(),
+        val dispatchers: CoroutineDispatchers =
+            UnconfinedTestDispatcher().let { CoroutineDispatchers(io = it, main = it, default = it) },
     ) {
+        // Mesh-to-CoT is opt-in and FakeTakPrefs defaults it off, so it stays inert here.
+        val broadcaster = MeshToCotBroadcaster(serverManager, nodeRepository, takPrefs, dispatchers)
+
         val integration =
             TAKMeshIntegration(
                 takServerManager = serverManager,
@@ -351,6 +320,7 @@ class TAKMeshIntegrationTest {
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
+                meshToCotBroadcaster = broadcaster,
             )
     }
 

@@ -52,6 +52,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.datastore)
+            implementation(projects.core.testing)
             implementation(libs.compose.multiplatform.ui.test)
         }
 

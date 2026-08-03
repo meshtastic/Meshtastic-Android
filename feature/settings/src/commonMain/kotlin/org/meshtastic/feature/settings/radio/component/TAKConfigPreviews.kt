@@ -42,13 +42,29 @@ fun TakConfigCardPreview() {
 @PreviewLightDark
 @Composable
 fun TakServerSectionDisabledPreview() {
-    AppTheme { TakServerSection(isTakServerEnabled = false, onEnabledChange = {}, onExport = {}) }
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = false,
+            onEnabledChange = {},
+            isMeshToCotEnabled = false,
+            onMeshToCotChange = {},
+            onExport = {},
+        )
+    }
 }
 
 @PreviewLightDark
 @Composable
 fun TakServerSectionEnabledPreview() {
-    AppTheme { TakServerSection(isTakServerEnabled = true, onEnabledChange = {}, onExport = {}) }
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = true,
+            onEnabledChange = {},
+            isMeshToCotEnabled = true,
+            onMeshToCotChange = {},
+            onExport = {},
+        )
+    }
 }
 
 @PreviewLightDark
