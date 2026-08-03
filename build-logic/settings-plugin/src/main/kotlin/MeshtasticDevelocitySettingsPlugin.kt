@@ -61,7 +61,14 @@ class MeshtasticDevelocitySettingsPlugin : Plugin<Settings> {
             remote(develocity.buildCache) {
                 isEnabled = true
                 val accessKey = System.getenv("DEVELOCITY_ACCESS_KEY")?.trim()
-                isPush = isCI && !accessKey.isNullOrEmpty()
+                // Write only from trusted events. A same-repository pull request DOES
+                // receive repository secrets, so gating on the access key alone let PR
+                // builds write into the shared cache; excluding pull_request here keeps
+                // unmerged code out of it. Fork PRs have no key and are excluded twice
+                // over, and local builds are excluded by isCI.
+                val event = System.getenv("GITHUB_EVENT_NAME")
+                val trustedForPush = event == "push" || event == "merge_group"
+                isPush = isCI && trustedForPush && !accessKey.isNullOrEmpty()
             }
         }
     }
