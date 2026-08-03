@@ -110,7 +110,7 @@ Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa mode
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Kohalik statistika ühendatud raadiost kuvatakse ka signaali kvaliteedi all, kui see on saadaval. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Kasuta **Taotle**, et küsida ühendatud raadiost uut kohaliku statistika telemeetriaaruannet, **Tühjenda**, et eemaldada selle sõlme kohaliku statistika logi ja **Salvesta**, et salvestada nähtavat kohaliku statistika ajalugu CSV-failina.
+Kohalik statistika ühendatud raadiost kuvatakse ka signaali kvaliteedi all, kui see on saadaval. Need logid sisaldavad mürataset, liiklusloendureid, edastusloendureid, võrgus olevate sõlmede arvu ja raadio tööaega. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Kasuta **Taotle**, et küsida ühendatud raadiost uut kohaliku statistika telemeetriaaruannet, **Tühjenda**, et eemaldada selle sõlme kohaliku statistika logi ja **Salvesta**, et salvestada nähtavat kohaliku statistika ajalugu CSV-failina.
 
 ## Võimsusnäitajad
 
@@ -142,7 +142,7 @@ Iga hüpe esindab vahendussõlme, mis sõnumi edastas.
 
 Historical position data for nodes that share their location:
 
-- GPS coordinates
+- GPS koordinaadid
 - Kõrgus
 - Speed (if moving)
 - Timestamp for each position report

@@ -25,7 +25,7 @@ Kaardil kuvatakse:
 
 - **Sõlmede asukohad** — värvilised markerid iga sõlme asukoha kohta
 - **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **Teie asukoht** — teie praegune GPS asukoht
 
 ### Node Markers
 
@@ -104,7 +104,7 @@ Puuduta kaardil kihtide ikooni, et avada **Kaardikihtide haldamine**, kus saad i
 
 ### Enabling Position Sharing
 
-Your node shares its GPS position based on:
+Sõlm jagab oma GPS positsiooni järgmise alusel:
 
 - **Fikseeritud intervall** – levitamine regulaarsete intervallidega
 - **Nutikas asukoht** – levitatakse, kui liikumine ületab lävendi
@@ -114,7 +114,7 @@ Configure position behavior in **Settings → Position**.
 
 ### Privacy Considerations
 
-> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. Kui sa ei soovi, et sinu asukohta jagataks, keela GPS-positsioon seadetes või kasuta fikseeritud/võltspositsiooni.
 
 ## Kaardi allikad
 
