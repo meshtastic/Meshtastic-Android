@@ -37,12 +37,16 @@ internal fun Node.isEligibleForCot(ourNodeNum: Int?, lastHeardThreshold: Int = o
     num != ourNodeNum && !isUnknownUser && lastHeard > lastHeardThreshold && validPosition != null
 
 /**
- * The stable CoT UID for [this] node, e.g. `MESHTASTIC-a1b2c3d4`.
+ * The stable CoT UID for [this] node, e.g. `MESHTASTIC-A1B2C3D4`.
  *
  * ATAK identifies a contact by UID, so this must stay stable across broadcasts or every refresh spawns a duplicate
  * marker. Derived from the node number rather than the user record because [Node.user] can be empty or change.
+ *
+ * Upper-case hex is load-bearing, not cosmetic — see [MESH_NODE_UID_PREFIX]. Deliberately not built from
+ * [NodeAddress.numToDefaultId], which formats `!%08x` in lower case for display.
  */
-internal fun Node.cotUid(): String = MESH_NODE_UID_PREFIX + NodeAddress.numToDefaultId(num).removePrefix("!")
+internal fun Node.cotUid(): String =
+    MESH_NODE_UID_PREFIX + num.toUInt().toString(TAK_HEX_RADIX).uppercase().padStart(MESH_NODE_UID_HEX_WIDTH, '0')
 
 /**
  * The ATAK callsign for [this] node — `"SHORT - Long Name"`, matching Apple. Falls back through the names that are
@@ -60,23 +64,31 @@ internal fun Node.cotCallsign(): String {
 }
 
 /**
- * Telemetry summary carried in the CoT `<remarks>` element, as Apple does.
+ * Telemetry summary carried in the CoT `<remarks>` element.
  *
- * Every field is omitted when the node has not reported it. Zero is a real reading for all of these, so absence is
- * detected via nullability and the SNR/RSSI sentinels ([Node.snrOrNull] / [Node.rssiOrNull]) rather than by treating 0
- * as missing.
+ * Field labels, order, and precision match Apple's `createCoTFromNode` so an operator reading a contact's remarks sees
+ * the same text regardless of which phone bridged it.
+ *
+ * **Deliberate divergence:** Apple suppresses a field when its value is zero (`if voltage > 0`, `if rssi != 0`, …).
+ * This repo treats zero as a real reading — 0 dB SNR and 0 dBm RSSI are genuine measurements, and 0% battery is exactly
+ * the value an operator most needs to see — so absence is detected via nullability and the SNR/RSSI sentinels
+ * ([Node.snrOrNull] / [Node.rssiOrNull]) instead. Apple also substitutes 100% for an unreported battery; omitting it is
+ * preferred over reporting a figure the node never sent. `Air Util Tx` has no Apple counterpart and is additive.
  */
 internal fun Node.cotRemarks(): String? {
     val parts = buildList {
         batteryLevel?.let { add("Battery: $it%") }
-        voltage?.let { add("Voltage: ${NumberFormatter.format(it, 1)}V") }
-        deviceMetrics.channel_utilization?.let { add("ChUtil: ${NumberFormatter.format(it, 1)}%") }
-        deviceMetrics.air_util_tx?.let { add("AirUtilTx: ${NumberFormatter.format(it, 1)}%") }
-        snrOrNull?.let { add("SNR: ${NumberFormatter.format(it, 1)}dB") }
-        rssiOrNull?.let { add("RSSI: ${it}dBm") }
+        voltage?.let { add("Voltage: ${NumberFormatter.format(it, VOLTAGE_DECIMALS)}V") }
+        deviceMetrics.channel_utilization?.let { add("Chan Util: ${NumberFormatter.format(it, 1)}%") }
+        deviceMetrics.air_util_tx?.let { add("Air Util Tx: ${NumberFormatter.format(it, 1)}%") }
+        rssiOrNull?.let { add("RSSI: $it dBm") }
+        snrOrNull?.let { add("SNR: ${NumberFormatter.format(it, 1)} dB") }
     }
     return parts.joinToString(" | ").ifEmpty { null }
 }
+
+/** Apple prints voltage with two decimals (`%.2f`) where every other telemetry field uses one. */
+private const val VOLTAGE_DECIMALS = 2
 
 /**
  * Build the CoT event representing [this] node.

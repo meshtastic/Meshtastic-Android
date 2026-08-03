@@ -57,8 +57,20 @@ class MeshNodeCoTConversionTest {
     @Test
     fun `uid is derived from the node number and stays stable`() {
         // ATAK keys a contact by uid; a uid that drifts spawns duplicate markers.
-        assertEquals("MESHTASTIC-a1b2c3d4", meshNode().cotUid())
+        assertEquals("MESHTASTIC-A1B2C3D4", meshNode().cotUid())
         assertEquals(meshNode().cotUid(), meshNode(shortName = "DIFF", longName = "Renamed").cotUid())
+    }
+
+    @Test
+    fun `uid hex is upper-case and zero-padded to match Apple`() {
+        // Apple formats "MESHTASTIC-%08X". ATAK compares uids case-sensitively, so lower-case hex
+        // would make an Android-bridged node a separate contact from the same iOS-bridged node.
+        val uid = meshNode().cotUid()
+        assertEquals(uid.uppercase(), uid)
+
+        // Low node number must keep its leading zeros rather than collapsing to "MESHTASTIC-2A".
+        val lowNum = Node(num = 0x2a, user = user(), position = position(), lastHeard = RECENT_LAST_HEARD)
+        assertEquals("MESHTASTIC-0000002A", lowNum.cotUid())
     }
 
     @Test
@@ -75,9 +87,11 @@ class MeshNodeCoTConversionTest {
 
     @Test
     fun `remarks carry the reported telemetry`() {
-        val remarks = meshNode().cotRemarks()
+        // Labels, order, and precision match Apple's createCoTFromNode (voltage at two decimals,
+        // everything else at one) so remarks read identically whichever phone bridged the node.
+        val remarks = meshNode(voltage = 3.95f).cotRemarks()
         assertEquals(
-            "Battery: 76% | Voltage: 3.9V | ChUtil: 12.5% | AirUtilTx: 4.2% | SNR: 8.5dB | RSSI: -92dBm",
+            "Battery: 76% | Voltage: 3.95V | Chan Util: 12.5% | Air Util Tx: 4.2% | RSSI: -92 dBm | SNR: 8.5 dB",
             remarks,
         )
     }
@@ -92,30 +106,32 @@ class MeshNodeCoTConversionTest {
     @Test
     fun `zero is preserved as a real telemetry reading`() {
         val node = meshNode(batteryLevel = 0, voltage = 0f, channelUtilization = 0f, airUtilTx = 0f, snr = 0f, rssi = 0)
+        // Apple suppresses each of these at zero; this repo reports them, since 0 dB SNR / 0 dBm
+        // RSSI are real measurements and 0% battery is the value an operator most needs to see.
         val remarks = node.cotRemarks()
         assertTrue(remarks!!.contains("Battery: 0%"), remarks)
-        assertTrue(remarks.contains("Voltage: 0.0V"), remarks)
-        assertTrue(remarks.contains("ChUtil: 0.0%"), remarks)
-        assertTrue(remarks.contains("AirUtilTx: 0.0%"), remarks)
-        assertTrue(remarks.contains("SNR: 0.0dB"), remarks)
-        assertTrue(remarks.contains("RSSI: 0dBm"), remarks)
+        assertTrue(remarks.contains("Voltage: 0.00V"), remarks)
+        assertTrue(remarks.contains("Chan Util: 0.0%"), remarks)
+        assertTrue(remarks.contains("Air Util Tx: 0.0%"), remarks)
+        assertTrue(remarks.contains("RSSI: 0 dBm"), remarks)
+        assertTrue(remarks.contains("SNR: 0.0 dB"), remarks)
     }
 
     @Test
     fun `negative fractional readings keep their sign`() {
         // -5 / 10 truncates to 0 in integer division; naive formatting rendered -0.5 as "0.5".
         val remarks = meshNode(snr = -0.5f).cotRemarks()
-        assertTrue(remarks!!.contains("SNR: -0.5dB"), remarks)
+        assertTrue(remarks!!.contains("SNR: -0.5 dB"), remarks)
 
         val belowMinusOne = meshNode(snr = -12.5f).cotRemarks()
-        assertTrue(belowMinusOne!!.contains("SNR: -12.5dB"), belowMinusOne)
+        assertTrue(belowMinusOne!!.contains("SNR: -12.5 dB"), belowMinusOne)
     }
 
     @Test
     fun `cot event matches the cross-platform contract`() {
         val cot = meshNode().toCoTMessage()
 
-        assertEquals("MESHTASTIC-a1b2c3d4", cot.uid)
+        assertEquals("MESHTASTIC-A1B2C3D4", cot.uid)
         assertEquals(DEFAULT_PLI_COT_TYPE, cot.type)
         assertEquals("WOLF - Wolf Ridge Relay", cot.contact?.callsign)
         assertEquals(MESH_NODE_TAK_TEAM, cot.group?.name)

@@ -83,7 +83,7 @@ class MeshToCotBroadcasterTest {
         h.settle()
 
         assertEquals(1, h.serverManager.broadcasts.size)
-        assertEquals("MESHTASTIC-a1b2c3d4", h.serverManager.broadcasts.single().uid)
+        assertEquals("MESHTASTIC-A1B2C3D4", h.serverManager.broadcasts.single().uid)
     }
 
     @Test

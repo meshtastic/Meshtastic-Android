@@ -78,8 +78,18 @@ internal const val DEFAULT_PLI_COT_TYPE = "a-f-G-U-C"
 // Changing any of them makes the same physical node appear as a different contact
 // depending on which phone is bridging.
 
-/** UID prefix for synthesized node CoT, e.g. `MESHTASTIC-a1b2c3d4`. */
+/**
+ * UID prefix for synthesized node CoT, e.g. `MESHTASTIC-A1B2C3D4`.
+ *
+ * The hex suffix is **upper-case, zero-padded to [MESH_NODE_UID_HEX_WIDTH]**, matching Apple's `String(format:
+ * "MESHTASTIC-%08X", node.num)`. ATAK keys a contact by UID and compares case-sensitively, so lower-casing this makes
+ * an Android-bridged node a *different* contact from the same iOS-bridged node — the mesh appears duplicated whenever
+ * both phones bridge into one TAK network.
+ */
 internal const val MESH_NODE_UID_PREFIX = "MESHTASTIC-"
+
+/** Hex digits in a node number, zero-padded — `%08X` on the Apple side. */
+internal const val MESH_NODE_UID_HEX_WIDTH = 8
 
 /** Team colour for synthesized node CoT. Remote nodes never report a TAK team, so Apple's fixed Green is used. */
 internal const val MESH_NODE_TAK_TEAM = "Green"
