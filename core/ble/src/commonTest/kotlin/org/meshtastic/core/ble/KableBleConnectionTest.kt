@@ -183,15 +183,20 @@ class KableBleConnectionTest {
 
     @Test
     fun `scan matches the requested address case-insensitively`() = runTest {
+        // A second, non-matching advertisement keeps this honest: a scan that ignored the address entirely would
+        // emit both, so the assertion proves the filter ran *and* that it matched across case.
         val scanner =
             TestKableBleScanner(
                 scanResults =
-                flowOf(KableScanResult(identifier = "aa:bb:cc:dd:ee:ff", name = "Meshtastic", advertisement = null)),
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "Other", advertisement = null),
+                    KableScanResult(identifier = "aa:bb:cc:dd:ee:ff", name = "Meshtastic", advertisement = null),
+                ),
             )
 
         val result = scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").toList()
 
-        assertEquals(1, result.size)
+        assertEquals(listOf("aa:bb:cc:dd:ee:ff"), result.map { it.address })
     }
 
     @Test
@@ -207,7 +212,7 @@ class KableBleConnectionTest {
 
         val result = scanner.scan(timeout = 1.seconds).toList()
 
-        assertEquals(2, result.size)
+        assertEquals(listOf("11:22:33:44:55:66", "77:88:99:AA:BB:CC"), result.map { it.address })
     }
 
     @Test
