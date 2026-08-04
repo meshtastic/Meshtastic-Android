@@ -18,6 +18,7 @@ package org.meshtastic.core.takserver
 
 import java.io.ByteArrayInputStream
 import java.security.KeyStore
+import java.security.PrivateKey
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -37,19 +38,26 @@ class TakCertLegacyEncodingTest {
     private val sha1TripleDesOid =
         byteArrayOf(0x06, 0x0A, 0x2A, 0x86.toByte(), 0x48, 0x86.toByte(), 0xF7.toByte(), 0x0D, 0x01, 0x0C, 0x01, 0x03)
 
+    // DER prefix of the MacData DigestInfo for a SHA1 MAC: AlgorithmIdentifier(1.3.14.3.2.26, NULL)
+    // followed by the 20-byte OCTET STRING header — must appear.
+    private val sha1MacDigestInfoPrefix =
+        byteArrayOf(0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14)
+
     private fun ByteArray.containsSequence(needle: ByteArray): Boolean =
         (0..size - needle.size).any { offset -> needle.indices.all { this[offset + it] == needle[it] } }
 
     private fun assertLegacyEncoding(bytes: ByteArray, name: String) {
         assertFalse(bytes.containsSequence(pbes2Oid), "$name uses PBES2/AES encryption, unreadable on Android <= 9")
         assertTrue(bytes.containsSequence(sha1TripleDesOid), "$name is missing legacy SHA1/3DES PKCS#12 encryption")
+        assertTrue(bytes.containsSequence(sha1MacDigestInfoPrefix), "$name is missing a SHA1 PKCS#12 MAC")
     }
 
     private fun assertLoadsAsPkcs12(bytes: ByteArray, name: String) {
+        val password = TAK_BUNDLED_CERT_PASSWORD.toCharArray()
         val keyStore = KeyStore.getInstance("PKCS12")
-        ByteArrayInputStream(bytes).use { keyStore.load(it, TAK_BUNDLED_CERT_PASSWORD.toCharArray()) }
-        val aliases = keyStore.aliases().toList()
-        assertTrue(aliases.any { keyStore.isKeyEntry(it) }, "$name has no private key entry")
+        ByteArrayInputStream(bytes).use { keyStore.load(it, password) }
+        val privateKeys = keyStore.aliases().toList().mapNotNull { keyStore.getKey(it, password) as? PrivateKey }
+        assertTrue(privateKeys.isNotEmpty(), "$name has no private key entry")
     }
 
     @Test
