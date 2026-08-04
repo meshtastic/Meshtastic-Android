@@ -53,7 +53,13 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
         }
-        LaunchedEffect(node.latitude, node.longitude) { cameraState.animate(CameraUpdateFactory.newLatLng(location)) }
+        // Follow live position updates. Guarded on the current target so the initial composition, which
+        // rememberCameraPositionState has already centred, doesn't animate to where the camera sits.
+        LaunchedEffect(node.latitude, node.longitude) {
+            if (cameraState.position.target != location) {
+                cameraState.animate(CameraUpdateFactory.newLatLng(location))
+            }
+        }
 
         GoogleMap(
             mapColorScheme = mapColorScheme,
