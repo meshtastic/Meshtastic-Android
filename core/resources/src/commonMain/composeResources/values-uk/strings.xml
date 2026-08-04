@@ -35,6 +35,7 @@
     <string name="action_select_network">Обрати мережу</string>
     <string name="action_send_reply">Відповісти</string>
     <string name="action_show_message_status">Показати статус повідомлення</string>
+    <string name="action_translate_message">Перекласти повідомлення</string>
     <string name="actions">Дії</string>
     <string name="adc_multiplier_override">Корекція множника напруги</string>
     <string name="adc_multiplier_override_ratio">Множник корекції напруги</string>
@@ -326,10 +327,12 @@
     <string name="discovery_paused">Призупинено: %1$s</string>
     <string name="discovery_scan_history">Історія сканувань</string>
     <string name="discovery_start_scan">Почати сканування</string>
+    <string name="discovery_start_scan_reason_24ghz_unsupported">апаратне забезпечення радіо не підтримує 2.4 ГГц</string>
     <string name="discovery_stat_analysis">Аналіз</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямий</string>
     <string name="discovery_stat_messages">Повідомлення</string>
+    <string name="discovery_stat_online_total_nodes">Онлайн / Всього вузлів</string>
     <string name="discovery_stat_selected">Вибраний</string>
     <string name="discovery_stat_status">Статус</string>
     <string name="discovery_stop_scan">Зупинити сканування</string>
@@ -499,6 +502,11 @@
     <string name="flip_screen">Перевернути екран</string>
     <string name="for_more_information_see_our_privacy_policy">Для додаткової інформації, перегляньте нашу політику конфіденційності.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Жирний</string>
+    <string name="format_code">Код</string>
+    <string name="format_italic">Курсив</string>
+    <string name="format_link">Посилання</string>
+    <string name="format_strikethrough">Закреслений</string>
     <string name="free_memory">Вільна пам'ять</string>
     <string name="free_memory_description">Доступно системної пам'яті в байтах</string>
     <string name="freq">Част</string>
@@ -559,12 +567,14 @@
     <string name="ignore_remove">Видалити '%1$s' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Імпортувати налаштування</string>
+    <string name="import_export_label">Імпорт/Експорт</string>
     <string name="import_known_shared_contact_text">Увага: Цей контакт уже існує. Імпортування призведе до перезапису попередньої інформації про контакт.</string>
     <string name="import_label">Імпортувати</string>
     <string name="import_shared_contact">Імпортувати спільний контакт?</string>
     <string name="incoming_messages">Вхідні повідомлення</string>
     <string name="indoor_air_quality_iaq">Якість повітря в приміщенні (IAQ)</string>
     <string name="info">Інформація</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Наразі встановлено</string>
     <string name="internal">Внутрішній</string>
     <string name="interval_always_on">Завжди увімк.</string>
@@ -594,6 +604,8 @@
     <string name="label_short_fast">Мала дальність - Повільно</string>
     <string name="label_short_slow">Мала дальність - Повільно</string>
     <string name="label_short_turbo">Мала дальність - Турбо</string>
+    <string name="label_tiny_fast"></string>
+    <string name="label_tiny_slow"></string>
     <string name="label_very_long_slow">Дуже велика дальність - Повільно</string>
     <string name="last_heard_filter_label">Фільтрувати за часом останньої активності:%1$s</string>
     <string name="last_position_update">Останнє оновлення позиції</string>
@@ -746,6 +758,7 @@
     <string name="mqtt_probe_success_with_info">Доступно (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Неможливо зв'язатися з брокером (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут після %1$d мілісекунд</string>
+    <string name="mqtt_proxy_local">MQTT проксі на цьому телефоні</string>
     <string name="mqtt_status_connected">Під’єднано</string>
     <string name="mqtt_status_connecting">З'єднання…</string>
     <string name="mqtt_status_disconnected">Відключено</string>
@@ -794,7 +807,10 @@
     <string name="no_pax_metrics_logs">Немає доступних показників PAX.</string>
     <string name="no_usb_devices_found">Не знайдений USB пристрій</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d онлайн</string>
+    <string name="node_count_shown">%1$d показано</string>
     <string name="node_count_template">(%1$d онлайн / %2$d показані / %3$d загалом)</string>
+    <string name="node_count_total">%1$d всього</string>
     <string name="node_filter_exclude_infrastructure">Виключити інфраструктуру</string>
     <string name="node_filter_exclude_mqtt">Виключити MQTT</string>
     <string name="node_filter_ignored">Ви переглядаєте ігноровані вузли,\nНатисніть щоб повернутися до списку вузлів.</string>
@@ -822,6 +838,7 @@
     <string name="node_list_help_node_details">Деталі вузла</string>
     <string name="node_list_help_title">Довідка по списку вузлів</string>
     <string name="node_number">Номер вузла</string>
+    <string name="node_restarting">Перезапуск…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Опції сортування вузлів</string>
     <string name="node_sort_channel">Канал</string>
@@ -1055,6 +1072,7 @@
     <string name="role_tracker_desc">Пріоритетна трансляція GPS-координат.</string>
     <string name="root_topic">Кореневий чат</string>
     <string name="rotary_encoder_1_enabled">Енкодер #1 активований</string>
+    <string name="router_role_confirmation_text">Я прочитав(-ла) &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; і допис у блозі про &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Помилка ключа сеансу</string>
     <string name="routing_error_admin_public_key_unauthorized">Несанкціонований відкритий ключ</string>
@@ -1157,7 +1175,14 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Якість сигналу</string>
     <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Підсилення антени (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Висота антени (м)</string>
+    <string name="site_planner_frequency_mhz">Частота (МГц)</string>
+    <string name="site_planner_invalid_positive">Має бути більше 0</string>
+    <string name="site_planner_rx_height_meters">Висота приймача (м)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Чутливість приймача (dBm)</string>
     <string name="site_planner_section_display">Дисплей</string>
+    <string name="site_planner_section_receiver">Приймач</string>
     <string name="skip">Пропустити</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Інтелектуальне передавання позиції</string>
@@ -1188,6 +1213,7 @@
     <string name="tak_role_teamlead">Лідер команди</string>
     <string name="tak_role_teammember">Член команди</string>
     <string name="tak_role_unspecified">Невизначений</string>
+    <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
@@ -1244,6 +1270,7 @@
     <string name="traceroute_showing_nodes">Показується %1$d/%2$d вузлів</string>
     <string name="track_and_share_locations">Відстежуйте та діліться місцезнаходженням</string>
     <!-- TRAFFIC -->
+    <string name="translate">Перекласти</string>
     <!-- TRANSLATION -->
     <string name="transmit_over_lora">Передавати через LoRa</string>
     <!-- TRANSPORT -->
