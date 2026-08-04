@@ -1568,7 +1568,6 @@
     <string name="signal">Segnale</string>
     <string name="signal_quality">Qualità Segnale</string>
     <!-- SITE -->
-    <string name="site_planner">Site Planner</string>
     <string name="site_planner_antenna_gain_dbi">Guadagno antenna (dBi)</string>
     <string name="site_planner_antenna_height_meters">Altezza antenna (m)</string>
     <string name="site_planner_color_scale">Palette di colori</string>
