@@ -18,9 +18,11 @@ package org.meshtastic.app.node.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -51,6 +53,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
         }
+        LaunchedEffect(node.latitude, node.longitude) { cameraState.animate(CameraUpdateFactory.newLatLng(location)) }
 
         GoogleMap(
             mapColorScheme = mapColorScheme,

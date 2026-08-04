@@ -45,7 +45,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(node.num) {
+    LaunchedEffect(node.latitude, node.longitude) {
         val point = GeoPoint(node.latitude, node.longitude)
 
         map.overlays.clear()

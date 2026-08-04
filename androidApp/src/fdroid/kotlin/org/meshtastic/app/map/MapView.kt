@@ -898,6 +898,9 @@ fun MapView(
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
             sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                map.controller.animateTo(GeoPoint(node.latitude, node.longitude))
+            }
             mapViewModel.consumeSitePlannerRequest()
         }
     }
