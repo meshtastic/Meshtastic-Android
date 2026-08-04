@@ -988,6 +988,9 @@ fun MapView(
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
             sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude)))
+            }
             mapViewModel.consumeSitePlannerRequest()
         }
     }
