@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.DeviceType
 
@@ -303,7 +304,14 @@ interface MapConsentPrefs {
 
 /** Reactive interface for map tile provider settings. */
 interface MapTileProviderPrefs {
-    val customTileProviders: StateFlow<String?>
+    /**
+     * The serialized provider list, emitted only once actually read back from storage.
+     *
+     * Deliberately not a [StateFlow]: a state flow has to invent an initial value, and a caller cannot tell that
+     * placeholder apart from "nothing was ever saved". Callers used to read `.value` synchronously at construction
+     * time, lose that race, and then persist a list built on the empty placeholder — destroying the stored providers.
+     */
+    val customTileProviders: Flow<String?>
 
     fun setCustomTileProviders(providers: String?)
 }

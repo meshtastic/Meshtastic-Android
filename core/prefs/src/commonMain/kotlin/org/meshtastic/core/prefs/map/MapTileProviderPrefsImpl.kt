@@ -20,10 +20,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -35,8 +33,9 @@ class MapTileProviderPrefsImpl(private val dataStore: MapTileProviderDataStore, 
     MapTileProviderPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    override val customTileProviders: StateFlow<String?> =
-        dataStore.data.map { it[KEY_CUSTOM_PROVIDERS_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+    // Not a StateFlow: see MapTileProviderPrefs.customTileProviders. Every emission here is a value actually read from
+    // storage, so a collector can tell "no providers saved" apart from "not read yet".
+    override val customTileProviders: Flow<String?> = dataStore.data.map { it[KEY_CUSTOM_PROVIDERS_PREF] }
 
     override fun setCustomTileProviders(providers: String?) {
         scope.launch {

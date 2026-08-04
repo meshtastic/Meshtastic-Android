@@ -25,10 +25,7 @@ import com.google.maps.android.compose.MapType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.app.map.prefs.di.GoogleMapsDataStore
@@ -36,11 +33,14 @@ import org.meshtastic.core.di.CoroutineDispatchers
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
 interface GoogleMapsPrefs {
-    val selectedGoogleMapType: StateFlow<String?>
+    // These two are plain flows rather than state flows on purpose: their stored value has to be awaited at start-up.
+    // Reading `.value` off a state flow returns the placeholder the flow was seeded with, not what is on disk, so the
+    // map used to restore a default instead of the user's actual selection.
+    val selectedGoogleMapType: Flow<String?>
 
     fun setSelectedGoogleMapType(value: String?)
 
-    val selectedCustomTileUrl: StateFlow<String?>
+    val selectedCustomTileUrl: Flow<String?>
 
     fun setSelectedCustomTileUrl(value: String?)
 
@@ -62,10 +62,8 @@ class GoogleMapsPrefsImpl(private val dataStore: GoogleMapsDataStore, dispatcher
     GoogleMapsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    override val selectedGoogleMapType: StateFlow<String?> =
-        dataStore.data
-            .map { it[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] ?: MapType.NORMAL.name }
-            .stateIn(scope, SharingStarted.Eagerly, MapType.NORMAL.name)
+    override val selectedGoogleMapType: Flow<String?> =
+        dataStore.data.map { it[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] ?: MapType.NORMAL.name }
 
     override fun setSelectedGoogleMapType(value: String?) {
         scope.launch {
@@ -79,8 +77,7 @@ class GoogleMapsPrefsImpl(private val dataStore: GoogleMapsDataStore, dispatcher
         }
     }
 
-    override val selectedCustomTileUrl: StateFlow<String?> =
-        dataStore.data.map { it[KEY_SELECTED_CUSTOM_TILE_URL_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+    override val selectedCustomTileUrl: Flow<String?> = dataStore.data.map { it[KEY_SELECTED_CUSTOM_TILE_URL_PREF] }
 
     override fun setSelectedCustomTileUrl(value: String?) {
         scope.launch {

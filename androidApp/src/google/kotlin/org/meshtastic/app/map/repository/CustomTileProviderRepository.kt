@@ -17,9 +17,15 @@
 package org.meshtastic.app.map.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -47,58 +53,65 @@ class CustomTileProviderRepositoryImpl(
     private val mapTileProviderPrefs: MapTileProviderPrefs,
 ) : CustomTileProviderRepository {
 
-    private val customTileProvidersStateFlow = MutableStateFlow<List<CustomTileProviderConfig>>(emptyList())
+    private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
+
+    /**
+     * `null` until the persisted list has actually been read back at least once.
+     *
+     * The distinction matters: this used to be seeded with an empty list, and every read-modify-write that landed
+     * before the first disk read completed persisted a list built on that empty baseline — wiping the user's imported
+     * providers instead of merely failing to show them.
+     */
+    private val cache = MutableStateFlow<List<CustomTileProviderConfig>?>(null)
+
+    /** Serializes read-modify-write cycles so two concurrent edits cannot each overwrite the other. */
+    private val writeLock = Mutex()
 
     init {
-        loadDataFromPrefs()
+        scope.launch { mapTileProviderPrefs.customTileProviders.collect { cache.value = it.decodeConfigs() } }
     }
 
-    override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> =
-        customTileProvidersStateFlow.asStateFlow()
+    override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> = cache.filterNotNull()
 
-    override suspend fun addCustomTileProvider(config: CustomTileProviderConfig) {
-        val newList = customTileProvidersStateFlow.value + config
-        customTileProvidersStateFlow.value = newList
-        saveDataToPrefs(newList)
+    override suspend fun addCustomTileProvider(config: CustomTileProviderConfig) = mutate { it + config }
+
+    override suspend fun updateCustomTileProvider(config: CustomTileProviderConfig) = mutate { providers ->
+        providers.map { if (it.id == config.id) config else it }
     }
 
-    override suspend fun updateCustomTileProvider(config: CustomTileProviderConfig) {
-        val newList = customTileProvidersStateFlow.value.map { if (it.id == config.id) config else it }
-        customTileProvidersStateFlow.value = newList
-        saveDataToPrefs(newList)
-    }
-
-    override suspend fun deleteCustomTileProvider(configId: String) {
-        val newList = customTileProvidersStateFlow.value.filterNot { it.id == configId }
-        customTileProvidersStateFlow.value = newList
-        saveDataToPrefs(newList)
+    override suspend fun deleteCustomTileProvider(configId: String) = mutate { providers ->
+        providers.filterNot { it.id == configId }
     }
 
     override suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig? =
-        customTileProvidersStateFlow.value.find { it.id == configId }
+        loaded().find { it.id == configId }
 
-    private fun loadDataFromPrefs() {
-        val jsonString = mapTileProviderPrefs.customTileProviders.value
-        if (jsonString != null) {
-            try {
-                customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
-            } catch (e: SerializationException) {
-                Logger.e(e) { "Error deserializing tile providers" }
-                customTileProvidersStateFlow.value = emptyList()
-            }
-        } else {
-            customTileProvidersStateFlow.value = emptyList()
+    /** Suspends until the persisted list has been read, so no write is ever built on an unloaded baseline. */
+    private suspend fun loaded(): List<CustomTileProviderConfig> = cache.filterNotNull().first()
+
+    private suspend fun mutate(transform: (List<CustomTileProviderConfig>) -> List<CustomTileProviderConfig>) {
+        writeLock.withLock {
+            val updated = transform(loaded())
+            val encoded =
+                try {
+                    json.encodeToString(updated)
+                } catch (e: SerializationException) {
+                    Logger.e(e) { "Error serializing tile providers" }
+                    return
+                }
+            // Publish before the store round-trip so an immediately following edit reads this list, not the stale one.
+            cache.value = updated
+            withContext(dispatchers.io) { mapTileProviderPrefs.setCustomTileProviders(encoded) }
         }
     }
 
-    private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
-        withContext(dispatchers.io) {
-            try {
-                val jsonString = json.encodeToString(providers)
-                mapTileProviderPrefs.setCustomTileProviders(jsonString)
-            } catch (e: SerializationException) {
-                Logger.e(e) { "Error serializing tile providers" }
-            }
+    private fun String?.decodeConfigs(): List<CustomTileProviderConfig> {
+        if (this == null) return emptyList()
+        return try {
+            json.decodeFromString<List<CustomTileProviderConfig>>(this)
+        } catch (e: SerializationException) {
+            Logger.e(e) { "Error deserializing tile providers" }
+            emptyList()
         }
     }
 }

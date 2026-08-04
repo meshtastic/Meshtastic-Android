@@ -28,4 +28,20 @@ data class CustomTileProviderConfig(
 ) {
     val isLocal: Boolean
         get() = localUri != null
+
+    /**
+     * The value persisted to mark this provider as the active map selection. Local (MBTiles) providers are identified
+     * by their file URI because [urlTemplate] is empty for them.
+     */
+    val selectionKey: String
+        get() = localUri ?: urlTemplate
+
+    /**
+     * True when [selection] — a value previously produced by [selectionKey] — refers to this provider.
+     *
+     * Both the renderer and the start-up restore path must resolve a persisted selection the same way. Keeping the rule
+     * here stops them drifting apart: a restore path that only compared [urlTemplate] silently dropped every local
+     * provider on restart.
+     */
+    fun matchesSelection(selection: String): Boolean = localUri == selection || urlTemplate == selection
 }

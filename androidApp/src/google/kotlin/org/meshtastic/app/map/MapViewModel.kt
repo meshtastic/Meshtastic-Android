@@ -156,7 +156,11 @@ class MapViewModel(
                 _errorFlow.emit("Invalid name, URL template, or local URI for custom tile provider.")
                 return@launch
             }
-            if (customTileProviderConfigs.value.any { it.name.equals(name, ignoreCase = true) }) {
+            if (
+                customTileProviderRepository.getCustomTileProviders().first().any {
+                    it.name.equals(name, ignoreCase = true)
+                }
+            ) {
                 _errorFlow.emit("Custom tile provider with name '$name' already exists.")
                 return@launch
             }
@@ -198,7 +202,7 @@ class MapViewModel(
                 _errorFlow.emit("Invalid name, URL template, or local URI for updating custom tile provider.")
                 return@launch
             }
-            val existingConfigs = customTileProviderConfigs.value
+            val existingConfigs = customTileProviderRepository.getCustomTileProviders().first()
             if (
                 existingConfigs.any {
                     it.id != configToUpdate.id && it.name.equals(configToUpdate.name, ignoreCase = true)
@@ -208,20 +212,15 @@ class MapViewModel(
                 return@launch
             }
 
+            // Read before writing: afterwards the store holds the new config, so the old selection key is gone.
+            val previous = customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
             customTileProviderRepository.updateCustomTileProvider(configToUpdate)
 
-            val originalConfig = customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
-            if (
-                _selectedCustomTileProviderUrl.value != null &&
-                originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value
-            ) {
-                // No change needed if URL didn't change, or handle if it did
-            } else if (originalConfig != null && _selectedCustomTileProviderUrl.value != originalConfig.urlTemplate) {
-                val currentlySelectedConfig =
-                    customTileProviderConfigs.value.find { it.urlTemplate == _selectedCustomTileProviderUrl.value }
-                if (currentlySelectedConfig?.id == configToUpdate.id) {
-                    _selectedCustomTileProviderUrl.value = configToUpdate.urlTemplate
-                }
+            // Follow the edit when the provider being displayed is the one that just changed, otherwise the persisted
+            // selection points at a key nothing matches any more and the layer is dropped on the next start.
+            if (previous != null && _selectedCustomTileProviderUrl.value == previous.selectionKey) {
+                _selectedCustomTileProviderUrl.value = configToUpdate.selectionKey
+                googleMapsPrefs.setSelectedCustomTileUrl(configToUpdate.selectionKey)
             }
         }
     }
@@ -232,10 +231,7 @@ class MapViewModel(
             customTileProviderRepository.deleteCustomTileProvider(configId)
 
             if (configToRemove != null) {
-                if (
-                    _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate ||
-                    _selectedCustomTileProviderUrl.value == configToRemove.localUri
-                ) {
+                if (_selectedCustomTileProviderUrl.value?.let(configToRemove::matchesSelection) == true) {
                     _selectedCustomTileProviderUrl.value = null
                     // Also clear from prefs
                     googleMapsPrefs.setSelectedCustomTileUrl(null)
@@ -257,8 +253,7 @@ class MapViewModel(
                 googleMapsPrefs.setSelectedCustomTileUrl(null)
                 return
             }
-            // Use localUri if present, otherwise urlTemplate
-            val selectedUrl = config.localUri ?: config.urlTemplate
+            val selectedUrl = config.selectionKey
             _selectedCustomTileProviderUrl.value = selectedUrl
             _selectedGoogleMapType.value = MapType.NONE
             googleMapsPrefs.setSelectedCustomTileUrl(selectedUrl)
@@ -287,7 +282,7 @@ class MapViewModel(
             return null
         }
 
-        val selectedUrl = config.localUri ?: config.urlTemplate
+        val selectedUrl = config.selectionKey
         if (currentTileProvider != null && _selectedCustomTileProviderUrl.value == selectedUrl) {
             return currentTileProvider
         }
@@ -360,10 +355,7 @@ class MapViewModel(
             }
         }
 
-        viewModelScope.launch {
-            customTileProviderRepository.getCustomTileProviders().first()
-            loadPersistedMapType()
-        }
+        viewModelScope.launch { restoreMapSelection() }
 
         selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
@@ -387,32 +379,45 @@ class MapViewModel(
         saveCameraPosition(cameraPositionState.position)
     }
 
-    private fun loadPersistedMapType() {
-        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl.value
-        if (savedCustomUrl != null) {
-            // Check if this custom provider still exists
-            if (
-                customTileProviderConfigs.value.any { it.urlTemplate == savedCustomUrl } &&
-                isValidTileUrlTemplate(savedCustomUrl)
-            ) {
-                _selectedCustomTileProviderUrl.value = savedCustomUrl
-                _selectedGoogleMapType.value =
-                    MapType.NONE // MapType.NONE to hide google basemap when using custom provider
-            } else {
-                // The saved custom URL is no longer valid or doesn't exist, remove preference
-                googleMapsPrefs.setSelectedCustomTileUrl(null)
-                // Fallback to default Google Map type
-                _selectedGoogleMapType.value = MapType.NORMAL
-            }
-        } else {
-            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType.value
-            try {
-                _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
-            } catch (e: IllegalArgumentException) {
-                Logger.e(e) { "Invalid saved Google Map type: $savedGoogleMapTypeName" }
-                _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
-                googleMapsPrefs.setSelectedGoogleMapType(null)
-            }
+    /**
+     * Restores the map layer chosen on a previous run, awaiting both stores before deciding.
+     *
+     * Both reads have to be awaited rather than sampled: the providers and the saved selection live in separate
+     * DataStores, and acting on a not-yet-loaded value silently discards the user's offline map.
+     */
+    private suspend fun restoreMapSelection() {
+        val configs = customTileProviderRepository.getCustomTileProviders().first()
+        val savedSelection = googleMapsPrefs.selectedCustomTileUrl.first()
+
+        val savedProvider = savedSelection?.let { selection -> configs.firstOrNull { it.matchesSelection(selection) } }
+        if (savedProvider != null) {
+            selectCustomTileProvider(savedProvider)
+            return
+        }
+        if (savedSelection != null) {
+            // configs is loaded here, so an unmatched selection really is a provider that no longer exists.
+            googleMapsPrefs.setSelectedCustomTileUrl(null)
+        }
+
+        val offlineProvider = configs.firstOrNull { it.isLocal }
+        if (offlineProvider != null) {
+            // Fork behaviour: an imported offline map always wins on start-up, so the app opens on usable tiles with no
+            // network and no user action. See FORK.md.
+            selectCustomTileProvider(offlineProvider)
+            return
+        }
+
+        restoreGoogleMapType()
+    }
+
+    private suspend fun restoreGoogleMapType() {
+        val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType.first()
+        try {
+            _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
+        } catch (e: IllegalArgumentException) {
+            Logger.e(e) { "Invalid saved Google Map type: $savedGoogleMapTypeName" }
+            _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
+            googleMapsPrefs.setSelectedGoogleMapType(null)
         }
     }
 
