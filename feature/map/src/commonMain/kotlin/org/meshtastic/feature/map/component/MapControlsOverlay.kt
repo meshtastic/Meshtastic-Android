@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.compass_find_favorite
 import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
@@ -43,6 +44,7 @@ import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -80,6 +82,7 @@ fun MapControlsOverlay(
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
+    onFindFavoriteClick: (() -> Unit)? = null,
 ) {
     HorizontalFloatingToolbar(
         expanded = true,
@@ -88,6 +91,16 @@ fun MapControlsOverlay(
     ) {
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
+
+        // Shortcut to the bearing-and-distance compass for the favourite node. Shown only when there is a favourite
+        // with a known position, so it never appears as a button that does nothing.
+        onFindFavoriteClick?.let { onClick ->
+            MapButton(
+                icon = MeshtasticIcons.Route,
+                contentDescription = stringResource(Res.string.compass_find_favorite),
+                onClick = onClick,
+            )
+        }
 
         // Filter button + dropdown
         Box {

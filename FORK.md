@@ -18,6 +18,26 @@ fine for personal use. They must be changed before any distribution beyond that.
 | 1 | Offline map persistence | Imported custom tile providers and the active layer now survive an app restart. | **Yes** — pure bug fix, no fork-specific behaviour. |
 | 2 | Offline map priority | On start-up, an imported local (MBTiles) provider is selected automatically when no valid saved selection applies. | No — deliberate product choice for this fork. |
 | 3 | Bluetooth-only connections | The transport selector is hidden and the Connections pane is pinned to BLE. | No — upstream deliberately supports three transports. |
+| 4 | Compass shortcut on the map | A map toolbar button opens the existing compass straight onto the favourite node. | Possibly — the `openCompass` route flag is generic; the map button is opinionated. |
+
+### 4. Compass shortcut on the map
+
+The compass itself is upstream's, and it already does the hard part: it reads the phone's magnetometer, so the arrow
+points where to walk rather than showing a bearing relative to north, and it reports distance, alignment, and the
+degraded cases (no magnetometer, no location permission, location off, no fix). Nothing here reimplements it.
+
+What the fork adds is reach. Upstream's path is: node list → find the right node → open it → tap the compass. This
+adds a toolbar button on the main map that lands on the compass in one tap:
+
+- `NodesRoute.NodeDetail` gains `openCompass: Boolean = false`, and `NodeDetailScreen` opens the compass overlay once
+  the node has loaded when it is set.
+- `MapViewProvider.MapView` and `LocalMapMainScreenProvider` gain a `navigateToNodeCompass` callback, defaulting to
+  plain node details so nothing else has to change. The osmdroid (fdroid) provider accepts it and ignores it.
+- The button appears only when a favourite node has a known position, so it is never a control that does nothing.
+
+Targeting is by **favourite node**, not a hard-coded node number: mark the companion's device as a favourite once,
+and it stays changeable in the field without a rebuild. If several nodes are favourited, the first with a position
+wins — fine for a two-person trip, worth revisiting for a larger group.
 
 ### 1. Offline map persistence (bug fix)
 

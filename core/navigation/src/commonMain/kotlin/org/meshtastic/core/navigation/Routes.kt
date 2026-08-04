@@ -61,7 +61,11 @@ sealed interface MapRoute : Route {
 sealed interface NodesRoute : Route {
     @Serializable data object Nodes : NodesRoute, Graph
 
-    @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
+    /**
+     * @param openCompass opens the compass overlay as soon as the screen appears, so a caller can hand the user a
+     *   direction and a distance in one tap instead of making them find the node and then the compass button.
+     */
+    @Serializable data class NodeDetail(val destNum: Int? = null, val openCompass: Boolean = false) : NodesRoute
 }
 
 @Serializable

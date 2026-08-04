@@ -29,6 +29,8 @@ fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
             { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // onClickNodeChip
             { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // navigateToNodeDetails
             args.waypointId,
+            // navigateToNodeCompass: lands on the compass itself, not the detail screen it lives in.
+            { id -> backStack.add(NodesRoute.NodeDetail(id, openCompass = true)) },
         )
     }
 }

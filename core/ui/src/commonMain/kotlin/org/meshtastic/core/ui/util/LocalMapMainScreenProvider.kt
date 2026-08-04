@@ -27,7 +27,12 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
 @Suppress("Wrapping")
 val LocalMapMainScreenProvider =
     compositionLocalOf<
-        @Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit,
+        @Composable (
+            onClickNodeChip: (Int) -> Unit,
+            navigateToNodeDetails: (Int) -> Unit,
+            waypointId: Int?,
+            navigateToNodeCompass: (Int) -> Unit,
+        ) -> Unit,
         > {
-        { _, _, _ -> PlaceholderScreen("Map") }
+        { _, _, _, _ -> PlaceholderScreen("Map") }
     }

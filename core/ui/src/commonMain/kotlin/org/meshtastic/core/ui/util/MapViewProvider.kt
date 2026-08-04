@@ -25,7 +25,17 @@ import androidx.compose.ui.Modifier
  * implementations (Google Maps vs OSMDroid). Platform implementations create their own ViewModel via Koin.
  */
 interface MapViewProvider {
-    @Composable fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int? = null)
+    /**
+     * @param navigateToNodeCompass opens a node straight on its compass. Defaults to plain node details so
+     *   implementations and callers that do not offer the shortcut keep working unchanged.
+     */
+    @Composable
+    fun MapView(
+        modifier: Modifier,
+        navigateToNodeDetails: (Int) -> Unit,
+        waypointId: Int? = null,
+        navigateToNodeCompass: (Int) -> Unit = navigateToNodeDetails,
+    )
 }
 
 val LocalMapViewProvider = compositionLocalOf<MapViewProvider?> { null }

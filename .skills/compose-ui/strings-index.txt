@@ -221,6 +221,7 @@ communicate_off_the_grid
 compass_bearing
 compass_bearing_na
 compass_distance
+compass_find_favorite
 compass_location_disabled
 compass_no_location_fix
 compass_no_location_permission

@@ -65,6 +65,7 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     LaunchedEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -77,6 +78,7 @@ fun NodeDetailScreen(
         onNavigate = onNavigate,
         onNavigateUp = onNavigateUp,
         compassViewModel = compassViewModel,
+        openCompass = openCompass,
     )
 }
 
@@ -90,6 +92,7 @@ private fun NodeDetailScaffold(
     onNavigate: (Route) -> Unit,
     onNavigateUp: () -> Unit,
     compassViewModel: CompassViewModel? = null,
+    openCompass: Boolean = false,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     val actualCompassViewModel = compassViewModel
@@ -97,6 +100,17 @@ private fun NodeDetailScaffold(
         actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
 
     val node = uiState.node
+
+    // Opens the compass for a caller that asked for it (see NodesRoute.NodeDetail.openCompass). Waits for the node to
+    // load, and keys on it so a dismissed overlay is not immediately reopened by a later recomposition.
+    var compassAutoOpened by remember(node?.num) { mutableStateOf(false) }
+    LaunchedEffect(openCompass, node, compassAutoOpened) {
+        if (openCompass && node != null && !compassAutoOpened) {
+            compassAutoOpened = true
+            actualCompassViewModel?.start(node, uiState.metricsState.displayUnits)
+            activeOverlay = NodeDetailOverlay.Compass
+        }
+    }
     val listState = rememberLazyListState()
 
     Scaffold(

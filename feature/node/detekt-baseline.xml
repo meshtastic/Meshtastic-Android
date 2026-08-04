@@ -85,6 +85,6 @@
     <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompletePreview</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
-    <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, )</ID>
+    <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, openCompass = openCompass, )</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -269,13 +269,14 @@ class MainActivity : AppCompatActivity() {
                     )
                 },
             LocalMapMainScreenProvider provides
-                { onClickNodeChip, navigateToNodeDetails, waypointId ->
+                { onClickNodeChip, navigateToNodeDetails, waypointId, navigateToNodeCompass ->
                     val viewModel = koinViewModel<SharedMapViewModel>()
                     MapScreen(
                         viewModel = viewModel,
                         onClickNodeChip = onClickNodeChip,
                         navigateToNodeDetails = navigateToNodeDetails,
                         waypointId = waypointId,
+                        navigateToNodeCompass = navigateToNodeCompass,
                     )
                 },
             content = content,

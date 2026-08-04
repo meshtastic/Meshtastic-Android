@@ -239,6 +239,7 @@ fun MapView(
     mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit = {},
     mode: GoogleMapMode = GoogleMapMode.Main,
+    navigateToNodeCompass: (Int) -> Unit = navigateToNodeDetails,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -876,6 +877,16 @@ fun MapView(
         val showRefresh = visibleNetworkLayers.isNotEmpty()
         val isRefreshingLayers = visibleNetworkLayers.any { it.isRefreshing }
 
+        // Favourite node to point the compass at. Marking the companion's node as a favourite is the whole setup — no
+        // hard-coded node number, and it stays changeable in the field. Requires a known position, so the shortcut only
+        // appears when it can actually give a bearing. Main map only; the track and traceroute modes have one subject
+        // already. See FORK.md.
+        val nodesWithPosition by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
+        val favoriteNodeToFind =
+            remember(nodesWithPosition, mode) {
+                nodesWithPosition.firstOrNull { node -> node.isFavorite }.takeIf { mode is GoogleMapMode.Main }
+            }
+
         MapControlsOverlay(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
             onToggleFilterMenu = { mapFilterMenuExpanded = true },
@@ -926,6 +937,7 @@ fun MapView(
             } else {
                 null
             },
+            onFindFavoriteClick = favoriteNodeToFind?.let { node -> { navigateToNodeCompass(node.num) } },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
                 when {
