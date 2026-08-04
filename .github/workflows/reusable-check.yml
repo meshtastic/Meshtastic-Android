@@ -426,19 +426,42 @@ jobs:
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
           install_jetbrains_jdk: 'true'
 
+      - name: Install dependencies for AppImage
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfuse2t64
+
       - name: Build Desktop
         # proguardReleaseJars is included because it is otherwise only exercised by the
         # release workflow: jlink tolerates a jmods-less JDK (JEP 493) but ProGuard does
         # not, so a broken packaging JDK would surface at release time instead of here.
-        run: ./gradlew :desktopApp:createDistributable :desktopApp:proguardReleaseJars -Pci=true
+        # packageDistributionForCurrentOS (debug build type, no ProGuard) produces real
+        # installers (dmg/msi+exe/deb+rpm+AppImage-dir) so the snapshot release below can
+        # ship something testers can actually install, not just an unpacked app dir.
+        run: ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true
+
+      # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
+      # a Linux .AppImage. Wrap it into a real AppImage, same as the release workflow.
+      - name: Build AppImage from jpackage app-image
+        if: runner.os == 'Linux'
+        env:
+          APP_VERSION_NAME: snapshot
+          BINARIES_DIR: desktopApp/build/compose/binaries/main
+        run: scripts/build-appimage.sh
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: desktop-app-${{ runner.os }}-${{ runner.arch }}
-          path: desktopApp/build/compose/binaries/main/app/
+          path: |
+            desktopApp/build/compose/binaries/main/*/*.dmg
+            desktopApp/build/compose/binaries/main/*/*.msi
+            desktopApp/build/compose/binaries/main/*/*.exe
+            desktopApp/build/compose/binaries/main/*/*.deb
+            desktopApp/build/compose/binaries/main/*/*.rpm
+            desktopApp/build/compose/binaries/main/*/*.AppImage
           retention-days: 7
+          if-no-files-found: error
 
   # ── Flatpak Sources ───────────────────────────────────────────────────
   build-flatpak-src:
