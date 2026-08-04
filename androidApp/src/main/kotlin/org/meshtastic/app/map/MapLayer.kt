@@ -74,19 +74,32 @@ private val TRAILING_UUID =
 fun displayNameFromFileName(fileNameWithoutExtension: String): String =
     fileNameWithoutExtension.replace(TRAILING_UUID, "")
 
-/** Characters not allowed in an on-disk layer file name; strips path separators so imports can't traverse. */
-private val FILE_NAME_UNSAFE = Regex("[^A-Za-z0-9._-]")
+/**
+ * Characters not allowed in an on-disk layer file name: path separators, so an import can't traverse out of
+ * `map_layers/`, plus control characters. Everything else — spaces, punctuation, non-Latin scripts — is kept, because
+ * the list rebuilds a layer's display name from this file name and users should see the name they chose.
+ */
+private val FILE_NAME_UNSAFE = Regex("""[/\\\p{Cntrl}]""")
+
+/**
+ * Longest sanitized base name kept, in characters. Bounds the total path length: the UUID suffix and extension add ~46
+ * bytes, and a non-Latin name can reach 4 bytes per character, which would otherwise overrun the 255-byte file name
+ * limit and fail the write.
+ */
+private const val MAX_BASE_NAME_CHARS = 40
 
 /**
  * Build the on-disk file name for a layer from its [displayName].
  *
- * [displayName] is untrusted (a DISPLAY_NAME/lastPathSegment from another app's share/open-with), so unsafe characters
- * are stripped to keep the write inside `map_layers/`. The UUID suffix is load-bearing, not cosmetic: two layers
- * sharing a display name would otherwise resolve to the same path and the second write would truncate the first.
- * [displayNameFromFileName] strips it back off for display.
+ * [displayName] is untrusted (a DISPLAY_NAME/lastPathSegment from another app's share/open-with), so separators are
+ * stripped to keep the write inside `map_layers/`. The UUID suffix is load-bearing, not cosmetic: two layers sharing a
+ * display name would otherwise resolve to the same path and the second write would truncate the first. It also means a
+ * name of `..` can never itself be the file name. [displayNameFromFileName] strips it back off for display.
  */
-fun layerFileName(displayName: String, extension: String): String =
-    "${displayName.replace(FILE_NAME_UNSAFE, "_")}_${Uuid.random()}.$extension"
+fun layerFileName(displayName: String, extension: String): String {
+    val safeBase = displayName.replace(FILE_NAME_UNSAFE, "_").take(MAX_BASE_NAME_CHARS)
+    return "${safeBase}_${Uuid.random()}.$extension"
+}
 
 /**
  * Resolve a file extension or MIME subtype (e.g. `geojson`, `vnd.geo+json`) to a [LayerType], or null if unsupported.
