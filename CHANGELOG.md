@@ -25,8 +25,6 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(docs): publish only screenshots a synced page references by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6557
 * fix(icons): differentiate google/fdroid debug launcher icons by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6564
 * fix(tak): re-encode bundled .p12 certs with legacy PKCS#12 algorithms for Android ≤ 9 ATAK compatibility by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6569
-#### 📝 Other Changes
-* chore: remove stray .gitmodules from vendored spec-kit review extension by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6573
 
 ## New Contributors
 * @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
