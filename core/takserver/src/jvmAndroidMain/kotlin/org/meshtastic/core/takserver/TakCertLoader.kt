@@ -39,8 +39,9 @@ import javax.net.ssl.TrustManagerFactory
  * - `ca.pem` — PEM-encoded CA certificate used to validate the presented client certificate during mTLS. Only clients
  *   whose certificate chains back to this CA are accepted.
  *
- * All files are the same bytes as the iOS Meshtastic-Apple bundle, so the same exported data package works for both
- * platforms with no re-import.
+ * The certificates and keys are identical to the iOS Meshtastic-Apple bundle, so the same exported data package works
+ * for both platforms with no re-import. The `.p12` containers MUST stay encoded with legacy PKCS#12 algorithms
+ * (SHA1/3DES bags, SHA1 MAC): Android 9 and older cannot parse PBES2/AES containers, which breaks ATAK import (#6567).
  */
 internal object TakCertLoader {
 
