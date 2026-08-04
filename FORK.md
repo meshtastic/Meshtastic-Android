@@ -17,6 +17,7 @@ fine for personal use. They must be changed before any distribution beyond that.
 |---|------|--------|--------------|
 | 1 | Offline map persistence | Imported custom tile providers and the active layer now survive an app restart. | **Yes** — pure bug fix, no fork-specific behaviour. |
 | 2 | Offline map priority | On start-up, an imported local (MBTiles) provider is selected automatically when no valid saved selection applies. | No — deliberate product choice for this fork. |
+| 3 | Bluetooth-only connections | The transport selector is hidden and the Connections pane is pinned to BLE. | No — upstream deliberately supports three transports. |
 
 ### 1. Offline map persistence (bug fix)
 

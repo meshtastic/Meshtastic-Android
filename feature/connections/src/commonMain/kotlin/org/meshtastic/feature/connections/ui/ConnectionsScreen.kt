@@ -115,7 +115,6 @@ import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
-import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -417,12 +416,8 @@ fun ConnectionsScreen(
                             }
                         }
 
-                        // Transport selector sits between the connection card and device list; it controls only the
-                        // visible discovery pane, not the globally selected/connected device shown above.
-                        TransportSelector(
-                            activeTransport = activeTransport,
-                            onSelectTransport = scanModel::selectTransport,
-                        )
+                        // Fork behaviour: no transport selector. This build offers Bluetooth only, and the pane is
+                        // pinned to BLE in ScannerViewModel. See FORK.md.
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.

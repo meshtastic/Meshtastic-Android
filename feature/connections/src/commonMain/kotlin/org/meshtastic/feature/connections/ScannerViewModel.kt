@@ -23,7 +23,6 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,7 +34,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.BleDevice
@@ -322,18 +320,14 @@ open class ScannerViewModel(
 
     // ── Active transport pane ────────────────────────────────────────────────────────────────
 
-    /** The single transport pane currently rendered by the Connections screen. */
-    val activeTransport: StateFlow<DeviceType> =
-        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow) { preferred, selectedAddress ->
-            resolveActiveTransport(preferred, selectedAddress)
-        }
-            .distinctUntilChanged()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue =
-                resolveActiveTransport(uiPrefs.selectedConnectionTransport.value, selectedAddressFlow.value),
-            )
+    /**
+     * The single transport pane currently rendered by the Connections screen.
+     *
+     * Fork behaviour: this build only offers Bluetooth, so the pane is pinned to BLE and the Connections screen hides
+     * the transport selector. Pinning matters beyond hiding the control — a phone that already had TCP or USB stored
+     * would otherwise open on an empty pane with no visible way back to Bluetooth. See FORK.md.
+     */
+    val activeTransport: StateFlow<DeviceType> = MutableStateFlow(DeviceType.BLE)
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
@@ -684,9 +678,6 @@ open class ScannerViewModel(
             }
         }
     }
-
-    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =
-        preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
 
     private fun recordSelectedTransport(fullAddress: String) {
         DeviceType.fromAddress(fullAddress)?.let(uiPrefs::setSelectedConnectionTransport)

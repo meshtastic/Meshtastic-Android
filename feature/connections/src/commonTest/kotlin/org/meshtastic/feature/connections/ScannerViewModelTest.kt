@@ -284,10 +284,21 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `active transport defaults to selected device type when no explicit preference exists`() {
+    fun `active transport stays BLE even when the selected device is a network one`() {
         harness.currentDeviceAddressFlow.value = "t192.168.1.50"
 
-        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
+        // Fork behaviour: Bluetooth-only build. A TCP or USB address left over from another build must not strand the
+        // Connections screen on a pane whose selector is hidden. See FORK.md.
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
+    }
+
+    @Test
+    fun `a stored non-Bluetooth transport preference is ignored`() {
+        harness.uiPrefs.setSelectedConnectionTransport(DeviceType.USB)
+
+        // The trap this guards: with the selector hidden, honouring the stored preference would open an empty USB pane
+        // the user has no visible way to leave.
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
     }
 
     @Test
@@ -476,8 +487,9 @@ class ScannerViewModelTest {
 
         viewModel.selectTransport(DeviceType.TCP)
 
-        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
         assertEquals(false, viewModel.isBleScanning.value)
+        // Only the scan-stopping side effect survives in this build; the pane itself stays on BLE.
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
     }
 
     @Test
@@ -487,7 +499,6 @@ class ScannerViewModelTest {
 
         viewModel.selectTransport(DeviceType.USB)
 
-        assertEquals(DeviceType.USB, viewModel.activeTransport.value)
         assertEquals(false, viewModel.isBleScanning.value)
         assertEquals(false, viewModel.isNetworkScanning.value)
 
@@ -583,21 +594,18 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `startBleAutoScan starts only when active transport is BLE`() = runTest {
+    fun `startBleAutoScan is never gated off because the pane is pinned to BLE`() = runTest {
+        // Selecting another transport no longer moves the pane, so BLE discovery can always start. That is the point:
+        // a stored TCP or USB preference must not leave the device list permanently empty. See FORK.md.
         viewModel.selectTransport(DeviceType.TCP)
 
-        viewModel.startBleAutoScan()
-
-        assertEquals(false, viewModel.isBleScanning.value)
-
-        viewModel.selectTransport(DeviceType.BLE)
         viewModel.startBleAutoScan()
 
         assertEquals(true, viewModel.isBleScanning.value)
     }
 
     @Test
-    fun `startNetworkAutoScan starts only when active transport is TCP`() = runTest {
+    fun `startNetworkAutoScan never starts in a Bluetooth-only build`() = runTest {
         viewModel.startNetworkAutoScan()
 
         assertEquals(false, viewModel.isNetworkScanning.value)
@@ -605,7 +613,7 @@ class ScannerViewModelTest {
         viewModel.selectTransport(DeviceType.TCP)
         viewModel.startNetworkAutoScan()
 
-        assertEquals(true, viewModel.isNetworkScanning.value)
+        assertEquals(false, viewModel.isNetworkScanning.value)
     }
 
     // ── Toggle persistence: enable clears the opposite persisted auto-scan pref ──────────────
@@ -670,7 +678,7 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `onSelected records active transport for BLE TCP and USB entries`() = runTest {
+    fun `onSelected leaves the pane on BLE whatever entry type is picked`() = runTest {
         val bleEntry =
             DeviceListEntry.Ble(device = FakeBleDevice(address = "01:02:03:04:05:06", name = "BLE Node"), bonded = true)
         val tcpEntry = DeviceListEntry.Tcp(name = "TCP Node", fullAddress = "t192.168.1.50")
@@ -686,10 +694,10 @@ class ScannerViewModelTest {
         assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
 
         viewModel.onSelected(tcpEntry)
-        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
 
         viewModel.onSelected(usbEntry)
-        assertEquals(DeviceType.USB, viewModel.activeTransport.value)
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
     }
 
     // ── persistNetworkAutoScanIntent invariant ───────────────────────────────────────────────
