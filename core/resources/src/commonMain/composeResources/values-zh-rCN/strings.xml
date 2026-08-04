@@ -115,7 +115,12 @@
     <!-- AQI -->
     <string name="aqi">空气质量指数</string>
     <string name="aqi_good">良好</string>
+    <string name="aqi_hazardous">危险</string>
     <string name="aqi_moderate">适度</string>
+    <string name="aqi_unhealthy">有害健康</string>
+    <string name="aqi_unhealthy_sensitive">对敏感人群有害</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">重度污染</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="are_you_sure_change_default">您是否确定要改回默认频道？</string>
     <string name="audio">音频</string>
@@ -144,8 +149,12 @@
     <string name="bluetooth_feature_discovery">发现</string>
     <string name="bluetooth_feature_discovery_description">查找并识别附近的Meshtastic设备。</string>
     <string name="bluetooth_permission">蓝牙</string>
+    <string name="bluetooth_scan_location_services_disabled">定位服务已关闭请将其开启以便扫描附近的设备。</string>
     <string name="bluetooth_scan_missing_permission">蓝牙扫描需要权限请授予附近设备 (位置信息) 权限以查找设备。</string>
     <string name="bluetooth_scan_start_failed">蓝牙扫描无法启动请重试。</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="other">已达到蓝牙扫描次数限制。请在 %1$d秒后重试。</item>
+    </plurals>
     <string name="bold_heading">加粗标题</string>
     <string name="bonding_failed_permissions">配对失败请授权附近设备权限后重试。</string>
     <string name="bonding_failed_retry">配对未完成请尝试重新配对。</string>
@@ -272,6 +281,7 @@
     <string name="config_position_flags_summary">包含位置消息时可选择包含的附加字段。包含的字段越多，消息体积就越大——这会导致占用更长的空中传输时间并增加丢包的风险。</string>
     <string name="config_position_gps_update_interval_summary">应该以多长的时间尝试获取 GPS 位置(&lt;10秒将GPS保持开启)。</string>
     <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
+    <string name="config_saved_restarting">该节点正在重启，将在短时间内无法连接。</string>
     <string name="config_security_admin_key">授权向该节点发送管理员密钥。</string>
     <string name="config_security_debug_log_api_enabled">通过串行或蓝牙导出设备调试日志。</string>
     <string name="config_security_is_managed">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>
@@ -326,6 +336,7 @@
     <string name="debug_logcat_empty">没有应用日志可以显示</string>
     <string name="debug_logcat_refresh">刷新</string>
     <string name="debug_logs_export">导出程序日志</string>
+    <string name="debug_logs_export_warning">此文件可能包含您的消息文本精确位置以及节点详细信息在公开分享之前请务必先进行审查。</string>
     <string name="debug_logs_exported">日志已导出</string>
     <string name="debug_panel">调试面板</string>
     <string name="debug_search_clear">清除搜索</string>
@@ -1076,6 +1087,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT设置</string>
     <string name="mqtt_enabled">启用MQTT</string>
+    <string name="mqtt_error_connection_lost">MQTT：连接已丢失</string>
+    <string name="mqtt_error_credentials_rejected">MQTT：连接被拒绝（请检查凭据）</string>
+    <string name="mqtt_error_proxy_failed">MQTT 代理失败: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT：连接被拒绝: %1$s</string>
     <string name="mqtt_probe_dns_failure">主机未找到</string>
     <string name="mqtt_probe_other_failure">连接失败</string>
     <string name="mqtt_probe_rejected">代理服务器拒绝连接: %1$s</string>
@@ -1141,7 +1156,10 @@
     <string name="no_usb_devices_hint">请通过 USB 数据线连接设备以使用串口功能。</string>
     <string name="no_usb_devices_seen">未检测到任何 USB 设备</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d 在线</string>
+    <string name="node_count_shown">%1$d 显示</string>
     <string name="node_count_template">(%1$d 在线 / %2$d 显示 / %3$d 总计)</string>
+    <string name="node_count_total">%1$d 总计</string>
     <string name="node_filter_exclude_infrastructure">排除公共节点</string>
     <string name="node_filter_exclude_mqtt">排除MQTT</string>
     <string name="node_filter_ignored">您正在查看被忽略的节点，\n点击返回到节点列表。</string>
@@ -1179,6 +1197,7 @@
     <string name="node_list_help_title">节点列表帮助</string>
     <string name="node_list_long_click_label">节点选项</string>
     <string name="node_number">节点编号</string>
+    <string name="node_restarting">正在重启…</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_channel">频道</string>
@@ -1249,6 +1268,18 @@
     <string name="override_frequency_mhz">频率覆盖</string>
     <string name="pa_fan_disabled">PA风扇已禁用</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">数据包身份验证</string>
+    <string name="packet_authenticity_balanced">平衡模式 —优先验证身份</string>
+    <string name="packet_authenticity_balanced_summary">推荐设置拒绝来自已知签名节点的未签名降级尝试。</string>
+    <string name="packet_authenticity_compatible">兼容模式 —接受未签名消息</string>
+    <string name="packet_authenticity_compatible_summary">在可能的情况下对数据包进行身份验证，但为了获得最大的兼容性，也会接受未签名的流量。</string>
+    <string name="packet_authenticity_level">安全等级</string>
+    <string name="packet_authenticity_strict">严格模式 —强制要求身份验证</string>
+    <string name="packet_authenticity_strict_confirm">启用严格模式</string>
+    <string name="packet_authenticity_strict_confirmation">严格模式会忽略每一个未经加密身份验证的远程网状网络数据包。使用旧版固件的设备、没有 PKI 密钥的授权或业余无线电HAM节点，以及超大的数据包可能会因此从网络中消失无法接收不过，经过 PKI 身份验证的直接消息私聊依然可用。</string>
+    <string name="packet_authenticity_strict_summary">仅显示和处理经过加密身份验证的网状网络数据包。旧版节点和超大尺寸的数据包可能会因此消失。</string>
+    <string name="packet_authenticity_strict_title">是否启用严格身份验证？</string>
+    <string name="packet_authenticity_unsupported">当前连接的设备不支持数据包签名验证功能。</string>
     <string name="pairing_mode">配对模式</string>
     <string name="password">密码</string>
     <!-- PAX -->
@@ -1445,6 +1476,7 @@
     <string name="sats">卫星</string>
     <!-- SAVE -->
     <string name="save">保存</string>
+    <string name="save_and_restart">保存 &amp; 重启</string>
     <string name="save_changes">保存</string>
     <string name="save_csv_in_storage_esp32_only">保存 CSV 到存储 (仅ESP32)</string>
     <string name="save_rangetest">导出范围测试数据包</string>
@@ -1519,6 +1551,7 @@
     <string name="share_connected_node">分享已连接的节点</string>
     <string name="share_contact">分享联系人</string>
     <string name="share_location">分享位置</string>
+    <string name="share_location_description">使用手机的 GPS 将位置信息发送到你的节点，以代替使用节点上自带的硬件 GPS。</string>
     <string name="share_to">分享到…</string>
     <string name="share_your_location_in_real_time">实时分享您的位置，并通过集成的GPS功能保持团队的协调一致。</string>
     <string name="short_name">短名称</string>
@@ -1574,6 +1607,7 @@
     <string name="soil_temperature">土壤温度</string>
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d 公里/小时</string>
+    <string name="speed_mph">%1$d 英里每小时</string>
     <string name="spread_factor">扩散因子</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状态广播(秒)</string>
@@ -1609,6 +1643,8 @@
     <string name="tak_server_enabled_desc">在 8089 端口启动一个本地 TLS 服务器，用于 ATAK/iTAK 客户端连接</string>
     <string name="tak_server_export_data_package_desc">生成zip压缩包,供 ATAK/iTAK 客户端连接到本服务器使用</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Mesh 转 CoT 转换器</string>
+    <string name="tak_server_mesh_to_cot_desc">在 ATAK/iTAK 地图上将 Meshtastic 节点显示为联系人</string>
     <string name="tak_server_section">服务器</string>
     <string name="tak_server_test_card_title">TAK 网状网络测试（调试模式）</string>
     <string name="tak_server_test_idle">全部发送 %1$d 将测试固件数据发送至网状网络</string>
