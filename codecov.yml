@@ -25,13 +25,21 @@ comment:
   require_changes: false  # Post a comment even if coverage doesn't change
 
 flags:
-  host-unit:
+  core:
     paths:
-      - .
+      - core/**
     carryforward: true
-  android-instrumented:
+  feature:
     paths:
-      - .
+      - feature/**
+    carryforward: true
+  app:
+    paths:
+      - androidApp/**
+    carryforward: true
+  desktop:
+    paths:
+      - desktopApp/**
     carryforward: true
 
 component_management:

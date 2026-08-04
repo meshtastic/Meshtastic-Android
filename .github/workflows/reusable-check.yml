@@ -310,26 +310,101 @@ jobs:
           ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue \
             "-Dscan.value.CI shard=${{ matrix.shard.name }}"
 
-      - name: Upload test results to Codecov
+      # Flags are tagged by logical module group (core/feature/app/desktop), matching
+      # codecov.yml's flags/component_management — NOT by shard name. Shards are a CI
+      # load-balancing detail; which shard happens to run a module must not change
+      # which Codecov flag its coverage lands under.
+      - name: Upload test results to Codecov (core)
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          flags: ${{ matrix.shard.name }}
+          flags: core
           fail_ci_if_error: false
+          disable_search: true
           report_type: test_results
-          files: "**/build/test-results/**/*.xml"
+          files: "core/**/build/test-results/**/*.xml"
 
-      - name: Upload coverage to Codecov
+      - name: Upload test results to Codecov (feature)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: feature
+          fail_ci_if_error: false
+          disable_search: true
+          report_type: test_results
+          files: "feature/**/build/test-results/**/*.xml"
+
+      - name: Upload test results to Codecov (app)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: app
+          fail_ci_if_error: false
+          disable_search: true
+          report_type: test_results
+          files: "androidApp/build/test-results/**/*.xml"
+
+      - name: Upload test results to Codecov (desktop)
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: desktop
+          fail_ci_if_error: false
+          disable_search: true
+          report_type: test_results
+          files: "desktopApp/build/test-results/**/*.xml"
+
+      - name: Upload coverage to Codecov (core)
         if: ${{ !cancelled() && inputs.run_coverage }}
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          flags: ${{ matrix.shard.name }}
+          flags: core
           fail_ci_if_error: false
-          files: "**/build/reports/kover/report*.xml"
+          disable_search: true
+          files: "core/**/build/reports/kover/report*.xml"
+
+      - name: Upload coverage to Codecov (feature)
+        if: ${{ !cancelled() && inputs.run_coverage }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: feature
+          fail_ci_if_error: false
+          disable_search: true
+          files: "feature/**/build/reports/kover/report*.xml"
+
+      - name: Upload coverage to Codecov (app)
+        if: ${{ !cancelled() && inputs.run_coverage }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: app
+          fail_ci_if_error: false
+          disable_search: true
+          files: "androidApp/build/reports/kover/report*.xml"
+
+      - name: Upload coverage to Codecov (desktop)
+        if: ${{ !cancelled() && inputs.run_coverage }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: desktop
+          fail_ci_if_error: false
+          disable_search: true
+          files: "desktopApp/build/reports/kover/report*.xml"
 
       - name: Upload shard reports
         if: ${{ always() && inputs.upload_artifacts }}
