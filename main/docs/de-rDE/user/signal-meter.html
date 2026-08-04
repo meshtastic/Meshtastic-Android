@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How the Meshtastic Signal Meter Works</title>
+  <title>Wie das Meshtastic Signal Meter funktioniert</title>
   <link rel="stylesheet" href="../../styles/docs.css">
 </head>
 <body data-page="signal-meter" data-locale="de-rDE">
-<pre class="markdown-content"># How the Meshtastic Signal Meter Works
+<pre class="markdown-content"># Wie das Meshtastic Signal Meter funktioniert
 
 Die Meshtastic-Signalanzeige – die vertrauten Balken oder die Statusfarbe in der App – wird ganz anders berechnet als die „Balken“ bei einem herkömmlichen Mobiltelefon oder WLAN-Router.
 
-Most consumer devices simply measure how "loud" a signal is. Da Meshtastic jedoch die **LoRa Technologie (Long Range)** verwendet, misst die Signalanzeige, wie **klar** das Signal ist – und zwar im Verhältnis zu den spezifischen Einstellungen, die in Ihrem Mesh-Netzwerk genutzt werden.
+Die meisten Endgeräte messen einfach, wie "laut" ein Signal ist. Da Meshtastic jedoch die **LoRa Technologie (Long Range)** verwendet, misst die Signalanzeige, wie **klar** das Signal ist – und zwar im Verhältnis zu den spezifischen Einstellungen, die in Ihrem Mesh-Netzwerk genutzt werden.
 
-## 2. The Magic of LoRa: Hearing "Below the Noise Floor"
+## 2. Die Magie von LoRa: Empfangen "Unter dem Lärmboden"
 
-For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
+Für standard Radios (wie FM oder WLAN) gilt, wenn das Hintergrundrauschen lauter ist, als das Signal (ein negativer SNR), hört der Empfänger nur Rauschen.
 
-LoRa is special. Es nutzt die **„Spread-Spectrum“**-Modulation, die es dem Funkgerät ermöglicht, ein Signal mathematisch aus der Luft zu extrahieren, selbst wenn es tief _unterhalb_ des Hintergrundrauschens liegt. This is why you will frequently see **negative SNR numbers** in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).
+LoRa ist speziell. Es nutzt die **„Spread-Spectrum“**-Modulation, die es dem Funkgerät ermöglicht, ein Signal mathematisch aus der Luft zu extrahieren, selbst wenn es tief _unterhalb_ des Hintergrundrauschens liegt. Das ist der Grund weshalb du häufig **negative SNR Werte** (z.B. -10 dB, was bedeutet, dass das Signal 10 Dezibel schwächer ist, als das Hintergrundrauschen) in Meshtastic sehen wirst.
 
 Je nachdem, welche Meshtastic Voreinstellung Sie verwenden (z. B. `LongFast` vs. `ShortFast`), weist das Funkgerät einen spezifischen **Signal-Rauschabstand Grenzwert** auf – das absolute Maximum an Rauschen, das es tolerieren kann, bevor die Nachricht im Rauschen vollständig verloren geht.
 
