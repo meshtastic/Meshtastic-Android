@@ -848,6 +848,12 @@ last_position_update
 latest_alpha_firmware
 latest_stable_firmware
 latitude
+### LAYER ###
+layer_subtitle
+layer_type_coverage
+layer_type_geojson
+layer_type_kml
+layer_type_network
 learn_more
 led_heartbeat
 led_state

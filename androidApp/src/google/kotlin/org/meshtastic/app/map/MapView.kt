@@ -1441,7 +1441,9 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
         kml.toLayer()
     }
 
-    LayerType.GEOJSON -> GeoJsonParser().parse(stream)?.toLayer()?.applySimpleStyleSpec()
+    LayerType.GEOJSON,
+    LayerType.COVERAGE,
+    -> GeoJsonParser().parse(stream)?.toLayer()?.applySimpleStyleSpec()
 }
 
 /**

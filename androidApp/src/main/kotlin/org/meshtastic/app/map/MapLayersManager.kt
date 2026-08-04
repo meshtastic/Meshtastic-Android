@@ -37,13 +37,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.app.MapFileImportBus
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapPrefs
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import kotlin.uuid.Uuid
 
 /**
  * Flavor-neutral owner of the imported map-layer list, its internal-storage persistence, and the GeoJSON/KML import
@@ -93,10 +93,11 @@ class MapLayersManager(
                             resolveLayerType(file.extension)?.let { layerType ->
                                 val uri = Uri.fromFile(file)
                                 MapLayerItem(
-                                    name = file.nameWithoutExtension,
+                                    name = displayNameFromFileName(file.nameWithoutExtension),
                                     uri = uri,
                                     isVisible = !hiddenLayerUrls.contains(uri.toString()),
                                     layerType = layerType,
+                                    createdAt = file.lastModified().takeIf { it > 0 },
                                 )
                             }
                         }
@@ -141,18 +142,18 @@ class MapLayersManager(
                     ?: application.contentResolver.getType(uri)?.split('/')?.last()
 
             val layerType = resolveLayerType(extension)
-            if (layerType == null) {
+            // resolveLayerType only matches non-null input, so a non-null type guarantees a non-null extension.
+            if (layerType == null || extension == null) {
                 Logger.withTag(TAG).e("Unsupported map layer file type: $extension")
                 return@launch
             }
 
-            // Sanitize the on-disk name: fileName comes from an untrusted DISPLAY_NAME/lastPathSegment (share/open-with
-            // from other apps), so strip anything that could let it escape map_layers/ (mirrors addGeoJsonLayer).
-            val safeBase = layerName.replace(FILE_NAME_UNSAFE, "_")
-            val finalFileName = if (fileName != null) "$safeBase.$extension" else "layer_${Uuid.random()}.$extension"
-            val localFileUri = copyFileToInternalStorage(uri, finalFileName)
+            val localFileUri = copyFileToInternalStorage(uri, layerFileName(layerName, extension))
             if (localFileUri != null) {
-                _mapLayers.update { it + MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType) }
+                _mapLayers.update {
+                    it +
+                        MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType, createdAt = nowMillis)
+                }
             } else {
                 Logger.withTag(TAG).e("Failed to copy file to internal storage.")
             }
@@ -166,10 +167,17 @@ class MapLayersManager(
     fun addGeoJsonLayer(name: String, geoJson: String) {
         scope.launch {
             val displayName = name.ifBlank { "Coverage" }
-            val safeFileName = displayName.replace(FILE_NAME_UNSAFE, "_")
-            val uri = writeStringToInternalStorage(geoJson, "${safeFileName}_${Uuid.random()}.geojson")
+            val uri = writeStringToInternalStorage(geoJson, layerFileName(displayName, COVERAGE_EXTENSION))
             if (uri != null) {
-                _mapLayers.update { it + MapLayerItem(name = displayName, uri = uri, layerType = LayerType.GEOJSON) }
+                _mapLayers.update {
+                    it +
+                        MapLayerItem(
+                            name = displayName,
+                            uri = uri,
+                            layerType = LayerType.COVERAGE,
+                            createdAt = nowMillis,
+                        )
+                }
             } else {
                 Logger.withTag(TAG).e("Failed to write GeoJSON layer to internal storage.")
             }
@@ -309,8 +317,5 @@ class MapLayersManager(
         const val LAYERS_DIR = "map_layers"
         const val NETWORK_LAYER_DELIMITER = "|:|"
         const val NETWORK_LAYER_FIELDS = 3 // id|:|name|:|uri
-
-        // Characters not allowed in an on-disk layer file name; strips path separators so imports can't traverse.
-        val FILE_NAME_UNSAFE = Regex("[^A-Za-z0-9._-]")
     }
 }

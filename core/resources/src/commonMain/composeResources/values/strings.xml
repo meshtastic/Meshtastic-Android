@@ -875,6 +875,12 @@
     <string name="latest_alpha_firmware">Latest alpha</string>
     <string name="latest_stable_firmware">Latest stable</string>
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Coverage estimate</string>
+    <string name="layer_type_geojson" translatable="false">GeoJSON</string>
+    <string name="layer_type_kml" translatable="false">KML</string>
+    <string name="layer_type_network">Network layer</string>
     <string name="learn_more">Learn more</string>
     <string name="led_heartbeat">LED Heartbeat</string>
     <string name="led_state">LED state</string>
