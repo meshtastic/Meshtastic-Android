@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -23,6 +24,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+
+/**
+ * Minimum touch target from the Meshtastic design standards (`.skills/design-standards`).
+ *
+ * Set explicitly rather than inherited: Material's [FilledIconButton] container default is smaller, which left the map
+ * controls under the standard. Sized to the 44dp minimum rather than the roomier 48dp because the map toolbar does not
+ * scroll — at 48dp a fully-populated toolbar overflows a 360dp-wide screen and buttons get clipped.
+ */
+private val MapButtonTouchTarget = 44.dp
+
+/** Icon glyph size. Larger than Material's 24dp default so the symbol stays readable at arm's length outdoors. */
+private val MapButtonIconSize = 26.dp
 
 /**
  * A compact icon button used in map control overlays. Uses [FilledIconButton] for a consistent, compact appearance
@@ -36,11 +50,12 @@ fun MapButton(
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
 ) {
-    FilledIconButton(onClick = onClick, modifier = modifier) {
+    FilledIconButton(onClick = onClick, modifier = modifier.size(MapButtonTouchTarget)) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = iconTint ?: IconButtonDefaults.filledIconButtonColors().contentColor,
+            modifier = Modifier.size(MapButtonIconSize),
         )
     }
 }

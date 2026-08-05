@@ -19,6 +19,7 @@ fine for personal use. They must be changed before any distribution beyond that.
 | 2 | Offline map priority | On start-up, an imported local (MBTiles) provider is selected automatically when no valid saved selection applies. | No — deliberate product choice for this fork. |
 | 3 | Bluetooth-only connections | The transport selector is hidden and the Connections pane is pinned to BLE. | No — upstream deliberately supports three transports. |
 | 4 | Compass shortcut on the map | A map toolbar button opens the existing compass straight onto the favourite node. | Possibly — the `openCompass` route flag is generic; the map button is opinionated. |
+| 5 | Map control legibility | Map buttons pin an explicit 44dp touch target and a 26dp glyph. | **Yes** — it brings the controls up to the project's own documented minimum. |
 
 ### 4. Compass shortcut on the map
 
@@ -38,6 +39,19 @@ adds a toolbar button on the main map that lands on the compass in one tap:
 Targeting is by **favourite node**, not a hard-coded node number: mark the companion's device as a favourite once,
 and it stays changeable in the field without a rebuild. If several nodes are favourited, the first with a position
 wins — fine for a two-person trip, worth revisiting for a larger group.
+
+### 5. Map control legibility
+
+`MapButton` sets its touch target and glyph size explicitly instead of inheriting Material's defaults, which left the
+map controls below the 44dp minimum in `.skills/design-standards`. Buttons are now 44dp with a 26dp glyph.
+
+Sized to 44dp and not the roomier 48dp on purpose: `HorizontalFloatingToolbar` does not scroll, and a fully-populated
+map toolbar (compass, find-favourite, filter, map type, layers, site planner, location) at 48dp overflows a 360dp-wide
+screen and clips its last buttons. 44dp meets the standard and still fits. If the toolbar ever gains horizontal
+scrolling, 48dp becomes the better value.
+
+Deliberately **not** changed: the icon glyphs themselves. Which symbols read as unclear is a judgement that needs eyes
+on a real screen, and swapping artwork blind would trade a known set of icons for an unverified one.
 
 ### 1. Offline map persistence (bug fix)
 
