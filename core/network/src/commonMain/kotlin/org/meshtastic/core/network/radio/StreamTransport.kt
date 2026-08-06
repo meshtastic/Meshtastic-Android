@@ -77,10 +77,14 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
     /** Flushes buffered bytes to the underlying stream. No-op by default. */
     open fun flushBytes() {}
 
-    override fun handleSendToRadio(p: ByteArray) {
-        // This method is called from a continuation and it might show up late, so check for uart being null
-        scope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
-    }
+    /**
+     * Queues the framed packet onto [scope].
+     *
+     * @return true when the write coroutine was launched on a live scope. Delivery through [sendBytes] happens later
+     *   and is not confirmed by this result.
+     */
+    override fun handleSendToRadio(p: ByteArray): Boolean =
+        !scope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }.isCancelled
 
     /** Process a single incoming byte through the stream framing state machine. */
     protected fun readChar(c: Byte) {

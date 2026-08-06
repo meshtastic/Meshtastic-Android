@@ -48,7 +48,7 @@ private constructor(
     private var serialPort: SerialPort? = null
     private var readJob: Job? = null
 
-    private val heartbeatSender = HeartbeatSender(sendToRadio = ::handleSendToRadio, logTag = "Serial[$portName]")
+    private val heartbeatSender = HeartbeatSender(sendToRadio = { handleSendToRadio(it) }, logTag = "Serial[$portName]")
 
     /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
     private fun startConnection(): Boolean {

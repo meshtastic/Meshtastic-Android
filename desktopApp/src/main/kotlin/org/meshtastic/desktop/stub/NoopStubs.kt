@@ -90,7 +90,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override val connectionError: Flow<String> = MutableSharedFlow<String>()
 
     override fun trySendToRadio(bytes: ByteArray): Boolean {
-        logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")
+        logWarn("NoopRadioInterfaceService.trySendToRadio(${bytes.size} bytes)")
         return false
     }
 

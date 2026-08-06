@@ -507,7 +507,7 @@ class MeshDataHandlerTest {
     // --- Routing/ACK-NAK handling ---
 
     @Test
-    fun `routing packet with successful ack broadcasts and removes response`() = testScope.runTest {
+    fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
         val routing = Routing(error_reason = Routing.Error.NONE)
         val packet =
             MeshPacket(
@@ -528,7 +528,33 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
 
-        verifySuspend { packetHandler.removeResponse(99, complete = true) }
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
+    }
+
+    @Test
+    fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
+        // DUTY_CYCLE_LIMIT also exercises localized UI warnings; keep this response-ownership test independent.
+        val routing = Routing(error_reason = Routing.Error.NO_ROUTE)
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded =
+                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
+            )
+        val dataPacket =
+            DataPacket(
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = routing.encode().toByteString(),
+                dataType = PortNum.ROUTING_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.toNodeID(456) } returns "!remote"
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false) }
     }
 
     @Test
@@ -556,7 +582,7 @@ class MeshDataHandlerTest {
 
         verifySuspend(exactly(0)) { packetRepository.getPacketByPacketId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
-        verifySuspend(exactly(0)) { packetHandler.removeResponse(any(), any()) }
+        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any()) }
     }
 
     @Test

@@ -93,7 +93,7 @@ internal class MessagingControllerImpl(
                 rssi = null,
                 hopsAway = 0,
                 packetId = dataPacket.id,
-                status = dataPacket.status ?: MessageStatus.ERROR,
+                status = dataPacket.status ?: MessageStatus.QUEUED,
                 to = destId,
                 channel = channel,
             ),

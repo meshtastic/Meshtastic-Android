@@ -436,7 +436,7 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(updated)
                 }
             }
-            packetHandler.removeResponse(requestId, complete = true)
+            packetHandler.completeDispatchedResponse(requestId, complete = isAck)
         }
     }
 

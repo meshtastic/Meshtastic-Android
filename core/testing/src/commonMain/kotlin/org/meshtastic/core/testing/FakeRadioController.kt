@@ -82,6 +82,10 @@ class FakeRadioController :
     val moduleConfigs: List<ModuleConfig>
         get() = moduleConfigWrites.map(ModuleConfigWrite::config)
 
+    /** Module configuration payloads written inside a local edit transaction (whose destination sentinel is zero). */
+    val localModuleConfigs: List<ModuleConfig>
+        get() = moduleConfigWrites.filter { it.destination == 0 }.map(ModuleConfigWrite::config)
+
     /** Destination node for every module configuration write, in order. */
     val moduleConfigDestinations: List<Int>
         get() = moduleConfigWrites.map(ModuleConfigWrite::destination)
@@ -208,7 +212,7 @@ class FakeRadioController :
         recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
 
-    private suspend fun recordConfigWrite(destNum: Int, config: Config, invokeStandaloneHook: Boolean) {
+    private suspend fun recordConfigWrite(destNum: Int?, config: Config, invokeStandaloneHook: Boolean) {
         configWrites.add(ConfigWrite(destination = destNum, config = config))
         adminOperations.add("config:update")
         if (invokeStandaloneHook) onStandaloneConfig(config)
@@ -287,7 +291,7 @@ class FakeRadioController :
                 override suspend fun setOwner(user: User) = setOwner(destNum, user, generatePacketId())
 
                 override suspend fun setConfig(config: Config) =
-                    recordConfigWrite(destNum, config, invokeStandaloneHook = false)
+                    recordConfigWrite(destNum.takeUnless { it == 0 }, config, invokeStandaloneHook = false)
 
                 override suspend fun setModuleConfig(config: ModuleConfig) =
                     recordModuleConfigWrite(destNum, config, invokeStandaloneHook = false)

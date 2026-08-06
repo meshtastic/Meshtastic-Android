@@ -23,6 +23,7 @@ import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.capture
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
@@ -40,8 +41,11 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
@@ -53,6 +57,7 @@ import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -379,6 +384,44 @@ class RadioControllerImplTest {
     }
 
     @Test
+    fun sendMessageDoesNotPersistWhenQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 456)
+        val packet = DataPacket(to = NodeAddress.ID_BROADCAST, channel = 1, text = "ping")
+        val rejection = PacketQueueRejectedException("Data packet")
+        everySuspend { commandSender.sendData(packet) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.sendMessage(packet) }
+
+        assertSame(rejection, failure)
+        verifySuspend(exactly(0)) { dataHandler.rememberDataPacket(any(), any(), any()) }
+    }
+
+    @Test
+    fun localChannelDoesNotPersistWhenQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 456)
+        val channel = Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary"))
+        val rejection = PacketQueueRejectedException("Admin command")
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setLocalChannel(channel) }
+
+        assertSame(rejection, failure)
+        verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
+    }
+
+    @Test
+    fun fixedPositionPropagatesQueueRejection() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val position = Position(latitude = 1.0, longitude = 2.0, altitude = 3)
+        val rejection = PacketQueueRejectedException("Fixed position")
+        everySuspend { commandSender.setFixedPosition(123, position) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setFixedPosition(123, position) }
+
+        assertSame(rejection, failure)
+    }
+
+    @Test
     fun sendSharedContactCallsCommandSenderAdminAwait() = runTest {
         val controller = createController(scope = backgroundScope)
         val nodeNum = 321
@@ -610,12 +653,38 @@ class RadioControllerImplTest {
         val node = Node(num = 1234, user = user)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to node)
         every { nodeManager.getMyId() } returns "!abcd1234"
+        // Production CommandSenderImpl.sendData stamps QUEUED on successful queue admission. DataPacket.status is
+        // nullable but defaults to UNKNOWN, so the default value does not exercise the controller's null fallback.
+        // Mirror the production stamp here so this assertion exercises the realistic happy-path contract; the explicit
+        // ERROR-stamping path is covered by sendReactionPersistsStatusStampedByCommandSender.
+        everySuspend { commandSender.sendData(any()) } calls
+            {
+                (it.args[0] as DataPacket).status = MessageStatus.QUEUED
+            }
+
+        val reactions = mutableListOf<Reaction>()
+        everySuspend { packetRepository.insertReaction(capture(reactions), any()) } returns Unit
 
         controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
 
-        // Reaction must be persisted (not fire-and-forget)
+        // Reaction must be persisted (not fire-and-forget) with the queue-admission QUEUED status.
         verifySuspend { commandSender.sendData(any()) }
-        verifySuspend { packetRepository.insertReaction(any(), any()) }
+        assertEquals(MessageStatus.QUEUED, reactions.single().status)
+    }
+
+    @Test
+    fun sendReactionPersistsStatusStampedByCommandSender() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
+        every { nodeManager.getMyId() } returns "!abcd1234"
+        everySuspend { commandSender.sendData(any()) } calls { (it.args[0] as DataPacket).status = MessageStatus.ERROR }
+        val reactions = mutableListOf<Reaction>()
+        everySuspend { packetRepository.insertReaction(capture(reactions), any()) } returns Unit
+
+        controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
+
+        assertEquals(MessageStatus.ERROR, reactions.single().status)
     }
 
     @Test
@@ -783,10 +852,9 @@ class RadioControllerImplTest {
         verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
         verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
         verifySuspend(exactly(2)) { commandSender.sendAdmin(any(), any(), any(), any()) }
-        // A transactional channel write must NOT eagerly mirror to the local cache the way one-shot
-        // setRemoteChannel does for the local node. importChannelSet owns the cache and writes it once after commit
-        // (replaceAllSettings), so an interrupted import can't leave partial channels cached. A regression to
-        // per-slot mirroring inside the session would make this call count non-zero.
+        // A transactional channel write must not eagerly mirror to the local cache like a one-shot setRemoteChannel.
+        // The batch operation knows the complete target set and must reconcile it after the transaction; per-slot
+        // mirroring here could expose a partial cache when a later write or commit fails.
         verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
     }
 
@@ -834,7 +902,7 @@ class RadioControllerImplTest {
 
         val failure = assertFailsWith<IllegalStateException> { controller.editLocalSettings { blockRan = true } }
 
-        assertEquals("Device rejected or timed out while sending edit-settings begin", failure.message)
+        assertEquals(editSettingsBoundaryFailureMessage("begin"), failure.message)
         assertFalse(blockRan)
         verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
         verifySuspend(exactly(0)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
@@ -1031,11 +1099,11 @@ class RadioControllerImplTest {
     }
 
     @Test
-    fun editSettingsAcceptsDepartureThatArrivesAfterTwoSeconds() = runTest {
+    fun editSettingsAcceptsDepartureThatArrivesWithinCommitDepartureTimeout() = runTest {
         val (controller, serviceRepository) =
             createCommitBoundaryFixture(backgroundScope) { repository ->
                 backgroundScope.launch {
-                    delay(3_000)
+                    delay(COMMIT_DEPARTURE_TIMEOUT.inWholeMilliseconds / 2)
                     repository.setConnectionState(ConnectionState.Disconnected)
                 }
                 AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true)
@@ -1044,6 +1112,7 @@ class RadioControllerImplTest {
         controller.editLocalSettings {}
 
         assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
     }
 
     @Test

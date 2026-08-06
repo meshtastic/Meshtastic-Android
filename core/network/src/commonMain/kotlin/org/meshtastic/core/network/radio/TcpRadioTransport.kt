@@ -90,7 +90,8 @@ open class TcpRadioTransport(
         scope.handledLaunch { transport.sendHeartbeat() }
     }
 
-    override fun handleSendToRadio(p: ByteArray) {
-        scope.handledLaunch { transport.sendPacket(p) }
+    override fun handleSendToRadio(p: ByteArray): Boolean {
+        if (closing || !transport.isConnected) return false
+        return !scope.handledLaunch { transport.sendPacket(p) }.isCancelled
     }
 }

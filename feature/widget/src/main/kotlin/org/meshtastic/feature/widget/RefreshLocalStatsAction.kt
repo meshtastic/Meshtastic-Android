@@ -26,6 +26,7 @@ import org.koin.core.component.inject
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 
 class RefreshLocalStatsAction :
     ActionCallback,
@@ -41,7 +42,15 @@ class RefreshLocalStatsAction :
             return
         }
 
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
+        requestTelemetryBestEffort(myNodeNum, TelemetryType.LOCAL_STATS)
+        requestTelemetryBestEffort(myNodeNum, TelemetryType.DEVICE)
+    }
+
+    private suspend fun requestTelemetryBestEffort(myNodeNum: Int, type: TelemetryType) {
+        try {
+            commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, type.ordinal)
+        } catch (e: PacketQueueRejectedException) {
+            Logger.w(e) { "RefreshLocalStatsAction: $type request rejected by packet queue" }
+        }
     }
 }

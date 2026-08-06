@@ -96,7 +96,8 @@ class AndroidRadioTransportFactory(
                 SerialRadioTransport(
                     callback = service,
                     scope = service.serviceScope,
-                    usbRepository = usbRepository,
+                    serialDevices = usbRepository.serialDevices,
+                    createSerialConnection = usbRepository::createSerialConnection,
                     address = rest,
                 )
 

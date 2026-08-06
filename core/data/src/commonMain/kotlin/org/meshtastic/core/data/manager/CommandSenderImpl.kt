@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
@@ -63,10 +64,6 @@ import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
 import org.meshtastic.proto.Position as ProtoPosition
-
-/** Thrown when the outbound packet queue refuses admission for a command. */
-class PacketQueueRejectedException(operation: String) :
-    IllegalStateException("$operation was rejected by the outbound packet queue")
 
 @Suppress("TooManyFunctions", "CyclomaticComplexMethod", "LongParameterList")
 @Single
@@ -158,7 +155,11 @@ class CommandSenderImpl(
             p.status = MessageStatus.QUEUED
         }
 
-        if (!sendNow(p)) p.status = MessageStatus.ERROR
+        if (!sendNow(p)) {
+            p.status = MessageStatus.ERROR
+            // Persistence owners treat a normal return as successful admission; throw so they can requeue or fail it.
+            throw PacketQueueRejectedException("Data packet")
+        }
     }
 
     private suspend fun sendNow(p: DataPacket): Boolean {

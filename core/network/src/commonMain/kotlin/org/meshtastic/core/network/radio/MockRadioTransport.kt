@@ -82,7 +82,7 @@ class MockRadioTransport(
         callback.onConnect() // Tell clients they can use the API
     }
 
-    override fun handleSendToRadio(p: ByteArray) {
+    override fun handleSendToRadio(p: ByteArray): Boolean {
         val pr = ToRadio.ADAPTER.decode(p)
 
         // Intercept want_config handshake — send config response only when requested,
@@ -90,7 +90,7 @@ class MockRadioTransport(
         val wantConfigId = pr.want_config_id ?: 0
         if (wantConfigId != 0) {
             sendConfigResponse(wantConfigId)
-            return
+            return true
         }
 
         val packet = pr.packet
@@ -108,6 +108,7 @@ class MockRadioTransport(
 
             else -> Logger.i { "Ignoring data sent to mock transport $pr" }
         }
+        return true
     }
 
     private fun handleAdminPacket(pr: ToRadio, d: AdminMessage) {

@@ -104,6 +104,25 @@ class BleRadioTransportTest {
         assertEquals(address, bleTransport.address)
     }
 
+    @Test
+    fun `send is rejected before the BLE profile is available`() = runTest {
+        val bleTransport =
+            BleRadioTransport(
+                scope = testScope,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+
+        try {
+            assertFalse(bleTransport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+        } finally {
+            bleTransport.close()
+        }
+    }
+
     /**
      * After [BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD] consecutive connection failures,
      * [RadioInterfaceService.onDisconnect] must be called so the higher layers can react (e.g. start the device-sleep

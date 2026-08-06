@@ -123,17 +123,26 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _connectionError = MutableSharedFlow<String>()
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
-    val sentToRadio = mutableListOf<ByteArray>()
+    private val _sentToRadio = mutableListOf<ByteArray>()
+
+    /** Thread-safe snapshot of writes accepted by the currently admitted fake transport session. */
+    val sentToRadio: List<ByteArray>
+        get() = synchronized(sessionAdmissionLock) { _sentToRadio.map { it.copyOf() } }
+
     var connectCalled = false
     var restartTransportCalled: Boolean = false
         private set
 
     override fun isMockTransport(): Boolean = true
 
+    /**
+     * Records [bytes] only while a transport session is admitted. Tests must select a non-null device address and call
+     * [connect] before sending; attempts outside that lifecycle return false and leave [sentToRadio] unchanged.
+     */
     override fun trySendToRadio(bytes: ByteArray): Boolean {
         val admittedSession = admitSessionOperation() ?: return false
         return try {
-            synchronized(sessionAdmissionLock) { sentToRadio.add(bytes) }
+            synchronized(sessionAdmissionLock) { _sentToRadio.add(bytes.copyOf()) }
             true
         } finally {
             releaseSessionOperation(admittedSession)

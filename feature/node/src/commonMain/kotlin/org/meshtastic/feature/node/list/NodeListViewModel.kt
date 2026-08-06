@@ -42,6 +42,7 @@ import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -213,7 +214,7 @@ class NodeListViewModel(
 
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
-        viewModelScope.launch { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
+        safeLaunch(tag = "requestTraceroute") { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
     }
 
     companion object {

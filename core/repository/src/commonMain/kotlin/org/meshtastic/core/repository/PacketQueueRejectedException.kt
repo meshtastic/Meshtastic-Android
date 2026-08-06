@@ -14,30 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.testing
+package org.meshtastic.core.repository
 
-import org.meshtastic.core.repository.RadioTransport
-
-/** A test double for [RadioTransport] that tracks sent data. */
-class FakeRadioTransport : RadioTransport {
-    val sentData = mutableListOf<ByteArray>()
-    var closeCalled = false
-    var closeCount = 0
-        private set
-
-    var keepAliveCalled = false
-
-    override fun handleSendToRadio(p: ByteArray): Boolean {
-        sentData.add(p)
-        return true
-    }
-
-    override fun keepAlive() {
-        keepAliveCalled = true
-    }
-
-    override suspend fun close() {
-        closeCalled = true
-        closeCount++
-    }
-}
+/** Thrown when the outbound packet queue refuses admission for an operation. */
+class PacketQueueRejectedException(operation: String) :
+    IllegalStateException("$operation was rejected by the outbound packet queue")

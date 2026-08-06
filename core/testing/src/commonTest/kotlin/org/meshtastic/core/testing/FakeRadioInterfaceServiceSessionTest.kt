@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -79,6 +80,22 @@ class FakeRadioInterfaceServiceSessionTest {
         service.disconnect()
         assertFalse(service.trySendToRadio(bytes))
         assertEquals(1, service.sentToRadio.size)
+    }
+
+    @Test
+    fun `recorded radio writes are isolated from caller mutation`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        val bytes = byteArrayOf(1, 2, 3)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+
+        assertTrue(service.trySendToRadio(bytes))
+        bytes[0] = 9
+        val recorded = service.sentToRadio.single()
+        assertContentEquals(byteArrayOf(1, 2, 3), recorded)
+
+        recorded[1] = 8
+        assertContentEquals(byteArrayOf(1, 2, 3), service.sentToRadio.single())
     }
 
     @Test

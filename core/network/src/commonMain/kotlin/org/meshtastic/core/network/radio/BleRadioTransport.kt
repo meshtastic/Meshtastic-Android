@@ -220,7 +220,7 @@ class BleRadioTransport(
 
     private val heartbeatSender =
         HeartbeatSender(
-            sendToRadio = ::handleSendToRadio,
+            sendToRadio = { handleSendToRadio(it) },
             afterHeartbeat = {
                 delay(HEARTBEAT_DRAIN_DELAY)
                 radioService?.requestDrain()
@@ -683,50 +683,52 @@ class BleRadioTransport(
      *
      * @param p The packet to send.
      */
-    override fun handleSendToRadio(p: ByteArray) {
+    override fun handleSendToRadio(p: ByteArray): Boolean {
         // Fast-path check: skip coroutine launch entirely if no transport is active.
         if (radioService == null) {
             Logger.w { "[$address] toRadio characteristic unavailable, can't send data" }
-            return
+            return false
         }
-        connectionScope.launch {
-            writeMutex.withLock {
-                // Re-read radioService UNDER the lock — handleFailure may have nulled it
-                // between the outer check and lock acquisition. Without this, a queued send
-                // can retry writes against a stale/dead profile.
-                val currentService =
-                    radioService
-                        ?: run {
-                            Logger.w { "[$address] toRadio characteristic cleared during write queue" }
-                            return@withLock
+        val sendJob =
+            connectionScope.launch {
+                writeMutex.withLock {
+                    // Re-read radioService UNDER the lock — handleFailure may have nulled it
+                    // between the outer check and lock acquisition. Without this, a queued send
+                    // can retry writes against a stale/dead profile.
+                    val currentService =
+                        radioService
+                            ?: run {
+                                Logger.w { "[$address] toRadio characteristic cleared during write queue" }
+                                return@withLock
+                            }
+                    try {
+                        retryBleOperation(tag = address, retryWhile = { currentService === radioService }) {
+                            currentService.sendToRadio(p)
                         }
-                try {
-                    retryBleOperation(tag = address, retryWhile = { currentService === radioService }) {
-                        currentService.sendToRadio(p)
-                    }
-                    val sent = packetsSent.incrementAndGet()
-                    val txBytes = bytesSent.addAndGet(p.size.toLong())
-                    Logger.v {
-                        "[$address] Wrote packet #$sent " + "to toRadio (${p.size} bytes, total TX: $txBytes bytes)"
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    // Guard: only call handleFailure if this write was against the CURRENT session.
-                    // If radioService was replaced (new reconnect cycle) or cleared (handleFailure
-                    // already ran), this is a stale write from the old session — silently discard.
-                    if (currentService === radioService) {
-                        Logger.w(e) {
-                            "[$address] Failed to write packet to toRadioCharacteristic after " +
-                                "${packetsSent.value} successful writes"
+                        val sent = packetsSent.incrementAndGet()
+                        val txBytes = bytesSent.addAndGet(p.size.toLong())
+                        Logger.v {
+                            "[$address] Wrote packet #$sent " + "to toRadio (${p.size} bytes, total TX: $txBytes bytes)"
                         }
-                        handleFailure(e)
-                    } else {
-                        Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // Guard: only call handleFailure if this write was against the CURRENT session.
+                        // If radioService was replaced (new reconnect cycle) or cleared (handleFailure
+                        // already ran), this is a stale write from the old session — silently discard.
+                        if (currentService === radioService) {
+                            Logger.w(e) {
+                                "[$address] Failed to write packet to toRadioCharacteristic after " +
+                                    "${packetsSent.value} successful writes"
+                            }
+                            handleFailure(e)
+                        } else {
+                            Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
+                        }
                     }
                 }
             }
-        }
+        return !sendJob.isCancelled
     }
 
     override fun keepAlive() {

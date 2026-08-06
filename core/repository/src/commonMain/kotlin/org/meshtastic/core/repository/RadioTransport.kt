@@ -21,8 +21,13 @@ package org.meshtastic.core.repository
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
 interface RadioTransport {
-    /** Sends a raw byte array to the radio hardware. */
-    fun handleSendToRadio(p: ByteArray)
+    /**
+     * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required
+     * synchronous admission checks and enqueue asynchronous I/O internally.
+     *
+     * @return `true` when the transport accepted the bytes for delivery, or `false` when no send was scheduled.
+     */
+    fun handleSendToRadio(p: ByteArray): Boolean
 
     /**
      * Initializes the transport after construction. Called by the factory once the transport has been fully created.

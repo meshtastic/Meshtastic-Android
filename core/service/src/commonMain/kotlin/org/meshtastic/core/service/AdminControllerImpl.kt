@@ -44,6 +44,16 @@ import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Additional window for observing local transport departure after a dispatched commit loses its response. The
+ * surrounding NonCancellable finalization can take longer because [CommandSender.sendAdminAwaitResult] first waits
+ * behind older FIFO entries and then owns its radio-response window.
+ */
+internal val COMMIT_DEPARTURE_TIMEOUT = 5.seconds
+
+internal fun editSettingsBoundaryFailureMessage(boundary: String): String =
+    "Device rejected or timed out while sending edit-settings $boundary"
+
 internal fun editSettingsCommitFailureMessage(status: AwaitedSendStatus, dispatched: Boolean): String =
     "Device rejected or timed out while sending edit-settings commit (status=$status, dispatched=$dispatched)"
 
@@ -265,17 +275,16 @@ internal class AdminControllerImpl(
             this@AdminControllerImpl.setFixedPosition(destNum, position)
     }
 
-    /**
-     * Applies back-pressure at transaction boundaries. Ordinary writes are already queued FIFO by [CommandSender], so
-     * waiting for the commit's queue acceptance keeps the caller suspended until the sender has processed every
-     * preceding write. This prevents a rebooting transport write from overtaking an uncommitted settings transaction.
-     */
+    /** Requires the begin boundary to be admitted before any transactional settings writes are issued. */
     private suspend fun requireEditBoundaryAccepted(destNum: Int, boundary: String, message: () -> AdminMessage) {
-        check(commandSender.sendAdminAwait(destNum, initFn = message)) {
-            "Device rejected or timed out while sending edit-settings $boundary"
-        }
+        check(commandSender.sendAdminAwait(destNum, initFn = message)) { editSettingsBoundaryFailureMessage(boundary) }
     }
 
+    /**
+     * Applies commit back-pressure. Ordinary writes are already queued FIFO by [CommandSender], so waiting for the
+     * commit's queue acceptance keeps the caller suspended until the sender has processed every preceding write. This
+     * prevents a rebooting transport write from overtaking an uncommitted settings transaction.
+     */
     private suspend fun requireCommitBoundaryAccepted(destNum: Int) {
         val isLocalDestination = destNum == nodeManager.myNodeNum.value
         val departureBaseline = connectionStateProvider.connectionLifecycle.value.epochs.departures
@@ -292,8 +301,7 @@ internal class AdminControllerImpl(
             }
         // A dispatched local commit is durable once any post-baseline departure is observed. Firmware may move the
         // connection through Disconnected, Connecting, or DeviceSleep while rebooting.
-        val committedBeforeLocalDeparture =
-            stoppedAfterDispatch && departedLifecycle?.epochs?.lastDepartureState != null
+        val committedBeforeLocalDeparture = stoppedAfterDispatch && departedLifecycle != null
 
         check(result.accepted || committedBeforeLocalDeparture) {
             editSettingsCommitFailureMessage(result.status, result.dispatched)
@@ -305,6 +313,5 @@ internal class AdminControllerImpl(
 
     private companion object {
         private const val DEFAULT_DELAY_SECONDS = 5
-        private val COMMIT_DEPARTURE_TIMEOUT = 5.seconds
     }
 }

@@ -26,11 +26,13 @@ import io.kotest.property.arbitrary.byte
 import io.kotest.property.arbitrary.byteArray
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class StreamTransportTest {
@@ -64,7 +66,19 @@ class StreamTransportTest {
     fun `handleSendToRadio property test`() = runTest {
         fakeStream = FakeStreamTransport(callback, testScope)
 
-        checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload -> fakeStream.handleSendToRadio(payload) }
+        checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload ->
+            assertTrue(fakeStream.handleSendToRadio(payload))
+        }
+    }
+
+    @Test
+    fun `send is rejected after the transport scope stops`() {
+        val stoppedScope = TestScope()
+        val transport = FakeStreamTransport(callback, stoppedScope)
+        stoppedScope.cancel()
+
+        assertFalse(transport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+        assertTrue(transport.sentBytes.isEmpty())
     }
 
     @Test

@@ -38,7 +38,9 @@ interface CommandSender {
     fun generatePacketId(): Int
 
     /**
-     * Sends a data packet to the mesh, recording [org.meshtastic.core.model.MessageStatus.ERROR] if admission fails.
+     * Sends a data packet to the mesh. If the outbound queue refuses admission, the packet is marked
+     * [org.meshtastic.core.model.MessageStatus.ERROR] and [PacketQueueRejectedException] is thrown so the persistence
+     * owner can requeue or fail its durable record instead of treating a normal return as successful admission.
      */
     suspend fun sendData(p: DataPacket)
 

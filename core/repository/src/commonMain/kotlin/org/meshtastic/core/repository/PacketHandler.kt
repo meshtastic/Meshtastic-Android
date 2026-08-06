@@ -57,9 +57,11 @@ interface PacketHandler {
     fun handleQueueStatus(queueStatus: QueueStatus)
 
     /**
-     * Completes a dispatched request before the caller's lifecycle lease is released; pre-dispatch replies are stale.
+     * Completes the pending response for [dataRequestId] when an active transport already dispatched that packet.
+     * Replies that arrive before dispatch are stale and are ignored. This method does not release the packet ID
+     * reservation; the queue worker owns that removal.
      */
-    suspend fun removeResponse(dataRequestId: Int, complete: Boolean)
+    suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean)
 
     /** Stops the packet queue. */
     fun stopPacketQueue()

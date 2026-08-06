@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
@@ -418,8 +419,12 @@ class DiscoveryScanEngine(
     private suspend fun requestNeighborInfoAtDwellBoundary() {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
         val packetId = radioController.generatePacketId()
-        radioController.requestNeighborInfo(packetId, myNodeNum)
-        Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        try {
+            radioController.requestNeighborInfo(packetId, myNodeNum)
+            Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        } catch (e: PacketQueueRejectedException) {
+            Logger.d(e) { "DiscoveryScanEngine: NeighborInfo request rejected during transport transition" }
+        }
     }
 
     private suspend fun runDwell(presetName: String, durationSeconds: Long): Boolean {

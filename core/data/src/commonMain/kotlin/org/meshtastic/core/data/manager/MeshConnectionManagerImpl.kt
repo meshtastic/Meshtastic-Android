@@ -53,6 +53,7 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -171,7 +172,13 @@ class MeshConnectionManagerImpl(
                             .shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
-                                    locationManager.start(scope) { pos -> commandSender.sendPosition(pos) }
+                                    locationManager.start(scope) { pos ->
+                                        try {
+                                            commandSender.sendPosition(pos)
+                                        } catch (e: PacketQueueRejectedException) {
+                                            Logger.w(e) { "Location update was rejected by packet queue" }
+                                        }
+                                    }
                                 } else {
                                     locationManager.stop()
                                 }
@@ -527,7 +534,11 @@ class MeshConnectionManagerImpl(
         // admin *response* (wantResponse=true), but set_time_only (sent at MyNodeInfo) has no
         // response. A get_owner request is the lightest way to trigger a response and populate the
         // passkey cache so that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
-        commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
+        try {
+            commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
+        } catch (e: PacketQueueRejectedException) {
+            Logger.w(e) { "Session-passkey seed request was rejected by packet queue" }
+        }
 
         // Start MQTT if enabled
         scope.handledLaunch {
@@ -549,8 +560,20 @@ class MeshConnectionManagerImpl(
         }
 
         // Request immediate LocalStats and DeviceMetrics update on connection with proper request IDs
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
+        try {
+            commandSender.requestTelemetry(
+                commandSender.generatePacketId(),
+                myNodeNum,
+                TelemetryType.LOCAL_STATS.ordinal,
+            )
+        } catch (e: PacketQueueRejectedException) {
+            Logger.w(e) { "Local-stats request was rejected by packet queue" }
+        }
+        try {
+            commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
+        } catch (e: PacketQueueRejectedException) {
+            Logger.w(e) { "Device-metrics request was rejected by packet queue" }
+        }
     }
 
     /**

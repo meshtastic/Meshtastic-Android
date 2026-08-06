@@ -25,14 +25,12 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
@@ -54,7 +52,6 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -69,7 +66,7 @@ class PacketHandlerImpl(
 ) : PacketHandler {
 
     companion object {
-        private val TIMEOUT = 5.seconds
+        internal val RESPONSE_TIMEOUT = 5.seconds
 
         /**
          * Firmware-internal `ErrorCode` (MeshTypes.h `ERRNO_SHOULD_RELEASE`) leaked into `QueueStatus.res`: "no error,
@@ -87,8 +84,8 @@ class PacketHandlerImpl(
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<QueuedPacket>()
 
-    // Set to true by stopPacketQueue() under queueMutex. Checked by startPacketQueueLocked()
-    // and the queue processor's finally block to prevent restarting a stopped queue.
+    // Marks the current queue generation as drained. The next admission clears it so reconnect recovery can start a
+    // fresh worker; stale workers retain their generation and cannot replace that worker.
     private var queueStopped = false
 
     private val responseMutex = Mutex()
@@ -107,10 +104,20 @@ class PacketHandlerImpl(
         }
     }
 
+    private sealed interface QueueAdmission {
+        data class Admitted(val pending: PendingResponse) : QueueAdmission
+
+        data object DuplicateId : QueueAdmission
+
+        data object ScopeInactive : QueueAdmission
+    }
+
     private val queueResponse = mutableMapOf<Int, PendingResponse>()
 
     override fun sendToRadio(p: ToRadio) {
-        dispatchToRadio(p)
+        if (!dispatchToRadio(p)) {
+            Logger.w { "sendToRadio dropped: no active transport accepted outbound command" }
+        }
     }
 
     private fun dispatchToRadio(p: ToRadio): Boolean {
@@ -143,69 +150,71 @@ class PacketHandlerImpl(
      * coroutine; concurrent senders share FIFO only at the per-call grain.
      */
     override suspend fun sendToRadio(packet: MeshPacket): Boolean {
-        val pending = packet.takeIf { it.id != 0 }?.let { enqueuePacket(it) }
-        when {
-            packet.id == 0 -> Logger.w { "Dropping queued packet without an ID" }
-
-            pending == null && !scope.isActive ->
-                Logger.w { "Rejecting packet id=${packet.id.toUInt()}: service scope is no longer active" }
-
-            pending == null -> Logger.w { "Rejecting packet with reserved id=${packet.id.toUInt()}" }
+        if (packet.id == 0) {
+            Logger.w { "Dropping queued packet without an ID" }
+            return false
         }
-        return pending != null
+        return when (enqueuePacket(packet)) {
+            is QueueAdmission.Admitted -> true
+
+            QueueAdmission.ScopeInactive -> {
+                Logger.w { "Rejecting packet id=${packet.id.toUInt()}: service scope is no longer active" }
+                false
+            }
+
+            QueueAdmission.DuplicateId -> {
+                Logger.w { "Rejecting packet with reserved id=${packet.id.toUInt()}" }
+                false
+            }
+        }
+    }
+
+    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult = if (packet.id == 0) {
+        Logger.w { "Rejecting awaited packet without an ID" }
+        AwaitedSendResult(status = AwaitedSendStatus.REJECTED, dispatched = false)
+    } else {
+        when (val admission = enqueuePacket(packet)) {
+            is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
+
+            QueueAdmission.ScopeInactive -> {
+                Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
+                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = false)
+            }
+
+            QueueAdmission.DuplicateId -> {
+                Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
+                AwaitedSendResult(status = AwaitedSendStatus.REJECTED, dispatched = false)
+            }
+        }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult {
-        val pending = packet.takeIf { it.id != 0 }?.let { enqueuePacket(it) }
-        if (pending == null) {
-            val status =
-                when {
-                    packet.id == 0 -> {
-                        Logger.w { "Rejecting awaited packet without an ID" }
-                        AwaitedSendStatus.REJECTED
-                    }
-
-                    !scope.isActive -> {
-                        Logger.w {
-                            "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active"
-                        }
-                        AwaitedSendStatus.TRANSPORT_STOPPED
-                    }
-
-                    else -> {
-                        Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
-                        AwaitedSendStatus.REJECTED
-                    }
-                }
-            return AwaitedSendResult(status = status, dispatched = false)
-        }
-        return try {
-            // The queue processor owns both the response timeout and the ID reservation. Permanent
-            // service-scope shutdown is the only caller-observed terminal condition because no worker may exist.
-            AwaitedSendResult(status = awaitPendingResponse(pending), dispatched = pending.wasDispatched)
-        } catch (e: CancellationException) {
-            throw e // Preserve structured concurrency cancellation propagation.
-        } catch (e: Exception) {
-            Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} failed: ${e.message}" }
-            AwaitedSendResult(status = AwaitedSendStatus.SEND_FAILED, dispatched = pending.wasDispatched)
-        }
+    private suspend fun awaitAdmittedPacket(packet: MeshPacket, pending: PendingResponse): AwaitedSendResult = try {
+        // The queue processor owns both the response timeout and the ID reservation. Permanent
+        // service-scope shutdown is the only caller-observed terminal condition because no worker may exist.
+        AwaitedSendResult(status = awaitPendingResponse(pending), dispatched = pending.wasDispatched)
+    } catch (e: CancellationException) {
+        throw e // Preserve structured concurrency cancellation propagation.
+    } catch (e: Exception) {
+        Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} failed: ${e.message}" }
+        AwaitedSendResult(status = AwaitedSendStatus.SEND_FAILED, dispatched = pending.wasDispatched)
     }
 
     /**
      * Reserves [packet]'s non-zero ID and queues it as one atomic admission. The reservation spans both queued and
      * in-flight work, so a second sender cannot replace the original caller's [PendingResponse].
      */
-    private suspend fun enqueuePacket(packet: MeshPacket): PendingResponse? = queueMutex.withLock {
+    private suspend fun enqueuePacket(packet: MeshPacket): QueueAdmission = queueMutex.withLock {
         responseMutex.withLock responseLock@{
-            if (!scope.isActive || queueResponse.containsKey(packet.id)) return@responseLock null
+            if (!scope.isActive) return@responseLock QueueAdmission.ScopeInactive
+            if (queueResponse.containsKey(packet.id)) return@responseLock QueueAdmission.DuplicateId
 
             val pending = PendingResponse()
             queueResponse[packet.id] = pending
             queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
             queuedPackets.add(QueuedPacket(packet = packet, pending = pending))
             startPacketQueueLocked()
-            pending
+            QueueAdmission.Admitted(pending)
         }
     }
 
@@ -214,6 +223,8 @@ class PacketHandlerImpl(
         val scopeJob = scope.coroutineContext[Job] ?: return pending.deferred.await()
         val serviceStopped = select {
             pending.deferred.onAwait { false }
+            // External callers observe service shutdown as TRANSPORT_STOPPED; callers inside the service scope retain
+            // structured cancellation and leave through the surrounding CancellationException path.
             scopeJob.onJoin { true }
         }
         if (serviceStopped) {
@@ -254,7 +265,7 @@ class PacketHandlerImpl(
             with(queueStatus) { Triple(res == 0 || res == ERRNO_SHOULD_RELEASE, free == 0, mesh_packet_id) }
         // Only the plain res==0 "queue accepted, now full" echo is skipped here. ERRNO_SHOULD_RELEASE denotes a
         // synchronous local-loopback delivery that still needs its queueResponse completed, even when free==0, or it
-        // would hang until TIMEOUT.
+        // would hang until RESPONSE_TIMEOUT.
         if (queueStatus.res == 0 && isFull) return
 
         scope.handledLaunch {
@@ -265,6 +276,8 @@ class PacketHandlerImpl(
                         ?.deferred
                         ?.complete(success.toAwaitedSendStatus())
                 } else {
+                    // Firmware omits requestId for the active queue entry. The worker is serial, so at most one
+                    // dispatched response can still be pending; preserve that invariant if dispatch is parallelized.
                     queueResponse.values
                         .firstOrNull { it.wasDispatched && !it.deferred.isCompleted }
                         ?.deferred
@@ -274,7 +287,7 @@ class PacketHandlerImpl(
         }
     }
 
-    override suspend fun removeResponse(dataRequestId: Int, complete: Boolean) {
+    override suspend fun completeDispatchedResponse(dataRequestId: Int, complete: Boolean) {
         responseMutex.withLock {
             queueResponse[dataRequestId]
                 ?.takeIf { it.wasDispatched }
@@ -314,7 +327,7 @@ class PacketHandlerImpl(
         try {
             val response = sendPacket(packet, pending)
             Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
-            val status = withTimeout(TIMEOUT) { response.await() }
+            val status = withTimeout(RESPONSE_TIMEOUT) { response.await() }
             Logger.d { "queueJob packet id=${packet.id.toUInt()} status $status" }
             if (status != AwaitedSendStatus.ACCEPTED) changeStatus(packet.id, MessageStatus.ERROR)
             // External status paths only complete the response; the queue worker owns reservation removal so an ID
@@ -324,20 +337,23 @@ class PacketHandlerImpl(
             Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
             // Complete an awaiting caller before removing the response. Its timeout starts here, after the packet is
             // actually sent, rather than while it waits behind the existing FIFO backlog.
-            pending.deferred.complete(AwaitedSendStatus.TIMED_OUT)
+            val completedByTimeout = pending.deferred.complete(AwaitedSendStatus.TIMED_OUT)
             // A response the transport already accepted must not be reclassified by the timeout.
-            if (pending.deferred.getCompleted() != AwaitedSendStatus.ACCEPTED) {
-                changeStatus(packet.id, MessageStatus.ERROR)
-            }
+            val terminalStatus = if (completedByTimeout) AwaitedSendStatus.TIMED_OUT else pending.deferred.await()
+            if (terminalStatus != AwaitedSendStatus.ACCEPTED) changeStatus(packet.id, MessageStatus.ERROR)
             removePendingResponse(packet.id, pending)
         } catch (e: CancellationException) {
             // A later queued packet makes finishPacketQueueGeneration restart the worker instead of draining the
             // interrupted entry. Complete and remove this reservation before propagating cancellation. A response
             // the transport already accepted keeps its ACCEPTED status: shutdown preemption cannot reclassify it.
-            pending.deferred.complete(AwaitedSendStatus.TRANSPORT_STOPPED)
-            if (pending.deferred.getCompleted() != AwaitedSendStatus.ACCEPTED) {
-                changeStatus(packet.id, MessageStatus.ERROR)
-            }
+            val completedByCancellation = pending.deferred.complete(AwaitedSendStatus.TRANSPORT_STOPPED)
+            val terminalStatus =
+                if (completedByCancellation) {
+                    AwaitedSendStatus.TRANSPORT_STOPPED
+                } else {
+                    withContext(NonCancellable) { pending.deferred.await() }
+                }
+            if (terminalStatus != AwaitedSendStatus.ACCEPTED) changeStatus(packet.id, MessageStatus.ERROR)
             removePendingResponse(packet.id, pending)
             throw e // Preserve structured concurrency cancellation propagation.
         } catch (e: Exception) {
@@ -353,9 +369,7 @@ class PacketHandlerImpl(
         // Keep completion, replacement, and disconnect draining atomic with new admissions. queueGeneration
         // advances only under queueMutex: stopPacketQueue() drains every pending response, while
         // startPacketQueueLocked() advances it only after the previous queueJob is inactive. Therefore a stale
-        // worker has already lost ownership to a path that drained or replaced it and must not clear that
-        // replacement
-        // job.
+        // worker has already lost ownership to a path that drained or replaced it and must not clear its successor.
         val failedPacketIds =
             queueMutex.withLock {
                 if (generation != queueGeneration) return@withLock emptyList()
@@ -390,22 +404,20 @@ class PacketHandlerImpl(
     private fun changeStatus(packetId: Int, m: MessageStatus) =
         scope.handledLaunch { changeStatusesNow(listOf(packetId), m) }
 
-    /** Resolves and updates all known packet IDs within one shared bound, including during non-cancellable teardown. */
+    /** Applies [status] once to any durable packet row already associated with the mesh packet IDs. */
     private suspend fun changeStatusesNow(packetIds: Collection<Int>, status: MessageStatus) {
-        val remaining = packetIds.filterTo(mutableSetOf()) { it != 0 }
-        withTimeoutOrNull(1.seconds) {
-            while (remaining.isNotEmpty()) {
-                remaining.toList().forEach { packetId ->
-                    val packet = packetRepository.value.getPacketById(packetId) ?: return@forEach
-                    if (packet.status != status) packetRepository.value.updateMessageStatus(packet, status)
-                    remaining.remove(packetId)
+        packetIds
+            .asSequence()
+            .filter { it != 0 }
+            .distinct()
+            .forEach { packetId ->
+                val packet = packetRepository.value.getPacketByPacketId(packetId)
+                if (packet == null) {
+                    Logger.d { "Skipping $status for mesh packet id=${packetId.toUInt()}: no persisted packet row" }
+                } else if (packet.status != status) {
+                    packetRepository.value.updateMessageStatus(packet, status)
                 }
-                if (remaining.isNotEmpty()) delay(100.milliseconds)
             }
-        }
-        if (remaining.isNotEmpty()) {
-            Logger.w { "Could not apply $status to ${remaining.size} unresolved packet IDs within 1 second" }
-        }
     }
 
     @Suppress("TooGenericExceptionCaught")

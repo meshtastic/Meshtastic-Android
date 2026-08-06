@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
@@ -183,12 +184,13 @@ class CommandSenderImplTest {
     }
 
     @Test
-    fun sendData_marksPacketErrorWhenQueueRejectsIt() = runTest {
+    fun sendData_marksPacketErrorAndThrowsWhenQueueRejectsIt() = runTest {
         val packet = DataPacket(to = "^all", bytes = "hello".encodeUtf8(), dataType = PortNum.TEXT_MESSAGE_APP.value)
         everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } returns false
 
-        commandSender.sendData(packet)
+        val failure = assertFailsWith<PacketQueueRejectedException> { commandSender.sendData(packet) }
 
+        assertEquals("Data packet was rejected by the outbound packet queue", failure.message)
         assertEquals(MessageStatus.ERROR, packet.status)
     }
 
@@ -228,9 +230,7 @@ class CommandSenderImplTest {
         val packets = mutableListOf<MeshPacket>()
         everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
 
-        commandSender.sendAdmin(DEST_NODE, requestId = 0) {
-            org.meshtastic.proto.AdminMessage(get_owner_request = true)
-        }
+        commandSender.sendAdmin(DEST_NODE, requestId = 0) { AdminMessage(get_owner_request = true) }
 
         assertNotEquals(0, packets.single().id)
     }
@@ -251,9 +251,7 @@ class CommandSenderImplTest {
         everySuspend { packetHandler.sendToRadioAndAwaitResult(capture(packets)) } returns
             AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true)
 
-        commandSender.sendAdminAwaitResult(DEST_NODE, requestId = 0) {
-            org.meshtastic.proto.AdminMessage(get_owner_request = true)
-        }
+        commandSender.sendAdminAwaitResult(DEST_NODE, requestId = 0) { AdminMessage(get_owner_request = true) }
 
         assertNotEquals(0, packets.single().id)
     }
@@ -306,6 +304,15 @@ class CommandSenderImplTest {
         }
 
         verify(exactly(0)) { tracerouteHandler.recordStartTime(any()) }
+    }
+
+    @Test
+    fun requestTelemetry_surfacesQueueRejection() = runTest {
+        everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } returns false
+
+        assertFailsWith<PacketQueueRejectedException> {
+            commandSender.requestTelemetry(requestId = 42, destNum = DEST_NODE, typeValue = 0)
+        }
     }
 
     @Test

@@ -158,7 +158,7 @@ private fun TransportDisconnectReason.toConnectionErrorMessage(): String = when 
  * hardware state observability (BLE/Network toggles). Delegates the actual raw byte transport mapping to a
  * platform-specific [RadioTransportFactory].
  */
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LargeClass", "LongParameterList", "TooManyFunctions")
 @Single
 class SharedRadioInterfaceService(
     private val dispatchers: CoroutineDispatchers,
@@ -284,30 +284,64 @@ class SharedRadioInterfaceService(
     private fun releaseSessionOperation(admittedSession: RadioTransportSession) {
         val drainWaiter =
             synchronized(sessionCallbackLock) {
-                check(activeTransportSession === admittedSession) {
-                    "Session changed before an admitted operation released its lease"
-                }
-                check(admittedSessionOperations > 0) { "Session operation count underflow" }
-                admittedSessionOperations--
-                if (admittedSessionOperations == 0) {
-                    sessionDrainWaiter.also { sessionDrainWaiter = null }
-                } else {
-                    null
+                when {
+                    activeTransportSession !== admittedSession -> {
+                        Logger.e { "Session changed before an admitted operation released its lease" }
+                        null
+                    }
+
+                    admittedSessionOperations <= 0 -> {
+                        Logger.e { "Session operation count underflow" }
+                        null
+                    }
+
+                    else -> {
+                        admittedSessionOperations--
+                        if (admittedSessionOperations == 0) {
+                            sessionDrainWaiter.also { sessionDrainWaiter = null }
+                        } else {
+                            null
+                        }
+                    }
                 }
             }
         drainWaiter?.complete(Unit)
     }
 
-    private data class AdmittedTransportSend(val session: RadioTransportSession, val transport: RadioTransport)
+    private sealed interface TransportSendAdmission {
+        data class Admitted(val session: RadioTransportSession, val transport: RadioTransport) : TransportSendAdmission
 
-    /** Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. */
-    private fun admitTransportSend(): AdmittedTransportSend? = synchronized(sessionCallbackLock) admission@{
-        if (!sessionAdmissionOpen || isStopping) return@admission null
-        val session = activeTransportSession ?: return@admission null
-        val transport = radioTransport ?: return@admission null
+        data object AdmissionClosed : TransportSendAdmission
 
-        admittedSessionOperations++
-        AdmittedTransportSend(session = session, transport = transport)
+        data object Stopping : TransportSendAdmission
+
+        data object NoActiveSession : TransportSendAdmission
+
+        data object NoTransport : TransportSendAdmission
+    }
+
+    /**
+     * Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. [Stopping]
+     * covers only a pre-revocation stopping window; once teardown revokes admission, [AdmissionClosed] is
+     * authoritative.
+     */
+    private fun admitTransportSend(): TransportSendAdmission = synchronized(sessionCallbackLock) {
+        val session = activeTransportSession
+        val transport = radioTransport
+        when {
+            isStopping -> TransportSendAdmission.Stopping
+
+            !sessionAdmissionOpen -> TransportSendAdmission.AdmissionClosed
+
+            session == null -> TransportSendAdmission.NoActiveSession
+
+            transport == null -> TransportSendAdmission.NoTransport
+
+            else -> {
+                admittedSessionOperations++
+                TransportSendAdmission.Admitted(session = session, transport = transport)
+            }
+        }
     }
 
     /** Runs a callback only while [session] still owns admission, atomically with session teardown. */
@@ -1019,32 +1053,71 @@ class SharedRadioInterfaceService(
     }
 
     fun keepAlive(now: Long = now()) {
-        if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
-            radioTransport?.keepAlive()
-            lastHeartbeatMillis = now
+        if (now - lastHeartbeatMillis <= HEARTBEAT_INTERVAL_MILLIS) return
+
+        when (val admission = admitTransportSend()) {
+            is TransportSendAdmission.Admitted -> {
+                if (keepAliveThroughAdmittedTransport(admission)) lastHeartbeatMillis = now
+            }
+
+            TransportSendAdmission.Stopping -> Logger.d { "keepAlive: transport stopping, dropping heartbeat" }
+
+            TransportSendAdmission.AdmissionClosed,
+            TransportSendAdmission.NoActiveSession,
+            ->
+                Logger.d { "keepAlive: no admitted transport session, dropping heartbeat" }
+
+            TransportSendAdmission.NoTransport ->
+                Logger.w { "keepAlive: admitted session has no radio transport, dropping heartbeat" }
         }
     }
 
-    override fun trySendToRadio(bytes: ByteArray): Boolean {
+    private fun keepAliveThroughAdmittedTransport(admission: TransportSendAdmission.Admitted): Boolean = try {
+        safeCatching { admission.transport.keepAlive() }
+            .onFailure { Logger.w(it) { "keepAlive: active transport rejected heartbeat" } }
+            .isSuccess
+    } finally {
+        releaseSessionOperation(admission.session)
+    }
+
+    override fun trySendToRadio(bytes: ByteArray): Boolean =
         // Admission and teardown share one session gate. Once accepted, teardown drains the synchronous handoff before
         // revoking the session; transport implementations still own their asynchronous delivery outcome.
-        val admitted =
-            admitTransportSend()
-                ?: run {
-                    Logger.w { "trySendToRadio: no admitted radio transport, dropping ${bytes.size} bytes" }
-                    return false
-                }
-        return try {
-            safeCatching {
-                admitted.transport.handleSendToRadio(bytes)
-                _meshActivity.tryEmit(MeshActivity.Send)
+        when (val admission = admitTransportSend()) {
+            is TransportSendAdmission.Admitted -> sendThroughAdmittedTransport(admission, bytes)
+
+            TransportSendAdmission.Stopping -> {
+                Logger.d { "trySendToRadio: transport stopping, dropping ${bytes.size} bytes" }
+                false
             }
-                .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
-                .isSuccess
-        } finally {
-            releaseSessionOperation(admitted.session)
+
+            TransportSendAdmission.AdmissionClosed,
+            TransportSendAdmission.NoActiveSession,
+            -> {
+                Logger.d { "trySendToRadio: no admitted transport session, dropping ${bytes.size} bytes" }
+                false
+            }
+
+            TransportSendAdmission.NoTransport -> {
+                Logger.w { "trySendToRadio: admitted session has no radio transport, dropping ${bytes.size} bytes" }
+                false
+            }
         }
-    }
+
+    private fun sendThroughAdmittedTransport(admission: TransportSendAdmission.Admitted, bytes: ByteArray): Boolean =
+        try {
+            val sent =
+                safeCatching { admission.transport.handleSendToRadio(bytes) }
+                    .onFailure { Logger.w(it) { "trySendToRadio: active transport rejected ${bytes.size} bytes" } }
+                    .getOrDefault(false)
+            if (sent) {
+                safeCatching { _meshActivity.tryEmit(MeshActivity.Send) }
+                    .onFailure { Logger.w(it) { "trySendToRadio: failed to publish mesh activity" } }
+            }
+            sent
+        } finally {
+            releaseSessionOperation(admission.session)
+        }
 
     @Suppress("TooGenericExceptionCaught")
     override fun handleFromRadio(bytes: ByteArray) {

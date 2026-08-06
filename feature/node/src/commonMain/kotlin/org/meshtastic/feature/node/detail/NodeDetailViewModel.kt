@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
 import org.meshtastic.core.resources.remote_admin_unreachable
 import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -143,27 +144,27 @@ class NodeDetailViewModel(
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
 
             is NodeMenuAction.RequestUserInfo ->
-                viewModelScope.launch {
+                safeLaunch(tag = "requestUserInfo") {
                     nodeRequestActions.requestUserInfo(action.node.num, action.node.user.long_name)
                 }
 
             is NodeMenuAction.RequestNeighborInfo ->
-                viewModelScope.launch {
+                safeLaunch(tag = "requestNeighborInfo") {
                     nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.long_name)
                 }
 
             is NodeMenuAction.RequestPosition ->
-                viewModelScope.launch {
+                safeLaunch(tag = "requestPosition") {
                     nodeRequestActions.requestPosition(action.node.num, action.node.user.long_name)
                 }
 
             is NodeMenuAction.RequestTelemetry ->
-                viewModelScope.launch {
+                safeLaunch(tag = "requestTelemetry") {
                     nodeRequestActions.requestTelemetry(action.node.num, action.node.user.long_name, action.type)
                 }
 
             is NodeMenuAction.TraceRoute ->
-                viewModelScope.launch {
+                safeLaunch(tag = "requestTraceroute") {
                     nodeRequestActions.requestTraceroute(action.node.num, action.node.user.long_name)
                 }
 

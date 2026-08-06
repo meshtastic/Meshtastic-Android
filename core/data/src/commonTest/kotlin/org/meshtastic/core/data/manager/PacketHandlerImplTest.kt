@@ -73,19 +73,22 @@ class PacketHandlerImplTest {
 
     private lateinit var handler: PacketHandlerImpl
 
+    private val responseTimeoutCrossingMillis = PacketHandlerImpl.RESPONSE_TIMEOUT.inWholeMilliseconds + 1
+
+    private fun handlerWithScope(scope: TestScope) = PacketHandlerImpl(
+        lazy { packetRepository },
+        radioInterfaceService,
+        lazy { meshLogRepository },
+        serviceRepository,
+        scope.asServiceScope(),
+    )
+
     @BeforeTest
     fun setUp() {
         every { serviceRepository.connectionState } returns connectionStateFlow
         every { radioInterfaceService.trySendToRadio(any()) } returns true
 
-        handler =
-            PacketHandlerImpl(
-                lazy { packetRepository },
-                radioInterfaceService,
-                lazy { meshLogRepository },
-                serviceRepository,
-                testScope.asServiceScope(),
-            )
+        handler = handlerWithScope(testScope)
     }
 
     @Test
@@ -117,14 +120,7 @@ class PacketHandlerImplTest {
     fun `awaited send rejects when service scope is already stopped`() = runTest(testDispatcher) {
         val stoppedScope = TestScope(StandardTestDispatcher(testScheduler))
         stoppedScope.cancel()
-        val stoppedHandler =
-            PacketHandlerImpl(
-                lazy { packetRepository },
-                radioInterfaceService,
-                lazy { meshLogRepository },
-                serviceRepository,
-                stoppedScope.asServiceScope(),
-            )
+        val stoppedHandler = handlerWithScope(stoppedScope)
 
         val result = stoppedHandler.sendToRadioAndAwaitResult(MeshPacket(id = 457))
 
@@ -133,17 +129,22 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `plain send rejects when service scope is already stopped`() = runTest(testDispatcher) {
+        val stoppedScope = TestScope(StandardTestDispatcher(testScheduler))
+        stoppedScope.cancel()
+        val stoppedHandler = handlerWithScope(stoppedScope)
+
+        val accepted = stoppedHandler.sendToRadio(MeshPacket(id = 459))
+
+        assertFalse(accepted)
+        verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
+    }
+
+    @Test
     fun `awaited send is released when service scope stops before worker starts`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         val serviceScope = TestScope(StandardTestDispatcher(testScheduler))
-        val stoppedHandler =
-            PacketHandlerImpl(
-                lazy { packetRepository },
-                radioInterfaceService,
-                lazy { meshLogRepository },
-                serviceRepository,
-                serviceScope.asServiceScope(),
-            )
+        val stoppedHandler = handlerWithScope(serviceScope)
 
         val result =
             async(start = CoroutineStart.UNDISPATCHED) {
@@ -233,10 +234,10 @@ class PacketHandlerImplTest {
         // Let both earlier packets consume their full response windows. The awaited packet has not timed out
         // because
         // it has not reached the head of the queue yet.
-        testScheduler.advanceTimeBy(5_001)
+        testScheduler.advanceTimeBy(responseTimeoutCrossingMillis)
         testScheduler.runCurrent()
         assertFalse(result.isCompleted)
-        testScheduler.advanceTimeBy(5_001)
+        testScheduler.advanceTimeBy(responseTimeoutCrossingMillis)
         testScheduler.runCurrent()
         assertFalse(result.isCompleted)
 
@@ -257,7 +258,7 @@ class PacketHandlerImplTest {
                 id = 804,
                 status = MessageStatus.QUEUED,
             )
-        everySuspend { packetRepository.getPacketById(804) } returns storedPacket
+        everySuspend { packetRepository.getPacketByPacketId(804) } returns storedPacket
         everySuspend { packetRepository.updateMessageStatus(storedPacket, MessageStatus.ERROR) } returns Unit
         handler.sendToRadio(MeshPacket(id = 803))
         val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 804)) }
@@ -273,6 +274,20 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `queue stop checks a missing persisted packet row only once`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        handler.sendToRadio(MeshPacket(id = 820))
+        val queued = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 821)) }
+        testScheduler.runCurrent()
+
+        handler.stopPacketQueue()
+        testScheduler.runCurrent()
+
+        assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, queued.await().status)
+        verifySuspend(exactly(1)) { packetRepository.getPacketByPacketId(821) }
+    }
+
+    @Test
     fun `stopping the queue reports an awaited packet that was already dispatched`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         // With no backlog, packet 807 reaches the transport before stopPacketQueue() drains its response.
@@ -283,7 +298,7 @@ class PacketHandlerImplTest {
                 id = 807,
                 status = MessageStatus.ENROUTE,
             )
-        everySuspend { packetRepository.getPacketById(807) } returns storedPacket
+        everySuspend { packetRepository.getPacketByPacketId(807) } returns storedPacket
         everySuspend { packetRepository.updateMessageStatus(storedPacket, MessageStatus.ERROR) } returns Unit
         val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 807)) }
         testScheduler.runCurrent()
@@ -308,7 +323,7 @@ class PacketHandlerImplTest {
                     id = 817,
                     status = MessageStatus.ENROUTE,
                 )
-            everySuspend { packetRepository.getPacketById(817) } returns storedPacket
+            everySuspend { packetRepository.getPacketByPacketId(817) } returns storedPacket
             everySuspend { packetRepository.updateMessageStatus(storedPacket, MessageStatus.ERROR) } returns Unit
             val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 817)) }
             testScheduler.runCurrent()
@@ -350,7 +365,7 @@ class PacketHandlerImplTest {
         val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 805)) }
         testScheduler.runCurrent()
 
-        testScheduler.advanceTimeBy(5_001)
+        testScheduler.advanceTimeBy(responseTimeoutCrossingMillis)
         testScheduler.runCurrent()
 
         val timedOut = result.await()
@@ -380,7 +395,7 @@ class PacketHandlerImplTest {
                 id = 808,
                 status = MessageStatus.QUEUED,
             )
-        everySuspend { packetRepository.getPacketById(808) } returns storedPacket
+        everySuspend { packetRepository.getPacketByPacketId(808) } returns storedPacket
         everySuspend { packetRepository.updateMessageStatus(storedPacket, MessageStatus.ERROR) } returns Unit
 
         val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 808)) }
@@ -512,7 +527,7 @@ class PacketHandlerImplTest {
         testScheduler.runCurrent()
 
         handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
-        handler.removeResponse(dataRequestId = 817, complete = true)
+        handler.completeDispatchedResponse(dataRequestId = 817, complete = true)
         testScheduler.runCurrent()
 
         assertFalse(queued.isCompleted)
@@ -534,6 +549,20 @@ class PacketHandlerImplTest {
         testScheduler.runCurrent()
         handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
         testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `routing rejection after dispatch completes awaited response as radio rejected`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 818)) }
+        testScheduler.runCurrent()
+
+        handler.completeDispatchedResponse(dataRequestId = 818, complete = false)
+        testScheduler.runCurrent()
+
+        val rejected = result.await()
+        assertEquals(AwaitedSendStatus.RADIO_REJECTED, rejected.status)
+        assertTrue(rejected.dispatched)
     }
 
     @Test

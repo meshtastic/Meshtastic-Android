@@ -29,6 +29,7 @@ import org.meshtastic.proto.ToRadio
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ReplayRadioTransportTest {
@@ -91,10 +92,22 @@ class ReplayRadioTransportTest {
         val callback = RecordingCallback()
         val transport = ReplayRadioTransport(callback, this, address = "", frames = asset(), packetDelayMs = 0)
 
-        transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+        val accepted = transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
         testScheduler.advanceUntilIdle()
 
+        assertTrue(accepted)
         assertEquals(configFrames + FromRadio(config_complete_id = HandshakeConstants.CONFIG_NONCE), callback.received)
+    }
+
+    @Test
+    fun `read-only replay rejects outbound mesh traffic`() = runTest {
+        val callback = RecordingCallback()
+        val transport = ReplayRadioTransport(callback, this, address = "", frames = asset(), packetDelayMs = 0)
+
+        val accepted = transport.handleSendToRadio(ToRadio(packet = MeshPacket(id = 1)).encode())
+
+        assertFalse(accepted)
+        assertTrue(callback.received.isEmpty())
     }
 
     @Test
