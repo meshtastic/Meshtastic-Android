@@ -33,6 +33,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -136,7 +137,14 @@ class MeshConnectionManagerImpl(
         // Bridge transport-level state into the canonical app-level state.
         // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
         // light-sleep policy and handshake awareness before writing to ServiceRepository.
-        radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
+        // Guarded per-emission: one uncaught throw here would kill the sole bridge collector and
+        // permanently freeze the app-level state (a stuck-"Connected" UI no transport event can fix).
+        radioInterfaceService.connectionState
+            .onEach { state ->
+                safeCatching { onRadioConnectionState(state) }
+                    .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
+            }
+            .launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
         serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)

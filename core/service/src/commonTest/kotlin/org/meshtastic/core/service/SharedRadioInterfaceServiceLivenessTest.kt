@@ -820,6 +820,132 @@ class SharedRadioInterfaceServiceLivenessTest {
         }
     }
 
+    /**
+     * Regression for the field wedge behind "app shows Connected but the node stops updating": frames dropped by a full
+     * receive queue must NOT feed the liveness timer. Before the fix, [SharedRadioInterfaceService] stamped
+     * `lastDataReceivedMillis` on arrival (even for dropped frames), so a wedged consumer kept liveness satisfied
+     * forever while every frame was discarded.
+     */
+    @Test
+    fun `frames dropped by a full receive queue do not reset the liveness timer`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            // No collector attached: fill the channel to capacity at t=0. All of these are admitted
+            // and stamp liveness at 0.
+            val payload = byteArrayOf(1)
+            repeat(SharedRadioInterfaceService.RECEIVE_QUEUE_CAPACITY) { service.handleFromRadio(payload) }
+
+            // A frame arriving at t=30s is DROPPED (queue full). It must not count as liveness data.
+            clock = 30_000L
+            service.handleFromRadio(payload)
+
+            // At t=65s the silence is 65s if the drop was correctly ignored (fires), but only 35s if
+            // the drop stamped the timer (must not happen).
+            clock = 65_000L
+            service.checkLiveness()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertTrue(
+                createdTransports.first().closeCalled,
+                "Liveness must fire on queue-full silence — dropped frames must not feed the timer",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    // ─── Session handler timeout: the pipeline must not wedge forever ───────────────────────────
+
+    /**
+     * Regression for the 2.8.0 stale-connection wedge: a handler that suspends indefinitely inside
+     * [SharedRadioInterfaceService.runWhileSessionActive] holds the session-operation lane (the whole inbound
+     * pipeline). It must be cancelled at the handler timeout so queued work behind it can run.
+     */
+    @Test
+    fun `wedged session handler is cancelled at the timeout and the pipeline continues`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        val session = requireNotNull(service.activeSession.value)
+        val wedgeStarted = CompletableDeferred<Unit>()
+        val neverReleased = CompletableDeferred<Unit>()
+        var wedgeRanToCompletion = false
+
+        val wedged = launch {
+            service.runWhileSessionActive(session) {
+                wedgeStarted.complete(Unit)
+                neverReleased.await() // simulates a handler stuck on an unbounded suspension
+                wedgeRanToCompletion = true
+            }
+        }
+        wedgeStarted.await()
+        val nextStarted = CompletableDeferred<Unit>()
+        val next = launch { service.runWhileSessionActive(session) { nextStarted.complete(Unit) } }
+        try {
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(nextStarted.isCompleted, "ordered work is serialized behind the wedged handler")
+
+            // Cross the 2-minute handler timeout: the wedged block is cancelled, releasing the lane.
+            advanceTimeBy(121_000L)
+            wedged.join()
+            next.join()
+
+            assertFalse(wedgeRanToCompletion, "the wedged handler must have been cancelled, not completed")
+            assertTrue(nextStarted.isCompleted, "the handler timeout must release the pipeline for queued work")
+        } finally {
+            neverReleased.complete(Unit)
+            wedged.cancel()
+            next.cancel()
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * The user-facing half of the same wedge: disconnect() drains admitted leases before teardown, so a handler stuck
+     * forever previously made disconnect unreachable (only a force-stop recovered). The handler timeout must bound that
+     * wait.
+     */
+    @Test
+    fun `disconnect completes after a wedged handler is timed out`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        val session = requireNotNull(service.activeSession.value)
+        val wedgeStarted = CompletableDeferred<Unit>()
+        val neverReleased = CompletableDeferred<Unit>()
+
+        val wedged = launch {
+            service.runWhileSessionActive(session) {
+                wedgeStarted.complete(Unit)
+                neverReleased.await()
+            }
+        }
+        wedgeStarted.await()
+
+        val disconnectJob = launch { service.disconnect() }
+        try {
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(disconnectJob.isCompleted, "disconnect must wait while the lease is admitted")
+
+            // Cross the handler timeout (cancels the wedged block, draining the lease) plus the
+            // polite-disconnect drain window inside stopTransportLocked.
+            advanceTimeBy(121_000L)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            disconnectJob.join()
+            wedged.join()
+
+            assertNull(service.activeSession.value, "teardown must complete once the wedged lease is released")
+        } finally {
+            neverReleased.complete(Unit)
+            wedged.cancel()
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
     @Test
     fun `USB permission denial emits error and permanent disconnected state`() = runTest(testDispatcher) {
         clock = 0L

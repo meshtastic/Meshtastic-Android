@@ -27,10 +27,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +53,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -271,7 +276,23 @@ class SharedRadioInterfaceService(
     }
 
     override suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
-        sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
+        sessionOperationMutex.withLock {
+            runWithSessionLease(session) {
+                // Bound the handler: it holds sessionOperationMutex (the whole inbound pipeline) and an admitted
+                // lease (which teardown's drain awaits), so an indefinite suspension here is a total wedge, not a
+                // slow packet. Cancelling the block releases both. Only OUR timeout is swallowed — ensureActive()
+                // rethrows if the surrounding scope was cancelled concurrently.
+                try {
+                    withTimeout(SESSION_HANDLER_TIMEOUT_MILLIS) { block() }
+                } catch (timeout: TimeoutCancellationException) {
+                    currentCoroutineContext().ensureActive()
+                    Logger.e(timeout) {
+                        "Session handler exceeded ${SESSION_HANDLER_TIMEOUT_MILLIS}ms and was cancelled; " +
+                            "dropping its packet to keep the receive pipeline alive"
+                    }
+                }
+            }
+        }
 
     /** Runs a callback only while [session] still owns admission, atomically with session teardown. */
     private inline fun runIfTransportSessionActive(session: RadioTransportSession, block: () -> Unit): Boolean =
@@ -299,7 +320,21 @@ class SharedRadioInterfaceService(
                         sessionDrainWaiter ?: CompletableDeferred<Unit>().also { sessionDrainWaiter = it }
                     }
                 }
-            drainWaiter?.await()
+            if (drainWaiter != null) {
+                // The drain must complete before a replacement generation is admitted (DB-atomicity contract), so we
+                // keep waiting — but never silently. A lease stuck past the handler timeout means a handler ignored
+                // cancellation; these error-level reports are the observability surface for that wedge (this wait
+                // previously blocked disconnect()/restart forever with no telemetry at all).
+                var waitedMillis = 0L
+                while (withTimeoutOrNull(DRAIN_WAIT_LOG_INTERVAL_MILLIS) { drainWaiter.await() } == null) {
+                    waitedMillis += DRAIN_WAIT_LOG_INTERVAL_MILLIS
+                    val outstanding = synchronized(sessionCallbackLock) { admittedSessionOperations }
+                    Logger.e {
+                        "Transport teardown blocked ${waitedMillis}ms waiting for $outstanding admitted session " +
+                            "operation(s) to release (generation=${session.generation})"
+                    }
+                }
+            }
             synchronized(sessionCallbackLock) {
                 if (activeTransportSession === session) {
                     check(admittedSessionOperations == 0) { "Session revoked before admitted operations drained" }
@@ -432,6 +467,18 @@ class SharedRadioInterfaceService(
          * flaky GATT connection. Serial and TCP typically flush well under this window.
          */
         private const val POLITE_DISCONNECT_DRAIN_MS = 500L
+
+        /**
+         * Ceiling on a single [runWhileSessionActive] handler. The block holds [sessionOperationMutex] — the whole
+         * inbound pipeline — so a handler that suspends indefinitely wedges packet processing, fills [_receivedData],
+         * and deadlocks teardown's lease drain (a Connected-looking zombie only a force-stop clears; observed in the
+         * field as multi-hour "receive queue at capacity" sessions). 2 minutes is far above any legitimate handler
+         * (large-mesh config DB installs run seconds) while still bounding the wedge.
+         */
+        private const val SESSION_HANDLER_TIMEOUT_MILLIS = 2 * 60 * 1000L
+
+        /** How often [revokeTransportSession] reports a lease drain that has not completed. */
+        private const val DRAIN_WAIT_LOG_INTERVAL_MILLIS = 15 * 1000L
     }
 
     private val initLock = Mutex()
@@ -979,7 +1026,6 @@ class SharedRadioInterfaceService(
     @Suppress("TooGenericExceptionCaught")
     private fun enqueueReceivedData(bytes: ByteArray, session: RadioTransportSession) {
         try {
-            lastDataReceivedMillis = now()
             // trySend synchronously onto the Channel so packet order matches arrival order. The
             // previous `launch { emit() }` pattern dispatched each packet onto a fresh coroutine,
             // letting the scheduler reorder them — which broke the firmware config handshake
@@ -993,6 +1039,12 @@ class SharedRadioInterfaceService(
             }
             val frame = ReceivedRadioFrame(payload = bytes.toByteString(), session = session.context)
             val result = _receivedData.trySend(frame)
+            if (result.isSuccess) {
+                // Stamp liveness only for frames actually admitted to the queue. Stamping on arrival kept
+                // checkLiveness() satisfied while a wedged consumer dropped every frame — a Connected-looking zombie
+                // the watchdog existed to catch. A full queue now reads as silence and trips liveness recovery.
+                lastDataReceivedMillis = now()
+            }
             if (result.isFailure) {
                 // Rate-limited on purpose: drops only happen under sustained inbound traffic, and Kermit forwards to
                 // Datadog/Crashlytics, so logging every drop would turn a bounded memory problem into unbounded
