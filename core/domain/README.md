@@ -50,7 +50,7 @@ Ensures a per-node remote-admin passkey session exists before entering the remot
 sealed interface EnsureSessionResult {
     data object AlreadyActive   : EnsureSessionResult  // passkey already fresh
     data object Refreshed       : EnsureSessionResult  // metadata response arrived
-    data object Timeout         : EnsureSessionResult  // no response within 10 s
+    data object Timeout         : EnsureSessionResult  // no response within 30 s
     data object Disconnected    : EnsureSessionResult  // radio not connected
 }
 ```

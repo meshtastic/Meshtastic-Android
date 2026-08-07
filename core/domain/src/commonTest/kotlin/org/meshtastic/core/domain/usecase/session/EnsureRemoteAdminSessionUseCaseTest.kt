@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import org.meshtastic.core.common.di.asServiceScope
@@ -42,6 +43,7 @@ import org.meshtastic.core.repository.SessionManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EnsureRemoteAdminSessionUseCaseTest {
@@ -113,6 +115,27 @@ class EnsureRemoteAdminSessionUseCaseTest {
         val result = useCase(destNum)
 
         assertEquals(EnsureSessionResult.Refreshed, result)
+        verifySuspend { controller.refreshMetadata(destNum) }
+    }
+
+    @Test
+    fun `accepts a valid refresh arriving after the former ten second deadline`() = runTest {
+        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        val sessionManager = stubSessionManager(refreshFlow = refresh)
+        val controller = mock<RadioController>(MockMode.autofill)
+        everySuspend { controller.refreshMetadata(any()) } returns Unit
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
+
+        var observed: EnsureSessionResult? = null
+        val job = launch { observed = useCase(destNum) }
+        runCurrent()
+        advanceTimeBy(13.seconds.inWholeMilliseconds)
+        refresh.emit(destNum)
+        advanceUntilIdle()
+        job.join()
+
+        assertEquals(EnsureSessionResult.Refreshed, observed)
         verifySuspend { controller.refreshMetadata(destNum) }
     }
 

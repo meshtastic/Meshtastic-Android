@@ -103,9 +103,10 @@ open class EnsureRemoteAdminSessionUseCase(
 
     companion object {
         /**
-         * UX deadline for surfacing a result to the user. The metadata request keeps flying after this — late responses
-         * still update the durable `SessionStatus` flow.
+         * UX deadline for surfacing a result to the user. Multi-hop remote-admin responses can legitimately take well
+         * over ten seconds; the metadata request keeps flying after this, and late responses still update the durable
+         * `SessionStatus` flow.
          */
-        val UX_TIMEOUT = 10.seconds
+        val UX_TIMEOUT = 30.seconds
     }
 }
