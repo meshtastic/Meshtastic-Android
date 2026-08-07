@@ -25,7 +25,9 @@ interface RadioTransport {
      * Attempts to hand [p] to this transport for delivery. Implementations must return promptly after any required
      * synchronous admission checks and enqueue asynchronous I/O internally.
      *
-     * @return `true` when the transport accepted the bytes for delivery, or `false` when no send was scheduled.
+     * @return `true` when the transport accepted or scheduled the handoff, or `false` when no send was scheduled.
+     *   Acceptance does not confirm that the bytes reached the radio; protocol acknowledgements provide delivery
+     *   evidence where required.
      */
     fun handleSendToRadio(p: ByteArray): Boolean
 

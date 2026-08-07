@@ -18,7 +18,9 @@
 
 package org.meshtastic.feature.discovery
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -36,6 +39,7 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
@@ -78,6 +82,9 @@ private class FakeDiscoveryDao : DiscoveryDao {
     val sessions = mutableMapOf<Long, DiscoverySessionEntity>()
     val presetResults = mutableMapOf<Long, DiscoveryPresetResultEntity>()
     val discoveredNodes = mutableMapOf<Long, DiscoveredNodeEntity>()
+    var nextUpdateSessionEntered: CompletableDeferred<Unit>? = null
+    var releaseNextUpdateSession: CompletableDeferred<Unit>? = null
+    var nextUpdateSessionFailure: Exception? = null
 
     override suspend fun insertSession(session: DiscoverySessionEntity): Long {
         val id = nextSessionId++
@@ -86,6 +93,18 @@ private class FakeDiscoveryDao : DiscoveryDao {
     }
 
     override suspend fun updateSession(session: DiscoverySessionEntity) {
+        nextUpdateSessionEntered?.also { entered ->
+            nextUpdateSessionEntered = null
+            entered.complete(Unit)
+        }
+        releaseNextUpdateSession?.also { release ->
+            releaseNextUpdateSession = null
+            release.await()
+        }
+        nextUpdateSessionFailure?.also { failure ->
+            nextUpdateSessionFailure = null
+            throw failure
+        }
         sessions[session.id] = session
     }
 
@@ -95,6 +114,16 @@ private class FakeDiscoveryDao : DiscoveryDao {
     override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> = sessions.values.toList()
 
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? = sessions[sessionId]
+
+    override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String) {
+        sessions[sessionId]?.let { sessions[sessionId] = it.copy(completionStatus = status) }
+    }
+
+    override suspend fun updateRecoverableSessionCompletionStatus(sessionId: Long, status: String) {
+        sessions[sessionId]
+            ?.takeIf { it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
+            ?.let { sessions[sessionId] = it.copy(completionStatus = status) }
+    }
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> = MutableStateFlow(sessions[sessionId])
 
@@ -165,14 +194,14 @@ private class FakeDiscoveryDao : DiscoveryDao {
     override suspend fun markInterruptedSessions() {
         sessions.keys.toList().forEach { key ->
             val session = sessions[key]!!
-            if (session.completionStatus == "in_progress") {
-                sessions[key] = session.copy(completionStatus = "interrupted")
+            if (session.completionStatus == DiscoverySessionStatus.IN_PROGRESS) {
+                sessions[key] = session.copy(completionStatus = DiscoverySessionStatus.INTERRUPTED)
             }
         }
     }
 
     override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
-        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
+        .filter { it.deviceAddress == deviceAddress && it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
         .maxByOrNull { it.timestamp }
 }
 
@@ -317,7 +346,7 @@ class DiscoveryScanEngineTest {
         // Session should be persisted (happens synchronously inside startScan)
         assertEquals(1, discoveryDao.sessions.size)
         val session = discoveryDao.sessions.values.first()
-        assertEquals("in_progress", session.completionStatus)
+        assertEquals(DiscoverySessionStatus.IN_PROGRESS, session.completionStatus)
         assertEquals("LONG_FAST", session.presetsScanned)
         assertEquals("LONG_FAST", session.homePreset)
 
@@ -355,9 +384,12 @@ class DiscoveryScanEngineTest {
         // Collector should be unregistered
         assertNull(collectorRegistry.collector)
 
-        // Session should be finalized with "stopped" status
+        // stopScan returns after process-scope restoration ownership is established, not after its settle delay.
         val session = discoveryDao.sessions.values.first()
-        assertEquals("stopped", session.completionStatus)
+        assertEquals(DiscoverySessionStatus.RESTORE_PENDING_STOPPED, session.completionStatus)
+        advanceTimeBy(DiscoveryHomeRestorer.POST_RESTORE_SETTLE_DELAY_MS)
+        runCurrent()
+        assertEquals(DiscoverySessionStatus.STOPPED, discoveryDao.sessions.values.first().completionStatus)
     }
 
     @Test
@@ -367,7 +399,7 @@ class DiscoveryScanEngineTest {
 
         // Immediately after startScan, the session should exist with "in_progress"
         val session = discoveryDao.sessions.values.first()
-        assertEquals("in_progress", session.completionStatus)
+        assertEquals(DiscoverySessionStatus.IN_PROGRESS, session.completionStatus)
 
         // Wait for the scan loop to start, then verify active
         assertScanActive(engine)
@@ -616,8 +648,15 @@ class DiscoveryScanEngineTest {
         assertFalse(engine.isActive)
         assertNull(collectorRegistry.collector, "collector should be unregistered")
 
-        assertEquals("failed", discoveryDao.sessions.values.first().completionStatus)
-        // The last LoRa config applied is the home preset (LONG_FAST), not the scan preset (SHORT_FAST).
+        assertEquals(
+            DiscoverySessionStatus.RESTORE_PENDING_FAILED,
+            discoveryDao.sessions.values.first().completionStatus,
+        )
+        assertEquals(ChannelOption.SHORT_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+        assertEquals(DiscoverySessionStatus.FAILED, discoveryDao.sessions.values.first().completionStatus)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
     }
 
@@ -631,6 +670,204 @@ class DiscoveryScanEngineTest {
         advanceUntilIdle() // let the applicationScope restore complete
 
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun concurrentStopsShareOneTerminalCleanupAndHomeRestore() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        val originalSessionId = checkNotNull(engine.currentSession.value).id
+        val updateEntered = CompletableDeferred<Unit>()
+        val releaseUpdate = CompletableDeferred<Unit>()
+        discoveryDao.nextUpdateSessionEntered = updateEntered
+        discoveryDao.releaseNextUpdateSession = releaseUpdate
+
+        val firstStop = async { engine.stopScan() }
+        updateEntered.await()
+        val redundantStop = async { engine.stopScan() }
+        runCurrent()
+
+        assertFalse(redundantStop.isCompleted, "all stop callers must await the elected terminal cleanup")
+        releaseUpdate.complete(Unit)
+        firstStop.await()
+        redundantStop.await()
+        advanceUntilIdle()
+
+        val homeWrites =
+            radioController.configWrites.count { it.config.lora?.modem_preset == ChannelOption.LONG_FAST.modemPreset }
+        assertEquals(1, homeWrites)
+    }
+
+    @Test
+    fun stopDuringNaturalTerminalCleanupDoesNotReplaceSuccessfulCompletion() = runTest {
+        val engine = createEngine(this)
+        val updateEntered = CompletableDeferred<Unit>()
+        val releaseUpdate = CompletableDeferred<Unit>()
+        discoveryDao.nextUpdateSessionEntered = updateEntered
+        discoveryDao.releaseNextUpdateSession = releaseUpdate
+
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 1)
+        advanceTimeBy(1_001L)
+        updateEntered.await()
+        assertEquals(DiscoveryScanState.Analysis, engine.scanState.value)
+
+        engine.stopScan()
+        releaseUpdate.complete(Unit)
+        advanceUntilIdle()
+
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoverySessionStatus.COMPLETE, discoveryDao.sessions.values.first().completionStatus)
+    }
+
+    @Test
+    fun resetAndNewScanCannotDisplaceActiveTerminalCleanup() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        val originalSessionId = assertNotNull(engine.currentSession.value).id
+        val updateEntered = CompletableDeferred<Unit>()
+        val releaseUpdate = CompletableDeferred<Unit>()
+        discoveryDao.nextUpdateSessionEntered = updateEntered
+        discoveryDao.releaseNextUpdateSession = releaseUpdate
+
+        val stop = async { engine.stopScan() }
+        updateEntered.await()
+        engine.reset()
+        engine.startScan(listOf(ChannelOption.MEDIUM_FAST), dwellDurationSeconds = 60)
+
+        assertEquals(setOf(originalSessionId), discoveryDao.sessions.keys)
+        assertEquals(DiscoveryScanState.Cancelling, engine.scanState.value)
+        assertEquals(
+            originalSessionId,
+            assertNotNull(engine.currentSession.value, "reset must not discard the active session restore plan").id,
+        )
+        assertFalse(
+            radioController.configWrites.any { it.config.lora?.modem_preset == ChannelOption.MEDIUM_FAST.modemPreset },
+            "a refused restart must not retune the radio",
+        )
+
+        releaseUpdate.complete(Unit)
+        stop.await()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun targetShiftQueueRejectionFailsScanAndStillRestoresHomePreset() = runTest {
+        radioController.rejectLocalConfigWritesRemaining = 1
+        val engine = createEngine(this)
+
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        advanceUntilIdle()
+
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(DiscoverySessionStatus.FAILED, discoveryDao.sessions.values.first().completionStatus)
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun stopScanRetriesHomeRestoreAfterQueueRejection() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        radioController.rejectLocalConfigWritesRemaining = 1
+
+        engine.stopScan()
+        advanceUntilIdle()
+
+        assertEquals(0, radioController.rejectLocalConfigWritesRemaining)
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun newScanWaitsForPendingHomeRestoreBeforeRetuning() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        radioController.rejectLocalConfigWritesRemaining = 1
+
+        engine.stopScan()
+        engine.reset()
+        val restart = async { engine.startScan(listOf(ChannelOption.MEDIUM_FAST), dwellDurationSeconds = 60) }
+        runCurrent()
+
+        assertFalse(restart.isCompleted, "a new scan must wait for the prior session's home restore")
+        assertFalse(
+            radioController.configWrites.any { it.config.lora?.modem_preset == ChannelOption.MEDIUM_FAST.modemPreset },
+            "the new scan must not retune before the prior home restore succeeds",
+        )
+
+        // Admission retry delay after rejection, plus the settle delay after the successful restore.
+        advanceTimeBy(DiscoveryHomeRestorer.RETRY_DELAY_MS + DiscoveryHomeRestorer.POST_RESTORE_SETTLE_DELAY_MS + 1)
+        restart.await()
+        runCurrent()
+
+        val appliedPresets = radioController.configWrites.mapNotNull { it.config.lora?.modem_preset }
+        val homeRestoreIndex = appliedPresets.indexOfFirst { it == ChannelOption.LONG_FAST.modemPreset }
+        val newScanIndex = appliedPresets.indexOfFirst { it == ChannelOption.MEDIUM_FAST.modemPreset }
+        assertTrue(homeRestoreIndex >= 0, "the prior session must restore the home preset")
+        assertTrue(newScanIndex > homeRestoreIndex, "the new scan retune must happen after home restoration")
+
+        engine.stopScan()
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun scanIsRefusedWhenHomeLoraConfigCannotBeCaptured() = runTest {
+        radioConfigRepository.setLocalConfigDirect(LocalConfig())
+        val engine = createEngine(this)
+
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+
+        assertEquals(DiscoveryScanState.Failed("Home LoRa configuration is not available"), engine.scanState.value)
+        assertTrue(discoveryDao.sessions.isEmpty())
+        assertTrue(radioController.configWrites.isEmpty())
+    }
+
+    @Test
+    fun terminalPersistenceFailureCannotSuppressHomeRestoration() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        discoveryDao.nextUpdateSessionFailure = IllegalStateException("database unavailable")
+
+        engine.stopScan()
+        advanceUntilIdle()
+
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+        assertTrue(engine.scanState.value is DiscoveryScanState.Complete)
+    }
+
+    @Test
+    fun deviceSwitchCancelsOldProcessRestoreWithoutApplyingItToReplacement() = runTest {
+        val firstDevice = "x:FIRST"
+        val secondDevice = "x:SECOND"
+        meshPrefs.setDeviceAddress(firstDevice)
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+
+        engine.stopScan()
+        engine.reset()
+        meshPrefs.setDeviceAddress(secondDevice)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        engine.startScan(listOf(ChannelOption.MEDIUM_FAST), dwellDurationSeconds = 60)
+        runCurrent()
+
+        val presets = radioController.configWrites.mapNotNull { it.config.lora?.modem_preset }
+        assertEquals(ChannelOption.MEDIUM_FAST.modemPreset, presets.last())
+        assertFalse(
+            presets.drop(1).contains(ChannelOption.LONG_FAST.modemPreset),
+            "the first device's delayed home restore must not retune the replacement device",
+        )
+
+        engine.stopScan()
+        advanceUntilIdle()
     }
 
     @Test
@@ -655,7 +892,7 @@ class DiscoveryScanEngineTest {
         id: Long = 1L,
         deviceAddress: String,
         homePreset: String = "LONG_FAST",
-        completionStatus: String = "in_progress",
+        completionStatus: String = DiscoverySessionStatus.IN_PROGRESS,
         homeLoraConfig: Config.LoRaConfig? =
             Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
     ) {
@@ -714,7 +951,7 @@ class DiscoveryScanEngineTest {
         advanceUntilIdle()
 
         assertNull(radioController.lastLocalConfig, "Should not touch the radio for a session from another device")
-        assertEquals("in_progress", discoveryDao.sessions.getValue(1).completionStatus)
+        assertEquals(DiscoverySessionStatus.IN_PROGRESS, discoveryDao.sessions.getValue(1).completionStatus)
         assertTrue(restored.isEmpty(), "No notification for a session from another device")
 
         watcherJob.cancel()
@@ -741,7 +978,7 @@ class DiscoveryScanEngineTest {
         runCurrent()
 
         assertEquals(
-            "in_progress",
+            DiscoverySessionStatus.IN_PROGRESS,
             discoveryDao.sessions.getValue(999).completionStatus,
             "Stale row must not be touched while this engine's own scan is active",
         )
@@ -764,7 +1001,11 @@ class DiscoveryScanEngineTest {
         val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
         advanceUntilIdle()
 
-        assertEquals("in_progress", discoveryDao.sessions.getValue(1).completionStatus, "Failed restore must not mark")
+        assertEquals(
+            DiscoverySessionStatus.IN_PROGRESS,
+            discoveryDao.sessions.getValue(1).completionStatus,
+            "Failed restore must not mark",
+        )
         assertTrue(restored.isEmpty(), "No notification when the restore write failed")
 
         // Next reconnect succeeds — the watcher must still be alive to retry. A real reconnect always passes through
@@ -779,6 +1020,27 @@ class DiscoveryScanEngineTest {
         assertEquals("restored", discoveryDao.sessions.getValue(1).completionStatus)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
         assertEquals(listOf("LONG_FAST"), restored, "Caller notified once the retry succeeded")
+
+        watcherJob.cancel()
+    }
+
+    @Test
+    fun restoreInterruptedSessionsOnReconnectFinalizesPendingCompleteWithoutLegacyRestorePlan() = runTest {
+        val address = "x:AA:BB:CC:DD:EE:FF"
+        meshPrefs.setDeviceAddress(address)
+        seedInterruptedSession(
+            deviceAddress = address,
+            completionStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
+            homePreset = "CUSTOM",
+            homeLoraConfig = null,
+        )
+
+        val engine = createEngine(this)
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect {} }
+        advanceUntilIdle()
+
+        assertEquals(DiscoverySessionStatus.COMPLETE, discoveryDao.sessions.getValue(1).completionStatus)
+        assertNull(radioController.lastLocalConfig, "legacy row without a restore plan must not touch the radio")
 
         watcherJob.cancel()
     }

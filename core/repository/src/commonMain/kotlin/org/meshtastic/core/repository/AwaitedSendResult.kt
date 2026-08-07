@@ -39,10 +39,34 @@ enum class AwaitedSendStatus {
 
 /**
  * Detailed result for an awaited send. [dispatched] is true only when an active transport accepted the outbound bytes
- * for asynchronous delivery. Correlated responses received before dispatch are ignored, so an accepted result always
- * belongs to an admitted transport send.
+ * for asynchronous delivery. [departureEpochAtDispatch] captures the canonical departure counter at that admission
+ * boundary, allowing callers to distinguish a later transport departure from one that happened while the packet was
+ * still queued. Correlated responses received before dispatch are ignored, so an accepted result always belongs to an
+ * admitted transport send.
  */
-data class AwaitedSendResult(val status: AwaitedSendStatus, val dispatched: Boolean) {
+data class AwaitedSendResult(
+    val status: AwaitedSendStatus,
+    val dispatched: Boolean,
+    val departureEpochAtDispatch: Long? = null,
+) {
+    init {
+        require(dispatched == (departureEpochAtDispatch != null)) {
+            "departureEpochAtDispatch must be set exactly when dispatched is true"
+        }
+        require(status != AwaitedSendStatus.REJECTED || !dispatched) {
+            "a REJECTED result must not come from an admitted transport send"
+        }
+        require(status != AwaitedSendStatus.RADIO_REJECTED || dispatched) {
+            "a RADIO_REJECTED result must come from an admitted transport send"
+        }
+        require(status != AwaitedSendStatus.ACCEPTED || dispatched) {
+            "an ACCEPTED result must come from an admitted transport send"
+        }
+        require(status != AwaitedSendStatus.TIMED_OUT || dispatched) {
+            "a TIMED_OUT result must come from an admitted transport send"
+        }
+    }
+
     val accepted: Boolean
         get() = status == AwaitedSendStatus.ACCEPTED
 }

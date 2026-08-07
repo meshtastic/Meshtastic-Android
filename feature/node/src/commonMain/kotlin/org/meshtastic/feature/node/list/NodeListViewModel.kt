@@ -188,7 +188,7 @@ class NodeListViewModel(
         nodeFilterPreferences.setNodeSort(sort)
     }
 
-    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
         radioConfigRepository.replaceAllSettings(channelSet.settings)
         val newLoraConfig = channelSet.lora_config
         if (newLoraConfig != null) {

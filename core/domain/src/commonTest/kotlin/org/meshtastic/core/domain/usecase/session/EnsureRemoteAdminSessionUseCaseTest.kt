@@ -25,6 +25,8 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -130,7 +132,8 @@ class EnsureRemoteAdminSessionUseCaseTest {
         var observed: EnsureSessionResult? = null
         val job = launch { observed = useCase(destNum) }
         runCurrent()
-        advanceTimeBy(13.seconds.inWholeMilliseconds)
+        // Keep the emission late while deriving the boundary from the production UX deadline.
+        advanceTimeBy(EnsureRemoteAdminSessionUseCase.UX_TIMEOUT.inWholeMilliseconds - 1.seconds.inWholeMilliseconds)
         refresh.emit(destNum)
         advanceUntilIdle()
         job.join()
@@ -156,5 +159,33 @@ class EnsureRemoteAdminSessionUseCaseTest {
         job.join()
 
         assertEquals(EnsureSessionResult.Timeout, observed)
+    }
+
+    @Test
+    fun `canceling one caller keeps the shared ensure alive for another caller`() = runTest {
+        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        val sessionManager = stubSessionManager(refreshFlow = refresh)
+        val controller = mock<RadioController>(MockMode.autofill)
+        var dispatches = 0
+        everySuspend { controller.refreshMetadata(any()) } calls
+            {
+                dispatches++
+                Unit
+            }
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
+
+        val firstCaller = launch { useCase(destNum) }
+        runCurrent()
+        val secondCaller = async { useCase(destNum) }
+        runCurrent()
+
+        firstCaller.cancelAndJoin()
+        assertEquals(1, dispatches)
+        refresh.emit(destNum)
+        runCurrent()
+
+        assertEquals(EnsureSessionResult.Refreshed, secondCaller.await())
+        assertEquals(1, dispatches)
     }
 }

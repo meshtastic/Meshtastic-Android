@@ -56,6 +56,14 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
         dbManager.withDb { it.discoveryDao().getSession(sessionId) }
 
+    override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String) {
+        dbManager.withDb { it.discoveryDao().updateSessionCompletionStatus(sessionId, status) }
+    }
+
+    override suspend fun updateRecoverableSessionCompletionStatus(sessionId: Long, status: String) {
+        dbManager.withDb { it.discoveryDao().updateRecoverableSessionCompletionStatus(sessionId, status) }
+    }
+
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> =
         dbManager.observeCurrentDb { it.discoveryDao().getSessionFlow(sessionId) }
 

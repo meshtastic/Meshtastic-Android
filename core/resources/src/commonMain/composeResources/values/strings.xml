@@ -1207,6 +1207,7 @@
     <string name="node_list_help_title">Node List Help</string>
     <string name="node_list_long_click_label">Node options</string>
     <string name="node_number">Node Number</string>
+    <string name="node_request_send_failed">Couldn't send request. Try again.</string>
     <string name="node_restarting">Restarting…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>

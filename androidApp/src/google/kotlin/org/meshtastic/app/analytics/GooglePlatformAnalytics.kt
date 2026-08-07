@@ -227,12 +227,13 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             Datadog.setTrackingConsent(if (allowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
         }
 
+        val crashlytics = crashlyticsIfAvailable()
+        crashlytics?.isCrashlyticsCollectionEnabled = allowed
         if (isFirebaseInitialized) {
-            Firebase.crashlytics.isCrashlyticsCollectionEnabled = allowed
             Firebase.analytics.setAnalyticsCollectionEnabled(allowed)
 
             if (allowed) {
-                Firebase.crashlytics.sendUnsentReports()
+                crashlytics?.sendUnsentReports()
                 // Ensure ad-related PII collection remains disabled even if analytics is allowed
                 Firebase.analytics.setUserProperty("allow_personalized_ads", "false")
             }
@@ -294,26 +295,41 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
     override val isPlatformServicesAvailable: Boolean
         get() = isGooglePlayAvailable
 
+    /** Robolectric and partial Firebase test apps may initialize Firebase without registering Crashlytics. */
+    private fun crashlyticsIfAvailable() = if (!isFirebaseInitialized) {
+        null
+    } else {
+        try {
+            Firebase.crashlytics
+        } catch (_: IllegalStateException) {
+            null
+        } catch (_: NullPointerException) {
+            // FirebaseCrashlytics.getInstance() throws this when Robolectric initializes Firebase without the
+            // Crashlytics component registered.
+            null
+        }
+    }
+
     private inner class CrashlyticsLogWriter : LogWriter() {
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-            if (!isFirebaseInitialized) return
-            if (!Firebase.crashlytics.isCrashlyticsCollectionEnabled) return
+            val crashlytics = crashlyticsIfAvailable()
+            if (crashlytics?.isCrashlyticsCollectionEnabled == true) {
+                // Add the log to the Crashlytics log buffer so it appears in reports.
+                crashlytics.log("$severity/$tag: $message")
 
-            // Add the log to the Crashlytics log buffer so it appears in reports
-            Firebase.crashlytics.log("$severity/$tag: $message")
-
-            // Cancellations and expected conditions stay breadcrumbs only — see shouldReportAsException.
-            if (!shouldReportAsException(severity, throwable)) return
-
-            if (throwable != null) {
-                Firebase.crashlytics.recordException(throwable)
-            } else {
-                Firebase.crashlytics.setCustomKeys {
-                    key(KEY_PRIORITY, severity.ordinal)
-                    key(KEY_TAG, tag)
-                    key(KEY_MESSAGE, message)
+                // Cancellations and expected conditions stay breadcrumbs only — see shouldReportAsException.
+                if (shouldReportAsException(severity, throwable)) {
+                    if (throwable != null) {
+                        crashlytics.recordException(throwable)
+                    } else {
+                        crashlytics.setCustomKeys {
+                            key(KEY_PRIORITY, severity.ordinal)
+                            key(KEY_TAG, tag)
+                            key(KEY_MESSAGE, message)
+                        }
+                        crashlytics.recordException(Exception(message))
+                    }
                 }
-                Firebase.crashlytics.recordException(Exception(message))
             }
         }
     }

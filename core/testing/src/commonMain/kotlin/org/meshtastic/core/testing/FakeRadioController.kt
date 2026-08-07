@@ -24,6 +24,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.ConnectionStateHolder
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
@@ -56,8 +57,11 @@ class FakeRadioController :
     /** One local or admin configuration write. Local writes have no destination. */
     data class ConfigWrite(val destination: Int?, val config: Config)
 
-    /** One module configuration write, preserving its destination and payload as a single observation. */
-    data class ModuleConfigWrite(val destination: Int, val config: ModuleConfig)
+    /** One module configuration write. Local writes have no destination. */
+    data class ModuleConfigWrite(val destination: Int?, val config: ModuleConfig)
+
+    /** One owner write. Local writes have no destination. */
+    data class OwnerWrite(val destination: Int?, val user: User)
 
     /** Every local or admin configuration write, preserving destination and call order together. */
     val configWrites = mutableListOf<ConfigWrite>()
@@ -79,16 +83,19 @@ class FakeRadioController :
     val moduleConfigWrites = mutableListOf<ModuleConfigWrite>()
 
     /** Module configuration payloads in call order. Prefer [moduleConfigWrites] when destination identity matters. */
-    val moduleConfigs: List<ModuleConfig>
+    val allModuleConfigs: List<ModuleConfig>
         get() = moduleConfigWrites.map(ModuleConfigWrite::config)
 
-    /** Module configuration payloads written inside a local edit transaction (whose destination sentinel is zero). */
+    /** Local module configuration payloads in call order. Prefer [moduleConfigWrites] when destination matters. */
     val localModuleConfigs: List<ModuleConfig>
-        get() = moduleConfigWrites.filter { it.destination == 0 }.map(ModuleConfigWrite::config)
+        get() = moduleConfigWrites.filter { it.destination == null }.map(ModuleConfigWrite::config)
 
-    /** Destination node for every module configuration write, in order. */
-    val moduleConfigDestinations: List<Int>
+    /** Destination node for every module configuration write, in order. Local writes have no destination. */
+    val moduleConfigDestinations: List<Int?>
         get() = moduleConfigWrites.map(ModuleConfigWrite::destination)
+
+    /** Every local or admin owner write, preserving destination and call order together. */
+    val ownerWrites = mutableListOf<OwnerWrite>()
 
     /** Destination node for every edit transaction, in order. Local edits use the fake's sentinel value of zero. */
     val editSettingsDestinations = mutableListOf<Int>()
@@ -112,6 +119,12 @@ class FakeRadioController :
 
     /** When true, [setLocalConfig] throws — simulates the radio link dropping mid config write. */
     var throwOnSetLocalConfig: Boolean = false
+
+    /** Number of upcoming local-config writes to reject through the production queue-admission failure contract. */
+    var rejectLocalConfigWritesRemaining: Int = 0
+
+    /** Number of upcoming local-channel writes to reject through the production queue-admission failure contract. */
+    var rejectLocalChannelWritesRemaining: Int = 0
 
     /**
      * When set, a channel write throws once [localChannels] has reached this many entries — simulates a mid-write
@@ -141,6 +154,7 @@ class FakeRadioController :
             localChannels.clear()
             fixedPositions.clear()
             moduleConfigWrites.clear()
+            ownerWrites.clear()
             editSettingsDestinations.clear()
             adminOperations.clear()
             failEditSettingsBegin = false
@@ -149,6 +163,8 @@ class FakeRadioController :
             onStandaloneConfig = {}
             throwOnSend = false
             throwOnSetLocalConfig = false
+            rejectLocalConfigWritesRemaining = 0
+            rejectLocalChannelWritesRemaining = 0
             failChannelWriteAfter = null
             lastSetDeviceAddress = null
             lastSetOwnerUser = null
@@ -190,15 +206,24 @@ class FakeRadioController :
 
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
+        if (rejectLocalConfigWritesRemaining > 0) {
+            rejectLocalConfigWritesRemaining--
+            throw PacketQueueRejectedException("Local config")
+        }
         configWrites.add(ConfigWrite(destination = null, config = config))
     }
 
     override suspend fun setLocalChannel(channel: Channel) {
+        if (rejectLocalChannelWritesRemaining > 0) {
+            rejectLocalChannelWritesRemaining--
+            throw PacketQueueRejectedException("Local channel")
+        }
         localChannels.add(channel)
     }
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
         lastSetOwnerUser = user
+        ownerWrites.add(OwnerWrite(destination = destNum.takeUnless { it == 0 }, user = user))
         adminOperations.add("owner")
     }
 
@@ -212,14 +237,14 @@ class FakeRadioController :
         recordModuleConfigWrite(destNum, config, invokeStandaloneHook = true)
     }
 
-    private suspend fun recordConfigWrite(destNum: Int?, config: Config, invokeStandaloneHook: Boolean) {
-        configWrites.add(ConfigWrite(destination = destNum, config = config))
+    private suspend fun recordConfigWrite(destNum: Int, config: Config, invokeStandaloneHook: Boolean) {
+        configWrites.add(ConfigWrite(destination = destNum.takeUnless { it == 0 }, config = config))
         adminOperations.add("config:update")
         if (invokeStandaloneHook) onStandaloneConfig(config)
     }
 
     private suspend fun recordModuleConfigWrite(destNum: Int, config: ModuleConfig, invokeStandaloneHook: Boolean) {
-        moduleConfigWrites.add(ModuleConfigWrite(destination = destNum, config = config))
+        moduleConfigWrites.add(ModuleConfigWrite(destination = destNum.takeUnless { it == 0 }, config = config))
         adminOperations.add("module:update")
         if (invokeStandaloneHook) onStandaloneModuleConfig(config)
     }
@@ -291,7 +316,7 @@ class FakeRadioController :
                 override suspend fun setOwner(user: User) = setOwner(destNum, user, generatePacketId())
 
                 override suspend fun setConfig(config: Config) =
-                    recordConfigWrite(destNum.takeUnless { it == 0 }, config, invokeStandaloneHook = false)
+                    recordConfigWrite(destNum, config, invokeStandaloneHook = false)
 
                 override suspend fun setModuleConfig(config: ModuleConfig) =
                     recordModuleConfigWrite(destNum, config, invokeStandaloneHook = false)

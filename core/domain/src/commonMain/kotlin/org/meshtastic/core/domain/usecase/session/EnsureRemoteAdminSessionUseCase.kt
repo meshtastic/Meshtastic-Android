@@ -22,6 +22,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -57,7 +58,7 @@ open class EnsureRemoteAdminSessionUseCase(
     private val serviceRepository: ServiceRepository,
     private val serviceScope: ServiceScope,
 ) {
-    private val mutex = Mutex()
+    private val inFlightMutex = Mutex()
     private val inFlight = mutableMapOf<Int, Deferred<EnsureSessionResult>>()
 
     @Suppress("ReturnCount")
@@ -70,17 +71,25 @@ open class EnsureRemoteAdminSessionUseCase(
         }
 
         val deferred =
-            mutex.withLock {
-                inFlight[destNum]
+            inFlightMutex.withLock {
+                inFlight[destNum]?.takeIf { !it.isCompleted }
                     ?: serviceScope
                         .async(start = CoroutineStart.LAZY) { runEnsure(destNum) }
-                        .also { inFlight[destNum] = it }
+                        .also { newDeferred ->
+                            inFlight[destNum] = newDeferred
+                            // Register before the lazy deferred can start. Cleanup is identity-checked so an old
+                            // completion
+                            // cannot remove a newer ensure for the same node.
+                            newDeferred.invokeOnCompletion {
+                                serviceScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                                    inFlightMutex.withLock {
+                                        if (inFlight[destNum] === newDeferred) inFlight.remove(destNum)
+                                    }
+                                }
+                            }
+                        }
             }
-        return try {
-            deferred.await()
-        } finally {
-            mutex.withLock { if (inFlight[destNum] === deferred) inFlight.remove(destNum) }
-        }
+        return deferred.await()
     }
 
     private suspend fun runEnsure(destNum: Int): EnsureSessionResult {

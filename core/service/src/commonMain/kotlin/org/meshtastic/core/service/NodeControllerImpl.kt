@@ -16,11 +16,13 @@
  */
 package org.meshtastic.core.service
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.AdminMessage
 
@@ -74,6 +76,12 @@ internal class NodeControllerImpl(
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
         nodeManager.removeByNodenum(nodeNum)
         val myNum = nodeManager.myNodeNum.value ?: return
-        commandSender.sendAdmin(myNum, packetId) { AdminMessage(remove_by_nodenum = nodeNum) }
+        try {
+            commandSender.sendAdmin(myNum, packetId) { AdminMessage(remove_by_nodenum = nodeNum) }
+        } catch (e: PacketQueueRejectedException) {
+            // Node removal has always been local-first and is allowed while disconnected. Preserve that contract when
+            // the connected transport is transitioning and cannot admit the best-effort radio cleanup command.
+            Logger.w(e) { "Remove-node admin command for $nodeNum was not admitted; local removal retained" }
+        }
     }
 }

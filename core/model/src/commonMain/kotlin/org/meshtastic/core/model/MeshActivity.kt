@@ -18,7 +18,7 @@ package org.meshtastic.core.model
 
 /** Represents activity on the mesh network. */
 sealed class MeshActivity {
-    /** Data is being sent to the radio. */
+    /** The active transport accepted a local outbound handoff; this does not confirm radio or mesh delivery. */
     data object Send : MeshActivity()
 
     /** Data is being received from the radio. */

@@ -18,19 +18,32 @@ package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
 import com.hoho.android.usbserial.driver.UsbSerialDriver
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.network.repository.SerialConnection
 import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.transport.HeartbeatSender
+import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration.Companion.seconds
+
+private val SERIAL_TRANSPORT_TEARDOWN_TIMEOUT = 45.seconds
 
 /** An Android USB/serial [RadioTransport] implementation. */
+@Suppress("TooManyFunctions")
 class SerialRadioTransport(
     callback: RadioTransportCallback,
     scope: CoroutineScope,
@@ -38,36 +51,56 @@ class SerialRadioTransport(
     private val createSerialConnection: (UsbSerialDriver, SerialConnectionListener) -> SerialConnection,
     private val address: String,
 ) : StreamTransport(callback, scope) {
-    private var connRef = AtomicReference<SerialConnection?>()
+    private val connRef = AtomicReference<SerialConnection?>()
     private val connectionAdmissionLock = Any()
-    private var activeConnectionToken: Any? = null
+
+    private class ConnectionToken {
+        var connection: SerialConnection? = null
+        val lifecycle = TransportLifecycleGate("Android serial connection")
+        val connectCompletion = CompletableDeferred<Unit>()
+    }
+
+    private data class ConnectionOperation(
+        val token: ConnectionToken,
+        val connection: SerialConnection,
+        val lease: TransportLifecycleGate.OperationLease,
+    )
+
+    private data class ClaimedConnection(
+        val token: ConnectionToken,
+        val connection: SerialConnection,
+        val cleanupCompletion: CompletableDeferred<Unit>,
+    )
+
+    private data class ConnectionStats(
+        val connectStartedAt: Long,
+        var connectedAt: Long = 0L,
+        var packetsReceived: Int = 0,
+        var bytesReceived: Long = 0L,
+    )
+
+    private var activeConnectionToken: ConnectionToken? = null
+
+    /** Guarded by [connectionAdmissionLock]; replacement waits until old physical cleanup and notification finish. */
+    private var connectionCleanupInProgress = false
+    private var connectionCleanupCompletion: CompletableDeferred<Unit>? = null
+    private var connectAfterCleanupScheduled = false
     private val connectionReady = AtomicBoolean(false)
+    private val lifecycle =
+        TransportLifecycleGate("Android serial", teardownTimeout = SERIAL_TRANSPORT_TEARDOWN_TIMEOUT)
 
     private val heartbeatSender = HeartbeatSender(sendToRadio = { handleSendToRadio(it) }, logTag = "Serial[$address]")
 
-    /**
-     * Set while an explicit [close] is tearing down the connection so the reader thread's
-     * [SerialConnectionListener.onDisconnected] callback (invoked synchronously by `port.close()` through the reader's
-     * `onRunError`) does NOT forward a transient [onDeviceDisconnect] up to the orchestrator. The service-layer caller
-     * of `close()` (SharedRadioInterfaceService's stopTransportLocked) owns post-close notification and would otherwise
-     * observe a double emission: a transient DeviceSleep from this callback chain followed by its own intended
-     * disconnect emission.
-     */
-    private val explicitCloseInProgress = AtomicBoolean(false)
-
-    override fun start() {
-        connect()
-    }
+    override fun start() = connect()
 
     override suspend fun close() {
-        Logger.d { "[$address] Closing serial transport" }
-        explicitCloseInProgress.set(true)
-        try {
-            closeConnection(waitForStopped = true)
-            super.close()
-        } finally {
-            explicitCloseInProgress.set(false)
-        }
+        val completed =
+            lifecycle.close {
+                Logger.d { "[$address] Closing serial transport" }
+                closeConnectionAndAwaitConnect(waitForStopped = true)
+                super.close()
+            }
+        if (!completed) Logger.w { "[$address] Serial teardown did not complete within its lifecycle bounds" }
     }
 
     override fun onDeviceDisconnect(
@@ -76,163 +109,382 @@ class SerialRadioTransport(
         errorMessage: String?,
         reason: TransportDisconnectReason?,
     ) {
-        if (closeConnection(waitForStopped)) {
-            super.onDeviceDisconnect(waitForStopped, isPermanent, errorMessage, reason)
-        }
+        disconnectConnection(
+            connectionToken = null,
+            waitForStopped = waitForStopped,
+            isPermanent = isPermanent,
+            errorMessage = errorMessage,
+            reason = reason,
+        )
     }
 
-    private fun closeConnection(waitForStopped: Boolean): Boolean {
-        val connection =
-            synchronized(connectionAdmissionLock) {
-                connectionReady.set(false)
-                activeConnectionToken = null
-                connRef.getAndSet(null)
-            } ?: return false
-        connection.close(waitForStopped)
+    private fun claimConnection(connectionToken: ConnectionToken? = null): ClaimedConnection? =
+        synchronized(connectionAdmissionLock) {
+            val token = activeConnectionToken ?: return@synchronized null
+            val connection = connRef.get() ?: return@synchronized null
+            if (connectionToken != null && !ownsConnectionLocked(connectionToken, connection)) return@synchronized null
+            connRef.set(null)
+            connectionReady.set(false)
+            activeConnectionToken = null
+            token.connection = null
+            connectionCleanupInProgress = true
+            val cleanupCompletion = CompletableDeferred<Unit>().also { connectionCleanupCompletion = it }
+            ClaimedConnection(token, connection, cleanupCompletion)
+        }
+
+    /** Caller must hold [connectionAdmissionLock]. */
+    private fun ownsConnectionLocked(connectionToken: ConnectionToken, connection: SerialConnection): Boolean =
+        activeConnectionToken === connectionToken &&
+            connectionToken.connection === connection &&
+            connRef.get() === connection
+
+    private suspend fun closeConnectionAndAwaitConnect(waitForStopped: Boolean): Boolean {
+        val claimed = claimConnection()
+        if (claimed == null) {
+            awaitPendingConnectionCleanup()
+            return false
+        }
+        try {
+            closeClaimedConnection(claimed, waitForStopped)
+        } finally {
+            finishConnectionCleanup(claimed.cleanupCompletion)
+        }
         return true
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    override fun connect() {
-        val deviceMap = serialDevices.value
-        val device = deviceMap[address] ?: deviceMap.values.firstOrNull()
-        if (device == null) {
-            Logger.e { "[$address] Serial device not found at address" }
-        } else {
-            val connectStart = nowMillis
-            Logger.i { "[$address] Opening serial device: $device" }
+    private suspend fun awaitPendingConnectionCleanup() {
+        synchronized(connectionAdmissionLock) { connectionCleanupCompletion }?.await()
+    }
 
-            var packetsReceived = 0
-            var bytesReceived = 0L
-            var connectionStartTime = 0L
-
-            val connectionToken = Any()
-            val onConnect: () -> Unit = {
-                connectionStartTime = nowMillis
-                val connectionTime = connectionStartTime - connectStart
-                Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
-                super.connect()
+    private suspend fun closeClaimedConnection(claimed: ClaimedConnection, waitForStopped: Boolean) {
+        val completed =
+            claimed.token.lifecycle.close {
+                claimed.connection.close(waitForStopped)
+                claimed.token.connectCompletion.awaitForClose("connection attempt")
             }
+        if (!completed) {
+            Logger.w { "[$address] Serial connection teardown did not complete within its lifecycle bounds" }
+        }
+    }
 
-            createSerialConnection(
-                device,
-                object : SerialConnectionListener {
-                    override fun onMissingPermission() {
-                        Logger.e {
-                            "[$address] Serial connection failed - missing USB permissions for device: $device"
-                        }
-                        // Permission denial is terminal for this connection attempt: stop the reconnect loop
-                        // and let the service/UI layer choose the user-facing copy for the structured reason.
-                        onDeviceDisconnect(
-                            waitForStopped = false,
-                            isPermanent = true,
-                            errorMessage = null,
-                            reason = TransportDisconnectReason.UsbPermissionDenied,
-                        )
+    private suspend fun Deferred<Unit>.awaitForClose(phase: String) {
+        val timeout = TransportLifecycleGate.OPERATION_DRAIN_TIMEOUT
+        val completed =
+            withTimeoutOrNull(timeout) {
+                await()
+                true
+            } == true
+        if (!completed) Logger.w { "[$address] Serial close timed out after $timeout while waiting for $phase" }
+    }
+
+    private fun disconnectConnection(
+        connectionToken: ConnectionToken?,
+        waitForStopped: Boolean,
+        isPermanent: Boolean,
+        errorMessage: String? = null,
+        reason: TransportDisconnectReason? = null,
+    ): Boolean {
+        val claimed = claimConnection(connectionToken) ?: return false
+        launchConnectionCleanup {
+            try {
+                closeClaimedConnection(claimed, waitForStopped)
+            } finally {
+                try {
+                    notifyDeviceDisconnect(waitForStopped, isPermanent, errorMessage, reason)
+                } finally {
+                    finishConnectionCleanup(claimed.cleanupCompletion)
+                }
+            }
+        }
+        return true
+    }
+
+    private fun launchConnectionCleanup(block: suspend () -> Unit) {
+        // Enter NonCancellable before returning from the callback so parent cancellation cannot strand claimed USB
+        // state.
+        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) { withContext(NonCancellable) { block() } }
+    }
+
+    private fun notifyDeviceDisconnect(
+        waitForStopped: Boolean,
+        isPermanent: Boolean,
+        errorMessage: String?,
+        reason: TransportDisconnectReason?,
+    ) {
+        // Explicit close owns the terminal service-layer notification. Admission at emission time linearizes this
+        // callback with close even when physical cleanup was deferred behind an older operation.
+        lifecycle.runIfOpen { super.onDeviceDisconnect(waitForStopped, isPermanent, errorMessage, reason) }
+    }
+
+    override fun connect() {
+        when {
+            lifecycle.isClosed -> Logger.d { "[$address] Ignoring start after serial transport close" }
+
+            deferConnectUntilCleanup() -> Unit
+
+            hasActiveConnection() -> Logger.d { "[$address] Ignoring start while serial generation is active" }
+
+            else -> {
+                val devices = serialDevices.value
+                // Keep legacy path-based selections usable when a single serial device can be resolved unambiguously.
+                // Generation ownership still binds all callbacks to this transport instance after the device is chosen.
+                val device = devices[address] ?: devices.values.singleOrNull()
+                if (device == null) {
+                    Logger.e { "[$address] Serial device not found at selected address" }
+                } else {
+                    openConnection(device)
+                }
+            }
+        }
+    }
+
+    private fun hasActiveConnection(): Boolean =
+        synchronized(connectionAdmissionLock) { activeConnectionToken != null || connRef.get() != null }
+
+    private fun deferConnectUntilCleanup(): Boolean {
+        var cleanup: Deferred<Unit>? = null
+        val deferred =
+            synchronized(connectionAdmissionLock) {
+                if (!connectionCleanupInProgress) {
+                    false
+                } else {
+                    if (!connectAfterCleanupScheduled) {
+                        connectAfterCleanupScheduled = true
+                        cleanup = checkNotNull(connectionCleanupCompletion)
                     }
+                    true
+                }
+            }
+        cleanup?.let { completion ->
+            scope.handledLaunch {
+                try {
+                    completion.await()
+                } finally {
+                    synchronized(connectionAdmissionLock) { connectAfterCleanupScheduled = false }
+                }
+                connect()
+            }
+        }
+        return deferred
+    }
 
-                    override fun onConnected() {
-                        synchronized(connectionAdmissionLock) {
-                            if (activeConnectionToken !== connectionToken || connRef.get() == null) return
-                            connectionReady.set(true)
-                            onConnect.invoke()
-                        }
-                    }
+    @Suppress("TooGenericExceptionCaught")
+    private fun openConnection(device: UsbSerialDriver) {
+        val stats = ConnectionStats(connectStartedAt = nowMillis)
+        Logger.i { "[$address] Opening serial device: $device" }
 
-                    override fun onDataReceived(bytes: ByteArray) {
-                        packetsReceived++
-                        bytesReceived += bytes.size
-                        Logger.d {
-                            "[$address] Serial received packet #$packetsReceived - " +
-                                "${bytes.size} byte(s) (Total RX: $bytesReceived bytes)"
-                        }
-                        bytes.forEach(::readChar)
-                    }
+        val connectionToken = ConnectionToken()
+        val connection = createSerialConnection(device, createConnectionListener(device, connectionToken, stats))
+        if (!publishConnection(connectionToken, connection)) {
+            Logger.d { "[$address] Serial generation is active or still tearing down; closing unused connection" }
+            connection.close(waitForStopped = false)
+            return
+        }
 
-                    override fun onDisconnected(thrown: Exception?) {
-                        // Skip the disconnect callback when the reader-thread termination is the
-                        // direct result of an explicit close() — the caller owns the post-close
-                        // notification, and the expected close must not emit warning-log noise.
-                        // USB unplug / cable error is the only path that should log + forward a
-                        // transient disconnect here.
-                        if (explicitCloseInProgress.get()) {
-                            return
-                        }
-
-                        val uptime =
-                            if (connectionStartTime > 0) {
-                                nowMillis - connectionStartTime
-                            } else {
-                                0
-                            }
-                        thrown?.let { e ->
-                            // USB errors are common when unplugging; log as warning to avoid Crashlytics noise
-                            Logger.w(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
-                        }
-                        Logger.w {
-                            "[$address] Serial device disconnected - " +
-                                "Device: $device, " +
-                                "Uptime: ${uptime}ms, " +
-                                "Packets RX: $packetsReceived ($bytesReceived bytes)"
-                        }
-                        // USB unplug / cable error is transient — the transport will reconnect when
-                        // the device is replugged or the OS re-enumerates the port. Only close()
-                        // (user disconnects) and missing-permission (see onMissingPermission) signal
-                        // a permanent disconnect; cable unplug / I/O errors are transient.
-                        onDeviceDisconnect(waitForStopped = false, isPermanent = false)
-                    }
-                },
+        try {
+            connection.connect()
+        } catch (e: CancellationException) {
+            disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false, errorMessage = e.message)
+            throw e
+        } catch (e: Exception) {
+            Logger.w(e) { "[$address] Serial connect failed" }
+            disconnectConnection(
+                connectionToken = connectionToken,
+                waitForStopped = false,
+                isPermanent = false,
+                errorMessage = e.message,
             )
-                .also { conn ->
+        } finally {
+            connectionToken.connectCompletion.complete(Unit)
+        }
+    }
+
+    private fun createConnectionListener(
+        device: UsbSerialDriver,
+        connectionToken: ConnectionToken,
+        stats: ConnectionStats,
+    ): SerialConnectionListener = object : SerialConnectionListener {
+        override fun onMissingPermission() {
+            if (
+                disconnectConnection(
+                    connectionToken = connectionToken,
+                    waitForStopped = false,
+                    isPermanent = true,
+                    reason = TransportDisconnectReason.UsbPermissionDenied,
+                )
+            ) {
+                Logger.w { "Serial connection unavailable: USB permission denied" }
+            }
+        }
+
+        override fun onConnected() = handleConnected(connectionToken, stats)
+
+        override fun onDataReceived(bytes: ByteArray) = handleDataReceived(connectionToken, stats, bytes)
+
+        override fun onDisconnected(thrown: Exception?) = handleDisconnected(connectionToken, stats, device, thrown)
+    }
+
+    private fun handleConnected(connectionToken: ConnectionToken, stats: ConnectionStats) {
+        val operation = admitConnectionOperation(connectionToken, requireReady = false) ?: return
+        try {
+            stats.connectedAt = nowMillis
+            val connectionTime = stats.connectedAt - stats.connectStartedAt
+            Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
+            val wakeFailure = sendWakeBytes(operation.connection)
+            if (wakeFailure != null) {
+                handleWakeFailure(connectionToken, wakeFailure)
+            } else {
+                val readyToPublish =
                     synchronized(connectionAdmissionLock) {
-                        connRef.set(conn)
-                        activeConnectionToken = connectionToken
-                        connectionReady.set(false)
+                        ownsConnectionLocked(connectionToken, operation.connection).also { owns ->
+                            if (owns) connectionReady.set(true)
+                        }
                     }
-                    try {
-                        conn.connect()
-                    } catch (e: Exception) {
-                        // A synchronous listener callback can already have cleared and closed this connection.
-                        val shouldClose =
+                if (readyToPublish) {
+                    lifecycle.runIfOpen {
+                        val stillOwned =
                             synchronized(connectionAdmissionLock) {
-                                if (activeConnectionToken !== connectionToken || !connRef.compareAndSet(conn, null)) {
-                                    false
-                                } else {
-                                    connectionReady.set(false)
-                                    activeConnectionToken = null
-                                    true
-                                }
+                                ownsConnectionLocked(connectionToken, operation.connection) && connectionReady.get()
                             }
-                        if (shouldClose) conn.close(waitForStopped = false)
-                        throw e
+                        if (stillOwned) callback.onConnect()
                     }
                 }
+            }
+        } finally {
+            operation.lease.release()
         }
     }
 
-    // The result reports synchronous admission against the current connection, not eventual delivery: framing and
-    // sendBytes run later on the transport scope, where teardown may legitimately make the connection unavailable.
-    override fun handleSendToRadio(p: ByteArray): Boolean {
-        if (!connectionReady.get() || connRef.get() == null) {
-            Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
-            return false
-        }
-        return super.handleSendToRadio(p)
+    private fun sendWakeBytes(connection: SerialConnection): Exception? = try {
+        // SerialConnection.sendBytes is asynchronous. This lease guarantees handoff to this exact connection
+        // generation's write queue; it does not claim physical wire delivery.
+        connection.sendBytes(StreamFrameCodec.WAKE_BYTES)
+        null
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: IOException) {
+        e
+    } catch (e: IllegalStateException) {
+        e
     }
+
+    private fun handleWakeFailure(connectionToken: ConnectionToken, failure: Exception) {
+        Logger.w(failure) { "[$address] Serial wake failed; ending connection generation" }
+        disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false)
+    }
+
+    private fun handleDataReceived(connectionToken: ConnectionToken, stats: ConnectionStats, bytes: ByteArray) {
+        val operation = admitConnectionOperation(connectionToken, requireReady = false) ?: return
+        try {
+            stats.packetsReceived++
+            stats.bytesReceived += bytes.size
+            Logger.d {
+                "[$address] Serial received packet #${stats.packetsReceived} - " +
+                    "${bytes.size} byte(s) (Total RX: ${stats.bytesReceived} bytes)"
+            }
+            bytes.forEach(::readChar)
+        } finally {
+            operation.lease.release()
+        }
+    }
+
+    private fun handleDisconnected(
+        connectionToken: ConnectionToken,
+        stats: ConnectionStats,
+        device: UsbSerialDriver,
+        thrown: Exception?,
+    ) {
+        if (lifecycle.isClosed) return
+        if (!disconnectConnection(connectionToken, waitForStopped = false, isPermanent = false)) return
+
+        val uptime = if (stats.connectedAt > 0) nowMillis - stats.connectedAt else 0
+        thrown?.let { error -> Logger.w(error) { "[$address] Serial error after ${uptime}ms: ${error.message}" } }
+        Logger.w {
+            "[$address] Serial device disconnected - Device: $device, Uptime: ${uptime}ms, " +
+                "Packets RX: ${stats.packetsReceived} (${stats.bytesReceived} bytes)"
+        }
+    }
+
+    private fun publishConnection(connectionToken: ConnectionToken, connection: SerialConnection): Boolean =
+        synchronized(connectionAdmissionLock) {
+            val generationAvailable =
+                !lifecycle.isClosed &&
+                    !connectionCleanupInProgress &&
+                    activeConnectionToken == null &&
+                    connRef.get() == null
+            if (generationAvailable) {
+                connectionToken.connection = connection
+                connRef.set(connection)
+                activeConnectionToken = connectionToken
+                connectionReady.set(false)
+            }
+            generationAvailable
+        }
+
+    private fun finishConnectionCleanup(completion: CompletableDeferred<Unit>) {
+        synchronized(connectionAdmissionLock) {
+            if (connectionCleanupCompletion === completion) {
+                connectionCleanupCompletion = null
+                connectionCleanupInProgress = false
+            }
+        }
+        completion.complete(Unit)
+    }
+
+    override fun handleSendToRadio(p: ByteArray): Boolean {
+        val transportLease = lifecycle.tryAcquire()
+        val operation =
+            transportLease?.let {
+                val token = synchronized(connectionAdmissionLock) { activeConnectionToken }
+                token?.let { active -> admitConnectionOperation(active, requireReady = true) }
+            }
+        return if (transportLease == null || operation == null) {
+            transportLease?.release()
+            Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
+            false
+        } else {
+            queueFramedSend(
+                payload = p,
+                writer = { bytes -> operation.connection.sendBytes(bytes) },
+                onCompletion = {
+                    operation.lease.release()
+                    transportLease.release()
+                },
+            )
+        }
+    }
+
+    private fun admitConnectionOperation(token: ConnectionToken, requireReady: Boolean): ConnectionOperation? =
+        synchronized(connectionAdmissionLock) {
+            val connection = connRef.get()
+            val ready = !requireReady || connectionReady.get()
+            if (connection == null || !ownsConnectionLocked(token, connection) || !ready) {
+                null
+            } else {
+                token.lifecycle.tryAcquire()?.let { lease -> ConnectionOperation(token, connection, lease) }
+            }
+        }
 
     override fun keepAlive() {
-        // Delegate to HeartbeatSender which sends a ToRadio heartbeat to prove the serial
-        // link is alive and keep the local node's lastHeard timestamp current.
         scope.handledLaunch { heartbeatSender.sendHeartbeat() }
     }
 
     override fun sendBytes(p: ByteArray) {
-        val conn = connRef.get()
-        if (conn != null) {
-            Logger.d { "[$address] Serial sending ${p.size} bytes" }
-            conn.sendBytes(p)
-        } else {
+        val transportLease = lifecycle.tryAcquire()
+        val token = synchronized(connectionAdmissionLock) { activeConnectionToken }
+        val operation =
+            transportLease?.let { token?.let { active -> admitConnectionOperation(active, requireReady = false) } }
+        if (operation == null) {
+            transportLease?.release()
             Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
+            return
+        }
+        try {
+            Logger.d { "[$address] Serial queueing ${p.size} bytes" }
+            operation.connection.sendBytes(p)
+        } finally {
+            operation.lease.release()
+            transportLease.release()
         }
     }
 }

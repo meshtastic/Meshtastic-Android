@@ -506,26 +506,28 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    @Test
-    fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
-        val routing = Routing(error_reason = Routing.Error.NONE)
+    private fun routingPacket(error: Routing.Error): MeshPacket {
+        val routing = Routing(error_reason = error)
         val packet =
             MeshPacket(
                 from = 456,
                 decoded =
                 Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
             )
-        val dataPacket =
+        every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
                 to = NodeAddress.ID_BROADCAST,
                 bytes = routing.encode().toByteString(),
                 dataType = PortNum.ROUTING_APP.value,
             )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.toNodeID(456) } returns "!remote"
+        return packet
+    }
 
-        handler.handleReceivedData(packet, 123)
+    @Test
+    fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
         advanceUntilIdle()
 
         verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
@@ -534,24 +536,7 @@ class MeshDataHandlerTest {
     @Test
     fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
         // DUTY_CYCLE_LIMIT also exercises localized UI warnings; keep this response-ownership test independent.
-        val routing = Routing(error_reason = Routing.Error.NO_ROUTE)
-        val packet =
-            MeshPacket(
-                from = 456,
-                decoded =
-                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
-            )
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
-
-        handler.handleReceivedData(packet, 123)
+        handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
         advanceUntilIdle()
 
         verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false) }

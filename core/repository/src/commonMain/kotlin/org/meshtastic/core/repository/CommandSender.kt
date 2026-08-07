@@ -21,6 +21,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.Position as ProtoPosition
 
 /** Interface for sending commands and packets to the mesh network. */
 @Suppress("TooManyFunctions")
@@ -66,7 +67,7 @@ interface CommandSender {
      * as sending a shared contact before the first DM to a node. Time spent behind existing FIFO entries does not count
      * against the radio-response timeout.
      *
-     * @return `true` if the radio accepted the packet, `false` on timeout or failure.
+     * @return `true` if the radio accepted the packet; `false` on rejection, timeout, transport stop, or send failure.
      */
     suspend fun sendAdminAwait(
         destNum: Int,
@@ -75,7 +76,11 @@ interface CommandSender {
         initFn: () -> AdminMessage,
     ): Boolean = sendAdminAwaitResult(destNum, requestId, wantResponse, initFn).accepted
 
-    /** Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. */
+    /**
+     * Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. Queue or transport
+     * rejection is represented by a non-accepted [AwaitedSendResult] with `dispatched == false`; it is not reported as
+     * [PacketQueueRejectedException].
+     */
     suspend fun sendAdminAwaitResult(
         destNum: Int,
         requestId: Int = generatePacketId(),
@@ -84,7 +89,7 @@ interface CommandSender {
     ): AwaitedSendResult
 
     /** Sends our current position to the mesh, or throws if the outbound queue rejects it. */
-    suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false)
+    suspend fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false)
 
     /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestPosition(destNum: Int, currentPosition: Position)

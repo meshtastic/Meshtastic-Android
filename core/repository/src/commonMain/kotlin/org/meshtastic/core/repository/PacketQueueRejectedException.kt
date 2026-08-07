@@ -16,6 +16,11 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.common.log.ExpectedCondition
+
 /** Thrown when the outbound packet queue refuses admission for an operation. */
 class PacketQueueRejectedException(operation: String) :
-    IllegalStateException("$operation was rejected by the outbound packet queue")
+    IllegalStateException("$operation was rejected by the outbound packet queue"),
+    ExpectedCondition {
+    override val expectedConditionLabel: String = "packet-queue-rejected"
+}

@@ -284,12 +284,10 @@ class SharedRadioInterfaceService(
     private fun releaseSessionOperation(admittedSession: RadioTransportSession) {
         val drainWaiter =
             synchronized(sessionCallbackLock) {
+                if (activeTransportSession !== admittedSession) {
+                    Logger.e { "Session changed before an admitted operation released its lease" }
+                }
                 when {
-                    activeTransportSession !== admittedSession -> {
-                        Logger.e { "Session changed before an admitted operation released its lease" }
-                        null
-                    }
-
                     admittedSessionOperations <= 0 -> {
                         Logger.e { "Session operation count underflow" }
                         null
@@ -313,24 +311,16 @@ class SharedRadioInterfaceService(
 
         data object AdmissionClosed : TransportSendAdmission
 
-        data object Stopping : TransportSendAdmission
-
         data object NoActiveSession : TransportSendAdmission
 
         data object NoTransport : TransportSendAdmission
     }
 
-    /**
-     * Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. [Stopping]
-     * covers only a pre-revocation stopping window; once teardown revokes admission, [AdmissionClosed] is
-     * authoritative.
-     */
+    /** Admits one synchronous transport handoff under the same gate drained by [revokeTransportSession]. */
     private fun admitTransportSend(): TransportSendAdmission = synchronized(sessionCallbackLock) {
         val session = activeTransportSession
         val transport = radioTransport
         when {
-            isStopping -> TransportSendAdmission.Stopping
-
             !sessionAdmissionOpen -> TransportSendAdmission.AdmissionClosed
 
             session == null -> TransportSendAdmission.NoActiveSession
@@ -426,13 +416,6 @@ class SharedRadioInterfaceService(
     @Volatile private var radioTransport: RadioTransport? = null
     private var runningTransportId: InterfaceId? = null
     private var isStarted = false
-
-    /**
-     * Set while [stopTransportLocked] is draining the polite disconnect frame. [trySendToRadio] checks this so any late
-     * traffic submitted after we've announced disconnection is dropped rather than racing in front of the firmware-side
-     * link teardown.
-     */
-    @Volatile private var isStopping = false
 
     /**
      * True while an explicit connection lifecycle is active (set by [connect]/[setDeviceAddress], cleared by
@@ -924,13 +907,14 @@ class SharedRadioInterfaceService(
         // Reject queued callbacks and new suspend work immediately, then drain existing leases before admitting a
         // replacement generation or closing the old transport.
         revokeTransportSession(currentSession)
+        heartbeatJob?.cancel()
+        heartbeatJob = null
         Logger.i { "Stopping transport $currentTransport" }
         // Best-effort polite goodbye: tell the firmware we're disconnecting on purpose so it can
         // tear down its side of the link cleanly instead of relying on timeouts / hardware events.
-        // Flip isStopping before sending so any concurrent sendToRadio() drops incoming traffic —
-        // we don't want normal packets racing behind the disconnect frame. Skip only when already
-        // Disconnected; firmware can still consume the goodbye while handshaking or sleeping, so
-        // it's worth sending in every other state. The send is fire-and-forget through the
+        // Session admission is already revoked, so normal packets cannot race behind this direct transport write.
+        // Skip only when already Disconnected; firmware can still consume the goodbye while handshaking or sleeping,
+        // so it's worth sending in every other state. The send is fire-and-forget through the
         // transport's own scope; the drain delay gives async transports a window to flush before
         // close() cancels their write scope. BLE's retry path backs off 500ms, so this window
         // also covers one retry on flaky GATT links.
@@ -940,7 +924,6 @@ class SharedRadioInterfaceService(
                 currentTransport != null &&
                 _connectionState.value != ConnectionState.Disconnected
             ) {
-                isStopping = true
                 ignoreExceptionSuspend {
                     currentTransport.handleSendToRadio(ToRadio(disconnect = true).encode())
                     delay(POLITE_DISCONNECT_DRAIN_MS)
@@ -950,7 +933,6 @@ class SharedRadioInterfaceService(
             isStarted = false
             radioTransport = null
             runningTransportId = null
-            isStopping = false
             try {
                 currentTransport?.close()
             } finally {
@@ -1060,8 +1042,6 @@ class SharedRadioInterfaceService(
                 if (keepAliveThroughAdmittedTransport(admission)) lastHeartbeatMillis = now
             }
 
-            TransportSendAdmission.Stopping -> Logger.d { "keepAlive: transport stopping, dropping heartbeat" }
-
             TransportSendAdmission.AdmissionClosed,
             TransportSendAdmission.NoActiveSession,
             ->
@@ -1085,11 +1065,6 @@ class SharedRadioInterfaceService(
         // revoking the session; transport implementations still own their asynchronous delivery outcome.
         when (val admission = admitTransportSend()) {
             is TransportSendAdmission.Admitted -> sendThroughAdmittedTransport(admission, bytes)
-
-            TransportSendAdmission.Stopping -> {
-                Logger.d { "trySendToRadio: transport stopping, dropping ${bytes.size} bytes" }
-                false
-            }
 
             TransportSendAdmission.AdmissionClosed,
             TransportSendAdmission.NoActiveSession,

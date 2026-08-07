@@ -32,7 +32,7 @@ interface PacketHandler {
      * or in flight, preserving single ownership of its response.
      *
      * @return `true` when the packet's non-zero ID was reserved and queued, or `false` when the packet was invalid, its
-     *   ID was already reserved, or the owning service scope has shut down.
+     *   ID was already reserved, the radio is not connected, or the owning service scope has shut down.
      */
     suspend fun sendToRadio(packet: MeshPacket): Boolean
 

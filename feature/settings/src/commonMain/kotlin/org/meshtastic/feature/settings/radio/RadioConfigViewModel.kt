@@ -22,7 +22,9 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -230,6 +232,7 @@ open class RadioConfigViewModel(
 
     private var probeJob: Job? = null
     private val channelUpdateMutex = Mutex()
+    private var manualChannelBatchJob: Job? = null
     private var manualChannelBatchEnqueueing = false
     private val manualChannelBatchRequestIds = mutableSetOf<Int>()
 
@@ -443,46 +446,54 @@ open class RadioConfigViewModel(
         val destNum = destNum ?: destNode.value?.num ?: return
 
         safeLaunch(tag = "setRemoteChannels") {
-            // Manual channel saves are an ordered batch: only update canonical local state after every write request is
-            // enqueued. Serialize batches so two ordered write plans cannot interleave on the radio link, and diff
-            // each queued save against the canonical list at the moment it starts.
-            channelUpdateMutex.withLock {
-                val current = radioConfigState.value.channelList.ifEmpty { old }
-                val updatePlan = getManualChannelUpdatePlan(new, current)
-                if (updatePlan.isEmpty()) return@withLock
-                if (!beginManualChannelBatch(updatePlan.size)) return@withLock
-                val batchRequestIds = mutableSetOf<Int>()
+            val batchJob = checkNotNull(currentCoroutineContext()[Job])
+            try {
+                // Manual channel saves are an ordered batch: only update canonical local state after every write
+                // request is enqueued. Serialize batches so two ordered write plans cannot interleave on the radio
+                // link, and diff each queued save against the canonical list at the moment it starts.
+                channelUpdateMutex.withLock {
+                    val current = radioConfigState.value.channelList.ifEmpty { old }
+                    val updatePlan = getManualChannelUpdatePlan(new, current)
+                    if (updatePlan.isEmpty()) return@withLock
+                    if (!beginManualChannelBatch(updatePlan.size)) return@withLock
+                    manualChannelBatchJob = batchJob
+                    val batchRequestIds = mutableSetOf<Int>()
 
-                try {
-                    applyManualChannelUpdatePlan(
-                        updatePlan = updatePlan,
-                        currentSettings = current,
-                        finalSettings = new,
-                        writeChannel = { channel, onRequestId ->
-                            radioConfigUseCase.setRemoteChannel(destNum, channel, onRequestId)
-                        },
-                        registerRequestId = { packetId ->
-                            batchRequestIds.add(packetId)
-                            registerManualChannelBatchRequestId(packetId)
-                        },
-                        onInterrupted = { result ->
-                            reconcileInterruptedManualChannelUpdate(
-                                destNum = destNum,
-                                oldSettings = current,
-                                appliedSettings = result.appliedSettings,
-                            )
-                        },
-                    )
-                    commitManualChannelSettings(destNum = destNum, oldSettings = current, newSettings = new)
-                    finishManualChannelBatch()
-                } catch (e: CancellationException) {
-                    abortManualChannelBatch(batchRequestIds)
-                    throw e
-                } catch (e: Throwable) {
-                    abortManualChannelBatch(batchRequestIds)
-                    Logger.w(e) { "Manual channel update failed after enqueue" }
-                    e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
+                    try {
+                        applyManualChannelUpdatePlan(
+                            updatePlan = updatePlan,
+                            currentSettings = current,
+                            finalSettings = new,
+                            writeChannel = { channel, onRequestId ->
+                                currentCoroutineContext().ensureActive()
+                                radioConfigUseCase.setRemoteChannel(destNum, channel, onRequestId)
+                            },
+                            registerRequestId = { packetId ->
+                                batchRequestIds.add(packetId)
+                                registerManualChannelBatchRequestId(packetId)
+                            },
+                            onInterrupted = { result ->
+                                reconcileInterruptedManualChannelUpdate(
+                                    destNum = destNum,
+                                    oldSettings = current,
+                                    appliedSettings = result.appliedSettings,
+                                )
+                            },
+                        )
+                        currentCoroutineContext().ensureActive()
+                        commitManualChannelSettings(destNum = destNum, oldSettings = current, newSettings = new)
+                        finishManualChannelBatch()
+                    } catch (e: CancellationException) {
+                        abortManualChannelBatch(batchRequestIds)
+                        throw e
+                    } catch (e: Throwable) {
+                        abortManualChannelBatch(batchRequestIds)
+                        Logger.w(e) { "Manual channel update failed after enqueue" }
+                        e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
+                    }
                 }
+            } finally {
+                if (manualChannelBatchJob === batchJob) manualChannelBatchJob = null
             }
         }
     }
@@ -872,6 +883,12 @@ open class RadioConfigViewModel(
         removeRequestIds(batchRequestIds)
     }
 
+    private fun invalidateManualChannelBatch() {
+        manualChannelBatchEnqueueing = false
+        manualChannelBatchJob?.cancel()
+        manualChannelBatchJob = null
+    }
+
     /**
      * True while a manual channel batch is in flight — from enqueue through the ack-wait that outlives
      * [finishManualChannelBatch]. [manualChannelBatchEnqueueing] alone only covers the enqueue phase, so pending batch
@@ -1018,6 +1035,11 @@ open class RadioConfigViewModel(
 
         when (result) {
             is RadioResponseResult.Error -> {
+                // A routing/admin error is terminal for the current request flow. Drop every outstanding request ID
+                // and cancel its timeout so a late timeout cannot overwrite the specific failure or block the next
+                // retry.
+                invalidateManualChannelBatch()
+                clearRequestIds()
                 sendError(result.message)
                 // Abort the AdminRoute flow — do not fire the destructive action
                 // (reboot/shutdown/factory_reset) if the metadata preflight failed.

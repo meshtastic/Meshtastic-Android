@@ -219,6 +219,9 @@ class FakeBleService : BleService {
     /** When non-null, [write] throws this exception on every call until explicitly cleared. */
     var writeException: Exception? = null
 
+    /** Optional suspend hook invoked after admission but before a BLE write is recorded. */
+    var beforeWrite: (suspend () -> Unit)? = null
+
     /**
      * When non-null, [read] throws this exception instead of returning data. Reset to null before throwing (in the same
      * call).
@@ -299,6 +302,7 @@ class FakeBleService : BleService {
 
     override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
         writeAttempts++
+        beforeWrite?.invoke()
         writeException?.let { ex -> throw ex }
         availableCharacteristics += characteristic.uuid
         writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
@@ -43,6 +44,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
@@ -108,6 +110,9 @@ class MeshConnectionManagerImpl(
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
 
+    /** Guarded by [connectionMutex]. */
+    private var postHandshakeRequestsJob: Job? = null
+
     private val handshakeTimeout = atomic<Job?>(null)
 
     /**
@@ -120,6 +125,7 @@ class MeshConnectionManagerImpl(
      * Connecting-state guard inside [onHandshakeProgress] is insufficient on its own.
      */
     private val handshakeCompleteLatch = atomic(false)
+    private val locationRejectionLogged = atomic(false)
 
     /**
      * Consecutive handshake-recovery failure count for [runSiblingHandshakeRecovery].
@@ -166,6 +172,7 @@ class MeshConnectionManagerImpl(
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
                 locationRequestsJob?.cancel()
+                locationRejectionLogged.value = false
                 if (myNodeEntity != null) {
                     locationRequestsJob =
                         uiPrefs
@@ -175,11 +182,18 @@ class MeshConnectionManagerImpl(
                                     locationManager.start(scope) { pos ->
                                         try {
                                             commandSender.sendPosition(pos)
+                                            locationRejectionLogged.value = false
                                         } catch (e: PacketQueueRejectedException) {
-                                            Logger.w(e) { "Location update was rejected by packet queue" }
+                                            logLocationSendFailure(e, "Location update was rejected by packet queue")
+                                        } catch (e: LocalNodeUnavailableException) {
+                                            logLocationSendFailure(
+                                                e,
+                                                "Location update is waiting for local node identity",
+                                            )
                                         }
                                     }
                                 } else {
+                                    locationRejectionLogged.value = false
                                     locationManager.stop()
                                 }
                             }
@@ -432,6 +446,8 @@ class MeshConnectionManagerImpl(
     }
 
     private fun tearDownConnection() {
+        postHandshakeRequestsJob?.cancel()
+        postHandshakeRequestsJob = null
         packetHandler.stopPacketQueue()
         sessionManager.clearAll() // Prevent stale per-node passkeys on reconnect.
         locationManager.stop()
@@ -529,16 +545,7 @@ class MeshConnectionManagerImpl(
         // orphan a job in the gap between cancel and reassign.
         handshakeTimeout.getAndSet(null)?.cancel()
 
-        val myNodeNum = nodeManager.myNodeNum.value ?: 0
-        // Proactively seed the session passkey. The firmware embeds session_passkey in every
-        // admin *response* (wantResponse=true), but set_time_only (sent at MyNodeInfo) has no
-        // response. A get_owner request is the lightest way to trigger a response and populate the
-        // passkey cache so that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
-        try {
-            commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
-        } catch (e: PacketQueueRejectedException) {
-            Logger.w(e) { "Session-passkey seed request was rejected by packet queue" }
-        }
+        val myNodeNum = schedulePostHandshakeRequests()
 
         // Start MQTT if enabled
         scope.handledLaunch {
@@ -554,25 +561,111 @@ class MeshConnectionManagerImpl(
         // Request history
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
-            moduleConfig.store_forward?.let {
-                historyManager.requestHistoryReplay("onNodeDbReady", myNodeNum, it, "Unknown")
+            moduleConfig.store_forward?.let { config ->
+                myNodeNum?.let { nodeNum ->
+                    historyManager.requestHistoryReplay("onNodeDbReady", nodeNum, config, "Unknown")
+                }
             }
         }
+    }
 
-        // Request immediate LocalStats and DeviceMetrics update on connection with proper request IDs
-        try {
-            commandSender.requestTelemetry(
-                commandSender.generatePacketId(),
-                myNodeNum,
-                TelemetryType.LOCAL_STATS.ordinal,
-            )
-        } catch (e: PacketQueueRejectedException) {
-            Logger.w(e) { "Local-stats request was rejected by packet queue" }
+    private suspend fun schedulePostHandshakeRequests(): Int? = connectionMutex.withLock {
+        postHandshakeRequestsJob?.cancel()
+        postHandshakeRequestsJob = null
+        val myNodeNum = nodeManager.myNodeNum.value
+        val connectedLifecycle = serviceRepository.connectionLifecycle.value
+        if (myNodeNum == null || connectedLifecycle.state !is ConnectionState.Connected) {
+            Logger.w { "Skipping post-handshake requests because the connected local-node state is unavailable" }
+        } else {
+            postHandshakeRequestsJob =
+                scope.handledLaunch {
+                    // The requests are independent. One unexpected request failure must not cancel the others, and
+                    // teardown serializes with this job publication through connectionMutex.
+                    supervisorScope {
+                        launch {
+                            retryPostHandshakeRequest(
+                                "Session-passkey seed",
+                                myNodeNum,
+                                connectedLifecycle.version,
+                            ) {
+                                commandSender.sendAdmin(myNodeNum, wantResponse = true) {
+                                    AdminMessage(get_owner_request = true)
+                                }
+                            }
+                        }
+                        listOf(TelemetryType.LOCAL_STATS, TelemetryType.DEVICE).forEach { type ->
+                            launch {
+                                retryPostHandshakeRequest(
+                                    label = "$type telemetry request",
+                                    myNodeNum = myNodeNum,
+                                    connectedVersion = connectedLifecycle.version,
+                                ) {
+                                    commandSender.requestTelemetry(
+                                        commandSender.generatePacketId(),
+                                        myNodeNum,
+                                        type.ordinal,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
         }
-        try {
-            commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
-        } catch (e: PacketQueueRejectedException) {
-            Logger.w(e) { "Device-metrics request was rejected by packet queue" }
+        myNodeNum
+    }
+
+    private fun logLocationSendFailure(failure: Throwable, warning: String) {
+        if (locationRejectionLogged.compareAndSet(expect = false, update = true)) {
+            Logger.w(failure) { warning }
+        } else {
+            Logger.d { "$warning (still pending)" }
+        }
+    }
+
+    private fun ownsPostHandshakeRequests(myNodeNum: Int, connectedVersion: Long): Boolean =
+        serviceRepository.connectionLifecycle.value.let { lifecycle ->
+            lifecycle.version == connectedVersion &&
+                lifecycle.state is ConnectionState.Connected &&
+                nodeManager.myNodeNum.value == myNodeNum
+        }
+
+    private suspend fun retryPostHandshakeRequest(
+        label: String,
+        myNodeNum: Int,
+        connectedVersion: Long,
+        send: suspend () -> Unit,
+    ) {
+        var rejectionCount = 0
+        var rejectionLogged = false
+        var complete = false
+        while (!complete && ownsPostHandshakeRequests(myNodeNum, connectedVersion)) {
+            try {
+                send()
+                complete = true
+            } catch (e: PacketQueueRejectedException) {
+                rejectionCount++
+                val exhausted = rejectionCount >= MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS
+                if (exhausted) {
+                    Logger.w(e) { "$label abandoned after $rejectionCount packet-queue rejections" }
+                } else {
+                    if (!rejectionLogged) {
+                        Logger.w(e) { "$label rejected; waiting for packet-queue admission" }
+                        rejectionLogged = true
+                    } else {
+                        Logger.d { "$label still waiting for packet-queue admission" }
+                    }
+                    delay(postHandshakeAdmissionRetryDelay(rejectionCount))
+                }
+                complete = exhausted
+            } catch (e: LocalNodeUnavailableException) {
+                Logger.w(e) { "$label stopped because the local node became unavailable" }
+                complete = true
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "$label failed after the handshake" }
+                complete = true
+            }
         }
     }
 
@@ -702,6 +795,16 @@ class MeshConnectionManagerImpl(
          * negligible connection latency.
          */
         private const val PRE_HANDSHAKE_SETTLE_MS = 100L
+
+        internal const val MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS = 8
+        private val POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY = 1.seconds
+        private const val POST_HANDSHAKE_ADMISSION_MAX_BACKOFF_EXPONENT = 3
+
+        internal fun postHandshakeAdmissionRetryDelay(rejectionCount: Int): Duration {
+            require(rejectionCount > 0) { "rejectionCount must be positive" }
+            val exponent = (rejectionCount - 1).coerceAtMost(POST_HANDSHAKE_ADMISSION_MAX_BACKOFF_EXPONENT)
+            return POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY * (1 shl exponent)
+        }
 
         private val HANDSHAKE_TIMEOUT_STAGE1 = 30.seconds
 

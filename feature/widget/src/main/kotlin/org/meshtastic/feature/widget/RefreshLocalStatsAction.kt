@@ -25,8 +25,19 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketQueueRejectedException
+
+internal suspend fun runTelemetryRequestBestEffort(type: TelemetryType, request: suspend () -> Unit) {
+    try {
+        request()
+    } catch (e: PacketQueueRejectedException) {
+        Logger.w(e) { "RefreshLocalStatsAction: $type request rejected by packet queue" }
+    } catch (e: LocalNodeUnavailableException) {
+        Logger.w(e) { "RefreshLocalStatsAction: $type request skipped because the local node became unavailable" }
+    }
+}
 
 class RefreshLocalStatsAction :
     ActionCallback,
@@ -47,10 +58,8 @@ class RefreshLocalStatsAction :
     }
 
     private suspend fun requestTelemetryBestEffort(myNodeNum: Int, type: TelemetryType) {
-        try {
+        runTelemetryRequestBestEffort(type) {
             commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, type.ordinal)
-        } catch (e: PacketQueueRejectedException) {
-            Logger.w(e) { "RefreshLocalStatsAction: $type request rejected by packet queue" }
         }
     }
 }

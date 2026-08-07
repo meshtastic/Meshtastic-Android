@@ -449,6 +449,41 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `routing error stops remaining manual channel writes`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val old = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"), ChannelSettings(name = "C"))
+        val new = listOf(old[0], old[2], old[1])
+        val writtenIndexes = mutableListOf<Int>()
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenIndexes += channel.index
+                it.args.onRequestIdArg()(41)
+                41
+            }
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+        assertEquals(listOf(1), writtenIndexes)
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        runCurrent()
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds + 1)
+        runCurrent()
+
+        assertEquals(listOf(1), writtenIndexes, "a terminal response must invalidate the rest of the batch")
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    @Test
     fun `updateChannels reconciles applied channel writes when ordered write fails`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         val old = fourChannelFixture()
@@ -1078,6 +1113,36 @@ class RadioConfigViewModelTest {
             RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Fail"))
         packetFlow.emit(MeshPacket())
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    @Test
+    fun `routing error clears request timeout without replacing the specific failure`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getOwner(any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+
+        viewModel = createViewModel()
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+        verifySuspend { radioConfigUseCase.getOwner(123, any()) }
+
+        val failure = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Error(failure)
+        packetFlow.emit(MeshPacket())
+        runCurrent()
+
+        assertEquals(ResponseState.Error(failure), viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+
+        assertEquals(ResponseState.Error(failure), viewModel.radioConfigState.value.responseState)
     }
 
     @Test

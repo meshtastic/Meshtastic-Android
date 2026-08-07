@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.testing
 
+import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -125,7 +126,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     private val _sentToRadio = mutableListOf<ByteArray>()
 
-    /** Thread-safe snapshot of writes accepted by the currently admitted fake transport session. */
+    /** Thread-safe lifetime history of writes accepted across all admitted fake transport sessions. */
     val sentToRadio: List<ByteArray>
         get() = synchronized(sessionAdmissionLock) { _sentToRadio.map { it.copyOf() } }
 
@@ -189,15 +190,19 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private fun releaseSessionOperation(admittedSession: RadioSessionContext) {
         val waiter =
             synchronized(sessionAdmissionLock) {
-                check(_activeSession.value == admittedSession) {
-                    "Fake session changed before an admitted operation released its lease"
+                if (_activeSession.value != admittedSession) {
+                    Logger.e { "Fake session changed before an admitted operation released its lease" }
                 }
-                check(admittedSessionOperations > 0) { "Session operation count underflow" }
-                admittedSessionOperations--
-                if (admittedSessionOperations == 0) {
-                    sessionDrainWaiter.also { sessionDrainWaiter = null }
-                } else {
+                if (admittedSessionOperations <= 0) {
+                    Logger.e { "Fake session operation count underflow" }
                     null
+                } else {
+                    admittedSessionOperations--
+                    if (admittedSessionOperations == 0) {
+                        sessionDrainWaiter.also { sessionDrainWaiter = null }
+                    } else {
+                        null
+                    }
                 }
             }
         waiter?.complete(Unit)

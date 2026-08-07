@@ -16,7 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,19 +25,12 @@ import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
 
-/**
- * Owns canonical connection state and its lifecycle epochs as one lock-free transition.
- *
- * The canonical [ConnectionLifecycle] flow is updated with compare-and-set, so concurrent writers cannot lose or
- * double-count lifecycle edges. One publisher then mirrors its newest value to the legacy state and epoch convenience
- * flows. Lifecycle-sensitive consumers therefore never have to correlate separate publications.
- */
+/** Owns canonical connection state, epochs, and compatibility projections under one publication lock. */
 class ConnectionStateHolder(
     initialState: ConnectionState = ConnectionState.Disconnected,
     initialEpochs: ConnectionEpochs = ConnectionEpochs(),
 ) : ConnectionStateProvider {
-    private val publicationInProgress = atomic(false)
-    private val publishedVersion = atomic(0L)
+    private val publicationLock = SynchronizedObject()
 
     private val mutableConnectionLifecycle =
         MutableStateFlow(ConnectionLifecycle(version = 0, state = initialState, epochs = initialEpochs))
@@ -47,65 +41,43 @@ class ConnectionStateHolder(
     override val connectionState: StateFlow<ConnectionState> = mutableConnectionState.asStateFlow()
     override val connectionEpochs: StateFlow<ConnectionEpochs> = mutableConnectionEpochs.asStateFlow()
 
-    /**
-     * Applies [newState] and advances epochs exactly once when the state changes.
-     *
-     * [connectionLifecycle] is authoritative on return. A concurrent publisher may update the compatibility
-     * [connectionState] and [connectionEpochs] mirrors immediately afterward, so they are not read-after-write
-     * consistent for the caller under contention.
-     */
-    fun setConnectionState(newState: ConnectionState) {
-        while (true) {
-            val current = mutableConnectionLifecycle.value
-            if (current.state == newState) return
-
-            val next =
+    /** Applies [newState] and advances epochs exactly once when the state changes. */
+    fun setConnectionState(newState: ConnectionState) = synchronized(publicationLock) {
+        val current = mutableConnectionLifecycle.value
+        if (current.state != newState) {
+            publish(
                 ConnectionLifecycle(
                     version = current.version + 1,
                     state = newState,
                     epochs = current.epochs.advance(current.state, newState),
-                )
-            if (mutableConnectionLifecycle.compareAndSet(current, next)) {
-                publishCompatibilityViews()
-                return
-            }
+                ),
+            )
         }
     }
 
     /**
-     * Restores a known baseline, primarily for reusable test fakes. The version remains monotonic even when state and
-     * epochs return to earlier values, so a reader cannot mistake a reset snapshot for an older publication.
+     * Restores a known state, primarily for reusable test fakes. Epoch counters remain monotonic: omitting [epochs]
+     * applies the canonical transition into [state], while an explicit value may only advance the counters. The
+     * publication version always advances so readers can distinguish the reset from the preceding snapshot.
      */
-    fun reset(state: ConnectionState = ConnectionState.Disconnected, epochs: ConnectionEpochs = ConnectionEpochs()) {
-        while (true) {
+    fun reset(state: ConnectionState = ConnectionState.Disconnected, epochs: ConnectionEpochs? = null) =
+        synchronized(publicationLock) {
             val current = mutableConnectionLifecycle.value
-            val next = ConnectionLifecycle(version = current.version + 1, state = state, epochs = epochs)
-            if (mutableConnectionLifecycle.compareAndSet(current, next)) {
-                publishCompatibilityViews()
-                return
+            val nextEpochs = epochs ?: current.epochs.advance(current.state, state)
+            require(
+                nextEpochs.departures >= current.epochs.departures &&
+                    nextEpochs.completedHandshakes >= current.epochs.completedHandshakes,
+            ) {
+                "reset must not rewind monotonic connection epoch counters"
             }
+            publish(ConnectionLifecycle(version = current.version + 1, state = state, epochs = nextEpochs))
         }
-    }
 
-    private fun publishCompatibilityViews() {
-        while (true) {
-            if (!publicationInProgress.compareAndSet(expect = false, update = true)) return
-            try {
-                do {
-                    val snapshot = mutableConnectionLifecycle.value
-                    // Epochs first: state collectors that then read connectionEpochs must not observe lagging counters.
-                    mutableConnectionEpochs.value = snapshot.epochs
-                    mutableConnectionState.value = snapshot.state
-                    publishedVersion.value = snapshot.version
-                } while (publishedVersion.value != mutableConnectionLifecycle.value.version)
-            } finally {
-                publicationInProgress.value = false
-            }
-
-            // An updater can commit after the final loop check, lose the publisher race, and return before this owner
-            // releases the flag. Sequentially consistent atomics make that lifecycle write visible here. The
-            // post-release recheck ensures its compatibility projection cannot be stranded.
-            if (publishedVersion.value == mutableConnectionLifecycle.value.version) return
-        }
+    /** Publishes one authoritative snapshot and both legacy mirrors as one non-suspending critical section. */
+    private fun publish(next: ConnectionLifecycle) {
+        mutableConnectionLifecycle.value = next
+        // Epochs first: state collectors that then read connectionEpochs must not observe lagging counters.
+        mutableConnectionEpochs.value = next.epochs
+        mutableConnectionState.value = next.state
     }
 }

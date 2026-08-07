@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -76,7 +77,9 @@ interface RadioSessionAuthority {
 interface RadioTransportWriter {
     /** Sends [bytes] when a transport is available; callers that need admission evidence use [trySendToRadio]. */
     fun sendToRadio(bytes: ByteArray) {
-        trySendToRadio(bytes)
+        if (!trySendToRadio(bytes)) {
+            Logger.w { "sendToRadio dropped ${bytes.size} bytes: no active transport accepted the frame" }
+        }
     }
 
     /**

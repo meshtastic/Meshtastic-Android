@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
@@ -39,6 +38,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -68,10 +68,6 @@ data class NodeDetailUiState(
     val isEnsuringSession: Boolean = false,
 )
 
-internal object NodeDetailUiTextResolver {
-    var resolve: suspend (UiText) -> String = { it.resolve() }
-}
-
 /**
  * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
  */
@@ -87,6 +83,7 @@ class NodeDetailViewModel(
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
     private val snackbarManager: SnackbarManager,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : ViewModel() {
 
     private val nodeIdFromRoute: Int? = savedStateHandle.get<Int>("destNum")
@@ -175,7 +172,18 @@ class NodeDetailViewModel(
     /**
      * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
      */
-    fun refreshMetadata(destNum: Int) = viewModelScope.launch { queryController.refreshMetadata(destNum) }
+    fun refreshMetadata(destNum: Int) = safeLaunch(tag = "refreshMetadata") {
+        try {
+            queryController.refreshMetadata(destNum)
+        } catch (e: PacketQueueRejectedException) {
+            showNodeRequestFailure(
+                e,
+                "Node-detail request rejected by outbound packet queue",
+                snackbarManager,
+                resolveUiText,
+            )
+        }
+    }
 
     /**
      * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a
@@ -184,7 +192,7 @@ class NodeDetailViewModel(
     fun openRemoteAdmin(destNum: Int) {
         // Atomic check-and-flip prevents a double-tap from queuing two passkey exchanges + two navigation events.
         if (!isEnsuringSession.compareAndSet(expect = false, update = true)) return
-        viewModelScope.launch {
+        safeLaunch(tag = "openRemoteAdmin") {
             try {
                 when (ensureRemoteAdminSession(destNum)) {
                     EnsureSessionResult.AlreadyActive,
@@ -193,14 +201,21 @@ class NodeDetailViewModel(
 
                     EnsureSessionResult.Disconnected -> {
                         val text = Res.string.connect_radio_for_remote_admin
-                        snackbarManager.showSnackbar(NodeDetailUiTextResolver.resolve(UiText.Resource(text)))
+                        snackbarManager.showSnackbar(resolveUiText(UiText.Resource(text)))
                     }
 
                     EnsureSessionResult.Timeout ->
                         snackbarManager.showSnackbar(
-                            NodeDetailUiTextResolver.resolve(UiText.Resource(Res.string.remote_admin_unreachable)),
+                            resolveUiText(UiText.Resource(Res.string.remote_admin_unreachable)),
                         )
                 }
+            } catch (e: PacketQueueRejectedException) {
+                showNodeRequestFailure(
+                    e,
+                    "Node-detail request rejected by outbound packet queue",
+                    snackbarManager,
+                    resolveUiText,
+                )
             } finally {
                 isEnsuringSession.value = false
             }
@@ -208,7 +223,7 @@ class NodeDetailViewModel(
     }
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
-        viewModelScope.launch { nodeManagementActions.setNodeNotes(nodeNum, notes) }
+        safeLaunch(tag = "setNodeNotes") { nodeManagementActions.setNodeNotes(nodeNum, notes) }
     }
 
     /** Returns the type-safe navigation route for a direct message to this node. */

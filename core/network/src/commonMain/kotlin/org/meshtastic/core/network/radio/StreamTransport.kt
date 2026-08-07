@@ -17,7 +17,10 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.RadioTransport
@@ -33,11 +36,46 @@ import org.meshtastic.core.repository.TransportDisconnectReason
 abstract class StreamTransport(protected val callback: RadioTransportCallback, protected val scope: CoroutineScope) :
     RadioTransport {
 
+    private class FramedSend(
+        val payload: ByteArray,
+        val writer: suspend (ByteArray) -> Unit,
+        val flusher: suspend () -> Unit,
+        val onCompletion: () -> Unit,
+    )
+
     private val codec =
         StreamFrameCodec(onPacketReceived = { callback.handleFromRadio(it) }, logTag = "StreamTransport")
+    private val sendQueue = Channel<FramedSend>(capacity = MAX_PENDING_SENDS)
+    private val sendWorker =
+        scope.handledLaunch {
+            try {
+                for (send in sendQueue) {
+                    val failure =
+                        runCatching { codec.frameAndSend(send.payload, send.writer, send.flusher) }.exceptionOrNull()
+                    try {
+                        when (failure) {
+                            null -> Unit
+                            is CancellationException -> throw failure
+                            is Error -> throw failure
+                            else -> Logger.w(failure) { "StreamTransport: framed send failed" }
+                        }
+                    } finally {
+                        completeSend(send)
+                    }
+                }
+            } finally {
+                sendQueue.close()
+                while (true) {
+                    val abandoned = sendQueue.tryReceive().getOrNull() ?: break
+                    completeSend(abandoned)
+                }
+            }
+        }
 
     override suspend fun close() {
         Logger.d { "Closing stream transport" }
+        sendQueue.close()
+        sendWorker.cancelAndJoin()
     }
 
     /**
@@ -78,16 +116,44 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
     open fun flushBytes() {}
 
     /**
-     * Queues the framed packet onto [scope].
+     * Queues the framed packet onto [scope], optionally binding the deferred write to a transport-session resource.
      *
-     * @return true when the write coroutine was launched on a live scope. Delivery through [sendBytes] happens later
-     *   and is not confirmed by this result.
+     * Capturing the writer at admission keeps a queued write from being redirected to a replacement connection before
+     * its coroutine runs. The result reports only successful scheduling on a live scope; physical delivery is not
+     * confirmed.
+     *
+     * [onCompletion] runs exactly once whether the send is admitted, abandoned during worker teardown, or rejected.
      */
-    override fun handleSendToRadio(p: ByteArray): Boolean =
-        !scope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }.isCancelled
+    protected fun queueFramedSend(
+        payload: ByteArray,
+        writer: suspend (ByteArray) -> Unit = { sendBytes(it) },
+        flusher: suspend () -> Unit = { flushBytes() },
+        onCompletion: () -> Unit = {},
+    ): Boolean {
+        val send = FramedSend(payload, writer, flusher, onCompletion)
+        val accepted = sendWorker.isActive && sendQueue.trySend(send).isSuccess
+        if (!accepted) completeSend(send)
+        return accepted
+    }
+
+    private fun completeSend(send: FramedSend) {
+        val failure = runCatching(send.onCompletion).exceptionOrNull()
+        when (failure) {
+            null -> Unit
+            is Error -> throw failure
+            else -> Logger.e(failure) { "StreamTransport: framed-send completion failed" }
+        }
+    }
+
+    override fun handleSendToRadio(p: ByteArray): Boolean = queueFramedSend(p)
 
     /** Process a single incoming byte through the stream framing state machine. */
     protected fun readChar(c: Byte) {
         codec.processInputByte(c)
+    }
+
+    internal companion object {
+        /** Upper bound on framed sends awaiting the serialized writer. */
+        const val MAX_PENDING_SENDS = 32
     }
 }

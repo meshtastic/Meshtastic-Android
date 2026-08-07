@@ -18,6 +18,9 @@ package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -48,6 +51,7 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.proto.Channel as ProtoChannel
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
@@ -66,6 +70,7 @@ class MockRadioTransport(
 
     companion object {
         private const val MY_NODE = 0x42424242
+        internal val FAKE_ACK_DELAY = 2.seconds
 
         @Suppress("MagicNumber")
         private val FAKE_SESSION_PASSKEY: okio.ByteString =
@@ -77,12 +82,18 @@ class MockRadioTransport(
     // an infinite sequence of ints
     private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
+    private val lifecycle = TransportLifecycleGate("Mock")
+    private val transportJob = SupervisorJob(scope.coroutineContext[Job])
+    private val transportScope = CoroutineScope(scope.coroutineContext + transportJob)
+
     override fun start() {
-        Logger.i { "Starting the mock transport" }
-        callback.onConnect() // Tell clients they can use the API
+        lifecycle.runIfOpen {
+            Logger.i { "Starting the mock transport" }
+            callback.onConnect() // Tell clients they can use the API
+        }
     }
 
-    override fun handleSendToRadio(p: ByteArray): Boolean {
+    override fun handleSendToRadio(p: ByteArray): Boolean = lifecycle.runIfOpen {
         val pr = ToRadio.ADAPTER.decode(p)
 
         // Intercept want_config handshake — send config response only when requested,
@@ -90,26 +101,25 @@ class MockRadioTransport(
         val wantConfigId = pr.want_config_id ?: 0
         if (wantConfigId != 0) {
             sendConfigResponse(wantConfigId)
-            return true
+        } else {
+            val packet = pr.packet
+            if (packet != null) {
+                sendQueueStatus(packet.id)
+            }
+
+            val data = packet?.decoded
+
+            when {
+                data != null && data.portnum == PortNum.ADMIN_APP ->
+                    handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
+
+                packet != null && packet.want_ack == true -> sendFakeAck(pr)
+
+                else -> Logger.i { "Ignoring data sent to mock transport $pr" }
+            }
         }
-
-        val packet = pr.packet
-        if (packet != null) {
-            sendQueueStatus(packet.id)
-        }
-
-        val data = packet?.decoded
-
-        when {
-            data != null && data.portnum == PortNum.ADMIN_APP ->
-                handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
-
-            packet != null && packet.want_ack == true -> sendFakeAck(pr)
-
-            else -> Logger.i { "Ignoring data sent to mock transport $pr" }
-        }
-        return true
-    }
+        true
+    } ?: false
 
     private fun handleAdminPacket(pr: ToRadio, d: AdminMessage) {
         val packet = pr.packet ?: return
@@ -152,7 +162,12 @@ class MockRadioTransport(
     }
 
     override suspend fun close() {
-        Logger.i { "Closing the mock transport" }
+        val completed =
+            lifecycle.close {
+                transportJob.cancelAndJoin()
+                Logger.i { "Closing the mock transport" }
+            }
+        if (!completed) Logger.w { "Mock transport teardown did not complete within its lifecycle bounds" }
     }
 
     // / Generate a fake text message from a node
@@ -317,10 +332,10 @@ class MockRadioTransport(
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: ToRadio) = scope.handledLaunch {
+    private fun sendFakeAck(pr: ToRadio) = transportScope.handledLaunch {
         val packet = pr.packet ?: return@handledLaunch
-        delay(2000)
-        callback.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())
+        delay(FAKE_ACK_DELAY)
+        lifecycle.runIfOpen { callback.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode()) }
     }
 
     private fun sendConfigResponse(configId: Int) {

@@ -34,6 +34,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.repository.AwaitedSendResult
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
@@ -41,6 +42,8 @@ import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.repository.toFixedPositionAdminMessage
+import org.meshtastic.core.repository.toFixedPositionProto
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.ChannelSet
@@ -160,6 +163,7 @@ class CommandSenderImpl(
             // Persistence owners treat a normal return as successful admission; throw so they can requeue or fail it.
             throw PacketQueueRejectedException("Data packet")
         }
+        p.time = nowMillis
     }
 
     private suspend fun sendNow(p: DataPacket): Boolean {
@@ -178,7 +182,6 @@ class CommandSenderImpl(
                     emoji = p.emoji,
                 ),
             )
-        p.time = nowMillis
         return packetHandler.sendToRadio(meshPacket)
     }
 
@@ -217,7 +220,7 @@ class CommandSenderImpl(
         packetHandler.sendToRadioAndAwaitResult(buildAdminMessagePacket(destNum, requestId, wantResponse, initFn))
 
     override suspend fun sendPosition(pos: ProtoPosition, destNum: Int?, wantResponse: Boolean) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Position update")
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum $pos" }
 
@@ -265,25 +268,22 @@ class CommandSenderImpl(
     }
 
     override suspend fun setFixedPosition(destNum: Int, pos: Position) {
-        val meshPos =
-            ProtoPosition(
-                latitude_i = Position.degI(pos.latitude),
-                longitude_i = Position.degI(pos.longitude),
-                altitude = pos.altitude,
-            )
-        sendAdmin(destNum) {
-            if (pos != Position(0.0, 0.0, 0)) {
-                AdminMessage(set_fixed_position = meshPos)
+        val removesFixedPosition = pos.isFixedPositionRemoval()
+        val myNodeNum =
+            if (removesFixedPosition) {
+                null
             } else {
-                AdminMessage(remove_fixed_position = true)
+                nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Fixed position")
             }
+        sendAdmin(destNum) { pos.toFixedPositionAdminMessage() }
+        if (myNodeNum != null) {
+            nodeManager.handleReceivedPosition(destNum, myNodeNum, pos.toFixedPositionProto(), nowMillis)
         }
-        nodeManager.handleReceivedPosition(destNum, nodeManager.myNodeNum.value ?: 0, meshPos, nowMillis)
     }
 
     override suspend fun requestUserInfo(destNum: Int) {
-        val myNum = nodeManager.myNodeNum.value ?: return
-        val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: return
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("User-info request")
+        val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: throw LocalNodeUnavailableException("User-info request")
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
@@ -352,7 +352,7 @@ class CommandSenderImpl(
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
         val effectiveRequestId = requestId.nonZeroRequestId()
-        val myNum = nodeManager.myNodeNum.value ?: 0
+        val myNum = nodeManager.myNodeNum.value ?: throw LocalNodeUnavailableException("Neighbor-info request")
         val packet =
             if (destNum == myNum) {
                 val neighborInfoToSend =

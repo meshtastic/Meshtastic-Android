@@ -1174,6 +1174,7 @@ node_list_help_node_details
 node_list_help_title
 node_list_long_click_label
 node_number
+node_request_send_failed
 node_restarting
 node_sort_alpha
 node_sort_button

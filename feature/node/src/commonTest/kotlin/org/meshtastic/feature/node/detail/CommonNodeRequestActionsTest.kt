@@ -16,16 +16,16 @@
  */
 package org.meshtastic.feature.node.detail
 
-import androidx.compose.material3.SnackbarDuration
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.ui.util.SnackbarManager
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -33,43 +33,45 @@ import kotlin.test.assertNull
 class CommonNodeRequestActionsTest {
     private val radioController: RadioController = mock()
     private val snackbarManager = RecordingSnackbarManager()
-    private val actions = CommonNodeRequestActions(radioController, snackbarManager)
+    private val actions = CommonNodeRequestActions(radioController, snackbarManager, resolveNodeRequestFailureUiText)
 
-    private class RecordingSnackbarManager : SnackbarManager() {
-        val messages = mutableListOf<String>()
+    @BeforeTest
+    fun setUp() {
+        snackbarManager.messages.clear()
+    }
 
-        override fun showSnackbar(
-            message: String,
-            actionLabel: String?,
-            withDismissAction: Boolean,
-            duration: SnackbarDuration,
-            onAction: (() -> Unit)?,
-        ) {
-            messages += message
-        }
+    @Test
+    fun `missing local identity uses the same localized request feedback`() = runTest {
+        everySuspend { radioController.requestUserInfo(1234) } throws LocalNodeUnavailableException("local node")
+
+        actions.requestUserInfo(destNum = 1234, longName = "Test Node")
+
+        assertEquals(listOf("Couldn't send request. Try again."), snackbarManager.messages)
     }
 
     @Test
     fun `traceroute queue rejection is surfaced without starting the request timer`() = runTest {
         val rejection = PacketQueueRejectedException("Traceroute request")
+        val expectedMessage = "Couldn't send request. Try again."
         every { radioController.generatePacketId() } returns 42
         everySuspend { radioController.requestTraceroute(42, 1234) } throws rejection
 
         actions.requestTraceroute(destNum = 1234, longName = "Test Node")
 
         assertNull(actions.lastTracerouteTime.value)
-        assertEquals(listOf(checkNotNull(rejection.message)), snackbarManager.messages)
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
     }
 
     @Test
     fun `neighbor queue rejection is surfaced without starting the request timer`() = runTest {
         val rejection = PacketQueueRejectedException("Neighbor info request")
+        val expectedMessage = "Couldn't send request. Try again."
         every { radioController.generatePacketId() } returns 43
         everySuspend { radioController.requestNeighborInfo(43, 1234) } throws rejection
 
         actions.requestNeighborInfo(destNum = 1234, longName = "Test Node")
 
         assertEquals(emptyMap(), actions.lastRequestNeighborTimes.value)
-        assertEquals(listOf(checkNotNull(rejection.message)), snackbarManager.messages)
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
     }
 }

@@ -23,22 +23,16 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.Position
-import org.meshtastic.core.repository.AwaitedSendResult
-import org.meshtastic.core.repository.AwaitedSendStatus
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeTakPrefs
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
@@ -69,62 +63,6 @@ class TAKMeshIntegrationTest {
 
     // ── Fakes ────────────────────────────────────────────────────────────────
     // FakeTAKServerManager lives in its own file in this source set, shared with MeshToCotBroadcasterTest.
-
-    private class FakeCommandSender : CommandSender {
-        val sentPackets = mutableListOf<DataPacket>()
-
-        override suspend fun sendData(p: DataPacket) {
-            sentPackets.add(p)
-        }
-
-        override fun getCurrentPacketId(): Long = 0L
-
-        override fun getCachedLocalConfig(): LocalConfig = LocalConfig()
-
-        override fun getCachedChannelSet(): ChannelSet = ChannelSet()
-
-        override fun generatePacketId(): Int = 1
-
-        override suspend fun sendAdmin(
-            destNum: Int,
-            requestId: Int,
-            wantResponse: Boolean,
-            initFn: () -> AdminMessage,
-        ) {}
-
-        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {}
-
-        override suspend fun sendAdminAwaitResult(
-            destNum: Int,
-            requestId: Int,
-            wantResponse: Boolean,
-            initFn: () -> AdminMessage,
-        ) = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true)
-
-        override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {}
-
-        override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
-
-        override suspend fun setFixedPosition(destNum: Int, pos: Position) {}
-
-        override suspend fun requestUserInfo(destNum: Int) {}
-
-        override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
-
-        override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
-
-        override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
-
-        override fun sendLockdownPassphrase(
-            passphrase: String,
-            boots: Int,
-            hours: Int,
-            maxSessionSeconds: Int,
-            disable: Boolean,
-        ) {}
-
-        override fun sendLockNow() {}
-    }
 
     private class FakeMeshConfigHandler : MeshConfigHandler {
         override val localConfig: StateFlow<LocalConfig> = MutableStateFlow(LocalConfig())

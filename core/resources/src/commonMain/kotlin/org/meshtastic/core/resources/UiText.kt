@@ -18,7 +18,6 @@ package org.meshtastic.core.resources
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -74,13 +73,13 @@ sealed class UiText {
             val resolvedArgs =
                 args.map { arg ->
                     when (arg) {
-                        is StringResource -> getString(arg)
+                        is StringResource -> getStringSuspend(arg)
                         is UiText -> arg.resolve()
                         else -> arg
                     }
                 }
             @Suppress("SpreadOperator")
-            getString(res, *resolvedArgs.toTypedArray())
+            getStringSuspend(res, *resolvedArgs.toTypedArray())
         }
     }
 }

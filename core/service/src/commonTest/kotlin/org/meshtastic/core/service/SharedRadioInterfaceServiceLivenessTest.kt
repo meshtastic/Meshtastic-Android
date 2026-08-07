@@ -731,9 +731,8 @@ class SharedRadioInterfaceServiceLivenessTest {
         val transports = mutableListOf<RadioTransport>()
         lateinit var service: SharedRadioInterfaceService
         lateinit var initialTransport: ReentrantRestartTransport
-        // The provider runs before `service` is assigned; keep the callback disarmed until construction completes
-        // so
-        // the captured lateinit reference cannot be touched from the transport factory.
+        // The provider runs before `service` is assigned; keep the callback disarmed until construction
+        // completes so the captured lateinit reference cannot be touched from the transport factory.
         var restartArmed = false
         val transportProvider: () -> RadioTransport = {
             if (transports.isEmpty()) {
@@ -798,6 +797,7 @@ class SharedRadioInterfaceServiceLivenessTest {
 
         service.disconnect()
         testDispatcher.scheduler.runCurrent()
+        advanceTimeBy(1_000L)
 
         assertFalse(service.trySendToRadio(byteArrayOf(1, 2, 3)))
     }

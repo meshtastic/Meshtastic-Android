@@ -25,6 +25,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
@@ -48,6 +49,7 @@ class CommonNodeRequestActions
 constructor(
     private val radioController: RadioController,
     private val snackbarManager: SnackbarManager,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : NodeRequestActions {
 
     private val _lastTracerouteTime = MutableStateFlow<Long?>(null)
@@ -57,15 +59,21 @@ constructor(
     override val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
     private suspend fun showFeedback(text: UiText) {
-        snackbarManager.showSnackbar(message = text.resolve())
+        snackbarManager.showSnackbar(message = resolveUiText(text))
     }
 
     private suspend fun runRequest(block: suspend () -> Unit) {
         try {
             block()
         } catch (e: PacketQueueRejectedException) {
-            Logger.w(e) { "Node request rejected by outbound packet queue" }
-            snackbarManager.showSnackbar(checkNotNull(e.message))
+            showNodeRequestFailure(e, "Node request rejected by outbound packet queue", snackbarManager, resolveUiText)
+        } catch (e: LocalNodeUnavailableException) {
+            showNodeRequestFailure(
+                e,
+                "Node request deferred until local node identity is available",
+                snackbarManager,
+                resolveUiText,
+            )
         }
     }
 

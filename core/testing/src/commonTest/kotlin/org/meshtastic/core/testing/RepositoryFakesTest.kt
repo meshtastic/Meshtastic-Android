@@ -25,12 +25,17 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -203,7 +208,7 @@ class RepositoryFakesTest {
             listOf(FakeRadioController.ModuleConfigWrite(destination = 7, config = module)),
             controller.moduleConfigWrites,
         )
-        assertEquals(listOf(module), controller.moduleConfigs)
+        assertEquals(listOf(module), controller.allModuleConfigs)
         assertEquals(listOf(7), controller.moduleConfigDestinations)
         assertEquals(listOf(position), controller.fixedPositions)
         assertEquals(ConnectionState.Connected, controller.connectionState.value)
@@ -214,11 +219,83 @@ class RepositoryFakesTest {
         assertTrue(controller.configWrites.isEmpty())
         assertTrue(controller.localConfigs.isEmpty())
         assertTrue(controller.moduleConfigWrites.isEmpty())
-        assertTrue(controller.moduleConfigs.isEmpty())
+        assertTrue(controller.allModuleConfigs.isEmpty())
         assertTrue(controller.moduleConfigDestinations.isEmpty())
         assertTrue(controller.fixedPositions.isEmpty())
         assertEquals(ConnectionState.Disconnected, controller.connectionState.value)
-        assertEquals(ConnectionEpochs(), controller.connectionEpochs.value)
+        assertEquals(
+            ConnectionEpochs(
+                departures = 1,
+                completedHandshakes = 1,
+                handshakesAtLastDeparture = 1,
+                lastDepartureState = ConnectionState.Disconnected,
+            ),
+            controller.connectionEpochs.value,
+        )
+    }
+
+    @Test
+    fun `FakeRadioController uses null destination consistently for local config writes`() = runTest {
+        val controller = FakeRadioController()
+        val config = Config(device = Config.DeviceConfig())
+        val moduleConfig = ModuleConfig(serial = ModuleConfig.SerialConfig(enabled = true))
+
+        controller.setConfig(destNum = 0, config = config, packetId = 1)
+        controller.setModuleConfig(destNum = 0, config = moduleConfig, packetId = 2)
+        controller.editLocalSettings {
+            setConfig(config)
+            setModuleConfig(moduleConfig)
+        }
+
+        assertEquals(
+            List(2) { FakeRadioController.ConfigWrite(destination = null, config = config) },
+            controller.configWrites,
+        )
+        assertEquals(
+            List(2) { FakeRadioController.ModuleConfigWrite(destination = null, config = moduleConfig) },
+            controller.moduleConfigWrites,
+        )
+        assertEquals(List(2) { moduleConfig }, controller.localModuleConfigs)
+        assertEquals(List<Int?>(2) { null }, controller.moduleConfigDestinations)
+    }
+
+    @Test
+    fun `FakeCommandSender mirrors queued status after successful admission`() = runTest {
+        val sender = FakeCommandSender()
+        val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value)
+
+        sender.sendData(packet)
+
+        assertEquals(MessageStatus.QUEUED, packet.status)
+        assertSame(packet, sender.sentPackets.single())
+    }
+
+    @Test
+    fun `FakeCommandSender mirrors rejected data admission`() = runTest {
+        val sender = FakeCommandSender()
+        val rejection = PacketQueueRejectedException("Test packet")
+        val packet = DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value)
+        sender.sendDataFailure = rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { sender.sendData(packet) }
+
+        assertSame(rejection, failure)
+        assertEquals(MessageStatus.ERROR, packet.status)
+        assertTrue(sender.sentPackets.isEmpty())
+    }
+
+    @Test
+    fun `FakeRadioTransport is terminal after close`() = runTest {
+        val transport = FakeRadioTransport()
+
+        assertTrue(transport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+        transport.close()
+        transport.keepAliveCalled = false
+
+        assertFalse(transport.handleSendToRadio(byteArrayOf(4, 5, 6)))
+        transport.keepAlive()
+        assertFalse(transport.keepAliveCalled)
+        assertEquals(1, transport.sentData.size)
     }
 
     @Test
@@ -274,6 +351,27 @@ class RepositoryFakesTest {
             listOf("begin", "config:update", "module:update", "config:update", "module:update", "commit"),
             controller.adminOperations,
         )
+    }
+
+    @Test
+    fun `FakeRadioController records owner destinations consistently`() = runTest {
+        val controller = FakeRadioController()
+        val localOwner = User(id = "!00000001", long_name = "Local")
+        val remoteOwner = User(id = "!00000002", long_name = "Remote")
+
+        controller.setOwner(destNum = 0, user = localOwner, packetId = 1)
+        controller.setOwner(destNum = 7, user = remoteOwner, packetId = 2)
+
+        assertEquals(
+            listOf(
+                FakeRadioController.OwnerWrite(destination = null, user = localOwner),
+                FakeRadioController.OwnerWrite(destination = 7, user = remoteOwner),
+            ),
+            controller.ownerWrites,
+        )
+
+        controller.reset()
+        assertTrue(controller.ownerWrites.isEmpty())
     }
 
     @Test

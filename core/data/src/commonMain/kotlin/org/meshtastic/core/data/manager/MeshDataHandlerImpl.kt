@@ -118,14 +118,6 @@ class MeshDataHandlerImpl(
     private val scope: ServiceScope,
 ) : MeshDataHandler {
 
-    private val rememberDataType =
-        setOf(
-            PortNum.TEXT_MESSAGE_APP.value,
-            PortNum.ALERT_APP.value,
-            PortNum.WAYPOINT_APP.value,
-            PortNum.NODE_STATUS_APP.value,
-        )
-
     override fun handleReceivedData(
         packet: MeshPacket,
         myNodeNum: Int,
@@ -344,7 +336,7 @@ class MeshDataHandlerImpl(
         session: RadioSessionContext,
     ) {
         val decoded = packet.decoded ?: return
-        if (decoded.reply_id != 0 && decoded.emoji != 0) {
+        if (decoded.isReaction()) {
             rememberReaction(packet, session)
         } else {
             rememberDataPacket(dataPacket, myNodeNum, session = session)
@@ -446,7 +438,7 @@ class MeshDataHandlerImpl(
         updateNotification: Boolean,
         session: RadioSessionContext?,
     ) {
-        if (dataPacket.dataType !in rememberDataType) return
+        if (dataPacket.dataType !in PERSISTED_DATA_PORT_NUMBERS) return
         radioInterfaceService.launchSessionWork(scope, session) {
             persistDataPacket(dataPacket, myNodeNum, updateNotification)
         }
@@ -455,8 +447,8 @@ class MeshDataHandlerImpl(
     /**
      * Deduplicates, filters, persists, and (when appropriate) notifies for a single [dataPacket]. Runs inside a session
      * lease — callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
-     * packet's [DataPacket.dataType] is one of [rememberDataType]. Split out from [rememberDataPacket] so the waypoint
-     * path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
+     * packet's [DataPacket.dataType] is one of [PERSISTED_DATA_PORT_NUMBERS]. Split out from [rememberDataPacket] so
+     * the waypoint path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
      */
     private suspend fun persistDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         val fromLocal = dataPacket.isFromLocal(myNodeNum)

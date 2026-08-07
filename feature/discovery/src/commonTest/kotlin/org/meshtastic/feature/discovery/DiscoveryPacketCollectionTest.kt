@@ -33,6 +33,7 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
@@ -359,6 +360,16 @@ private class InMemoryDiscoveryDao : DiscoveryDao {
 
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? = sessions[sessionId]
 
+    override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String) {
+        sessions[sessionId]?.let { sessions[sessionId] = it.copy(completionStatus = status) }
+    }
+
+    override suspend fun updateRecoverableSessionCompletionStatus(sessionId: Long, status: String) {
+        sessions[sessionId]
+            ?.takeIf { it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
+            ?.let { sessions[sessionId] = it.copy(completionStatus = status) }
+    }
+
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> = MutableStateFlow(sessions[sessionId])
 
     override suspend fun deleteSession(sessionId: Long) {
@@ -424,13 +435,13 @@ private class InMemoryDiscoveryDao : DiscoveryDao {
     override suspend fun markInterruptedSessions() {
         sessions.keys.toList().forEach { key ->
             val session = sessions[key]!!
-            if (session.completionStatus == "in_progress") {
-                sessions[key] = session.copy(completionStatus = "interrupted")
+            if (session.completionStatus == DiscoverySessionStatus.IN_PROGRESS) {
+                sessions[key] = session.copy(completionStatus = DiscoverySessionStatus.INTERRUPTED)
             }
         }
     }
 
     override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
-        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
+        .filter { it.deviceAddress == deviceAddress && it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
         .maxByOrNull { it.timestamp }
 }
