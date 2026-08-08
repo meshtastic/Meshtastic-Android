@@ -37,6 +37,7 @@ import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.repository.DeviceLinkRepository
@@ -46,6 +47,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -73,9 +75,13 @@ class DeviceHardwareRepositoryImplTest {
 
     private class FakeBundledAssetReader(var hardware: List<NetworkDeviceHardware>, private val json: Json) :
         BundledAssetReader {
-        override fun open(name: String): Source? {
-            if (name != "device_hardware.json") return null
-            return Buffer().write(json.encodeToString(hardware).encodeToByteArray())
+        /** Raw `device_bootloader_ota_quirks.json` body, or null to model the asset being absent entirely. */
+        var quirksJson: String? = null
+
+        override fun open(name: String): Source? = when (name) {
+            "device_hardware.json" -> Buffer().write(json.encodeToString(hardware).encodeToByteArray())
+            "device_bootloader_ota_quirks.json" -> quirksJson?.let { Buffer().write(it.encodeToByteArray()) }
+            else -> null
         }
     }
 
@@ -124,6 +130,7 @@ class DeviceHardwareRepositoryImplTest {
     private lateinit var databaseProvider: FakeDatabaseProvider
     private lateinit var api: FakeApiService
     private lateinit var links: FakeDeviceLinkRepository
+    private lateinit var assetReader: FakeBundledAssetReader
     private lateinit var repository: DeviceHardwareRepositoryImpl
 
     @BeforeTest
@@ -131,11 +138,12 @@ class DeviceHardwareRepositoryImplTest {
         databaseProvider = FakeDatabaseProvider()
         api = FakeApiService(listOf(knownHardware))
         links = FakeDeviceLinkRepository()
+        assetReader = FakeBundledAssetReader(listOf(knownHardware), json)
         repository =
             DeviceHardwareRepositoryImpl(
                 remoteDataSource = DeviceHardwareRemoteDataSource(api, dispatchers),
                 localDataSource = DeviceHardwareLocalDataSource(databaseProvider),
-                assetReader = FakeBundledAssetReader(listOf(knownHardware), json),
+                assetReader = assetReader,
                 json = json,
                 deviceLinkRepository = links,
                 dispatchers = dispatchers,
@@ -198,6 +206,103 @@ class DeviceHardwareRepositoryImplTest {
         assertEquals(remoteOnlyHardware.displayName, afterEmptyRefresh?.displayName)
         assertEquals(2, api.hardwareCalls)
         assertEquals(2, links.reconcileCalls)
+    }
+
+    // ── SoftDevice variant resolution: fail-closed on every unresolvable case ──────────────────────
+
+    private val nrfHardware =
+        NetworkDeviceHardware(
+            hwModel = 9,
+            hwModelSlug = "RAK4631",
+            platformioTarget = "rak4631",
+            architecture = "nrf52840",
+            activelySupported = true,
+            displayName = "RAK4631",
+            images = listOf("rak4631.svg"),
+        )
+
+    private fun quirksAsset(hwModel: Int = 9, targets: String = "[\"rak4631\"]", softDevice: String? = "6.1.1") =
+        """
+        {
+          "devices": [],
+          "softDeviceVariants": [
+            { "hwModel": $hwModel, "hwModelSlug": "RAK4631", "platformioTargets": $targets
+              ${softDevice?.let { ", \"softDevice\": \"$it\"" } ?: ""} }
+          ]
+        }
+        """
+            .trimIndent()
+
+    /** Rebuilds the repository around an nRF fixture so SoftDevice resolution can be exercised. */
+    private fun nrfRepository(quirks: String?): DeviceHardwareRepositoryImpl {
+        api = FakeApiService(listOf(nrfHardware))
+        assetReader = FakeBundledAssetReader(listOf(nrfHardware), json).apply { quirksJson = quirks }
+        return DeviceHardwareRepositoryImpl(
+            remoteDataSource = DeviceHardwareRemoteDataSource(api, dispatchers),
+            localDataSource = DeviceHardwareLocalDataSource(databaseProvider),
+            assetReader = assetReader,
+            json = json,
+            deviceLinkRepository = links,
+            dispatchers = dispatchers,
+        )
+    }
+
+    @Test
+    fun softDeviceResolvesWhenModelAndTargetMatch() = runBlocking {
+        val repo = nrfRepository(quirksAsset())
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertEquals(SoftDeviceVariant.S140_6_1_1, hardware?.softDeviceVariant)
+    }
+
+    @Test
+    fun softDeviceIsNullWhenTheAssetIsAbsent() = runBlocking {
+        val repo = nrfRepository(quirks = null)
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertNotNull(hardware, "hardware lookup must still succeed — only the variant is unavailable")
+        assertEquals(null, hardware.softDeviceVariant, "an absent asset must not resolve a variant")
+    }
+
+    @Test
+    fun softDeviceIsNullWhenTheAssetIsMalformed() = runBlocking {
+        val repo = nrfRepository(quirks = "{ not json at all")
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertNotNull(hardware, "a malformed asset must not fail the hardware lookup")
+        assertEquals(null, hardware.softDeviceVariant)
+    }
+
+    @Test
+    fun softDeviceIsNullWhenTheModelIsUnmapped() = runBlocking {
+        val repo = nrfRepository(quirksAsset(hwModel = 999))
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertEquals(null, hardware?.softDeviceVariant, "an unmapped model must not borrow another row")
+    }
+
+    @Test
+    fun softDeviceIsNullWhenTheReportedTargetIsNotInTheRow() = runBlocking {
+        // The dangerous case: hwModel matches but the device reports a build we have not verified. Borrowing the row's
+        // variant here is exactly what would write an erase image into a SoftDevice.
+        val repo = nrfRepository(quirksAsset(targets = "[\"rak4631_some_other_build\"]"))
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertEquals(null, hardware?.softDeviceVariant, "a target mismatch must refuse, not fall back")
+    }
+
+    @Test
+    fun softDeviceIsNullWhenTheValueIsUnrecognised() = runBlocking {
+        val repo = nrfRepository(quirksAsset(softDevice = "6.1.2"))
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "rak4631").getOrNull()
+
+        assertEquals(null, hardware?.softDeviceVariant, "an unknown SoftDevice string must not map to an image")
     }
 }
 

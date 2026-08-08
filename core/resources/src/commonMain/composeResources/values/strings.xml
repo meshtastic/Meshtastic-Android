@@ -636,6 +636,23 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_event_ended_banner">%1$s has ended. Return to standard Meshtastic firmware to restore normal features.</string>
     <string name="firmware_event_ended_button">Update firmware</string>
+    <string name="firmware_maintenance_cdc_unblock_failed">The erase file was copied but the device didn't start erasing. Nothing has been changed yet. Unplug the device, double-press its reset button, and try again.</string>
+    <string name="firmware_maintenance_copy_failed">Couldn't copy the file to the device's drive. Make sure the drive is still connected and try again.</string>
+    <string name="firmware_maintenance_erase_action">Erase and reinstall</string>
+    <string name="firmware_maintenance_erase_confirm_button">Erase device</string>
+    <string name="firmware_maintenance_erase_confirm_text">This erases everything on %1$s, including its channels, keys and all settings, then reinstalls the firmware. It cannot be undone and there is no backup.\n\nYou will be asked to select the device's drive twice: once for the erase file, then again for the firmware.</string>
+    <string name="firmware_maintenance_erase_confirm_title">Erase this device?</string>
+    <string name="firmware_maintenance_no_release">Select a firmware version first, so the device can be reinstalled after erasing.</string>
+    <string name="firmware_maintenance_not_a_bootloader_volume">That drive isn't the device's update drive. Select the drive that appears when the device is in update mode (it contains a file named INFO_UF2.TXT).</string>
+    <string name="firmware_maintenance_select_drive">Select the device's update drive</string>
+    <string name="firmware_maintenance_softdevice_conflict">The device reports a different Bluetooth stack than expected, so erasing it isn't safe. Please report this along with your device model.</string>
+    <string name="firmware_maintenance_unknown_board">This device's bootloader isn't one this app has an upgrade for.</string>
+    <string name="firmware_maintenance_unknown_softdevice">This app can't confirm which Bluetooth stack this device uses, so erasing it isn't safe. Use the web flasher at flasher.meshtastic.org instead.</string>
+    <string name="firmware_maintenance_unsupported_device">This device doesn't support erasing from the app.</string>
+    <string name="firmware_maintenance_upgrade_bootloader_action">Upgrade bootloader</string>
+    <string name="firmware_maintenance_upgrade_confirm_text">This installs an upgraded bootloader on %1$s, which makes future Bluetooth updates much faster. The firmware is reinstalled afterwards.\n\nDon't disconnect the device while this runs.</string>
+    <string name="firmware_maintenance_upgrade_confirm_title">Upgrade bootloader?</string>
+    <string name="firmware_maintenance_wrong_destination">That location isn't the device's update drive, so nothing was written to the device. Select the removable drive that appears when the device is in update mode.</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_recovery_banner">Finish updating %1$s</string>
     <string name="firmware_recovery_ble_failed">Couldn't finish the update over Bluetooth. This device's stock bootloader can't reliably complete an interrupted update over the air. Connect it to a computer with USB and re-flash it using the vendor's serial DFU tool (for example adafruit-nrfutil) to recover the device.</string>
@@ -692,7 +709,7 @@
     <string name="firmware_update_open_flasher">Open Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA update failed: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">This device's OTA loader rejected the requested update method: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor's serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>
+    <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, the vendor's bootloader .zip has to be flashed with a serial DFU tool such as adafruit-nrfutil — copying that .zip to the device's drive won't work. Alternatively, connect this device over USB and use the bootloader upgrade in this app.</string>
     <string name="firmware_update_rebooting">Rebooting to DFU...</string>
     <string name="firmware_update_release_notes">Release Notes</string>
     <string name="firmware_update_requires_bin">%1$s requires a target-matching .bin file.</string>

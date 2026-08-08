@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -151,6 +152,7 @@ class SharedRadioInterfaceServiceLivenessTest {
 
     private val networkRepository: NetworkRepository = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    private val firmwareMaintenanceLock = FirmwareMaintenanceLock()
 
     /**
      * Minimal [LifecycleOwner] for tests that avoids [LifecycleRegistry], which enforces main-thread checks and throws
@@ -277,6 +279,7 @@ class SharedRadioInterfaceServiceLivenessTest {
                 radioPrefs = radioPrefs,
                 transportFactory = transportFactory,
                 analytics = analytics,
+                firmwareMaintenanceLock = firmwareMaintenanceLock,
             )
         service.clockMillis = { clock }
         // Register the service so tearDown can disconnect it deterministically (the heartbeat loop

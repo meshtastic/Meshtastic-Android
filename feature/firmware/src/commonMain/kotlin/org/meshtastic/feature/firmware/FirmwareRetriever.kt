@@ -29,6 +29,9 @@ private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", 
 
 private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
+/** Radix for the hex flash addresses in maintenance-image diagnostics. */
+private const val HEX_RADIX = 16
+
 /** OTA partition role in .mt.json manifests — the main application firmware. */
 private const val OTA_PART_NAME = "app0"
 
@@ -40,14 +43,14 @@ private val manifestJson = Json {
 
 /** Retrieves firmware files, either by direct download or by extracting from a release asset zip. */
 @Single
-class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
+open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     /**
      * Download the OTA firmware zip for a Nordic (nRF52) DFU update.
      *
      * @return The downloaded `-ota.zip` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
-    suspend fun retrieveOtaFirmware(
+    open suspend fun retrieveOtaFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
@@ -64,7 +67,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      *
      * @return The downloaded `.uf2` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
-    suspend fun retrieveUsbFirmware(
+    open suspend fun retrieveUsbFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
@@ -75,6 +78,61 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         fileSuffix = ".uf2",
         internalFileExtension = ".uf2",
     )
+
+    /**
+     * Download a pinned maintenance image (factory erase, bootloader upgrade) and verify it before returning.
+     *
+     * The module's only absolute-URL entry point. Unlike release artifacts, these images have no versioned upstream —
+     * `nrf52_factory_erase` has cut no releases — so the URL is commit/tag-pinned and the content is the real contract.
+     *
+     * A digest or address mismatch is **terminal**: the file is deleted and `null` is returned with no fallback. The
+     * release-zip fallback the other retrievers use would be actively wrong here, because the payload is destructive
+     * and "some other file with the right name" is precisely the failure being guarded against.
+     *
+     * @return The verified [FirmwareArtifact], or `null` when the download failed or verification did not pass.
+     */
+    @Suppress("ReturnCount") // guard clauses: every failure path must abort before a destructive write
+    internal open suspend fun retrieveMaintenanceUf2(
+        asset: MaintenanceUf2,
+        onProgress: (Float) -> Unit,
+    ): FirmwareArtifact? {
+        val artifact =
+            try {
+                fileHandler.downloadFile(asset.url, asset.fileName, onProgress)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Maintenance image download failed: ${asset.fileName}" }
+                null
+            } ?: return null
+
+        val bytes = fileHandler.readBytes(artifact)
+        val actualDigest = FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(bytes))
+        if (!actualDigest.equals(asset.sha256, ignoreCase = true)) {
+            Logger.e {
+                "Maintenance image ${asset.fileName} digest mismatch (expected ${asset.sha256}, got $actualDigest)"
+            }
+            fileHandler.deleteFile(artifact)
+            return null
+        }
+
+        val expectedAddress = asset.expectedFirstTargetAddress
+        if (expectedAddress != null) {
+            val actualAddress = uf2FirstTargetAddress(bytes)
+            if (actualAddress != expectedAddress) {
+                // The digest proved which file arrived; this proves the pinned row itself isn't mismatched — a swapped
+                // URL/digest pair is the one authoring error a digest cannot catch, and the one that erases a
+                // SoftDevice.
+                Logger.e {
+                    "Maintenance image ${asset.fileName} targets ${actualAddress?.toString(HEX_RADIX)}, " +
+                        "expected ${expectedAddress.toString(HEX_RADIX)} — refusing to write"
+                }
+                fileHandler.deleteFile(artifact)
+                return null
+            }
+        }
+
+        Logger.i { "Maintenance image ${asset.fileName} verified (${bytes.size} bytes)" }
+        return artifact
+    }
 
     /**
      * Download the ESP32 OTA firmware binary. Tries in order:
@@ -89,7 +147,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      * @return The downloaded `.bin` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
     @Suppress("ReturnCount")
-    suspend fun retrieveEsp32Firmware(
+    open suspend fun retrieveEsp32Firmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,

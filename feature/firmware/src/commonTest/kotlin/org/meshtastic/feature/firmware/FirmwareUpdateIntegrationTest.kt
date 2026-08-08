@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -68,6 +69,7 @@ class FirmwareUpdateIntegrationTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
 
     private val stableRelease = FirmwareRelease(id = "1", title = "2.5.0", zipUrl = "url", releaseNotes = "")
     private val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
@@ -113,6 +115,8 @@ class FirmwareUpdateIntegrationTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        firmwareRetriever,
+        FirmwareMaintenanceLock(),
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
     )

@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware
 
 import android.content.Context
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toAndroidUri
@@ -44,6 +45,12 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 private const val DOWNLOAD_BUFFER_SIZE = 8192
+
+/** SAF provider for physical volumes; the only one a UF2 bootloader drive can appear under. */
+private const val EXTERNAL_STORAGE_AUTHORITY = "com.android.externalstorage.documents"
+
+/** SAF volume id for internal shared storage — never a removable drive. */
+private const val PRIMARY_VOLUME_ID = "primary"
 
 /**
  * Helper class to handle file operations related to firmware updates, such as downloading, copying from URI, and
@@ -317,6 +324,83 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
 
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean =
         org.meshtastic.feature.firmware.isValidFirmwareFile(filename, target, fileExtension)
+
+    /**
+     * Accepts only a Storage Access Framework document on a non-primary external volume.
+     *
+     * `com.android.externalstorage.documents` document ids are `<volumeId>:<path>`, where internal shared storage is
+     * always `primary`. A mounted USB mass-storage volume — which is what a UF2 bootloader drive is — gets its own
+     * volume id. Every other provider (Downloads, Drive, MediaStore) is therefore rejected, which is the point: those
+     * are exactly where a mis-tap sends the image.
+     */
+    override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = withContext(ioDispatcher) {
+        runCatching {
+            val androidUri = destinationUri.toAndroidUri()
+            if (androidUri.authority != EXTERNAL_STORAGE_AUTHORITY) return@runCatching false
+            // Accepts either a tree URI (the maintenance flow picks the volume) or a single document URI.
+            val documentId =
+                runCatching { DocumentsContract.getTreeDocumentId(androidUri) }.getOrNull()
+                    ?: DocumentsContract.getDocumentId(androidUri)
+            val volumeId = documentId.substringBefore(':', missingDelimiterValue = "")
+            volumeId.isNotBlank() && !volumeId.equals(PRIMARY_VOLUME_ID, ignoreCase = true)
+        }
+            .onFailure { Logger.w(it) { "Could not classify destination volume for $destinationUri" } }
+            .getOrDefault(false)
+    }
+
+    override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean = withContext(ioDispatcher) {
+        runCatching { context.contentResolver.openInputStream(destinationUri.toAndroidUri())?.use { true } == true }
+            .getOrDefault(false)
+    }
+
+    override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = withContext(ioDispatcher) {
+        runCatching {
+            val tree = treeUri.toAndroidUri()
+            val treeDocumentId = DocumentsContract.getTreeDocumentId(tree)
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, treeDocumentId)
+            val documentId =
+                context.contentResolver
+                    .query(
+                        childrenUri,
+                        arrayOf(
+                            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                        ),
+                        null,
+                        null,
+                        null,
+                    )
+                    ?.use { cursor ->
+                        var found: String? = null
+                        while (cursor.moveToNext()) {
+                            if (cursor.getString(1).equals(fileName, ignoreCase = true)) {
+                                found = cursor.getString(0)
+                                break
+                            }
+                        }
+                        found
+                    } ?: return@runCatching null
+
+            val documentUri = DocumentsContract.buildDocumentUriUsingTree(tree, documentId)
+            context.contentResolver.openInputStream(documentUri)?.use { it.readBytes().decodeToString() }
+        }
+            .onFailure { Logger.w(it) { "Could not read $fileName from $treeUri" } }
+            .getOrNull()
+    }
+
+    override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+        withContext(ioDispatcher) {
+            runCatching {
+                val tree = treeUri.toAndroidUri()
+                val parent =
+                    DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+                DocumentsContract.createDocument(context.contentResolver, parent, mimeType, fileName)?.let {
+                    CommonUri.parse(it.toString())
+                }
+            }
+                .onFailure { Logger.w(it) { "Could not create $fileName in $treeUri" } }
+                .getOrNull()
+        }
 
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
         withContext(ioDispatcher) {

@@ -147,6 +147,15 @@ actual fun rememberSaveFileLauncher(
 }
 
 @Composable
+actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit {
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            onTreeUriSelect(uri?.toKmpUri())
+        }
+    return remember(launcher) { { launcher.launch(null) } }
+}
+
+@Composable
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->

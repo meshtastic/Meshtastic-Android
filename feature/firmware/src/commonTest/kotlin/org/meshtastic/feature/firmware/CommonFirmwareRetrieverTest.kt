@@ -449,6 +449,90 @@ abstract class CommonFirmwareRetrieverTest {
     }
 
     // -----------------------------------------------------------------------
+    // Pinned maintenance images (factory erase / bootloader upgrade)
+    // -----------------------------------------------------------------------
+
+    /** Builds a single valid UF2 block whose payload target address is [targetAddress]. */
+    private fun uf2Block(targetAddress: Long): ByteArray {
+        val block = ByteArray(UF2_BLOCK_BYTES)
+        fun putLe32(offset: Int, value: Long) {
+            for (i in 0 until 4) {
+                block[offset + i] = ((value shr (8 * i)) and 0xFF).toByte()
+            }
+        }
+        putLe32(0, 0x0A324655L) // magicStart0
+        putLe32(UF2_TARGET_ADDR_OFFSET, targetAddress)
+        return block
+    }
+
+    private fun maintenanceAsset(payload: ByteArray, expectedAddress: Long?) = MaintenanceUf2(
+        url = "https://example.com/uf2/nrf_erase_test.uf2",
+        fileName = "nrf_erase_test.uf2",
+        sha256 = FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(payload)),
+        expectedFirstTargetAddress = expectedAddress,
+    )
+
+    @Test
+    fun `maintenance uf2 with matching digest and target address is returned`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = uf2Block(APP_START_S140_7_3_0)
+        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        val result = retriever.retrieveMaintenanceUf2(asset) {}
+
+        assertNotNull(result, "A verified maintenance image should be returned")
+        assertEquals(asset.fileName, result.fileName)
+        assertTrue(handler.deletedFiles.isEmpty(), "A verified image must not be deleted")
+    }
+
+    @Test
+    fun `maintenance uf2 digest mismatch is terminal and deletes the download`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = uf2Block(APP_START_S140_7_3_0)
+        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0).copy(sha256 = "00".repeat(32))
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        val result = retriever.retrieveMaintenanceUf2(asset) {}
+
+        assertNull(result, "A digest mismatch must not yield an artifact")
+        assertEquals(1, handler.deletedFiles.size, "The rejected download must be deleted")
+    }
+
+    @Test
+    fun `maintenance uf2 with wrong target address is rejected even when the digest matches`() = runTest {
+        // A swapped URL/digest row: the file is intact and matches its own digest, but it is linked for the other
+        // SoftDevice. Writing it would erase a SoftDevice page.
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = uf2Block(APP_START_S140_6_1_1)
+        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        val result = retriever.retrieveMaintenanceUf2(asset) {}
+
+        assertNull(result, "A target-address mismatch must not yield an artifact")
+        assertEquals(1, handler.deletedFiles.size, "The rejected download must be deleted")
+    }
+
+    @Test
+    fun `maintenance uf2 skips the address check when the asset declares no expected address`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = uf2Block(0x10000000L)
+        val asset = maintenanceAsset(payload, expectedAddress = null)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        assertNotNull(retriever.retrieveMaintenanceUf2(asset) {}, "No expected address means no address check")
+    }
+
+    // -----------------------------------------------------------------------
     // Test infrastructure
     // -----------------------------------------------------------------------
 
@@ -547,8 +631,22 @@ abstract class CommonFirmwareRetrieverTest {
 
         override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> = emptyMap()
 
-        override suspend fun deleteFile(file: FirmwareArtifact) {}
+        /** Artifacts passed to [deleteFile], so verification-failure paths can assert cleanup happened. */
+        val deletedFiles = mutableListOf<FirmwareArtifact>()
+
+        override suspend fun deleteFile(file: FirmwareArtifact) {
+            deletedFiles.add(file)
+        }
 
         override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long = 0L
+
+        override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = true
+
+        override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean = false
+
+        override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = null
+
+        override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+            null
     }
 }

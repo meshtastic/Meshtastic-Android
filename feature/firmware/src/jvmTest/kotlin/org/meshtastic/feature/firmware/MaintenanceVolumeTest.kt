@@ -16,21 +16,10 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.database.entity.FirmwareReleaseType
-
-data class FirmwareUpdateActions(
-    val onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
-    val onStartUpdate: () -> Unit,
-    val onPickFile: () -> Unit,
-    val onSaveFile: (String) -> Unit,
-    /** Pick the device's UF2 volume for a maintenance pass, which vets the drive before writing to it. */
-    val onPickVolume: () -> Unit,
-    val onFactoryErase: () -> Unit,
-    val onBootloaderUpgrade: () -> Unit,
-    val onConfirmLocalFile: () -> Unit,
-    val onDismissLocalFile: () -> Unit,
-    val onRetry: () -> Unit,
-    val onCancel: () -> Unit,
-    val onDone: () -> Unit,
-    val onDismissBootloaderWarning: () -> Unit,
-)
+/**
+ * JVM runner for [CommonMaintenanceVolumeTest].
+ *
+ * The base class is abstract because it builds `CommonUri`. Without a concrete subclass it would contribute zero tests
+ * silently — see PR #6501, which revived eight bases that had been inert for exactly this reason.
+ */
+class MaintenanceVolumeTest : CommonMaintenanceVolumeTest()

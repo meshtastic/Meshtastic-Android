@@ -26,11 +26,49 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
+import org.meshtastic.core.network.repository.UsbRepository
 
 /** Manages USB-related interactions for firmware updates. */
 @Single
-class AndroidFirmwareUsbManager(private val context: Context) : FirmwareUsbManager {
+class AndroidFirmwareUsbManager(private val context: Context, private val usbRepository: UsbRepository) :
+    FirmwareUsbManager {
+
+    override suspend fun serialPortKeys(): Set<String> = usbRepository.serialDevices.value.keys
+
+    @Suppress("ReturnCount") // each failed precondition must abort without poking an arbitrary port
+    override suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean {
+        // The erase image enumerates a moment after the write, so poll rather than sampling once.
+        val driver =
+            withTimeoutOrNull(waitMillis) {
+                usbRepository.serialDevices
+                    .map { devices -> devices.entries.firstOrNull { it.key !in excluding }?.value }
+                    .filterNotNull()
+                    .first()
+            }
+
+        if (driver == null) {
+            Logger.w { "No new serial port appeared within ${waitMillis}ms; cannot unblock the erase image" }
+            return false
+        }
+
+        // device_filter.xml lists no bootloader-mode ids (and none at all for Seeed's 0x2886), so no implicit grant
+        // exists here — an explicit request is the only route.
+        if (
+            !usbRepository.hasPermission(driver.device) &&
+            usbRepository.requestPermission(driver.device).first() != true
+        ) {
+            Logger.w { "USB permission denied; cannot unblock the erase image" }
+            return false
+        }
+
+        return usbRepository.pokeDtr(driver, holdMillis)
+    }
+
     /** Observe when a USB device is detached. */
     override fun deviceDetachFlow(): Flow<Unit> = callbackFlow {
         val receiver =

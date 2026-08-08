@@ -205,6 +205,40 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             destinationFile.length()
         }
 
+    /**
+     * Always false on desktop: there is no Storage Access Framework to classify a volume with, and the multi-pass UF2
+     * maintenance flow is Android-only. Refusing is the fail-closed answer, consistent with [DesktopFirmwareUsbManager]
+     * reporting the CDC unblock unsupported.
+     */
+    override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = false
+
+    override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean =
+        withContext(ioDispatcher) { destinationUri.toLocalFileOrNull()?.canRead() == true }
+
+    /**
+     * Directory-based equivalents of the Android tree operations. Reachable only if a desktop maintenance flow is ever
+     * built — [isRemovableDestination] refuses first today — but implemented rather than stubbed so the behaviour is
+     * obvious to whoever gets there.
+     */
+    override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = withContext(ioDispatcher) {
+        val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
+        dir.listFiles()
+            ?.firstOrNull { it.name.equals(fileName, ignoreCase = true) }
+            ?.let { file -> runCatching { file.readText() }.getOrNull() }
+    }
+
+    override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+        withContext(ioDispatcher) {
+            val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
+            runCatching {
+                dir.mkdirs()
+                val target = File(dir, fileName)
+                target.createNewFile()
+                CommonUri.parse(target.toURI().toString())
+            }
+                .getOrNull()
+        }
+
     @Suppress("NestedBlockDepth", "ReturnCount")
     private fun extractFromZipFile(
         zipFile: File,

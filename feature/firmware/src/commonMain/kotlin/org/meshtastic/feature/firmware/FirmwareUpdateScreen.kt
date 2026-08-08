@@ -94,6 +94,14 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_maintenance_erase_action
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_button
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_text
+import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_title
+import org.meshtastic.core.resources.firmware_maintenance_select_drive
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_bootloader_action
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_text
+import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_title
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
@@ -155,6 +163,7 @@ import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.KeepScreenOn
+import org.meshtastic.core.ui.util.rememberOpenDocumentTreeLauncher
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
@@ -188,6 +197,12 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
+    // Maintenance passes pick the whole volume, not a filename, so the app can read INFO_UF2.TXT and confirm it really
+    // is the device's update drive before writing anything to it.
+    val volumePickerLauncher = rememberOpenDocumentTreeLauncher { uri ->
+        uri?.let { viewModel.writeMaintenancePass(it) }
+    }
+
     val actions =
         remember(viewModel, onNavigateUp) {
             FirmwareUpdateActions(
@@ -198,7 +213,10 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                         filePickerLauncher("*/*")
                     }
                 },
-                onSaveFile = { fileName -> saveFileLauncher(fileName, "application/octet-stream") },
+                onSaveFile = { fileName -> saveFileLauncher(fileName, UF2_MIME_TYPE) },
+                onPickVolume = volumePickerLauncher,
+                onFactoryErase = viewModel::startFactoryErase,
+                onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
@@ -370,6 +388,11 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     is FirmwareUpdateState.Verifying,
     -> true
 
+    // A maintenance pass is mid-sequence: the device may already have no application, and the pass queue lives in
+    // the
+    // ViewModel, so letting the screen sleep (and the ViewModel clear) would strand the device.
+    is FirmwareUpdateState.AwaitingFileSave -> state.step.isDestructive || state.retryMessage != null
+
     else -> false
 }
 
@@ -410,7 +433,12 @@ private fun FirmwareUpdateContent(
             is FirmwareUpdateState.Success ->
                 SuccessState(onDone = actions.onDone, wasLowSpeedTransfer = state.wasLowSpeedTransfer)
 
-            is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
+            is FirmwareUpdateState.AwaitingFileSave ->
+                AwaitingFileSaveState(
+                    state = state,
+                    onSaveFile = actions.onSaveFile,
+                    onPickVolume = actions.onPickVolume,
+                )
         }
     }
 }
@@ -472,6 +500,16 @@ private fun ReadyState(
 
     if (state.showBootloaderWarning) {
         BootloaderWarningCard(deviceHardware = device, onDismissForDevice = actions.onDismissBootloaderWarning)
+        Spacer(Modifier.height(16.dp))
+    }
+
+    if (state.maintenance.show) {
+        UsbMaintenanceCard(
+            gate = state.maintenance,
+            deviceName = device.displayName,
+            onFactoryErase = actions.onFactoryErase,
+            onBootloaderUpgrade = actions.onBootloaderUpgrade,
+        )
         Spacer(Modifier.height(16.dp))
     }
 
@@ -718,6 +756,91 @@ private fun DeviceInfoCard(
     }
 }
 
+/**
+ * Offers factory erase and, where available, an OTAFIX bootloader upgrade.
+ *
+ * Both are destructive, so both sit behind a confirmation and are rendered as low-emphasis error-tinted text buttons
+ * rather than anything that competes with the primary update action — the same treatment [BootloaderWarningCard] uses.
+ *
+ * An erase that cannot run safely stays **visible but disabled with its reason shown**, because the reason is the
+ * useful part: it tells the user this app can't confirm their device's SoftDevice and points them at the web flasher. A
+ * missing bootloader image is different and is simply absent — that is a coverage gap, not something a user can act on.
+ */
+@Composable
+internal fun UsbMaintenanceCard(
+    gate: UsbMaintenanceGate,
+    deviceName: String,
+    onFactoryErase: () -> Unit,
+    onBootloaderUpgrade: () -> Unit,
+) {
+    var showEraseConfirmation by remember { mutableStateOf(false) }
+    var showUpgradeConfirmation by remember { mutableStateOf(false) }
+
+    if (showEraseConfirmation) {
+        MeshtasticDialog(
+            onDismiss = { showEraseConfirmation = false },
+            title = stringResource(Res.string.firmware_maintenance_erase_confirm_title),
+            message = stringResource(Res.string.firmware_maintenance_erase_confirm_text, deviceName),
+            confirmText = stringResource(Res.string.firmware_maintenance_erase_confirm_button),
+            onConfirm = {
+                showEraseConfirmation = false
+                onFactoryErase()
+            },
+            dismissText = stringResource(Res.string.cancel),
+        )
+    }
+
+    if (showUpgradeConfirmation) {
+        MeshtasticDialog(
+            onDismiss = { showUpgradeConfirmation = false },
+            title = stringResource(Res.string.firmware_maintenance_upgrade_confirm_title),
+            message = stringResource(Res.string.firmware_maintenance_upgrade_confirm_text, deviceName),
+            confirmText = stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action),
+            onConfirm = {
+                showUpgradeConfirmation = false
+                onBootloaderUpgrade()
+            },
+            dismissText = stringResource(Res.string.cancel),
+        )
+    }
+
+    Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TextButton(
+                onClick = { showEraseConfirmation = true },
+                enabled = gate.eraseRefusal == null,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text(stringResource(Res.string.firmware_maintenance_erase_action))
+            }
+
+            gate.eraseRefusal?.let { refusal ->
+                Text(
+                    text = usbMaintenanceRefusalText(refusal),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            if (gate.showBootloaderUpgrade) {
+                TextButton(onClick = { showUpgradeConfirmation = true }) {
+                    Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Copy for a pre-flight refusal shown inline next to the disabled button.
+ *
+ * Resolves the same [usbMaintenanceRefusalMessage] mapping the ViewModel uses for a refusal raised mid-flow, so the two
+ * call sites can never drift out of sync with each other.
+ */
+@Composable
+private fun usbMaintenanceRefusalText(refusal: UsbMaintenanceRefusal): String =
+    usbMaintenanceRefusalMessage(refusal).asString()
+
 @Composable
 private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDevice: () -> Unit) {
     val openUrl = rememberOpenUrl()
@@ -869,8 +992,19 @@ private fun ProgressContent(
 }
 
 @Composable
-private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, onSaveFile: (String) -> Unit) {
-    var showDialog by remember { mutableStateOf(true) }
+internal fun AwaitingFileSaveState(
+    state: FirmwareUpdateState.AwaitingFileSave,
+    onSaveFile: (String) -> Unit,
+    onPickVolume: () -> Unit,
+) {
+    // Keyed on the step so each leg of a multi-pass sequence re-shows its own instructions. An unkeyed remember would
+    // leave the second pass with no dialog at all, since the branch stays in composition across the transition.
+    var showDialog by remember(state.step) { mutableStateOf(true) }
+
+    // A maintenance pass has no artifact yet: the image is chosen from what the volume reports, so the user points at
+    // the drive and the app names the file.
+    val fileName = state.fileName
+    val launchPicker = { if (fileName != null) onSaveFile(fileName) else onPickVolume() }
 
     if (showDialog) {
         MeshtasticDialog(
@@ -879,9 +1013,17 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
             confirmText = stringResource(Res.string.okay),
             onConfirm = {
                 showDialog = false
-                onSaveFile(state.fileName)
+                launchPicker()
             },
-            text = { Text(stringResource(Res.string.firmware_update_usb_instruction_text)) },
+            text = {
+                Text(
+                    if (fileName != null) {
+                        stringResource(Res.string.firmware_update_usb_instruction_text)
+                    } else {
+                        stringResource(Res.string.firmware_maintenance_select_drive)
+                    },
+                )
+            },
             dismissable = false,
         )
     }
@@ -894,9 +1036,19 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
         textAlign = TextAlign.Center,
     )
 
+    state.retryMessage?.let { retry ->
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = retry.asString(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center,
+        )
+    }
+
     if (!showDialog) {
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { onSaveFile(state.fileName) }) { Text(stringResource(Res.string.save)) }
+        Button(onClick = launchPicker) { Text(stringResource(Res.string.save)) }
     }
 }
 

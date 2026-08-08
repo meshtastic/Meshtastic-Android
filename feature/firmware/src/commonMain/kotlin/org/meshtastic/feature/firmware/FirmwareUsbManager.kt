@@ -20,4 +20,25 @@ import kotlinx.coroutines.flow.Flow
 
 interface FirmwareUsbManager {
     fun deviceDetachFlow(): Flow<Unit>
+
+    /**
+     * Records which serial ports are present, so a port that appears *after* a UF2 write can be told apart from one
+     * that was already there.
+     *
+     * Snapshot-then-diff rather than matching a VID/PID table: bootloader-mode ids are per-board and collide (four
+     * OTAFIX boards share `239A/0029`), and identifying by serial number needs a permission grant we may not hold yet.
+     */
+    suspend fun serialPortKeys(): Set<String>
+
+    /**
+     * Opens the port that appeared since [excluding] was captured and holds DTR asserted, so firmware waiting on a host
+     * will run.
+     *
+     * The nRF52 factory-erase image blocks in `while (!Serial)` before `InternalFS.format()`, and `Serial` only becomes
+     * truthy once DTR is asserted — without this the erase never starts. A failure here is therefore safe: the image is
+     * written but has destroyed nothing.
+     *
+     * @return true when a port was claimed and DTR held.
+     */
+    suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean
 }

@@ -72,8 +72,10 @@ fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
     partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
     requiresDfu = requiresDfu,
+    // Quirk/overlay fields are applied at read time by DeviceHardwareRepositoryImpl and never persisted.
     requiresBootloaderUpgradeForOta = null,
     bootloaderInfoUrl = null,
+    softDeviceVariant = null,
     supportLevel = supportLevel,
     tags = tags,
 )

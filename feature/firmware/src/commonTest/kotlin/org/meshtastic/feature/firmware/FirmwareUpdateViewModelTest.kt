@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
@@ -76,6 +77,7 @@ class FirmwareUpdateViewModelTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -136,6 +138,8 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        firmwareRetriever,
+        FirmwareMaintenanceLock(),
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
     )
