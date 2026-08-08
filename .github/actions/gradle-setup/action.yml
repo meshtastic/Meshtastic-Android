@@ -140,6 +140,9 @@ runs:
     # Develocity measured 100% CC miss (~52s config/build) before this. Runs after Setup
     # Gradle so GRADLE_ENCRYPTION_KEY is exported. No sha in the key: unchanged build files
     # hit exactly and skip the save; restore-keys is the self-heal for stale entries.
+    # The wrapper hash is its own restore-key segment: a stale same-version entry is a
+    # graceful CC miss, but an entry written by a DIFFERENT Gradle version can crash
+    # fingerprint deserialization outright (seen on 9.6.1 entries under 9.7.0).
     - name: Cache Gradle configuration-cache
       # Gates: opted in; key present (undecryptable otherwise — keeps keyless fork PRs off
       # these entries); not merge_group (throwaway cache scope).
@@ -147,6 +150,6 @@ runs:
       uses: actions/cache@v6
       with:
         path: ${{ github.workspace }}/.gradle/configuration-cache
-        key: gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-${{ hashFiles('settings.gradle.kts', '**/build.gradle.kts', 'build-logic/**', 'gradle/*.gradle', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', 'gradle.properties', 'config.properties', '.github/ci-gradle.properties') }}
+        key: gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('settings.gradle.kts', '**/build.gradle.kts', 'build-logic/**', 'gradle/*.gradle', 'gradle/libs.versions.toml', 'gradle.properties', 'config.properties', '.github/ci-gradle.properties') }}
         restore-keys: |
-          gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-
+          gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-
