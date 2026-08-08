@@ -120,6 +120,11 @@ interface UiPrefs {
 
     fun setHasShownNotPairedWarning(shown: Boolean)
 
+    /** Whether the user dismissed the one-time companion-device (CDM) association prompt for already-paired radios. */
+    val companionAssociationPromptDismissed: StateFlow<Boolean>
+
+    fun setCompanionAssociationPromptDismissed(dismissed: Boolean)
+
     val showQuickChat: StateFlow<Boolean>
 
     fun setShowQuickChat(show: Boolean)

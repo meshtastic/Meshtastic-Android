@@ -146,6 +146,12 @@ class FakeUiPrefs : UiPrefs {
         hasShownNotPairedWarning.value = shown
     }
 
+    override val companionAssociationPromptDismissed = MutableStateFlow(false)
+
+    override fun setCompanionAssociationPromptDismissed(dismissed: Boolean) {
+        companionAssociationPromptDismissed.value = dismissed
+    }
+
     override val showQuickChat = MutableStateFlow(true)
 
     override fun setShowQuickChat(show: Boolean) {
