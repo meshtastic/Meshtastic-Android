@@ -112,6 +112,7 @@
     <string name="ip_address">Adrès IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aksè lokasyon enfim, pa ka bay pozisyon mesh la.</string>

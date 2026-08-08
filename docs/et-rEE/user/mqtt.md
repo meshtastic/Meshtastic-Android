@@ -82,7 +82,7 @@ Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnak
 
 - Nähtav aadressil [meshmap.net](https://meshmap.net) ja sarnastes kogukonna kaarditeenustes
 - Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+- Keela see valik, kui sa ei soovi, et sinu asukoht oleks avalikult nähtav
 
 ## Üleslink vs allalink
 

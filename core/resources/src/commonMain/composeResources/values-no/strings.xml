@@ -118,6 +118,7 @@
     <string name="ip_address">IP-adresse:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>

@@ -66,7 +66,7 @@ Enne uuendamist:
 
 - [ ] Aku > 50%
 - [ ] Stabiilne sinihamba ühendus
-- [ ] Note your current settings (they may reset on major version changes)
+- [ ] Pane tähele oma praeguseid seadeid (need võivad oluliste versioonimuudatuste korral lähtestuda)
 - [ ] Check the release notes for breaking changes
 
 ## Eelvärskendus
@@ -79,7 +79,7 @@ Kui värskendus õnnestub:
 
 - Raadio taaskäivitub automaatselt
 - Sinihamba ühendus taastatakse
-- Verify your settings are intact
+- Veendu, et seaded on puutumatud
 - Kontrolli uut versiooni püsivara värskenduse ekraanil jaotises **Praegu paigaldatud** – see kuvatakse ka sõlme üksikasjade lehel ja ühenduste ekraanil
 
 ![Püsivara värskendus õnnestus](/assets/screenshots/firmware_success.png)

@@ -260,6 +260,7 @@
     <!-- LABEL -->
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
+    <!-- LAYER -->
     <string name="led_state">LED 상태</string>
     <string name="licensed_amateur_radio_text">이 옵션을 활성화하면 암호화가 비활성화되며 기본 Meshtastic 네트워크와 호환되지 않습니다.</string>
     <!-- LOAD -->

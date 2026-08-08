@@ -86,7 +86,7 @@ Rakenduses kuvatakse signaaliandmeid mitmes kohas:
 
 - [Nodes](nodes) — where signal bars appear in the node list
 - [Node Metrics](node-metrics) — SNR/RSSI history and the per-node signal quality reference
-- [Settings — Radio & User](settings-radio-user) — modem presets and their SNR limits
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — modemi eelseadistused ja nende signaali-müra piirangud
 
 ---
 

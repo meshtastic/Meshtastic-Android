@@ -207,6 +207,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Breedtegraad</string>
+    <!-- LAYER -->
     <string name="led_state">LED status</string>
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
     <!-- LOAD -->

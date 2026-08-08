@@ -113,6 +113,7 @@
     <string name="ip_address">عنوان الـ IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>

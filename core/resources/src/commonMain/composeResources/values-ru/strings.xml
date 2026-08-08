@@ -874,6 +874,10 @@
     <string name="latest_alpha_firmware">Последняя альфа</string>
     <string name="latest_stable_firmware">Последняя стабильная</string>
     <string name="latitude">Широта</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Оценка покрытия</string>
+    <string name="layer_type_network">Сетевой уровень</string>
     <string name="learn_more">Подробности</string>
     <string name="led_heartbeat">Сердцебиение светодиодом</string>
     <string name="led_state">Состояние LED</string>
@@ -1590,6 +1594,7 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
     <!-- SITE -->
+    <string name="site_planner">Планировщик места</string>
     <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
     <string name="site_planner_antenna_height_meters">Высота антенны (м)</string>
     <string name="site_planner_color_scale">Цветовая палитра</string>
@@ -1659,6 +1664,8 @@
     <string name="tak_server_enabled_desc">Запускает локальный TLS-сервер на порту 8089 для подключений ATAK/iTAK</string>
     <string name="tak_server_export_data_package_desc">Создайте .zip для ATAK/iTAK, чтобы подключиться к этому серверу</string>
     <string name="tak_server_loading">...</string>
+    <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
+    <string name="tak_server_mesh_to_cot_desc">Показывать ноды Meshtastic на карте ATAK/iTAK как контакты</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_test_card_title">Сетевой тест TAK (Отладка)</string>
     <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>

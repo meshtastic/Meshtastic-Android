@@ -239,6 +239,7 @@
     <string name="label_short_slow">Кратки домет - Споро</string>
     <string name="label_short_turbo">Кратки домет - Турбо</string>
     <string name="latitude">Ширина</string>
+    <!-- LAYER -->
     <string name="led_heartbeat">LED срчани откуцаји</string>
     <!-- LOAD -->
     <!-- LOCAL -->

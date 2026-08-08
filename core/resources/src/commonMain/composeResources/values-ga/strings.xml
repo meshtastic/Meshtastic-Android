@@ -116,6 +116,7 @@
     <string name="ip_address">Seoladh IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Cead iontrála áit dúnta, ní féidir an suíomh a chur ar fáil chuig an mesh.</string>

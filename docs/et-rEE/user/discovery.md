@@ -27,7 +27,7 @@ The app offers two complementary approaches:
 
 Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. See kerib ühendatud raadio läbi ühe või mitu valitud eelseadet, kuulab (või "ootab") igaüht neist määratud aja jooksul pakettide kogumiseks ning seejärel analüüsib ja järjestab tulemused.
 
-Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
+Ava see menüüst **Seaded → Lisateave → Kohaliku võrgu tuvastamine**. Töölaual on sellel omaette kirje **Seaded → Kohaliku võrgu avastamine**.
 
 > ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Skannimise käivitamiseks peab seade olema ühendatud.
 
@@ -90,9 +90,9 @@ Additional features available from the results:
 
 ## Kärgvõrgu majakas
 
-Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+Kärgvõrgu majakas võimaldab sõlmedel kutsuda teisi oma võrguga liituma. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
 
-Configure it under **Settings → Module Config → Mesh Beacon**:
+Konfigureeri see menüüs **Seaded → Mooduli konfiguratsioon → Kärgvõrgu majakas**:
 
 - **Listen for beacons** — receive invitations broadcast by other nodes.
 - **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
@@ -100,7 +100,7 @@ Configure it under **Settings → Module Config → Mesh Beacon**:
 Received invitations appear as **Mesh invitations** cards on the Discovery screen. Igal kaardil kuvatakse saatja sõnum koos pakutava kanali, piirkonna, eelseadistuse ja signaali kvaliteedi ning järgmiste toimingutega:
 
 - **Liitu** — lülitu pakutavale kanalile ja seadista see eelhäälestamisega (häälestab raadio uuesti ja taaskäivitab selle). Kui pakkumine sobib praeguse sageduspesaga, lisab toiming **Lisa kanal** selle taaskäivituseta.
-- **Avasta** – sisesta pakutud eelseadistusega avastusskannimisskeem, et saaksid enne liitumist seda võrku uurida (kuvatakse ainult siis, kui signaalijaam pakub eelseadistust).
+- **Avasta** – sisesta pakutud eelseadistusega avastusskannimisskeem, et saaksid enne liitumist seda võrku uurida (kuvatakse ainult siis, kui majakas pakub eelseadistust).
 - **Dismiss** — ignore the invitation.
 
 Majakate poolt reklaamitud kanalid kuvatakse skannimise seadistuses ka **Majakakanalitena** – valige üks, et see skannimise sihtmärgina lisada.

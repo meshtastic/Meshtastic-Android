@@ -417,6 +417,7 @@ Rango de Valores 0 - 500.</string>
     <string name="latest_alpha_firmware">Última alfa</string>
     <string name="latest_stable_firmware">Última estable</string>
     <string name="latitude">Latitud</string>
+    <!-- LAYER -->
     <string name="learn_more">Saber más</string>
     <string name="led_heartbeat">Latido LED</string>
     <string name="led_state">Estado de led</string>
