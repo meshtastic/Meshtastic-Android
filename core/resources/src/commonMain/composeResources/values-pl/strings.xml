@@ -396,6 +396,7 @@
     <string name="latest_alpha_firmware">Ostatnia wersja alpha</string>
     <string name="latest_stable_firmware">Ostatnia stabilna wersja</string>
     <string name="latitude">Szerokość geograficzna</string>
+    <!-- LAYER -->
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="led_heartbeat">LED bicia serca</string>
     <string name="led_state">Stan diody LED</string>

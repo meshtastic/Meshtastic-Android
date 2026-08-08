@@ -221,7 +221,7 @@ Removes stale nodes from your local database that haven't been heard in a config
 
 ### Factory Reset
 
-Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
+Taastab kõik seaded tehase vaikeväärtustele. **Seda ei saa tagasi võtta.**
 
 ### Taaskäivita
 
@@ -239,7 +239,7 @@ Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaat
 
 ## Related Topics
 
-- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — raadio ja kasutajaprofiili põhiseaded
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
 - [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused
 

@@ -124,6 +124,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Γεωγραφικό Πλάτος</string>
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Η πρόσβαση στην τοποθεσία είναι απενεργοποιημένη, δεν μπορεί να παρέχει θέση στο πλέγμα.</string>
