@@ -574,7 +574,7 @@ jobs:
       # runtime classpath. :assemble alone would miss runtime-only deps (skiko, ktor-cio, …).
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew --no-build-cache --no-configuration-cache
+          ./gradlew --no-build-cache --no-isolated-projects --no-configuration-cache
           -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
           :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
 
