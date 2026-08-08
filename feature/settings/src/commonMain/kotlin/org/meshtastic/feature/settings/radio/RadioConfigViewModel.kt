@@ -113,6 +113,8 @@ internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
     val isLocal: Boolean = false,
+    /** PlatformIO target for the configured destination; available only when that destination is directly connected. */
+    val pioEnv: String? = null,
     val connected: Boolean = false,
     val route: String = "",
     val metadata: DeviceMetadata? = null,
@@ -298,6 +300,9 @@ open class RadioConfigViewModel(
         nodeRepository.myNodeInfo
             .map { ni ->
                 val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
+                _radioConfigState.update { state ->
+                    state.copy(isLocal = isLocal, pioEnv = if (isLocal) ni?.pioEnv else null)
+                }
                 isLocal
             }
             .distinctUntilChanged()

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 fun PreferenceFooter(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    positiveEnabled: Boolean = true,
     negativeText: String? = null,
     onNegativeClicked: () -> Unit = {},
     positiveText: String? = null,
@@ -64,7 +65,7 @@ fun PreferenceFooter(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.buttonColors(),
-                enabled = enabled,
+                enabled = enabled && positiveEnabled,
                 onClick = onPositiveClicked,
             ) {
                 Text(text = positiveText, style = ButtonDefaults.textStyleFor(mediumHeight))

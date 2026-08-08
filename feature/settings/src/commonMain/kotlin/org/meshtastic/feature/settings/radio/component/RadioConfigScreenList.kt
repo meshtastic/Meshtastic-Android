@@ -56,6 +56,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     enabled: Boolean,
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
+    saveEnabled: Boolean = enabled,
     rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
     actions: @Composable () -> Unit = {},
     additionalDirtyCheck: () -> Boolean = { false },
@@ -96,6 +97,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                     ) {
                         PreferenceFooter(
                             enabled = enabled && showFooterButtons,
+                            positiveEnabled = saveEnabled,
                             negativeText = stringResource(Res.string.discard_changes),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
@@ -110,7 +112,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                             },
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                onSave(configState.value)
+                                if (saveEnabled) onSave(configState.value)
                             },
                         )
                     }
