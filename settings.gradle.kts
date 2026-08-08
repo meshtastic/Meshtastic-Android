@@ -36,7 +36,16 @@ plugins {
     // Develocity + CCUD + build cache; shared with build-logic, versions from the catalog.
     id("meshtastic.develocity")
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("org.meshtastic.flatpak.sources.settings") version "0.1.5"
+    // Applied on demand only — see below.
+    id("org.meshtastic.flatpak.sources.settings") version "0.1.5" apply false
+}
+
+// The flatpak-sources plugin reads Gradle.extensions, which Isolated Projects forbids; Gradle 9.7
+// enforces that and fails every task in the build. Only :captureFlatpakSources needs the plugin, and
+// its callers already pass --no-isolated-projects, so gate it on an opt-in property. Remove the gate
+// once org.meshtastic.flatpak.sources.settings > 0.1.5 ships an Isolated-Projects-safe release.
+if (providers.gradleProperty("meshtastic.flatpakSources").isPresent) {
+    pluginManager.apply("org.meshtastic.flatpak.sources.settings")
 }
 
 @Suppress("UnstableApiUsage")
