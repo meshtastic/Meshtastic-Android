@@ -78,7 +78,8 @@ spotless {
     ratchetFrom("origin/main")
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
-        targetExclude("**/build/**/*.kt")
+        // secrets_gradle_plugin is vendored third-party code (Apache-2.0) keeping Google's header.
+        targetExclude("**/build/**/*.kt", "**/secrets_gradle_plugin/**")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint(libs.versions.ktlint.get())
             .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
@@ -101,6 +102,9 @@ detekt {
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
+
+// Vendored third-party code stays as close to upstream as possible — don't lint it to house style.
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach { exclude("**/secrets_gradle_plugin/**") }
 
 gradlePlugin {
     plugins {
@@ -127,6 +131,11 @@ gradlePlugin {
         register("androidLibraryCompose") {
             id = "meshtastic.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
+        register("androidSecrets") {
+            id = "meshtastic.android.secrets"
+            implementationClass =
+                "com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPlugin"
         }
         register("androidScreenshot") {
             id = "meshtastic.android.screenshot"
