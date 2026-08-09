@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -34,8 +35,11 @@ import kotlin.time.Duration.Companion.minutes
 data class InboundCoTMessage(val cotMessage: CoTMessage, val clientInfo: TAKClientInfo? = null)
 
 interface TAKServerManager {
+    val isSupported: Boolean
     val isRunning: StateFlow<Boolean>
+    val isStarting: StateFlow<Boolean>
     val connectionCount: StateFlow<Int>
+    val hasStartError: StateFlow<Boolean>
     val inboundMessages: SharedFlow<InboundCoTMessage>
 
     /**
@@ -61,11 +65,21 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
 
     private var scope: CoroutineScope? = null
 
+    @Volatile private var startGeneration = 0L
+
+    override val isSupported = takServer.isSupported
+
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
+    private val _isStarting = MutableStateFlow(false)
+    override val isStarting: StateFlow<Boolean> = _isStarting.asStateFlow()
+
     // Mirror TAKServer's event-driven connection count — no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
+
+    private val _hasStartError = MutableStateFlow(false)
+    override val hasStartError: StateFlow<Boolean> = _hasStartError.asStateFlow()
 
     private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
     override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
@@ -87,10 +101,14 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
     }
 
     override fun start(scope: CoroutineScope) {
-        if (_isRunning.value) {
+        if (!isSupported) return
+        if (_isRunning.value || _isStarting.value) {
             Logger.w { "TAKServerManager already running" }
             return
         }
+        _hasStartError.value = false
+        _isStarting.value = true
+        val generation = ++startGeneration
         // Assign scope AFTER the guard so a second concurrent start() can never
         // overwrite the active scope without actually restarting the server.
         this.scope = scope
@@ -111,10 +129,16 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
             }
 
             val result = takServer.start(scope)
+            if (generation != startGeneration) {
+                if (result.isSuccess) takServer.stop()
+                return@launch
+            }
+            _isStarting.value = false
             if (result.isSuccess) {
                 _isRunning.value = true
                 Logger.i { "TAK Server started" }
             } else {
+                _hasStartError.value = true
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
                 // Clear both callbacks if start failed so we don't hold a reference unnecessarily
                 takServer.onMessage = null
@@ -128,7 +152,10 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
         // any broadcast()/drainOfflineQueue() that races stop() sees _isRunning=false
         // and exits early instead of launching coroutines on a scope that is about to
         // be discarded.
+        startGeneration++
         _isRunning.value = false
+        _isStarting.value = false
+        _hasStartError.value = false
         scope = null
         takServer.onMessage = null
         takServer.onClientConnected = null

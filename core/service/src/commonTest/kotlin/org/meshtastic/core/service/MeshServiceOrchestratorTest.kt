@@ -204,6 +204,40 @@ class MeshServiceOrchestratorTest {
     }
 
     @Test
+    fun testTakServerCanRetryAfterFailedStart() {
+        val takEnabledFlow = MutableStateFlow(false)
+        val takRunningFlow = MutableStateFlow(false)
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        takEnabledFlow.value = true
+        takEnabledFlow.value = false
+        takEnabledFlow.value = true
+
+        verify(exactly(2)) { takServerManager.start(any()) }
+        verify { takServerManager.stop() }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun testStopStopsTakServerWhileStarting() {
+        val takEnabledFlow = MutableStateFlow(true)
+        val takRunningFlow = MutableStateFlow(false)
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        verify { takServerManager.start(any()) }
+
+        orchestrator.stop()
+
+        verify { takServerManager.stop() }
+
+        orchestrator.start()
+        orchestrator.stop()
+    }
+
+    @Test
     fun testStartCallsSwitchActiveDatabase() {
         // New ordering: start() waits for currentDeviceAddressFlow to surface a valid address,
         // then switches the DB to it and connects. getDeviceAddress() is no longer consulted

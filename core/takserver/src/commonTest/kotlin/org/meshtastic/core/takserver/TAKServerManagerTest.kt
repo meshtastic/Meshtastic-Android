@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.takserver
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -186,15 +187,50 @@ class TAKServerManagerTest {
         override suspend fun hasConnections(): Boolean = false
     }
 
+    private class DelayedTAKServer : TAKServer {
+        override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
+        override var onClientConnected: (() -> Unit)? = null
+
+        val startResult = CompletableDeferred<Result<Unit>>()
+        var stopCount = 0
+
+        override suspend fun start(scope: CoroutineScope): Result<Unit> = startResult.await()
+
+        override fun stop() {
+            stopCount++
+        }
+
+        override suspend fun broadcast(cotMessage: CoTMessage) {}
+
+        override suspend fun broadcastRawXml(xml: String) {}
+
+        override suspend fun hasConnections(): Boolean = false
+    }
+
     @Test
-    fun `start failure due to port conflict leaves isRunning false`() = runTest {
+    fun `start failure due to port conflict reports an error state`() = runTest {
         val failingServer = FailingTAKServer()
         val manager = TAKServerManagerImpl(failingServer)
         manager.start(this)
         advanceUntilIdle()
 
-        // Manager should NOT be running after start failure
         assertEquals(false, manager.isRunning.value)
+        assertTrue(manager.hasStartError.value)
+    }
+
+    @Test
+    fun `stop invalidates a pending successful start`() = runTest {
+        val delayedServer = DelayedTAKServer()
+        val manager = TAKServerManagerImpl(delayedServer)
+        manager.start(this)
+
+        manager.stop()
+        delayedServer.startResult.complete(Result.success(Unit))
+        advanceUntilIdle()
+
+        assertEquals(false, manager.isRunning.value)
+        assertEquals(2, delayedServer.stopCount)
     }
 
     @Test

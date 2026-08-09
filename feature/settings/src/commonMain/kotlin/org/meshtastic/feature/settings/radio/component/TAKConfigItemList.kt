@@ -18,11 +18,15 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.BuildConfigProvider
@@ -65,6 +70,14 @@ import org.meshtastic.core.resources.tak_server_loading
 import org.meshtastic.core.resources.tak_server_mesh_to_cot
 import org.meshtastic.core.resources.tak_server_mesh_to_cot_desc
 import org.meshtastic.core.resources.tak_server_section
+import org.meshtastic.core.resources.tak_server_status
+import org.meshtastic.core.resources.tak_server_status_connected
+import org.meshtastic.core.resources.tak_server_status_failed
+import org.meshtastic.core.resources.tak_server_status_not_running
+import org.meshtastic.core.resources.tak_server_status_off
+import org.meshtastic.core.resources.tak_server_status_starting
+import org.meshtastic.core.resources.tak_server_status_unavailable
+import org.meshtastic.core.resources.tak_server_status_waiting
 import org.meshtastic.core.resources.tak_server_test_card_title
 import org.meshtastic.core.resources.tak_server_test_idle
 import org.meshtastic.core.resources.tak_server_test_result_bytes
@@ -74,6 +87,7 @@ import org.meshtastic.core.resources.tak_server_test_run
 import org.meshtastic.core.resources.tak_server_test_running
 import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
+import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.core.takserver.TakMeshTestRunner
 import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -180,8 +194,22 @@ internal fun handleTakPermissionResult(granted: Boolean, isTakServerEnabled: Boo
 @Composable
 fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
+    val takServerManager: TAKServerManager = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
     val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
+    val isTakServerRunning by takServerManager.isRunning.collectAsStateWithLifecycle()
+    val isTakServerStarting by takServerManager.isStarting.collectAsStateWithLifecycle()
+    val takClientCount by takServerManager.connectionCount.collectAsStateWithLifecycle()
+    val hasTakServerStartError by takServerManager.hasStartError.collectAsStateWithLifecycle()
+    val takServerStatus =
+        TakServerStatus.resolve(
+            isSupported = takServerManager.isSupported,
+            isEnabled = isTakServerEnabled,
+            isRunning = isTakServerRunning,
+            isStarting = isTakServerStarting,
+            clientCount = takClientCount,
+            hasStartError = hasTakServerStartError,
+        )
     val exportLauncher = rememberDataPackageExporter { TAKDataPackageGenerator.generateDataPackage() }
 
     TakPermissionHandler(
@@ -220,6 +248,8 @@ fun TakServerScreen(onBack: () -> Unit) {
                 onEnabledChange = { takPrefs.setTakServerEnabled(it) },
                 isMeshToCotEnabled = isMeshToCotEnabled,
                 onMeshToCotChange = { takPrefs.setMeshToCotEnabled(it) },
+                status = takServerStatus,
+                clientCount = takClientCount,
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
             )
             TakMeshTestCard()
@@ -234,6 +264,8 @@ internal fun TakServerSection(
     onEnabledChange: (Boolean) -> Unit,
     isMeshToCotEnabled: Boolean,
     onMeshToCotChange: (Boolean) -> Unit,
+    status: TakServerStatus,
+    clientCount: Int,
     onExport: () -> Unit,
 ) {
     TitledCard(title = stringResource(Res.string.tak_server_section)) {
@@ -244,6 +276,8 @@ internal fun TakServerSection(
             enabled = true,
             onCheckedChange = onEnabledChange,
         )
+        HorizontalDivider()
+        TakServerStatusRow(status = status, clientCount = clientCount)
         if (isTakServerEnabled) {
             HorizontalDivider()
             SwitchPreference(
@@ -277,6 +311,79 @@ internal fun TakServerSection(
                     )
                 }
             }
+        }
+    }
+}
+
+internal enum class TakServerStatus {
+    Unavailable,
+    Off,
+    Starting,
+    WaitingForClient,
+    Connected,
+    Failed,
+    NotRunning,
+    ;
+
+    companion object {
+        fun resolve(
+            isSupported: Boolean,
+            isEnabled: Boolean,
+            isRunning: Boolean,
+            isStarting: Boolean,
+            clientCount: Int,
+            hasStartError: Boolean,
+        ): TakServerStatus = when {
+            !isSupported -> Unavailable
+            !isEnabled -> Off
+            hasStartError -> Failed
+            isStarting -> Starting
+            isRunning && clientCount > 0 -> Connected
+            isRunning -> WaitingForClient
+            else -> NotRunning
+        }
+    }
+}
+
+@Composable
+private fun TakServerStatusRow(status: TakServerStatus, clientCount: Int) {
+    val (description, color) =
+        when (status) {
+            TakServerStatus.Unavailable ->
+                stringResource(Res.string.tak_server_status_unavailable) to MaterialTheme.colorScheme.onSurfaceVariant
+
+            TakServerStatus.Off ->
+                stringResource(Res.string.tak_server_status_off) to MaterialTheme.colorScheme.onSurfaceVariant
+
+            TakServerStatus.Starting ->
+                stringResource(Res.string.tak_server_status_starting) to MaterialTheme.colorScheme.onSurfaceVariant
+
+            TakServerStatus.WaitingForClient ->
+                stringResource(Res.string.tak_server_status_waiting) to MaterialTheme.colorScheme.primary
+
+            TakServerStatus.Connected ->
+                pluralStringResource(Res.plurals.tak_server_status_connected, clientCount, clientCount) to
+                    MaterialTheme.colorScheme.primary
+
+            TakServerStatus.Failed ->
+                stringResource(Res.string.tak_server_status_failed) to MaterialTheme.colorScheme.error
+
+            TakServerStatus.NotRunning ->
+                stringResource(Res.string.tak_server_status_not_running) to MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(modifier = Modifier.size(10.dp).background(color, CircleShape))
+        Column(modifier = Modifier.padding(start = 12.dp)) {
+            Text(text = stringResource(Res.string.tak_server_status), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
