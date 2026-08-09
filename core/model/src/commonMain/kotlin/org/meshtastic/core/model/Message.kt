@@ -28,6 +28,7 @@ import org.meshtastic.core.resources.message_routing_error_bad_request
 import org.meshtastic.core.resources.message_routing_error_bad_request_detail
 import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit
 import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit_detail
+import org.meshtastic.core.resources.message_routing_error_got_nak_detail
 import org.meshtastic.core.resources.message_routing_error_max_retransmit
 import org.meshtastic.core.resources.message_routing_error_max_retransmit_detail
 import org.meshtastic.core.resources.message_routing_error_no_channel
@@ -47,6 +48,7 @@ import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
 import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey_detail
 import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded
 import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded_detail
+import org.meshtastic.core.resources.message_routing_error_timeout_detail
 import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_routing_error_too_large_detail
 import org.meshtastic.core.resources.message_status_delivered
@@ -142,10 +144,11 @@ fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = whe
 fun getMessageRoutingErrorDetailResFrom(routingError: Int): StringResource? = when (routingError) {
     Routing.Error.NO_ROUTE.value -> Res.string.message_routing_error_no_route_detail
 
-    Routing.Error.GOT_NAK.value,
-    Routing.Error.TIMEOUT.value,
-    Routing.Error.MAX_RETRANSMIT.value,
-    -> Res.string.message_routing_error_max_retransmit_detail
+    Routing.Error.GOT_NAK.value -> Res.string.message_routing_error_got_nak_detail
+
+    Routing.Error.TIMEOUT.value -> Res.string.message_routing_error_timeout_detail
+
+    Routing.Error.MAX_RETRANSMIT.value -> Res.string.message_routing_error_max_retransmit_detail
 
     Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel_detail
 

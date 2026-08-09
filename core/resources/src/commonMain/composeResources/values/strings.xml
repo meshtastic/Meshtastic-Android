@@ -1072,6 +1072,7 @@
     <string name="message_routing_error_bad_request_detail">The destination rejected this request as invalid.</string>
     <string name="message_routing_error_duty_cycle_limit">Duty cycle limit</string>
     <string name="message_routing_error_duty_cycle_limit_detail">Local airtime limits are temporarily blocking sends. Wait before trying again.</string>
+    <string name="message_routing_error_got_nak_detail">A node rejected this message. Try again when the route changes.</string>
     <string name="message_routing_error_max_retransmit">Failed to deliver to mesh</string>
     <string name="message_routing_error_max_retransmit_detail">No node confirmed this message. Try again when you have better signal or more mesh coverage.</string>
     <string name="message_routing_error_no_channel">Channel/key mismatch</string>
@@ -1091,6 +1092,7 @@
     <string name="message_routing_error_pki_unknown_pubkey_detail">The recipient does not know your public key yet. Your node may share its info automatically; try again after it syncs.</string>
     <string name="message_routing_error_rate_limit_exceeded">Rate limited</string>
     <string name="message_routing_error_rate_limit_exceeded_detail">Messages are being sent too quickly. Wait before trying again.</string>
+    <string name="message_routing_error_timeout_detail">No acknowledgment was received in time. Try again when you have better signal or more mesh coverage.</string>
     <string name="message_routing_error_too_large">Message is too large to send</string>
     <string name="message_routing_error_too_large_detail">Shorten the message and send it again.</string>
     <string name="message_status_delivered">Delivered to mesh</string>
