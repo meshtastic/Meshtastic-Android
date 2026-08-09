@@ -37,23 +37,23 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
-import coil3.ImageLoader
-import coil3.compose.setSingletonImageLoaderFactory
 import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
+import org.meshtastic.app.map.sitePlannerAvailable
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
@@ -65,8 +65,14 @@ import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.EventFontResolver
+import org.meshtastic.core.ui.theme.EventTheme
+import org.meshtastic.core.ui.theme.EventThemeToggle
+import org.meshtastic.core.ui.theme.LocalEventTheme
+import org.meshtastic.core.ui.theme.LocalEventThemeToggle
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
@@ -81,9 +87,13 @@ import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
+import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
+import org.meshtastic.core.ui.util.accentColorOrNull
+import org.meshtastic.core.ui.util.brandHighlightOrNull
+import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
@@ -105,9 +115,6 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // ponytail: debug-only test affordance so CI/agent tooling can skip onboarding on a fresh
-        // install: `adb shell am start -n <pkg>/.MainActivity --ez skip_onboarding true`. Pair with
-        // `adb shell pm grant <pkg> <permission>` to pre-grant runtime permissions (native, no app code).
         if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
             model.onAppIntroCompleted()
         }
@@ -126,10 +133,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            // Bridge Koin-provided ImageLoader (with flavor-specific HttpClient, SVG, debug logger)
-            // to Coil's singleton so all AsyncImage composables use the custom configuration.
-            setSingletonImageLoaderFactory { get<ImageLoader>() }
-
             val theme by model.theme.collectAsStateWithLifecycle()
             val dynamic = theme == MODE_DYNAMIC
             val dark =
@@ -173,7 +176,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        MeshService.startService(this)
+        MeshService.startService(this, ServiceStartTrigger.UserInterface)
     }
 
     override fun onResume() {
@@ -190,8 +193,30 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
+        val eventThemeEnabled by model.eventThemeEnabled.collectAsStateWithLifecycle()
+        val eventFontResolver = koinInject<EventFontResolver>()
+        // Resolve the ambient event theme once per edition: an accent wash and brand palette (any flavor) and/or
+        // downloadable fonts (Google flavor only). Applied app-wide only while on event firmware and not opted out.
+        val eventAccent = eventEdition?.accentColorOrNull()
+        val eventHighlight = eventEdition?.brandHighlightOrNull()
+        val eventPalette = remember(eventEdition) { eventEdition?.brandPalette().orEmpty() }
+        val resolvedEventFonts =
+            remember(eventEdition, eventFontResolver) { eventFontResolver.resolve(eventEdition?.theme?.fonts) }
         CompositionLocalProvider(
             LocalEventBranding provides eventEdition,
+            LocalEventTheme provides
+                if (eventThemeEnabled && eventEdition != null) {
+                    EventTheme(
+                        accent = eventAccent,
+                        highlight = eventHighlight,
+                        palette = eventPalette,
+                        fonts = resolvedEventFonts,
+                    )
+                } else {
+                    null
+                },
+            LocalEventThemeToggle provides
+                EventThemeToggle(enabled = eventThemeEnabled, onChange = model::setEventThemeEnabled),
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
@@ -199,6 +224,7 @@ class MainActivity : AppCompatActivity() {
             LocalNfcScannerSupported provides true,
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
+            LocalSitePlannerAvailable provides sitePlannerAvailable(),
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
                 { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
@@ -262,9 +288,7 @@ class MainActivity : AppCompatActivity() {
         val appLinkData: Uri? = intent.data
 
         when (appLinkAction) {
-            Intent.ACTION_VIEW -> {
-                appLinkData?.let { handleMeshtasticUri(it) }
-            }
+            Intent.ACTION_VIEW -> handleViewIntent(appLinkData)
 
             NfcAdapter.ACTION_NDEF_DISCOVERED -> {
                 val rawMessages =
@@ -295,12 +319,7 @@ class MainActivity : AppCompatActivity() {
 
             Intent.ACTION_MAIN -> {}
 
-            Intent.ACTION_SEND -> {
-                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                if (text != null) {
-                    createShareIntent(text).send()
-                }
-            }
+            Intent.ACTION_SEND -> handleSendIntent(intent)
 
             else -> {
                 Logger.w { "Unexpected action $appLinkAction" }
@@ -308,10 +327,44 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleViewIntent(uri: Uri?) {
+        when {
+            uri == null -> {}
+
+            // A file handed to us via "Open in Meshtastic" (Files, Share Sheet, drag-and-drop) rather than a
+            // meshtastic:// / https deep link — import it as a map overlay.
+            uri.scheme == "content" || uri.scheme == "file" -> importMapFile(uri)
+
+            else -> handleMeshtasticUri(uri)
+        }
+    }
+
+    private fun handleSendIntent(intent: Intent) {
+        val stream = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+        val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+        when {
+            stream != null -> importMapFile(stream)
+
+            // shared .geojson/.kml file (e.g. Site Planner)
+            text != null -> createShareIntent(text).send()
+        }
+    }
+
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
 
         model.handleDeepLink(uri.toKmpUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
+    }
+
+    /**
+     * Hand a map file received via an OS "Open in / Send to Meshtastic" intent to the map, then bring the Map tab
+     * forward so the imported overlay is visible. Only the Google-flavor map consumes this (see [MapFileImportBus]);
+     * the read grant on [uri] lives as long as this activity, which is long enough for the map to copy the file in.
+     */
+    private fun importMapFile(uri: Uri) {
+        Logger.d { "Importing shared map file: $uri" }
+        MapFileImportBus.pending.value = uri
+        handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
     }
 
     private fun createShareIntent(message: String): PendingIntent {

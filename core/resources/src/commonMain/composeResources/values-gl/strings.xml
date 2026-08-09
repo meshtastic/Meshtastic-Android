@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">Actualización da aplicación requerida</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
@@ -62,6 +63,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="description">Descrición</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="direct_message">Mensaxe directa</string>
@@ -84,12 +86,14 @@
     <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
     <string name="firmware_too_old">Actualización de firmware necesaria.</string>
     <string name="firmware_update_failed">Actualización fallou</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
     <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
     <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
+    <!-- IMPORT -->
     <string name="interval_unset">Sen configurar</string>
     <string name="intro_show">Amosar introdución</string>
     <string name="ip_address">Enderezo IP:</string>
@@ -159,6 +163,7 @@
     <string name="one_day">24 Horas</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -193,6 +198,7 @@
     <string name="routing_error_not_authorized">Non autorizado</string>
     <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
     <string name="routing_error_pki_unknown_pubkey">Chave pública descoñecida</string>
+    <!-- SAVE -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>
     <!-- SCAN -->
@@ -205,6 +211,7 @@
     <string name="share">Compartir</string>
     <!-- SHOW -->
     <string name="shutdown">Apagar</string>
+    <!-- SITE -->
     <!-- TAK -->
     <string name="theme">Tema</string>
     <string name="theme_dark">Escuro</string>
@@ -231,5 +238,6 @@
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Enderezo IP</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Ti</string>
 </resources>

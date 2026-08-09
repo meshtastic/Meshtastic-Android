@@ -19,6 +19,8 @@ package org.meshtastic.screenshots.feature
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
+import org.meshtastic.feature.map.component.DeleteWaypointDialogLocalOnlyPreview
+import org.meshtastic.feature.map.component.DeleteWaypointDialogWithBroadcastPreview
 import org.meshtastic.feature.map.component.MapControlsOverlayPreview
 import org.meshtastic.feature.map.component.WaypointInfoDialogOptedInPreview
 import org.meshtastic.feature.map.component.WaypointInfoDialogReadOnlyPreview
@@ -28,6 +30,20 @@ import org.meshtastic.feature.map.component.WaypointInfoDialogReadOnlyPreview
 @Composable
 fun ScreenshotMapControlsOverlay() {
     MapControlsOverlayPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotDeleteWaypointDialogLocalOnly() {
+    DeleteWaypointDialogLocalOnlyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotDeleteWaypointDialogWithBroadcast() {
+    DeleteWaypointDialogWithBroadcastPreview()
 }
 
 @PreviewTest

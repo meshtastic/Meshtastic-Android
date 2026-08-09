@@ -1,0 +1,33 @@
+# Class A of "Recurring Defect Classes" in .skills/code-review/SKILL.md, enforced mechanically.
+# Presence in this repo is nullability: the models are Wire-generated, so there is no hasX()
+# accessor — an optional field is simply a nullable type. The proto `rx_rssi` only becomes `Int?`
+# in protobufs 2.7.26.138 (PR #6498, still open at time of writing); on the pinned 2.7.26.130 it
+# is `Int = 0`. So this rule currently guards APP-level nullable rssi (parameters, state, BLE
+# advertisement values) and becomes a proto regression guard once #6498 lands.
+#
+# INT LITERALS ONLY, deliberately. RSSI is an integer dBm value everywhere in this repo —
+# proto `rx_rssi: Int`, `Node.rssi: Int`, `MetricFormatter.rssi(value: Int)` — and there is no
+# Float-typed rssi declaration anywhere. Adding `?: 0f` / `takeIf { it != 0f }` variants here
+# would be dead patterns. Float sentinels on genuinely-Float metrics are the float rule's job.
+# RSSI only, deliberately NOT snr: rx_snr still has no proto presence upstream, so a 0f guard there
+# is genuinely ambiguous and unfixable app-side — flagging it would be pure noise on code nobody can
+# correct. Also excludes `replyId ?: 0` and `packet.from.takeIf { it != 0 }`, which are legitimate
+# because 0 there means "unset", not "a measurement of zero".
+id: presence-vs-sentinel-zero-signal
+language: kotlin
+severity: warning
+message: >-
+  Zero-default on a signal metric conflates "not reported" with a real reading. 0 dBm is a
+  valid RSSI (SX126x reports exactly 0, SX127x can go positive) and on a signal-strength scale
+  it renders as the STRONGEST value — so an unknown signal displays as excellent. Keep the type
+  nullable and branch on null, rendering absence explicitly rather than substituting a number.
+note: >-
+  See .skills/code-review/SKILL.md, "Recurring Defect Classes", class A. rx_snr still has no
+  proto presence upstream, so its 0f ambiguity cannot be fixed app-side — do not re-raise that.
+rule:
+  any:
+    - pattern: "$RECV.takeIf { it != 0 }"
+    - pattern: "$RECV ?: 0"
+constraints:
+  RECV:
+    regex: "(?i)rssi$"

@@ -52,6 +52,8 @@
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
     <string name="app_version">Wersja</string>
     <string name="apply">Zastosuj</string>
+    <!-- AQI -->
+    <string name="aqi_good">dobry</string>
     <string name="are_you_sure">Czy jesteś pewien?</string>
     <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny?</string>
     <string name="audio">Dźwięk</string>
@@ -152,6 +154,7 @@
     <string name="config_security_is_managed">Urządzenie jest zarządzane przez administratora sieci mesh, użytkownik nie ma dostępu do żadnych ustawień urządzenia.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
     <string name="config_security_serial_enabled">Konsola szeregowa przez Stream API.</string>
+    <string name="configuration">Konfiguracja</string>
     <string name="configure_notification_permissions">Skonfiguruj uprawnienia powiadomień</string>
     <string name="connect">Połącz</string>
     <string name="connected">Połączony</string>
@@ -206,6 +209,7 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="desc_node_filter_clear">Wyczyść filtr</string>
     <string name="description">Opis</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="details">Szczegóły</string>
     <string name="detection_sensor">Czujnik detekcji</string>
@@ -220,6 +224,7 @@
     <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="dew_point">Punkt rosy</string>
     <string name="direct_message">Bezpośrednia wiadomość</string>
+    <string name="direct_messages">Bezpośrednie Wiadomości</string>
     <string name="discard_changes">Odrzuć</string>
     <string name="disconnect">Rozłącz</string>
     <string name="disconnected">Rozłączono</string>
@@ -324,6 +329,7 @@
     <string name="fixed_pin">Stały PIN</string>
     <string name="fixed_position">Położenie stałe</string>
     <string name="flip_screen">Odwróć ekran</string>
+    <!-- FORMAT -->
     <string name="frequency_slot">Slot częstotliwości</string>
     <string name="friendly_name">Przyjazna nazwa</string>
     <string name="gas_resistance">Rezystancja gazu</string>
@@ -360,6 +366,7 @@
     <string name="ignore_incoming">Ignoruj przychodzące</string>
     <string name="ignore_mqtt">Zignoruj MQTT</string>
     <string name="ignore_remove">Usunąć '%1$s' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Import konfiguracji</string>
     <string name="import_label">Import</string>
     <string name="incoming_messages">Wiadomości przychodzące</string>
@@ -473,7 +480,6 @@
     <string name="message">Wiadomość</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
     <string name="message_input_label">Wiadomość</string>
-    <string name="message_status_enroute">Oczekiwanie na potwierdzenie</string>
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
     <string name="message_status_unknown">Nieznany</string>
     <string name="messages">Wiadomości</string>
@@ -570,11 +576,12 @@
     <string name="output_led_gpio">Wyjście LED (GPIO)</string>
     <string name="output_vibra_gpio">Wyjście silnika wibracyjnego (GPIO)</string>
     <string name="override_duty_cycle">Nadpisz cykl pracy</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Tryb parowania</string>
     <string name="password">Hasło</string>
     <!-- PAX -->
     <string name="paxcounter">Paxcounter</string>
-    <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia \"Urządzenia w pobliżu\" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
+    <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia "Urządzenia w pobliżu" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
     <string name="phone_location">Lokalizacja telefonu</string>
     <string name="play">Odtwórz</string>
     <plurals name="plurals_hours">
@@ -659,7 +666,7 @@
     <!-- ROLE -->
     <string name="role">Rola urządzenia</string>
     <string name="role_client_desc">Urządzenie samodzielne lub sparowane z aplikacją.</string>
-    <string name="role_client_hidden_desc"> Used for nodes that \"only speak when spoken to\" Turns all of the routine broadcasts but allows for ad-hoc communication. Still rebroadcasts, but with local only rebroadcast mode (known meshes only). Can be used for private operation or to dramatically reduce airtime / power consumption.</string>
+    <string name="role_client_hidden_desc"> Used for nodes that "only speak when spoken to" Turns all of the routine broadcasts but allows for ad-hoc communication. Still rebroadcasts, but with local only rebroadcast mode (known meshes only). Can be used for private operation or to dramatically reduce airtime / power consumption.</string>
     <string name="role_client_mute_desc">Wyciszenie klienta - To samo, co klient, z wyjątkiem pakietów, które nie przeskakują przez ten węzeł, nie przyczynia się do routingu pakietów dla siatki.</string>
     <string name="role_lost_and_found_desc">Nadaje regularnie lokalizację jako wiadomości do głównego kanału, aby pomóc w odzyskaniu urządzenia.</string>
     <string name="role_repeater_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów z minimalnym narzutem. Niewidoczny na liście węzłów.</string>
@@ -692,6 +699,7 @@
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="rsyslog_server">Serwer rsyslog</string>
+    <!-- SAVE -->
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz</string>
     <string name="save_rangetest">Eksportuj pakiety zasięgu</string>
@@ -741,12 +749,15 @@
     <string name="shutdown_warning">⚠️ Spowoduje to WYŁĄCZENIE węzła. Do ponownego włączenia węzła, konieczna będzie fizyczna interakcja.</string>
     <string name="signal">Sygnał:</string>
     <string name="signal_quality">Jakość sygnału</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Wyświetlacz</string>
     <string name="skip">Pomiń</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
     <string name="snr">SNR:</string>
     <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="speed">Prędkość</string>
     <string name="ssid">SSID</string>
+    <string name="subnet">Podsieć</string>
     <string name="supported">Obsługiwane</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
@@ -848,5 +859,6 @@
     <string name="wifi_rssi_threshold_defaults_to_80">Próg WiFi RSSI (domyślnie: -80)</string>
     <!-- WIND -->
     <string name="wind">Wiatr</string>
+    <!-- WRITE -->
     <string name="you">Ty</string>
 </resources>

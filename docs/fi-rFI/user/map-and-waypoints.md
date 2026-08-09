@@ -2,13 +2,17 @@
 title: Kartta ja reittipisteet
 parent: Käyttöopas
 nav_order: 6
-last_updated: 2026-06-25
-description: Näytä radion sijainnit kartalla, luo ja jaa reittipisteitä sekä hallitse sijainnin jakamista ja yksityisyyttä.
+last_updated: 2026-07-08
+description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
   - reittipisteet
   - gps
   - sijainti
+  - site-planner
+  - karttatasot
+  - geojson
+  - kml
 ---
 
 # Kartta ja reittipisteet
@@ -49,24 +53,37 @@ Reittipisteet ovat jaettuja maantieteellisiä kiinnostavia kohteita, jotka kaikk
 3. Valitse reittipisteelle kuvake tai emoji.
 4. Napauta **Lähetä** jakaaksesi sen verkkoon.
 
+Reittipisteet osoitetaan kuten viestit: oletuksena ne lähetetään yleislähetyksenä ensisijaisella kanavalla, mutta reittipiste voidaan lähettää myös tietyllä kanavalla tai suoraviestinä yhdelle radiolle.
+
 ### Reittipisteen ominaisuudet
 
-| Ominaisuus      | Kuvaus                                                      |
-| --------------- | ----------------------------------------------------------- |
-| Nimi            | Lyhyt tunniste (enintään 30 merkkiä)     |
-| Kuvaus          | Valinnainen pidempi kuvaus                                  |
-| Kuvake          | Visuaalinen merkkiemoji kartalla                            |
-| Lukittu         | Jos lukittu, vain merkin luonut voi muokata tai poistaa sen |
-| Voimassaoloaika | Valinnainen automaattinen poistumisaika                     |
+| Ominaisuus      | Kuvaus                                                                  |
+| --------------- | ----------------------------------------------------------------------- |
+| Nimi            | Lyhyt tunniste (enintään 29 merkkiä)                 |
+| Kuvaus          | Valinnainen pidempi kuvaus                                              |
+| Kuvake          | Visuaalinen merkkiemoji kartalla                                        |
+| Lukittu         | Jos lukittu, vain merkin luonut voi muokata tai poistaa sen             |
+| Voimassaoloaika | Valinnainen automaattinen poistopäivä ja -aika                          |
+| Aluerajaus      | Valinnainen aluerajaus saapumis- ja poistumisilmoituksille — katso alla |
 
 ### Reittipisteen vanheneminen
 
 Reittipisteet voidaan asettaa vanhenemaan automaattisesti:
 
 - Ei koskaan (oletus) — reittipiste pysyy voimassa kunnes se poistetaan manuaalisesti
-- **Aikaperusteinen** — reittipiste poistetaan automaattisesti määritellyn ajan jälkeen (esim. “poista 2 tunnin kuluttua”). Hyödyllinen tilapäisille merkinnöille kuten kokoontumispaikat, vaarat tai tapaamispaikat.
+- **Ajastettu** — valitse tietty päivämäärä ja kellonaika. Reittipiste poistetaan automaattisesti, kun kyseinen ajankohta on ohitettu. Hyödyllinen tilapäisille merkinnöille kuten kokoontumispaikat, vaarat tai tapaamispaikat.
 
-Vanhentuneet reittipisteet piilotetaan automaattisesti kartalta, jotta näkymä pysyy selkeänä. Vanhenemislaskuri alkaa, kun reittipiste luodaan, ei silloin kun muut radiot vastaanottavat sen.
+Vanhentuneet reittipisteet piilotetaan automaattisesti kartalta, jotta näkymä pysyy selkeänä. Poistumisen ajastus perustuu valitsemaasi päivämäärään ja kellonaikaan, ei siihen, kuinka kauan reittipiste on ollut olemassa tai vastaanotettuna.
+
+### Reittipisteiden aluerajaukset
+
+Mikä tahansa reittipiste voidaan määrittää myös **aluerajaukseksi** eli ilmoitusalueeksi, jolloin sinä tai muut käyttäjät saatte ilmoituksen, kun radio saapuu alueelle tai poistuu sieltä:
+
+1. Määritä **aluerajauksen säde** valmiista vaihtoehdoista (tai valitse **Pois** poistaaksesi toiminnon käytöstä), tai napauta **Määritä alue kartalla** piirtääksesi mukautetun suorakulmaisen alueen.
+2. Kun alue on määritetty, ota käyttöön **Ilmoita saapuessa** ja/tai **Ilmoita poistuttaessa**.
+3. Voit halutessasi ottaa käyttöön **Vain suosikit** -asetuksen, jolloin ilmoituksia näytetään vain suosikkiradioistasi.
+
+Koska reittipisteet (ja niiden aluerajaukset) lähetetään koko mesh-verkkoon, oletusarvoisesti ilmoitukset saa vain niiden **luoja**. Jos joku jakaa kanssasi aluerajauksen sisältävän reittipisteen, sen tiedoissa voit ottaa käyttöön **Ilmoita aluerajan ylityksistä** -asetuksen, jolloin saat myös ilmoitukset alueelle saapumisesta ja sieltä poistumisesta.
 
 ### Reittipisteiden hallinta
 
@@ -74,6 +91,14 @@ Vanhentuneet reittipisteet piilotetaan automaattisesti kartalta, jotta näkymä 
 - Muokkaa tai poista luomiasi reittipisteitä
 - **Lukitut reittipisteet** eivät ole muiden radioiden muokattavissa tai poistettavissa — vain alkuperäisen merkin luonut voi muuttaa niitä
 - Lukitsemattomia reittipisteitä voi muokata kuka tahansa mesh-verkon jäsen
+
+## Karttatasot
+
+Napauta kartan karttatasokuvaketta avataksesi **Hallitse karttatasoja** -näkymän, jossa voit tuoda omia karttatasojasi `.kml`-, `.kmz`- tai GeoJSON-muodossa joko avaamalla tiedoston Meshtasticissa tai jakamalla sen sovellukseen toisesta sovelluksesta. Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Tämä on käytettävissä sekä Google Play- että F-Droid-versioissa.
+
+### Site Planner
+
+**Site Planner** arvioi lähettimen kuuluvuusalueen ja piirtää sen kartalle värikoodattuna peittoalueena. Avaa se kartan ohjaimista tai radion tiedoista **Arvioi peittoalue** -toiminnolla (näkyy vain radioille, joilla on tunnettu sijainti). Määritä lähettimen asetukset (sijainti, taajuus, lähetysteho, antennin vahvistus ja korkeus), vastaanottimen asetukset (herkkyys ja korkeus) sekä simuloinnin asetukset (enimmäisetäisyys, korkean tarkkuuden maastomalli ja väripaletti), ja käynnistä sitten arviointi. Karttatasojen tavoin myös Site Planner on käytettävissä sekä Google Play- että F-Droid-versioissa.
 
 ## Sijainnin jakaminen
 
@@ -93,9 +118,8 @@ Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
 
 ## Karttalähteet
 
-Sovellus tukee useita karttatiililähteitä:
+Kartan pohja riippuu sovellusversiosta: **Google Play** -versio käyttää Google Mapsia, kun taas **F-Droid**- ja työpöytäversiot käyttävät OpenStreetMapia. Pohjakartan lisäksi käytettävissä on muita karttatasoja peitekerroksina tai vaihtoehtoisina karttoina:
 
-- OpenStreetMap (oletus)
 - Satelliittikuvat (jos saatavilla)
 - Offline-kartat (lataa alueet offline-käyttöä varten)
 

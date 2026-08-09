@@ -31,6 +31,8 @@
     <!-- APP -->
     <string name="app_too_old">Applikasjon for gammel</string>
     <string name="apply">Bruk</string>
+    <!-- AQI -->
+    <string name="aqi_good">Godt</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="bad">Dårlig</string>
     <string name="battery">Batteri</string>
@@ -70,6 +72,7 @@
     <string name="delivery_confirmed">Leveringen er bekreftet</string>
     <string name="desc_node_filter_clear">tøm nodefilter</string>
     <string name="description">Beskrivelse</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Enhet sover</string>
     <string name="direct_message">Direktemelding</string>
@@ -97,6 +100,7 @@
     <string name="firmware_old">Radiofirmwaren er for gammel til å snakke med denne applikasjonen. For mer informasjon om dette se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår Firmware installasjonsveiledning</a>.</string>
     <string name="firmware_too_old">Firmwareoppdatering kreves.</string>
     <string name="firmware_update_failed">Oppdatering feilet</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Godt</string>
     <!-- GPIO -->
@@ -107,6 +111,7 @@
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
     <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>
+    <!-- IMPORT -->
     <string name="info">Informasjon</string>
     <string name="interval_unset">Lås opp</string>
     <string name="intro_show">Vis introduksjon</string>
@@ -147,7 +152,6 @@
     <string name="message">Melding</string>
     <string name="message_delivery_status">Melding leveringsstatus</string>
     <string name="message_input_label">Melding</string>
-    <string name="message_status_enroute">Venter på bekreftelse</string>
     <string name="message_status_queued">I kø for å sende</string>
     <string name="module_settings">Modul konfigurasjon</string>
     <!-- MQTT -->
@@ -186,6 +190,7 @@
     <string name="one_week">1U</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -254,7 +259,8 @@
     <string name="routing_error_timeout">Tidsavbrudd</string>
     <string name="routing_error_too_large">Pakken er for stor</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">\"Received Signal Strength Indicator\", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
+    <string name="rssi_definition">"Received Signal Strength Indicator", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
+    <!-- SAVE -->
     <string name="save">Lagre</string>
     <string name="save_changes">Lagre</string>
     <!-- SCAN -->
@@ -270,6 +276,7 @@
     <string name="shutdown">Avslutt</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalstyrke</string>
+    <!-- SITE -->
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, et mål som brukes i kommunikasjon for å sette nivået av et ønsket signal til bakgrunnstrøynivået. I Meshtastic og andre trådløse systemer tyder et høyere SNR på et klarere signal som kan forbedre påliteligheten og kvaliteten på dataoverføringen.</string>
     <!-- TAK -->
@@ -309,5 +316,6 @@
     <string name="wifi_qr_code_error">Ugyldig WiFi legitimasjon QR-kode format</string>
     <string name="wifi_qr_code_scan">Skann WiFi QR-kode</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Deg</string>
 </resources>

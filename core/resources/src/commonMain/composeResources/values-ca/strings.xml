@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">Actualització de l'aplicació necessària</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Calculant…</string>
@@ -59,6 +60,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">netejar filtre de node</string>
     <string name="description">Descripció</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <!-- DEVICE -->
     <string name="device_sleeping">Dispositiu hivernant</string>
@@ -83,12 +85,14 @@
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_update_failed">Actualització fallida</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
     <!-- IGNORE -->
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
     <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
+    <!-- IMPORT -->
     <string name="interval_unset">No configurat</string>
     <string name="intro_show">Mostrar Introducció</string>
     <string name="ip_address">Adreça IP:</string>
@@ -126,7 +130,6 @@
     <string name="message">Missatge</string>
     <string name="message_delivery_status">Estat d'entrega del missatge</string>
     <string name="message_input_label">Missatge</string>
-    <string name="message_status_enroute">Esperant confirmació</string>
     <string name="message_status_queued">En cua per enviar</string>
     <string name="module_settings">Configuració de mòdul</string>
     <!-- MQTT -->
@@ -166,6 +169,7 @@
     <string name="one_day">24 Hores</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -229,6 +233,7 @@
     <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
     <string name="routing_error_timeout">Temps esgotat</string>
     <string name="routing_error_too_large">Packet massa llarg</string>
+    <!-- SAVE -->
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>
     <!-- SCAN -->
@@ -241,6 +246,7 @@
     <string name="share">Compartir</string>
     <!-- SHOW -->
     <string name="shutdown">Apagar</string>
+    <!-- SITE -->
     <!-- TAK -->
     <string name="theme">Tema</string>
     <string name="theme_dark">Fosc</string>
@@ -268,5 +274,6 @@
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adreça IP</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Tu</string>
 </resources>

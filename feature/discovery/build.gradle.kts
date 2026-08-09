@@ -32,7 +32,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -49,7 +48,5 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.meshtastic.protobufs)
         }
-
-        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

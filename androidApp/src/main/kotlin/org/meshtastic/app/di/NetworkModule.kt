@@ -32,7 +32,7 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import coil3.util.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -49,6 +49,8 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.service.ApiService
+import org.meshtastic.core.network.service.ApiServiceImpl
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
@@ -56,6 +58,8 @@ private const val MEMORY_CACHE_BACKGROUND_PERCENT = 0.1
 
 @Module
 class NetworkModule {
+
+    @Single fun bindApiService(apiServiceImpl: ApiServiceImpl): ApiService = apiServiceImpl
 
     @Single
     fun provideConnectivityManager(application: Application): ConnectivityManager =
@@ -95,22 +99,37 @@ class NetworkModule {
         .crossfade(enable = true)
         .build()
 
+    /**
+     * Uses the OkHttp engine, not `Android`. The `Android` engine is backed by [java.net.HttpURLConnection], which on
+     * device routes through the platform's bundled OkHttp 2.x fork (`com.android.okhttp`). Cancelling a request while
+     * its gzip/chunked response body is still being read trips a re-entrant `AsyncTimeout.enter()` in that fork and
+     * crashes with "Unbalanced enter/exit" (Crashlytics 97ae5ea1, 2.8.0 only). Square's OkHttp has no such bug.
+     */
     @Single
-    fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
-        HttpClient(engineFactory = Android) {
-            install(plugin = ContentNegotiation) { json(json) }
-            install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
-            install(plugin = HttpTimeout) {
-                requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
-                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
-            }
-            install(plugin = HttpRequestRetry) { configureDefaultRetry() }
-            if (buildConfigProvider.isDebug) {
-                install(plugin = Logging) {
-                    logger = KermitHttpLogger
-                    level = LogLevel.INFO
-                }
+    fun provideHttpClient(
+        json: Json,
+        buildConfigProvider: BuildConfigProvider,
+        networkInstrumentation: OkHttpNetworkInstrumentation,
+    ): HttpClient = HttpClient(engineFactory = OkHttp) {
+        engine {
+            // Flavor-provided analytics hooks: google supplies Datadog's interceptor + event listener so RUM
+            // captures per-request network timing; fdroid supplies OkHttpNetworkInstrumentation.NONE (no-op).
+            networkInstrumentation.interceptors.forEach { addInterceptor(it) }
+            networkInstrumentation.eventListenerFactory?.let { factory -> config { eventListenerFactory(factory) } }
+        }
+        install(plugin = ContentNegotiation) { json(json) }
+        install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
+        install(plugin = HttpTimeout) {
+            requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
+            connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+            socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+        }
+        install(plugin = HttpRequestRetry) { configureDefaultRetry() }
+        if (buildConfigProvider.isDebug) {
+            install(plugin = Logging) {
+                logger = KermitHttpLogger
+                level = LogLevel.INFO
             }
         }
+    }
 }

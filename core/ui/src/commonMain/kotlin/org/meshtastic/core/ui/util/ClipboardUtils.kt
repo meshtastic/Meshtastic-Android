@@ -18,5 +18,11 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.ui.platform.ClipEntry
 
-/** Creates a platform-appropriate [ClipEntry] for the given text. */
-expect fun createClipEntry(text: String, label: String = ""): ClipEntry
+/**
+ * Creates a platform-appropriate [ClipEntry] for the given text.
+ *
+ * Set [sensitive] for key material or anything else that should not be surfaced by the OS: on Android it marks the clip
+ * so the system does not show the copied content in the paste preview toast, and clipboard-reading tools are asked to
+ * treat it as secret. Pass it for private keys and for channel URLs, which carry channel PSKs.
+ */
+expect fun createClipEntry(text: String, label: String = "", sensitive: Boolean = false): ClipEntry

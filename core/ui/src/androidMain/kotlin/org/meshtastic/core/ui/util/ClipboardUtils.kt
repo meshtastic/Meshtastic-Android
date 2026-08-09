@@ -17,6 +17,16 @@
 package org.meshtastic.core.ui.util
 
 import android.content.ClipData
+import android.content.ClipDescription
+import android.os.Build
+import android.os.PersistableBundle
 import androidx.compose.ui.platform.ClipEntry
 
-actual fun createClipEntry(text: String, label: String): ClipEntry = ClipEntry(ClipData.newPlainText(label, text))
+actual fun createClipEntry(text: String, label: String, sensitive: Boolean): ClipEntry {
+    val clip = ClipData.newPlainText(label, text)
+    // EXTRA_IS_SENSITIVE is API 33+; there is no equivalent below that, so the clip is created unmarked there.
+    if (sensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        clip.description.extras = PersistableBundle().apply { putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true) }
+    }
+    return ClipEntry(clip)
+}

@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
@@ -372,9 +373,11 @@ class DebugViewModel(
             Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.long_name
-                val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
+                // Wire's toString prints `relay_node=245`; rows stored before the Wire
+                // migration carry protobuf-java's `relay_node: 245`. Match both.
+                val regex = Regex("""\brelay_node[=:] ?${relayNode.toUInt()}\b""")
                 if (regex.containsMatchIn(result)) {
-                    relayNodeAnnotation = "relay_node: $relayName ($relayId)"
+                    relayNodeAnnotation = "relay_node=$relayName ($relayId)"
                     result = regex.replace(result, placeholder)
                 }
             }
@@ -406,9 +409,13 @@ class DebugViewModel(
 
     /** Look for a single node ID integer in the string and annotate it with the hex equivalent if found. */
     private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
-        val nodeIdStr = nodeId.toUInt().toString()
-        // Only match if whitespace before and after
-        val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
+        // Wire's toString prints int fields SIGNED and `=`-delimited (`from=-1897181963,`),
+        // which is what users see since the Wire migration (#6520). Rows stored before it
+        // carry protobuf-java's text format: unsigned, colon-separated, whitespace-bounded
+        // (`from: 2397785333`). Match either representation at a value position.
+        val signed = Regex.escape(nodeId.toString())
+        val unsigned = Regex.escape(nodeId.toUInt().toString())
+        val regex = Regex("""(?<=[=\s]|^)($signed|$unsigned)(?=[,}\s]|$)""")
         if (!regex.containsMatchIn(this)) return false
         regex.findAll(this).toList().asReversed().forEach {
             val idx = it.range.last + 1
@@ -548,7 +555,9 @@ class DebugViewModel(
             if (info.neighbors.isNotEmpty()) {
                 appendLine("  neighbors:")
                 info.neighbors.forEach {
-                    appendLine("    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${it.snr}")
+                    appendLine(
+                        "    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${MetricFormatter.snr(it.snr)}",
+                    )
                 }
             }
         }

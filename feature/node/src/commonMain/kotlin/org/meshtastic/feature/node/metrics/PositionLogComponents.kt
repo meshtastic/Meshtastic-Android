@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
+import org.meshtastic.core.model.util.kmhIn
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -49,6 +51,7 @@ import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed_kmh
+import org.meshtastic.core.resources.speed_mph
 import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
@@ -82,10 +85,13 @@ fun PositionCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             /* Coordinates */
-            Row(
+            // FlowRow(SpaceBetween) so "Sats" stays pinned right when it fits and drops onto its own line when the
+            // (localized) coordinate labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricValueRow(color = GraphColors.Blue, text = "${stringResource(Res.string.latitude)}: $latitude")
@@ -98,17 +104,20 @@ fun PositionCard(
                 Text(
                     text = "${stringResource(Res.string.sats)}: ${position.sats_in_view}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
             /* Alt, Speed, Heading */
-            Row(
+            // FlowRow(SpaceBetween) so "Heading" stays pinned right when it fits and drops onto its own line when the
+            // (localized) labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricValueRow(
@@ -120,9 +129,15 @@ fun PositionCard(
                     )
                     if (position.ground_speed != null && position.ground_speed != 0) {
                         Spacer(Modifier.width(12.dp))
+                        val speedRes =
+                            if (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL) {
+                                Res.string.speed_mph
+                            } else {
+                                Res.string.speed_kmh
+                            }
                         MetricValueRow(
                             color = GraphColors.Gold,
-                            text = stringResource(Res.string.speed_kmh, position.ground_speed ?: 0),
+                            text = stringResource(speedRes, (position.ground_speed ?: 0).kmhIn(displayUnits)),
                         )
                     }
                 }
@@ -133,7 +148,7 @@ fun PositionCard(
                             formatString("%.0f", (position.ground_track ?: 0) * HEADING_DEG)
                         }\u00B0",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }

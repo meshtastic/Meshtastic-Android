@@ -1,9 +1,9 @@
 ---
-title: Desktop App
+title: デスクトップアプリ
 parent: User Guide
 nav_order: 14
-last_updated: 2026-06-11
-description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
+last_updated: 2026-07-07
+description: Linux、macOS、Windows で Meshtastic デスクトップアプリをインストールして使う方法。接続、機能の対応状況、キーボードショートカットを説明します。
 aliases:
   - desktop
   - linux
@@ -12,137 +12,139 @@ aliases:
   - jvm
 ---
 
-# Desktop App
+# デスクトップアプリ
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+Meshtastic デスクトップアプリケーションは、Kotlin Multiplatform を通じて、コアのコードベースを Android と共有しています。 ほとんどの機能は、Linux、macOS、Windows で同じように動作します。
 
-## Installation
+## インストール
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
-- Or build from source using `./gradlew :desktopApp:run`
+- リリースページから `.deb` または `.AppImage` パッケージをダウンロードします
+- または、`./gradlew :desktopApp:run` を使ってソースからビルドします
 
 ### macOS
 
-- Download the `.dmg` package from releases
-- Or build from source
+- リリースから `.dmg` パッケージをダウンロードします
+- または、ソースからビルドします
 
 ### Windows
 
-- Download the `.msi` installer from releases
-- Or build from source
+- リリースから `.msi` インストーラーをダウンロードします
+- または、ソースからビルドします
 
-## Connecting Your Radio
+## 無線機を接続する
 
-### USB Serial (Primary)
+### USB シリアル（主要）
 
-The most reliable connection method on Desktop:
+デスクトップで最も信頼できる接続方法です：
 
-1. Connect your Meshtastic radio via USB cable.
-2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the Connect menu.
+1. USB ケーブルで Meshtastic 無線機を接続します。
+2. アプリがシリアルポートを自動的に検出します。
+3. 検出されない場合は、接続メニューから正しいシリアルポートを選択します。
 
 ### TCP/IP
 
-For network-connected radios:
+ネットワーク接続された無線機の場合：
 
-1. Enter the radio's IP address and port (default: 4403).
-2. Click **Connect**.
+1. 無線機の IP アドレスとポート（既定：4403）を入力します。
+2. 「**接続**」をクリックします。
 
-### Bluetooth (BLE)
+### Bluetooth（BLE）
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブラリを通じてデスクトップでサポートされています：
 
-1. Ensure your system has a Bluetooth adapter.
-2. The app scans for nearby Meshtastic radios automatically.
-3. Select your device from the Connect screen.
+1. システムに Bluetooth アダプターがあることを確認します。
+2. アプリが近くの Meshtastic 無線機を自動的にスキャンします。
+3. 接続画面からデバイスを選択します。
 
-## Feature Parity
+## 機能の対応状況
 
-| Feature                                      | Android | Desktop | Notes                                          |
-| -------------------------------------------- | ------- | ------- | ---------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                    |
-| Node List                                    | ✓       | ✓       | Full parity                                    |
-| 地図                                           | ✓       | ✓       | Full parity                                    |
-| 設定                                           | ✓       | ✓       | Full parity                                    |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                           |
-| Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
-| Notifications                                | ✓       | ✓       | Native OS notifications                        |
-| Widgets                                      | ✓       | ✗       | Android-only                                   |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
+| 機能                | Android | デスクトップ | 備考                                                   |
+| ----------------- | ------- | ------ | ---------------------------------------------------- |
+| メッセージング           | ✓       | ✓      | 完全対応                                                 |
+| ノードリスト            | ✓       | ✓      | 完全対応                                                 |
+| マップ               | ✓       | ◐      | マップタブはデスクトップにも存在しますが、インタラクティブなマップビューは Android のみです   |
+| 設定                | ✓       | ✓      | 完全対応                                                 |
+| Bluetooth（BLE）    | ✓       | ✓      | デスクトップでは Kable 経由                                    |
+| ファームウェアの更新        | ✓       | ✓      | アプリ内の USB、BLE、Wi-Fi（ESP32）更新はすべて、Android と同じように動作します |
+| 通知                | ✓       | ✓      | OS ネイティブの通知                                          |
+| ウィジェット            | ✓       | ✗      | Android のみ                                           |
+| Android Auto      | ✓       | ✗      | Android のみ。デスクトップや iOS では利用できません                     |
+| AI アシスタント（Chirpy） | ✓\*     | ✗      | Google 版の Android のみ                                 |
+| アプリ機能（システム AI）    | ✓†      | ✗      | Google 版の Android のみ                                 |
 
-\*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
+\*Chirpy AI には、対応ハードウェアを備えた Google 版ビルドで Android 14 以降が必要です。
 
-†App Functions exposes app actions to the Android system AI on Google flavor builds. See [App Functions](app-functions).
+†アプリ機能は、Google 版ビルドで、アプリの操作を Android のシステム AI に公開します。 [アプリ機能](app-functions) を参照してください。
 
-## UI Differences
+## UI の違い
 
-The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
+デスクトップアプリは、同じ Compose Multiplatform の UI を使用し、大きな画面とデスクトップ操作に合わせて調整されています。
 
-### Keyboard Shortcuts
+### キーボードショートカット
 
-| Shortcut            | Action                 |
-| ------------------- | ---------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | Open Settings          |
-| **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
-| **⌘3** / **Ctrl+3** | Switch to Map tab      |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
+ショートカットは、macOS では **⌘**（Command）、Windows と Linux では **Ctrl** を使用します。 （Super／Windows キーは割り当てられていません。）
 
-### Window & System Tray
+| ショートカット      | 操作           |
+| ------------ | ------------ |
+| **⌘/Ctrl+Q** | アプリケーションを終了  |
+| **⌘/Ctrl+,** | 設定を開く        |
+| **⌘/Ctrl+1** | メッセージタブに切り替え |
+| **⌘/Ctrl+2** | ノードタブに切り替え   |
+| **⌘/Ctrl+3** | マップタブに切り替え   |
+| **⌘/Ctrl+4** | 接続タブに切り替え    |
+| **⌘/Ctrl+/** | バージョン情報を開く   |
 
-- **Window resizing** — responsive layout adapts to window dimensions
-- **System tray** — minimize to system tray for background mesh operation
-- **Tray menu** — right-click the tray icon to show window or quit
-- **Mouse interaction** — hover states and standard desktop navigation
+### ウィンドウとシステムトレイ
 
-### Notification Preferences
+- **ウィンドウのサイズ変更**：レスポンシブなレイアウトがウィンドウの寸法に合わせて調整されます
+- **システムトレイ**：システムトレイに最小化して、バックグラウンドでメッシュを動作させます
+- **トレイメニュー**：トレイアイコンを右クリックして、ウィンドウ表示または終了します
+- **マウス操作**：ホバー状態と標準的なデスクトップのナビゲーション
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+### 通知の設定
 
-## Built-in Documentation Browser
+デスクトップアプリには、どの通知を表示するか（メッセージ、新しいノード、バッテリー低下の警告）を制御するアプリ内トグルがあります。 これらには、アプリ内の「**設定 → 通知**」からアクセスします。
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+## 組み込みのドキュメントブラウザー
 
-![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
+デスクトップアプリには、アプリケーションを離れることなくヘルプコンテンツにすばやくアクセスできる、組み込みのドキュメントブラウザーが含まれています。
 
-The browser supports full-text search across all documentation:
+![目次付きのドキュメントブラウザー](../../assets/screenshots/docs-browser_toc.png)
 
-![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
+ブラウザーは、すべてのドキュメントを対象とした全文検索に対応しています：
 
-Individual doc pages render with full formatting:
+![ドキュメントブラウザーの検索](../../assets/screenshots/docs-browser_search.png)
 
-![A documentation page](../../assets/screenshots/docs-browser_page.png)
+個々のドキュメントページは、完全な書式で表示されます：
 
-## Building from Source
+![ドキュメントページ](../../assets/screenshots/docs-browser_page.png)
+
+## ソースからビルドする
 
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
-Requirements:
+要件：
 
 - JDK 21
-- No Android SDK required for desktop-only builds
+- デスクトップのみのビルドに Android SDK は不要です
 
-## Known Limitations
+## 既知の制限
 
-- No OTA firmware updates (use web flasher)
-- Some Android-specific features (widgets, specific notification channels) are unavailable
-- Performance may vary on low-spec hardware running Compose Desktop
-- BLE bonding is not yet supported on desktop (pairing works without bonding)
+- インタラクティブなマップビューは Android のみです。マップタブは存在しますが、デスクトップではマップが表示されません。
+- 一部の Android 固有の機能（ウィジェット、特定の通知チャンネル）は利用できません
+- Compose Desktop を実行する低スペックのハードウェアでは、パフォーマンスが変わることがあります
+- デスクトップでは BLE のボンディングはまだサポートされていません（ペアリングはボンディングなしで機能します）
 
-## Related Topics
+## 関連トピック
 
-- [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+- [コネクション](connections)：接続方法の概要
+- [ファームウェア更新](firmware)：USB、BLE、Wi-Fi 更新はすべて、Android と同じように動作します
 
 ---
 

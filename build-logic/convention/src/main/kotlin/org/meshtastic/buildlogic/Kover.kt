@@ -19,6 +19,7 @@ package org.meshtastic.buildlogic
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.project
 
 fun Project.configureKover() {
     val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
@@ -64,5 +65,5 @@ fun Project.configureKover() {
  * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
  */
 fun Project.configureKoverAggregation(subprojectPaths: List<String>) {
-    subprojectPaths.forEach { path -> dependencies.add("kover", project(path)) }
+    subprojectPaths.forEach { path -> dependencies.add("kover", dependencies.project(path)) }
 }

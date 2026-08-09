@@ -30,6 +30,8 @@
     <!-- APP -->
     <string name="app_too_old">Nuashonrú feidhmchláir riachtanach</string>
     <string name="apply">Cuir i bhfeidhm</string>
+    <!-- AQI -->
+    <string name="aqi_good">Maith</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="bad">Go dona</string>
     <string name="battery">Cúis leictreachais</string>
@@ -68,6 +70,7 @@
     <string name="delivery_confirmed">Seachadadh deimhnithe</string>
     <string name="desc_node_filter_clear">Cuir scagaire na nóid in áirithe</string>
     <string name="description">Cur síos</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Gléas ina chodladh</string>
     <string name="direct_message">Teachtaireacht dhíreach</string>
@@ -95,6 +98,7 @@
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
     <!-- GPIO -->
@@ -105,6 +109,7 @@
     <string name="ignore">Ignóra</string>
     <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
     <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
+    <!-- IMPORT -->
     <string name="info">Eolas</string>
     <string name="interval_unset">Díshocraigh</string>
     <string name="intro_show">Taispeáin Úvod</string>
@@ -144,7 +149,6 @@
     <string name="message">Teachtaireacht</string>
     <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
     <string name="message_input_label">Teachtaireacht</string>
-    <string name="message_status_enroute">Ag fanacht le ceadú</string>
     <string name="message_status_queued">Cur síos ar sheoladh</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
     <!-- MQTT -->
@@ -181,6 +185,7 @@
     <string name="one_day">24 Uair an chloig</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -245,6 +250,7 @@
     <string name="routing_error_timeout">Am tráth</string>
     <string name="routing_error_too_large">Pacáiste ró-mhór</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
+    <!-- SAVE -->
     <string name="save">Sábháil</string>
     <string name="save_changes">Sábháil</string>
     <!-- SCAN -->
@@ -259,6 +265,7 @@
     <string name="shutdown">Dún</string>
     <string name="signal">Sígneal</string>
     <string name="signal_quality">Cáilíocht na Sígneal</string>
+    <!-- SITE -->
     <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>
     <!-- TAK -->
     <string name="theme">Téama</string>
@@ -298,5 +305,6 @@
     <string name="wifi_qr_code_error">Formáid QR cód Creidiúnachtaí WiFi neamhbhailí</string>
     <string name="wifi_qr_code_scan">Scan QR cód WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Tú</string>
 </resources>

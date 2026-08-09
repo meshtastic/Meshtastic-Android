@@ -10,6 +10,7 @@
 [![CLA assistant](https://cla-assistant.io/readme/badge/meshtastic/Meshtastic-Android)](https://cla-assistant.io/meshtastic/Meshtastic-Android)
 [![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
 [![Vercel](https://img.shields.io/static/v1?label=Powered%20by&message=Vercel&style=flat&logo=vercel&color=000000)](https://vercel.com?utm_source=meshtastic&utm_campaign=oss)
+[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://community.develocity.cloud/scans?search.rootProjectNames=MeshtasticAndroid)
 
 This is a tool for using Android (and Compose Desktop) with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the device side code, see [here](https://github.com/meshtastic/firmware).
 
@@ -17,18 +18,43 @@ If you have questions or feedback please [Join our discussion forum](https://git
 
 ## Features
 
-Highlights from the latest release:
+Highlights from the 2.8.0 release:
 
-- **Full-text message search** across your conversation history.
-- **Mesh network discovery** to surface nodes and channels around you.
-- **Android Auto** support for hands-free use while driving (`google` flavor).
+- **Mesh network discovery** to surface nodes and channels around you, with **Mesh Beacon** invitations for joining nearby meshes.
+- **Waypoint geofences** — draw zones on the map and get alerts when nodes cross them.
+- **Secure key backup** — encrypted backup, restore, and delete for your device security keys.
+- **NFC sharing** — write shared contacts and channels to NFC tags.
+- **XEdDSA packet signing** indicators in the node and messaging UI.
 - **Air-quality telemetry** — PM1.0, PM2.5, PM10, and CO₂ readings from supported sensors.
-- **Device hardware links** via [msh.to](https://msh.to) for quick access to hardware details.
 - **App Functions / system-AI integration** so on-device assistants can trigger common workflows.
 
 ## Get Meshtastic
 
 The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically.
+
+With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google Crashlytics and Google Maps; `fdroid` has no Google dependencies.
+
+<!-- BEGIN GENERATED LINKS: obtainium/generate-links.py -->
+
+| Channel | `google` flavor | `fdroid` flavor |
+|---|---|---|
+| **Latest release** | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%22%2C%22additionalSettings%22%3A%22%7B%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%5C%22%7D%22%7D) |
+| **Open beta** | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-open%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22google-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) | [Add](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22com.geeksville.mesh%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fmeshtastic%2FMeshtastic-Android%22%2C%22author%22%3A%22meshtastic%22%2C%22name%22%3A%22Meshtastic%20Beta%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22-open%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22fdroid-.%2A-release%5C%5C%5C%5C.apk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22Meshtastic%20Beta%5C%22%7D%22%7D) |
+
+<!-- END GENERATED LINKS -->
+
+What those two channels point at right now:
+
+<!-- BEGIN GENERATED STATUS: obtainium/generate-links.py --refresh -->
+
+| Channel | Currently | Released |
+|---|---|---|
+| **Latest release** | `v2.8.0` | 2026-07-29 |
+| **Open beta** | *none published right now* | — |
+
+<!-- END GENERATED STATUS -->
+
+Closed-beta and per-commit snapshot channels, importable config files, and the setup details are in [Test Builds & Obtainium](docs/en/developer/test-builds.md). These links, files and the table above are generated — see [`obtainium/`](obtainium/).
 
 Alternatively, these other providers are also available, but may be slower to update. 
 
@@ -50,7 +76,7 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ### Desktop
 
-**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak package is maintained at [vidplace7/org.meshtastic.desktop](https://github.com/vidplace7/org.meshtastic.desktop).
+**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak is available on [Flathub](https://flathub.org/apps/org.meshtastic.MeshtasticDesktop) (packaging repo: [flathub/org.meshtastic.MeshtasticDesktop](https://github.com/flathub/org.meshtastic.MeshtasticDesktop)).
 
 ## Documentation
 
@@ -112,6 +138,7 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/common](core/common/README.md) | Common utilities |
 | [core/di](core/di/README.md) | Koin DI modules |
 | [core/testing](core/testing/README.md) | Shared test fakes & utilities |
+| [core/konsist](core/konsist/README.md) | Konsist architecture-rule tests (KMP boundary guards) |
 | [core/nfc](core/nfc/README.md) | NFC support |
 | [core/prefs](core/prefs/README.md) | Legacy preference helpers |
 | [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
@@ -123,10 +150,10 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
 | [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
 | [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
-| [feature/discovery](feature/discovery) | Mesh network discovery |
+| [feature/discovery](feature/discovery/README.md) | Mesh network discovery (scanner, AI summaries, Mesh Beacon) |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
-| [feature/car](feature/car) | Android Auto integration (Car App Library, `google` flavor) |
+| [feature/car](feature/car/README.md) | Android Auto integration (Car App Library, `google` flavor) |
 | [baselineprofile](baselineprofile/README.md) | Macrobenchmark Baseline Profile generation for `:androidApp` |
 
 ## Translations
@@ -135,7 +162,7 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 ## Integration
 
-The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
+The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a loopback-only TLS (mTLS) server on port 8089 so ATAK on the same device can connect directly and route its traffic over the mesh.
 
 ## Building the Android App
 > [!WARNING]
@@ -143,9 +170,10 @@ The app includes a built-in **Local TAK Server** feature that can be enabled in 
 
 https://meshtastic.org/docs/development/android/
 
-Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) `MAPS_API_KEY` in `local.properties` in order to use Google Maps.
+Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) as `MAPS_API_KEY` in `secrets.properties` (repo root — create the file if it doesn't exist) in order to use Google Maps. Without it, `secrets.defaults.properties` supplies a placeholder so the build still succeeds, but map tiles will not load.
 e.g.
 ```properties
+# secrets.properties
 MAPS_API_KEY=your_google_maps_api_key_here
 ```
 
@@ -158,4 +186,4 @@ For details on our release process, see the [RELEASE_PROCESS.md](RELEASE_PROCESS
 
 ![Alt](https://repobeats.axiom.co/api/embed/1d75239069a6d671fe0b8f80b2e1bf590a98f0eb.svg "Repobeats analytics image")
 
-Copyright 2025, Meshtastic LLC. GPL-3.0 license
+Copyright 2025-2026, Meshtastic LLC. GPL-3.0 license

@@ -2,7 +2,7 @@
 title: 連線
 parent: 使用者指南
 nav_order: 2
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: 透過藍牙、USB 或 TCP/IP 將您的手機或電腦連接至 Meshtastic 無線電裝置。
 aliases:
   - 藍牙
@@ -23,15 +23,15 @@ Meshtastic 支援多種傳輸方式，以便您的手機或電腦與無線電節
 
 1. 請確認您的 Meshtastic 無線電裝置已開機，並進入配對模式。
 2. 開啟應用程式，並前往「連線」頁籤。
-3. 點選「掃描裝置」——附近的 Meshtastic 無線電裝置將會顯示。
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. 從清單中選取您的裝置。
 5. 若出現藍牙配對提示，請點選接受。
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-您可使用頂部的篩選標籤，依傳輸類型篩選裝置：
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 提示：若裝置未顯示，請確認已授予藍牙與位置權限，且該無線電裝置尚未連接至其他裝置。
 
@@ -77,10 +77,10 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
+2. On the Connect screen, select **Network** in the transport selector.
 3. Choose the radio one of two ways:
-   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
-   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
+   - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
+   - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
 
 > 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.

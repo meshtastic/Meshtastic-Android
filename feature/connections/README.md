@@ -110,7 +110,7 @@ Android and JVM subclasses override `requestBonding(entry)` and `requestPermissi
 
 ```kotlin
 // Registration (in androidApp / desktopApp nav graph)
-fun EntryProviderScope<NavKey>.connectionsGraph(backStack: BackStack<NavKey>) {
+fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
     // Registers ConnectionsRoute.Connections entry
     // Injects ScannerViewModel + RadioConfigViewModel via Koin
 }
@@ -120,23 +120,23 @@ Route: `ConnectionsRoute.Connections`
 
 ## Dependency Graph
 
-```
+### Key Dependencies
+
+```text
 feature:connections
   ├── core:ble, core:network       (transports)
-  ├── core:data, core:database, core:datastore, core:di
+  ├── core:common, core:data, core:database, core:datastore, core:di
   ├── core:domain, core:model, core:navigation
-  ├── core:prefs, core:proto, core:resources, core:service, core:ui
+  ├── core:prefs, core:resources, core:service, core:ui
+  ├── org.meshtastic:protobufs     (Maven artifact)
   ├── feature:settings             (RadioConfigViewModel)
   └── usb-serial-android           (Android only)
 ```
-
-## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :feature:connections[connections]:::kmp-feature
-  :feature:connections -.-> :core:testing
   :feature:connections -.-> :core:common
   :feature:connections -.-> :core:data
   :feature:connections -.-> :core:database
@@ -152,6 +152,7 @@ graph TB
   :feature:connections -.-> :core:ble
   :feature:connections -.-> :core:network
   :feature:connections -.-> :feature:settings
+  :feature:connections -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

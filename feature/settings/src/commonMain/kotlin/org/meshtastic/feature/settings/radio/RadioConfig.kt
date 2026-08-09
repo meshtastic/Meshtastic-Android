@@ -18,6 +18,7 @@ package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +29,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -36,8 +38,10 @@ import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
 import org.meshtastic.core.resources.backup_restore
 import org.meshtastic.core.resources.clean_node_database_title
+import org.meshtastic.core.resources.configuration
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.device_configuration
+import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.factory_reset
 import org.meshtastic.core.resources.firmware_update_title
@@ -50,7 +54,6 @@ import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.message_device_managed
 import org.meshtastic.core.resources.module_settings
 import org.meshtastic.core.resources.nodedb_reset
-import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.set_time
 import org.meshtastic.core.resources.shutdown
@@ -63,6 +66,7 @@ import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
@@ -80,75 +84,59 @@ fun RadioConfigItemList(
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
-    // ponytail: Debug Log/App Logs read local device data, not the radio, so they stay usable offline.
-    val debugPanelEnabled = !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        RadioConfigSection(isManaged, enabled, onRouteClick)
-        DeviceConfigSection(isManaged, enabled, onNavigate)
-        ModuleSettingsSection(isManaged, enabled, onNavigate)
+        ExpressiveSection(title = stringResource(Res.string.configuration)) {
+            if (isManaged) {
+                ManagedMessage()
+            }
+            RadioConfigContent(enabled, onRouteClick)
+            DeviceConfigContent(enabled, onNavigate)
+            ModuleSettingsContent(enabled, onNavigate)
+            AdministrationContent(enabled, onNavigate)
+        }
 
         if (state.isLocal) {
             BackupRestoreSection(isManaged, enabled, onImport, onExport)
-        }
-
-        AdministrationSection(enabled, onNavigate)
-
-        if (state.isLocal) {
-            AdvancedSection(isManaged, isOtaCapable, enabled, debugPanelEnabled, onNavigate)
+            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
         }
     }
 }
 
 @Composable
-private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
-        if (isManaged) {
-            ManagedMessage()
-        }
-        ConfigRoute.radioConfigRoutes.forEach {
-            ListItem(
-                text = stringResource(it.title),
-                leadingIcon = it.icon?.let { res -> vectorResource(res) },
-                enabled = enabled,
-            ) {
-                onRouteClick(it)
-            }
-        }
-    }
-}
-
-@Composable
-private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
-        if (isManaged) {
-            ManagedMessage()
-        }
+private fun ColumnScope.RadioConfigContent(enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
+    ConfigRoute.radioConfigRoutes.forEach {
         ListItem(
-            text = stringResource(Res.string.device_configuration),
-            leadingIcon = MeshtasticIcons.AppSettingsAlt,
-            trailingIcon = MeshtasticIcons.ChevronRight,
+            text = stringResource(it.title),
+            leadingIcon = it.icon?.let { res -> vectorResource(res) },
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoute.DeviceConfiguration)
+            onRouteClick(it)
         }
     }
 }
 
 @Composable
-private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.module_settings)) {
-        if (isManaged) {
-            ManagedMessage()
-        }
-        ListItem(
-            text = stringResource(Res.string.module_settings),
-            leadingIcon = MeshtasticIcons.Settings,
-            trailingIcon = MeshtasticIcons.ChevronRight,
-            enabled = enabled,
-        ) {
-            onNavigate(SettingsRoute.ModuleConfiguration)
-        }
+private fun ColumnScope.DeviceConfigContent(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.device_configuration),
+        leadingIcon = MeshtasticIcons.AppSettingsAlt,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        enabled = enabled,
+    ) {
+        onNavigate(SettingsRoute.DeviceConfiguration)
+    }
+}
+
+@Composable
+private fun ColumnScope.ModuleSettingsContent(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.module_settings),
+        leadingIcon = MeshtasticIcons.Settings,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        enabled = enabled,
+    ) {
+        onNavigate(SettingsRoute.ModuleConfiguration)
     }
 }
 
@@ -175,30 +163,22 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
 }
 
 @Composable
-private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit) {
-    ExpressiveSection(title = stringResource(Res.string.administration)) {
-        ListItem(
-            text = stringResource(Res.string.administration),
-            leadingIcon = MeshtasticIcons.AdminPanelSettings,
-            trailingIcon = MeshtasticIcons.ChevronRight,
-            leadingIconTint = MaterialTheme.colorScheme.error,
-            textColor = MaterialTheme.colorScheme.error,
-            trailingIconTint = MaterialTheme.colorScheme.error,
-            enabled = enabled,
-        ) {
-            onNavigate(SettingsRoute.Administration)
-        }
+private fun ColumnScope.AdministrationContent(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ListItem(
+        text = stringResource(Res.string.administration),
+        leadingIcon = MeshtasticIcons.AdminPanelSettings,
+        trailingIcon = MeshtasticIcons.ChevronRight,
+        leadingIconTint = MaterialTheme.colorScheme.error,
+        textColor = MaterialTheme.colorScheme.error,
+        trailingIconTint = MaterialTheme.colorScheme.error,
+        enabled = enabled,
+    ) {
+        onNavigate(SettingsRoute.Administration)
     }
 }
 
 @Composable
-private fun AdvancedSection(
-    isManaged: Boolean,
-    isOtaCapable: Boolean,
-    enabled: Boolean,
-    debugPanelEnabled: Boolean,
-    onNavigate: (Route) -> Unit,
-) {
+private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
     ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
         if (isManaged) {
             ManagedMessage()
@@ -228,9 +208,17 @@ private fun AdvancedSection(
         )
 
         ListItem(
+            text = stringResource(Res.string.discovery_local_mesh),
+            leadingIcon = MeshtasticIcons.PermScanWifi,
+            enabled = enabled,
+            onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
+        )
+
+        // Always enabled: the Debug Panel reads app-local logs only — no radio connection,
+        // pending config response, or managed-mode restriction applies to it.
+        ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = MeshtasticIcons.BugReport,
-            enabled = debugPanelEnabled,
             onClick = { onNavigate(SettingsRoute.DebugPanel) },
         )
     }

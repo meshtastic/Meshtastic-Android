@@ -16,51 +16,33 @@
  */
 package org.meshtastic.app.map.component
 
-import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.Cluster
-import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
-import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
-import com.google.maps.android.compose.clustering.rememberClusterManager
-import com.google.maps.android.compose.rememberComposeBitmapDescriptor
+import com.google.maps.android.compose.clustering.ClusteringMarkerProperties
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.feature.map.BaseMapViewModel
 
 private const val MIN_CLUSTER_SIZE = 10
 
 /**
- * Renders node markers with clustering.
+ * Renders node markers with clustering via the library's [Clustering] composable.
  *
- * Marker bitmaps are generated **in the maps compose scope** via [rememberComposeBitmapDescriptor], which composes each
- * chip in a `ComposeView` parented to the live host view (a real, attached view that has valid `ViewTreeLifecycleOwner`
- * / `SavedStateRegistryOwner`) and renders it synchronously to a [BitmapDescriptor].
+ * Each unclustered node is composed as a [PulsingNodeChip] (`clusterItemContent`), with its z-index forwarded through
+ * [ClusteringMarkerProperties]; cluster bubbles keep the library's default rendering. Native info windows
+ * (title/snippet from [NodeClusterItem]) and click interactions are handled by the library renderer, and precision
+ * circles are drawn for the currently-unclustered items via `clusterItemDecoration`.
  *
- * This deliberately avoids the clustering library's `clusterItemContent` path: that renderer
- * ([com.google.maps.android.compose.clustering.ComposeUiClusterRenderer]) composes each item in a *detached*
- * `ComposeView` that only carries a fake lifecycle owner and no `SavedStateRegistryOwner`, so it crashes when the
- * surrounding Navigation 3 / popup hierarchy lacks those owners (the top Crashlytics FATAL). A custom
- * [DefaultClusterRenderer] subclass assigns the pre-baked bitmaps instead, keeping native info windows (title/snippet
- * from [NodeClusterItem]) and click interactions intact.
+ * Requires maps-compose >= 8.4.0: earlier versions composed cluster items into a detached `ComposeView` that carried no
+ * lifecycle/saved-state owners, crashing under the Navigation 3 hierarchy (fixed upstream in
+ * googlemaps/android-maps-compose#930, which this file previously worked around with a custom [DefaultClusterRenderer]
+ * assigning pre-baked bitmaps).
  */
 @OptIn(MapsComposeExperimentalApi::class)
-@Suppress("NestedBlockDepth")
 @Composable
 fun NodeClusterMarkers(
     nodeClusterItems: List<NodeClusterItem>,
@@ -68,48 +50,16 @@ fun NodeClusterMarkers(
     navigateToNodeDetails: (Int) -> Unit,
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
-    val context = LocalContext.current
-    val clusterManager = rememberClusterManager<NodeClusterItem>()
-
-    // Bake each node's marker icon in-scope. Keyed by node so a bitmap is only re-rendered when that node
-    // actually changes. The descriptors are stashed in a snapshot map the renderer reads at render time.
-    val iconDescriptors = remember { mutableStateMapOf<Int, BitmapDescriptor>() }
-    nodeClusterItems.forEach { item ->
-        key(item.node.num) {
-            val descriptor = rememberComposeBitmapDescriptor(item.node) { PulsingNodeChip(node = item.node) }
-            DisposableEffect(descriptor) {
-                iconDescriptors[item.node.num] = descriptor
-                onDispose { iconDescriptors.remove(item.node.num) }
-            }
-        }
-    }
-
-    if (clusterManager != null) {
-        val rendererState = remember { mutableStateOf<NodeClusterRenderer?>(null) }
-
-        // The renderer needs the GoogleMap instance, only available inside the map scope.
-        MapEffect(clusterManager) { map ->
-            val renderer = NodeClusterRenderer(context, map, clusterManager) { iconDescriptors[it] }
-            clusterManager.renderer = renderer
-            rendererState.value = renderer
-        }
-
-        // Keep listeners current — the lambdas can change across recompositions.
-        SideEffect {
-            clusterManager.setOnClusterClickListener { cluster -> onClusterClick(cluster) }
-            clusterManager.setOnClusterItemInfoWindowClickListener { item -> navigateToNodeDetails(item.node.num) }
-        }
-
-        // Re-cluster once the renderer is attached and freshly-baked icons arrive, so markers pick up the bitmaps
-        // even when the cluster manager became available after the icons were rendered.
-        val renderer = rendererState.value
-        LaunchedEffect(renderer, iconDescriptors.size) { if (renderer != null) clusterManager.cluster() }
-
-        Clustering(items = nodeClusterItems, clusterManager = clusterManager)
-
-        // Precision circles for the currently-unclustered items (the renderer tracks them as the zoom changes).
-        if (mapFilterState.showPrecisionCircle) {
-            renderer?.unclusteredItems?.value?.forEach { item ->
+    Clustering(
+        items = nodeClusterItems,
+        onClusterClick = onClusterClick,
+        onClusterItemInfoWindowClick = { item -> navigateToNodeDetails(item.node.num) },
+        clusterItemContent = { item ->
+            ClusteringMarkerProperties(zIndex = item.zIndex)
+            PulsingNodeChip(node = item.node)
+        },
+        clusterItemDecoration = { item ->
+            if (mapFilterState.showPrecisionCircle) {
                 item.getPrecisionMeters()?.let { precisionMeters ->
                     if (precisionMeters > 0) {
                         Circle(
@@ -123,44 +73,14 @@ fun NodeClusterMarkers(
                     }
                 }
             }
-        }
-    }
-}
-
-/**
- * [DefaultClusterRenderer] that assigns the pre-baked [BitmapDescriptor]s (rendered in the maps compose scope) to
- * non-clustered item markers, and exposes the set of currently-unclustered items so the caller can decorate them (e.g.
- * precision circles). Cluster bubbles keep the library's default rendering.
- */
-private class NodeClusterRenderer(
-    context: Context,
-    map: GoogleMap,
-    clusterManager: ClusterManager<NodeClusterItem>,
-    private val iconProvider: (Int) -> BitmapDescriptor?,
-) : DefaultClusterRenderer<NodeClusterItem>(context, map, clusterManager) {
-
-    val unclusteredItems = mutableStateOf<Set<NodeClusterItem>>(emptySet())
-
-    init {
-        minClusterSize = MIN_CLUSTER_SIZE
-    }
-
-    override fun onClustersChanged(clusters: Set<Cluster<NodeClusterItem>>) {
-        super.onClustersChanged(clusters)
-        unclusteredItems.value = clusters.filterNot { shouldRenderAsCluster(it) }.flatMap { it.items }.toSet()
-    }
-
-    override fun onBeforeClusterItemRendered(item: NodeClusterItem, markerOptions: MarkerOptions) {
-        // super sets title/snippet from the ClusterItem, which drives the native info window.
-        super.onBeforeClusterItemRendered(item, markerOptions)
-        iconProvider(item.node.num)?.let { markerOptions.icon(it) }
-        markerOptions.zIndex(item.getZIndex())
-    }
-
-    override fun onClusterItemUpdated(item: NodeClusterItem, marker: Marker) {
-        // super keeps title/snippet (and the open info window) in sync.
-        super.onClusterItemUpdated(item, marker)
-        iconProvider(item.node.num)?.let { marker.setIcon(it) }
-        marker.zIndex = item.getZIndex()
-    }
+        },
+        onClusterManager = { clusterManager ->
+            // The library renderer extends DefaultClusterRenderer; raise its clustering threshold once.
+            val renderer = clusterManager.renderer as? DefaultClusterRenderer<*>
+            if (renderer != null && renderer.minClusterSize != MIN_CLUSTER_SIZE) {
+                renderer.minClusterSize = MIN_CLUSTER_SIZE
+                clusterManager.cluster()
+            }
+        },
+    )
 }

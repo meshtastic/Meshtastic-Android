@@ -28,11 +28,13 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readLine
 import io.ktor.utils.io.writeFully
 import io.ktor.utils.io.writeStringUtf8
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.util.anonymize
 
 /**
  * WiFi/TCP transport implementation for ESP32 Unified OTA protocol.
@@ -56,14 +58,21 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
     /** Connect to the device via TCP using Ktor raw sockets. */
     override suspend fun connect(): Result<Unit> = withContext(ioDispatcher) {
         safeCatching {
-            Logger.i { "WiFi OTA: Connecting to $deviceIpAddress:$port" }
+            Logger.i { "WiFi OTA: Connecting to ${deviceIpAddress.anonymize()}:$port" }
 
             val selector = SelectorManager(ioDispatcher)
             selectorManager = selector
 
             val tcpSocket =
-                withTimeout(CONNECTION_TIMEOUT_MS) {
-                    aSocket(selector).tcp().connect(InetSocketAddress(deviceIpAddress, port))
+                try {
+                    withTimeout(CONNECTION_TIMEOUT_MS) {
+                        aSocket(selector).tcp().connect(InetSocketAddress(deviceIpAddress, port))
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    throw OtaProtocolException.ConnectionFailed(
+                        "TCP connect to ${deviceIpAddress.anonymize()}:$port timed out after $CONNECTION_TIMEOUT_MS ms",
+                        e,
+                    )
                 }
             socket = tcpSocket
 
@@ -191,11 +200,15 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         wc.flush()
     }
 
-    private suspend fun readResponse(timeoutMs: Long = COMMAND_TIMEOUT_MS): String = withTimeout(timeoutMs) {
-        val rc = readChannel ?: throw OtaProtocolException.ConnectionFailed("Not connected")
-        val response = rc.readLine() ?: throw OtaProtocolException.ConnectionFailed("Connection closed")
-        Logger.d { "WiFi OTA: Received response: $response" }
-        response
+    private suspend fun readResponse(timeoutMs: Long = COMMAND_TIMEOUT_MS): String = try {
+        withTimeout(timeoutMs) {
+            val rc = readChannel ?: throw OtaProtocolException.ConnectionFailed("Not connected")
+            val response = rc.readLine() ?: throw OtaProtocolException.ConnectionFailed("Connection closed")
+            Logger.d { "WiFi OTA: Received response: $response" }
+            response
+        }
+    } catch (e: TimeoutCancellationException) {
+        throw OtaProtocolException.ConnectionFailed("Timed out waiting for OTA response after ${timeoutMs}ms", e)
     }
 
     companion object {

@@ -19,8 +19,8 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -49,6 +49,7 @@ kotlin {
             api(libs.compose.multiplatform.ui.tooling.preview)
 
             implementation(libs.coil)
+            implementation(libs.jetbrains.markdown)
             implementation(libs.kermit)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)
@@ -64,14 +65,13 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime.compose)
         }
 
-        val jvmAndroidMain by getting { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }
+        getByName("jvmAndroidMain") { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.junit)
-            implementation(libs.kotlinx.coroutines.test)
             implementation(libs.compose.multiplatform.ui.test)
         }
 

@@ -13,9 +13,19 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    # Review once when the PR goes ready, then on demand via `@coderabbitai review`.
+    # Re-reviewing every push turned 6-commit PRs into 8 review rounds, because each
+    # fix commit reopened a full pass. Batch the fixes, push, then ask for one re-review.
+    auto_incremental_review: false
     ignore_usernames:
       - renovate
       - renovate[bot]
+      # Workflow-authored PRs (changelog updates, scheduled firmware/hardware/
+      # translation bumps) — machine-generated content, nothing to review.
+      - github-actions
+      - github-actions[bot]
+    ignore_title_keywords:
+      - "chore: Scheduled updates"
   # Stop reviewing once a PR is closed.
   abort_on_close: true
 
@@ -29,25 +39,111 @@ reviews:
     - "!**/flatpak-sources.json"
     # Crowdin-managed translations — owned upstream, not hand-edited here.
     - "!**/values-*/strings.xml"
+    # Spec Kit scaffolding — vendored tooling, not hand-maintained here.
+    - "!.specify/**"
 
   path_instructions:
     - path: "**/commonMain/**"
       instructions: >
-        KMP common code. Flag any import of java.* or android.* — these break
-        non-Android targets. Expect KMP equivalents instead (Okio, kotlinx
-        Mutex/atomicfu, NumberFormatter.format() for floats).
+        KMP common code. Flag any import of java.* or android.* — these break non-Android targets. Expect KMP equivalents instead (Okio, kotlinx Mutex/atomicfu, NumberFormatter.format() for floats).
     - path: "**/*.kt"
       instructions: >
-        Flag leftover // ... existing code ... placeholders, and any logging of
-        PII, location, or cryptographic keys.
+        Flag leftover // ... existing code ... placeholders, and any logging of PII, location, or cryptographic keys.
     - path: "**/src/**/strings.xml"
       instructions: >
-        New string resources must be alphabetically sorted (scripts/sort-strings.py).
-        Flag out-of-order additions.
+        New string resources must be alphabetically sorted (scripts/sort-strings.py). Flag out-of-order additions.
+    - path: baselineprofile/
+      instructions: Keep baseline profile generation tied to the `google` flavor and connected devices/emulators, and commit the generated profile output to `androidApp/src/google/generated/baselineProfiles/baseline-prof.txt`.
+    - path: docs/
+      instructions: Treat non-English locale folders as Crowdin-managed output; edit the English sources under `docs/en/` and register new pages through `feature/docs/` instead of hand-editing translated locale directories.
+    - path: screenshot-tests/
+      instructions: When updating docs screenshots, keep `docs-screenshots-manifest.txt` and `docs-screenshot-aliases.properties` in sync with the generated files, and rerun `copyDocsScreenshots` after regenerating screenshots.
+    - path: docs-screenshots/
+      instructions: Keep this module generate-only for documentation screenshots; do not add it to the CI validation gate that is reserved for `screenshot-tests`.
+    - path: desktopApp/
+      instructions: Keep desktop release ProGuard rules aligned with `androidApp/proguard-rules.pro`, and preserve the desktop-specific runtime wiring needed for `Dispatchers.Main` on JVM.
+    - path: androidApp/
+      instructions: Keep the Android app’s `MeshService` declaration and manifest wiring in sync with the implementation that lives in `core:service`.
+    - path: core/service/
+      instructions: Keep `RadioControllerImpl` composed from its sub-controllers via interface delegation; admin sends are fire-and-forget, and any config mutation must go through `editSettings { }` transactions.
+    - path: feature/docs/
+      instructions: Treat the Compose resources under `src/commonMain/composeResources/files/` as generated output from `/docs/en/**` and translated docs sync tasks; do not hand-edit those copied files.
+    - path: feature/map/
+      instructions: Route map access through the injected `CompositionLocal` provider contracts; do not depend directly on Google Maps or osmdroid from feature code.
+    - path: feature/car/
+      instructions: Run unit tests with `./gradlew :feature:car:testGoogleDebugUnitTest`, and keep Robolectric pinned to SDK 36 for this module.
 
-  # CI is the source of truth for detekt + spotless (Zero Lint Tolerance gate),
-  # so disable detekt here to avoid duplicate comments. Keep the security/CI/shell
-  # scanners CI doesn't run inline.
+  # Every CodeRabbit tool is enabled by default, so this block only ever needs to
+  # turn things OFF or configure them. detekt is off because CI owns it (Zero Lint
+  # Tolerance gate) and duplicate comments were the noise we removed. The scanners
+  # CI doesn't run — gitleaks, shellcheck, actionlint, zizmor, semgrep, trivy,
+  # presidio (PII), buf (protobuf) — are already on by default; don't re-list them.
   tools:
     detekt:
       enabled: false
+    # Custom AST rules mechanically enforce the recurring defect classes that prose
+    # can't. See .coderabbit/ast-grep-rules/ and .skills/code-review/SKILL.md.
+    # essential_rules stays on (default) — these are additive.
+    ast-grep:
+      rule_dirs:
+        - ".coderabbit/ast-grep-rules"
+
+  # Auto-generated docstrings/tests/autofix are noisy for a repo with strict
+  # human-authored KDoc and KMP-aware tests; leave finishing touches off.
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+  # No KDoc-coverage mandate in this repo; the default warning-at-80% check
+  # would nag every PR. PR titles are already linted by CI
+  # (.github/workflows/pull-request-target.yml), so no title check here either.
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    # The two defect classes that survive review-by-prose because they are about
+    # what's ABSENT from a diff — a sibling call site left unfixed, or a test that
+    # would still pass with the fix reverted. Warning, not error: these are
+    # judgment calls and a false positive must not block a merge.
+    custom_checks:
+      - name: "Sibling call sites and presence semantics"
+        mode: "warning"
+        instructions: >-
+          When a diff changes how an absent value is represented — making a field nullable,
+          removing a zero-guard, or adding a presence check — verify EVERY call site of that
+          field was updated, not just the one the bug was reported against. Ambient temperature
+          was fixed in NodeItem.kt while its sibling NodeItemCompact.kt kept the zero-guard.
+          Name any unfixed sibling explicitly. Also flag a new field defaulting to 0 where 0 is
+          a physically reachable value on that scale (RSSI, temperature, current, voltage,
+          particulate concentration). Two exceptions, do NOT flag either: humidity, where 0 %RH
+          is unreachable and the guard is intentional and tested; and the proto `rx_snr`, which
+          has no presence upstream, so its 0f ambiguity cannot be fixed app-side. An app-level
+          SNR field that IS nullable is still in scope.
+      - name: "Tests prove the path, not the end state"
+        mode: "warning"
+        instructions: >-
+          For each added or changed test, decide whether it would still pass if the production
+          code it covers were reverted. Flag tests that seed a fake's backing store and then
+          assert the value comes back, tests that assert only a collection's size rather than
+          which items survived, and tests asserting emission ORDER under Dispatchers.Unconfined
+          (not a stable contract). A test must assert the side effect only the intended path
+          produces — a call counter, a request issued, a cache written.
+
+knowledge_base:
+  # Learnings are how a confirmed finding stops recurring on the next PR. Pin the
+  # scope to this repo: the default `auto` already resolves to `local` for public
+  # repos, but being explicit keeps it from shifting if visibility ever changes.
+  learnings:
+    scope: local
+  # Feed CodeRabbit the same guidance human/AI contributors follow, including
+  # the repo-specific .skills/ modules and Copilot path instructions it
+  # wouldn't pick up by default.
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".skills/**/SKILL.md"
+      - ".github/copilot-instructions.md"
+      - ".github/instructions/*.instructions.md"

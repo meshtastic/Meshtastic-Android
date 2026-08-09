@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -48,6 +49,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -165,7 +167,8 @@ class MeshConnectionManagerImplTest {
         appWidgetUpdater,
         DataLayerHeartbeatSender(packetHandler),
         lockdownCoordinator,
-        scope,
+        scope.asServiceScope(),
+        NodeRestartTracker(scope),
     )
 
     private fun restartTransportCallCounter(): () -> Int {

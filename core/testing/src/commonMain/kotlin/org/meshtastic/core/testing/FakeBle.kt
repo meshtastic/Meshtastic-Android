@@ -56,7 +56,7 @@ class FakeBleDevice(
     override val isConnected: Boolean
         get() = _state.value == BleConnectionState.Connected
 
-    override suspend fun readRssi(): Int = DEFAULT_RSSI
+    override suspend fun readRssi(): Int? = rssi
 
     override suspend fun bond() {
         _isBonded.value = true
@@ -64,10 +64,6 @@ class FakeBleDevice(
 
     fun setState(newState: BleConnectionState) {
         _state.value = newState
-    }
-
-    companion object {
-        private const val DEFAULT_RSSI = -60
     }
 }
 
@@ -114,11 +110,23 @@ class FakeBleConnection :
     /** Negotiated write length exposed to callers; `null` means unknown / not negotiated. */
     var maxWriteValueLength: Int? = null
 
+    /** Result returned by [invalidateServiceCache]; defaults to `false` to match the [BleConnection] default. */
+    var invalidateServiceCacheResult: Boolean = false
+
+    /** Number of times [invalidateServiceCache] has been invoked. */
+    var invalidateServiceCacheCalls: Int = 0
+
+    /** Optional callback invoked at the end of [disconnect] (e.g. seed freshly-discovered services on reconnect). */
+    var onDisconnect: (() -> Unit)? = null
+
     /** Number of times [disconnect] has been invoked. */
     var disconnectCalls: Int = 0
 
     /** Number of times [connectAndAwait] has been invoked (including failures). */
     var connectAndAwaitCalls: Int = 0
+
+    /** Number of times [profile] has been invoked. */
+    var profileCalls: Int = 0
 
     /** Externally simulate a remote disconnect (e.g. node power-cycle) for tests that exercise reconnect. */
     fun simulateRemoteDisconnect(reason: DisconnectReason = DisconnectReason.Timeout) {
@@ -161,6 +169,7 @@ class FakeBleConnection :
             currentDevice.setState(BleConnectionState.Disconnected())
         }
         _device.value = null
+        onDisconnect?.invoke()
     }
 
     override suspend fun <T> profile(
@@ -168,6 +177,7 @@ class FakeBleConnection :
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
     ): T {
+        profileCalls++
         if (serviceUuid in missingServices) {
             throw NoSuchElementException("Service $serviceUuid not found")
         }
@@ -178,6 +188,11 @@ class FakeBleConnection :
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
+
+    override fun invalidateServiceCache(): Boolean {
+        invalidateServiceCacheCalls++
+        return invalidateServiceCacheResult
+    }
 }
 
 class FakeBleWrite(val characteristic: BleCharacteristic, val data: ByteArray, val writeType: BleWriteType) {
@@ -196,6 +211,10 @@ class FakeBleService : BleService {
     private val readQueues = mutableMapOf<Uuid, MutableList<ByteArray>>()
 
     val writes = mutableListOf<FakeBleWrite>()
+
+    /** Counts every write invocation, including attempts that fail before they can be recorded in [writes]. */
+    var writeAttempts: Int = 0
+        private set
 
     /** When non-null, [write] throws this exception on every call until explicitly cleared. */
     var writeException: Exception? = null
@@ -279,6 +298,7 @@ class FakeBleService : BleService {
     override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType = BleWriteType.WITH_RESPONSE
 
     override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+        writeAttempts++
         writeException?.let { ex -> throw ex }
         availableCharacteristics += characteristic.uuid
         writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)

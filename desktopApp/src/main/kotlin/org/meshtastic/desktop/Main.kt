@@ -24,13 +24,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
@@ -63,9 +67,11 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -74,21 +80,28 @@ import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.desktop_tray_quit
 import org.meshtastic.core.resources.desktop_tray_show
 import org.meshtastic.core.resources.desktop_tray_tooltip
+import org.meshtastic.core.resources.desktop_update_available_message
+import org.meshtastic.core.resources.desktop_update_available_title
+import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalEventBranding
+import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
+import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import java.awt.Desktop
 import java.util.Locale
+import kotlin.system.exitProcess
 import coil3.util.Logger as CoilLogger
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
@@ -115,20 +128,36 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 }
 
 @OptIn(ExperimentalCoilApi::class)
-fun main(args: Array<String>) = application {
-    val koinApp = remember {
-        // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
-        Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
-        Logger.i { "Meshtastic Desktop — Starting" }
-        startKoin { modules(desktopPlatformModule(), desktopModule()) }
-    }
-    val systemLocale = remember { Locale.getDefault() }
-    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-    val httpClient = remember { koinApp.koin.get<HttpClient>() }
+fun main(args: Array<String>) {
+    // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
+    // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
+    // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
+    application(exitProcessOnExit = false) {
+        val koinApp = remember {
+            // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
+            Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+            Logger.i { "Meshtastic Desktop — Starting" }
+            startKoin { modules(desktopPlatformModule(), desktopModule()) }
+        }
+        val systemLocale = remember { Locale.getDefault() }
+        val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+        val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-    DeepLinkHandler(args, uiViewModel)
-    MeshServiceLifecycle()
-    ThemeAndLocaleProvider(uiViewModel)
+        DeepLinkHandler(args, uiViewModel)
+        MeshServiceLifecycle()
+        ThemeAndLocaleProvider(uiViewModel)
+    }
+
+    // Runs on the main thread with the UI already gone. Closing the container fires the `onClose` callbacks that
+    // release native handles — currently libnotify's process-wide state in LinuxNotificationSender. Guarded because
+    // a teardown failure must not turn a clean quit into a non-zero exit.
+    runCatching { stopKoin() }.onFailure { Logger.w(it) { "stopKoin() failed during shutdown" } }
+    Logger.i { "Meshtastic Desktop — Stopped" }
+
+    // Restores the exit application() no longer performs. Not optional: lingering non-daemon threads (coroutine
+    // dispatchers, ktor pools, AWT stragglers) would otherwise keep the JVM alive after the last window closes,
+    // turning "quit" into a hung background process.
+    exitProcess(0)
 }
 
 // ----- Deep link handling -----
@@ -219,6 +248,9 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         notificationManager.fallbackNotifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
+    val openUrl = rememberOpenUrl()
+    val updateInfo = rememberAvailableUpdate(notificationManager)
+
     WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }
 
     Tray(
@@ -227,13 +259,21 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         tooltip = stringResource(Res.string.desktop_tray_tooltip),
         onAction = { isAppVisible = true },
         menu = {
+            updateInfo?.let { update ->
+                Item(
+                    stringResource(Res.string.desktop_update_download, update.versionName),
+                    onClick = { openUrl(update.releaseUrl) },
+                )
+            }
             Item(stringResource(Res.string.desktop_tray_show), onClick = { isAppVisible = true })
             Item(stringResource(Res.string.desktop_tray_quit), onClick = ::exitApplication)
         },
     )
 
-    if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) {
+    if (isWindowReady) {
+        // Hide via `visible` rather than dropping the Window from composition so the UI tree
+        // (navigation backstack, scroll positions) survives a hide-to-tray round trip.
+        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState, visible = isAppVisible) {
             // Minimize to the tray on close — but only where a tray exists. On platforms without a
             // system tray (e.g. some Linux desktop environments) there's nowhere to minimize to, so
             // quit instead; otherwise the process would be stranded with no window and no tray icon.
@@ -244,6 +284,39 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
             }
         }
     }
+}
+
+// ----- Update discovery -----
+
+/**
+ * Checks once per launch whether a newer release is published on GitHub and surfaces it via a native notification.
+ * Release builds only — dev builds carry the bare base version and would match or trail every published release.
+ * Flatpak installs (FLATPAK_ID is set inside the sandbox) update through Flathub instead, so don't point them at
+ * GitHub.
+ */
+@Composable
+private fun rememberAvailableUpdate(notificationManager: DesktopNotificationManager): UpdateChecker.UpdateInfo? {
+    val buildConfig = koinInject<BuildConfigProvider>()
+    val httpClient = koinInject<HttpClient>()
+    val updateInfo by
+        produceState<UpdateChecker.UpdateInfo?>(initialValue = null) {
+            if (!buildConfig.isDebug && System.getenv("FLATPAK_ID") == null) {
+                value = UpdateChecker(httpClient).check(buildConfig.versionName)
+            }
+        }
+
+    LaunchedEffect(updateInfo) {
+        updateInfo?.let { update ->
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.desktop_update_available_title),
+                    message = getString(Res.string.desktop_update_available_message, update.versionName),
+                    category = Notification.Category.Service,
+                ),
+            )
+        }
+    }
+    return updateInfo
 }
 
 // ----- Window bounds persistence -----
@@ -293,6 +366,7 @@ private fun ApplicationScope.MeshtasticWindow(
     isDarkTheme: Boolean,
     appIcon: Painter,
     windowState: WindowState,
+    visible: Boolean,
     onCloseRequest: () -> Unit,
 ) {
     val multiBackstack =
@@ -310,6 +384,7 @@ private fun ApplicationScope.MeshtasticWindow(
         title = "Meshtastic Desktop",
         icon = appIcon,
         state = windowState,
+        visible = visible,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
         val eventEdition by uiViewModel.eventEdition.collectAsState()
@@ -352,13 +427,23 @@ private fun CoilImageLoaderSetup() {
 
 // ----- Keyboard shortcuts -----
 
-/** Handles Cmd-key shortcuts. Returns `true` if the event was consumed. */
+private val isMacOS = DesktopOS.current() == DesktopOS.MacOS
+
+/**
+ * Platform-conventional shortcut modifier: Cmd on macOS, Ctrl on Windows/Linux. Alt must be up on the Ctrl path because
+ * Windows reports AltGr as Ctrl+Alt — otherwise typing AltGr characters (e.g. @ on German layouts, which is AltGr+Q)
+ * would trigger shortcuts like quit.
+ */
+private val KeyEvent.isShortcutModifierPressed: Boolean
+    get() = if (isMacOS) isMetaPressed else isCtrlPressed && !isAltPressed
+
+/** Handles Cmd/Ctrl-key shortcuts. Returns `true` if the event was consumed. */
 private fun handleKeyboardShortcut(
-    event: androidx.compose.ui.input.key.KeyEvent,
+    event: KeyEvent,
     multiBackstack: MultiBackstack,
     exitApplication: () -> Unit,
 ): Boolean {
-    if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) return false
+    if (event.type != KeyEventType.KeyDown || !event.isShortcutModifierPressed) return false
     val backStack = multiBackstack.activeBackStack
     return when (event.key) {
         Key.Q -> {

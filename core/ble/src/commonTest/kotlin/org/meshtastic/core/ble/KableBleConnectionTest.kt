@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ble
 
+import app.cash.turbine.test
 import com.juul.kable.Advertisement
 import dev.mokkery.MockMode
 import dev.mokkery.mock
@@ -67,6 +68,34 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan reserves one platform start before collecting advertisements`() = runTest {
+        val reservationEvent = "scan-start-reserved"
+        val collectionEvent = "advertisements-collected"
+        val events = mutableListOf<String>()
+        val scanner =
+            TestKableBleScanner(
+                scanResults = flow { events += collectionEvent },
+                scanStartLimiter = BleScanStartLimiter { events += reservationEvent },
+            )
+
+        scanner.scan(timeout = 1.seconds).toList()
+
+        assertEquals(1, events.count { it == reservationEvent })
+        assertEquals(listOf(reservationEvent, collectionEvent), events)
+    }
+
+    @Test
+    fun `expired timeout does not reserve a platform start`() = runTest {
+        var reservations = 0
+        val scanner =
+            TestKableBleScanner(scanResults = emptyFlow(), scanStartLimiter = BleScanStartLimiter { reservations += 1 })
+
+        scanner.scan(timeout = 0.seconds).toList()
+
+        assertEquals(0, reservations)
+    }
+
+    @Test
     fun `timeout terminates scan`() = runTest {
         var cancelled = false
         val scanner =
@@ -104,22 +133,91 @@ class KableBleConnectionTest {
     }
 
     @Test
-    fun `address filter is applied`() = runTest {
-        val scanner = TestKableBleScanner(scanResults = emptyFlow())
+    fun `address filter is used natively only where the platform supports it`() {
+        val address = "AA:BB:CC:DD:EE:FF"
 
-        scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").toList()
-
-        assertEquals(KableScanFilter.Address("AA:BB:CC:DD:EE:FF"), scanner.lastFilter)
+        assertEquals(
+            KableScanFilter.Address(address),
+            resolveKableScanFilter(serviceUuid = null, address = address, supportsAddressFilter = true),
+        )
+        // Without native support the scan must stay unfiltered rather than carry a filter that matches nothing.
+        assertEquals(
+            KableScanFilter.None,
+            resolveKableScanFilter(serviceUuid = null, address = address, supportsAddressFilter = false),
+        )
     }
 
     @Test
-    fun `address filter takes priority over service uuid`() = runTest {
+    fun `service uuid wins over address when the platform cannot filter by address`() {
         val serviceUuid = Uuid.parse("12345678-1234-1234-1234-1234567890ab")
-        val scanner = TestKableBleScanner(scanResults = emptyFlow())
+        val address = "AA:BB:CC:DD:EE:FF"
 
-        scanner.scan(timeout = 1.seconds, serviceUuid = serviceUuid, address = "AA:BB:CC:DD:EE:FF").toList()
+        assertEquals(
+            KableScanFilter.Address(address),
+            resolveKableScanFilter(serviceUuid = serviceUuid, address = address, supportsAddressFilter = true),
+        )
+        // Kable's btleplug backend matches address filters against a hardcoded null, so an address filter here would
+        // silently yield no advertisements at all and BLE connect could never find the device.
+        assertEquals(
+            KableScanFilter.ServiceUuid(serviceUuid),
+            resolveKableScanFilter(serviceUuid = serviceUuid, address = address, supportsAddressFilter = false),
+        )
+    }
 
-        assertEquals(KableScanFilter.Address("AA:BB:CC:DD:EE:FF"), scanner.lastFilter)
+    @Test
+    fun `scan narrows to the requested address regardless of the native filter`() = runTest {
+        val wanted = "AA:BB:CC:DD:EE:FF"
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "Other", advertisement = null),
+                    KableScanResult(identifier = wanted, name = "Meshtastic", advertisement = null),
+                    KableScanResult(identifier = "77:88:99:AA:BB:CC", name = "Another", advertisement = null),
+                ),
+            )
+
+        scanner.scan(timeout = 1.seconds, address = wanted).test {
+            assertEquals(wanted, awaitItem().address)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `scan matches the requested address case-insensitively`() = runTest {
+        // A second, non-matching advertisement keeps this honest: a scan that ignored the address entirely would
+        // emit both, so the assertion proves the filter ran *and* that it matched across case.
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "Other", advertisement = null),
+                    KableScanResult(identifier = "aa:bb:cc:dd:ee:ff", name = "Meshtastic", advertisement = null),
+                ),
+            )
+
+        scanner.scan(timeout = 1.seconds, address = "AA:BB:CC:DD:EE:FF").test {
+            assertEquals("aa:bb:cc:dd:ee:ff", awaitItem().address)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `scan without an address emits every advertisement`() = runTest {
+        val scanner =
+            TestKableBleScanner(
+                scanResults =
+                flowOf(
+                    KableScanResult(identifier = "11:22:33:44:55:66", name = "One", advertisement = null),
+                    KableScanResult(identifier = "77:88:99:AA:BB:CC", name = "Two", advertisement = null),
+                ),
+            )
+
+        scanner.scan(timeout = 1.seconds).test {
+            assertEquals("11:22:33:44:55:66", awaitItem().address)
+            assertEquals("77:88:99:AA:BB:CC", awaitItem().address)
+            awaitComplete()
+        }
     }
 
     @Test
@@ -146,6 +244,26 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan wraps Android scanning too frequently failure`() = runTest {
+        val message = "Failed. App is scanning too frequently"
+        val scanner = TestKableBleScanner(scanResults = flow { throw IllegalStateException(message) })
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.ScanningTooFrequently, failure.reason)
+    }
+
+    @Test
+    fun `scan wraps missing scan permission failure`() = runTest {
+        val message = "Missing required android.permission.ACCESS_COARSE_LOCATION for scanning"
+        val scanner = TestKableBleScanner(scanResults = flow { throw IllegalStateException(message) })
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.MissingScanPermission, failure.reason)
+    }
+
+    @Test
     fun `scan preserves unrelated illegal state failure`() = runTest {
         val scanner =
             TestKableBleScanner(scanResults = flow { throw IllegalStateException("Unexpected scanner state") })
@@ -155,10 +273,14 @@ class KableBleConnectionTest {
         assertEquals("Unexpected scanner state", failure.message)
     }
 
-    private class TestKableBleScanner(private val scanResults: Flow<KableScanResult>) :
-        KableBleScanner(BleLoggingConfig.Release) {
+    private class TestKableBleScanner(
+        private val scanResults: Flow<KableScanResult>,
+        private val scanStartLimiter: BleScanStartLimiter = NoOpBleScanStartLimiter,
+    ) : KableBleScanner(BleLoggingConfig.Release) {
         var lastFilter: KableScanFilter? = null
             private set
+
+        override suspend fun reserveScanStart() = scanStartLimiter.reserveStart()
 
         override fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {
             lastFilter = filter

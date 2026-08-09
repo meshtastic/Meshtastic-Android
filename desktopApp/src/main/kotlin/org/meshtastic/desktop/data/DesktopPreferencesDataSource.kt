@@ -27,8 +27,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CorePreferencesDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /**
@@ -38,10 +38,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
  * [setWindowBounds] and exposed as [StateFlow] properties for composable consumption.
  */
 @Single
-class DesktopPreferencesDataSource(
-    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) {
+class DesktopPreferencesDataSource(private val dataStore: CorePreferencesDataStore, dispatchers: CoroutineDispatchers) {
 
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 

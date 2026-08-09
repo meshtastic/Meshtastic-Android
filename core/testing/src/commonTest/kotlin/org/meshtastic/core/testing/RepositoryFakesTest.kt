@@ -112,6 +112,27 @@ class RepositoryFakesTest {
     }
 
     @Test
+    fun `FakeDatabaseManager associates only the active address`() = runTest {
+        val manager = FakeDatabaseManager()
+        manager.switchActiveDatabase("active")
+
+        manager.associateDevice(address = "stale", nodeNum = 1, deviceId = "old", isSessionActive = { true })
+        assertNull(manager.lastAssociatedAddress)
+        assertNull(manager.lastAssociatedNode)
+        assertNull(manager.lastAssociatedDeviceId)
+
+        manager.associateDevice(address = "active", nodeNum = 2, deviceId = "inactive", isSessionActive = { false })
+        assertNull(manager.lastAssociatedAddress)
+        assertNull(manager.lastAssociatedNode)
+        assertNull(manager.lastAssociatedDeviceId)
+
+        manager.associateDevice(address = "active", nodeNum = 3, deviceId = "fresh", isSessionActive = { true })
+        assertEquals("active", manager.lastAssociatedAddress)
+        assertEquals(3, manager.lastAssociatedNode)
+        assertEquals("fresh", manager.lastAssociatedDeviceId)
+    }
+
+    @Test
     fun `FakeRadioConfigRepository tracks channel set and module config`() = runTest {
         val repo = FakeRadioConfigRepository()
         val a = ChannelSettings(name = "A")

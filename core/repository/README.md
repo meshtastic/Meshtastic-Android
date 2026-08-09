@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `:core:repository` module defines the **data and infrastructure contracts** for the Meshtastic KMP architecture. It is almost entirely interfaces — concrete implementations live in `:core:service` and platform modules. Consumers receive `:core:model` and `:core:proto` transitively because both are `api()`-exported.
+The `:core:repository` module defines the **data and infrastructure contracts** for the Meshtastic KMP architecture. It is almost entirely interfaces — concrete implementations live in `:core:data`, `:core:service`, and platform modules. Consumers receive `:core:model` and the `org.meshtastic:protobufs` Maven artifact transitively because both are `api()`-exported.
 
 **Targets:** Android · JVM · iOS (via `meshtastic.kmp.library` convention plugin)
 
@@ -134,7 +134,7 @@ Radio commands are issued through `RadioController` (a composite of `AdminContro
 
 ### `NodeRepository`
 
-Reactive mesh node database. Backed by Room KMP in `:core:service`.
+Reactive mesh node database. Backed by Room KMP in `:core:data` (`NodeRepositoryImpl`).
 
 ```kotlin
 interface NodeRepository {
@@ -173,8 +173,8 @@ interface SessionManager {
 
 ```
 core:repository
-  ├── api → core:model    (exported to consumers)
-  ├── api → core:proto    (exported to consumers)
+  ├── api → core:model                   (exported to consumers)
+  ├── api → org.meshtastic:protobufs     (Maven, exported to consumers)
   ├── core:common
   ├── core:database
   └── kotlinx.coroutines, kermit, androidx.paging.common

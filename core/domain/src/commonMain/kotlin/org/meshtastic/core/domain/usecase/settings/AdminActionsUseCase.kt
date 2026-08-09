@@ -25,6 +25,9 @@ import org.meshtastic.core.repository.RadioController
  *
  * This component provides methods for rebooting, shutting down, or resetting nodes within the mesh. It also handles
  * local database synchronization when these actions are performed on the locally connected device.
+ *
+ * Each method's `onRequestId` callback fires with the request's packet ID *before* the send is issued; callers that
+ * correlate responses by request ID must register there (see [RadioConfigUseCase] for the ordering rationale).
  */
 @Single
 open class AdminActionsUseCase
@@ -38,8 +41,9 @@ constructor(
      * @param destNum The node number to reboot.
      * @return The packet ID of the request.
      */
-    open suspend fun reboot(destNum: Int): Int {
+    open suspend fun reboot(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
         val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
         radioController.reboot(destNum, packetId)
         return packetId
     }
@@ -50,8 +54,9 @@ constructor(
      * @param destNum The node number to shut down.
      * @return The packet ID of the request.
      */
-    open suspend fun shutdown(destNum: Int): Int {
+    open suspend fun shutdown(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
         val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
         radioController.shutdown(destNum, packetId)
         return packetId
     }
@@ -63,8 +68,9 @@ constructor(
      * @param isLocal Whether the reset is being performed on the locally connected node.
      * @return The packet ID of the request.
      */
-    open suspend fun factoryReset(destNum: Int, isLocal: Boolean): Int {
+    open suspend fun factoryReset(destNum: Int, isLocal: Boolean, onRequestId: (Int) -> Unit = {}): Int {
         val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
         radioController.factoryReset(destNum, packetId)
 
         if (isLocal) {
@@ -83,8 +89,9 @@ constructor(
      * @param destNum The node number to update.
      * @return The packet ID of the request.
      */
-    open suspend fun setTime(destNum: Int): Int {
+    open suspend fun setTime(destNum: Int, onRequestId: (Int) -> Unit = {}): Int {
         val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
         radioController.setTime(destNum, packetId)
         return packetId
     }
@@ -97,8 +104,14 @@ constructor(
      * @param isLocal Whether the reset is being performed on the locally connected node.
      * @return The packet ID of the request.
      */
-    open suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean, isLocal: Boolean): Int {
+    open suspend fun nodedbReset(
+        destNum: Int,
+        preserveFavorites: Boolean,
+        isLocal: Boolean,
+        onRequestId: (Int) -> Unit = {},
+    ): Int {
         val packetId = radioController.generatePacketId()
+        onRequestId(packetId)
         radioController.nodedbReset(destNum, packetId, preserveFavorites)
 
         if (isLocal) {

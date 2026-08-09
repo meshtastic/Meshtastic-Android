@@ -30,6 +30,8 @@
     <!-- APP -->
     <string name="app_too_old">Aplikasyon twò ansyen</string>
     <string name="apply">Aplike</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bon</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="bad">Move</string>
     <string name="battery">Batri</string>
@@ -65,6 +67,7 @@
     <string name="delivery_confirmed">Livrezon konfime</string>
     <string name="desc_node_filter_clear">klarifye filtè nœud</string>
     <string name="description">Deskripsyon</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="direct_message">Mesaj dirèk</string>
@@ -92,6 +95,7 @@
     <string name="firmware_old">Mikwo lojisyèl radyo a twò ansyen pou li kominike ak aplikasyon sa a. Pou plis enfòmasyon sou sa, gade <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">gid enstalasyon mikwo lojisyèl nou an</a>.</string>
     <string name="firmware_too_old">Nouvo mizajou mikwo lojisyèl obligatwa.</string>
     <string name="firmware_update_failed">Mizajou echwe</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
     <!-- GPIO -->
@@ -101,6 +105,7 @@
     <string name="ignore">Ignoré</string>
     <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
     <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
+    <!-- IMPORT -->
     <string name="info">Enfòmasyon</string>
     <string name="interval_unset">Pa konfigire</string>
     <string name="intro_show">Montre entwodiksyon</string>
@@ -140,7 +145,6 @@
     <string name="message">Mesaj</string>
     <string name="message_delivery_status">Eta livrezon mesaj</string>
     <string name="message_input_label">Mesaj</string>
-    <string name="message_status_enroute">Ap tann pou li rekonèt</string>
     <string name="message_status_queued">Kwen pou voye</string>
     <string name="module_settings">Konfigirasyon modil</string>
     <!-- MQTT -->
@@ -177,6 +181,7 @@
     <string name="one_day">24 Èdtan</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -195,9 +200,9 @@
     <string name="reboot">Rekòmanse</string>
     <!-- REBROADCAST -->
     <string name="rebroadcast_mode_all_desc">Rebroadcast nenpòt mesaj obsève, si li te sou kanal prive nou oswa soti nan yon lòt mesh ak menm paramèt lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm \"ALL\" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman \"ALL\".</string>
+    <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm "ALL" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman "ALL".</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou \"LOCAL ONLY\", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
+    <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou "LOCAL ONLY", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
     <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="region_frequency_plan">Rejyon</string>
@@ -242,6 +247,7 @@
     <string name="routing_error_timeout">Tan pase</string>
     <string name="routing_error_too_large">Pake twò gwo</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
+    <!-- SAVE -->
     <string name="save">Sove</string>
     <string name="save_changes">Sove</string>
     <!-- SCAN -->
@@ -256,6 +262,7 @@
     <string name="shutdown">Fèmen</string>
     <string name="signal">Siynal</string>
     <string name="signal_quality">Kalite Siynal</string>
+    <!-- SITE -->
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
     <!-- TAK -->
     <string name="theme">Tèm</string>
@@ -286,5 +293,6 @@
     <string name="wifi_qr_code_error">Fòma QR Kòd Kredi WiFi Invalid</string>
     <string name="wifi_qr_code_scan">Skan QR Kòd WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Ou</string>
 </resources>

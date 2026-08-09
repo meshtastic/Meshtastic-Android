@@ -39,6 +39,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -63,6 +64,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
     LaunchedEffect(statusMessageConfig) { formState.value = statusMessageConfig }
 
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.NEVER,
         title = stringResource(Res.string.status_message),
         onBack = onBack,
         configState = formState,

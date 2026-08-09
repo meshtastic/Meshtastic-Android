@@ -28,6 +28,7 @@
     <!-- APP -->
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>
     <string name="apply">החל</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>
     <!-- BLUETOOTH -->
     <string name="bottom_nav_settings">הגדרות</string>
@@ -61,6 +62,7 @@
         <item quantity="other">מחק %1$s הודעות?</item>
     </plurals>
     <string name="description">תיאור</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="direct_message">הודעה ישירה</string>
@@ -82,12 +84,14 @@
     <string name="firmware_old">קושחת המכשיר ישנה מידי בכדי לתקשר עם האפליקציה. למידע נוסף בקר ב<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">מדריך התקנת קושחה</a>.</string>
     <string name="firmware_too_old">נדרש עדכון קושחה.</string>
     <string name="firmware_update_failed">העדכון נכשל</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
     <!-- IGNORE -->
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף '%1$s' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד '%1$s' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
+    <!-- IMPORT -->
     <string name="interval_unset">לא מוגדר</string>
     <string name="intro_show">הראה מקדמה</string>
     <string name="ip_address">‏כתובת IP:</string>
@@ -152,6 +156,7 @@
     <!-- ONE -->
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -179,6 +184,7 @@
     <string name="reset_to_defaults">איפוס לברירת מחדל</string>
     <!-- ROLE -->
     <!-- ROUTING -->
+    <!-- SAVE -->
     <string name="save">שמור</string>
     <string name="save_changes">שמור</string>
     <!-- SCAN -->
@@ -192,6 +198,7 @@
     <string name="share">שתף</string>
     <!-- SHOW -->
     <string name="shutdown">כיבוי</string>
+    <!-- SITE -->
     <!-- TAK -->
     <string name="theme">ערכת נושא</string>
     <string name="theme_dark">כהה</string>
@@ -214,5 +221,6 @@
     <string name="waypoint_received">התקבל נקודת ציון: %1$s</string>
     <!-- WIFI -->
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">אתה</string>
 </resources>

@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
-import org.meshtastic.core.datastore.ChannelSetDataSource
+import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
@@ -51,7 +51,7 @@ private const val MAX_FILE_MANIFEST_ENTRIES = 4096
 @Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
     private val nodeDB: NodeRepository,
-    private val channelSetDataSource: ChannelSetDataSource,
+    private val channelSetDataSource: SwitchingChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
 ) : RadioConfigRepository {

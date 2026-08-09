@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-07-01
+last_updated: 2026-07-08
 aliases:
   - deeplinks
   - navigation-3
@@ -57,10 +57,19 @@ https://meshtastic.org/{path}       # App Link, android:autoVerify — also open
 `adb shell am start -a android.intent.action.VIEW -d "meshtastic://meshtastic/{path}"` is the fastest way to
 trigger any route below from a shell or automation script without touching the UI.
 
-**Source of truth:** the exhaustive, always-current list of segments lives as KDoc on
-[`DeepLinkRouter.route()`](../../../core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
-and as executable spec in
-[`DeepLinkRouterTest.kt`](../../../core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
+For the `https` form to open in-app, each top-level path segment must also be declared as an
+`android:pathPrefix` in the `android:autoVerify` intent-filter in `androidApp/src/main/AndroidManifest.xml` —
+otherwise the link opens in the browser. Adding a new top-level route therefore takes three steps: add the
+segment to `DeepLinkRouter.topLevelPathSegments` (the router refuses to dispatch segments outside that set),
+add its `when` branch in `DeepLinkRouter.route()`, and add the matching `pathPrefix` to the manifest.
+`DeepLinkManifestConsistencyTest` (androidApp unit tests) checks the manifest against the set, so a missing
+manifest entry fails CI.
+
+**Source of truth:** the always-current list of top-level segments is `topLevelPathSegments` in
+[`DeepLinkRouter`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
+— sub-paths live in the `route()` `when` block plus its helper maps (`settingsSubRoutes`, `nodeDetailSubRoutes`);
+the class-level KDoc is illustrative, not exhaustive. It also exists as executable spec in
+[`DeepLinkRouterTest.kt`](https://github.com/meshtastic/Meshtastic-Android/blob/main/core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
 The table below is a snapshot for quick reference — check those two files if it looks out of date.
 
 ### Supported Deep Links
@@ -76,6 +85,7 @@ The table below is a snapshot for quick reference — check those two files if i
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
 | `/settings/help-docs` | `SettingsRoute.HelpDocs` | Compatibility alias |
+| `/discovery` | `DiscoveryRoute.DiscoveryGraph` | Local Mesh Discovery entry point |
 | `/settings/local-mesh-discovery/session/{sessionId}` | `DiscoveryRoute.DiscoverySummary(sessionId)` | Discovery session result |
 | `/nodes` | `NodesRoute.Nodes` | Node list |
 | `/nodes/{destNum}` | `NodesRoute.NodeDetail(destNum)` | Node detail |

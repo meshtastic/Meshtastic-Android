@@ -36,6 +36,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
@@ -91,7 +92,7 @@ class NymeaWifiService(
      * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT].
      */
     suspend fun connect(address: String? = null): Result<String> = safeCatching {
-        Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=$address)…" }
+        Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=${address.anonymize()})…" }
 
         val device =
             withTimeout(SCAN_TIMEOUT) {
@@ -99,10 +100,12 @@ class NymeaWifiService(
             }
 
         val deviceName = device.name ?: device.address
-        Logger.i { "$TAG: Found device: ${device.name} @ ${device.address}" }
+        Logger.i { "$TAG: Found device @ ${device.address.anonymize()}" }
 
         val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT)
-        check(state is BleConnectionState.Connected) { "Failed to connect to ${device.address} — final state: $state" }
+        check(state is BleConnectionState.Connected) {
+            "Failed to connect to ${device.address.anonymize()} — final state: $state"
+        }
 
         Logger.i { "$TAG: Connected. Discovering wireless service…" }
 

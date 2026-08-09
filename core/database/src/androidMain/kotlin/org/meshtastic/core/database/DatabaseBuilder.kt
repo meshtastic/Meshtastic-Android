@@ -32,13 +32,8 @@ import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 
 /**
- * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName].
- *
- * Android production deliberately opts out of Room KMP's multi-reader connection pool (`multiConnection = false`).
- * Under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`), the reader-pool permit semaphore can
- * wedge: all reader connections report `Free` but `permits=0`, so every new read acquisition times out indefinitely.
- * Single-connection mode serializes reads and writes through one connection, eliminating the separate reader permit
- * pool entirely. JVM/iOS may still use the pool; see [MeshtasticDatabase.configureCommon].
+ * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. All platforms use Room KMP's
+ * single-connection pool to avoid the reader-pool permit wedge; see [MeshtasticDatabase.configureCommon].
  */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
     val dbFile = ContextServices.app.getDatabasePath(dbName)
@@ -46,14 +41,14 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
-        .configureCommon(multiConnection = false)
+        .configureCommon()
         .setDriver(BundledSQLiteDriver())
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory Android database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
     Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
-        .configureCommon(multiConnection = false)
+        .configureCommon()
         .setDriver(BundledSQLiteDriver())
 
 /** Returns the Android directory where database files are stored. */

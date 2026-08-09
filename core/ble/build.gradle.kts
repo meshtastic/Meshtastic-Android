@@ -17,7 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -25,7 +25,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
+            // api: BleScanStartException implements core.common's ExpectedCondition in its public supertype list.
+            api(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
 
@@ -39,17 +40,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies {
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(projects.core.testing)
-        }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

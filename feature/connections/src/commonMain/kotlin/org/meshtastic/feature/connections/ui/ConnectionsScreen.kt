@@ -24,6 +24,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +32,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -53,6 +58,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.FirmwareUpdateDestination
+import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
@@ -60,13 +67,24 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
+import org.meshtastic.core.resources.disconnect
+import org.meshtastic.core.resources.firmware_event_ended_banner
+import org.meshtastic.core.resources.firmware_event_ended_button
 import org.meshtastic.core.resources.firmware_recovery_banner
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_dismiss
+import org.meshtastic.core.resources.firmware_update_available
+import org.meshtastic.core.resources.firmware_update_notification_android
+import org.meshtastic.core.resources.firmware_update_notification_flasher
+import org.meshtastic.core.resources.firmware_update_open
+import org.meshtastic.core.resources.firmware_update_open_flasher
+import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_wifi_settings
+import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.set_your_region
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.resources.wifi_unavailable
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
@@ -77,7 +95,10 @@ import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.icon.SystemUpdate
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.hasEnded
 import org.meshtastic.core.ui.util.isBluetoothDisabled
 import org.meshtastic.core.ui.util.isWifiUnavailable
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
@@ -92,6 +113,7 @@ import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
+import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -123,6 +145,7 @@ fun ConnectionsScreen(
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
+    val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
     val sessionAuthorized by connectionsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
 
@@ -152,6 +175,7 @@ fun ConnectionsScreen(
     val wifiUnavailable = isWifiUnavailable()
     val openBluetoothSettings = rememberOpenBluetoothSettings()
     val openWifiSettings = rememberOpenWifiSettings()
+    val uriHandler = LocalUriHandler.current
 
     // Auto-start BLE discovery when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
     // ScannerViewModel skips screen-entry discovery when a selected device can reconnect through the transport's
@@ -220,6 +244,23 @@ fun ConnectionsScreen(
         )
     }
 
+    // Work around CMP-6615 in Compose Multiplatform 1.11.1: Android stringResource enters a blocking resource state.
+    // Keep these stable slots outside AnimatedContent so connection-state transitions do not re-enter resource loading
+    // while the main thread is applying an animation frame.
+    val firmwareVersion =
+        ourNode
+            ?.metadata
+            ?.firmware_version
+            ?.takeIf { it.isNotBlank() }
+            ?.let { stringResource(Res.string.firmware_version, it) }
+    val currentlyConnectedText =
+        CurrentlyConnectedText(
+            unknownLabel = stringResource(Res.string.unknown),
+            rssiLabel = stringResource(Res.string.rssi),
+            disconnectLabel = stringResource(Res.string.disconnect),
+            firmwareVersion = firmwareVersion,
+        )
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -275,6 +316,7 @@ fun ConnectionsScreen(
                                                 ourNode = ourNode,
                                                 selectedDevice = selectedDevice,
                                                 bleDevices = bleDevices,
+                                                text = currentlyConnectedText,
                                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                                 onClickDisconnect = { scanModel.disconnect() },
                                             )
@@ -298,6 +340,21 @@ fun ConnectionsScreen(
                             }
                         }
 
+                        firmwareUpdateNotice?.let { notice ->
+                            FirmwareUpdateNoticeCard(
+                                notice = notice,
+                                onAction = {
+                                    when (notice.destination) {
+                                        FirmwareUpdateDestination.AndroidUpdate ->
+                                            onConfigNavigate(FirmwareRoute.FirmwareUpdate)
+
+                                        FirmwareUpdateDestination.MeshtasticFlasher ->
+                                            uriHandler.openUri("https://flasher.meshtastic.org")
+                                    }
+                                },
+                            )
+                        }
+
                         // A device stranded in bootloader mode by an interrupted update can be re-flashed without
                         // reconnecting first. Shown only while disconnected so the Firmware screen enters its recovery
                         // path (it uses the live connection when connected); cleared automatically once the device
@@ -316,6 +373,23 @@ fun ConnectionsScreen(
                                     // reconnect/success.
                                     onDismiss = { scanModel.dismissRecovery() },
                                     dismissContentDescription = stringResource(Res.string.firmware_recovery_dismiss),
+                                )
+                            }
+
+                        // Once an event is over, nudge users still on that event's firmware back to standard
+                        // firmware. Driven purely by the metadata end date (LocalEventBranding is only populated
+                        // while connected to event firmware), so it appears whenever an ended-event device is
+                        // connected and disappears on its own once the device is re-flashed to vanilla. Not
+                        // dismissable — it stays until the underlying condition is actually resolved.
+                        LocalEventBranding.current
+                            ?.takeIf { it.hasEnded() }
+                            ?.let { endedEvent ->
+                                Spacer(modifier = Modifier.height(8.dp))
+                                RecoveryCard(
+                                    message =
+                                    stringResource(Res.string.firmware_event_ended_banner, endedEvent.displayName),
+                                    actionLabel = stringResource(Res.string.firmware_event_ended_button),
+                                    onAction = { onConfigNavigate(FirmwareRoute.FirmwareUpdate) },
                                 )
                             }
 
@@ -442,18 +516,71 @@ fun ConnectionsScreen(
     }
 }
 
+/** Informational, non-dismissible nudge for a connected device with a newer stable firmware release. */
+@Composable
+private fun FirmwareUpdateNoticeCard(notice: FirmwareUpdateNotice, onAction: () -> Unit) {
+    val actionLabel =
+        stringResource(
+            when (notice.destination) {
+                FirmwareUpdateDestination.AndroidUpdate -> Res.string.firmware_update_open
+                FirmwareUpdateDestination.MeshtasticFlasher -> Res.string.firmware_update_open_flasher
+            },
+        )
+    val message =
+        stringResource(
+            when (notice.destination) {
+                FirmwareUpdateDestination.AndroidUpdate -> Res.string.firmware_update_notification_android
+                FirmwareUpdateDestination.MeshtasticFlasher -> Res.string.firmware_update_notification_flasher
+            },
+            notice.currentVersion,
+            notice.stableVersion,
+        )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.Top) {
+            Icon(
+                imageVector = MeshtasticIcons.SystemUpdate,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(
+                    text = stringResource(Res.string.firmware_update_available),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = message,
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(modifier = Modifier.padding(top = 12.dp), onClick = onAction) {
+                    Icon(imageVector = MeshtasticIcons.SystemUpdate, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(actionLabel)
+                }
+            }
+        }
+    }
+}
+
 /** Body for the CONNECTED state — sits inside the shared outer Card in [ConnectionsScreen]. */
 @Composable
 private fun ConnectedDeviceContent(
     ourNode: org.meshtastic.core.model.Node?,
     selectedDevice: String,
     bleDevices: List<DeviceListEntry>,
+    text: CurrentlyConnectedText,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
 ) {
     ourNode?.let { node ->
         CurrentlyConnectedInfo(
             node = node,
+            text = text,
             bleDevice = bleDevices.find { it.fullAddress == selectedDevice } as DeviceListEntry.Ble?,
             onNavigateToNodeDetails = onNavigateToNodeDetails,
             onClickDisconnect = onClickDisconnect,

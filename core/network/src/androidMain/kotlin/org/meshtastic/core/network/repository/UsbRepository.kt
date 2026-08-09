@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
 
@@ -43,7 +44,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class UsbRepository(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val usbBroadcastReceiverLazy: Lazy<UsbBroadcastReceiver>,
     private val usbManagerLazy: Lazy<UsbManager?>,
     private val usbSerialProberLazy: Lazy<UsbSerialProber>,
@@ -109,9 +110,5 @@ class UsbRepository(
  * NOT use [UsbDevice.getSerialNumber] — that requires an active USB permission grant, which is exactly what is missing
  * immediately after a re-enumeration, so a serial-based key would read back null mid-recovery and break the very
  * reconnect this is meant to enable.
- *
- * ponytail: vendor:product collides if two *identical* boards are attached at once (last one wins in the map). Append
- * getSerialNumber() — gated on usbManager.hasPermission(device) — only if multi-identical-device support is ever
- * needed.
  */
 internal fun UsbDevice.usbSerialStableKey(): String = "$vendorId-$productId"

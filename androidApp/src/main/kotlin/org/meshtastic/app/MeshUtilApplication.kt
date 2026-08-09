@@ -18,6 +18,7 @@ package org.meshtastic.app
 
 import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Context
 import android.os.Build
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -26,6 +27,9 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +37,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -42,7 +47,12 @@ import org.meshtastic.app.di.AndroidKoinApp
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_interrupted_scan_restored
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
+import org.meshtastic.feature.discovery.DiscoveryScanEngine
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
@@ -55,13 +65,18 @@ import kotlin.time.toJavaDuration
  */
 open class MeshUtilApplication :
     Application(),
-    Configuration.Provider {
+    Configuration.Provider,
+    SingletonImageLoader.Factory {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
+    override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
 
     override fun onCreate() {
         super.onCreate()
         ContextServices.app = this
+        configureFlavorApplication(BuildConfig.APPLICATION_ID)
 
         startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)
@@ -112,14 +127,33 @@ open class MeshUtilApplication :
             val meshPrefs: MeshPrefs = get()
             dbManager.init(meshPrefs.deviceAddress.value)
         }
+
+        // Restore a radio left detuned by a discovery scan that was interrupted (crash, BLE loss, process death)
+        // before it could restore the home LoRa config itself. Never returns; watches reconnects for the app's life.
+        // The engine stays UI-free — we localize the "restored" notice here and push it through the app-wide alert.
+        applicationScope.launch {
+            val scanEngine: DiscoveryScanEngine = get()
+            val serviceRepository: ServiceRepository = get()
+            scanEngine.restoreInterruptedSessionsOnReconnect { homePreset ->
+                serviceRepository.setErrorMessage(
+                    getStringSuspend(Res.string.discovery_interrupted_scan_restored, homePreset),
+                    Severity.Warn,
+                )
+            }
+        }
     }
 
     override fun onTerminate() {
-        // Shutdown managers (useful for Robolectric tests)
-        get<DatabaseManager>().close()
+        // Shutdown managers (useful for Robolectric tests).
+        // Non-blocking: cancelAndJoin inside runBlocking on the main thread can deadlock
+        // if any active coroutine is dispatching to Dispatchers.Main.
         applicationScope.cancel()
-        super.onTerminate()
-        org.koin.core.context.stopKoin()
+        try {
+            runBlocking { get<DatabaseManager>().close() }
+        } finally {
+            super.onTerminate()
+            org.koin.core.context.stopKoin()
+        }
     }
 
     private fun scheduleMeshLogCleanup() {

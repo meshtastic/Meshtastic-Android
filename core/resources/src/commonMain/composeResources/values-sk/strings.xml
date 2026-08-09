@@ -37,6 +37,8 @@
     <!-- APP -->
     <string name="app_too_old">Aplikáciu je potrebné aktualizovať</string>
     <string name="apply">Použiť</string>
+    <!-- AQI -->
+    <string name="aqi_good">Dobrý</string>
     <string name="are_you_sure">Si si istý?</string>
     <string name="are_you_sure_change_default">Ste si istý, že sa chcete prepnúť na predvolený kanál?</string>
     <string name="audio">Zvuk</string>
@@ -120,6 +122,7 @@
     <string name="delivery_confirmed">Doručenie potvrdené</string>
     <string name="desc_node_filter_clear">vymazať filter uzlov</string>
     <string name="description">Popis</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="details">Detaily</string>
     <string name="detection_sensor">Detekčný senzor</string>
@@ -169,6 +172,7 @@
     <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Fixná Pozícia</string>
     <string name="flip_screen">Otoč Obrazovku</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Dobrý</string>
     <!-- GPIO -->
@@ -192,6 +196,7 @@
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importovať konfiguráciu</string>
     <string name="info">Informácia</string>
     <string name="interval_unset">Nenastavené</string>
@@ -270,7 +275,6 @@
     <string name="message">Správa</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
     <string name="message_input_label">Správa</string>
-    <string name="message_status_enroute">Čaká sa na potvrdenie</string>
     <string name="message_status_queued">Vo fronte na odoslanie</string>
     <string name="messages">Správy</string>
     <string name="module_settings">Konfigurácia modulu</string>
@@ -326,6 +330,7 @@
     <string name="one_week">1 týždeň</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <string name="pairing_mode">Režim párovania</string>
     <string name="password">Heslo</string>
     <!-- PAX -->
@@ -419,6 +424,7 @@
     <string name="routing_error_too_large">Príliš veľký paket</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
+    <!-- SAVE -->
     <string name="save">Uložiť</string>
     <string name="save_changes">Uložiť</string>
     <!-- SCAN -->
@@ -440,6 +446,8 @@
     <string name="shutdown">Vypnúť</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Obrazovka</string>
     <string name="smart_position">Inteligentná poloha</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Pomer signálu od šumu (SNR), miera používaná v komunikácii na kvantifikáciu úrovne požadovaného signálu k úrovni hluku pozadia. V Meshtastic a iných bezdrôtových systémoch znamená vyšší SNR jasnejší signál, ktorý môže zvýšiť spoľahlivosť a kvalitu prenosu údajov.</string>
@@ -507,5 +515,6 @@
     <string name="wifi_qr_code_scan">Skenuj WiFi QR kód</string>
     <!-- WIND -->
     <string name="wind">Vietor</string>
+    <!-- WRITE -->
     <string name="you">Vy</string>
 </resources>

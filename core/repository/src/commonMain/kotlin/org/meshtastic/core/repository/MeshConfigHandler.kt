@@ -33,24 +33,45 @@ interface MeshConfigHandler {
     /** Reactive local module configuration. */
     val moduleConfig: StateFlow<LocalModuleConfig>
 
-    /** Handles a received device configuration. */
-    fun handleDeviceConfig(config: Config)
+    /**
+     * Handles a received device configuration.
+     *
+     * @param session The transport session that admitted [config].
+     * @return `true` when the update is admitted for the current session; `false` when [session] is stale or revoked.
+     */
+    fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean
 
-    /** Handles a received module configuration. */
-    fun handleModuleConfig(config: ModuleConfig)
+    /**
+     * Handles a received module configuration.
+     *
+     * @param session The transport session that admitted [config].
+     * @return `true` when the update is admitted for the current session; `false` when [session] is stale or revoked.
+     */
+    fun handleModuleConfig(config: ModuleConfig, session: RadioSessionContext): Boolean
 
-    /** Handles a received channel configuration. */
-    fun handleChannel(channel: Channel)
+    /**
+     * Handles a received channel configuration.
+     *
+     * @param session The transport session that admitted [channel].
+     * @return `true` when the update is admitted for the current session; `false` when [session] is stale or revoked.
+     */
+    fun handleChannel(channel: Channel, session: RadioSessionContext): Boolean
 
     /**
      * Handles the [DeviceUIConfig] received during the config handshake (STATE_SEND_UIDATA). This arrives as the 2nd
      * packet in every handshake, immediately after my_info.
+     *
+     * @param session The transport session that admitted [config].
+     * @return `true` when the update is admitted for the current session; `false` when [session] is stale or revoked.
      */
-    fun handleDeviceUIConfig(config: DeviceUIConfig)
+    fun handleDeviceUIConfig(config: DeviceUIConfig, session: RadioSessionContext): Boolean
 
     /**
      * Handles the [LoRaRegionPresetMap] received during the config handshake (after metadata, before channels). It
      * describes which modem presets are legal in each LoRa region. Absent on firmware older than 2.8.
+     *
+     * @param session The transport session that admitted [map].
+     * @return `true` when the update is admitted for the current session; `false` when [session] is stale or revoked.
      */
-    fun handleRegionPresets(map: LoRaRegionPresetMap)
+    fun handleRegionPresets(map: LoRaRegionPresetMap, session: RadioSessionContext): Boolean
 }

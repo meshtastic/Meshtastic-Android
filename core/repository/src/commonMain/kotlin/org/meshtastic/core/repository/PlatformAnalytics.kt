@@ -53,6 +53,29 @@ interface PlatformAnalytics {
     }
 
     /**
+     * Starts tracking a screen as a RUM view, aligned with the Meshtastic-Apple Datadog integration (which auto-tracks
+     * SwiftUI views) so per-screen RUM data lines up across platforms.
+     *
+     * Starting a view implicitly stops any previously active view. Callers should pair each call with a matching
+     * [stopScreenView] using the same [key] when the screen is left.
+     *
+     * @param key A stable identifier that pairs this start with its matching [stopScreenView].
+     * @param name The route-derived view name (e.g. `org.meshtastic.core.navigation.NodesRoute.Nodes`).
+     */
+    fun startScreenView(key: String, name: String) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
+     * Stops the RUM view previously started with [startScreenView] for the given [key].
+     *
+     * @param key The same identifier passed to the matching [startScreenView].
+     */
+    fun stopScreenView(key: String) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
      * Indicates whether platform-specific services (like Google Play Services or Datadog) are available and
      * initialized.
      */

@@ -64,7 +64,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.defaultPresetFor
-import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
@@ -95,6 +94,7 @@ import org.meshtastic.feature.settings.channel.ChannelViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -126,7 +126,7 @@ fun ChannelScreen(
 
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(true) }
+    val channelShareState = rememberChannelShareState()
 
     val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
 
@@ -135,6 +135,7 @@ fun ChannelScreen(
     if (isWaiting) {
         PacketResponseStateDialog(
             state = radioConfigState.responseState,
+            rebootBehavior = RebootBehavior.NEVER,
             onDismiss = {
                 isWaiting = false
                 radioConfigViewModel.clearPacketResponse()
@@ -222,8 +223,7 @@ fun ChannelScreen(
 
     if (showShareDialog) {
         ChannelShareDialog(
-            channelSet = selectedChannelSet,
-            shouldAddChannel = shouldAddChannelsState,
+            uriString = channelShareState.uriString(selectedChannelSet),
             onDismiss = { showShareDialog = false },
         )
     }
@@ -264,14 +264,14 @@ fun ChannelScreen(
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     SegmentedButton(
                         label = { Text(text = stringResource(Res.string.replace)) },
-                        onClick = { shouldAddChannelsState = false },
-                        selected = !shouldAddChannelsState,
+                        onClick = { channelShareState.shouldAdd = false },
+                        selected = !channelShareState.shouldAdd,
                         shape = SegmentedButtonDefaults.itemShape(0, 2),
                     )
                     SegmentedButton(
                         label = { Text(text = stringResource(Res.string.add)) },
-                        onClick = { shouldAddChannelsState = true },
-                        selected = shouldAddChannelsState,
+                        onClick = { channelShareState.shouldAdd = true },
+                        selected = channelShareState.shouldAdd,
                         shape = SegmentedButtonDefaults.itemShape(1, 2),
                     )
                 }
@@ -303,8 +303,7 @@ fun ChannelScreen(
 }
 
 @Composable
-private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
-    val uriString = channelSet.getChannelUrl(false, shouldAddChannel).toString()
+private fun ChannelShareDialog(uriString: String, onDismiss: () -> Unit) {
     QrDialog(title = stringResource(Res.string.share_channels_qr), uriString = uriString, onDismiss = onDismiss)
 }
 

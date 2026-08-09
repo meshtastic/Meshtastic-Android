@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.io.IOException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -40,6 +41,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -50,12 +52,14 @@ import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
+import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.mqtt.plus
 import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
 import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.proto.ServiceEnvelope
 import kotlin.concurrent.Volatile
 import kotlin.uuid.Uuid
 
@@ -114,6 +118,9 @@ class MQTTRepositoryImpl(
         scope.launch { safeCatching { c?.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } } }
     }
 
+    // json_enabled is deprecated in the protobuf schema but remains the only way to toggle MQTT JSON
+    // publish/consume, so we must keep reading it until the firmware/proto provides a replacement.
+    @Suppress("DEPRECATION")
     @OptIn(ExperimentalSerializationApi::class)
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
         // Append a per-connection random id. myId identifies the *node* (and is null →
@@ -159,7 +166,13 @@ class MQTTRepositoryImpl(
                     )
                 }
             }
-            add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", maxQos = QoS.AT_LEAST_ONCE, noLocal = true))
+            add(
+                Subscription(
+                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
+                    maxQos = QoS.AT_LEAST_ONCE,
+                    noLocal = true,
+                ),
+            )
         }
 
         // Collect from the SharedFlow before connecting to avoid missing retained messages
@@ -187,17 +200,29 @@ class MQTTRepositoryImpl(
                     }
                     Logger.i { "MQTT connected and subscribed" }
                 }
+                val failure = result.exceptionOrNull()
                 when {
                     result.isSuccess -> return@launch
 
-                    result.exceptionOrNull() is MqttException.ConnectionRejected -> {
-                        Logger.e(result.exceptionOrNull()) { "MQTT connection rejected (unrecoverable), stopping" }
-                        close(result.exceptionOrNull()!!)
+                    failure is MqttException.ConnectionRejected && failure.isCredentialRejection() -> {
+                        Logger.e(failure) { "MQTT connection rejected (unrecoverable), stopping" }
+                        close(failure)
                         return@launch
                     }
 
                     else -> {
-                        Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        // Broker- and network-side failures are what this retry loop exists to absorb — an
+                        // unreachable host, a TLS problem, a dropped connection, or a broker that violates the
+                        // MQTT 5 spec (e.g. the topic-alias limit). None are defects in this app, and reporting
+                        // every retry as a non-fatal drowned real regressions.
+                        //
+                        // Anything else landing here is unexpected — a fault in our own connect/subscribe setup
+                        // rather than the peer's — so it keeps reporting.
+                        if (failure.isExpectedMqttRetryFailure()) {
+                            Logger.w(failure) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        } else {
+                            Logger.e(failure) { "MQTT connect failed unexpectedly, retrying in ${reconnectDelay}ms" }
+                        }
                         delay(reconnectDelay)
                         reconnectDelay =
                             (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
@@ -245,6 +270,20 @@ class MQTTRepositoryImpl(
                 Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
             }
         } else {
+            // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
+            // them. In client-proxy mode the public broker floods payload-less packet-header
+            // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
+            // airtime, a decrypt attempt, and a node-side warning per packet.
+            if (isUndeliverableDownlink(payload, nodeRepository.myId.value)) {
+                Logger.d {
+                    if (buildConfigProvider.isDebug) {
+                        "MQTT downlink dropped (no payload): $topic"
+                    } else {
+                        "MQTT downlink dropped (no payload)"
+                    }
+                }
+                return
+            }
             trySend(MqttClientProxyMessage(topic = topic, data_ = payload.toByteString(), retained = msg.retain))
         }
     }
@@ -280,6 +319,44 @@ class MQTTRepositoryImpl(
             }
         }
     }
+}
+
+/**
+ * `true` only for CONNACK reason codes where retrying can never help — the broker examined our credentials or client
+ * identity and refused them.
+ *
+ * A [MqttException.ConnectionRejected] can still carry a *transient* broker verdict (`SERVER_BUSY`,
+ * `SERVER_UNAVAILABLE`, `CONNECTION_RATE_EXCEEDED`), which must stay in the retry loop rather than stop the proxy with
+ * a "check credentials" dialog. Public so `MqttManagerImpl` in `:core:data` can phrase its user-facing error from the
+ * same classification.
+ */
+fun MqttException.ConnectionRejected.isCredentialRejection(): Boolean = when (reasonCode) {
+    ReasonCode.BAD_USER_NAME_OR_PASSWORD,
+    ReasonCode.NOT_AUTHORIZED,
+    ReasonCode.BAD_AUTHENTICATION_METHOD,
+    ReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+    ReasonCode.BANNED,
+    -> true
+
+    else -> false
+}
+
+/**
+ * `true` when an MQTT connect/subscribe failure is one the retry loop is designed to absorb, rather than a defect worth
+ * reporting to Crashlytics/Datadog.
+ *
+ * Covers the MQTT client's own sealed error hierarchy — a lost connection, and protocol violations by the broker such
+ * as an inbound topic alias above the advertised maximum — plus transport-level I/O failures (unreachable host, TLS,
+ * socket reset). All are peer- or network-side and not actionable by this app.
+ *
+ * Deliberately narrow: an unexpected exception escaping our own client/state setup is a real bug and must keep
+ * reporting, so anything outside these families returns `false`.
+ */
+private fun Throwable?.isExpectedMqttRetryFailure(): Boolean = when (this) {
+    null -> false
+    is MqttException -> true
+    is IOException -> true
+    else -> false
 }
 
 internal data class MqttClientSetup(
@@ -326,11 +403,14 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
     MqttClient(setup.ownerId) {
         // mqtt-client 0.4.0 makes transport a required SPI: the client throws at connect if unset.
         // Register TCP/TLS (the default) + WebSocket (for user-entered ws://-/wss:// brokers).
-        transportFactory = TcpTransportFactory() + WebSocketTransportFactory()
+        // Both get the same private-CA trust hook so the grant stays scoped to this socket — see [mqttTlsConfig].
+        val tls = mqttTlsConfig()
+        transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         autoReconnect = true
-        username = setup.mqttConfig?.username
-        setup.mqttConfig?.password?.let { password(it) }
+        val (user, pass) = effectiveCredentials(setup.mqttConfig)
+        username = user
+        pass?.let { password(it) }
         logger = KermitMqttLogger()
         // WARN for production: the library emits endpoint addresses and topic strings at
         // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
@@ -339,7 +419,9 @@ private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession 
     },
 )
 
-private const val MQTT_KEEPALIVE_SECONDS = 30
+// Public (not internal/private) so MqttManagerImpl's probe in :core:data can mirror the live client —
+// some brokers reject a keepalive-0 CONNECT (misleadingly, as CLIENT_IDENTIFIER_NOT_VALID).
+const val MQTT_KEEPALIVE_SECONDS = 30
 private const val MQTT_PORT_PLAIN = 1883
 private const val MQTT_PORT_TLS = 8883
 
@@ -368,6 +450,26 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
 
 private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
 
+// The public broker's well-known credentials, same values as the firmware's Default.h.
+private const val DEFAULT_MQTT_USERNAME = "meshdev"
+private const val DEFAULT_MQTT_PASSWORD = "large4cats"
+
+/**
+ * Mirrors the firmware's `PubSubConfig` rule: an empty `address` means "the public broker with its well-known
+ * credentials", substituting username and password together with the server — the stored username/password are ignored
+ * in that case, whatever they contain. Substituting only the address (as this repository does for the endpoint) while
+ * passing the stored empty credentials through makes the proxy connect anonymously, which the public broker rejects
+ * with BAD_USER_NAME_OR_PASSWORD — surfaced to the user as a bogus "check credentials" error on configs the firmware
+ * itself connects with happily. Empty-address configs occur in the wild: lockdown-enabled firmware hands
+ * unauthenticated clients a zeroed MQTTConfig.
+ */
+internal fun effectiveCredentials(config: ModuleConfig.MQTTConfig?): Pair<String?, String?> =
+    if (config?.address.isNullOrEmpty()) {
+        DEFAULT_MQTT_USERNAME to DEFAULT_MQTT_PASSWORD
+    } else {
+        config?.username to config?.password
+    }
+
 fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
     tlsEnabled || extractHost(address).equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
 
@@ -387,4 +489,36 @@ internal fun extractHost(address: String): String {
         }
     // Remove path (if any), then remove port
     return afterScheme.substringBefore("/").substringBefore(":")
+}
+
+private const val PKI_CHANNEL_ID = "PKI"
+
+/**
+ * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
+ * forwarding over BLE (MQTT client-proxy mode).
+ *
+ * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
+ * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), our
+ * own echoed-back packets (used as implicit ACKs), a packet-less envelope, or any packet that actually carries a
+ * payload. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate
+ * Meshtastic packet is payload-less.
+ *
+ * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
+ * the full repository.
+ *
+ * @param payload the raw MQTT payload bytes (a serialized ServiceEnvelope on the binary topic).
+ * @param myId this device's node id in `!xxxxxxxx` hex form, or null before the local node loads.
+ */
+internal fun isUndeliverableDownlink(payload: ByteArray, myId: String?): Boolean {
+    // Decode without a logger: this is fail-open and, on a public broker, may see arbitrary bytes on the binary
+    // topic. Passing Logger would emit an error log per unparseable downlink — expensive noise for an expected case.
+    val envelope = ServiceEnvelope.ADAPTER.decodeOrNull(payload) ?: return false // fail open on garbage
+    // Guards — never drop: PKI-channel traffic (accepted without decryption) or our own echoed-back
+    // packets (used as implicit ACKs).
+    val isGuarded = envelope.channel_id == PKI_CHANNEL_ID || (myId != null && envelope.gateway_id == myId)
+    // Tier 1: a packet with neither `decoded` nor `encrypted` carries nothing the node can use.
+    // A packet-less envelope (packet == null) has nothing to prove, so it is treated as deliverable.
+    val packet = envelope.packet
+    val hasNoPayload = packet != null && packet.decoded == null && packet.encrypted == null
+    return hasNoPayload && !isGuarded
 }

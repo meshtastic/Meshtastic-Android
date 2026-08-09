@@ -8,14 +8,11 @@ The `:core:di` module defines the core Koin modules and provides standard depend
 
 ## Key Components
 
-### 1. `AppModule.kt`
-Defines bindings for application-wide singletons like `Application`, `Context`, and `Resources`.
+### 1. `CoroutineDispatchers.kt`
+A small data class wrapping the standard coroutine dispatchers (`io`, `main`, `default`), allowing injected classes to swap in test dispatchers instead of hard-coding `Dispatchers.*`.
 
-### 2. `CoroutineDispatchers.kt`
-Provides a wrapper for standard Kotlin `CoroutineDispatchers` (`IO`, `Default`, `Main`), allowing for easy mocking in unit tests.
-
-### 3. `ProcessLifecycle.kt`
-Exposes the application's global process lifecycle as a Koin binding, enabling components to react to the app entering the foreground or background.
+### 2. `di/CoreDiModule.kt`
+The Koin `@Module` for this module. Provides the `CoroutineDispatchers` singleton — `main`/`default` from `kotlinx.coroutines.Dispatchers`, `io` from `:core:common`'s platform-aware `ioDispatcher`.
 
 
 ## Dependency Graph

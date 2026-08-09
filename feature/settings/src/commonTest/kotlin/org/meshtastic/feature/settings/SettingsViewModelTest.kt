@@ -43,6 +43,7 @@ import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -120,6 +121,7 @@ class SettingsViewModelTest {
                 exportDataUseCase = exportDataUseCase,
                 isOtaCapableUseCase = isOtaCapableUseCase,
                 fileService = fileService,
+                hiddenFeaturesUnlock = HiddenFeaturesUnlock(),
             )
     }
 
@@ -180,10 +182,10 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `unlockExcludedModules updates state`() = runTest {
-        viewModel.excludedModulesUnlocked.value shouldBe false
-        viewModel.unlockExcludedModules()
-        viewModel.excludedModulesUnlocked.value shouldBe true
+    fun `unlockHiddenFeatures updates state`() = runTest {
+        viewModel.hiddenFeaturesUnlocked.value shouldBe false
+        viewModel.unlockHiddenFeatures()
+        viewModel.hiddenFeaturesUnlocked.value shouldBe true
     }
 
     @Test

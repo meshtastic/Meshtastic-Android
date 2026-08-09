@@ -43,7 +43,10 @@ interface DfuUploadTransport {
      */
     suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit>
 
-    /** Best-effort abort of any in-flight transfer (for cancellation / error recovery). Never throws. */
+    /**
+     * Best-effort abort. Operational transport exceptions are swallowed; structured-concurrency cancellation and Error
+     * subtypes propagate.
+     */
     suspend fun abort()
 
     /** Disconnect and release resources. */

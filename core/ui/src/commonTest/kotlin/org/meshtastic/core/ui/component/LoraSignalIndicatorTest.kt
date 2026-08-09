@@ -78,6 +78,22 @@ class LoraSignalIndicatorTest {
     }
 
     @Test
+    fun `a zero SNR reading is rated rather than treated as missing`() {
+        // 0 dB sits well above every preset's demod floor, so it is an excellent signal — not an absent one. If a
+        // presence check ever folds zero into "unknown", this is the reading that disappears.
+        assertEquals(Quality.GOOD, determineSignalQuality(snr = 0f, modemPreset = ModemPreset.LONG_FAST))
+        assertEquals(Quality.GOOD, determineSignalQuality(snr = 0f, modemPreset = ModemPreset.SHORT_FAST))
+    }
+
+    @Test
+    fun `absent SNR is not a quality band`() {
+        // Quality has no member for "no measurement": callers must pass a non-null SNR, and the composables render
+        // absence as Unknown rather than mapping it onto NONE (which asserts a measured, undemodulable signal).
+        assertEquals(4, Quality.entries.size)
+        assertEquals(listOf(Quality.NONE, Quality.BAD, Quality.FAIR, Quality.GOOD), Quality.entries.toList())
+    }
+
+    @Test
     fun `RSSI does not influence the rating`() {
         // Identical SNR + preset always yields the same verdict regardless of any RSSI (RSSI is display-only now).
         val good = determineSignalQuality(snr = -5f, modemPreset = ModemPreset.LONG_FAST)

@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.repository.NotificationPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -54,7 +55,7 @@ class NotificationPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
+        notificationPrefs = NotificationPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest
@@ -83,6 +84,62 @@ class NotificationPrefsTest {
     fun `setting nodeEventsEnabled updates preference`() = testScope.runTest {
         notificationPrefs.setNodeEventsEnabled(false)
         assertFalse(notificationPrefs.nodeEventsEnabled.value)
+    }
+
+    // ---------- applyEventFirmwareNodeEventDefault ----------
+
+    @Test
+    fun `event firmware disables node events and claims the restore`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertTrue(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `event firmware leaves an already-off preference alone and claims nothing`() = testScope.runTest {
+        // The user turned node events off themselves. Claiming the restore here would make the next vanilla
+        // connection switch them back on, discarding a choice we never made.
+        notificationPrefs.setNodeEventsEnabled(false)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `vanilla firmware restores node events only when the restore was claimed`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = false)
+
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `vanilla firmware does not enable node events the user had turned off`() = testScope.runTest {
+        // The full round trip of the bug this guards: off by the user, connect to event firmware, back to vanilla.
+        notificationPrefs.setNodeEventsEnabled(false)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = false)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `repeated event firmware connections do not re-disable a manual re-enable`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        // User re-enables mid-event; the restore is still claimed, so reconnects must respect their choice.
+        notificationPrefs.setNodeEventsEnabled(true)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
     }
 
     @Test

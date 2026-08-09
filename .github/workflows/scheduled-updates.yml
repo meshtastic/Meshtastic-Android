@@ -2,12 +2,21 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Run every 6 hours (raised from 4h to absorb the added baseline-profile step)
+    # Hourly. This job is cheap (curl + Crowdin + PR, no build) — the slow
+    # emulator/graph work lives in scheduled-baseline.yml on a daily cron.
+    - cron: '0 * * * *'
   workflow_dispatch:       # Allow manual triggering
+
+# Hourly cron + manual dispatch must never stack: overlapping runs race on the
+# scheduled-updates branch force-push. Later runs queue (at most one pending).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   update_assets:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
       contents: write      # To commit files and push branches
@@ -15,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
@@ -38,9 +47,12 @@ jobs:
             echo "status=error" >> "$GITHUB_OUTPUT"
             echo "detail=Invalid JSON response from firmware API" >> "$GITHUB_OUTPUT"
           else
-            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys . "$temp_firmware_file" | diff -q - <(jq --sort-keys . "$firmware_file_path"); then
+            # Drop `.pullRequests` before diffing and before writing: the API lists every open
+            # firmware PR, which turns over several times a day, and the app never reads the field
+            # (see NetworkFirmwareReleases). Keeping it churned an hourly PR carrying no real change.
+            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys 'del(.pullRequests)' "$temp_firmware_file" | diff -q - <(jq --sort-keys 'del(.pullRequests)' "$firmware_file_path"); then
               echo "Changes detected in firmware list or local file missing. Updating $firmware_file_path."
-              cp "$temp_firmware_file" "$firmware_file_path"
+              jq 'del(.pullRequests)' "$temp_firmware_file" > "$firmware_file_path"
               echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in firmware list."
@@ -77,6 +89,104 @@ jobs:
             fi
           fi
 
+      - name: Update event firmware metadata
+        id: event_firmware
+        run: |
+          event_firmware_file_path="androidApp/src/main/assets/event_firmware.json"
+          temp_event_firmware_file="/tmp/new_event_firmware.json"
+
+          echo "Fetching latest event firmware metadata..."
+          http_code=$(curl -s --max-time 90 -o "$temp_event_firmware_file" -w '%{http_code}' https://api.meshtastic.org/resource/eventFirmware || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Event firmware API returned HTTP $http_code. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from event firmware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_event_firmware_file" 2>/dev/null; then
+            echo "::warning::Event firmware API returned invalid JSON data. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from event firmware API" >> "$GITHUB_OUTPUT"
+          else
+            if [ ! -f "$event_firmware_file_path" ] || ! jq --sort-keys . "$temp_event_firmware_file" | diff -q - <(jq --sort-keys . "$event_firmware_file_path"); then
+              echo "Changes detected in event firmware metadata or local file missing. Updating $event_firmware_file_path."
+              cp "$temp_event_firmware_file" "$event_firmware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in event firmware metadata."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Update device links list
+        id: device_links
+        run: |
+          device_links_file_path="androidApp/src/main/assets/device_links.json"
+          temp_device_links_file="/tmp/new_device_links.json"
+
+          echo "Fetching latest device links..."
+          http_code=$(curl -s --max-time 90 -o "$temp_device_links_file" -w '%{http_code}' https://api.meshtastic.org/resource/deviceLinks || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Device links API returned HTTP $http_code. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from device links API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_device_links_file" 2>/dev/null; then
+            echo "::warning::Device links API returned invalid JSON data. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from device links API" >> "$GITHUB_OUTPUT"
+          else
+            # This file is only the offline seed for the runtime cache, which refreshes
+            # itself from the same endpoint on a TTL. Guard against a degraded response
+            # (HTTP 200 but empty catalog) wiping the seed — mirrors the runtime, which
+            # ignores empty responses for the same reason.
+            link_count=$(jq -r 'if (.links | type) == "array" then (.links | length) else 0 end' "$temp_device_links_file" 2>/dev/null || echo 0)
+            if [ "$link_count" -eq 0 ]; then
+              echo "::warning::Device links API returned no links. Skipping to protect the bundled seed."
+              echo "status=error" >> "$GITHUB_OUTPUT"
+              echo "detail=empty links array from device links API" >> "$GITHUB_OUTPUT"
+            # Diff on `.links` only: the envelope carries a server-set `generatedAt`
+            # timestamp that changes on every response, so an hourly whole-document diff
+            # would open a churn PR even when the catalog is unchanged.
+            elif [ ! -f "$device_links_file_path" ] || ! jq --sort-keys '.links' "$temp_device_links_file" | diff -q - <(jq --sort-keys '.links' "$device_links_file_path"); then
+              echo "Changes detected in device links or local file missing. Updating $device_links_file_path."
+              # Pretty-print so the committed asset stays readable and future diffs stay
+              # minimal regardless of the API's response formatting.
+              jq . "$temp_device_links_file" > "$device_links_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in device links."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Refresh Obtainium configs and deep links
+        id: obtainium
+        env:
+          # Only for the API rate limit; the releases endpoint is public.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Regenerates the deep-link tables and import files, then probes the live
+          # releases to confirm every apkFilterRegEx still matches published assets.
+          # A non-zero exit means an asset was renamed and the configs are broken —
+          # surface it as an error and skip the update rather than committing configs
+          # that resolve to nothing. Unreachable API exits 0 without touching files.
+          if python3 obtainium/generate-links.py --refresh; then
+            if git diff --quiet -- README.md docs/en/developer/test-builds.md obtainium; then
+              echo "No changes detected in Obtainium configs."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            else
+              echo "Obtainium configs or channel status changed."
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "::warning::Obtainium config refresh failed — see the error above."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=an apkFilterRegEx no longer matches the published release assets" >> "$GITHUB_OUTPUT"
+            git checkout -- README.md docs/en/developer/test-builds.md obtainium
+          fi
+
       - name: Sync with Crowdin
         uses: crowdin/github-action@v2
         with:
@@ -99,78 +209,42 @@ jobs:
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
       - name: Fix file permissions
-        run: sudo chown -R $USER:$USER .
+        run: sudo chown -R "$USER:$USER" .
 
       # Early warning for overlength store-listing translations just pulled from
-      # Crowdin. Non-blocking on purpose: a hard failure here would abort the
-      # firmware/hardware/graphs job and stop the PR from being created. The
-      # hard gate is the check-metadata job in pull-request.yml, which runs
-      # against the PR this workflow opens.
+      # Crowdin. Non-blocking on purpose: a hard failure here would abort the job
+      # and stop the PR from being created. The hard gate is the check-metadata
+      # job in pull-request.yml, which runs against the PR this workflow opens.
       - name: Check store metadata lengths
         continue-on-error: true
         run: python3 scripts/check-metadata-length.py
 
-      - name: Gradle Setup
-        uses: ./.github/actions/gradle-setup
-        with:
-          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: 'false'
-
-      - name: Update Graphs
-        run: ./gradlew graphUpdate
-        continue-on-error: true
-
-      # ── Baseline Profile regeneration ───────────────────────────────────
-      # Runs on every scheduled tick (and manual dispatch). Generation needs a booted emulator
-      # (~10 min); continue-on-error keeps flakiness from blocking the firmware/translation PR.
-      - name: Enable KVM (for the emulator)
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Generate Baseline Profile
-        id: generate_baseline
-        continue-on-error: true # Emulator flakiness must not block the firmware/translation PR.
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis # google flavor needs GMS (Maps) on the device image
-          arch: x86_64
-          profile: pixel_6
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # Writes androidApp/src/google/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
-          # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
-          # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
-          # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
-          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true --no-configuration-cache
-
-      - name: Detect baseline profile changes
-        id: baseline
-        run: |
-          profile_dir="androidApp/src/google/generated/baselineProfiles"
-          outcome="${{ steps.generate_baseline.outcome }}"
-          if [ "$outcome" = "skipped" ]; then
-            echo "status=skipped" >> "$GITHUB_OUTPUT"
-          elif [ "$outcome" != "success" ]; then
-            echo "::warning::Baseline profile generation failed (outcome: $outcome). Skipping."
-            echo "status=error" >> "$GITHUB_OUTPUT"
-          elif [ -n "$(git status --porcelain "$profile_dir" 2>/dev/null)" ]; then
-            echo "status=updated" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=unchanged" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Build PR body
         id: pr_body
+        env:
+          # Hoisted into env: (not interpolated directly in the script) so no step output can inject shell — see
+          # zizmor template-injection. Values are fixed strings today, but detail may carry API text in future.
+          FIRMWARE_STATUS: ${{ steps.firmware.outputs.status }}
+          FIRMWARE_DETAIL: ${{ steps.firmware.outputs.detail }}
+          HARDWARE_STATUS: ${{ steps.hardware.outputs.status }}
+          HARDWARE_DETAIL: ${{ steps.hardware.outputs.detail }}
+          EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
+          EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
+          DEVICE_LINKS_STATUS: ${{ steps.device_links.outputs.status }}
+          DEVICE_LINKS_DETAIL: ${{ steps.device_links.outputs.detail }}
+          OBTAINIUM_STATUS: ${{ steps.obtainium.outputs.status }}
+          OBTAINIUM_DETAIL: ${{ steps.obtainium.outputs.detail }}
         run: |
-          firmware_status="${{ steps.firmware.outputs.status }}"
-          firmware_detail="${{ steps.firmware.outputs.detail }}"
-          hardware_status="${{ steps.hardware.outputs.status }}"
-          hardware_detail="${{ steps.hardware.outputs.detail }}"
-          baseline_status="${{ steps.baseline.outputs.status }}"
+          firmware_status="$FIRMWARE_STATUS"
+          firmware_detail="$FIRMWARE_DETAIL"
+          hardware_status="$HARDWARE_STATUS"
+          hardware_detail="$HARDWARE_DETAIL"
+          event_firmware_status="$EVENT_FIRMWARE_STATUS"
+          event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
+          device_links_status="$DEVICE_LINKS_STATUS"
+          device_links_detail="$DEVICE_LINKS_DETAIL"
+          obtainium_status="$OBTAINIUM_STATUS"
+          obtainium_detail="$OBTAINIUM_DETAIL"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -191,19 +265,33 @@ jobs:
             *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
           esac
 
-          # Baseline profile (daily / manual only)
-          case "$baseline_status" in
-            updated)   body+=$'\n'"- ✅ \`androidApp\` baseline profile regenerated on an emulator." ;;
-            unchanged) body+=$'\n'"- ✔️ \`androidApp\` baseline profile regenerated — no changes detected." ;;
-            error)     body+=$'\n'"- ⚠️ \`androidApp\` baseline profile generation failed — skipped (see workflow logs)." ;;
-            skipped)   ;; # Not a daily/manual run — omit the line entirely.
-            *)         ;;
+          # Event firmware status
+          case "$event_firmware_status" in
+            updated)   body+=$'\n'"- ✅ \`event_firmware.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`event_firmware.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`event_firmware.json\` skipped — ${event_firmware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`event_firmware.json\` — unknown status." ;;
           esac
 
-          # Crowdin & graphs (always attempted)
+          # Device links status
+          case "$device_links_status" in
+            updated)   body+=$'\n'"- ✅ \`device_links.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_links.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_links.json\` skipped — ${device_links_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_links.json\` — unknown status." ;;
+          esac
+
+          # Obtainium configs / deep links
+          case "$obtainium_status" in
+            updated)   body+=$'\n'"- ✅ Obtainium deep links and import files regenerated (channel status changed)." ;;
+            unchanged) body+=$'\n'"- ✔️ Obtainium configs checked against the live releases — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ Obtainium configs skipped — ${obtainium_detail}." ;;
+            *)         body+=$'\n'"- ❓ Obtainium configs — unknown status." ;;
+          esac
+
+          # Crowdin (always attempted)
           body+=$'\n'"- Source strings were uploaded to Crowdin."
           body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
-          body+=$'\n'"- Updated module dependency graphs in README.md files (if changed)."
           body+=$'\n'
           body+=$'\n'"Please review the changes."
 
@@ -219,48 +307,33 @@ jobs:
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)
+            chore: Scheduled updates (Firmware, Hardware, Translations)
 
             Automated updates for:
             - Firmware releases list
             - Device hardware list
+            - Event firmware metadata
+            - Device links list
             - Crowdin source string uploads
             - Crowdin translation downloads
-            - Module dependency graphs
-            - androidApp baseline profile
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)'
+            - Obtainium deep links and import files
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
           body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
           base: 'main'
           delete-branch: true
-          # Only stage the baseline-profile dir when generation actually produced changes. When the emulator
-          # boots far enough for Gradle to create an *empty* baselineProfiles/ dir but generation then fails,
-          # `git add <glob>` aborts with "pathspec did not match any files", which would hard-fail this step
-          # and defeat the continue-on-error on the generation step above.
           add-paths: |
             androidApp/src/main/assets/firmware_releases.json
             androidApp/src/main/assets/device_hardware.json
-            ${{ steps.baseline.outputs.status == 'updated' && 'androidApp/src/google/generated/baselineProfiles/**' || '' }}
+            androidApp/src/main/assets/event_firmware.json
+            androidApp/src/main/assets/device_links.json
             fastlane/metadata/android/**
             **/strings.xml
-            **/README.md
             docs/**/*.md
+            README.md
+            obtainium/**
           labels: |
             automation
             l10n
             firmware
             hardware
-
-  check-workflow-status:
-    name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
-    permissions: {}
-    needs:
-        - update_assets
-    if: always()
-    steps:
-      - name: Check Workflow Status
-        if: "contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')"
-        run: |
-          echo "One of the dependent jobs failed or was cancelled. Failing the workflow."
-          exit 1

@@ -19,8 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kotlin.parcelize)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -33,6 +32,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
             api(projects.core.common)
@@ -46,21 +46,18 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(libs.androidx.sqlite.bundled)
-                // JVM variant provides the host-platform native for BundledSQLiteDriver
-                runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")
+                runtimeOnly(libs.androidx.sqlite.bundled.jvm)
                 implementation(libs.androidx.room.testing)
-                implementation(libs.androidx.test.ext.junit)
                 implementation(libs.junit)
             }
         }
-        val androidDeviceTest by getting {
+        getByName("androidDeviceTest") {
             dependencies {
                 implementation(libs.androidx.room.testing)
                 implementation(libs.androidx.test.ext.junit)
@@ -75,7 +72,7 @@ dependencies {
     "kspJvmTest"(libs.androidx.room.compiler)
     // KSP resolves this via a detached configuration at task execution time,
     // so we declare it explicitly to ensure offline/Flatpak builds can resolve it.
-    "kspJvm"("com.google.devtools.ksp:symbol-processing-aa-embeddable:${libs.versions.devtools.ksp.get()}")
+    "kspJvm"(libs.ksp.symbol.processing.aa.embeddable)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }

@@ -18,7 +18,9 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.flavors)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
+    // Version-less on purpose: mokkery is embedded in the convention-plugin jar (build-logic
+    // `implementation`), so a versioned alias(libs.plugins.mokkery) request is rejected by Gradle.
     id("dev.mokkery")
 }
 
@@ -30,15 +32,19 @@ android {
     defaultConfig {
         minSdk = 23
         consumerProguardFiles("proguard-rules.pro")
-        // The CarAppService is disabled unless -PenableCarTemplates=true. feature:car resolves the
-        // placeholder in its OWN manifest, so it must read the property directly (the app's value does
-        // not override a library's own placeholder). Default false → production ships it disabled.
-        manifestPlaceholders["carTemplatesEnabled"] =
-            ((findProperty("enableCarTemplates") as String?)?.toBoolean() ?: false).toString()
     }
 
     // Robolectric provides the Android context that androidx.car.app TestCarContext/ScreenController need.
     testOptions { unitTests { isIncludeAndroidResources = true } }
+}
+
+// Production manifests must not contain the CarAppService AT ALL (a disabled service still
+// triggers Play's static car-app category review — see the manifest comments), so the service
+// lives in an overlay manifest merged in only for -PenableCarTemplates=true builds.
+if (providers.gradleProperty("enableCarTemplates").map { it.toBoolean() }.getOrElse(false)) {
+    androidComponents {
+        onVariants { variant -> variant.sources.manifests.addStaticManifestFile("src/templates/AndroidManifest.xml") }
+    }
 }
 
 dependencies {
@@ -53,7 +59,6 @@ dependencies {
     implementation(libs.androidx.car.app.projected)
 
     implementation(libs.koin.android)
-    implementation(libs.koin.annotations)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)

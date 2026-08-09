@@ -19,43 +19,85 @@ package org.meshtastic.core.database
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.database.entity.MergeMarkerEntity
 
 /**
  * Folds the contents of one device database ([source]) into another ([dest]) when both turn out to belong to the same
- * physical node reached over different transports (BLE / TCP / USB). Called once, by [DatabaseManager.associateNode],
+ * physical node reached over different transports (BLE / TCP / USB). Called once, by [DatabaseManager.associateDevice],
  * the first time a secondary transport learns a `myNodeNum` that another transport already claimed.
  *
  * Every per-device table is unified so switching transport is seamless: messages (+FTS), reactions, contact mute/read
- * settings, nodes and their notes, per-node metadata, the audit log (each session's received-packet history — the
- * source of the telemetry timelines, position history, and traceroute results the UI reconstructs), traceroute
- * positions, and discovery sessions. Where the same row exists on both sides the destination is preferred (it will be
- * refreshed by the same radio's re-dump on connect); source-only rows and strictly newer history are brought over.
- * Packets/reactions in [source] and [dest] already share the same `myNodeNum` (same node), so no key remapping is
- * needed there; autoincrement-keyed rows (packets, discovery) are re-inserted with fresh ids to avoid collisions.
+ * settings, nodes and their notes, per-node metadata, quick-chat actions, the audit log (each session's received-packet
+ * history — the source of the telemetry timelines, position history, and traceroute results the UI reconstructs),
+ * traceroute positions, and discovery sessions. Where the same row exists on both sides the destination is preferred
+ * (it will be refreshed by the same radio's re-dump on connect); source-only rows and strictly newer history are
+ * brought over. Packets/reactions in [source] and [dest] already share the same `myNodeNum` (same node), so no key
+ * remapping is needed there; autoincrement-keyed rows (packets, discovery) are re-inserted with fresh ids to avoid
+ * collisions.
  */
+internal class StaleAssociationException : Exception("Transport session no longer authorizes database association")
+
 object DatabaseMerger {
 
-    suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
+    /**
+     * Folds [source] into [dest], skipping the work if [sourceName] was already merged into [dest]. [sourceName] is the
+     * source database's file name — the stable key under which the merge is recorded (see [MergeMarkerEntity]).
+     *
+     * The caller owns the transport-session lifecycle lease through this method's return. That lease makes transaction
+     * commit and session rollover mutually exclusive; [isAssociationActive] remains a defensive check for authority
+     * lost before the merge entered its commit phase.
+     */
+    suspend fun merge(
+        source: MeshtasticDatabase,
+        dest: MeshtasticDatabase,
+        sourceName: String,
+        isAssociationActive: () -> Boolean = { true },
+    ) {
         // All destination writes run in a single transaction so a crash or exception mid-merge rolls
-        // back cleanly instead of leaving `dest` half-merged. This also makes a retried merge safe: if
-        // associateNode re-runs (e.g. a crash before the address alias is persisted), the rolled-back
-        // partial writes never happened, so the fresh-id packet/discovery re-inserts can't duplicate.
-        // Reads from `source` use its own connection pool and don't participate in this transaction.
+        // back cleanly instead of leaving `dest` half-merged. The merge marker is written inside that
+        // same transaction, so it commits atomically with the copied rows: on a retried merge (e.g. a
+        // crash after commit but before associateDevice persisted the address alias) the marker is already
+        // present and the whole merge is skipped, so the fresh-id packet/discovery re-inserts — which are
+        // NOT idempotent on their own — can never duplicate. Reads from `source` use its own connection
+        // pool and don't participate in this transaction.
         var packets = 0
+        var skipped = false
         dest.useWriterConnection { transactor ->
             transactor.immediateTransaction {
+                ensureAssociationActive(isAssociationActive)
+                if (dest.mergeMarkerDao().isMerged(sourceName)) {
+                    ensureAssociationActive(isAssociationActive)
+                    skipped = true
+                    return@immediateTransaction
+                }
                 packets = mergePackets(source, dest)
                 mergeReactions(source, dest)
                 mergeContactSettings(source, dest)
                 mergeNodes(source, dest)
                 mergeMetadata(source, dest)
+                mergeQuickChat(source, dest)
                 // Logs must precede traceroute positions: the latter has a CASCADE foreign key onto log.uuid.
                 mergeLogs(source, dest)
                 mergeTraceroutePositions(source, dest)
                 mergeDiscovery(source, dest)
+                dest.mergeMarkerDao().insertMarker(MergeMarkerEntity(sourceDbName = sourceName, mergedAt = nowMillis))
+                // Keep the defensive authority check as the final transaction statement. The caller-held lifecycle
+                // lease prevents rollover until commit returns; this check still rolls back if authority was lost
+                // before
+                // the transaction entered the lease-protected commit phase.
+                ensureAssociationActive(isAssociationActive)
             }
         }
-        Logger.i { "Merged $packets packets across transports into unified node DB" }
+        if (skipped) {
+            Logger.i { "Source ${anonymizeDbName(sourceName)} already merged; skipped duplicate merge" }
+        } else {
+            Logger.i { "Merged $packets packets across transports into unified node DB" }
+        }
+    }
+
+    private fun ensureAssociationActive(isAssociationActive: () -> Boolean) {
+        if (!isAssociationActive()) throw StaleAssociationException()
     }
 
     /**
@@ -107,6 +149,23 @@ object DatabaseMerger {
         source.nodeInfoDao().getAllMetadataSnapshot().forEach { meta ->
             val existing = destByNum[meta.num]
             if (existing == null || meta.timestamp > existing.timestamp) dest.nodeInfoDao().upsert(meta)
+        }
+    }
+
+    /**
+     * User-authored quick-chat buttons. `uuid`/`position` are per-DB, so append the source's actions after the
+     * destination's last one with fresh ids, skipping any the destination already has (same name + message + mode).
+     * Without this the source's buttons are lost outright when [DatabaseManager] retires it.
+     */
+    private suspend fun mergeQuickChat(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
+        val destActions = dest.quickChatActionDao().getAllSnapshot()
+        val existing = destActions.mapTo(mutableSetOf()) { Triple(it.name, it.message, it.mode) }
+        var nextPosition = (destActions.maxOfOrNull { it.position } ?: -1) + 1
+        source.quickChatActionDao().getAllSnapshot().forEach { action ->
+            if (existing.add(Triple(action.name, action.message, action.mode))) {
+                dest.quickChatActionDao().upsert(action.copy(uuid = 0L, position = nextPosition))
+                nextPosition++
+            }
         }
     }
 

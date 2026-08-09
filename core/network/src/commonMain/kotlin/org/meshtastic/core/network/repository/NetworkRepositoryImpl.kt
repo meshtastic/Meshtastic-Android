@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.shareIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @Single(binds = [NetworkRepository::class])
@@ -33,7 +34,7 @@ class NetworkRepositoryImpl(
     networkMonitor: NetworkMonitor,
     serviceDiscovery: ServiceDiscovery,
     private val dispatchers: CoroutineDispatchers,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
 ) : NetworkRepository {
 
     override val networkAvailable: Flow<Boolean> by lazy {

@@ -22,6 +22,7 @@ import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import kotlin.math.roundToInt
 
 @Suppress("MagicNumber")
 enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: Int) {
@@ -89,6 +90,15 @@ fun Float.toSpeedString(system: DisplayUnits): String = if (system == DisplayUni
 } else {
     formatString("%.0f mph", this * 2.23694f)
 }
+
+/**
+ * Converts a speed already expressed in km/h (e.g. protobuf `Position.ground_speed`) to [system]'s unit, rounded to a
+ * whole number. Callers render the result through a localized string resource so the unit label itself stays
+ * translatable (see `speed_kmh`/`speed_mph`).
+ */
+@Suppress("MagicNumber")
+fun Int.kmhIn(system: DisplayUnits): Int =
+    if (system == DisplayUnits.IMPERIAL) (this * 0.621371f).roundToInt() else this
 
 @Suppress("MagicNumber")
 fun Float.toSmallDistanceString(system: DisplayUnits): String = if (system == DisplayUnits.IMPERIAL) {

@@ -42,6 +42,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
@@ -147,6 +149,79 @@ class ScannerViewModelTest {
         harness.testDispatcher.scheduler.advanceTimeBy(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN.inWholeMilliseconds + 1)
         viewModel.startBleScan()
 
+        assertEquals(2, scanAttempts)
+    }
+
+    @Test
+    fun `bluetooth-disabled failure allows an immediate retry once the user re-enables it`() = runTest {
+        // No cooldown for preconditions the user clears with a system toggle — a dead scan button right after they
+        // switched Bluetooth back on reads as a broken app.
+        var scanAttempts = 0
+        every { bleScanner.scan(any(), any()) } returns
+            flow {
+                scanAttempts += 1
+                throw BleScanStartException(
+                    reason = BleScanStartFailureReason.BluetoothDisabled,
+                    cause = IllegalStateException("Bluetooth disabled"),
+                )
+            }
+
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals("Bluetooth is off. Turn it on to scan for nearby devices.", serviceRepository.errorMessage.value)
+
+        // Immediately retryable — no waiting on the scheduler.
+        viewModel.startBleScan()
+        assertEquals(2, scanAttempts)
+    }
+
+    @Test
+    fun `location-services-disabled failure allows an immediate retry`() = runTest {
+        var scanAttempts = 0
+        every { bleScanner.scan(any(), any()) } returns
+            flow {
+                scanAttempts += 1
+                throw BleScanStartException(
+                    reason = BleScanStartFailureReason.LocationServicesDisabled,
+                    cause = IllegalStateException("Location services are required for scanning but are disabled"),
+                )
+            }
+
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+        assertEquals(
+            "Location services are off. Turn them on to scan for nearby devices.",
+            serviceRepository.errorMessage.value,
+        )
+
+        viewModel.startBleScan()
+        assertEquals(2, scanAttempts)
+    }
+
+    @Test
+    fun `scan quota failure honors retry-after cooldown`() = runTest {
+        var scanAttempts = 0
+        every { bleScanner.scan(any(), any()) } returns
+            flow {
+                scanAttempts += 1
+                throw BleScanStartException(
+                    reason = BleScanStartFailureReason.ScanningTooFrequently,
+                    cause = IllegalStateException("Android BLE scan-start quota exhausted"),
+                    retryAfter = 30.seconds + 1.milliseconds,
+                )
+            }
+
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+        assertEquals("Bluetooth scan limit reached. Try again in 31 seconds.", serviceRepository.errorMessage.value)
+
+        harness.testDispatcher.scheduler.advanceTimeBy(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN.inWholeMilliseconds + 1)
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+
+        harness.testDispatcher.scheduler.advanceTimeBy(15.seconds.inWholeMilliseconds + 1)
+        viewModel.startBleScan()
         assertEquals(2, scanAttempts)
     }
 

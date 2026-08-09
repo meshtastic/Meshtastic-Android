@@ -16,21 +16,18 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 
 /** Class that handles saving and retrieving [LocalModuleConfig] data. */
 @Single
-class ModuleConfigDataSource(
-    @Named("CoreModuleConfigDataStore") private val moduleConfigStore: DataStore<LocalModuleConfig>,
-) {
+class ModuleConfigDataSource(private val moduleConfigStore: CoreModuleConfigDataStore) {
     val moduleConfigFlow: Flow<LocalModuleConfig> =
         moduleConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

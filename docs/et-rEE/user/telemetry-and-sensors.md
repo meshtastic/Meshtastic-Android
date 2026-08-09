@@ -23,13 +23,13 @@ Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, ener
 
 Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
-| Meetriline         | Kirjeldus                      | Tüüpiline ulatus                   |
-| ------------------ | ------------------------------ | ---------------------------------- |
-| Battery Level      | Charge percentage              | 0–100%                             |
-| Vool               | Battery voltage                | 3,0–4,2V (LiPo) |
-| Kanali kasutus     | % of airtime used locally      | 0–100%                             |
-| Air Utilization TX | % of airtime used by this node | 0–100%                             |
-| Töötamise aeg      | Seconds since last boot        | Varies                             |
+| Meetriline       | Kirjeldus                      | Tüüpiline ulatus                   |
+| ---------------- | ------------------------------ | ---------------------------------- |
+| Aku tase         | Charge percentage              | 0–100%                             |
+| Vool             | Aku pinge                      | 3,0–4,2V (LiPo) |
+| Kanali kasutus   | % of airtime used locally      | 0–100%                             |
+| Eetri kasutus TX | % of airtime used by this node | 0–100%                             |
+| Töötamise aeg    | Seconds since last boot        | Varies                             |
 
 ## Environment Sensors
 
@@ -71,7 +71,7 @@ Nodes with INA-series power sensors can report:
 | Pinge       | Power consumption (mA) |
 | Toide       | Calculated power (mW)  |
 
-Useful for monitoring solar charging or battery health on remote nodes.
+Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes.
 
 ## Configuring Telemetry
 
@@ -88,7 +88,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 | Urban mesh (many nodes) | 3600                          | 3600                               |
 | Rural mesh (few nodes)  | 900                           | 900                                |
 | Weather station                            | 900                           | 300                                |
-| Battery conservation                       | 7200                          | 7200                               |
+| Aku säilitus                               | 7200                          | 7200                               |
 
 > ⚠️ **Märkus:** Lühemad intervallid suurendavad saate kasutusaega ja aku tühjenemist.
 
@@ -103,33 +103,35 @@ Nodes with particulate matter or CO₂ sensors report air quality data:
 | PM10                  | µg/m³ | Coarse particulate matter         |
 | CO₂                   | ppm   | Süsinikdioksiidi kontsentratsioon |
 
-The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands and colors.
+CO₂ sensors such as the SCD4x also report their own temperature and humidity, which appear alongside the readings above. From PM2.5 history the app additionally derives an **EPA NowCast AQI** value.
+
+CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne → Halb → Ohtlik → Evakueeruda). Täpsete ppm-vahemike, värvide ja õhukvaliteedi indeksite üksikasjade saamiseks vaata [Sõlme mõõdikud — õhukvaliteet](node-metrics#air-quality-metrics).
 
 Õhukvaliteedi andmeid saab vaadata infokaartidena sõlme detailvaates, aja jooksul graafikule lisada ja CSV-vormingusse salvestada.
 
 ## Viewing Telemetry
 
 1. Mine **Seadmed** ja vali seade.
-2. Telemetry sections show on the detail screen:
+2. Telemeetria jaotised kuvatakse detailvaates:
    - Device Metrics (always available)
    - Environment Metrics (if sensors present)
    - Power Metrics (if INA sensor present)
    - Air Quality Metrics (if PM/CO₂ sensor present)
-3. Historical graphs show trends over time.
+3. Ajaloolised graafikud näitavad aja jooksul trende.
 
-![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemeetria toimingud](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Troubleshooting
 
-- **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
-- **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Also verify the remote node is still online.
-- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi silumisväljundis aadresside kokkupõrkeid.
+- **Keskkonnaandmeid ei kuvata?** Kaugühenduse jaoks on vaja ühendada füüsiline andur (nt BME280 I2C-l). Seadme telemeetria (aku, tööaeg) on ​​alati saadaval, kuid keskkonnamõõdikute jaoks on vaja riistvara.
+- **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Samuti veendu, et kaugsõlm on endiselt võrgus.
+- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi arendajaväljundis aadresside kokkupõrkeid.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — telemeetriamooduli konfiguratsioon
-- [Units & Locale](units-and-locale) — temperature and pressure display units
+- [Ühikud ja lokaat](units-and-locale) — temperatuuri ja rõhu kuvamise ühikud
 
 ---
 

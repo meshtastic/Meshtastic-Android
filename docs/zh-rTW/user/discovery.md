@@ -2,7 +2,7 @@
 title: 尋找
 parent: 使用者指南
 nav_order: 12
-last_updated: 2026-06-11
+last_updated: 2026-07-27
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-探索
@@ -27,7 +27,7 @@ The app offers two complementary approaches:
 
 Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
 
-Open it from **Settings → Local Mesh Discovery**.
+Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
 > ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
 
@@ -44,7 +44,6 @@ Before starting, configure these controls:
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
 - The device is **not connected**.
-- The current channel is using the **default channel key** (use a unique key first — see [Messages & Channels](messages-and-channels)).
 - **No presets** have been selected to scan.
 - The selected preset uses **2.4 GHz**, which your hardware doesn't support.
 
@@ -89,6 +88,25 @@ Additional features available from the results:
 
 ---
 
+## Mesh Beacon
+
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+
+Configure it under **Settings → Module Config → Mesh Beacon**:
+
+- **Listen for beacons** — receive invitations broadcast by other nodes.
+- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+
+Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+
+- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
+- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
+- **Dismiss** — ignore the invitation.
+
+Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+
+---
+
 ## Manual Exploration
 
 The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
@@ -114,12 +132,12 @@ The tools below are available at any time from the node list and node detail scr
 
 每個跳躍點代表一個轉送該訊息的中繼節點。 每個跳躍點的 SNR 與 RSSI 數值可反映該路段的連線品質。
 
-| 判讀重點                                          | 代表意義                           |
-| --------------------------------------------- | ------------------------------ |
-| 所有跳躍點的 SNR 均佳（> 5 dB）                         | 路徑狀況良好 — 訊息可穩定傳送               |
-| 某跳躍點的 SNR 不佳（< 0 dB） | 訊號薄弱 — 此中繼路段不穩定                |
-| 跳躍點過多（4 個以上）                                  | 路徑過長 — 建議調整節點位置以縮短路徑           |
-| 重試時走不同路徑                                      | Mesh 網路正在自動調整 — 存在多條路由（這是好現象！） |
+| 判讀重點                                                                              | 代表意義                           |
+| --------------------------------------------------------------------------------- | ------------------------------ |
+| All hops show Good SNR (≥ −7 dB, green)                        | 路徑狀況良好 — 訊息可穩定傳送               |
+| One hop shows Bad SNR (< −15 dB, red) | 訊號薄弱 — 此中繼路段不穩定                |
+| 跳躍點過多（4 個以上）                                                                      | 路徑過長 — 建議調整節點位置以縮短路徑           |
+| 重試時走不同路徑                                                                          | Mesh 網路正在自動調整 — 存在多條路由（這是好現象！） |
 
 > 💡 提示：請在幾分鐘內多次執行路由追蹤。 若路徑發生變化，代表您的 mesh 網路具備備援路由 — 這是網路連線良好的象徵。
 
@@ -170,7 +188,7 @@ The tools below are available at any time from the node list and node detail scr
 
 ### 基礎架構稽核
 
-- 停用「排除基礎架構」，可顯示路由器、中繼器、延遲路由器及用戶端基地節點。
+- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - 檢查其訊號品質與最後收到訊號的時間，以確認基礎架構節點運作正常。
 
 請參閱〔節點〕(nodes) 以了解完整的篩選與排序選項說明。

@@ -18,9 +18,11 @@
 
 package org.meshtastic.app.map
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
+import android.graphics.Bitmap
+import android.location.Location
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -89,16 +92,26 @@ import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
-import com.google.maps.android.data.Layer
-import com.google.maps.android.data.geojson.GeoJsonFeature
-import com.google.maps.android.data.geojson.GeoJsonLayer
-import com.google.maps.android.data.geojson.GeoJsonLineStringStyle
-import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
-import com.google.maps.android.data.kml.KmlLayer
+import com.google.maps.android.data.parser.geojson.GeoJsonParser
+import com.google.maps.android.data.parser.kml.KmlParser
+import com.google.maps.android.data.parser.kml.KmzParser
+import com.google.maps.android.data.renderer.UrlIconProvider
+import com.google.maps.android.data.renderer.mapper.toLayer
+import com.google.maps.android.data.renderer.mapview.MapViewRenderer
+import com.google.maps.android.data.renderer.model.DataLayer
+import com.google.maps.android.data.renderer.model.Feature
+import com.google.maps.android.data.renderer.model.Geometry
+import com.google.maps.android.data.renderer.model.LineString
+import com.google.maps.android.data.renderer.model.LineStyle
+import com.google.maps.android.data.renderer.model.MultiGeometry
+import com.google.maps.android.data.renderer.model.PolygonStyle
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
-import org.json.JSONObject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
@@ -109,17 +122,21 @@ import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
+import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.cancel
@@ -147,19 +164,26 @@ import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import java.io.BufferedInputStream
+import java.io.InputStream
+import kotlin.coroutines.resume
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import android.graphics.Color as AndroidColor
+import com.google.android.gms.maps.GoogleMap as GmsGoogleMap
+import com.google.maps.android.data.renderer.model.Polygon as ModelPolygon
 
 // region --- Map Mode ---
 
@@ -250,7 +274,9 @@ fun MapView(
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    var deletingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     var geofenceInfoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
@@ -270,10 +296,12 @@ fun MapView(
     // Main mode persists camera; NodeTrack/Traceroute use ephemeral state with auto-centering.
     val cameraPositionState =
         if (mode is GoogleMapMode.Main) mapViewModel.cameraPositionState else rememberCameraPositionState()
+    val cameraInitialization by mapViewModel.cameraInitialization.collectAsStateWithLifecycle()
+    var isMapLoaded by remember { mutableStateOf(false) }
 
     if (mode is GoogleMapMode.Main) {
-        LaunchedEffect(cameraPositionState.isMoving) {
-            if (!cameraPositionState.isMoving) {
+        LaunchedEffect(cameraPositionState.isMoving, cameraInitialization) {
+            if (!cameraPositionState.isMoving && cameraInitialization == CameraInitialization.Restored) {
                 mapViewModel.saveCameraPosition(cameraPositionState.position)
             }
         }
@@ -354,6 +382,27 @@ fun MapView(
                     (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
                     node.num == ourNodeInfo?.num
             }
+
+    LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes) {
+        if (
+            mode is GoogleMapMode.Main &&
+            cameraInitialization == CameraInitialization.FitNodes &&
+            isMapLoaded &&
+            filteredNodes.isNotEmpty()
+        ) {
+            val points = filteredNodes.map { it.position.toLatLng() }
+            val cameraUpdate =
+                if (points.size == 1) {
+                    CameraUpdateFactory.newLatLngZoom(points.first(), 12f)
+                } else {
+                    val bounds = LatLngBounds.builder()
+                    points.forEach(bounds::include)
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 80)
+                }
+            cameraPositionState.move(cameraUpdate)
+            mapViewModel.onInitialNodeBoundsApplied()
+        }
+    }
 
     val myNodeNum = mapViewModel.myNodeNum
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -509,6 +558,8 @@ fun MapView(
 
     // --- Tile & layers state ---
     var showLayersBottomSheet by remember { mutableStateOf(false) }
+    // Non-null while the Site Planner estimate dialog/runner is open, holding the initial (prefilled) params.
+    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
 
     val onAddLayerClicked = {
         val intent =
@@ -569,6 +620,7 @@ fun MapView(
                 mapType = effectiveGoogleMapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
+            onMapLoaded = { isMapLoaded = true },
             onMapClick = { latLng ->
                 if (isMainMode && boxAuthoringDraft != null) {
                     val first = boxAuthoringFirstCorner
@@ -648,8 +700,8 @@ fun MapView(
                         navigateToNodeDetails = navigateToNodeDetails,
                         displayableWaypoints = displayableWaypoints,
                         myNodeNum = myNodeNum,
-                        isConnected = isConnected,
                         onEditWaypointRequest = { editingWaypoint = it },
+                        onDeleteWaypointRequest = { deletingWaypoint = it },
                         onShowGeofenceInfo = { geofenceInfoWaypoint = it },
                         selectedWaypointId = selectedWaypointId,
                         mapLayers = mapLayers,
@@ -695,6 +747,7 @@ fun MapView(
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
                     displayUnits = displayUnits,
+                    myNodeNum = myNodeNum,
                     onSend = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
@@ -707,7 +760,9 @@ fun MapView(
                         editingWaypoint = null
                     },
                     onDelete = { wpToDelete ->
-                        if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
+                        // Broadcast the removal (expire=1) only for waypoints we're allowed to modify mesh-wide
+                        // (unlocked, or locked to us); otherwise just drop our local copy below.
+                        if (wpToDelete.isModifiableBy(myNodeNum) && isConnected && wpToDelete.id != 0) {
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
@@ -723,6 +778,24 @@ fun MapView(
                 )
             }
 
+            deletingWaypoint?.let { waypoint ->
+                DeleteWaypointDialog(
+                    canDeleteForEveryone = waypoint.isModifiableBy(myNodeNum) && isConnected && waypoint.id != 0,
+                    onDeleteForMe = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        deletingWaypoint = null
+                    },
+                    onDeleteForEveryone = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
+                        mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        deletingWaypoint = null
+                    },
+                    onDismissRequest = { deletingWaypoint = null },
+                )
+            }
+
             geofenceInfoWaypoint?.let { waypoint ->
                 val optIns by mapViewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
                 WaypointInfoDialog(
@@ -734,13 +807,20 @@ fun MapView(
                     // Unlocked foreign geofences can still be edited/re-broadcast (only while connected, since editing
                     // means re-sending); locked ones stay read-only.
                     onEdit =
-                    if (waypoint.locked_to == 0 && isConnected) {
+                    if (!waypoint.isLocked && isConnected) {
                         {
                             geofenceInfoWaypoint = null
                             editingWaypoint = waypoint
                         }
                     } else {
                         null
+                    },
+                    // Dropping our local copy needs no mesh permission, so it's offered even when locked to its
+                    // creator.
+                    onDeleteForMe = {
+                        Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                        mapViewModel.deleteWaypoint(waypoint.id)
+                        geofenceInfoWaypoint = null
                     },
                 )
             }
@@ -839,6 +919,13 @@ fun MapView(
                     onClick = { showLayersBottomSheet = true },
                 )
             },
+            // Google flavor only: hands params to the hosted Site Planner and imports the returned coverage.
+            onSitePlannerClick =
+            if (sitePlannerAvailable()) {
+                { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+            } else {
+                null
+            },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
                 when {
@@ -896,6 +983,43 @@ fun MapView(
             )
         }
     }
+    // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
+    val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
+    LaunchedEffect(sitePlannerRequest) {
+        sitePlannerRequest?.let { node ->
+            sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude)))
+            }
+            mapViewModel.consumeSitePlannerRequest()
+        }
+    }
+    sitePlannerInitial?.let { initial ->
+        // Phone GPS: only when permission is already granted; otherwise the field stays manual.
+        val onRequestCurrentLocation: (suspend () -> Pair<Double, Double>?)? =
+            if (locationPermission.isGranted) {
+                { fusedLocationClient.awaitLastLocation()?.let { it.latitude to it.longitude } }
+            } else {
+                null
+            }
+        // Our connected node's reported position: only when it has a valid fix.
+        val onUseNodeLocation: (() -> Pair<Double, Double>)? =
+            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } }
+        SitePlannerHost(
+            initialParams = initial,
+            onDismiss = { sitePlannerInitial = null },
+            onImport = { name, geoJson, latitude, longitude ->
+                mapViewModel.addGeoJsonLayer(name, geoJson)
+                // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
+                coroutineScope.launch {
+                    cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(latitude, longitude)))
+                }
+            },
+            onRequestCurrentLocation = onRequestCurrentLocation,
+            onUseNodeLocation = onUseNodeLocation,
+            onUseMapCenter = { cameraPositionState.position.target.let { it.latitude to it.longitude } },
+        )
+    }
     showClusterItemsDialog?.let {
         ClusterItemsListDialog(
             items = it,
@@ -924,8 +1048,8 @@ private fun MainMapContent(
     navigateToNodeDetails: (Int) -> Unit,
     displayableWaypoints: List<Waypoint>,
     myNodeNum: Int?,
-    isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
+    onDeleteWaypointRequest: (Waypoint) -> Unit,
     onShowGeofenceInfo: (Waypoint) -> Unit,
     selectedWaypointId: Int?,
     mapLayers: List<MapLayerItem>,
@@ -966,8 +1090,8 @@ private fun MainMapContent(
         displayableWaypoints = displayableWaypoints,
         mapFilterState = mapFilterState,
         myNodeNum = myNodeNum ?: 0,
-        isConnected = isConnected,
         onEditWaypointRequest = onEditWaypointRequest,
+        onDeleteWaypointRequest = onDeleteWaypointRequest,
         isMyWaypoint = mapViewModel::isMyWaypoint,
         onShowGeofenceInfo = onShowGeofenceInfo,
         selectedWaypointId = selectedWaypointId,
@@ -1190,8 +1314,24 @@ private fun TracerouteMapContent(
         )
     }
     displayNodes.forEach { node ->
-        val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
-        MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = node) }
+        // Key by the stable node num so each marker's composition state (and MarkerComposable's cached
+        // icon bitmap) stays bound to its node. Without this, reordering displayNodes between reloads
+        // reuses marker slots positionally and swaps node labels/positions (#6197). The remaining keys
+        // are every NodeChip input (short name, colors, ignored strike-through) so the rendered chip
+        // bitmap refreshes when node metadata changes.
+        key(node.num) {
+            val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
+            MarkerComposable(
+                node.num,
+                node.user.short_name,
+                node.colors,
+                node.isIgnored,
+                state = markerState,
+                zIndex = 4f,
+            ) {
+                NodeChip(node = node)
+            }
+        }
     }
 }
 
@@ -1230,104 +1370,177 @@ private fun offsetPolyline(
 
 // region --- Map Layers ---
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel) {
-    val context = LocalContext.current
-    var currentLayer by remember { mutableStateOf<Layer?>(null) }
+    var currentLayer by remember { mutableStateOf<RenderedMapLayer?>(null) }
 
-    MapEffect(layerItem.id, layerItem.isRefreshing) { map ->
-        currentLayer?.safeRemoveLayerFromMap()
+    MapEffect(layerItem.id, layerItem.refreshToken) { map ->
+        currentLayer?.safeHide()
         currentLayer = null
         val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect
         val layer =
             try {
-                when (layerItem.layerType) {
-                    LayerType.KML -> KmlLayer(map, inputStream, context)
-
-                    LayerType.GEOJSON ->
-                        GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() })).also {
-                            it.applySimpleStyleSpec()
-                        }
+                val dataLayer =
+                    withContext(Dispatchers.IO) {
+                        inputStream.use { stream -> parseMapLayer(layerItem.layerType, stream) }
+                    }
+                if (dataLayer == null) {
+                    Logger.withTag("MapView").e { "Error loading map layer: ${layerItem.name} (unrecognized format)" }
+                    null
+                } else {
+                    RenderedMapLayer(map, dataLayer)
                 }
+            } catch (e: CancellationException) {
+                // Not a load failure: this MapEffect is relaunched on every refresh (refreshToken) and cancelled when
+                // the layer or the map leaves the composition, which lands here while parseMapLayer is suspended.
+                // Swallowing it broke structured concurrency and reported routine refreshes to error tracking.
+                throw e
             } catch (e: Exception) {
                 Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
                 null
             }
         layer?.let {
-            if (layerItem.isVisible) it.safeAddLayerToMap()
+            if (layerItem.isVisible) it.safeShow()
             currentLayer = it
         }
     }
 
     DisposableEffect(layerItem.id) {
         onDispose {
-            currentLayer?.safeRemoveLayerFromMap()
+            currentLayer?.safeHide()
             currentLayer = null
         }
     }
 
     LaunchedEffect(layerItem.isVisible) {
         val layer = currentLayer ?: return@LaunchedEffect
-        if (layerItem.isVisible) layer.safeAddLayerToMap() else layer.safeRemoveLayerFromMap()
+        if (layerItem.isVisible) layer.safeShow() else layer.safeHide()
     }
 }
 
-private fun Layer.safeRemoveLayerFromMap() {
-    try {
-        removeLayerFromMap()
-    } catch (e: Exception) {
-        Logger.withTag("MapView").e(e) { "Error removing map layer" }
+/** Zip magic bytes; a [LayerType.KML] source starting with these is a KMZ archive rather than bare KML. */
+private val KMZ_MAGIC = byteArrayOf('P'.code.toByte(), 'K'.code.toByte())
+
+/**
+ * Parse a custom overlay into the maps-utils platform-agnostic [DataLayer] model; null if the format is unrecognized.
+ */
+private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer? = when (layerType) {
+    LayerType.KML -> {
+        val buffered = BufferedInputStream(stream)
+        buffered.mark(KMZ_MAGIC.size)
+        val magic = ByteArray(KMZ_MAGIC.size)
+        val read = buffered.read(magic)
+        buffered.reset()
+        val kml =
+            if (read == KMZ_MAGIC.size && magic.contentEquals(KMZ_MAGIC)) {
+                KmzParser().parse(buffered)
+            } else {
+                KmlParser().parse(buffered)
+            }
+        kml.toLayer()
+    }
+
+    LayerType.GEOJSON,
+    LayerType.COVERAGE,
+    -> GeoJsonParser().parse(stream)?.toLayer()?.applySimpleStyleSpec()
+}
+
+/**
+ * A parsed custom overlay (KML/KMZ/GeoJSON) plus the machinery to draw it on the map.
+ *
+ * Each [show] creates a fresh single-use [MapViewRenderer] and [hide] tears it down with [MapViewRenderer.clear].
+ * Renderers are deliberately not reused: clear() cancels their icon-loading scope for good, and per-feature removal
+ * ([MapViewRenderer.removeFeature]) silently no-ops for MultiGeometry features (the renderer keys rendered map objects
+ * by internal per-geometry copies), so clear() is the only teardown that reliably takes everything off the map.
+ */
+private class RenderedMapLayer(private val map: GmsGoogleMap, private val dataLayer: DataLayer) {
+    private var renderer: MapViewRenderer? = null
+
+    /** Images extracted from a KMZ archive, keyed by archive path; the KML mapper stashes them in layer properties. */
+    private val localImages: Map<String, Bitmap>
+        @Suppress("UNCHECKED_CAST")
+        get() = dataLayer.properties["images"] as? Map<String, Bitmap> ?: emptyMap()
+
+    fun show() {
+        if (renderer != null) return
+        renderer =
+            MapViewRenderer(map, UrlIconProvider()).also { r ->
+                localImages.forEach { (path, bitmap) -> r.cacheImageData(path, bitmap) }
+                r.addLayer(dataLayer)
+            }
+    }
+
+    fun hide() {
+        renderer?.clear()
+        renderer = null
     }
 }
 
-private fun Layer.safeAddLayerToMap() {
+private fun RenderedMapLayer.safeShow() {
     try {
-        if (!isLayerOnMap) addLayerToMap()
+        show()
     } catch (e: Exception) {
         Logger.withTag("MapView").e(e) { "Error adding map layer" }
     }
 }
 
-/**
- * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a GeoJSON layer.
- *
- * Google's [GeoJsonLayer] otherwise applies one default style to every feature, so exports that carry per-feature
- * colors render unstyled. In particular, Meshtastic Site Planner coverage contours set `fill`/`stroke` (plus a legacy
- * `color`) and `fill-opacity`; read those and style each polygon/line so the coverage draws in its dBm colors instead
- * of the default black outline.
- */
-private fun GeoJsonLayer.applySimpleStyleSpec() {
-    for (feature in features) {
-        val fill = feature.cssColor("fill") ?: feature.cssColor("color")
-        val stroke = feature.cssColor("stroke") ?: feature.cssColor("color")
-        val fillOpacity = feature.getProperty("fill-opacity")?.toFloatOrNull()
-        val strokeWidth = feature.getProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
-        when (feature.geometry?.geometryType) {
-            "Polygon",
-            "MultiPolygon",
-            ->
-                feature.polygonStyle =
-                    GeoJsonPolygonStyle().apply {
-                        fill?.let { fillColor = it.resolveFillAlpha(fillOpacity) }
-                        stroke?.let { strokeColor = it }
-                        this.strokeWidth = strokeWidth
-                    }
-
-            "LineString",
-            "MultiLineString",
-            ->
-                feature.lineStringStyle =
-                    GeoJsonLineStringStyle().apply {
-                        stroke?.let { color = it }
-                        width = strokeWidth
-                    }
-
-            else -> Unit // Points keep the default marker.
-        }
+private fun RenderedMapLayer.safeHide() {
+    try {
+        hide()
+    } catch (e: Exception) {
+        Logger.withTag("MapView").e(e) { "Error removing map layer" }
     }
 }
 
-private fun GeoJsonFeature.cssColor(key: String): Int? = getProperty(key)?.let { parseCssColor(it) }
+/**
+ * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a parsed GeoJSON layer.
+ *
+ * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but misses
+ * several things this app relies on for Meshtastic Site Planner coverage exports: the legacy `color` fallback,
+ * `rgb()`/`rgba()` colors, a default fill opacity so stacked contour bands read as a gradient, and polygon styling for
+ * MultiPolygon features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its
+ * properties so the coverage draws in its dBm colors instead of the default black outline.
+ */
+private fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
+
+private fun Feature.applySimpleStyleSpec(): Feature {
+    val fill = cssColor("fill") ?: cssColor("color")
+    val fillOpacity = stringProperty("fill-opacity")?.toFloatOrNull()
+    val strokeOpacity = stringProperty("stroke-opacity")?.toFloatOrNull()
+    val stroke =
+        (cssColor("stroke") ?: cssColor("color"))?.let {
+            if (strokeOpacity != null) it.withAlpha(strokeOpacity) else it
+        }
+    val strokeWidth = stringProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
+    return when {
+        geometry.isPolygonal() ->
+            copy(
+                style =
+                PolygonStyle(
+                    fillColor = fill?.resolveFillAlpha(fillOpacity) ?: AndroidColor.TRANSPARENT,
+                    strokeColor = stroke ?: AndroidColor.BLACK,
+                    strokeWidth = strokeWidth,
+                ),
+            )
+
+        geometry.isLinear() -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
+
+        else -> this // Points keep the default marker; mixed geometry collections keep the mapper's style.
+    }
+}
+
+/** Polygon or MultiPolygon (a multi-geometry whose members are all polygons). */
+private fun Geometry.isPolygonal(): Boolean =
+    this is ModelPolygon || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is ModelPolygon })
+
+/** LineString or MultiLineString (a multi-geometry whose members are all line strings). */
+private fun Geometry.isLinear(): Boolean =
+    this is LineString || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is LineString })
+
+private fun Feature.stringProperty(key: String): String? = properties[key] as? String
+
+private fun Feature.cssColor(key: String): Int? = stringProperty(key)?.let { parseCssColor(it) }
 
 /**
  * Resolve a polygon fill's alpha: `fill-opacity` wins when present; otherwise keep any alpha the color already carries
@@ -1368,31 +1581,28 @@ private fun Int.withAlpha(opacity: Float): Int = AndroidColor.argb(
 
 // region --- Utilities ---
 
-internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
-    String(Character.toChars(unicodeCodePoint))
-} catch (e: IllegalArgumentException) {
-    Logger.w(e) { "Invalid unicode code point: $unicodeCodePoint" }
-    "\uD83D\uDCCD"
-}
-
-@Suppress("NestedBlockDepth")
-fun Uri.getFileName(context: android.content.Context): String {
-    var name = this.lastPathSegment ?: "layer_$nowMillis"
-    if (this.scheme == "content") {
-        context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val displayNameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                if (displayNameIndex != -1) {
-                    name = cursor.getString(displayNameIndex)
-                }
-            }
-        }
+internal fun convertIntToEmoji(unicodeCodePoint: Int): String {
+    if (!unicodeCodePoint.isValidCodePoint()) {
+        Logger.w { "Invalid unicode code point: $unicodeCodePoint" }
     }
-    return name
+    // waypointIconOrDefault before rendering: 0 is a valid code point, so it would otherwise render as U+0000.
+    return unicodeCodePoint.waypointIconOrDefault().toCodePointString()
 }
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
+
+/** One-shot last known location as a suspend call. Guarded by a permission check at the call site. */
+@SuppressLint("MissingPermission")
+private suspend fun FusedLocationProviderClient.awaitLastLocation(): Location? = suspendCancellableCoroutine { cont ->
+    // lastLocation can throw SecurityException synchronously if permission is revoked between the compose-time
+    // isGranted check and this call; treat that as "no location" rather than crashing the estimate flow.
+    try {
+        lastLocation.addOnSuccessListener { cont.resume(it) }.addOnFailureListener { cont.resume(null) }
+    } catch (_: SecurityException) {
+        cont.resume(null)
+    }
+}
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
 private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox(

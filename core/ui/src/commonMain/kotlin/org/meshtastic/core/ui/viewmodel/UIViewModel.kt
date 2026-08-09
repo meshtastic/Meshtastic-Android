@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +30,10 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -47,13 +51,16 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
@@ -78,6 +85,7 @@ import org.meshtastic.proto.SharedContact
  * shared contacts, channel sets, unread counts, etc.).
  */
 @KoinViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList", "TooManyFunctions")
 class UIViewModel(
     private val nodeDB: NodeRepository,
@@ -88,12 +96,17 @@ class UIViewModel(
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val eventFirmwareRepository: EventFirmwareRepository,
+    private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val uiPrefs: UiPrefs,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
     val snackbarManager: SnackbarManager,
+    nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
+
+    /** True while the connected node is expected to be mid-restart (reboot-applying config save or reboot command). */
+    val nodeRestartExpected: StateFlow<Boolean> = nodeRestartTracker.restartExpected
 
     private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
@@ -128,17 +141,23 @@ class UIViewModel(
 
     val theme: StateFlow<Int> = uiPrefs.theme
 
+    /** Opt-out for applying an event edition's ambient theme (accent + typeface) app-wide. */
+    val eventThemeEnabled: StateFlow<Boolean> = uiPrefs.eventThemeEnabled
+
+    fun setEventThemeEnabled(enabled: Boolean) = uiPrefs.setEventThemeEnabled(enabled)
+
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
     val eventEdition: StateFlow<EventFirmwareEdition?> =
         combine(firmwareEdition, connectionState) { edition, state ->
-            // combine's transform is suspending, so the repository lookup runs here directly.
-            if (state is ConnectionState.Connected) {
-                edition?.let { eventFirmwareRepository.getEdition(it.name) }
-            } else {
-                null
-            }
+            edition?.name?.takeIf { state is ConnectionState.Connected }
         }
+            .distinctUntilChanged()
+            // Observe rather than read once, so a manifest refresh that lands after connecting reaches the branding
+            // already on screen instead of waiting for a reconnect.
+            .flatMapLatest { editionName ->
+                editionName?.let { eventFirmwareRepository.observeEdition(it) } ?: flowOf(null)
+            }
             .stateInWhileSubscribed(initialValue = null)
 
     val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification
@@ -256,6 +275,14 @@ class UIViewModel(
         serviceRepository.clientNotification
             .filterNotNull()
             .onEach { notification ->
+                val firmwareUpdateStatus = firmwareUpdateStatusRepository.status.value
+                if (notification.isOtaStatusNotification() && firmwareUpdateStatus.isOtaUpdateActive) {
+                    Logger.i { "Suppressing OTA status ClientNotification generic alert during firmware update" }
+                    if (!firmwareUpdateStatus.isAwaitingOtaStatus) {
+                        clearClientNotification(notification)
+                    }
+                    return@onEach
+                }
                 val isCompromised = notification.low_entropy_key != null || notification.duplicated_public_key != null
                 showAlert(
                     titleRes = Res.string.client_notification,

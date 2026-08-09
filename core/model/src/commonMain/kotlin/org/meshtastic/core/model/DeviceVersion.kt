@@ -18,6 +18,21 @@ package org.meshtastic.core.model
 
 import kotlin.jvm.JvmInline
 
+/** Outcome of checking a device's firmware version against the app's minimum requirements. */
+enum class FirmwareCheckStatus {
+    /** Firmware meets the recommended minimum. */
+    OK,
+
+    /** Firmware is usable but below the recommended minimum; the user should be nudged to update. */
+    SHOULD_UPDATE,
+
+    /** Firmware is below the absolute minimum the app supports. */
+    TOO_OLD,
+
+    /** The version string could not be parsed (e.g. a blank/transient value during connection). Status is unknown. */
+    UNKNOWN,
+}
+
 /** Zero-overhead wrapper providing structured access to parse and compare device version strings. */
 @JvmInline
 value class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
@@ -25,6 +40,25 @@ value class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
     /** The integer representation of the version (e.g., 2.7.12 → 20712). */
     val asInt: Int
         get() = parseVersion(asString)
+
+    /** True when the version string parsed to a real version (non-zero). */
+    val isValid: Boolean
+        get() = asInt > 0
+
+    /**
+     * Classify this version against the app's firmware requirements.
+     *
+     * An unparseable version (int 0) is [FirmwareCheckStatus.UNKNOWN], NOT [FirmwareCheckStatus.TOO_OLD] — a transient
+     * or garbled version string arriving mid-handshake must never be mistaken for ancient firmware (regression #3726).
+     */
+    val checkStatus: FirmwareCheckStatus
+        get() =
+            when {
+                !isValid -> FirmwareCheckStatus.UNKNOWN
+                this < DeviceVersion(ABS_MIN_FW_VERSION) -> FirmwareCheckStatus.TOO_OLD
+                this < DeviceVersion(MIN_FW_VERSION) -> FirmwareCheckStatus.SHOULD_UPDATE
+                else -> FirmwareCheckStatus.OK
+            }
 
     override fun compareTo(other: DeviceVersion): Int = asInt.compareTo(other.asInt)
 

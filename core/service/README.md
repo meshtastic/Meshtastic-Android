@@ -27,7 +27,6 @@ The in-process `RadioController` composition root (Desktop, iOS, and single-proc
 ```mermaid
 graph TB
   :core:service[service]:::kmp-library
-  :core:service -.-> :core:testing
   :core:service --> :core:repository
   :core:service -.-> :core:common
   :core:service -.-> :core:data
@@ -39,6 +38,7 @@ graph TB
   :core:service -.-> :core:ble
   :core:service -.-> :core:prefs
   :core:service -.-> :core:takserver
+  :core:service -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

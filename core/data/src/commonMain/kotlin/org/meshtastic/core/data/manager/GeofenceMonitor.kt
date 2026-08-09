@@ -17,13 +17,12 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.geofence.geofencesToMonitor
@@ -33,6 +32,8 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.geofence_entered_body
@@ -67,10 +68,16 @@ class GeofenceMonitor(
     private val serviceNotifications: MeshNotificationManager,
     private val crossingStore: GeofenceCrossingStore,
     private val notificationPrefs: NotificationPrefs,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val radioInterfaceService: RadioInterfaceService,
+    private val scope: ServiceScope,
 ) {
 
-    private data class PositionSample(val nodeNum: Int, val lat: Double, val lon: Double)
+    private data class PositionSample(
+        val nodeNum: Int,
+        val lat: Double,
+        val lon: Double,
+        val session: RadioSessionContext?,
+    )
 
     @Volatile private var activeGeofences: List<Waypoint> = emptyList()
 
@@ -83,7 +90,13 @@ class GeofenceMonitor(
         scope.launch {
             for (sample in samples) {
                 try {
-                    evaluate(sample.nodeNum, sample.lat, sample.lon)
+                    if (sample.session == null) {
+                        evaluate(sample.nodeNum, sample.lat, sample.lon)
+                    } else {
+                        radioInterfaceService.runWhileSessionActive(sample.session) {
+                            evaluate(sample.nodeNum, sample.lat, sample.lon)
+                        }
+                    }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     // Isolate per-sample failures: an unexpected throw must not kill the sole consumer and silently
                     // stop geofence tracking for the rest of the session.
@@ -111,7 +124,7 @@ class GeofenceMonitor(
     }
 
     /** Evaluate a received node position against every active geofence. [nodeNum] is the position's sender. */
-    fun onPositionReceived(nodeNum: Int, myNodeNum: Int, position: Position) {
+    fun onPositionReceived(nodeNum: Int, myNodeNum: Int, position: Position, session: RadioSessionContext? = null) {
         val latI = position.latitude_i ?: 0
         val lonI = position.longitude_i ?: 0
         val lat = latI * DEG_D
@@ -125,7 +138,7 @@ class GeofenceMonitor(
                 lon !in MIN_LONGITUDE..MAX_LONGITUDE ||
                 activeGeofences.isEmpty()
         if (skip) return
-        samples.trySend(PositionSample(nodeNum, lat, lon))
+        samples.trySend(PositionSample(nodeNum, lat, lon, session))
     }
 
     private suspend fun evaluate(nodeNum: Int, lat: Double, lon: Double) {

@@ -3,7 +3,7 @@ title: Home Screen Widget
 parent: Kasutaja juhis
 nav_order: 20
 last_updated: 2026-06-25
-description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
+description: Lisa Meshtastici avakuva vidin, et vaadata ühendatud raadio kohalikku statistikat ilma rakendust avamata.
 aliases:
   - widget
   - home-screen-widget
@@ -12,35 +12,35 @@ aliases:
 
 # Home Screen Widget
 
-On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+Androidis pakub Meshtastic avakuva **vidinat**, mis näitab ühendatud raadio reaalajas kohalikku statistikat – rakendust pole vaja avada.
 
-## What It Shows
+## Mida see näitab
 
 The widget displays the **connected radio's** current local stats:
 
-- **Battery** — the radio's battery level, or _Powered_ when running on external power
-- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Aku** – raadio aku tase või _Toitel_, kui see töötab välise toiteallikaga
+- **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
+- **AirUtil** — eetriaega (kui suurt osa töötsüklist raadio edastab)
+- **Liiklus** — edastatud/vastuvõetud paketid ja nähtud duplikaadid
+- **Vahendajad** — edastatud paketid ja edastuste tühistamised (kuvatakse raadio vahendusprotsessi ajal)
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Vihje:** Väärtused kajastavad raadiojaama, millega olete hetkel ühendatud. Kui rakendus pole raadioga ühendatud, kuvab vidin viimaseid teadaolevaid andmeid kuni ühenduse taastamiseni.
 
 ## Adding the Widget
 
 1. Long-press an empty area of your Android home screen.
 2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
+3. Leia loendist **Meshtastic** ja lohista **Kohaliku statistika** vidin oma avakuvale.
 4. Resize it as needed — the layout adapts to the available space.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ⚠️ **Märkus:** Vidin on ainult Androidile. It is not available on the Desktop or iOS builds.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
-- [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [Ühendused](connections) — loo ühendus raadioga, et vidinal oleks statistikat kuvada
+- [Avasta](Discovery) — kanali ja eetriaja kasutamine kärgvõrgu ulatuses
 
 ---

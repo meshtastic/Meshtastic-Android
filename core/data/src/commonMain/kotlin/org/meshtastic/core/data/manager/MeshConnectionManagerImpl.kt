@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -29,11 +28,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -93,7 +94,8 @@ class MeshConnectionManagerImpl(
     private val appWidgetUpdater: AppWidgetUpdater,
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val lockdownCoordinator: LockdownCoordinator,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
+    private val nodeRestartTracker: NodeRestartTracker,
 ) : MeshConnectionManager {
     /**
      * Serializes [onConnectionChanged] to prevent TOCTOU races when multiple coroutines emit state transitions
@@ -135,10 +137,22 @@ class MeshConnectionManagerImpl(
         // Bridge transport-level state into the canonical app-level state.
         // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
         // light-sleep policy and handshake awareness before writing to ServiceRepository.
-        radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
+        // Guarded per-emission: one uncaught throw here would kill the sole bridge collector and
+        // permanently freeze the app-level state (a stuck-"Connected" UI no transport event can fix).
+        radioInterfaceService.connectionState
+            .onEach { state ->
+                safeCatching { onRadioConnectionState(state) }
+                    .onFailure { Logger.e(it) { "Connection state bridge failed for $state; collector kept alive" } }
+            }
+            .launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
         serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
+        // An expected node restart ends when the post-reboot config handshake completes.
+        serviceRepository.connectionState
+            .onEach { if (it == ConnectionState.Connected) nodeRestartTracker.onConnected() }
+            .launchIn(scope)
 
         scope.launch {
             try {
@@ -493,20 +507,26 @@ class MeshConnectionManagerImpl(
         }
     }
 
+    override fun onMyNodeInfoReceived(myNodeNum: Int) {
+        // Set device time as early as possible: MyNodeInfo is the first Stage 1 frame, so this
+        // lands before the firmware flushes its queued packet backlog and lets it stamp those
+        // packets with a corrected clock (firmware #11274). A single small write ahead of the
+        // config/node-info bursts avoids the GATT contention that pushed the old
+        // onRadioConfigLoaded-time send out of Stage 1. Must bypass the outbound packet queue:
+        // it only drains once Connected, which would hold this until after the backlog flush.
+        commandSender.sendAdminImmediate(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
+    }
+
     override suspend fun onNodeDbReady() {
         // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
         // orphan a job in the gap between cancel and reassign.
         handshakeTimeout.getAndSet(null)?.cancel()
 
         val myNodeNum = nodeManager.myNodeNum.value ?: 0
-        // Set device time now that the full node picture is ready. Sending this during Stage 1
-        // (onRadioConfigLoaded) introduced GATT write contention with the Stage 2 node-info burst.
-        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
-
         // Proactively seed the session passkey. The firmware embeds session_passkey in every
-        // admin *response* (wantResponse=true), but set_time_only has no response. A get_owner
-        // request is the lightest way to trigger a response and populate the passkey cache so
-        // that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
+        // admin *response* (wantResponse=true), but set_time_only (sent at MyNodeInfo) has no
+        // response. A get_owner request is the lightest way to trigger a response and populate the
+        // passkey cache so that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
         commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
 
         // Start MQTT if enabled
@@ -613,7 +633,11 @@ class MeshConnectionManagerImpl(
                     if (serviceRepository.connectionState.value !is ConnectionState.Connecting) {
                         return@handledLaunch
                     }
-                    Logger.e {
+                    // Warn, not error: the watchdog firing is the recovery mechanism working, and the cause is a
+                    // stalled radio or link rather than a defect here. A throwable-less Logger.e still synthesises a
+                    // non-fatal in Crashlytics and a RUM error, which made this one of the loudest issues in triage.
+                    // Track it as a rate over this log line instead.
+                    Logger.w {
                         "Fast-handshake watchdog expired after progress stalled — requesting forced transport restart"
                     }
                     runSiblingHandshakeRecovery()
@@ -623,10 +647,16 @@ class MeshConnectionManagerImpl(
     }
 
     override fun updateStatusNotification(telemetry: Telemetry?) {
-        serviceNotifications.updateServiceStateNotification(
-            serviceRepository.connectionState.value,
-            telemetry = telemetry,
-        )
+        val state = serviceRepository.connectionState.value
+        // During an expected node restart the disconnect is transient; keep the persistent notification on the
+        // connecting presentation instead of flashing "disconnected".
+        val presented =
+            if (state == ConnectionState.Disconnected && nodeRestartTracker.restartExpected.value) {
+                ConnectionState.Connecting
+            } else {
+                state
+            }
+        serviceNotifications.updateServiceStateNotification(presented, telemetry = telemetry)
     }
 
     companion object {

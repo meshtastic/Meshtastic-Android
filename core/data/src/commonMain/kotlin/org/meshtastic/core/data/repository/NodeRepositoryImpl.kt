@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -58,7 +59,7 @@ import org.meshtastic.proto.User
 @Single
 @Suppress("TooManyFunctions")
 class NodeRepositoryImpl(
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
@@ -198,7 +199,7 @@ class NodeRepositoryImpl(
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node.toEntity()) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) = withContext(dispatchers.io) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() })
     }
 
@@ -226,6 +227,9 @@ class NodeRepositoryImpl(
 
     override suspend fun getUnknownNodes(): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() } }
+
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> =
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodeDbSnapshot().mapValues { (_, it) -> it.toModel() } }
 
     /** Persists hardware metadata for a node. */
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =

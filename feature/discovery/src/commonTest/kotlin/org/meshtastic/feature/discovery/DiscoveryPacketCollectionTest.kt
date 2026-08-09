@@ -41,6 +41,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
+import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -79,6 +80,7 @@ class DiscoveryPacketCollectionTest {
     private val collectorRegistry = PacketTestCollectorRegistry()
     private val discoveryDao = InMemoryDiscoveryDao()
     private val aiProvider = PacketTestAiProvider()
+    private val meshPrefs = FakeMeshPrefs()
 
     private fun createEngine(testScope: TestScope): DiscoveryScanEngine {
         val testDispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
@@ -97,6 +99,7 @@ class DiscoveryPacketCollectionTest {
             aiProvider = aiProvider,
             applicationScope = appScope,
             dispatchers = dispatchers,
+            meshPrefs = meshPrefs,
         )
     }
 
@@ -426,4 +429,8 @@ private class InMemoryDiscoveryDao : DiscoveryDao {
             }
         }
     }
+
+    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
+        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
+        .maxByOrNull { it.timestamp }
 }

@@ -24,9 +24,6 @@ import co.touchlab.kermit.Severity
  * startup (`Logger.setLogWriters(platformLogWriter(), InMemoryLogBuffer)`) to let the Debug screen view and export the
  * app's own logs. Lines are formatted to loosely match Android's `logcat -v time` shape (`L/tag: message`) so the same
  * viewer/filters work on both platforms.
- *
- * ponytail: a plain synchronized ArrayDeque — trivially correct for log volumes; swap for a lock-free ring only if it
- * ever shows up hot in a profile.
  */
 object InMemoryLogBuffer : LogWriter() {
     private const val MAX_LINES = 5000

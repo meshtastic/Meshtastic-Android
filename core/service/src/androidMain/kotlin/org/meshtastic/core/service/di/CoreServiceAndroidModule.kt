@@ -17,12 +17,11 @@
 package org.meshtastic.core.service.di
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
@@ -44,6 +43,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.RadioControllerImpl
+import org.meshtastic.core.service.ServiceStartTrigger
 import org.meshtastic.core.service.startService
 
 @Module
@@ -77,7 +77,7 @@ class CoreServiceAndroidModule {
         notificationManager: NotificationManager,
         messageProcessor: Lazy<MeshMessageProcessor>,
         radioConfigRepository: RadioConfigRepository,
-        @Named("ServiceScope") scope: CoroutineScope,
+        scope: ServiceScope,
     ): RadioController = RadioControllerImpl(
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,
@@ -95,6 +95,6 @@ class CoreServiceAndroidModule {
         messageProcessor = messageProcessor,
         radioConfigRepository = radioConfigRepository,
         scope = scope,
-        onDeviceAddressChanged = { MeshService.startService(context) },
+        onDeviceAddressChanged = { MeshService.startService(context, ServiceStartTrigger.DeviceAddressChanged) },
     )
 }

@@ -31,6 +31,8 @@
     <!-- APP -->
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
     <string name="apply">Taikyti</string>
+    <!-- AQI -->
+    <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
     <string name="battery">Baterija</string>
@@ -69,6 +71,7 @@
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
     <string name="desc_node_filter_clear">išvalyti įtaisų filtrą</string>
     <string name="description">Aprašymas</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="direct_message">Tiesioginė žinutė</string>
@@ -96,6 +99,7 @@
     <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>
     <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Geras</string>
     <!-- GPIO -->
@@ -104,6 +108,7 @@
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
+    <!-- IMPORT -->
     <string name="info">Informacija</string>
     <string name="interval_unset">Nenustatyta</string>
     <string name="intro_show">Rodyti įvadą</string>
@@ -144,7 +149,6 @@
     <string name="message">Žinutė</string>
     <string name="message_delivery_status">Žinutės pristatymo statusas</string>
     <string name="message_input_label">Žinutė</string>
-    <string name="message_status_enroute">Laukiama patvirtinimo</string>
     <string name="message_status_queued">Eilėje išsiuntimui</string>
     <string name="module_settings">Modulio konfigūracija</string>
     <!-- MQTT -->
@@ -184,6 +188,7 @@
     <!-- OPEN -->
     <string name="open_settings">Atidaryti nustatymus</string>
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <!-- PAX -->
     <!-- POSITION -->
     <!-- POWER -->
@@ -250,6 +255,7 @@
     <string name="routing_error_timeout">Baigėsi laikas</string>
     <string name="routing_error_too_large">Paketas perdidelis</string>
     <string name="rssi">RSSI</string>
+    <!-- SAVE -->
     <string name="save">Išsaugoti</string>
     <string name="save_changes">Išsaugoti</string>
     <!-- SCAN -->
@@ -265,6 +271,7 @@
     <string name="shutdown">Išjungti</string>
     <string name="signal">Signalas</string>
     <string name="signal_quality">Signalo kokybė</string>
+    <!-- SITE -->
     <string name="snr">SNR</string>
     <!-- TAK -->
     <string name="tak_team_red">Raudona</string>
@@ -306,5 +313,6 @@
     <string name="wifi_qr_code_error">Neteisingas WiFi prisijungimo QR kodo formatas</string>
     <string name="wifi_qr_code_scan">Nuskenuoti WiFi QR kodą</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Tu</string>
 </resources>

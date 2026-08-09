@@ -45,6 +45,9 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
 private fun Project.applyAnalyticsPlugins() {
     extensions.configure<ApplicationExtension> {
+        // Deliberately eager `all {}` (not `configureEach`): this block APPLIES plugins as a side
+        // effect of the google flavor being registered. `configureEach` defers until AGP realizes
+        // the flavor objects, which can be too late for google-services/crashlytics to hook variants.
         productFlavors.all {
             if (name == "google") {
                 apply(plugin = libs.plugin("google-services").get().pluginId)

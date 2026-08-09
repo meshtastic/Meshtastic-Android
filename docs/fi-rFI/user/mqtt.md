@@ -52,9 +52,17 @@ Internet-yhteydellinen gateway-radio (WiFi tai Ethernet) julkaisee mesh-viestit 
 | TLS               | Yhteyden suojaaminen välityspalvelimeen                                                               | Ei käytössä                                         |
 | Karttaraportointi | Sijainnin julkaisu julkiselle kartalle                                                                | Ei käytössä                                         |
 
+### MQTT-välityspalvelin tässä puhelimessa
+
+Jos radiollasi ei ole omaa internetyhteyttä, se voi käyttää yhdistettyä puhelinta MQTT-yhdyskäytävänään. Ota käyttöön **MQTT** ja **Proxy to client enabled** moduulin asetuksista, jolloin sovellus välittää MQTT-liikenteen radion ja välityspalvelimen välillä puhelimen internetyhteyden kautta.
+
+MQTT-asetusten yläreunassa oleva **MQTT-välityspalvelin tässä puhelimessa** -kytkin näyttää, onko tämä välitys käytössä, ja sen avulla voit poistaa sen käytöstä (tai käynnistää sen uudelleen) heti ilman, että laitteen MQTT-asetuksia tarvitsee muokata ja tallentaa uudelleen.
+
 ### Oletus Meshtastic-välityspalvelin
 
 Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen.
+
+> ℹ️ **Huomautus:** Yhteydet palvelimeen `mqtt.meshtastic.org` käyttävät aina TLS-salausta (portti 8883), vaikka TLS-kytkin olisi poistettu käytöstä. Kaikkien muiden välityspalvelimien kohdalla TLS-salausta käytetään vain, kun otat sen käyttöön (TLS:llä portti 8883, ilman TLS:ää portti 1883).
 
 > 🔒 **Tietosuoja:** Julkisen välityspalvelimen viestit ovat kaikkien tilaajien luettavissa. Käytä aina kanavasalausta yksityiseen viestintään.
 

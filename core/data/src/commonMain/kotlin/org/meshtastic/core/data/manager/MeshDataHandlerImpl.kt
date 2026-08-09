@@ -18,14 +18,13 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
-import org.koin.core.annotation.Named
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -35,12 +34,16 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.destination
+import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.source
 import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
@@ -57,6 +60,8 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
@@ -109,7 +114,8 @@ class MeshDataHandlerImpl(
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val radioInterfaceService: RadioInterfaceService,
+    private val scope: ServiceScope,
 ) : MeshDataHandler {
 
     private val rememberDataType =
@@ -120,19 +126,27 @@ class MeshDataHandlerImpl(
             PortNum.NODE_STATUS_APP.value,
         )
 
-    override fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String?, logInsertJob: Job?) {
+    override fun handleReceivedData(
+        packet: MeshPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+        logUuid: String?,
+        logInsertJob: Job?,
+    ) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
         val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        handleDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
+        handleDataPacket(packet, dataPacket, myNodeNum, fromUs, session, logUuid, logInsertJob)
 
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
 
         // Forward to discovery scan collector if active
         collectorRegistry.collector?.let { collector ->
             if (collector.isActive) {
-                scope.handledLaunch { collector.onPacketReceived(packet, dataPacket) }
+                radioInterfaceService.launchSessionWork(scope, session) {
+                    collector.onPacketReceived(packet, dataPacket)
+                }
             }
         }
     }
@@ -142,19 +156,20 @@ class MeshDataHandlerImpl(
         dataPacket: DataPacket,
         myNodeNum: Int,
         fromUs: Boolean,
+        session: RadioSessionContext,
         logUuid: String?,
         logInsertJob: Job?,
     ) {
         val decoded = packet.decoded ?: return
         when (decoded.portnum) {
-            PortNum.TEXT_MESSAGE_APP -> handleTextMessage(packet, dataPacket, myNodeNum)
-            PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum)
-            PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum)
-            PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum)
-            PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
-            PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
-            PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum)
-            else -> handleSpecializedDataPacket(packet, dataPacket, myNodeNum, logUuid, logInsertJob)
+            PortNum.TEXT_MESSAGE_APP -> handleTextMessage(packet, dataPacket, myNodeNum, session)
+            PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum, session)
+            PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum, session = session)
+            PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum, session)
+            PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum, session)
+            PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet, session)
+            PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum, session)
+            else -> handleSpecializedDataPacket(packet, dataPacket, myNodeNum, session, logUuid, logInsertJob)
         }
     }
 
@@ -162,33 +177,34 @@ class MeshDataHandlerImpl(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
+        session: RadioSessionContext,
         logUuid: String?,
         logInsertJob: Job?,
     ) {
         val decoded = packet.decoded ?: return
         when (decoded.portnum) {
             PortNum.TRACEROUTE_APP -> {
-                tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
+                tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob, session)
             }
 
             PortNum.ROUTING_APP -> {
-                handleRouting(packet, dataPacket)
+                handleRouting(packet, dataPacket, session)
             }
 
             PortNum.PAXCOUNTER_APP -> {
-                handlePaxCounter(packet)
+                handlePaxCounter(packet, session)
             }
 
             PortNum.STORE_FORWARD_APP -> {
-                storeForwardHandler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+                storeForwardHandler.handleStoreAndForward(packet, dataPacket, myNodeNum, session)
             }
 
             PortNum.STORE_FORWARD_PLUSPLUS_APP -> {
-                storeForwardHandler.handleStoreForwardPlusPlus(packet)
+                storeForwardHandler.handleStoreForwardPlusPlus(packet, session)
             }
 
             PortNum.ADMIN_APP -> {
-                adminPacketHandler.handleAdminMessage(packet, myNodeNum)
+                adminPacketHandler.handleAdminMessage(packet, myNodeNum, session)
             }
 
             PortNum.NEIGHBORINFO_APP -> {
@@ -203,20 +219,20 @@ class MeshDataHandlerImpl(
             PortNum.RANGE_TEST_APP,
             PortNum.DETECTION_SENSOR_APP,
             -> {
-                handleRangeTest(dataPacket, myNodeNum)
+                handleRangeTest(dataPacket, myNodeNum, session)
             }
 
             PortNum.MESH_BEACON_APP -> {
-                handleMeshBeacon(packet, myNodeNum)
+                handleMeshBeacon(packet, myNodeNum, session)
             }
 
             else -> {}
         }
     }
 
-    private fun handleRangeTest(dataPacket: DataPacket, myNodeNum: Int) {
+    private fun handleRangeTest(dataPacket: DataPacket, myNodeNum: Int, session: RadioSessionContext) {
         val u = dataPacket.copy(dataType = PortNum.TEXT_MESSAGE_APP.value)
-        rememberDataPacket(u, myNodeNum)
+        rememberDataPacket(u, myNodeNum, session = session)
     }
 
     /**
@@ -226,7 +242,7 @@ class MeshDataHandlerImpl(
      * carrying a join offer (a channel) are actionable; message-only beacons are ignored.
      */
     @Suppress("ReturnCount")
-    private fun handleMeshBeacon(packet: MeshPacket, myNodeNum: Int) {
+    private fun handleMeshBeacon(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         // Ignore our own beacons (spec FR-001) — once broadcast is enabled a node that also listens would self-notify.
         if (packet.from == myNodeNum) return
         val payload = packet.decoded?.payload ?: return
@@ -234,9 +250,15 @@ class MeshDataHandlerImpl(
         // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
         if (beacon?.offer_channel == null) return
         val offer =
-            MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon, snr = packet.rx_snr, rssi = packet.rx_rssi)
+            MeshBeaconOffer(
+                fromNodeNum = packet.from,
+                beacon = beacon,
+                // [MeshBeaconOffer.snr] is not nullable, so absent narrows to 0f. See [snrOrNull].
+                snr = packet.snrOrNull() ?: 0f,
+                rssi = packet.rx_rssi,
+            )
         if (meshBeaconRepository.add(offer)) {
-            scope.launch {
+            radioInterfaceService.launchSessionWork(scope, session) {
                 notificationManager.dispatch(
                     Notification(
                         title = getStringSuspend(Res.string.mesh_beacon_notification_title),
@@ -250,38 +272,86 @@ class MeshDataHandlerImpl(
         }
     }
 
-    private fun handlePaxCounter(packet: MeshPacket) {
+    private fun handlePaxCounter(packet: MeshPacket, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val p = Paxcount.ADAPTER.decodeOrNull(payload, Logger) ?: return
-        nodeManager.handleReceivedPaxcounter(packet.from, p)
+        nodeManager.handleReceivedPaxcounter(packet.from, p, session)
     }
 
-    private fun handlePosition(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+    private fun handlePosition(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+    ) {
         val payload = packet.decoded?.payload ?: return
         val p = Position.ADAPTER.decodeOrNull(payload, Logger) ?: return
         Logger.d { "Position from ${packet.from}: ${Position.ADAPTER.toOneLiner(p)}" }
-        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time)
-        geofenceMonitor.onPositionReceived(packet.from, myNodeNum, p)
+        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time, session)
+        geofenceMonitor.onPositionReceived(packet.from, myNodeNum, p, session)
     }
 
-    private fun handleWaypoint(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+    private fun handleWaypoint(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+    ) {
         val payload = packet.decoded?.payload ?: return
         val u = Waypoint.ADAPTER.decode(payload)
-        if (u.locked_to != 0 && u.locked_to != packet.from) return
-        val currentSecond = nowSeconds.toInt()
-        rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
-    }
-
-    private fun handleTextMessage(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
-        val decoded = packet.decoded ?: return
-        if (decoded.reply_id != 0 && decoded.emoji != 0) {
-            rememberReaction(packet)
-        } else {
-            rememberDataPacket(dataPacket, myNodeNum)
+        // A locked waypoint may only be created/updated by its owner; drop it if the sender isn't allowed to modify it.
+        if (!u.isModifiableBy(packet.from)) return
+        // icon is an arbitrary int on the wire and a waypoint with expire == 0 is retained indefinitely, so
+        // normalise an unrenderable code point here at the trust boundary rather than relying on every consumer to
+        // guard (0 means "use the default pushpin").
+        if (!u.icon.isValidCodePoint()) {
+            Logger.w { "Clearing an out-of-range waypoint icon code point (${u.icon})" }
+            dataPacket.bytes = Waypoint.ADAPTER.encode(u.copy(icon = 0)).toByteString()
+        }
+        val updateNotification = u.expire > nowSeconds.toInt()
+        radioInterfaceService.launchSessionWork(scope, session) {
+            // Persisted-owner enforcement: a stored, locked waypoint may only be modified by the node it is locked to.
+            // The inbound check above only validates the incoming payload, so without this a non-owner could hijack a
+            // stored locked waypoint by replaying its id with locked_to = 0 (unlock) or their own num (takeover). The
+            // read and the write share this one lease so the check sees a committed snapshot (see [persistDataPacket]).
+            if (!storedWaypointModifiableBy(u.id, packet.from)) return@launchSessionWork
+            persistDataPacket(dataPacket, myNodeNum, updateNotification)
         }
     }
 
-    private fun handleNodeInfo(packet: MeshPacket) {
+    /**
+     * Whether an inbound waypoint update from [from] may modify the currently-stored waypoint with [waypointId]. A new
+     * waypoint (nothing stored) or an unlocked stored waypoint is always modifiable; a locked stored waypoint is
+     * modifiable only by the node it is locked to — this deliberately rejects inbound unlock (`locked_to = 0`) attempts
+     * from anyone else.
+     *
+     * [PacketRepository.getWaypoints] is a row-per-transmission firehose, so it is collapsed via
+     * [activeWaypointPackets] (newest-per-id, expired dropped) — the same normalisation the map UI and geofence engine
+     * use, so the three cannot drift. Waypoint packets are infrequent, so this one-shot read per waypoint is not hot.
+     */
+    private suspend fun storedWaypointModifiableBy(waypointId: Int, from: Int): Boolean {
+        // firstOrNull().orEmpty(): getWaypoints() is a hot repository flow that always emits (an empty list when there
+        // are none), but tolerate a flow that completes without emitting rather than throwing on the inbound path.
+        val active = packetRepository.value.getWaypoints().firstOrNull().orEmpty().activeWaypointPackets(nowSeconds)
+        val stored = active[waypointId]?.waypoint
+        return stored == null || stored.isModifiableBy(from)
+    }
+
+    private fun handleTextMessage(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+    ) {
+        val decoded = packet.decoded ?: return
+        if (decoded.reply_id != 0 && decoded.emoji != 0) {
+            rememberReaction(packet, session)
+        } else {
+            rememberDataPacket(dataPacket, myNodeNum, session = session)
+        }
+    }
+
+    private fun handleNodeInfo(packet: MeshPacket, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val u =
             User.ADAPTER.decode(payload)
@@ -293,21 +363,26 @@ class MeshDataHandlerImpl(
                         it
                     }
                 }
-        nodeManager.handleReceivedUser(packet.from, u, packet.channel)
+        nodeManager.handleReceivedUser(packet.from, u, packet.channel, session = session)
     }
 
-    private fun handleNodeStatus(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+    private fun handleNodeStatus(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+    ) {
         val payload = packet.decoded?.payload ?: return
         val s = StatusMessage.ADAPTER.decodeOrNull(payload, Logger) ?: return
-        nodeManager.handleReceivedNodeStatus(packet.from, s)
-        rememberDataPacket(dataPacket, myNodeNum)
+        nodeManager.handleReceivedNodeStatus(packet.from, s, session)
+        rememberDataPacket(dataPacket, myNodeNum, session = session)
     }
 
-    private fun handleRouting(packet: MeshPacket, dataPacket: DataPacket) {
+    private fun handleRouting(packet: MeshPacket, dataPacket: DataPacket, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
-            scope.launch {
+            radioInterfaceService.launchSessionWork(scope, session) {
                 serviceStateWriter.setErrorMessage(getStringSuspend(Res.string.error_duty_cycle), Severity.Warn)
             }
         }
@@ -316,13 +391,19 @@ class MeshDataHandlerImpl(
             nodeManager.toNodeID(packet.from),
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
+            session,
         )
-        packet.decoded?.request_id?.let { packetHandler.removeResponse(it, complete = true) }
     }
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    private fun handleAckNak(requestId: Int, fromId: String, routingError: Int, relayNode: Int?) {
-        scope.handledLaunch {
+    private fun handleAckNak(
+        requestId: Int,
+        fromId: String,
+        routingError: Int,
+        relayNode: Int?,
+        session: RadioSessionContext,
+    ) {
+        radioInterfaceService.launchSessionWork(scope, session) {
             val isAck = routingError == Routing.Error.NONE.value
             val p = packetRepository.value.getPacketByPacketId(requestId)
             val reaction = packetRepository.value.getReactionByPacketId(requestId)
@@ -355,11 +436,29 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(updated)
                 }
             }
+            packetHandler.removeResponse(requestId, complete = true)
         }
     }
 
-    override fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
+    override fun rememberDataPacket(
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        updateNotification: Boolean,
+        session: RadioSessionContext?,
+    ) {
         if (dataPacket.dataType !in rememberDataType) return
+        radioInterfaceService.launchSessionWork(scope, session) {
+            persistDataPacket(dataPacket, myNodeNum, updateNotification)
+        }
+    }
+
+    /**
+     * Deduplicates, filters, persists, and (when appropriate) notifies for a single [dataPacket]. Runs inside a session
+     * lease — callers must launch it via [RadioInterfaceService.launchSessionWork] and must have already confirmed the
+     * packet's [DataPacket.dataType] is one of [rememberDataType]. Split out from [rememberDataPacket] so the waypoint
+     * path can gate persistence on a repository read within the same lease (see [handleWaypoint]).
+     */
+    private suspend fun persistDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         val fromLocal = dataPacket.isFromLocal(myNodeNum)
         val toBroadcast = dataPacket.isBroadcast
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
@@ -367,33 +466,24 @@ class MeshDataHandlerImpl(
         // contactKey: unique contact key filter (channel)+(nodeId)
         val contactKey = "${dataPacket.channel}$contactId"
 
-        scope.handledLaunch {
-            packetRepository.value.apply {
-                // Check for duplicates before inserting
-                val existingPackets = findPacketsWithId(dataPacket.id)
-                if (existingPackets.isNotEmpty()) {
-                    Logger.d {
-                        "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
-                            "to=${dataPacket.to} contactKey=$contactKey" +
-                            " (already have ${existingPackets.size} packet(s))"
-                    }
-                    return@handledLaunch
+        packetRepository.value.apply {
+            // Check for duplicates before inserting
+            val existingPackets = findPacketsWithId(dataPacket.id)
+            if (existingPackets.isNotEmpty()) {
+                Logger.d {
+                    "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
+                        "to=${dataPacket.to} contactKey=$contactKey" +
+                        " (already have ${existingPackets.size} packet(s))"
                 }
+                return
+            }
 
-                // Check if message should be filtered
-                val isFiltered = shouldFilterMessage(dataPacket, contactKey)
+            // Check if message should be filtered
+            val isFiltered = shouldFilterMessage(dataPacket, contactKey)
 
-                insert(
-                    dataPacket,
-                    myNodeNum,
-                    contactKey,
-                    nowMillis,
-                    read = fromLocal || isFiltered,
-                    filtered = isFiltered,
-                )
-                if (!isFiltered) {
-                    handlePacketNotification(dataPacket, contactKey, updateNotification)
-                }
+            insert(dataPacket, myNodeNum, contactKey, nowMillis, read = fromLocal || isFiltered, filtered = isFiltered)
+            if (!isFiltered) {
+                handlePacketNotification(dataPacket, contactKey, updateNotification)
             }
         }
     }
@@ -415,24 +505,24 @@ class MeshDataHandlerImpl(
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
         val nodeMuted = nodeManager.getNodeById(dataPacket.from.orEmpty())?.isMuted == true
-        // A mention of our own id is a targeted ping, so it should still notify even in a muted channel/contact.
+        // A mention of our own id is a targeted ping, so it breaks through a muted channel/conversation
+        // (per meshtastic/design#21). Node mute is a stronger, per-sender signal and stays authoritative:
+        // a muted node cannot force a notification by spamming @-mentions.
         val mentionsMe =
             dataPacket.dataType == PortNum.TEXT_MESSAGE_APP.value &&
                 textMentionsNode(dataPacket.text, nodeManager.getMyId())
-        val isSilent = (conversationMuted || nodeMuted) && !mentionsMe
+        val isSilent = nodeMuted || (conversationMuted && !mentionsMe)
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
-            scope.launch {
-                notificationManager.dispatch(
-                    Notification(
-                        title = getSenderName(dataPacket),
-                        message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
-                        category = Notification.Category.Alert,
-                        contactKey = contactKey,
-                    ),
-                )
-            }
+            notificationManager.dispatch(
+                Notification(
+                    title = getSenderName(dataPacket),
+                    message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
+                    category = Notification.Category.Alert,
+                    contactKey = contactKey,
+                ),
+            )
         } else if (updateNotification && !isSilent) {
-            scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
+            updateNotification(contactKey, dataPacket, isSilent)
         }
     }
 
@@ -484,79 +574,81 @@ class MeshDataHandlerImpl(
     }
 
     @Suppress("LongMethod", "KotlinConstantConditions")
-    private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
-        val decoded = packet.decoded ?: return@handledLaunch
-        val emoji = decoded.payload.toByteArray().decodeToString()
-        val fromId = nodeManager.toNodeID(packet.from)
+    private fun rememberReaction(packet: MeshPacket, session: RadioSessionContext) =
+        radioInterfaceService.launchSessionWork(scope, session) {
+            val decoded = packet.decoded ?: return@launchSessionWork
+            val emoji = decoded.payload.toByteArray().decodeToString()
+            val fromId = nodeManager.toNodeID(packet.from)
 
-        val fromNode = nodeManager.nodeDBbyNodeNum[packet.from] ?: Node(num = packet.from)
-        val toNode = nodeManager.nodeDBbyNodeNum[packet.to] ?: Node(num = packet.to)
+            val fromNode = nodeManager.nodeDBbyNodeNum[packet.from] ?: Node(num = packet.from)
+            val toNode = nodeManager.nodeDBbyNodeNum[packet.to] ?: Node(num = packet.to)
 
-        val reaction =
-            Reaction(
-                replyId = decoded.reply_id,
-                user = fromNode.user,
-                emoji = emoji,
-                timestamp = nowMillis,
-                snr = packet.rx_snr,
-                rssi = packet.rx_rssi,
-                hopsAway =
-                if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {
-                    HOPS_AWAY_UNAVAILABLE
-                } else {
-                    packet.hop_start - packet.hop_limit
-                },
-                packetId = packet.id,
-                status = MessageStatus.RECEIVED,
-                to = toNode.user.id,
-                channel = packet.channel,
-            )
-
-        // Check for duplicates before inserting
-        val existingReactions = packetRepository.value.findReactionsWithId(packet.id)
-        if (existingReactions.isNotEmpty()) {
-            Logger.d {
-                "Skipping duplicate reaction: packetId=${packet.id} replyId=${decoded.reply_id} " +
-                    "from=$fromId emoji=$emoji (already have ${existingReactions.size} reaction(s))"
-            }
-            return@handledLaunch
-        }
-
-        packetRepository.value.insertReaction(reaction, nodeManager.myNodeNum.value ?: 0)
-
-        // Find the original packet to get the contactKey
-        packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
-            // Skip notification if the original message was filtered
-            val targetId =
-                if (originalPacket.source is NodeAddress.Local) originalPacket.to else originalPacket.from
-            val contactKey = "${originalPacket.channel}$targetId"
-            val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
-            val nodeMuted = nodeManager.getNodeById(fromId)?.isMuted == true
-            val isSilent = conversationMuted || nodeMuted
-
-            if (!isSilent) {
-                val isBroadcast = originalPacket.destination is NodeAddress.Broadcast
-                val channelName =
-                    if (isBroadcast) {
-                        radioConfigRepository.channelSetFlow
-                            .first()
-                            .settings
-                            .getOrNull(originalPacket.channel)
-                            ?.name
+            val reaction =
+                Reaction(
+                    replyId = decoded.reply_id,
+                    user = fromNode.user,
+                    emoji = emoji,
+                    timestamp = nowMillis,
+                    // [Reaction.snr] is not nullable, so absent narrows to 0f here. See [snrOrNull].
+                    snr = packet.snrOrNull() ?: 0f,
+                    rssi = packet.rx_rssi,
+                    hopsAway =
+                    if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {
+                        HOPS_AWAY_UNAVAILABLE
                     } else {
-                        null
-                    }
-                serviceNotifications.updateReactionNotification(
-                    contactKey,
-                    getSenderName(dataMapper.toDataPacket(packet)!!),
-                    emoji,
-                    isBroadcast,
-                    channelName,
-                    isSilent,
+                        packet.hop_start - packet.hop_limit
+                    },
+                    packetId = packet.id,
+                    status = MessageStatus.RECEIVED,
+                    to = toNode.user.id,
+                    channel = packet.channel,
                 )
+
+            // Check for duplicates before inserting
+            val existingReactions = packetRepository.value.findReactionsWithId(packet.id)
+            if (existingReactions.isNotEmpty()) {
+                Logger.d {
+                    "Skipping duplicate reaction: packetId=${packet.id} replyId=${decoded.reply_id} " +
+                        "from=$fromId emoji=$emoji (already have ${existingReactions.size} reaction(s))"
+                }
+                return@launchSessionWork
+            }
+
+            packetRepository.value.insertReaction(reaction, nodeManager.myNodeNum.value ?: 0)
+
+            // Find the original packet to get the contactKey
+            packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
+                // Skip notification if the original message was filtered
+                val targetId =
+                    if (originalPacket.source is NodeAddress.Local) originalPacket.to else originalPacket.from
+                val contactKey = "${originalPacket.channel}$targetId"
+                val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
+                val nodeMuted = nodeManager.getNodeById(fromId)?.isMuted == true
+                val isSilent = conversationMuted || nodeMuted
+
+                if (!isSilent) {
+                    val isBroadcast = originalPacket.destination is NodeAddress.Broadcast
+                    val channelName =
+                        if (isBroadcast) {
+                            radioConfigRepository.channelSetFlow
+                                .first()
+                                .settings
+                                .getOrNull(originalPacket.channel)
+                                ?.name
+                        } else {
+                            null
+                        }
+                    serviceNotifications.updateReactionNotification(
+                        contactKey,
+                        getSenderName(dataMapper.toDataPacket(packet)!!),
+                        emoji,
+                        isBroadcast,
+                        channelName,
+                        isSilent,
+                    )
+                }
             }
         }
-    }
 
     companion object {
         private const val HOPS_AWAY_UNAVAILABLE = -1

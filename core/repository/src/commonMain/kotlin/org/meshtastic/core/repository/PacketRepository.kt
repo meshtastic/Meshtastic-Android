@@ -40,8 +40,8 @@ interface PacketRepository {
     /** Reactive flow of all conversation contacts, keyed by their contact identifier. */
     fun getContacts(): Flow<Map<String, DataPacket>>
 
-    /** Reactive paged flow of conversation contacts. */
-    fun getContactsPaged(): Flow<PagingData<DataPacket>>
+    /** Reactive paged flow of conversation contacts, each paired with its stored contact key. */
+    fun getContactsPaged(): Flow<PagingData<Pair<String, DataPacket>>>
 
     /** Returns the total number of messages in a conversation. */
     suspend fun getMessageCount(contact: String): Int

@@ -131,6 +131,8 @@ class FakeNodeRepository :
 
     override suspend fun getUnknownNodes(): List<Node> = _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> = _nodeDBbyNum.value
+
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         if (preserveFavorites) {
             _nodeDBbyNum.value = _nodeDBbyNum.value.filter { it.value.isFavorite }
@@ -166,9 +168,10 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
     }
 
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> {
         _myNodeInfo.value = mi
         _nodeDBbyNum.value = nodes.associateBy { it.num }
+        return emptyList()
     }
 
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {

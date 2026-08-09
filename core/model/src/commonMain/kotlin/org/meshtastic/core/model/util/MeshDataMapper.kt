@@ -36,7 +36,7 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
         return DataPacket(
             from = nodeIdLookup.toNodeID(packet.from),
             to = nodeIdLookup.toNodeID(packet.to),
-            time = packet.rx_time * 1000L,
+            time = (packet.rxTimeOrNull() ?: 0) * 1000L,
             id = packet.id,
             dataType = decoded.portnum.value,
             bytes = decoded.payload.toByteArray().toByteString(),
@@ -44,7 +44,7 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
             channel = if (packet.pki_encrypted == true) NodeAddress.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack == true,
             hopStart = packet.hop_start,
-            snr = packet.rx_snr,
+            snr = packet.snrOrNull(),
             rssi = packet.rx_rssi,
             replyId = decoded.reply_id,
             relayNode = packet.relay_node,

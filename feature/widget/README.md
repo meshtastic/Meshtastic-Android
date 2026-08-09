@@ -76,8 +76,8 @@ data class LocalStatsWidgetUiState(
 
 ### `LocalStatsWidgetStateProvider`
 
-Koin `@Single` that eagerly combines four repository flows:
-- `ServiceRepository.connectionState`
+Koin `@Single` that eagerly combines four reactive flows (`ConnectionStateProvider` is injected as the constructor param `connectionStateProvider`):
+- `ConnectionStateProvider.connectionState`
 - `NodeRepository.nodeDBbyNum` (online/total counts)
 - `NodeRepository.localStats`
 - `NodeRepository.ourNodeInfo`
@@ -103,25 +103,30 @@ Tapping the widget opens the app. The refresh button fires `RefreshLocalStatsAct
 The mesh service holds a reference to `AppWidgetUpdater` (defined in `:core:repository`) without depending on Android widget APIs. `AndroidAppWidgetUpdater` in this module provides the concrete implementation:
 
 ```kotlin
-class AndroidAppWidgetUpdater : AppWidgetUpdater {
+// Simplified — the real updateAll() wraps the call in a try/catch
+@Single
+class AndroidAppWidgetUpdater(
+    private val context: Context,
+    stateProvider: LocalStatsWidgetStateProvider,
+) : AppWidgetUpdater {
     override suspend fun updateAll() {
         LocalStatsWidget().updateAll(context)
     }
 }
 ```
 
-This keeps the service layer platform-agnostic while still enabling widget refresh on data changes.
+It also observes `stateProvider.state` itself (debounced 500 ms, ignoring timestamp-only changes) and re-renders whenever widget instances exist — Glance compositions are ephemeral, so re-renders must be driven externally. This keeps the service layer platform-agnostic while still enabling widget refresh on data changes.
 
 ## Dependency Graph
 
-```
+### Key Dependencies
+
+```text
 feature:widget (Android only)
   ├── core:common, core:model, core:resources, core:repository
-  ├── androidx.glance.appwidget, glance.material3, glance.preview
+  ├── androidx.glance.appwidget, glance.material3, glance.preview, glance.appwidget.preview
   └── compose.multiplatform.ui (LocalConfiguration, LocalDensity)
 ```
-
-## Dependency Graph
 
 <!--region graph-->
 ```mermaid

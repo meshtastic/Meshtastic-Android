@@ -85,7 +85,7 @@ internal fun MeshBeaconInvitationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (region != null && region != RegionCode.UNSET) {
+            if (region != RegionCode.UNSET) {
                 Text(
                     text = stringResource(Res.string.mesh_beacon_offer_region, region.name),
                     style = MaterialTheme.typography.labelMedium,
@@ -99,7 +99,7 @@ internal fun MeshBeaconInvitationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (offer.rssi != 0 || offer.snr != 0f) {
+            if (offer.rssi != null || offer.snr != null) {
                 Text(
                     text =
                     stringResource(

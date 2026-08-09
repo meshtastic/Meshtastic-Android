@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.common.util.safeCatchingAll
@@ -58,7 +59,12 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_disabled
+import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
+import org.meshtastic.core.resources.bluetooth_scan_missing_permission
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
+import org.meshtastic.core.resources.bluetooth_scan_too_frequent
+import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -71,6 +77,55 @@ import kotlin.time.Duration.Companion.seconds
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
+
+/**
+ * How long to block scan restarts after a scan-start failure.
+ *
+ * A cooldown only helps where retrying too soon is itself the problem — Android's scan-start quota, or a registration
+ * failure that needs time to settle. [BleScanStartFailureReason.BluetoothDisabled] and
+ * [BleScanStartFailureReason.LocationServicesDisabled] instead clear the moment the user flips a system toggle, so
+ * holding the scan button dead for 15s after they have fixed it would just look broken.
+ */
+private fun effectiveBleScanRetryCooldown(reason: BleScanStartFailureReason, retryAfter: Duration?): Duration =
+    when (reason) {
+        BleScanStartFailureReason.BluetoothDisabled,
+        BleScanStartFailureReason.LocationServicesDisabled,
+        -> retryAfter ?: Duration.ZERO
+
+        BleScanStartFailureReason.ApplicationRegistrationFailed,
+        BleScanStartFailureReason.MissingScanPermission,
+        BleScanStartFailureReason.ScanningTooFrequently,
+        ->
+            maxOf(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN, retryAfter ?: Duration.ZERO)
+    }
+
+/**
+ * Last-resort English copy used only when compose-resources cannot resolve the translated string.
+ *
+ * Kept in step with the `bluetooth_scan_*` resources so the degraded path still names the actual problem instead of
+ * falling back to generic "scan couldn't start" advice for every reason.
+ */
+private fun untranslatedScanStartFailureMessage(reason: BleScanStartFailureReason, retryCooldownSeconds: Long): String =
+    when (reason) {
+        BleScanStartFailureReason.ScanningTooFrequently -> {
+            val unit = if (retryCooldownSeconds == 1L) "second" else "seconds"
+            "Bluetooth scan limit reached. Try again in $retryCooldownSeconds $unit."
+        }
+
+        BleScanStartFailureReason.BluetoothDisabled -> "Bluetooth is off. Turn it on to scan for nearby devices."
+
+        BleScanStartFailureReason.LocationServicesDisabled ->
+            "Location services are off. Turn them on to scan for nearby devices."
+
+        BleScanStartFailureReason.ApplicationRegistrationFailed,
+        BleScanStartFailureReason.MissingScanPermission,
+        -> BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK
+    }
+
+private fun Duration.roundedUpWholeSeconds(): Long {
+    val completeSeconds = inWholeSeconds
+    return completeSeconds + if (this > completeSeconds.seconds) 1 else 0
+}
 
 /**
  * Platform-neutral ViewModel that drives the Connections screen: device discovery (BLE/USB/TCP), scan state, current
@@ -391,25 +446,47 @@ open class ScannerViewModel(
         scanJob = null
         _isBleScanning.value = false
         uiPrefs.setBleAutoScan(false)
-        startBleScanRetryCooldown()
+        val retryCooldown = effectiveBleScanRetryCooldown(exception.reason, exception.retryAfter)
+        if (retryCooldown > Duration.ZERO) startBleScanRetryCooldown(retryCooldown)
 
         Logger.w(exception) {
             "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
         }
+        val retryCooldownSeconds = retryCooldown.roundedUpWholeSeconds()
         val errorMessage =
-            safeCatchingAll { getStringSuspend(Res.string.bluetooth_scan_start_failed) }
-                .getOrDefault(BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK)
+            safeCatchingAll {
+                when (exception.reason) {
+                    BleScanStartFailureReason.MissingScanPermission ->
+                        getStringSuspend(Res.string.bluetooth_scan_missing_permission)
+
+                    BleScanStartFailureReason.ApplicationRegistrationFailed ->
+                        getStringSuspend(Res.string.bluetooth_scan_start_failed)
+
+                    BleScanStartFailureReason.ScanningTooFrequently ->
+                        getPluralStringSuspend(
+                            Res.plurals.bluetooth_scan_too_frequent,
+                            retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                            retryCooldownSeconds,
+                        )
+
+                    BleScanStartFailureReason.BluetoothDisabled -> getStringSuspend(Res.string.bluetooth_disabled)
+
+                    BleScanStartFailureReason.LocationServicesDisabled ->
+                        getStringSuspend(Res.string.bluetooth_scan_location_services_disabled)
+                }
+            }
+                .getOrDefault(untranslatedScanStartFailureMessage(exception.reason, retryCooldownSeconds))
         serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
     }
 
-    private fun startBleScanRetryCooldown() {
+    private fun startBleScanRetryCooldown(cooldown: Duration) {
         val generation = ++scanStartFailureCooldownGeneration
         scanStartFailureCooldownActive.value = true
         scanStartFailureCooldownJob?.cancel()
         scanStartFailureCooldownJob =
             viewModelScope.launch {
                 try {
-                    delay(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN)
+                    delay(cooldown)
                 } finally {
                     if (scanStartFailureCooldownGeneration == generation) {
                         scanStartFailureCooldownActive.value = false

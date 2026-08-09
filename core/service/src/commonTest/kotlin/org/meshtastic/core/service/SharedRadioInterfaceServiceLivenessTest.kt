@@ -27,12 +27,15 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -45,6 +48,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.TransportDisconnectReason
@@ -54,8 +58,10 @@ import org.meshtastic.core.testing.FakeRadioTransport
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -75,6 +81,17 @@ class SharedRadioInterfaceServiceLivenessTest {
 
     private lateinit var processLifecycleOwner: TestLifecycleOwner
 
+    @Test
+    fun `transport session diagnostic redacts its address`() {
+        val rawAddress = "xAA:BB:CC:DD:EE:FF"
+
+        val diagnostic = RadioTransportSession(generation = 7L, address = rawAddress).toString()
+
+        assertFalse(rawAddress in diagnostic)
+        assertTrue("generation=7" in diagnostic)
+        assertTrue("address=..." in diagnostic)
+    }
+
     @BeforeTest
     fun setUp() {
         // processLifecycle.coroutineScope uses Dispatchers.Main.immediate internally;
@@ -86,6 +103,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         // USB tests leave serialDeviceKeys non-empty; reset before each test so non-USB
         // tests start from the documented empty default.
         serialDeviceKeys.value = emptySet()
+        bluetoothRepository.setBluetoothEnabled(true)
     }
 
     @AfterTest
@@ -229,12 +247,14 @@ class SharedRadioInterfaceServiceLivenessTest {
      * to bring the service to Connected state (FakeRadioTransport does not call onConnect itself).
      *
      * Pass [transportProvider] to swap in a custom test double (e.g. a suspending-close fake) instead of the default
-     * [FakeRadioTransport]; the default records each created transport in [createdTransports].
+     * [FakeRadioTransport]; the default records each created transport in [createdTransports]. Set [startConnected] to
+     * false when a test needs to inspect construction or an initial transport-start failure before connection.
      */
     private fun createConnectedService(
         address: String,
         transportProvider: () -> RadioTransport = { FakeRadioTransport().also { createdTransports.add(it) } },
         networkAvailability: MutableStateFlow<Boolean> = MutableStateFlow(true),
+        startConnected: Boolean = true,
     ): SharedRadioInterfaceService {
         every { networkRepository.networkAvailable } returns networkAvailability
         every { networkRepository.resolvedList } returns MutableSharedFlow()
@@ -262,10 +282,212 @@ class SharedRadioInterfaceServiceLivenessTest {
         // Register the service so tearDown can disconnect it deterministically (the heartbeat loop
         // launched in _serviceScope would otherwise outlive the test).
         services.add(service)
-        service.connect()
-        service.onConnect()
+        if (startConnected) {
+            service.connect()
+            service.onConnect()
+        }
         return service
     }
+
+    @Test
+    fun `transport factory failure revokes admitted session and retry uses a fresh generation`() =
+        runTest(testDispatcher) {
+            bluetoothRepository.setBluetoothEnabled(false)
+            val networkAvailability = MutableStateFlow(false)
+            var failCreation = true
+            var failedSessionCallback: RadioInterfaceService? = null
+            val service =
+                createConnectedService(
+                    address = "t192.0.2.1",
+                    networkAvailability = networkAvailability,
+                    startConnected = false,
+                )
+            every { transportFactory.createTransport(any(), any()) } calls
+                {
+                    if (failCreation) {
+                        val callback = it.args[1] as RadioInterfaceService
+                        failedSessionCallback = callback
+                        callback.onConnect()
+                        throw IllegalStateException("transport factory failed")
+                    }
+                    FakeRadioTransport().also { createdTransports.add(it) }
+                }
+            try {
+                service.connect()
+                testDispatcher.scheduler.runCurrent()
+
+                assertNull(service.activeSession.value, "a failed factory call must revoke the admitted session")
+                assertEquals(1L, service.sessionGeneration.value, "the observed failed generation stays consumed")
+                assertEquals(
+                    ConnectionState.Disconnected,
+                    service.connectionState.value,
+                    "a synchronous partial callback must not leave the failed transport connected",
+                )
+                assertTrue(createdTransports.isEmpty(), "a failed factory call must not publish a transport")
+
+                val queuedFrame = async(start = CoroutineStart.UNDISPATCHED) { service.receivedData.first() }
+                try {
+                    val revokedCallback = requireNotNull(failedSessionCallback)
+                    revokedCallback.onConnect()
+                    revokedCallback.handleFromRadio(byteArrayOf(1, 2, 3))
+                    testDispatcher.scheduler.runCurrent()
+                    assertEquals(
+                        ConnectionState.Disconnected,
+                        service.connectionState.value,
+                        "callbacks from a revoked factory session must not restore connection state",
+                    )
+                    assertFalse(
+                        queuedFrame.isCompleted,
+                        "callbacks from a revoked factory session must not enqueue data",
+                    )
+                } finally {
+                    queuedFrame.cancel()
+                }
+
+                failCreation = false
+                service.connect()
+                testDispatcher.scheduler.runCurrent()
+
+                assertEquals(2L, service.sessionGeneration.value, "a retry must receive a strictly newer generation")
+                assertEquals(2L, service.activeSession.value?.generation)
+                assertEquals("t192.0.2.1", service.activeSession.value?.address)
+                assertEquals(1, createdTransports.size, "the successful retry must publish exactly one transport")
+            } finally {
+                service.disconnect()
+            }
+        }
+
+    @Test
+    fun `setDeviceAddress contains factory failure and same-address repair can retry`() = runTest(testDispatcher) {
+        bluetoothRepository.setBluetoothEnabled(false)
+        val networkAvailability = MutableStateFlow(false)
+        var failCreation = true
+        val service =
+            createConnectedService(
+                address = "t192.0.2.1",
+                networkAvailability = networkAvailability,
+                startConnected = false,
+            )
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                if (failCreation) throw IllegalStateException("transport factory failed")
+                FakeRadioTransport().also { createdTransports.add(it) }
+            }
+        try {
+            assertTrue(service.setDeviceAddress("t192.0.2.2"))
+            testDispatcher.scheduler.runCurrent()
+
+            assertNull(service.activeSession.value, "the failed setDeviceAddress start must revoke its session")
+            assertEquals(1L, service.sessionGeneration.value, "the failed generation remains consumed")
+            assertTrue(createdTransports.isEmpty(), "a failed factory call must not publish a transport")
+
+            failCreation = false
+            assertTrue(service.setDeviceAddress("t192.0.2.2"), "a disconnected same-address selection is a repair")
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(2L, service.sessionGeneration.value, "the repair retry must use a fresh generation")
+            assertEquals(2L, service.activeSession.value?.generation)
+            assertEquals("t192.0.2.2", service.activeSession.value?.address)
+            assertEquals(1, createdTransports.size)
+        } finally {
+            service.disconnect()
+        }
+    }
+
+    @Test
+    fun `ordered session lane serializes handshake work while independent leases remain concurrent`() =
+        runTest(testDispatcher) {
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+            val session = requireNotNull(service.activeSession.value)
+            val firstStarted = CompletableDeferred<Unit>()
+            val releaseFirst = CompletableDeferred<Unit>()
+            val secondStarted = CompletableDeferred<Unit>()
+            val independentStarted = CompletableDeferred<Unit>()
+
+            val first = launch {
+                service.runWhileSessionActive(session) {
+                    firstStarted.complete(Unit)
+                    releaseFirst.await()
+                }
+            }
+            firstStarted.await()
+            val second = launch { service.runWhileSessionActive(session) { secondStarted.complete(Unit) } }
+            val independent = launch { service.runWithSessionLease(session) { independentStarted.complete(Unit) } }
+            try {
+                testDispatcher.scheduler.runCurrent()
+
+                assertFalse(secondStarted.isCompleted, "ordered work must wait for the current lane owner")
+                assertTrue(independentStarted.isCompleted, "independent deferred work must acquire its own lease")
+
+                releaseFirst.complete(Unit)
+                first.join()
+                second.join()
+                independent.join()
+                assertTrue(secondStarted.isCompleted)
+            } finally {
+                releaseFirst.complete(Unit)
+                first.cancel()
+                second.cancel()
+                independent.cancel()
+                first.join()
+                second.join()
+                independent.join()
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
+
+    @Test
+    fun `transport teardown remains cancellation safe while draining existing session leases`() =
+        runTest(testDispatcher) {
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+            val session = requireNotNull(service.activeSession.value)
+            val workStarted = CompletableDeferred<Unit>()
+            val releaseWork = CompletableDeferred<Unit>()
+            val leaseStillCurrent = CompletableDeferred<Boolean>()
+
+            val workJob = launch {
+                assertTrue(
+                    service.runWithSessionLease(session) { lease ->
+                        workStarted.complete(Unit)
+                        releaseWork.await()
+                        leaseStillCurrent.complete(lease.isCurrent())
+                    },
+                )
+            }
+            workStarted.await()
+
+            val disconnectJob = launch { service.disconnect() }
+            try {
+                testDispatcher.scheduler.runCurrent()
+
+                assertFalse(disconnectJob.isCompleted, "disconnect must wait for the admitted lease")
+                assertEquals(
+                    session,
+                    service.activeSession.value,
+                    "the session token remains published until its admitted operation finishes",
+                )
+                assertFalse(service.isSessionActive(session), "teardown must reject new work immediately")
+                assertFalse(
+                    service.runWhileSessionActive(session) { error("late operation must not run") },
+                    "work queued after admission closes must be rejected",
+                )
+                disconnectJob.cancel()
+            } finally {
+                releaseWork.complete(Unit)
+                workJob.join()
+                assertTrue(
+                    leaseStillCurrent.await(),
+                    "an admitted lease must remain authoritative until its transaction-bound work returns",
+                )
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+                disconnectJob.join()
+            }
+
+            assertNull(service.activeSession.value, "revocation publishes only after admitted work drains")
+            assertTrue(createdTransports.single().closeCalled, "cancellation must not strand the revoked transport")
+        }
 
     // ─── BLE: Liveness timeout triggers recovery ───────────────────────────────────────────────
 
@@ -287,6 +509,43 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertEquals(2, createdTransports.size, "Liveness restart should create exactly one fresh transport")
             assertTrue(createdTransports.first().closeCalled, "Old transport must be closed")
             assertEquals(1, createdTransports.first().closeCount, "Old transport closed exactly once")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `BLE liveness restart contains factory failure and a later connect can retry`() = runTest(testDispatcher) {
+        clock = 0L
+        var failRestart = false
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        every { transportFactory.createTransport(any(), any()) } calls
+            {
+                if (failRestart) throw IllegalStateException("restart factory failed")
+                FakeRadioTransport().also { createdTransports.add(it) }
+            }
+        try {
+            failRestart = true
+            clock = 65_000L
+            service.checkLiveness()
+            testDispatcher.scheduler.runCurrent()
+
+            assertTrue(
+                createdTransports.single().closeCalled,
+                "the failed restart must still close the old transport",
+            )
+            assertNull(service.activeSession.value, "the failed replacement session must be revoked")
+            assertEquals(2L, service.sessionGeneration.value, "the failed replacement generation remains consumed")
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value)
+
+            failRestart = false
+            service.connect()
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(3L, service.sessionGeneration.value, "the later retry must receive a fresh generation")
+            assertEquals(3L, service.activeSession.value?.generation)
+            assertEquals(2, createdTransports.size, "the later retry must publish one replacement transport")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)
@@ -523,12 +782,20 @@ class SharedRadioInterfaceServiceLivenessTest {
     @Test
     fun `inbound data resets liveness timer so timeout does not fire`() = runTest(testDispatcher) {
         clock = 0L
-        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        val address = "xAA:BB:CC:DD:EE:FF"
+        val service = createConnectedService(address)
 
         try {
             // Advance 30s, then receive data (resets lastDataReceivedMillis to clock=30s)
             clock = 30_000L
-            service.handleFromRadio(byteArrayOf(1, 2, 3))
+            val payload = byteArrayOf(1, 2, 3)
+            val received = async(start = CoroutineStart.UNDISPATCHED) { service.receivedData.first() }
+            service.handleFromRadio(payload)
+            val frame = received.await()
+
+            assertEquals(address, frame.session.address)
+            assertEquals(service.sessionGeneration.value, frame.session.generation)
+            assertContentEquals(payload, frame.payload.toByteArray())
 
             // 30s since last data → within 60s threshold → should NOT fire
             clock = 60_000L
@@ -548,6 +815,132 @@ class SharedRadioInterfaceServiceLivenessTest {
                 "Liveness should fire after silence exceeds threshold since last inbound data",
             )
         } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression for the field wedge behind "app shows Connected but the node stops updating": frames dropped by a full
+     * receive queue must NOT feed the liveness timer. Before the fix, [SharedRadioInterfaceService] stamped
+     * `lastDataReceivedMillis` on arrival (even for dropped frames), so a wedged consumer kept liveness satisfied
+     * forever while every frame was discarded.
+     */
+    @Test
+    fun `frames dropped by a full receive queue do not reset the liveness timer`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            // No collector attached: fill the channel to capacity at t=0. All of these are admitted
+            // and stamp liveness at 0.
+            val payload = byteArrayOf(1)
+            repeat(SharedRadioInterfaceService.RECEIVE_QUEUE_CAPACITY) { service.handleFromRadio(payload) }
+
+            // A frame arriving at t=30s is DROPPED (queue full). It must not count as liveness data.
+            clock = 30_000L
+            service.handleFromRadio(payload)
+
+            // At t=65s the silence is 65s if the drop was correctly ignored (fires), but only 35s if
+            // the drop stamped the timer (must not happen).
+            clock = 65_000L
+            service.checkLiveness()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertTrue(
+                createdTransports.first().closeCalled,
+                "Liveness must fire on queue-full silence — dropped frames must not feed the timer",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    // ─── Session handler timeout: the pipeline must not wedge forever ───────────────────────────
+
+    /**
+     * Regression for the 2.8.0 stale-connection wedge: a handler that suspends indefinitely inside
+     * [SharedRadioInterfaceService.runWhileSessionActive] holds the session-operation lane (the whole inbound
+     * pipeline). It must be cancelled at the handler timeout so queued work behind it can run.
+     */
+    @Test
+    fun `wedged session handler is cancelled at the timeout and the pipeline continues`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        val session = requireNotNull(service.activeSession.value)
+        val wedgeStarted = CompletableDeferred<Unit>()
+        val neverReleased = CompletableDeferred<Unit>()
+        var wedgeRanToCompletion = false
+
+        val wedged = launch {
+            service.runWhileSessionActive(session) {
+                wedgeStarted.complete(Unit)
+                neverReleased.await() // simulates a handler stuck on an unbounded suspension
+                wedgeRanToCompletion = true
+            }
+        }
+        wedgeStarted.await()
+        val nextStarted = CompletableDeferred<Unit>()
+        val next = launch { service.runWhileSessionActive(session) { nextStarted.complete(Unit) } }
+        try {
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(nextStarted.isCompleted, "ordered work is serialized behind the wedged handler")
+
+            // Cross the 2-minute handler timeout: the wedged block is cancelled, releasing the lane.
+            advanceTimeBy(121_000L)
+            wedged.join()
+            next.join()
+
+            assertFalse(wedgeRanToCompletion, "the wedged handler must have been cancelled, not completed")
+            assertTrue(nextStarted.isCompleted, "the handler timeout must release the pipeline for queued work")
+        } finally {
+            neverReleased.complete(Unit)
+            wedged.cancel()
+            next.cancel()
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * The user-facing half of the same wedge: disconnect() drains admitted leases before teardown, so a handler stuck
+     * forever previously made disconnect unreachable (only a force-stop recovered). The handler timeout must bound that
+     * wait.
+     */
+    @Test
+    fun `disconnect completes after a wedged handler is timed out`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        val session = requireNotNull(service.activeSession.value)
+        val wedgeStarted = CompletableDeferred<Unit>()
+        val neverReleased = CompletableDeferred<Unit>()
+
+        val wedged = launch {
+            service.runWhileSessionActive(session) {
+                wedgeStarted.complete(Unit)
+                neverReleased.await()
+            }
+        }
+        wedgeStarted.await()
+
+        val disconnectJob = launch { service.disconnect() }
+        try {
+            testDispatcher.scheduler.runCurrent()
+            assertFalse(disconnectJob.isCompleted, "disconnect must wait while the lease is admitted")
+
+            // Cross the handler timeout (cancels the wedged block, draining the lease) plus the
+            // polite-disconnect drain window inside stopTransportLocked.
+            advanceTimeBy(121_000L)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            disconnectJob.join()
+            wedged.join()
+
+            assertNull(service.activeSession.value, "teardown must complete once the wedged lease is released")
+        } finally {
+            neverReleased.complete(Unit)
+            wedged.cancel()
             service.disconnect()
             advanceTimeBy(1_000L)
         }
@@ -1678,6 +2071,129 @@ class SharedRadioInterfaceServiceLivenessTest {
                 "Duplicate same-key emission must NOT produce a second restart",
             )
             assertEquals(2, createdTransports.size, "Exactly one restart total (1 initial + 1 replug)")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    // ─── Post-OTA GATT cache invalidation flag lifecycle ───────────────────────────────────────
+
+    /**
+     * The one-shot cache-invalidation flag is armed by
+     * [SharedRadioInterfaceService.requestGattCacheInvalidationOnNextConnect] and consumed exactly once by
+     * [SharedRadioInterfaceService.consumeGattCacheInvalidationRequest] (atomic getAndSet).
+     * [SharedRadioInterfaceService.disconnect] must clear any still-pending flag so a later reconnect does not silently
+     * trigger a stale invalidation.
+     */
+    @Test
+    fun `gatt cache invalidation flag is consumed once and cleared on disconnect`() = runTest(testDispatcher) {
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertFalse(
+                service.consumeGattCacheInvalidationRequest(),
+                "flag must default to unset before any request",
+            )
+
+            service.requestGattCacheInvalidationOnNextConnect()
+            assertTrue(
+                service.consumeGattCacheInvalidationRequest(),
+                "first consume after request must return true",
+            )
+            assertFalse(
+                service.consumeGattCacheInvalidationRequest(),
+                "second consume must return false (one-shot getAndSet)",
+            )
+
+            // Re-arm; disconnect below must clear it.
+            service.requestGattCacheInvalidationOnNextConnect()
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+
+        assertFalse(
+            service.consumeGattCacheInvalidationRequest(),
+            "disconnect must clear the pending GATT cache invalidation flag",
+        )
+    }
+
+    /**
+     * Rebinding to a DIFFERENT device address must drop the pending flag — the cache invalidation was requested for the
+     * previous device's post-OTA reboot and must not bleed into the new device's connection.
+     * ([SharedRadioInterfaceService.setDeviceAddress] clears `gattCacheInvalidationRequested` when the address
+     * changes.)
+     */
+    @Test
+    fun `setDeviceAddress with a different address clears the pending gatt cache invalidation flag`() =
+        runTest(testDispatcher) {
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+            try {
+                service.requestGattCacheInvalidationOnNextConnect()
+
+                assertTrue(service.setDeviceAddress("xBB:11:22:33:44:55"), "setDeviceAddress must accept a new address")
+                // The clear happens inside the launched transportMutex.withLock; flush it.
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+
+                assertFalse(
+                    service.consumeGattCacheInvalidationRequest(),
+                    "switching to a different device address must clear the pending flag",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
+
+    /**
+     * Counterpart: rebinding to the SAME address is a documented no-op ([SharedRadioInterfaceService.setDeviceAddress]
+     * early-returns when already Connected to that address), so it must NOT touch the pending flag.
+     */
+    @Test
+    fun `setDeviceAddress with the same address preserves the pending gatt cache invalidation flag`() =
+        runTest(testDispatcher) {
+            val address = "xAA:BB:CC:DD:EE:FF"
+            val service = createConnectedService(address)
+            try {
+                service.requestGattCacheInvalidationOnNextConnect()
+
+                assertFalse(
+                    service.setDeviceAddress(address),
+                    "setDeviceAddress with the same connected address is a documented no-op (returns false)",
+                )
+                testDispatcher.scheduler.runCurrent()
+
+                assertTrue(
+                    service.consumeGattCacheInvalidationRequest(),
+                    "same-address rebind must preserve the pending GATT cache invalidation flag",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
+
+    @Test
+    fun `setDeviceAddress after deselect preserves pending gatt cache invalidation flag`() = runTest(testDispatcher) {
+        val address = "xAA:BB:CC:DD:EE:FF"
+        val service = createConnectedService(address)
+        try {
+            // OTA handler deselects to free the GATT
+            assertTrue(service.setDeviceAddress("n"), "deselect must succeed")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            // Post-OTA: arm flag, then re-select the SAME device
+            service.requestGattCacheInvalidationOnNextConnect()
+            assertTrue(service.setDeviceAddress(address), "re-select must start transport")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertTrue(
+                service.consumeGattCacheInvalidationRequest(),
+                "post-OTA re-select (null to address) must preserve the pending flag",
+            )
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

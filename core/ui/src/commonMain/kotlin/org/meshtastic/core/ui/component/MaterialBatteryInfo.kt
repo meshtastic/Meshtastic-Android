@@ -58,8 +58,9 @@ fun MaterialBatteryInfo(
     level: Int?,
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    unknownLabel: String = stringResource(Res.string.unknown),
 ) {
-    val levelString = level?.let { MetricFormatter.percent(it) } ?: stringResource(Res.string.unknown)
+    val levelString = level?.let { MetricFormatter.percent(it) } ?: unknownLabel
 
     Row(
         modifier = modifier,
@@ -71,7 +72,7 @@ fun MaterialBatteryInfo(
                 modifier = Modifier.size(SIZE_ICON.dp),
                 imageVector = MeshtasticIcons.BatteryUnknown,
                 tint = contentColor.copy(alpha = 0.65f),
-                contentDescription = stringResource(Res.string.unknown),
+                contentDescription = unknownLabel,
             )
         } else if (level > 100) {
             Icon(

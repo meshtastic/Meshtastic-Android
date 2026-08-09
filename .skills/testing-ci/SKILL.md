@@ -8,7 +8,7 @@ Guidelines and commands for verifying code changes locally and understanding the
 Run in a single invocation for routine changes to ensure code formatting, analysis, and basic compilation:
 
 ```bash
-./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
+./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests
 ```
 
 > **Why no `clean`?** Incremental builds are safe and significantly faster. Only use `clean` when debugging stale cache issues.
@@ -19,7 +19,7 @@ Run in a single invocation for routine changes to ensure code formatting, analys
 > `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP plugin.
 > Conversely, `allTests` does **not** cover pure-Android modules (`:androidApp`, `:core:barcode`, etc.), which is why both `test` and `allTests` are needed.
 
-*Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
+*Note: If testing Compose UI on the JVM (Robolectric), pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 ### SharedFlow + backgroundScope in `runTest`
 
@@ -99,7 +99,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
+   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`androidApp`, `desktopApp`, `core:barcode`).
    Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
@@ -127,11 +127,12 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 - **Robolectric SDK caching:** The `gradle-setup` composite action caches `~/.m2/repository/org/robolectric` to prevent flaky `SocketException` on SDK downloads. Cache key is `robolectric-{version}-sdk{level}` — update when bumping version or SDK level.
 - **`mavenLocal()` gated:** Disabled by default to prevent CI cache poisoning. Pass `-PuseMavenLocal` for local JitPack testing.
 - **JUnit parallel execution:** Enabled project-wide with classes running sequentially (`junit.jupiter.execution.parallel.mode.classes.default=same_thread`) to avoid `Dispatchers.setMain()` races. Cross-module parallelism comes from Gradle forks (`maxParallelForks`).
-- **`test-retry` plugin:** Applied to all module types (maxRetries=2, maxFailures=10).
+- **Test retry:** Develocity plugin's native retry (`develocity.testRetry` on each Test task), configured in `ProjectExtensions.kt` (maxRetries=2, maxFailures=10). Screenshot tests opt out (maxRetries=0). The standalone `org.gradle.test-retry` plugin was removed.
 - **`fail-fast: false`:** Test sharding does not cancel other shards on failure.
 - **Explicit Gradle task paths:** Prefer `app:lintFdroidDebug` over shorthand `lintDebug` in CI.
 - **Pull request CI:** Main-only (`.github/workflows/pull-request.yml` targets `main`).
-- **Cache writes:** Trusted on `main` and merge queue runs; other refs use read-only cache.
+- **Merge queue hygiene:** `merge-queue.yml` cancels superseded runs for the same PR (GitHub does not auto-cancel destroyed merge-group runs) and skips the heavy pipeline for docs-only entries (`docs/**`, `*.md`). `rb-check` runs ONLY in the merge queue. `main-check.yml` passes `run_lint: false` — every main commit is a merge-queue-verified merge commit, so main pushes only rebuild the debug APKs for the snapshot release.
+- **Cache writes:** Trusted on `main` only; merge-queue cache scopes are throwaway branches (writes unrecoverable), so the queue reads only, like all other refs.
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.
 

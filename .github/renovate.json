@@ -58,6 +58,13 @@
       "automerge": true
     },
     {
+      "description": "Protobufs: only accept the dot-form snapshot scheme (X.Y.Z.N-g<sha>-SNAPSHOT) or plain releases. Legacy hyphen-SHA snapshots (e.g. 2.7.26-678281c-SNAPSHOT) tokenize their digit-leading SHA as a huge int that outranks the dot-form commit-count in Renovate's maven comparator, so without this constraint Renovate keeps proposing a downgrade to an old snapshot (see PR #6229). The snapshot repo has no delete API; legacy versions auto-prune after 90 days.",
+      "matchPackageNames": [
+        "org.meshtastic:protobufs"
+      ],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(\\.\\d+-g[0-9a-f]+-SNAPSHOT)?$/"
+    },
+    {
       "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180)",
       "groupName": "compose-multiplatform",
       "matchPackageNames": [

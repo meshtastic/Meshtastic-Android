@@ -37,7 +37,6 @@ import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
 private const val MILLIS_PER_SECOND = 1000L
 private const val MAX_BATTERY_PERCENT = 100
-private const val SNR_UNSET_THRESHOLD = 100f
 
 /** Pre-resolved localized strings for TalkBack node descriptions. */
 @Immutable
@@ -82,8 +81,7 @@ internal fun buildNodeDescription(
     hopsAway: Int,
     batteryLevel: Int?,
     distance: String?,
-    snr: Float,
-    rssi: Int,
+    snr: Float?,
     viaMqtt: Boolean,
     strings: NodeDescriptionStrings,
     lastHeardIsRelative: Boolean = true,
@@ -122,7 +120,9 @@ internal fun buildNodeDescription(
         append(", ")
         append(strings.distanceAway.replace("%s", it))
     }
-    if (hopsAway == 0 && !viaMqtt && snr < SNR_UNSET_THRESHOLD && rssi < 0) {
+    // Rated from SNR alone: RSSI cannot indicate demodulability without the noise floor, and the old `rssi < 0` gate
+    // suppressed the announcement for a genuine 0 dBm reading.
+    if (hopsAway == 0 && !viaMqtt && snr != null) {
         val quality = determineSignalQuality(snr, modemPreset)
         append(", ")
         append(strings.signal.replace("%s", quality.name.lowercase()))

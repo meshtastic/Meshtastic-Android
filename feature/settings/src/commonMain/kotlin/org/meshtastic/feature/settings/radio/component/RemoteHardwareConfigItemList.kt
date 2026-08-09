@@ -34,6 +34,7 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.ModuleConfig
 
 @Composable
@@ -44,6 +45,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.remote_hardware),
         onBack = onBack,
         configState = formState,

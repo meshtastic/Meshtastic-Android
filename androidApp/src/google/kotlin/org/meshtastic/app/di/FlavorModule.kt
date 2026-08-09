@@ -18,18 +18,30 @@
 
 package org.meshtastic.app.di
 
+import com.datadog.android.okhttp.DatadogEventListener
+import com.datadog.android.okhttp.DatadogInterceptor
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
+import org.meshtastic.app.theme.GoogleFontsEventFontResolver
+import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.car.di.FeatureCarModule
 
 @Module(
-    includes =
-    [
-        GoogleNetworkModule::class,
-        GoogleMapsKoinModule::class,
-        GoogleAiModule::class,
-        AppFunctionsModule::class,
-        FeatureCarModule::class,
-    ],
+    includes = [GoogleMapsKoinModule::class, GoogleAiModule::class, AppFunctionsModule::class, FeatureCarModule::class],
 )
-class FlavorModule
+class FlavorModule {
+    /** Downloadable Google Fonts for event branding — Google flavor only. */
+    @Single fun eventFontResolver(): EventFontResolver = GoogleFontsEventFontResolver()
+
+    /**
+     * Datadog network instrumentation for the shared Ktor `HttpClient`. The interceptor emits RUM Resource spans with
+     * full DNS/connect/SSL/download timing for first-party (`meshtastic.org`) requests, and the event listener supplies
+     * the fine-grained timing breakdown. Requires `Trace.enable(...)` (see `GooglePlatformAnalytics.initDatadog`).
+     */
+    @Single
+    fun okHttpNetworkInstrumentation(): OkHttpNetworkInstrumentation = OkHttpNetworkInstrumentation(
+        interceptors = listOf(DatadogInterceptor.Builder(tracedHosts = listOf("meshtastic.org")).build()),
+        eventListenerFactory = DatadogEventListener.Factory(),
+    )
+}

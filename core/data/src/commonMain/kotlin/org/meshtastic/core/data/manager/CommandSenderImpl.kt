@@ -18,14 +18,13 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -73,7 +72,7 @@ class CommandSenderImpl(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val sessionManager: SessionManager,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val scope: ServiceScope,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
 
@@ -180,6 +179,12 @@ class CommandSenderImpl(
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
         packetHandler.sendToRadio(packet)
+    }
+
+    override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
+        val packet = buildAdminPacket(to = destNum, adminMessage = adminMsg)
+        packetHandler.sendToRadio(ToRadio(packet = packet))
     }
 
     override suspend fun sendAdminAwait(

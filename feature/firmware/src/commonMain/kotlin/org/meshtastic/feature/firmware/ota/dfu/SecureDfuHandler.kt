@@ -56,12 +56,376 @@ import org.meshtastic.feature.firmware.ota.retryWithDelay
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.stripFormatArgs
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 private const val PERCENT_MAX = 100
 private const val GATT_RELEASE_DELAY_MS = 1_500L
 private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
+
+/**
+ * Real upload attempts a confirmed Legacy primary is allowed before declaring failure. Legacy DFU has no resume, so a
+ * failed upload requires a whole fresh session (new transport + reconnect + re-handshake). Stale-session cleanup cycles
+ * do NOT consume this budget (see [MAX_LEGACY_STALE_RESETS]).
+ */
+internal const val LEGACY_SESSION_ATTEMPTS = 3
+
+/**
+ * Maximum number of stale-session cleanup cycles a Legacy run will perform. A [LegacyDfuException.StaleSessionReset]
+ * surfaces when the bootloader rejects START_DFU with INVALID_STATE (a half-finished previous session is wedged in the
+ * bootloader). The cleanup connects a fresh transport, RESETs, and waits for the bootloader to reboot into a clean OTA
+ * session. This budget is separate from [LEGACY_SESSION_ATTEMPTS] so a run that legitimately needs to reset-prime more
+ * than once (e.g. a mid-stream drop that left the bootloader wedged twice in a row) is not punished by losing an upload
+ * attempt for a cleanup that did not actually try to upload.
+ */
+internal const val MAX_LEGACY_STALE_RESETS = 2
+
+/** Limited probe/fallback budget for inconclusive detection or alternate-protocol attempts. */
+internal const val LIMITED_SESSION_ATTEMPTS = 1
+
+/**
+ * Two-stage session budget.
+ *
+ * [preEngagementAttempts] limits speculative connection attempts before the selected DFU service has been confirmed.
+ * [engagedAttempts] applies after a connection to that protocol's DFU service succeeds. Engagement means the selected
+ * protocol's DFU service was connected to; it does not by itself universally prevent fallback (see
+ * [DfuFallbackCoordinator] for the fallback policy). Secure always carries [preEngagementAttempts] == [engagedAttempts]
+ * so engagement never expands its budget.
+ */
+internal data class DfuAttemptBudget(val preEngagementAttempts: Int, val engagedAttempts: Int) {
+    init {
+        require(preEngagementAttempts in 1..engagedAttempts) {
+            "preEngagementAttempts ($preEngagementAttempts) must be in 1..engagedAttempts ($engagedAttempts)"
+        }
+    }
+}
+
+/**
+ * Transport-dispatch key: which [DfuUploadTransport] implementation ([SecureDfuTransport] or [LegacyDfuTransport]) to
+ * use, and therefore which DFU service UUID its scan/connect is filtering on.
+ */
+internal enum class DfuProtocolKind {
+    SECURE,
+    LEGACY,
+}
+
+/**
+ * Outcome of bootloader service detection. Unlike [DfuProtocolKind] (which is the transport-dispatch key), this type
+ * keeps the "neither service observed" case representable instead of silently coercing it to one protocol.
+ */
+internal sealed class BootloaderDetection {
+    /** Legacy DFU service (`1530`) was observed in the advertisement. Treat the bootloader as Legacy DFU. */
+    data object LegacyObserved : BootloaderDetection()
+
+    /** Secure DFU service (`FE59`) was observed in the advertisement. Treat the bootloader as Secure DFU. */
+    data object SecureObserved : BootloaderDetection()
+
+    /**
+     * Neither DFU service was conclusively observed inside the detection window. Causes of an inconclusive scan include
+     * advertisement-interval timing, Android scan duty-cycling, OS-level advertisement cache, and the bootloader not
+     * having resumed advertising yet after the buttonless reboot.
+     */
+    data object Unknown : BootloaderDetection()
+}
+
+internal sealed class DfuUploadResult {
+    data object Success : DfuUploadResult()
+
+    data class Failure(val error: Throwable, val protocolEngaged: Boolean) : DfuUploadResult()
+}
+
+/**
+ * Owns fallback ordering and retry budget policy. Whether an alternate protocol is tried after a primary failure
+ * depends on the [detection] outcome and engagement state — see [shouldTryAlternateAfterFailure].
+ */
+internal class DfuFallbackCoordinator(private val detection: BootloaderDetection) {
+
+    suspend fun execute(uploadWithRetry: suspend (DfuProtocolKind, DfuAttemptBudget) -> DfuUploadResult) {
+        val orderedProtocols = detection.orderedProtocols()
+        Logger.i { "DFU: detection=$detection → protocols=$orderedProtocols" }
+
+        var primaryError: Throwable? = null
+        for ((index, protocol) in orderedProtocols.withIndex()) {
+            val isPrimary = index == 0
+            val hasAlternateProtocol = index < orderedProtocols.lastIndex
+            val budget = budgetFor(protocol, isPrimary)
+            if (isPrimary) {
+                Logger.i {
+                    "DFU: primary protocol=$protocol " +
+                        "(upload attempts pre=${budget.preEngagementAttempts}, engaged=${budget.engagedAttempts})"
+                }
+            } else {
+                Logger.w { "DFU: trying alternate protocol=$protocol (detection=$detection, budget=$budget)" }
+            }
+
+            when (val result = uploadWithRetry(protocol, budget)) {
+                DfuUploadResult.Success -> return
+
+                is DfuUploadResult.Failure -> {
+                    if (isPrimary) {
+                        primaryError = result.error
+                    }
+                    if (!hasAlternateProtocol || !shouldTryAlternateAfterFailure(isPrimary, result.protocolEngaged)) {
+                        throw primaryError.withSuppressedAlternate(result.error)
+                    }
+                    Logger.w {
+                        "DFU: $protocol failed; trying alternate protocol (detection=$detection, " +
+                            "protocolEngaged=${result.protocolEngaged}): ${result.error::class.simpleName}"
+                    }
+                }
+            }
+        }
+        throw IllegalStateException("DFU fallback exhausted with non-empty protocol list (detection=$detection)")
+    }
+
+    /**
+     * The ordered list of protocols to attempt for this detection outcome. The first element is the primary; the second
+     * is the alternate. Whether the alternate is reached depends on [shouldTryAlternateAfterFailure], not ordering.
+     */
+    private fun BootloaderDetection.orderedProtocols(): List<DfuProtocolKind> = when (this) {
+        BootloaderDetection.LegacyObserved -> listOf(DfuProtocolKind.LEGACY, DfuProtocolKind.SECURE)
+        BootloaderDetection.SecureObserved -> listOf(DfuProtocolKind.SECURE, DfuProtocolKind.LEGACY)
+        BootloaderDetection.Unknown -> listOf(DfuProtocolKind.LEGACY, DfuProtocolKind.SECURE)
+    }
+
+    /**
+     * Two-stage upload-attempt budget for the given protocol in this detection context.
+     * - Confirmed Legacy primary ([BootloaderDetection.LegacyObserved]): full [LEGACY_SESSION_ATTEMPTS] (3) budget
+     *   before AND after engagement — the protocol was conclusively observed.
+     * - Unknown Legacy primary: [LIMITED_SESSION_ATTEMPTS] (1) pre-engagement probe so Secure fallback stays timely,
+     *   promoted to [LEGACY_SESSION_ATTEMPTS] (3) once Legacy engages and is conclusively identified.
+     * - Legacy alternate (e.g. SecureObserved → Legacy fallback): same Unknown-style two-stage budget — pre-engagement
+     *   probe of 1, full Legacy budget of 3 once engaged.
+     * - Secure: 1/1 — never expanded by engagement, since the Secure recovery path is single-shot.
+     */
+    private fun budgetFor(protocol: DfuProtocolKind, isPrimary: Boolean): DfuAttemptBudget = when {
+        protocol == DfuProtocolKind.SECURE ->
+            DfuAttemptBudget(
+                preEngagementAttempts = LIMITED_SESSION_ATTEMPTS,
+                engagedAttempts = LIMITED_SESSION_ATTEMPTS,
+            )
+
+        protocol == DfuProtocolKind.LEGACY && isPrimary && detection == BootloaderDetection.LegacyObserved ->
+            DfuAttemptBudget(
+                preEngagementAttempts = LEGACY_SESSION_ATTEMPTS,
+                engagedAttempts = LEGACY_SESSION_ATTEMPTS,
+            )
+
+        // Unknown Legacy primary and Legacy alternate: speculative probe that promotes on engagement.
+        else ->
+            DfuAttemptBudget(
+                preEngagementAttempts = LIMITED_SESSION_ATTEMPTS,
+                engagedAttempts = LEGACY_SESSION_ATTEMPTS,
+            )
+    }
+
+    private fun shouldTryAlternateAfterFailure(isPrimary: Boolean, protocolEngaged: Boolean): Boolean {
+        if (!isPrimary) return false
+        return when (detection) {
+            // Unknown detection: Legacy is tried first, Secure fallback only if Legacy fails before engagement.
+            BootloaderDetection.Unknown -> !protocolEngaged
+
+            // Conclusive detection: a pre-engagement failure of the observed protocol does NOT immediately try the
+            // opposite protocol. Alternate fallback is retained only after engagement failure — insurance against a
+            // stale or misleading conclusive detection.
+            BootloaderDetection.LegacyObserved,
+            BootloaderDetection.SecureObserved,
+            -> protocolEngaged
+        }
+    }
+
+    private fun Throwable?.withSuppressedAlternate(alternateError: Throwable): Throwable {
+        val primary = this ?: return alternateError
+        if (primary !== alternateError) {
+            primary.addSuppressed(alternateError)
+        }
+        return primary
+    }
+}
+
+/** The DFU service UUID this protocol scans for, for diagnostic logging. Mirrors the transport's own scan filter. */
+private fun DfuProtocolKind.serviceUuid(): Uuid = when (this) {
+    DfuProtocolKind.LEGACY -> LegacyDfuUuids.SERVICE
+    DfuProtocolKind.SECURE -> SecureDfuUuids.SERVICE
+}
+
+/**
+ * Drives the bounded Legacy/Secure DFU upload retry loop. Extracted from [SecureDfuHandler.runDfuUploadWithRetry] so
+ * the retry policy can be unit-tested without bringing up the full BLE stack — callers supply a [runUploadSession]
+ * lambda that returns the next [DfuUploadResult] and a [resetStaleBootloader] lambda that performs the fresh-connection
+ * RESET-prime cycle.
+ *
+ * Policy:
+ * - Active attempt limit starts at [DfuAttemptBudget.preEngagementAttempts]; the first [DfuUploadResult.Failure] whose
+ *   `protocolEngaged=true` promotes the active limit to [DfuAttemptBudget.engagedAttempts] BEFORE the budget-exhaustion
+ *   check runs, so an engaged Legacy probe receives its full retry budget.
+ * - Non-[LegacyDfuException.StaleSessionReset] failures consume one upload attempt.
+ * - A [LegacyDfuException.StaleSessionReset] consumes one of [maxStaleResets], NOT an upload attempt — the cleanup
+ *   cycle never tried to upload.
+ * - After the first [LegacyDfuException.MidStreamDisconnect] on Legacy, every subsequent Legacy attempt uses
+ *   [LegacyDfuStreamProfile.RECOVERY]; a stale-session alone never switches the profile.
+ * - All exit paths are bounded: the loop stops when the upload-attempt budget is exhausted or the stale-response budget
+ *   is exceeded. Up to [maxStaleResets] reset-prime cleanups run; the next stale response terminates without another
+ *   cleanup.
+ * - [DfuProtocolKind.SECURE] carries pre==engaged budgets, so engagement promotion is a no-op there.
+ *
+ * If a mid-stream drop preceded the terminal failure, the first [LegacyDfuException.MidStreamDisconnect] is attached as
+ * a suppressed exception on the surfaced error so the underlying cause stays visible.
+ */
+@Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod")
+internal suspend fun runDfuRetryLoop(
+    protocol: DfuProtocolKind,
+    budget: DfuAttemptBudget,
+    maxStaleResets: Int,
+    runUploadSession: suspend (LegacyDfuStreamProfile) -> DfuUploadResult,
+    resetStaleBootloader: suspend () -> Unit,
+    interAttemptDelay: suspend () -> Unit,
+): DfuUploadResult {
+    var uploadAttempts = 0
+    var staleResets = 0
+    var midStreamSeen = false
+    var firstMidStreamError: LegacyDfuException.MidStreamDisconnect? = null
+    var lastError: Throwable? = null
+    var protocolEngaged = false
+    var activeAttempts = budget.preEngagementAttempts
+
+    while (uploadAttempts < activeAttempts) {
+        var skipInterAttemptDelay = false
+
+        val profile =
+            if (protocol == DfuProtocolKind.LEGACY && midStreamSeen) {
+                LegacyDfuStreamProfile.RECOVERY
+            } else {
+                LegacyDfuStreamProfile.NORMAL
+            }
+
+        uploadAttempts++
+        Logger.i { "DFU: upload attempt $uploadAttempts/$activeAttempts ($protocol, profile=$profile)" }
+        when (val result = runUploadSession(profile)) {
+            DfuUploadResult.Success -> return result
+
+            is DfuUploadResult.Failure -> {
+                lastError = result.error
+                val wasEngaged = protocolEngaged
+                protocolEngaged = protocolEngaged || result.protocolEngaged
+
+                // Promote the upload budget the moment a session first reports protocolEngaged. Promotion happens
+                // BEFORE the budget-exhaustion check (the while condition on the next iteration) so an engaged
+                // Legacy probe receives its full retry budget. For Secure (pre==engaged) this is a no-op.
+                if (!wasEngaged && protocolEngaged && activeAttempts < budget.engagedAttempts) {
+                    activeAttempts = budget.engagedAttempts
+                    Logger.i {
+                        "DFU: protocol engaged; promoting upload budget " +
+                            "(${budget.preEngagementAttempts} → ${budget.engagedAttempts}) ($protocol)"
+                    }
+                }
+
+                // Legacy-only stale-session handling. StaleSessionReset consumes a stale-reset cycle, NOT an upload
+                // attempt — the cycle never tried to upload.
+                if (protocol == DfuProtocolKind.LEGACY && result.error is LegacyDfuException.StaleSessionReset) {
+                    uploadAttempts--
+                    staleResets++
+                    if (staleResets > maxStaleResets) {
+                        Logger.w {
+                            "DFU: stale cleanup exhausted ($staleResets > $maxStaleResets) — giving up on $protocol"
+                        }
+                        break
+                    }
+                    if (midStreamSeen) {
+                        // Expected: a stale session is the natural residue of a mid-stream drop, so an informational
+                        // log keeps the operator calm.
+                        Logger.i {
+                            "DFU: stale cleanup cycle $staleResets/$maxStaleResets after mid-stream drop " +
+                                "(expected) ($protocol)"
+                        }
+                    } else {
+                        // Unexpected: the very first session came up stale with no preceding drop, which usually
+                        // means the device was stranded in the bootloader before this update began.
+                        Logger.w {
+                            "DFU: stale cleanup cycle $staleResets/$maxStaleResets — unexpected initial stale " +
+                                "session ($protocol)"
+                        }
+                    }
+                    resetStaleBootloader()
+                    skipInterAttemptDelay = true
+                }
+
+                if (!skipInterAttemptDelay) {
+                    // Mid-stream disconnect: switch subsequent Legacy uploads to the recovery profile and surface the
+                    // host in-flight offset in the log so it is not hidden by later cleanup failures.
+                    val error = result.error
+                    if (protocol == DfuProtocolKind.LEGACY && error is LegacyDfuException.MidStreamDisconnect) {
+                        if (!midStreamSeen) {
+                            midStreamSeen = true
+                            firstMidStreamError = error
+                        }
+                        Logger.w(error) {
+                            "DFU: mid-stream disconnect at host in-flight offset " +
+                                "${error.bytesSent}/${error.totalBytes} " +
+                                "(state=${error.connectionState}); subsequent $protocol attempts will use " +
+                                "${LegacyDfuStreamProfile.RECOVERY}"
+                        }
+                    } else {
+                        Logger.w(error) {
+                            "DFU: upload attempt $uploadAttempts/$activeAttempts failed ($protocol): " +
+                                "${error::class.simpleName}"
+                        }
+                    }
+
+                    if (uploadAttempts < activeAttempts) interAttemptDelay()
+                }
+            }
+        }
+    }
+
+    val error = lastError ?: DfuException.TransferFailed("DFU upload failed after $activeAttempts attempts ($protocol)")
+    // Keep the original mid-stream failure visible even when the terminal failure is a later cleanup/transfer error.
+    firstMidStreamError?.let { drop ->
+        if (error !== drop) {
+            error.addSuppressed(drop)
+        }
+    }
+    return DfuUploadResult.Failure(error, protocolEngaged)
+}
+
+/**
+ * Cleanup policy for a DFU upload session's transport. Extracted from [SecureDfuHandler.runUploadSession]'s finally
+ * block so the skip-abort / always-close contract can be tested directly.
+ *
+ * Semantics:
+ * - Executes in [NonCancellable] so close always runs even if the caller was cancelled.
+ * - Skips [DfuUploadTransport.abort] after a completed session — nothing to abort.
+ * - Skips [DfuUploadTransport.abort] after a [LegacyDfuException.StaleSessionReset] — some Legacy variants become
+ *   unresponsive after INVALID_STATE, so the same-connection RESET may block or be ineffective; the fresh-connection
+ *   reset-prime path owns recovery.
+ * - Skips [DfuUploadTransport.abort] after a [LegacyDfuException.MidStreamDisconnect] — the link has already dropped,
+ *   so there is no live connection over which to deliver an abort.
+ * - Attempts [DfuUploadTransport.abort] after a [DfuException.ConnectionFailed] — [DfuException.ConnectionFailed] is
+ *   produced by [connectWithRetry] for any exhausted connection or setup failure, including cases where a GATT
+ *   connection was established but a subsequent step (e.g. unsupported bootloader version, profile setup) failed. A
+ *   usable connection may still exist, so the bounded best-effort abort is attempted before close.
+ * - Otherwise calls [DfuUploadTransport.abort], then [DfuUploadTransport.close] in a nested finally.
+ * - [DfuUploadTransport.abort]'s own cancellation/Error propagation contract is preserved: the [NonCancellable] context
+ *   prevents the outer coroutine cancellation from interrupting close, but an [Error] thrown by abort still propagates
+ *   after close runs.
+ */
+internal suspend fun cleanupDfuSessionTransport(
+    transport: DfuUploadTransport,
+    completed: Boolean,
+    sessionFailure: Throwable?,
+) {
+    withContext(NonCancellable) {
+        val skipAbort =
+            sessionFailure is LegacyDfuException.StaleSessionReset ||
+                sessionFailure is LegacyDfuException.MidStreamDisconnect
+        try {
+            if (!completed && !skipAbort) transport.abort()
+        } finally {
+            transport.close()
+        }
+    }
+}
 
 /**
  * KMP [FirmwareUpdateHandler] for nRF52 devices.
@@ -127,9 +491,9 @@ class SecureDfuHandler(
                 }
                 delay(DFU_REBOOT_WAIT_MS)
 
-                // ── 4. Service detection: which DFU protocol does the bootloader speak? ─
-                val protocol = detectBootloaderProtocol(target, updateState)
-                Logger.i { "DFU: Bootloader protocol detected: $protocol" }
+                // ── 4. Service detection: which DFU service does the bootloader advertise? ─
+                val detection = detectBootloaderProtocol(target, updateState)
+                Logger.i { "DFU: Bootloader detection = $detection" }
 
                 // NOTE: do NOT drop the bond for a same-address Legacy bootloader. When Meshtastic triggers
                 // buttonless DFU it hands the app's bond keys to the bootloader (peer_data), and the Adafruit
@@ -138,13 +502,18 @@ class SecureDfuHandler(
                 // identity so it no longer matches the whitelist — the phone then can't connect at all. The
                 // shared LTK also lets the DFU link encrypt cleanly (verified on-air: AES-128, keySize 16), so the
                 // bond must be KEPT, mirroring Nordic's DfuServiceInitiator.setKeepBond(true)/setRestoreBond(true).
+                // This applies to BOTH protocols and to the fallback path — the bond is never removed or refreshed
+                // anywhere in this handler.
 
-                // Legacy DFU has no resume, so a failed session is retried whole (fresh transport + reconnect +
-                // re-handshake), mirroring Nordic's DFU library ("the Legacy DFU will start again"). A stock
-                // bootloader that leaves the first session's control-point handshake unanswered often responds
+                // Legacy DFU has no resume, so a confirmed Legacy session is retried whole (fresh transport +
+                // reconnect + re-handshake), mirroring Nordic's DFU library ("the Legacy DFU will start again"). A
+                // stock bootloader that leaves the first session's control-point handshake unanswered often responds
                 // after a clean reconnect. Secure DFU resumes in place, so it runs a single session.
-                val sessionAttempts = if (protocol == DfuProtocolKind.LEGACY) LEGACY_SESSION_ATTEMPTS else 1
-                runDfuUploadWithRetry(protocol, target, pkg, sessionAttempts, updateState)
+                // DfuFallbackCoordinator resolves the detection into an ordered protocol list; whether the alternate
+                // is tried depends on detection-specific engagement rules (shouldTryAlternateAfterFailure).
+                DfuFallbackCoordinator(detection).execute { protocol, budget ->
+                    runDfuUploadWithRetry(protocol, target, pkg, budget, updateState)
+                }
                 zipFile
             }
         } catch (e: CancellationException) {
@@ -167,77 +536,102 @@ class SecureDfuHandler(
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Detect which DFU protocol the bootloader speaks by scanning for advertised service UUIDs. We scan for the legacy
-     * service (1530) first with a short timeout — Adafruit/oltaco bootloaders always advertise it, while Nordic Secure
-     * bootloaders never do, so a hit unambiguously means Legacy. Miss ⇒ assume Secure (preserves current behavior on
-     * unaffected devices).
+     * Detect which DFU service the bootloader advertises by scanning first for the Legacy (`1530`) service UUID. If
+     * Legacy is observed, return immediately; otherwise scan for the Secure (`FE59`) service UUID. The scans run
+     * sequentially because BLE scan is a shared OS resource and parallel scans are unreliable across Android versions.
+     *
+     * Returns a [BootloaderDetection] that keeps the inconclusive case (`Unknown`) *representable* instead of silently
+     * coercing a missed Legacy scan into a Secure-DFU verdict. The fallback coordinator resolves a detection into an
+     * ordered list of protocols to attempt, so a `Unknown` result no longer locks the handler into a single transport —
+     * both protocols are tried (Legacy first) before the update is declared failed. `Unknown` means neither service was
+     * observed in the detection windows.
      */
     private suspend fun detectBootloaderProtocol(
         target: String,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): DfuProtocolKind {
+    ): BootloaderDetection {
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
         )
-        val targetAddresses = setOf(target, calculateMacPlusOne(target))
+        val macPlusOne = calculateMacPlusOne(target)
+        val targetAddresses = setOf(target, macPlusOne)
+        Logger.i { "DFU: detect — predicate matches original MAC and MAC+1" }
+
+        Logger.i { "DFU: detect — scanning for Legacy DFU service (${LegacyDfuUuids.SERVICE})" }
         val legacyHit =
             scanForBleDevice(
                 scanner = bleScanner,
-                tag = "DFU detect",
+                tag = "DFU detect (legacy)",
                 serviceUuid = LegacyDfuUuids.SERVICE,
                 retryCount = 1,
                 retryDelay = 0.seconds,
                 scanTimeout = DETECT_SCAN_TIMEOUT,
                 predicate = { it.address in targetAddresses },
             )
-        return if (legacyHit != null) DfuProtocolKind.LEGACY else DfuProtocolKind.SECURE
+
+        if (legacyHit != null) {
+            Logger.i {
+                "DFU: detect — Legacy service observed; skipping Secure DFU scan (Legacy wins per orderedProtocols)"
+            }
+            return BootloaderDetection.LegacyObserved
+        }
+
+        Logger.i { "DFU: detect — scanning for Secure DFU service (${SecureDfuUuids.SERVICE})" }
+        val secureHit =
+            scanForBleDevice(
+                scanner = bleScanner,
+                tag = "DFU detect (secure)",
+                serviceUuid = SecureDfuUuids.SERVICE,
+                retryCount = 1,
+                retryDelay = 0.seconds,
+                scanTimeout = DETECT_SCAN_TIMEOUT,
+                predicate = { it.address in targetAddresses },
+            )
+
+        val detection = if (secureHit != null) BootloaderDetection.SecureObserved else BootloaderDetection.Unknown
+        Logger.i { "DFU: detect — secureHit=${secureHit != null}, result=$detection" }
+        return detection
     }
 
     /**
-     * Run the connect + init + firmware upload, retrying the whole session up to [attempts] times. Each attempt uses a
-     * fresh [DfuUploadTransport] (new GATT connection + re-handshake) since Legacy DFU can't resume mid-stream.
+     * Run the connect + init + firmware upload, retrying within the [DfuFallbackCoordinator] budget. Delegates the
+     * bounded retry logic to [runDfuRetryLoop] (testable without bringing up the full BLE stack); the lambdas here
+     * supply the real [runUploadSession] and [resetStaleBootloader] implementations.
      */
     private suspend fun runDfuUploadWithRetry(
         protocol: DfuProtocolKind,
         target: String,
         pkg: DfuZipPackage,
-        attempts: Int,
+        budget: DfuAttemptBudget,
         updateState: (FirmwareUpdateState) -> Unit,
-    ) {
-        var lastError: Throwable? = null
-        repeat(attempts) { i ->
-            val attempt = i + 1
-            Logger.i { "DFU: upload session attempt $attempt/$attempts" }
-            try {
-                runUploadSession(protocol, target, pkg, updateState)
-                return
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-                lastError = e
-                Logger.w(e) { "DFU: upload session $attempt/$attempts failed: ${e.message}" }
-                // A stock bootloader holding a wedged session from an interrupted flash rejects START with
-                // INVALID_STATE, then goes unresponsive (the RESET can't land on that connection). A *fresh*
-                // connection is responsive up until START, so reset it there — the device reboots into a clean OTA
-                // session (GPREGRET OTA flag is retained) that the next attempt can flash normally.
-                if (e is LegacyDfuException.StaleSessionReset && attempt < attempts) {
-                    resetStaleBootloader(protocol, target)
-                }
-                if (attempt < attempts) delay(SESSION_RETRY_DELAY_MS)
-            }
-        }
-        throw lastError ?: DfuException.TransferFailed("DFU upload failed after $attempts attempts")
-    }
+    ): DfuUploadResult = runDfuRetryLoop(
+        protocol = protocol,
+        budget = budget,
+        maxStaleResets = MAX_LEGACY_STALE_RESETS,
+        runUploadSession = { profile -> runUploadSession(protocol, target, pkg, profile, updateState) },
+        resetStaleBootloader = { resetStaleBootloader(protocol, target) },
+        interAttemptDelay = { delay(SESSION_RETRY_DELAY_MS) },
+    )
 
-    private fun createTransport(protocol: DfuProtocolKind, target: String): DfuUploadTransport = when (protocol) {
-        DfuProtocolKind.LEGACY -> LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+    private fun createTransport(
+        protocol: DfuProtocolKind,
+        target: String,
+        legacyProfile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+    ): DfuUploadTransport = when (protocol) {
+        // Legacy transport receives the selected stream profile; default NORMAL keeps prior behavior for any caller
+        // that does not pass an explicit profile (e.g. reset-prime, which is a control-point operation only).
+        DfuProtocolKind.LEGACY ->
+            LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default, legacyProfile)
+
         DfuProtocolKind.SECURE -> SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
     }
 
     /**
      * Reboot a bootloader wedged in a stale DFU session. Connects a fresh transport (which is responsive before any
-     * START) and issues RESET (0x06) via [DfuUploadTransport.abort], then waits for the reboot + re-advertise. Best
-     * effort: any failure here is non-fatal — the caller retries the upload regardless.
+     * START) and issues RESET (0x06) via the bounded [DfuUploadTransport.abort], then closes the connection and waits
+     * for the configured [RESET_PRIME_REBOOT_WAIT_MS] reboot/re-advertisement interval. Operational [Exception]s during
+     * abort are best-effort (swallowed by [DfuUploadTransport.abort]); structured-concurrency cancellation and [Error]
+     * subtypes propagate per the abort contract.
      */
     private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String) {
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
@@ -247,7 +641,7 @@ class SecureDfuHandler(
                 .connectToDfuMode()
                 .onSuccess {
                     transport.abort()
-                    Logger.i { "DFU: reset-prime RESET sent; waiting for clean reboot" }
+                    Logger.i { "DFU: reset-prime RESET attempted; disconnecting and waiting for re-advertisement" }
                 }
                 .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
         } finally {
@@ -261,12 +655,16 @@ class SecureDfuHandler(
         protocol: DfuProtocolKind,
         target: String,
         pkg: DfuZipPackage,
+        legacyProfile: LegacyDfuStreamProfile,
         updateState: (FirmwareUpdateState) -> Unit,
-    ) {
-        val transport: DfuUploadTransport = createTransport(protocol, target)
+    ): DfuUploadResult {
+        val transport: DfuUploadTransport = createTransport(protocol, target, legacyProfile)
         var completed = false
+        var protocolEngaged = false
+        var sessionFailure: Throwable? = null
         try {
-            connectWithRetry(transport, updateState)
+            connectWithRetry(transport, protocol, updateState)
+            protocolEngaged = true
 
             updateState(
                 FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu))),
@@ -305,15 +703,23 @@ class SecureDfuHandler(
 
             completed = true
             updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
+            return DfuUploadResult.Success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            sessionFailure = e
+            return DfuUploadResult.Failure(e, protocolEngaged)
         } finally {
-            withContext(NonCancellable) {
-                if (!completed) transport.abort()
-                transport.close()
-            }
+            cleanupDfuSessionTransport(transport, completed, sessionFailure)
         }
     }
 
-    private suspend fun connectWithRetry(transport: DfuUploadTransport, updateState: (FirmwareUpdateState) -> Unit) {
+    private suspend fun connectWithRetry(
+        transport: DfuUploadTransport,
+        protocol: DfuProtocolKind,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ) {
+        val serviceUuid = protocol.serviceUuid()
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
         )
@@ -334,14 +740,19 @@ class SecureDfuHandler(
                 )
             },
             block = { attempt ->
+                Logger.i {
+                    "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS via $protocol (scan service=$serviceUuid)"
+                }
                 transport.connectToDfuMode().onFailure {
-                    Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${it.message}" }
+                    Logger.w(it) {
+                        "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS via $protocol failed: ${it.message}"
+                    }
                 }
             },
         )
             .getOrElse {
                 throw DfuException.ConnectionFailed(
-                    "Failed to connect to DFU device after $CONNECT_ATTEMPTS attempts",
+                    "Failed to connect to DFU device via $protocol after $CONNECT_ATTEMPTS attempts",
                     it,
                 )
             }
@@ -385,18 +796,12 @@ class SecureDfuHandler(
         return path
     }
 
-    /** Result of [detectBootloaderProtocol]. */
-    internal enum class DfuProtocolKind {
-        SECURE,
-        LEGACY,
-    }
-
     private companion object {
-        /** Detection scan timeout — short because we only want to confirm/refute an advertised legacy service. */
+        /**
+         * Per-service scan timeout for bootloader protocol detection. Applied to both Legacy (1530) and Secure (FE59)
+         * scans. Sequential, so worst-case detection is 2× this value.
+         */
         private val DETECT_SCAN_TIMEOUT = 8.seconds
-
-        /** Legacy DFU can't resume, so retry the whole session this many times before giving up. */
-        private const val LEGACY_SESSION_ATTEMPTS = 3
 
         /** Delay between whole-session retries (lets the bootloader settle / resume advertising). */
         private const val SESSION_RETRY_DELAY_MS = 2_000L

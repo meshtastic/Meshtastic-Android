@@ -2,8 +2,12 @@
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
+            <!--
+              System anchors only. User-installed CAs used to be trusted here for self-hosted MQTT brokers
+              (#5365), but base-config applies to every TLS connection the app makes. mqtt-client 0.7.0 lets
+              that trust be scoped to the MQTT transports instead — see mqttTlsConfig() in :core:network.
+            -->
             <certificates src="system"/>
-            <certificates src="user"/>
         </trust-anchors>
     </base-config>
 

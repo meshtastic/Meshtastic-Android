@@ -2,12 +2,13 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-06-25
+last_updated: 2026-07-27
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
   - mesh-radiot
   - vertaisradiot
+  - Hyppymääräjakauma
 ---
 
 # Laitteet
@@ -102,14 +103,14 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 ### Suodatusvalinnat
 
-| Suodatus                              | Kuvaus                                                                                          |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                  |
-| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)              |
-| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                                 |
-| **Ohita infrastruktuurilaitteet**     | Piilottaa infrastruktuuriroolit (Router, Repeater, Router Late, Client Base) |
-| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                              |
-| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                                       |
+| Suodatus                              | Kuvaus                                                                              |
+| ------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                      |
+| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)  |
+| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                     |
+| **Ohita infrastruktuurilaitteet**     | Piilota infrastruktuuriroolit (Router, Router Late, Client Base) |
+| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                  |
+| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                           |
 
 ### Lajitteluvaihtoehdot
 
@@ -122,6 +123,10 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 | **Kanava**                                      | Ryhmitelty kanavaindeksin mukaan                                                  |
 | **MQTT:n kautta**               | Ryhmitelty MQTT:n kautta kuultuihin ja radiolla kuultuihin        |
 | **Suosikkien kautta**                           | Suosikkiradiot ensin                                                              |
+
+## Radiot hyppymäärän mukaan
+
+Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyydellä, napauttamalla radioluettelon sovelluspalkissa olevaa hyppyhistogrammikuvaketta (0 = suora yhteys, 1 = yksi välityshyppy ja niin edelleen). Suodata kaavio **Viimeksi kuultu** -ajanjakson mukaan — Kaikki ajat, 1 tunti, 8 tuntia tai 24 tuntia — nähdäksesi, miltä mesh-verkko näyttää juuri nyt verrattuna pidempään ajanjaksoon. Tämä on nopea tapa arvioida, kuinka laaja ja kuormittunut paikallinen mesh-verkkosi on.
 
 ## Radion tiedot
 
@@ -147,7 +152,7 @@ Rivinsisäiset tilailmaisimet näyttävät tärkeimmät tiedot yhdellä silmäyk
 
 Kun radion laitteisto tunnistetaan, tietonäkymä näyttää avattavan **"Haluan sellaisen"** -osion, jossa on linkkejä laitteen ostamiseen tai lisätietojen hankkimiseen: valmistajan tuotesivu, tuoteversiot sekä alueelliset kauppapaikkalistaukset (esim. AliExpress, Amazon ja tuetut jälleenmyyjät), suodatettuna maasi mukaan. Jokainen linkki avautuu mesh.to -uudelleenohjauspalvelun kautta. Laitteet, joille ei löydy vastaavia linkkejä, eivät näytä tätä osiota.
 
-Täydellinen selattava hakemisto kaikista linkeistä on saatavilla myös kohdassa **Asetukset → Laite-linkit**.
+Kaikkien linkkien selattava hakemisto löytyy myös kohdasta **Asetukset → Ohje ja dokumentaatio → Laitelinkit**.
 
 ## Aiheeseen liittyvät aiheet
 

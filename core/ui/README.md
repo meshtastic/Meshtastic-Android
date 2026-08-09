@@ -1,7 +1,7 @@
 # `:core:ui`
 
 ## Overview
-The `:core:ui` module contains shared Jetpack Compose components, themes, and utility functions used across the entire Meshtastic Android application. It ensures a consistent look and feel following Material 3 guidelines.
+The `:core:ui` module contains Compose Multiplatform components, themes, and utility functions shared across the Android and Desktop apps (and the iOS compile target). It ensures a consistent look and feel following Material 3 guidelines.
 
 ## Key Components
 

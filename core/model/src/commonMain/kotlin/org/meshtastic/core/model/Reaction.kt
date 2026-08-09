@@ -24,8 +24,12 @@ data class Reaction(
     val user: User,
     val emoji: String,
     val timestamp: Long,
-    val snr: Float,
-    val rssi: Int,
+    /**
+     * Signal-to-noise ratio in dB, or null when the packet carried no measurement (locally sent reactions included).
+     */
+    val snr: Float?,
+    /** Received signal strength, or null when the radio did not report one (locally sent reactions included). */
+    val rssi: Int?,
     val hopsAway: Int,
     val packetId: Int = 0,
     val status: MessageStatus = MessageStatus.UNKNOWN,

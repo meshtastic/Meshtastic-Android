@@ -39,6 +39,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -51,6 +52,9 @@ class DatabaseMergerTest {
 
     // Same physical node reached over two transports → same myNodeNum in both DBs.
     private val nodeNum = 0x1234
+
+    // The source DB's file name — the key under which a completed merge is recorded in `dest`.
+    private val sourceName = "meshtastic_database_source"
 
     private val source: MeshtasticDatabase = getInMemoryDatabaseBuilder().build()
     private val dest: MeshtasticDatabase = getInMemoryDatabaseBuilder().build()
@@ -171,7 +175,7 @@ class DatabaseMergerTest {
             .discoveryDao()
             .insertDiscoveredNodes(listOf(DiscoveredNodeEntity(presetResultId = srcPreset, nodeNum = 30L)))
 
-        DatabaseMerger.merge(source, dest)
+        DatabaseMerger.merge(source, dest, sourceName)
 
         // Packets: 1 + 2, with fresh distinct non-zero uuids (no collision with dest's existing uuid).
         val packets = dest.packetDao().getAllPacketsSnapshot()
@@ -218,6 +222,90 @@ class DatabaseMergerTest {
             1,
             dest.discoveryDao().getDiscoveredNodes(presets.first().id).size,
             "node appended under rewired preset id",
+        )
+    }
+
+    @Test
+    fun staleAssociationAtCommitRollsBackEntireMerge() = runTest {
+        source.nodeInfoDao().setMyNodeInfo(myNode())
+        source.packetDao().insert(textPacket("0!broadcast", "must-not-commit", time = 200))
+
+        var authorityChecks = 0
+        assertFailsWith<StaleAssociationException> {
+            DatabaseMerger.merge(
+                source = source,
+                dest = dest,
+                sourceName = sourceName,
+                isAssociationActive = { authorityChecks++ == 0 },
+            )
+        }
+
+        assertEquals(2, authorityChecks, "authority is revalidated immediately before commit")
+        assertTrue(dest.packetDao().getAllPacketsSnapshot().isEmpty(), "stale merge writes must roll back")
+        assertTrue(!dest.mergeMarkerDao().isMerged(sourceName), "stale merge marker must roll back")
+    }
+
+    @Test
+    fun alreadyMergedPathRechecksAssociationAuthority() = runTest {
+        DatabaseMerger.merge(source, dest, sourceName)
+        var authorityChecks = 0
+
+        assertFailsWith<StaleAssociationException> {
+            DatabaseMerger.merge(
+                source = source,
+                dest = dest,
+                sourceName = sourceName,
+                isAssociationActive = { authorityChecks++ == 0 },
+            )
+        }
+
+        assertEquals(2, authorityChecks, "already-merged path must revalidate authority before returning")
+    }
+
+    /**
+     * Regression for #6230: a crash after the merge transaction commits but before the address alias is persisted
+     * re-runs [DatabaseMerger.merge] on the next connection. The non-idempotent tables (packets, discovery) must not be
+     * duplicated. The durable per-source merge marker, written inside the merge transaction, makes the second merge a
+     * no-op.
+     */
+    @Test
+    fun mergeIsIdempotentAcrossRetry() = runTest {
+        source.nodeInfoDao().setMyNodeInfo(myNode())
+        source.packetDao().insert(textPacket("0!broadcast", "srcmsgone", time = 200))
+        source.packetDao().insert(textPacket("0!broadcast", "srcmsgtwo", time = 300))
+        val srcSession =
+            source
+                .discoveryDao()
+                .insertSession(
+                    DiscoverySessionEntity(timestamp = 1, presetsScanned = "LongFast", homePreset = "LongFast"),
+                )
+        val srcPreset =
+            source
+                .discoveryDao()
+                .insertPresetResult(DiscoveryPresetResultEntity(sessionId = srcSession, presetName = "LongFast"))
+        source
+            .discoveryDao()
+            .insertDiscoveredNodes(listOf(DiscoveredNodeEntity(presetResultId = srcPreset, nodeNum = 30L)))
+
+        DatabaseMerger.merge(source, dest, sourceName)
+
+        val packetsAfterFirst = dest.packetDao().getAllPacketsSnapshot().size
+        val sessionsAfterFirst = dest.discoveryDao().getAllSessionsSnapshot().size
+        assertEquals(2, packetsAfterFirst, "both source packets merged once")
+        assertEquals(1, sessionsAfterFirst, "source discovery session merged once")
+
+        // Simulate the crash-window retry: same source folded into the same dest again.
+        DatabaseMerger.merge(source, dest, sourceName)
+
+        assertEquals(
+            packetsAfterFirst,
+            dest.packetDao().getAllPacketsSnapshot().size,
+            "packets not duplicated on retry",
+        )
+        assertEquals(
+            sessionsAfterFirst,
+            dest.discoveryDao().getAllSessionsSnapshot().size,
+            "discovery sessions not duplicated on retry",
         )
     }
 }

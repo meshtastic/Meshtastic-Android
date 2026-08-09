@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.notification
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -28,16 +26,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.NotificationPrefs
 
 @Single
-class NotificationPrefsImpl(
-    @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : NotificationPrefs {
+class NotificationPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : NotificationPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val messagesEnabled: StateFlow<Boolean> =
@@ -59,6 +54,30 @@ class NotificationPrefsImpl(
 
     override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
         scope.launch { dataStore.edit { it[KEY_NODE_EVENTS_AUTO_DISABLED] = disabled } }
+    }
+
+    override fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean) {
+        // One edit block: DataStore serializes edits, so the values read here are the same snapshot written below.
+        // Reading the StateFlows and calling the setters instead would race — they lag these writes.
+        scope.launch {
+            dataStore.edit { prefs ->
+                val enabled = prefs[KEY_NODE_EVENTS_ENABLED] ?: true
+                val autoDisabled = prefs[KEY_NODE_EVENTS_AUTO_DISABLED] ?: false
+                when {
+                    // Only claim the restore if node events were actually on — otherwise the vanilla branch would
+                    // later enable a preference the user turned off themselves.
+                    isEventFirmware && !autoDisabled && enabled -> {
+                        prefs[KEY_NODE_EVENTS_ENABLED] = false
+                        prefs[KEY_NODE_EVENTS_AUTO_DISABLED] = true
+                    }
+
+                    !isEventFirmware && autoDisabled -> {
+                        prefs[KEY_NODE_EVENTS_ENABLED] = true
+                        prefs[KEY_NODE_EVENTS_AUTO_DISABLED] = false
+                    }
+                }
+            }
+        }
     }
 
     override val lowBatteryEnabled: StateFlow<Boolean> =

@@ -16,23 +16,23 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.AirQualityIndex
+import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.aqi
+import org.meshtastic.core.resources.aqi_value_with_severity
 import org.meshtastic.core.resources.co2
+import org.meshtastic.core.resources.co2_humidity
+import org.meshtastic.core.resources.co2_temperature
 import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
@@ -41,7 +41,9 @@ import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.PmAqiSeverity
 import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Telemetry
@@ -59,38 +61,53 @@ private fun nowCastAqi(pm25History: List<Telemetry>): Pair<Int, PmAqiSeverity>? 
 
 private fun buildAirQualityCards(
     metrics: AirQualityMetrics,
-    aqi: Pair<Int, PmAqiSeverity>?,
+    aqiText: String?,
     ugm3: String,
     ppmUnit: String,
     icon: ImageVector,
-    pm10Label: StringResource,
-    pm25Label: StringResource,
-    aqiLabel: StringResource,
-    pm100Label: StringResource,
-    co2Label: StringResource,
-): List<VectorMetricInfo> = buildList {
+    tempIcon: ImageVector,
+    humidityIcon: ImageVector,
+    isFahrenheit: Boolean,
+): List<MetricGroup> = buildList {
     // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
     // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
-    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(pm10Label, "$pm $ugm3", icon)) }
+    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", icon).asGroup()) }
     metrics.pm25_standard?.let { pm ->
-        add(VectorMetricInfo(pm25Label, "$pm $ugm3", icon))
-        // AQI sits alongside the raw PM2.5 reading, so only show it when that raw reading is present.
-        aqi?.let { (aqiValue, severity) -> add(VectorMetricInfo(aqiLabel, "$aqiValue (${severity.label})", icon)) }
+        add(
+            listOfNotNull(
+                VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", icon),
+                // AQI is derived from the raw PM2.5 reading, so it stacks directly under it — and is only shown when
+                // that raw reading is present.
+                aqiText?.let { VectorMetricInfo(Res.string.aqi, it, icon) },
+            ),
+        )
     }
-    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(pm100Label, "$pm $ugm3", icon)) }
-    metrics.co2?.let { co2 -> add(VectorMetricInfo(co2Label, "$co2 $ppmUnit", icon)) }
+    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", icon).asGroup()) }
+    // The SCD4x CO₂ sensor also reports its own temperature/humidity (#5873) — surfaced here so a node can double as a
+    // weather station without a separate BME sensor. All three come from that one sensor, so they share a column.
+    // `?.` hides only genuinely-absent readings.
+    add(
+        listOfNotNull(
+            metrics.co2?.let { co2 -> VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", icon) },
+            metrics.co2_temperature?.let { temp ->
+                VectorMetricInfo(Res.string.co2_temperature, temp.toTempString(isFahrenheit), tempIcon)
+            },
+            metrics.co2_humidity?.let { hum ->
+                VectorMetricInfo(Res.string.co2_humidity, "${NumberFormatter.format(hum, 0)}%", humidityIcon)
+            },
+        ),
+    )
 }
 
-private fun metricValueColor(
-    label: StringResource,
-    co2Color: Color?,
-    aqiSeverity: PmAqiSeverity?,
-    defaultColor: Color,
-): Color = when (label) {
+/**
+ * Severity color for a metric's value text, or null to keep the default card color. The AQI tone is resolved by the
+ * caller because [PmAqiSeverity.color] is `@Composable`.
+ */
+private fun metricValueColor(label: StringResource, co2Color: Color?, aqiColor: Color?): Color? = when (label) {
     Res.string.co2 -> co2Color
-    Res.string.aqi -> aqiSeverity?.color
+    Res.string.aqi -> aqiColor
     else -> null
-} ?: defaultColor
+}
 
 /**
  * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. A card is shown for each metric
@@ -102,51 +119,33 @@ private fun metricValueColor(
  * shown — never a computed AQI from insufficient data.
  */
 @Composable
-internal fun AirQualityInfoCards(node: Node, pm25History: List<Telemetry> = emptyList()) {
+internal fun AirQualityInfoCards(
+    node: Node,
+    pm25History: List<Telemetry> = emptyList(),
+    isFahrenheit: Boolean = false,
+) {
     val metrics = node.airQualityMetrics
     val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
     val ppmUnit = stringResource(Res.string.ppm)
 
-    // Not remembered on pm25History alone: NowCast depends on nowSeconds, so a value cached until new telemetry
-    // arrives would keep showing after its most recent reading ages out of the 12h window. Recomputing per
-    // recomposition (cheap) reads fresh nowSeconds; the equal-by-value Pair keeps `cards` below from churning.
-    // ponytail: no dedicated wall-clock ticker — the node-detail screen already stops recomposing with the node.
     val aqi = nowCastAqi(pm25History)
+    // The category name always accompanies the value, so the AQI card never relies on color alone.
+    val aqiText =
+        aqi?.let { (value, severity) ->
+            stringResource(Res.string.aqi_value_with_severity, value, stringResource(severity.labelRes))
+        }
     val icon = MeshtasticIcons.AirQuality
+    val tempIcon = MeshtasticIcons.Temperature
+    val humidityIcon = MeshtasticIcons.Humidity
     val cards =
-        remember(metrics, aqi, ugm3, ppmUnit, icon) {
-            buildAirQualityCards(
-                metrics,
-                aqi,
-                ugm3,
-                ppmUnit,
-                icon,
-                Res.string.pm1_0,
-                Res.string.pm2_5,
-                Res.string.aqi,
-                Res.string.pm10,
-                Res.string.co2,
-            )
+        remember(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
+            buildAirQualityCards(metrics, aqiText, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
         }
 
-    if (cards.isEmpty()) return
+    if (cards.none { it.isNotEmpty() }) return
 
     val co2Color = Co2Severity.fromPpm(metrics.co2 ?: 0)?.color
-    val aqiSeverity = aqi?.second
-    val defaultColor = MaterialTheme.colorScheme.onSurface
+    val aqiColor = aqi?.second?.color()
 
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        cards.forEach { metric ->
-            InfoCard(
-                icon = metric.icon,
-                text = stringResource(metric.label),
-                value = metric.value,
-                valueColor = metricValueColor(metric.label, co2Color, aqiSeverity, defaultColor),
-            )
-        }
-    }
+    MetricCardFlow(groups = cards, valueColor = { metric -> metricValueColor(metric.label, co2Color, aqiColor) })
 }

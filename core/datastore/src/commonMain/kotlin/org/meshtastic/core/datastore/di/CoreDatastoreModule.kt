@@ -20,21 +20,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
-
-/**
- * Koin qualifier for the application-scoped [CoroutineScope] shared by all [DataStore] instances.
- *
- * Used with `@Named(DATASTORE_SCOPE)` in Koin annotations and `named(DATASTORE_SCOPE)` in manual DSL modules.
- */
-const val DATASTORE_SCOPE = "DataStoreScope"
 
 @Module
 @ComponentScan("org.meshtastic.core.datastore")
 class CoreDatastoreModule {
     @Single
-    @Named(DATASTORE_SCOPE)
-    fun provideDataStoreScope(): CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    fun provideDataStoreScope(): DataStoreScope = CoroutineScope(ioDispatcher + SupervisorJob()).asDataStoreScope()
 }

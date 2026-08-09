@@ -28,8 +28,8 @@ plugins {
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
-    id("meshtastic.kover")
-    id("meshtastic.aboutlibraries")
+    alias(libs.plugins.meshtastic.kover)
+    alias(libs.plugins.meshtastic.aboutlibraries)
 }
 
 configureGraphTasks()
@@ -73,7 +73,7 @@ val generateBuildConfig =
             |    const val VERSION_CODE: Int = ${versionInfo.versionCode}
             |    const val VERSION_NAME: String = "${versionInfo.versionName}"
             |    const val IS_DEBUG: Boolean = $resolvedIsDebug
-            |    const val APPLICATION_ID: String = "org.meshtastic.desktop"
+            |    const val APPLICATION_ID: String = "org.meshtastic.MeshtasticDesktop"
             |    const val MIN_FW_VERSION: String = "${versionInfo.minFwVersion}"
             |    const val ABS_MIN_FW_VERSION: String = "${versionInfo.absMinFwVersion}"
             |}
@@ -86,18 +86,18 @@ val generateBuildConfig =
 sourceSets.main { kotlin.srcDir(generateBuildConfig.map { buildConfigOutputDir }) }
 
 // ── ProGuard configuration ───────────────────────────────────────────────────
-// compose-jb's standalone ProGuard 7.7 task does NOT auto-include
+// compose-jb's standalone ProGuard task does NOT auto-include
 // `META-INF/proguard/*.pro` consumer rules from dependency jars (only R8 on
 // Android does). We therefore inline every keep rule we need into the two
 // static .pro files referenced below.
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
         vendor.set(JvmVendorSpec.JETBRAINS)
     }
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
         freeCompilerArgs.add("-jvm-default=no-compatibility")
     }
 }
@@ -109,16 +109,43 @@ compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
 
+        // CMP resolves javaHome from the JVM running Gradle, not the Kotlin toolchain. On CI
+        // that's Temurin 25, which ships without jmods (JEP 493): jlink still works, but the
+        // ProGuard task derives -libraryjars from $javaHome/jmods and fails with ~857k
+        // unresolved java.* references. Pin packaging to the JBR SDK toolchain (jmods
+        // included) so ProGuard sees the platform classes and the bundled runtime is
+        // deterministically JBR 25 on every machine.
+        //
+        // This assignment must stay EAGER here on the extension. Deferring it to lazy
+        // `tasks.withType<AbstractProguardTask>().configureEach { javaHome.set(provider) }` (PR #6401)
+        // does not reach `proguardReleaseJars` — the extension value still wins, ProGuard relaunches
+        // under the Gradle JVM, and every Build Desktop leg goes red with the jmods-less signature.
+        javaHome =
+            javaToolchains
+                .launcherFor {
+                    languageVersion.set(JavaLanguageVersion.of(25))
+                    vendor.set(JvmVendorSpec.JETBRAINS)
+                }
+                .get()
+                .metadata
+                .installationPath
+                .asFile
+                .absolutePath
+
         val desktopJvmArgs =
             listOf(
                 "-Xmx2G",
+                // Let the macOS title bar follow the system light/dark theme (ignored on other OSes).
+                "-Dapple.awt.application.appearance=system",
                 "-Dapple.awt.application.name=Meshtastic Desktop",
                 "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+                "-Dcom.apple.bundle.identifier=org.meshtastic.MeshtasticDesktop",
             )
         jvmArgs(*desktopJvmArgs.toTypedArray())
 
         buildTypes.release.proguard {
+            // CMP's default ProGuard (7.7.0) can't parse Java 25 class files in the JBR 25 jmods
+            version.set("7.9.1")
             isEnabled.set(true)
             obfuscate.set(false) // Open-source project — obfuscation adds no value
             optimize.set(true)
@@ -150,7 +177,7 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
                 minimumSystemVersion = "12.0"
-                bundleID = "org.meshtastic.desktop"
+                bundleID = "org.meshtastic.MeshtasticDesktop"
                 appCategory = "public.app-category.utilities"
                 entitlementsFile.set(project.file("entitlements.plist"))
                 infoPlist {
@@ -314,12 +341,12 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
-    implementation(libs.koin.annotations)
     implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.jna)
 
     testRuntimeOnly(libs.junit.vintage.engine)
+    testImplementation(projects.core.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))

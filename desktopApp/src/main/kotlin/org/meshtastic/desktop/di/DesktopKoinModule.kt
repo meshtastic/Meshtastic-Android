@@ -32,8 +32,9 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.dsl.onClose
+import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
@@ -195,7 +196,7 @@ private fun desktopPlatformStubsModule() = module {
             notificationManager = get(),
             messageProcessor = lazy { get() },
             radioConfigRepository = get(),
-            scope = get(qualifier = named("ServiceScope")),
+            scope = get<ServiceScope>(),
         )
     }
     single<AdminController> { get<RadioController>() }
@@ -209,6 +210,11 @@ private fun desktopPlatformStubsModule() = module {
             DesktopOS.Windows -> WindowsNotificationSender()
         }
     }
+        .onClose { sender ->
+            // Only the Linux sender holds a native handle; the others are stateless. `stopKoin()` in Main.kt is what
+            // drives this, after the Compose application loop has returned.
+            (sender as? AutoCloseable)?.close()
+        }
     single { DesktopNotificationManager(prefs = get(), nativeSender = get()) }
     single<NotificationManager> { get<DesktopNotificationManager>() }
     single<MeshNotificationManager> { DesktopMeshNotificationManager(notificationManager = get()) }

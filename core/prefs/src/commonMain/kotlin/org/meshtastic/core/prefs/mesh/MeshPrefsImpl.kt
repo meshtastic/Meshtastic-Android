@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.mesh
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -30,18 +28,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.MeshDataStore
 import org.meshtastic.core.repository.MeshPrefs
 
 @Single
-class MeshPrefsImpl(
-    @Named("MeshDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MeshPrefs {
+class MeshPrefsImpl(private val dataStore: MeshDataStore, dispatchers: CoroutineDispatchers) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     private val storeForwardFlows = atomic(persistentMapOf<String?, Lazy<StateFlow<Int>>>())

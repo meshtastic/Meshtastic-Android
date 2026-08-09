@@ -48,6 +48,7 @@ import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -78,6 +79,12 @@ open class BaseMapViewModel(
     val displayUnits: StateFlow<DisplayUnits> = MutableStateFlow(DistanceUnit.getFromLocale()).asStateFlow()
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
+
+    /**
+     * Connected radio's channel set (primary-channel frequency + LoRa config); used to prefill a Site Planner estimate.
+     */
+    val channelSet: StateFlow<ChannelSet?> =
+        radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = null)
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum

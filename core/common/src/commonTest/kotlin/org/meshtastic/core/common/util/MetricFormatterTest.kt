@@ -74,6 +74,18 @@ class MetricFormatterTest {
     @Test
     fun snr() {
         assertEquals("5.5 dB", MetricFormatter.snr(5.5f))
+        assertEquals("-12.5 dB", MetricFormatter.snr(-12.5f))
+    }
+
+    @Test
+    fun snrAbsentIsUnknown() {
+        assertEquals("—", MetricFormatter.snr(null))
+    }
+
+    @Test
+    fun snrZeroIsARealReading() {
+        // Must not render as unknown: 0 dB is a signal at the noise floor, not a missing measurement.
+        assertEquals("0.0 dB", MetricFormatter.snr(0f))
     }
 
     @Test
@@ -114,6 +126,11 @@ class MetricFormatterTest {
     @Test
     fun rssiZero() {
         assertEquals("0 dBm", MetricFormatter.rssi(0))
+    }
+
+    @Test
+    fun rssiAbsentIsNotRenderedAsZero() {
+        assertEquals("—", MetricFormatter.rssi(null))
     }
 
     @Test

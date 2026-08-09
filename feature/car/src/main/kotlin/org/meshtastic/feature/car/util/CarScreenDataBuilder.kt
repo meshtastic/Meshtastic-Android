@@ -53,7 +53,7 @@ internal object CarScreenDataBuilder {
         userId = node.user.id,
         longName = node.user.long_name.ifEmpty { "Unknown" },
         shortName = node.user.short_name.ifEmpty { "?" },
-        signalQuality = determineSignalQuality(node.snr, modemPreset),
+        signalQuality = determineSignalQuality(node.snrOrNull, modemPreset),
         batteryPercent = node.batteryLevel?.takeIf { it in 1..BATTERY_MAX_PERCENT },
         isOnline = node.isOnline,
         lastHeard = node.lastHeard.toLong() * SECONDS_TO_MILLIS,
@@ -72,9 +72,12 @@ internal object CarScreenDataBuilder {
     /**
      * Determines signal quality from SNR relative to the modem preset's demodulation floor ([ModemPreset.snrLimit]).
      * RSSI is not used (matching core/ui); a null/unknown preset falls back to the LongFast default limit.
+     *
+     * A null [snr] means no reading and yields [SignalQuality.UNKNOWN], never [SignalQuality.NONE] — the latter claims
+     * a measured, undemodulable link. 0 dB is a real reading and rates normally.
      */
-    fun determineSignalQuality(snr: Float, modemPreset: ModemPreset? = null): SignalQuality {
-        if (snr == Float.MAX_VALUE) return SignalQuality.NONE
+    fun determineSignalQuality(snr: Float?, modemPreset: ModemPreset? = null): SignalQuality {
+        if (snr == null) return SignalQuality.UNKNOWN
         val limit = modemPreset.snrLimit
         return when {
             snr > limit + SNR_EXCELLENT_MARGIN -> SignalQuality.EXCELLENT

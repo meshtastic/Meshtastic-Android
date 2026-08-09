@@ -17,57 +17,117 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
+import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
+import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.network.EventFirmwareRemoteDataSource
 import org.meshtastic.core.repository.EventFirmwareRepository
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration.Companion.minutes
 
 /**
- * ponytail: bundled-only — the snapshot is a handful of static records, so it's decoded once into memory with no DB or
- * network refresh (unlike [DeviceLinkRepositoryImpl]). Add a `/resource/eventFirmware` refresh when that API ships.
+ * Caches event-firmware display metadata in the DB, seeded from the bundled `event_firmware.json` snapshot and
+ * refreshed from `/resource/eventFirmware`. DB-backed (not just in-memory) so the snapshot survives across process
+ * restarts without waiting on a fresh network round-trip. Mirrors [DeviceHardwareRepositoryImpl]'s seed → single-flight
+ * refresh pattern.
  */
 @Single
 class EventFirmwareRepositoryImpl(
+    private val remoteDataSource: EventFirmwareRemoteDataSource,
     private val assetReader: BundledAssetReader,
     private val json: Json,
+    private val localDataSource: EventFirmwareEditionLocalDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) : EventFirmwareRepository {
 
-    private val mutex = Mutex()
+    /** Serializes seeding so concurrent callers don't duplicate writes. */
+    private val writeMutex = Mutex()
 
-    @Volatile private var cache: Map<String, EventFirmwareEdition>? = null
+    @Volatile private var lastRefreshMillis = 0L
 
-    override suspend fun getEdition(editionName: String): EventFirmwareEdition? = load()[editionName]
+    // Advanced on every refresh *attempt* (success, empty, or failure), unlike lastRefreshMillis which only advances on
+    // a stored non-empty payload. Without this, an offline device (a common, expected state) would re-enter the stale
+    // branch and block up to NETWORK_REFRESH_TIMEOUT_MS on every getEdition() call, since the failed Deferred is no
+    // longer active. The cooldown caps retries while offline without waiting the full CACHE_EXPIRATION_TIME_MS.
+    @Volatile private var lastAttemptMillis = 0L
 
-    /**
-     * Decodes the bundled snapshot once, keyed by edition name. Empty (not crashing) if the asset is absent/malformed.
-     */
-    private suspend fun load(): Map<String, EventFirmwareEdition> {
-        cache?.let {
-            return it
+    /** Shared refresh; a caller that stops waiting can't abort it, and the fetch still lands in the DB. */
+    private val refresher =
+        SingleFlightRefresher(dispatchers.io, "EventFirmwareRepository") {
+            lastAttemptMillis = nowMillis
+            val editions = remoteDataSource.getEventFirmware().editions
+            if (editions.isNotEmpty()) {
+                localDataSource.upsertAll(editions.map { it.asEntity() })
+                localDataSource.deleteNotIn(editions.map { it.edition })
+                lastRefreshMillis = nowMillis
+            }
         }
-        return mutex.withLock {
-            cache
-                ?: withContext(dispatchers.io) {
-                    safeCatching { assetReader.decode<EventFirmwareResponse>(ASSET_NAME, json)?.editions.orEmpty() }
-                        .onFailure { e -> Logger.w(e) { "EventFirmwareRepository: failed to read bundled JSON" } }
-                        .getOrDefault(emptyList())
-                        .associateBy { it.edition }
+
+    override suspend fun getEdition(editionName: String): EventFirmwareEdition? = withContext(dispatchers.io) {
+        ensureSeeded()
+        maybeRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+        localDataSource.getByEdition(editionName)?.asExternalModel()
+    }
+
+    override fun observeEdition(editionName: String): Flow<EventFirmwareEdition?> = flow {
+        ensureSeeded()
+        // Don't wait — the emissions below carry whatever the refresh writes, so blocking would only delay the
+        // cached value the caller could already be showing.
+        maybeRefresh(maxWaitMs = 0)
+        emitAll(localDataSource.observeByEdition(editionName).map { it?.asExternalModel() })
+    }
+        .flowOn(dispatchers.io)
+
+    /** Refreshes if the cache is stale and the retry cooldown has elapsed. See [lastAttemptMillis] for the cooldown. */
+    private suspend fun maybeRefresh(maxWaitMs: Long) {
+        val stale = nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS
+        val retryCooldownElapsed = nowMillis - lastAttemptMillis > REFRESH_RETRY_COOLDOWN_MS
+        if (stale && retryCooldownElapsed) {
+            refresher.refresh(maxWaitMs = maxWaitMs)
+        }
+    }
+
+    /** Seeds the table from the bundled snapshot if empty (fresh install, data clear). */
+    private suspend fun ensureSeeded() {
+        if (localDataSource.count() > 0) return
+        writeMutex.withLock {
+            if (localDataSource.count() == 0) {
+                safeCatching {
+                    val editions = assetReader.decode<EventFirmwareResponse>(ASSET_NAME, json)?.editions.orEmpty()
+                    localDataSource.upsertAll(editions.map { it.asEntity() })
                 }
-                    .also { cache = it }
+                    .onFailure { e -> Logger.w(e) { "EventFirmwareRepository: failed to seed from bundled JSON" } }
+            }
         }
     }
 
     private companion object {
         private const val ASSET_NAME = "event_firmware.json"
+        private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+
+        /** Minimum gap between refresh *attempts*, so a failing/empty fetch (e.g. offline) doesn't retry every call. */
+        private val REFRESH_RETRY_COOLDOWN_MS = 5.minutes.inWholeMilliseconds
+
+        /** Maximum time a blocking lookup waits for an in-flight refresh before returning cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

@@ -17,16 +17,14 @@
 package org.meshtastic.feature.widget
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +62,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -77,6 +76,7 @@ import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
 import org.meshtastic.core.resources.local_stats_dropped
@@ -90,6 +90,7 @@ import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.unknown_error
 import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
 
@@ -121,14 +122,31 @@ class LocalStatsWidget :
         provideContent { WidgetContent(stateToRender) }
     }
 
+    /**
+     * Renders our own last-resort UI when the Glance composition throws, replacing Glance's default "Can't show
+     * content" layout, and logs the failure so a broken widget stops being silent.
+     *
+     * Overriding this is the only option available: Glance's `errorUiLayout` constructor parameter is `internal` in
+     * 1.2.0-rc01, so the approach shown in the official error-handling guide does not compile from outside the library.
+     * Note that overriding this method means `errorUiLayout` is never read at all.
+     *
+     * The message comes from the Crowdin-managed Compose-resources catalog via the project's blocking [getString], so
+     * it stays translated even though a `RemoteViews` layout cannot reference Compose resources itself.
+     */
+    override fun onCompositionError(context: Context, glanceId: GlanceId, appWidgetId: Int, throwable: Throwable) {
+        Logger.e(throwable) { "LocalStatsWidget composition failed; rendering error UI" }
+        val errorViews =
+            RemoteViews(context.packageName, R.layout.widget_composition_error).apply {
+                setTextViewText(R.id.widget_composition_error_text, getString(Res.string.unknown_error))
+            }
+        AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, errorViews)
+    }
+
     @Composable
     internal fun WidgetContent(state: LocalStatsWidgetUiState) {
         val context = LocalContext.current
-        CompositionLocalProvider(
-            androidx.compose.ui.platform.LocalContext provides context,
-            LocalConfiguration provides context.resources.configuration,
-            LocalDensity provides Density(context.resources.displayMetrics.density),
-        ) {
+        // Mandatory: without this bridge every stringResource call below throws. See WidgetResourceEnvironment.
+        WidgetResourceEnvironment {
             GlanceTheme {
                 Scaffold(
                     titleBar = {

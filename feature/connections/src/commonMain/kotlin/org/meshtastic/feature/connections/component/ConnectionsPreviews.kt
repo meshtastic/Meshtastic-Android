@@ -16,8 +16,11 @@
  */
 package org.meshtastic.feature.connections.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +33,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
@@ -43,6 +47,7 @@ import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.EmptyStateContent
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.proto.User
 
 private const val PREVIEW_BLE_RSSI = -60
 
@@ -50,6 +55,16 @@ private const val PREVIEW_BLE_RSSI = -60
 @Composable
 fun DeviceListItemPreview() {
     val device = DeviceListEntry.Tcp(name = "Meshtastic_abcd", fullAddress = "s192.168.1.100")
+    AppTheme { DeviceListItem(connectionState = ConnectionState.Disconnected, device = device, onSelect = {}) }
+}
+
+// Previously-connected device: shows the short-name NodeChip alongside the unique long name (#5808), which wraps to a
+// second line rather than truncating.
+@PreviewLightDark
+@Composable
+private fun DeviceListItemWithLongNamePreview() {
+    val node = Node(num = 13444, user = User(short_name = "AB12", long_name = "James' Rooftop Solar Repeater"))
+    val device = DeviceListEntry.Tcp(name = "Meshtastic_ab12", fullAddress = "s192.168.1.101", node = node)
     AppTheme { DeviceListItem(connectionState = ConnectionState.Disconnected, device = device, onSelect = {}) }
 }
 
@@ -121,10 +136,18 @@ fun DeviceSectionHeaderPreview() {
     AppTheme { DeviceSectionHeader(title = "Bluetooth Devices", showProgress = true) }
 }
 
+// Bounded width so the reference reflects the full-width segmented control as it renders on the Connections screen —
+// a fillMaxWidth control has no width to fill under the unbounded default preview constraint.
 @PreviewLightDark
 @Composable
 fun TransportSelectorPreview() {
-    AppTheme { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+            }
+        }
+    }
 }
 
 @PreviewLightDark
@@ -239,7 +262,7 @@ private class PreviewBleDevice(
     override val isBonded: Boolean = true
     override val isConnected: Boolean = false
 
-    override suspend fun readRssi(): Int = rssi ?: PREVIEW_BLE_RSSI
+    override suspend fun readRssi(): Int? = rssi
 
     override suspend fun bond() = Unit
 }

@@ -145,8 +145,10 @@ constructor(
                     .map { it?.firmware_edition }
                     .distinctUntilChanged()
                     .onStart { emit(null) },
-                firmwareReleaseRepository.stableRelease,
-                firmwareReleaseRepository.alphaRelease,
+                // Placeholders keep the first UI emission from waiting on the firmware cache/refresh pipeline —
+                // real values land via re-emission once the repository produces them.
+                firmwareReleaseRepository.stableRelease.onStart { emit(null) },
+                firmwareReleaseRepository.alphaRelease.onStart { emit(null) },
                 nodeRequestActions.lastTracerouteTime,
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
             ) { edition, stable, alpha, trTime, niTime ->
@@ -176,8 +178,13 @@ constructor(
             val logs = args[LOGS_INDEX] as LogsGroup
             val identity = args[IDENTITY_INDEX] as IdentityGroup
             val metadata = args[METADATA_INDEX] as MetadataGroup
+
+            @Suppress("UNCHECKED_CAST")
             val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
-            val (hw, deviceLinks) = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
+
+            @Suppress("UNCHECKED_CAST")
+            val hardwareAndLinks = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
+            val (hw, deviceLinks) = hardwareAndLinks
 
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num

@@ -25,6 +25,7 @@ import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
@@ -151,6 +152,12 @@ class FakeUiPrefs : UiPrefs {
         showQuickChat.value = show
     }
 
+    override val eventThemeEnabled = MutableStateFlow(true)
+
+    override fun setEventThemeEnabled(enabled: Boolean) {
+        eventThemeEnabled.value = enabled
+    }
+
     override val bleAutoScan = MutableStateFlow(false)
 
     override fun setBleAutoScan(enabled: Boolean) {
@@ -167,6 +174,12 @@ class FakeUiPrefs : UiPrefs {
 
     override fun setSelectedConnectionTransport(type: DeviceType) {
         selectedConnectionTransport.value = type
+    }
+
+    override val firmwareUpdateNotificationKeys = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun recordFirmwareUpdateNotificationKey(key: String) {
+        firmwareUpdateNotificationKeys.value += key
     }
 
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()
@@ -239,7 +252,10 @@ class FakeUiPrefs : UiPrefs {
     }
 }
 
+@Suppress("TooManyFunctions")
 class FakeMapPrefs : MapPrefs {
+    private var cameraPosition: MapCameraPosition? = null
+
     override val mapStyle = MutableStateFlow(0)
 
     override fun setMapStyle(style: Int) {
@@ -275,6 +291,28 @@ class FakeMapPrefs : MapPrefs {
     override fun setLastHeardTrackFilter(seconds: Long) {
         lastHeardTrackFilter.value = seconds
     }
+
+    override val hiddenLayerUrls = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>) {
+        hiddenLayerUrls.value = transform(hiddenLayerUrls.value)
+    }
+
+    override suspend fun awaitHiddenLayerUrls(): Set<String> = hiddenLayerUrls.value
+
+    override val networkMapLayers = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>) {
+        networkMapLayers.value = transform(networkMapLayers.value)
+    }
+
+    override suspend fun awaitNetworkMapLayers(): Set<String> = networkMapLayers.value
+
+    override fun setCameraPosition(position: MapCameraPosition) {
+        cameraPosition = position
+    }
+
+    override suspend fun awaitCameraPosition(): MapCameraPosition? = cameraPosition
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {
@@ -436,5 +474,11 @@ class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
 
     override fun setTakServerEnabled(enabled: Boolean) {
         isTakServerEnabled.value = enabled
+    }
+
+    override val isMeshToCotEnabled = MutableStateFlow(false)
+
+    override fun setMeshToCotEnabled(enabled: Boolean) {
+        isMeshToCotEnabled.value = enabled
     }
 }

@@ -77,6 +77,26 @@ object AirQualityIndex {
         }
     }
 
+    /**
+     * The historical NowCast AQI for every reading in [readings] — element `i` is the AQI as of `readings[i]`'s own
+     * timestamp, derived only from readings at or before it, or null where EPA's minimum-data rule (see
+     * [computeNowCastPm25]) isn't met at that point. Used to chart/tabulate AQI over time (issue #6381) rather than
+     * only the single live value.
+     *
+     * [readings] must be sorted ascending by epoch-second timestamp; a sliding window keeps this linear in the number
+     * of readings per 12-hour window rather than quadratic over the whole time frame.
+     */
+    fun nowCastAqiSeries(readings: List<Pair<Long, Double>>): List<Int?> {
+        val windowSeconds = NOWCAST_WINDOW_HOURS * SECONDS_PER_HOUR
+        var start = 0
+        return readings.mapIndexed { index, (time, _) ->
+            // Readings at or before this cutoff fall outside the point's own 12h window, so drop them from the front.
+            val cutoff = time - windowSeconds
+            while (readings[start].first <= cutoff) start++
+            computeNowCastPm25(readings.subList(start, index + 1), time)?.let(::pm25ToAqi)
+        }
+    }
+
     private data class Breakpoint(
         val concentrationLow: Double,
         val concentrationHigh: Double,
@@ -84,15 +104,17 @@ object AirQualityIndex {
         val aqiHigh: Int,
     )
 
-    // Standard EPA PM2.5 (µg/m³) breakpoint table.
+    // Current (2024) EPA PM2.5 24-hour breakpoint table (AQS parameter 88101), µg/m³.
+    // Kept in lockstep with iOS (meshtastic/Meshtastic-Apple#2075) for cross-platform AQI alignment
+    // (meshtastic/design#54).
     private val BREAKPOINTS =
         listOf(
-            Breakpoint(0.0, 12.0, 0, 50),
-            Breakpoint(12.1, 35.4, 51, 100),
+            Breakpoint(0.0, 9.0, 0, 50),
+            Breakpoint(9.1, 35.4, 51, 100),
             Breakpoint(35.5, 55.4, 101, 150),
-            Breakpoint(55.5, 150.4, 151, 200),
-            Breakpoint(150.5, 250.4, 201, 300),
-            Breakpoint(250.5, 500.4, 301, 500),
+            Breakpoint(55.5, 125.4, 151, 200),
+            Breakpoint(125.5, 225.4, 201, 300),
+            Breakpoint(225.5, 325.4, 301, 500),
         )
 
     /**

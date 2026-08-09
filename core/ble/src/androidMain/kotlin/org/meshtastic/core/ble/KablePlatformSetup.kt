@@ -22,6 +22,10 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.PooledThreadingStrategy
 import com.juul.kable.toIdentifier
+import org.meshtastic.core.model.util.anonymize
+
+/** Android's scanner filters on address in hardware, so Kable's `Filter.Address` works natively here. */
+internal actual val supportsNativeAddressScanFilter: Boolean = true
 
 /**
  * Shared thread pool for Kable BLE connections.
@@ -55,9 +59,9 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
             // Requesting the max MTU is critical for preventing dropped packets and stalls.
             @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
-            Logger.i { "[${device.address}] Negotiated MTU: $negotiatedMtu" }
+            Logger.i { "[${device.address.anonymize()}] Negotiated MTU: $negotiatedMtu" }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "[${device.address}] Failed to request MTU" }
+            Logger.w(e) { "[${device.address.anonymize()}] Failed to request MTU" }
         }
     }
 }

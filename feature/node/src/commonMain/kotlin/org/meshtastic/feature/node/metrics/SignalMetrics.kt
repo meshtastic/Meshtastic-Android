@@ -58,6 +58,8 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.model.util.rxTimeOrNull
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.busy_noise_floor
 import org.meshtastic.core.resources.clear
@@ -111,7 +113,14 @@ private val LEGEND_DATA =
         LegendData(nameRes = Res.string.snr, color = SignalMetric.SNR.color),
     )
 
-private sealed interface SignalLogEntry {
+/** Builds the combined signal log, newest first. Kept out of the composable so the LazyColumn keys are testable. */
+internal fun buildSignalLog(signalData: List<MeshPacket>, localStatsData: List<Telemetry>): List<SignalLogEntry> {
+    val localStats = localStatsData.mapIndexed { index, telemetry -> SignalLogEntry.LocalStatsEntry(telemetry, index) }
+    val packets = signalData.mapIndexed { index, packet -> SignalLogEntry.PacketEntry(packet, index) }
+    return (localStats + packets).sortedByDescending { it.timeSeconds }
+}
+
+internal sealed interface SignalLogEntry {
     val timeSeconds: Int
 
     /** Stable, collision-free identity for use as a LazyColumn item key across both entry types. */
@@ -128,9 +137,12 @@ private sealed interface SignalLogEntry {
         override val contentType: Any = "local_stats"
     }
 
-    data class PacketEntry(val meshPacket: MeshPacket) : SignalLogEntry {
-        override val timeSeconds: Int = meshPacket.rx_time
-        override val key: Any = "packet_${meshPacket.id}"
+    data class PacketEntry(val meshPacket: MeshPacket, val index: Int) : SignalLogEntry {
+        override val timeSeconds: Int = meshPacket.rxTimeOrNull() ?: 0
+
+        // MeshPacket.id repeats: it is unique only per originating node, and retransmissions are stored per reception.
+        // The source-list index disambiguates, as it does for local stats.
+        override val key: Any = "packet_${meshPacket.id}_$index"
         override val contentType: Any = "signal_packet"
     }
 }
@@ -142,19 +154,18 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val threshold = timeFrame.timeThreshold()
-    val signalData = state.signalMetrics.filter { it.rx_time.toLong() >= threshold }
-    val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
-    val data =
-        remember(signalData, localStatsData) {
-            (
-                localStatsData.mapIndexed { index, telemetry -> SignalLogEntry.LocalStatsEntry(telemetry, index) } +
-                    signalData.map { SignalLogEntry.PacketEntry(it) }
-                )
-                .sortedByDescending { it.timeSeconds }
+    // An unstamped packet has no place on a time axis. Dropping it here is the invariant every downstream
+    // `rxTimeOrNull() ?: 0` in this file relies on, so none of them can render or plot 1970.
+    val signalData =
+        state.signalMetrics.filter { packet ->
+            val rxTime = packet.rxTimeOrNull() ?: return@filter false
+            rxTime.toLong() >= threshold
         }
+    val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
+    val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
     val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
-    val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != 0 } }
-    val hasSnr = remember(signalData) { signalData.any { !it.rx_snr.isNaN() } }
+    val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != null } }
+    val hasSnr = remember(signalData) { signalData.any { it.snrOrNull() != null } }
     val hasAnyLocalStats = state.localStats.isNotEmpty()
     val localStatsExportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveLocalStatsCSV(uri, localStatsData) }
     val signalExportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveSignalMetricsCSV(uri, signalData) }
@@ -308,8 +319,8 @@ private fun SignalMetricsChart(
         remember(noiseFloorData) {
             if (noiseFloorData.size > 1) listOf(noiseFloorData.first(), noiseFloorData.last()) else emptyList()
         }
-    val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != 0 } }
-    val snrData = remember(meshPackets) { meshPackets.filter { !it.rx_snr.isNaN() } }
+    val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != null } }
+    val snrData = remember(meshPackets) { meshPackets.filter { it.snrOrNull() != null } }
     val legendData =
         remember(noiseFloorData, rssiData, snrData) {
             LEGEND_DATA.filter { legend ->
@@ -350,11 +361,15 @@ private fun SignalMetricsChart(
                     lineModel { series(x = busyFloorData.map { it.time }, y = busyFloorData.map { BUSY_FLOOR_DBM }) }
                 }
                 if (rssiData.isNotEmpty()) {
-                    lineModel { series(x = rssiData.map { it.rx_time }, y = rssiData.map { it.rx_rssi }) }
+                    lineModel {
+                        series(x = rssiData.map { it.rxTimeOrNull() ?: 0 }, y = rssiData.mapNotNull { it.rx_rssi })
+                    }
                 }
                 if (snrData.isNotEmpty()) {
                     /* Use a separate lineModel call to associate SNR with the right axis. */
-                    lineModel { series(x = snrData.map { it.rx_time }, y = snrData.map { it.rx_snr }) }
+                    lineModel {
+                        series(x = snrData.map { it.rxTimeOrNull() ?: 0 }, y = snrData.mapNotNull { it.snrOrNull() })
+                    }
                 }
             }
         }
@@ -482,7 +497,14 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // FlowRow(SpaceBetween): the relays stat wraps to its own line when the traffic label is too long,
+            // instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text =
                     stringResource(
@@ -506,7 +528,14 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // FlowRow(SpaceBetween): the uptime stat wraps to its own line when the nodes label is too long,
+            // instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text =
                     stringResource(
@@ -536,7 +565,7 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
-    val time = meshPacket.rx_time.toLong() * MS_PER_SEC
+    val time = (meshPacket.rxTimeOrNull() ?: 0).toLong() * MS_PER_SEC
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             /* Data */
@@ -557,14 +586,17 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MetricValueRow(color = SignalMetric.RSSI.color, text = MetricFormatter.rssi(meshPacket.rx_rssi))
                         Spacer(Modifier.width(12.dp))
-                        MetricValueRow(color = SignalMetric.SNR.color, text = MetricFormatter.snr(meshPacket.rx_snr))
+                        MetricValueRow(
+                            color = SignalMetric.SNR.color,
+                            text = MetricFormatter.snr(meshPacket.snrOrNull()),
+                        )
                     }
                 }
             }
 
             /* Signal Indicator */
             Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                LoraSignalIndicator(snr = meshPacket.rx_snr)
+                LoraSignalIndicator(snr = meshPacket.snrOrNull())
             }
         }
     }

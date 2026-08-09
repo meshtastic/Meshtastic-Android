@@ -29,6 +29,7 @@ import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.prefs.di.asUiDataStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -55,7 +56,7 @@ class UiPrefsImplTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        prefs = UiPrefsImpl(dataStore, dispatchers)
+        prefs = UiPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest
@@ -123,5 +124,17 @@ class UiPrefsImplTest {
         }
 
         assertEquals(DeviceType.USB, prefs.selectedConnectionTransport.value)
+    }
+
+    @Test
+    fun `firmware update notification keys persist without duplicates`() = testScope.runTest {
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.8.0")
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.8.0")
+        prefs.recordFirmwareUpdateNotificationKey("firmware-update-notified:node:target:2.9.0")
+
+        assertEquals(
+            setOf("firmware-update-notified:node:target:2.8.0", "firmware-update-notified:node:target:2.9.0"),
+            prefs.firmwareUpdateNotificationKeys.value,
+        )
     }
 }

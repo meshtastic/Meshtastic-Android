@@ -2,7 +2,7 @@
 title: Viestit ja kanavat
 parent: Käyttöopas
 nav_order: 3
-last_updated: 2026-06-25
+last_updated: 2026-07-11
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
   - kanavat
@@ -57,15 +57,17 @@ Yksityisviestit (DM) ovat kahden radion välistä päästä päähän salattua v
 
 ### Viestin tilat
 
-| Tila                                              | Ikoni | Tarkoitus                                                                 |
-| ------------------------------------------------- | ----- | ------------------------------------------------------------------------- |
-| Jonossa                                           | ⏳     | Viestiä odotetaan lähetettäväksi                                          |
-| Matkalla                                          | ✓     | Toimitettu radiolle, odottaa kuittausta                                   |
-| Toimitettu                                        | ✓✓    | Kuittaus vastaanotettu vastaanottajalta                                   |
-| Vastaanotettu                                     | ✓     | Viesti vastaanotettu mesh-verkosta (saapuva)           |
-| Varastoi & välitä             | 🔗    | Viestiä reititetään Varastoi & välitä -radion kautta  |
-| Varastoi & välitä vahvistettu | 🔗    | Toimitus vahvistettu Varastoi & välitä -radion kautta |
-| Virhe                                             | ✗     | Toimitus epäonnistui uudelleenyritysten jälkeen                           |
+Tilateksti näkyy vain **omissa** lähtevissä viesteissäsi (muiden lähettämissä saapuvissa viesteissä ei näytetä tilaa):
+
+| Tila                                                           | Merkitys                                                                                                                                                             |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lähetetään…                                                    | Jonossa tai jo siirretty radiolle, mutta lopullista tilaa ei ole vielä vahvistettu (jonossa ja lähetetään näyttävät molemmat tämän saman tekstin) |
+| Toimitettu vastaanottajalle                                    | Vahvin mahdollinen vahvistus suoralle viestille — vastaanottokuittaus on saatu                                                                                       |
+| Toimitettu mesh-verkkoon                                       | Kanavalähetyksessä viesti on saavuttanut mesh-verkon (kanavalähetyksille ei lähetetä vastaanottajakohtaista kuittausta)                           |
+| Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa | Suorassa viestissä tämä näytetään varoitusvärillä — viesti on välitetty eteenpäin, mutta vastaanottokuittausta ei ole vielä saatu                                    |
+| Reititetään SF++ ketjun kautta…                                | Reititetty tai puskuroitu varastoi & välitä Plus Plus -ketjussa                                                                                  |
+| Vahvistettu SF++-ketjussa                                      | Toimitus vahvistettu varastoi & välitä++ -ketjun kautta                                                                                          |
+| Virhe                                                          | Toimitus epäonnistui — napauta tilaa nähdäksesi tarkemman syyn (katso alla kohta toimitusvirheet)                                                 |
 
 ### Toimitusvirheet
 
@@ -116,11 +118,31 @@ Voit hakea koko keskusteluhistorian suoraan chat-näkymästä:
 
 ![Viestihaku-palkki tuloslaskurilla ja nuolilla](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 Vinkki: Haku on täystekstihaku ja toimii vain siinä keskustelussa, josta avasit sen — se ei hae muista kanavista tai kontakteista. Osumat löytyvät nopeasti myös pitkistä historiatiedoista, koska viestit on indeksoitu paikallisesti.
+> 💡 Vinkki: Haku on täystekstihaku ja toimii vain siinä keskustelussa, josta avasit sen — se ei hae muista kanavista tai kontakteista. Se hakee osumat laitteellesi jo tallennetuista viesteistä, joten se toimii täysin offline-tilassa.
 
 ### Viestikuplat
 
 Viestit näkyvät chat-kuplina — lähetetyt viestit oikealla, vastaanotetut vasemmalla. Jokainen kupla näyttää lähettäjän, aikaleiman ja toimitustilan. Vastaukselliset viestit sisältävät alkuperäisen viestin esikatselun vastauksen yläpuolella.
+
+### Tekstin muotoilu
+
+Viestit tukevat kevyttä rivinsisäistä **Markdown**-muotoilua. Vastaanotetut viestit näyttävät muotoilun ilman Markdown-syntaksimerkkejä:
+
+| Kirjoita            | Syntaksi                      | Näkyy muodossa        |
+| ------------------- | ----------------------------- | --------------------- |
+| Lihavoitu           | **lihavoitu**                 | **lihavoitu**         |
+| Kursivoitu          | `*kursivoitu*`                | _kursivoitu_          |
+| Yliviivattu         | `~~yliviivattu~~`             | ~~yliviivattu~~       |
+| Rivinsisäinen koodi | `` `koodi` ``                 | tasalevyinen `koodi`  |
+| Linkki              | `[nimi](https://example.com)` | napautettava **nimi** |
+
+Kun kirjoitat viestiä, napauta viestikenttää ja kirjoita vähintään kolme merkkiä, niin kentän alle avautuu **muotoilutyökalurivi**. Valitse teksti ja napauta muotoilua lisätäksesi sen ympärille merkinnät (napauta uudelleen poistaaksesi ne). Jos tekstiä ei ole valittuna, muotoilu lisää tyhjän merkkiparin ja sijoittaa kohdistimen niiden väliin. Linkkipainike avaa valintaikkunan URL-osoitteen syöttämistä varten. Kirjoittaessasi luonnoksen muotoilu näkyy kentässä, vaikka taustalla oleva teksti säilyttää Markdown-merkit.
+
+> 💡 **Vinkki:** Muotoilu välitetään mesh-verkossa kirjaimellisina merkkeinä – samoina tavuina, jotka iOS lähettää. Sovellukset, jotka eivät tue Markdownia (vanhemmat sovellukset ja pelkkää laiteohjelmistoa käyttävät laitteet), näyttävät alkuperäiset `**`- ja `~~`-merkit. URL-osoitteet, sähköpostiosoitteet ja puhelinnumerot muutetaan edelleen automaattisesti linkeiksi riippumatta siitä, käytätkö Markdownia.
+
+### Maininnat
+
+Kirjoita viestiä laatiessasi `@` mainitaksesi radion — valitsin ehdottaa kirjoittaessasi vastaavia yhteystietoja. Vastaanotetussa viestissä maininta näkyy korostettuna tunnisteena, jossa näkyy radion nimi. Napauta sitä siirtyäksesi suoraan kyseisen radion tietosivulle.
 
 ### Reaktiot
 
@@ -143,6 +165,7 @@ Pitkä painallus missä tahansa viestissä avaa:
 - **Kopioi** — kopioi viestin teksti leikepöydälle
 - **Vastaa** — lainaa viesti vastaukseesi
 - **Reagoi** — lisää emoji-reaktio
+- **Käännä** — kääntää vastaanotetun viestin laitteesi kielelle ja mahdollistaa vaihtamisen alkuperäisen ja käännetyn tekstin välillä (vain Google Play -versiossa; käyttää laitteella toimivaa käännöstä)
 - **Poista** — poista lähettämäsi viesti (paikallinen poisto)
 
 ### Viestien prioriteetti
@@ -156,6 +179,7 @@ Viestit jonotetaan ja lähetetään prioriteetin mukaan:
 ### Viestirajoitukset
 
 - **Enimmäispituus:** 200 tavua (noin 200 merkkiä ASCII-tekstille)
+- 200 tavun rajoitus koskee vain sovelluksen viestinkirjoituskenttää. Mesh-verkon viestin enimmäiskoko on noin 233 tavua, joten muilta lähettäjiltä (esimerkiksi sovellustoiminnoista tai Android Autosta) tulevat viestit voivat olla hieman pidempiä
 - **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
 - **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 

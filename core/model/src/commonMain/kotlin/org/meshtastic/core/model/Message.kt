@@ -174,13 +174,21 @@ data class Message(
     val text: String,
     val fromLocal: Boolean,
     val time: String,
+    /**
+     * Mesh time in epoch millis (the packet's `rx_time`) — the instant [time] renders. 0 when the radio never stamped
+     * one (the packet carried no arrival time, or an old-firmware 0); read [displayTime] instead of this field so that
+     * case falls back to [receivedTime].
+     */
+    val meshTime: Long = 0L,
     val read: Boolean,
     val status: MessageStatus?,
     val routingError: Int,
     val packetId: Int,
     val emojis: List<Reaction>,
-    val snr: Float,
-    val rssi: Int,
+    /** Signal-to-noise ratio in dB, or null when the packet carried no measurement. 0 dB is a valid reading. */
+    val snr: Float?,
+    /** Received signal strength, or null when the radio did not report one. 0 dBm is a valid reading. */
+    val rssi: Int?,
     val hopsAway: Int,
     val replyId: Int?,
     val originalMessage: Message? = null,
@@ -197,6 +205,14 @@ data class Message(
     /** Whether the bubble currently displays [translatedText] instead of [text]. */
     val showTranslated: Boolean = false,
 ) {
+    /**
+     * Epoch millis behind the displayed [time]: mesh time when the radio stamped one, otherwise the local
+     * [receivedTime]. Use this for anything time-based the user can see, so an offline backlog sync — where every
+     * packet shares one receipt instant — still reads as the conversation actually happened.
+     */
+    val displayTime: Long
+        get() = meshTime.takeIf { it > 0 } ?: receivedTime
+
     /**
      * The text the UI displays (and copies): the persisted translation when [showTranslated] is set, except while
      * [searching] — search matches and highlights apply to the original [text].

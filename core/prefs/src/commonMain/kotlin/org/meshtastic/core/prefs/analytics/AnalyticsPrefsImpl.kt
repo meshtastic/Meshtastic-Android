@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.analytics
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -28,16 +26,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.AnalyticsDataStore
+import org.meshtastic.core.prefs.di.AppDataStore
 import org.meshtastic.core.repository.AnalyticsPrefs
 import kotlin.uuid.Uuid
 
 @Single
 class AnalyticsPrefsImpl(
-    @Named("AnalyticsDataStore") private val analyticsDataStore: DataStore<Preferences>,
-    @Named("AppDataStore") private val appDataStore: DataStore<Preferences>,
+    private val analyticsDataStore: AnalyticsDataStore,
+    private val appDataStore: AppDataStore,
     dispatchers: CoroutineDispatchers,
 ) : AnalyticsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

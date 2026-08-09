@@ -25,22 +25,28 @@ import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.database.dao.ChannelSetDao
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.DeviceLinkDao
 import org.meshtastic.core.database.dao.DiscoveryDao
+import org.meshtastic.core.database.dao.EventFirmwareEditionDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
+import org.meshtastic.core.database.dao.MergeMarkerDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
+import org.meshtastic.core.database.entity.ChannelSetEntity
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.DeviceLinkEntity
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.EventFirmwareEditionEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
+import org.meshtastic.core.database.entity.MergeMarkerEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -70,6 +76,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         DiscoverySessionEntity::class,
         DiscoveryPresetResultEntity::class,
         DiscoveredNodeEntity::class,
+        EventFirmwareEditionEntity::class,
+        MergeMarkerEntity::class,
+        ChannelSetEntity::class,
     ],
     autoMigrations =
     [
@@ -116,13 +125,20 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 43, to = 44),
         AutoMigration(from = 44, to = 45),
         AutoMigration(from = 45, to = 46),
+        AutoMigration(from = 46, to = 47),
+        AutoMigration(from = 47, to = 48),
+        AutoMigration(from = 48, to = 49),
+        AutoMigration(from = 49, to = 50),
+        AutoMigration(from = 50, to = 51),
+        AutoMigration(from = 51, to = 52),
     ],
-    version = 46,
+    version = 52,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
 @ColumnTypeConverters(Converters::class)
 @androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
+@Suppress("TooManyFunctions") // One accessor per DAO; the count grows with the schema, not with class complexity.
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
 
@@ -142,45 +158,35 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
     abstract fun discoveryDao(): DiscoveryDao
 
+    abstract fun eventFirmwareEditionDao(): EventFirmwareEditionDao
+
+    abstract fun mergeMarkerDao(): MergeMarkerDao
+
+    abstract fun channelSetDao(): ChannelSetDao
+
     companion object {
         /**
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
-         * @param multiConnection when `true` (default), opens a multi-reader connection pool (`maxNumOfReaders = 4`,
-         *   `maxNumOfWriters = 1`) so reads can run concurrently. Pass `false` to explicitly force
-         *   [setSingleConnectionPool], serializing all reads and writes through one connection.
+         * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
+         * databases, and under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`) the reader-pool
+         * permit semaphore can wedge: all reader connections report `Free` but `permits=0`, so every read acquisition
+         * times out indefinitely ("Error code: 5, Timed out attempting to acquire a reader connection"). Android hit
+         * this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs, so JVM/iOS were moved
+         * off the multi-reader pool too. Single-connection eliminates the separate reader permit pool entirely.
          *
-         * **Android production passes `false`.** Without the explicit `setSingleConnectionPool()` call, Room defaults
-         * to a 4-reader pool for named databases regardless of whether `setMultipleConnectionPool` was called. Under
-         * coroutine cancellation churn (e.g. DB switches via `flatMapLatest`), the reader-pool permit semaphore can
-         * wedge: all reader connections report `Free` but `permits=0`, so every read acquisition times out
-         * indefinitely. Forcing single-connection eliminates the separate reader permit pool entirely.
-         *
-         * **In-memory databases (tests) pass `false`.** Room already serves an in-memory database (`name == null`) from
-         * a single connection regardless of the pool configuration, so this only makes the single-connection intent
-         * explicit and serializes the query dispatcher; it is not load-bearing for read-after-write.
-         * (`DeviceLinkRepositoryImplTest` is deterministic because it runs on the wall clock, not because of this flag;
-         * see that test's comments.)
-         *
-         * **JVM/iOS production uses `true`** (the default). Revisit if desktop/iOS field logs show similar
-         * pool-exhaustion patterns under cancellation churn.
+         * For in-memory databases (tests) this is a no-op for pooling — Room already serves `name == null` databases
+         * from a single connection — it just serializes the query dispatcher.
          */
         @OptIn(ExperimentalCoroutinesApi::class)
-        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
-            multiConnection: Boolean = true,
-        ): RoomDatabase.Builder<T> = this.fallbackToDestructiveMigration(dropAllTables = false)
-            .apply {
-                if (multiConnection) {
-                    setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
-                } else {
-                    setSingleConnectionPool()
-                }
-            }
-            .setQueryCoroutineContext(
-                // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
-                // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
-                if (multiConnection) ioDispatcher else ioDispatcher.limitedParallelism(1),
-            )
+        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
+            this.fallbackToDestructiveMigration(dropAllTables = false)
+                .setSingleConnectionPool()
+                .setQueryCoroutineContext(
+                    // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
+                    // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
+                    ioDispatcher.limitedParallelism(1),
+                )
     }
 }
 

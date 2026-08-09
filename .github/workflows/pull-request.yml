@@ -12,20 +12,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1. CHANGE DETECTION: Prevents unnecessary builds
+  # 1. CHANGE DETECTION: Prevents unnecessary builds. Also verifies the path
+  # filter below stays aligned with the module roots in settings.gradle.kts
+  # (folded into this job rather than run standalone: runner-pool slots, not
+  # compute, are the scarce resource during queue bursts).
   check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     outputs:
       android: ${{ steps.filter.outputs.android }}
+      screenshots: ${{ steps.filter.outputs.screenshots }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: dorny/paths-filter@v4
         id: filter
         with:
           token: ''
           filters: |
+            # Anything in screenshot-tests' dependency closure (feature/* and
+            # core/* transitively) or the build machinery that shapes rendering.
+            # androidApp-, desktopApp- and docs-only changes skip screenshots on
+            # PRs; the merge queue always runs them as the final gate.
+            screenshots:
+              - 'screenshot-tests/**'
+              - 'core/**'
+              - 'feature/**'
+              - 'build-logic/**'
+              - 'config/**'
+              - 'gradle/**'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - 'config.properties'
+              - 'compose_compiler_config.conf'
+              - '.github/workflows/**'
+              - '.github/actions/**'
             android:
               # CI/workflow implementation
               - '.github/workflows/**'
@@ -51,14 +73,6 @@ jobs:
               - 'gradlew.bat'
               - 'settings.gradle.kts'
               - 'test.gradle.kts'
-
-  # 1b. FILTER DRIFT CHECK: Ensures check-changes stays aligned with module roots
-  verify-check-changes-filter:
-    if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7.0.0
       - name: Verify module roots are represented in check-changes filter
         run: |
           python3 - <<'PY'
@@ -81,10 +95,12 @@ jobs:
               for path in re.findall(r"-\s*'([^']+/\*\*)'", workflow)
           }
 
-          actual_module_roots = filter_paths & expected_roots
+          # Filter roots that are intentionally not Gradle module roots
+          # (CI/workflow implementation + shared build infrastructure).
+          allowed_infra_roots = {'.github', 'build-logic', 'config', 'gradle'}
 
-          missing = sorted(expected_roots - actual_module_roots)
-          unexpected = sorted(actual_module_roots - expected_roots)
+          missing = sorted(expected_roots - filter_paths)
+          unexpected = sorted(filter_paths - expected_roots - allowed_infra_roots)
 
           if missing or unexpected:
               print('check-changes filter drift detected:')
@@ -95,6 +111,70 @@ jobs:
               raise SystemExit(1)
 
           print('check-changes filter is aligned with settings.gradle module roots.')
+          PY
+      # Drift guard: the shard task lists in reusable-check.yml are
+      # hand-maintained and have silently dropped modules before (discovery,
+      # docs, wifi-provision, car, datastore, konsist had tests that never ran
+      # in CI). Every module in settings.gradle.kts must appear in the shard
+      # matrix or be explicitly exempted — and an exempt module that gains test
+      # sources fails the guard until it is wired into a shard.
+      - name: Verify every module with tests is wired into a CI test shard
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          settings = Path('settings.gradle.kts').read_text()
+          check = Path('.github/workflows/reusable-check.yml').read_text()
+
+          modules = set(re.findall(r'"(:[^"]+)"', settings))
+
+          # Modules whose tests run in a dedicated job or only on-device --
+          # exempt unconditionally.
+          covered_elsewhere = {
+              ':screenshot-tests',   # dedicated screenshot-check job
+              ':docs-screenshots',   # doc-screenshot generation (screenshot tooling)
+              ':baselineprofile',    # benchmark module, instrumented-only
+          }
+          # Modules with no unit-test sources yet. One of these gaining test
+          # sources fails the guard: move it into a shard in reusable-check.yml
+          # and remove it from this list.
+          no_tests_yet = {
+              ':core:di',
+              ':core:nfc',
+              ':core:resources',
+          }
+
+          shards = check.split('# ── Sharded Unit Tests')[1].split('# ── Android Build')[0]
+
+          def has_test_sources(module):
+              root = Path(module.lstrip(':').replace(':', '/'))
+              return any(
+                  f.suffix == '.kt'
+                  for d in root.glob('src/*')
+                  if 'test' in d.name.lower()
+                  for f in d.rglob('*.kt')
+              )
+
+          problems = []
+          for m in sorted(modules):
+              if m in covered_elsewhere:
+                  continue
+              if m in no_tests_yet:
+                  if has_test_sources(m):
+                      problems.append(f'{m} is exempt as test-less but has test sources -- wire it into a shard')
+              # Require an actual test task (allTests / test / test<Variant>UnitTest),
+              # not just any reference -- a lone kover entry must not satisfy this.
+              elif not re.search(rf'{re.escape(m)}:(allTests|test)', shards):
+                  problems.append(f'{m} has no test task in any reusable-check.yml test shard')
+
+          if problems:
+              print('CI shard coverage drift detected:')
+              for p in problems:
+                  print('  -', p)
+              raise SystemExit(1)
+          exempt = covered_elsewhere | no_tests_yet
+          print(f'{len(modules) - len(modules & exempt)} modules verified against the shard matrix.')
           PY
 
   # 1c. STORE METADATA: Enforce store-listing length limits (e.g. the F-Droid /
@@ -111,9 +191,42 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+      # Workflow linting (actionlint + its shellcheck integration over every run: block).
+      # Version-pinned; the runner image ships shellcheck. ~1s over the whole tree.
+      - name: Lint GitHub workflows (actionlint)
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /tmp
+          /tmp/actionlint -color
+      - name: Lint repo shell scripts (shellcheck)
+        run: shellcheck scripts/*.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
+      # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
+      # backslash written before a quote renders literally in the UI (PR #6357).
+      # Guards the English source strings; locale mirrors are cleaned upstream by
+      # the Crowdin post-export processor.
+      - name: Check for escaped quotes in base string resources
+        run: python3 scripts/check-string-escapes.py
+      # The deep-link tables (README + developer guide) and both Obtainium import
+      # files are generated from CHANNELS x FLAVORS in obtainium/generate-links.py.
+      # Offline and deterministic, so drift can only come from a commit: this fails
+      # the PR that hand-edits a generated file or changes the script without
+      # regenerating. The network half (are the APK filters still matching real
+      # release assets?) is the --refresh probe in scheduled-updates.yml.
+      - name: Check Obtainium generated links are current
+        run: python3 obtainium/generate-links.py --check
+      # Flathub/AppStream needs a <release> entry for the version being shipped; a stale
+      # <releases> block degrades (or fails) the Flathub listing. Fails the PR that bumps
+      # VERSION_NAME_BASE until the matching entry is added.
+      - name: Require AppStream release entry for current version
+        run: |
+          VERSION=$(grep '^VERSION_NAME_BASE=' config.properties | cut -d'=' -f2)
+          METAINFO=desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml
+          if ! grep -q "version=\"$VERSION\"" "$METAINFO"; then
+            echo "::error file=$METAINFO::Missing <release version=\"$VERSION\"> entry. Add it alongside the VERSION_NAME_BASE bump."
+            exit 1
+          fi
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # We disable coverage and desktop builds for PRs to keep feedback fast
@@ -123,8 +236,12 @@ jobs:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write # Gradle job summary as a PR comment on failure
     with:
       run_lint: true
+      run_screenshot_tests: ${{ needs.check-changes.outputs.screenshots == 'true' }}
       run_unit_tests: true
       run_coverage: false
       upload_artifacts: true
@@ -136,13 +253,14 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     permissions: {}
-    needs: [check-changes, verify-check-changes-filter, check-metadata, validate-and-build]
+    needs: [check-changes, check-metadata, validate-and-build]
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
-          if [[ "${{ needs.verify-check-changes-filter.result }}" == "failure" || "${{ needs.verify-check-changes-filter.result }}" == "cancelled" ]]; then
-            echo "::error::check-changes filter verification failed"
+          # skipped is fine (bot branches); failure also covers the filter-drift step
+          if [[ "${{ needs.check-changes.result }}" == "failure" || "${{ needs.check-changes.result }}" == "cancelled" ]]; then
+            echo "::error::Change detection or filter drift check failed"
             exit 1
           fi
 

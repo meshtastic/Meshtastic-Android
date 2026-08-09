@@ -19,10 +19,13 @@ package org.meshtastic.screenshots.core
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
+import org.meshtastic.core.ui.share.PreviewSharedContactImportAlert
 import org.meshtastic.core.ui.util.PreviewComposableAlert
 import org.meshtastic.core.ui.util.PreviewHtmlAlert
 import org.meshtastic.core.ui.util.PreviewIconAlert
 import org.meshtastic.core.ui.util.PreviewMultipleChoiceAlert
+import org.meshtastic.core.ui.util.PreviewNfcWriteFailedAlert
+import org.meshtastic.core.ui.util.PreviewNfcWriteSuccessAlert
 import org.meshtastic.core.ui.util.PreviewTextAlert
 
 @PreviewTest
@@ -58,4 +61,25 @@ fun ScreenshotMultipleChoiceAlert() {
 @Composable
 fun ScreenshotComposableAlert() {
     PreviewComposableAlert()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNfcWriteSuccessAlert() {
+    PreviewNfcWriteSuccessAlert()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNfcWriteFailedAlert() {
+    PreviewNfcWriteFailedAlert()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSharedContactImportAlert() {
+    PreviewSharedContactImportAlert()
 }

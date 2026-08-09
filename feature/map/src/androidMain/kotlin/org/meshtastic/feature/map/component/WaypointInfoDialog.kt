@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -31,9 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.PUSHPIN_CODE_POINT
+import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.edit
 import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.geofence_alerts_opt_in
@@ -50,7 +55,8 @@ import org.meshtastic.proto.Waypoint
  * device raises crossing notifications for it (foreign geofences are silent by default — see
  * [org.meshtastic.core.data.manager .GeofenceMonitor]). Reached for both locked and unlocked foreign geofences, so the
  * locked case gets a view at all. Unlocked foreign geofences are still editable — [onEdit], when non-null, opens the
- * full editor.
+ * full editor. [onDeleteForMe] drops only our local copy, so it needs no mesh-wide permission and is offered even when
+ * the geofence is locked to its creator.
  */
 @Composable
 fun WaypointInfoDialog(
@@ -60,14 +66,16 @@ fun WaypointInfoDialog(
     onToggleAlerts: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
     onEdit: (() -> Unit)? = null,
+    onDeleteForMe: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    val emoji = if (waypoint.icon == 0) PUSHPIN else waypoint.icon
+    // waypoint.icon is untrusted input; toCodePointString substitutes a fallback rather than throwing.
+    val emoji = if (waypoint.icon == 0) PUSHPIN_CODE_POINT.toCodePointString() else waypoint.icon.toCodePointString()
     val title = waypoint.name.takeIf { it.isNotBlank() } ?: stringResource(Res.string.geofence)
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = "${String(Character.toChars(emoji))}  $title", fontWeight = FontWeight.Bold) },
+        title = { Text(text = "$emoji  $title", fontWeight = FontWeight.Bold) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (waypoint.description.isNotBlank()) {
@@ -98,15 +106,28 @@ fun WaypointInfoDialog(
             }
         },
         confirmButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.close)) } },
-        // Unlocked foreign geofences stay editable; the button is absent for locked ones.
+        // Unlocked foreign geofences stay editable; the edit button is absent for locked ones. The local delete sits
+        // alongside it because it is always available.
         dismissButton =
-        if (onEdit != null) {
-            { TextButton(onClick = onEdit) { Text(stringResource(Res.string.edit)) } }
+        if (onEdit != null || onDeleteForMe != null) {
+            {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (onDeleteForMe != null) {
+                        TextButton(onClick = onDeleteForMe) {
+                            Text(
+                                text = stringResource(Res.string.delete_for_me),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                    if (onEdit != null) {
+                        TextButton(onClick = onEdit) { Text(stringResource(Res.string.edit)) }
+                    }
+                }
+            }
         } else {
             null
         },
         modifier = modifier,
     )
 }
-
-private const val PUSHPIN = 0x1F4CD // 📍 Round Pushpin

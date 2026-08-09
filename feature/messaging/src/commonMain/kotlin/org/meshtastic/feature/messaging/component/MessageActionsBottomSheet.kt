@@ -61,10 +61,12 @@ import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.select
 import org.meshtastic.core.resources.show_original
 import org.meshtastic.core.resources.show_translation
+import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.translate
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
@@ -84,6 +86,7 @@ fun MessageActionsContent(
     onStatus: () -> Unit,
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
+    timestamp: String? = null,
     xeddsaSigned: Boolean = false,
     translationRowState: TranslationRowState? = null,
     onTranslate: () -> Unit = {},
@@ -105,6 +108,22 @@ fun MessageActionsContent(
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 },
+            )
+        }
+
+        // Bubbles only show a short header time per run, so the sheet is where the full date-time lives.
+        if (timestamp != null) {
+            ListItem(
+                headlineContent = {
+                    Text(
+                        stringResource(
+                            Res.string.device_metrics_label_value,
+                            stringResource(Res.string.timestamp),
+                            timestamp,
+                        ),
+                    )
+                },
+                leadingContent = { Icon(MeshtasticIcons.History, contentDescription = null) },
             )
         }
 

@@ -16,10 +16,20 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.model.EventFirmwareEdition
 
 /** Event-firmware display metadata, seeded from the bundled `event_firmware.json` snapshot. */
 interface EventFirmwareRepository {
     /** Metadata for [editionName] (a `FirmwareEdition` enum name), or `null` if it is not a known event edition. */
     suspend fun getEdition(editionName: String): EventFirmwareEdition?
+
+    /**
+     * Metadata for [editionName], re-emitting when the cache is refreshed from the network.
+     *
+     * Prefer this over [getEdition] for anything long-lived on screen. A one-shot read resolves once — when the device
+     * connects — so an edition added to the hosted manifest after that point stays invisible until the user reconnects.
+     * The flow triggers a refresh on collection and then re-emits whatever lands.
+     */
+    fun observeEdition(editionName: String): Flow<EventFirmwareEdition?>
 }

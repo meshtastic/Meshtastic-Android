@@ -19,8 +19,12 @@ package org.meshtastic.screenshots.feature
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
+import org.meshtastic.feature.node.component.AirQualityInfoCardsPreview
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
+import org.meshtastic.feature.node.component.EnvironmentMetricsPreview
+import org.meshtastic.feature.node.component.HopHistogramContentPreview
+import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
@@ -32,6 +36,9 @@ import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.NodeItemSignedPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
+import org.meshtastic.feature.node.component.PowerMetricsNoCurrentPreview
+import org.meshtastic.feature.node.component.PowerMetricsPartialPreview
+import org.meshtastic.feature.node.component.PowerMetricsPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionLocalPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
@@ -84,6 +91,41 @@ fun ScreenshotTelemetricActionsSectionLocal() {
 @Composable
 fun ScreenshotPositionInlineContent() {
     PositionInlineContentPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotEnvironmentMetricsCards() {
+    EnvironmentMetricsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotAirQualityInfoCards() {
+    AirQualityInfoCardsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPowerMetrics() {
+    PowerMetricsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPowerMetricsPartial() {
+    PowerMetricsPartialPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPowerMetricsNoCurrent() {
+    PowerMetricsNoCurrentPreview()
 }
 
 @PreviewTest
@@ -214,4 +256,22 @@ fun ScreenshotNodeItemCompleteOnlineRemote() {
 @Composable
 fun ScreenshotNodeDetailContentMinimal() {
     NodeDetailContentMinimalPreview()
+}
+
+// ---------------------------------------------------------------------------
+// Nodes-per-hop histogram (issue #5745)
+// ---------------------------------------------------------------------------
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotHopHistogramContent() {
+    HopHistogramContentPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotHopHistogramEmpty() {
+    HopHistogramEmptyPreview()
 }

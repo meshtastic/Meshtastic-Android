@@ -133,7 +133,7 @@ fun GenericMetricChart(
                 bottomAxis = bottomAxis,
                 marker = marker,
                 markerVisibilityListener = markerVisibilityListener,
-                persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
+                persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX },
                 fadingEdges = rememberFadingEdges(),
                 decorations = decorations,
                 // Telemetry timestamps arrive at irregular intervals. Without an explicit

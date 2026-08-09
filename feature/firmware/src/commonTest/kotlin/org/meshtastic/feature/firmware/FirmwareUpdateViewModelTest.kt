@@ -26,12 +26,14 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -44,6 +46,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
+import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -120,6 +123,8 @@ class FirmwareUpdateViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val hiddenFeaturesUnlock = HiddenFeaturesUnlock()
+
     private fun createViewModel() = FirmwareUpdateViewModel(
         firmwareReleaseRepository,
         deviceHardwareRepository,
@@ -132,6 +137,7 @@ class FirmwareUpdateViewModelTest {
         usbManager,
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
+        hiddenFeaturesUnlock,
     )
 
     @Test
@@ -309,13 +315,25 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `checkForUpdates sets error when hardware lookup fails`() = runTest {
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertEquals("1.0.0", viewModel.selectedRelease.value?.title)
+        assertIs<DeviceHardware>(viewModel.deviceHardware.value)
+        assertEquals("0.9.0", viewModel.currentFirmwareVersion.value)
+
+        every { firmwareReleaseRepository.stableRelease } returns flow { error("cache read failed") }
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.failure(IllegalStateException("Unknown hardware"))
 
-        viewModel = createViewModel()
+        viewModel.checkForUpdates()
         advanceUntilIdle()
 
-        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        assertEquals(null, viewModel.selectedRelease.value)
+        assertEquals(null, viewModel.deviceHardware.value)
+        assertEquals(null, viewModel.currentFirmwareVersion.value)
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_unknown_hardware, error.res)
     }
 
     @Test
@@ -428,5 +446,134 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `nightly recovery record re-asserts the hidden-features unlock`() = runTest {
+        // A NIGHTLY record can only have been written while unlocked; recovery after a process restart
+        // (unlock re-locked) must restore the unlock so the nightly channel is visible and re-fetchable.
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareReleaseRepository.nightlyRelease } returns
+            flowOf(FirmwareRelease(id = "v2.8.0.f52e2ea", title = "2.8.0 nightly", zipUrl = ""))
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "NIGHTLY",
+                    deviceName = "My Node",
+                ),
+            )
+
+        assertEquals(false, hiddenFeaturesUnlock.unlocked.value)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
+        assertEquals(FirmwareReleaseType.NIGHTLY, viewModel.selectedReleaseType.value)
+        assertTrue(hiddenFeaturesUnlock.unlocked.value, "Nightly recovery must re-assert the unlock")
+    }
+
+    @Test
+    fun `recovery hardware lookup failure clears stale device metadata`() = runTest {
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertEquals("1.0.0", viewModel.selectedRelease.value?.title)
+        assertIs<DeviceHardware>(viewModel.deviceHardware.value)
+        assertEquals("0.9.0", viewModel.currentFirmwareVersion.value)
+
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 999,
+                    pioEnv = "unknown",
+                    releaseType = "STABLE",
+                    deviceName = "Stale Node",
+                ),
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.failure(IllegalStateException("Unknown hardware"))
+
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.selectedRelease.value)
+        assertEquals(null, viewModel.deviceHardware.value)
+        assertEquals(null, viewModel.currentFirmwareVersion.value)
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_unknown_hardware, error.res)
+    }
+
+    @Test
+    fun `BLE post-update reconnect requests GATT cache invalidation`() = runTest {
+        advanceUntilIdle()
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertTrue(
+            radioController.gattCacheInvalidationRequested,
+            "BLE post-update reconnect should request GATT cache invalidation",
+        )
+    }
+
+    @Test
+    fun `TCP post-update reconnect does not request GATT cache invalidation`() = runTest {
+        advanceUntilIdle()
+
+        every { radioPrefs.devAddr } returns MutableStateFlow("t192.168.1.100")
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertFalse(
+            radioController.gattCacheInvalidationRequested,
+            "TCP post-update reconnect should not request GATT cache invalidation",
+        )
+    }
+
+    @Test
+    fun `BLE-prefixed post-update reconnect requests GATT cache invalidation`() = runTest {
+        advanceUntilIdle()
+
+        every { radioPrefs.devAddr } returns MutableStateFlow("xAA:BB:CC:DD:EE:FF")
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertTrue(
+            radioController.gattCacheInvalidationRequested,
+            "BLE-prefixed (x) post-update reconnect should request GATT cache invalidation",
+        )
     }
 }

@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 
@@ -26,6 +27,14 @@ interface DeviceHardwareDao {
     @Upsert suspend fun insert(deviceHardware: DeviceHardwareEntity)
 
     @Upsert suspend fun insertAll(deviceHardware: List<DeviceHardwareEntity>)
+
+    /** Replaces the full hardware catalog atomically after a successful non-empty remote response. */
+    @Transaction
+    suspend fun replaceAll(deviceHardware: List<DeviceHardwareEntity>) {
+        require(deviceHardware.isNotEmpty()) { "Device hardware catalog must not be empty" }
+        deleteAll()
+        insertAll(deviceHardware)
+    }
 
     @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel")
     suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity>

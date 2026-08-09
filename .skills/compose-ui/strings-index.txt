@@ -10,6 +10,7 @@ a11y_node_offline
 a11y_node_online
 a11y_node_role
 a11y_node_signal
+a11y_nodes_at_hop
 accept
 acknowledgements
 ### ACTION ###
@@ -93,7 +94,15 @@ app_settings
 app_too_old
 app_version
 apply
+### AQI ###
 aqi
+aqi_good
+aqi_hazardous
+aqi_moderate
+aqi_unhealthy
+aqi_unhealthy_sensitive
+aqi_value_with_severity
+aqi_very_unhealthy
 are_you_sure
 are_you_sure_change_default
 audio
@@ -122,7 +131,10 @@ bluetooth_feature_config_description
 bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
+bluetooth_scan_location_services_disabled
+bluetooth_scan_missing_permission
 bluetooth_scan_start_failed
+bluetooth_scan_too_frequent
 bold_heading
 bonding_failed_permissions
 bonding_failed_retry
@@ -197,6 +209,8 @@ client_notification
 close
 close_selection
 co2
+co2_humidity
+co2_temperature
 codec_2_enabled
 codec2_sample_rate
 coding_rate
@@ -247,12 +261,14 @@ config_position_broadcast_smart_minimum_interval_secs_summary
 config_position_flags_summary
 config_position_gps_update_interval_summary
 config_power_is_power_saving_summary
+config_saved_restarting
 config_security_admin_key
 config_security_debug_log_api_enabled
 config_security_is_managed
 config_security_private_key
 config_security_public_key
 config_security_serial_enabled
+configuration
 configure_bluetooth_permissions
 configure_critical_alerts
 configure_location_permissions
@@ -299,6 +315,7 @@ debug_log_api_enabled
 debug_logcat_empty
 debug_logcat_refresh
 debug_logs_export
+debug_logs_export_warning
 debug_logs_exported
 debug_panel
 debug_search_clear
@@ -308,6 +325,10 @@ debug_store_logs_summary
 debug_store_logs_title
 debug_tab_app_logs
 debug_tab_packets
+deep_link_connect_message
+deep_link_connect_title
+deep_link_disconnect_message
+deep_link_disconnect_title
 default_
 default_mqtt_address
 ### DELETE ###
@@ -326,10 +347,14 @@ demo_mode
 demo_mode_replay
 desc_node_filter_clear
 description
+### DESKTOP ###
 desktop_notification_title
 desktop_tray_quit
 desktop_tray_show
 desktop_tray_tooltip
+desktop_update_available_message
+desktop_update_available_title
+desktop_update_download
 details
 detection_sensor
 detection_sensor_config
@@ -358,6 +383,7 @@ device_theme_language
 dew_point
 direct_message
 direct_message_key
+direct_messages
 discard_changes
 disconnect
 disconnected
@@ -375,6 +401,7 @@ discovery_dwell_time_description
 discovery_empty_history
 discovery_export_report
 discovery_history
+discovery_interrupted_scan_restored
 discovery_keep_screen_awake
 discovery_keep_screen_awake_description
 discovery_local_mesh
@@ -540,6 +567,7 @@ establishing_session
 ethernet_config
 ethernet_enabled
 ethernet_ip
+event_use_event_theme
 exchange_position
 expand_chart
 expanded
@@ -579,6 +607,8 @@ firebase_link
 ### FIRMWARE ###
 firmware
 firmware_edition
+firmware_event_ended_banner
+firmware_event_ended_button
 firmware_old
 firmware_recovery_banner
 firmware_recovery_ble_failed
@@ -588,9 +618,15 @@ firmware_recovery_explanation
 firmware_too_old
 firmware_update_almost_there
 firmware_update_alpha
+firmware_update_archive_missing_target
+firmware_update_available
 firmware_update_battery_low
 firmware_update_checking
+firmware_update_confirm_file_button
+firmware_update_confirm_file_message
+firmware_update_confirm_file_title
 firmware_update_connecting_attempt
+firmware_update_context_changed
 firmware_update_copying
 firmware_update_currently_installed
 firmware_update_device
@@ -606,9 +642,11 @@ firmware_update_erasing
 firmware_update_error
 firmware_update_extracting
 firmware_update_failed
+firmware_update_filename_unavailable
 firmware_update_flashing
 firmware_update_hang_tight
 firmware_update_hash_rejected
+firmware_update_invalid_local_file_detail
 firmware_update_keep_device_close
 firmware_update_latest
 firmware_update_local_file
@@ -616,16 +654,27 @@ firmware_update_method_ble
 firmware_update_method_detail
 firmware_update_method_usb
 firmware_update_method_wifi
+firmware_update_missing_target
+firmware_update_nightly
 firmware_update_no_device
 firmware_update_node_info_missing
 firmware_update_not_found_in_release
+firmware_update_notification_android
+firmware_update_notification_flasher
+firmware_update_open
+firmware_update_open_flasher
 firmware_update_ota_failed
+firmware_update_ota_unsupported_reason
 firmware_update_rak4631_bootloader_hint
 firmware_update_rebooting
 firmware_update_release_notes
+firmware_update_requires_bin
+firmware_update_requires_ota_zip
+firmware_update_requires_uf2
 firmware_update_retrieval_failed
 firmware_update_retry
 firmware_update_save_dfu_file
+firmware_update_searching_device
 firmware_update_select_file
 firmware_update_slow_bootloader_hint
 firmware_update_source_local
@@ -640,6 +689,7 @@ firmware_update_unknown_error
 firmware_update_unknown_hardware
 firmware_update_unknown_release
 firmware_update_unsupported_transport
+firmware_update_unsupported_update_method
 firmware_update_uploading
 firmware_update_usb_bootloader_warning
 firmware_update_usb_failed
@@ -655,6 +705,12 @@ fixed_pin
 fixed_position
 flip_screen
 for_more_information_see_our_privacy_policy
+### FORMAT ###
+format_bold
+format_code
+format_italic
+format_link
+format_strikethrough
 fr_HT
 free_memory
 free_memory_description
@@ -711,6 +767,8 @@ hide_layer
 hide_password
 history_return_max
 history_return_window
+hop_histogram_empty
+hop_histogram_title
 hop_limit
 hops_away
 host
@@ -732,7 +790,9 @@ ignore_add
 ignore_incoming
 ignore_mqtt
 ignore_remove
+### IMPORT ###
 import_configuration
+import_export_label
 import_known_shared_contact_text
 import_label
 import_shared_contact
@@ -741,6 +801,10 @@ indoor_air_quality_iaq
 info
 input_channel_url
 input_shared_contact_url
+insert
+insert_link_message
+insert_link_title
+insert_link_url_hint
 installed_firmware_version
 internal
 interval_always_on
@@ -770,6 +834,7 @@ label_long_slow
 label_long_turbo
 label_medium_fast
 label_medium_slow
+label_medium_turbo
 label_narrow_fast
 label_narrow_slow
 label_short_fast
@@ -783,6 +848,12 @@ last_position_update
 latest_alpha_firmware
 latest_stable_firmware
 latitude
+### LAYER ###
+layer_subtitle
+layer_type_coverage
+layer_type_geojson
+layer_type_kml
+layer_type_network
 learn_more
 led_heartbeat
 led_state
@@ -1000,6 +1071,10 @@ mpwrd_os
 mqtt
 mqtt_config
 mqtt_enabled
+mqtt_error_connection_lost
+mqtt_error_credentials_rejected
+mqtt_error_proxy_failed
+mqtt_error_rejected
 mqtt_probe_dns_failure
 mqtt_probe_other_failure
 mqtt_probe_rejected
@@ -1066,7 +1141,10 @@ no_usb_devices_found
 no_usb_devices_hint
 no_usb_devices_seen
 ### NODE ###
+node_count_online
+node_count_shown
 node_count_template
+node_count_total
 node_filter_exclude_infrastructure
 node_filter_exclude_mqtt
 node_filter_ignored
@@ -1104,6 +1182,7 @@ node_list_help_node_details
 node_list_help_title
 node_list_long_click_label
 node_number
+node_restarting
 node_sort_alpha
 node_sort_button
 node_sort_channel
@@ -1173,6 +1252,19 @@ override_console_serial_port
 override_duty_cycle
 override_frequency_mhz
 pa_fan_disabled
+### PACKET ###
+packet_authenticity
+packet_authenticity_balanced
+packet_authenticity_balanced_summary
+packet_authenticity_compatible
+packet_authenticity_compatible_summary
+packet_authenticity_level
+packet_authenticity_strict
+packet_authenticity_strict_confirm
+packet_authenticity_strict_confirmation
+packet_authenticity_strict_summary
+packet_authenticity_strict_title
+packet_authenticity_unsupported
 pairing_mode
 password
 ### PAX ###
@@ -1362,7 +1454,9 @@ rssi_definition
 rsyslog_server
 sample_message
 sats
+### SAVE ###
 save
+save_and_restart
 save_changes
 save_csv_in_storage_esp32_only
 save_rangetest
@@ -1458,6 +1552,32 @@ shutdown_on_power_loss
 shutdown_warning
 signal
 signal_quality
+### SITE ###
+site_planner
+site_planner_antenna_gain_dbi
+site_planner_antenna_height_meters
+site_planner_color_scale
+site_planner_estimate
+site_planner_estimating
+site_planner_failed
+site_planner_frequency_mhz
+site_planner_high_resolution
+site_planner_invalid_latitude
+site_planner_invalid_longitude
+site_planner_invalid_positive
+site_planner_invalid_rx_sensitivity
+site_planner_max_range_km
+site_planner_rx_height_meters
+site_planner_rx_sensitivity_dbm
+site_planner_section_display
+site_planner_section_receiver
+site_planner_section_simulation
+site_planner_section_transmitter
+site_planner_subtitle
+site_planner_tx_power_watts
+site_planner_use_current_location
+site_planner_use_map_center
+site_planner_use_node_location
 skip
 slot
 smart_position
@@ -1467,6 +1587,7 @@ soil_moisture
 soil_temperature
 speed
 speed_kmh
+speed_mph
 spread_factor
 ssid
 state_broadcast_seconds
@@ -1502,6 +1623,8 @@ tak_server_enabled
 tak_server_enabled_desc
 tak_server_export_data_package_desc
 tak_server_loading
+tak_server_mesh_to_cot
+tak_server_mesh_to_cot_desc
 tak_server_section
 tak_server_test_card_title
 tak_server_test_idle
@@ -1711,8 +1834,10 @@ wind_direction
 wind_gust
 wind_lull
 wind_speed
+### WRITE ###
 write_nfc
 write_nfc_failed
+write_nfc_subtext
 write_nfc_success
 write_nfc_text
 you

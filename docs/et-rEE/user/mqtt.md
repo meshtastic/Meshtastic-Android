@@ -29,7 +29,7 @@ MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 [Sinu sõlm] → Raadio → [WiFi-ga lüüsisõlm] → MQTT vahendaja → [Kauglüüs] → Raadio → [Kaugsõlm]
 ```
 
-Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQTT. Remote gateways subscribed to the same topic inject those messages into their local mesh.
+Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQTT. Sama teemaga liitunud kauglüüsid sisestavad need sõnumid oma kohalikku kärgvõrku.
 
 ## Sätted
 
@@ -41,22 +41,30 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 
 ![MQTT lüliti](/assets/screenshots/settings_switch.png)
 
-| Sätted           | Kirjeldus                                                                                  | Vaikimisi                                           |
-| ---------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| Server Address   | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
-| Kasutajatunnus   | Broker authentication                                                                      | meshdev                                             |
-| Parool           | Broker authentication                                                                      | large4cats                                          |
-| Root Topic       | Base topic for messages                                                                    | msh                                                 |
-| Encryption       | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
-| ~~JSON väljund~~ | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
-| TLS              | Secure connection to broker                                                                | Keelatud                                            |
-| Map Reporting    | Report position to public map                                                              | Keelatud                                            |
+| Sätted                     | Kirjeldus                                                                                  | Vaikimisi                                           |
+| -------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Server Address             | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
+| Kasutajatunnus             | Broker authentication                                                                      | meshdev                                             |
+| Parool                     | Broker authentication                                                                      | large4cats                                          |
+| Root Topic                 | Base topic for messages                                                                    | msh                                                 |
+| Encryption                 | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
+| ~~JSON väljund~~           | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
+| TLS                        | Secure connection to broker                                                                | Keelatud                                            |
+| Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                           | Keelatud                                            |
+
+### MQTT puhverserver sellel telefonil
+
+Kui sõlmel puudub oma internetiühendus, saab see kasutada ühendatud telefoni MQTT-lüüsina: luba mooduli konfiguratsioonis **MQTT** ja **Proksi kliendiga lubatud** ning rakendus edastab MQTT-liikluse raadio ja maakleri vahel telefoni internetiühenduse kaudu.
+
+MQTT sätete ekraani ülaosas olev lüliti **MQTT puhverserver sellel telefonil** näitab, kas see relee töötab praegu, ja võimaldab selle kohe välja lülitada (või taaskäivitada) – ilma seadme MQTT konfiguratsiooni muutmata ja uuesti salvestamata.
 
 ### Meshtastic vaikemaakler
 
 Kogukond haldab avaliku vahendajat aadressil `mqtt.meshtastic.org`. This is intended for general use and testing.
 
-> 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Always use channel encryption for private communications.
+> ℹ️ **Märkus:** Ühendused saidiga `mqtt.meshtastic.org` kasutavad alati TLS-i (port 8883), isegi kui TLS-i lüliti on välja lülitatud. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+
+> 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Privaatse suhtluse jaoks kasuta alati kanali krüpteerimist.
 
 ### Private Broker
 
@@ -68,11 +76,11 @@ Parema privaatsuse ja kontrolli tagamiseks saad hallata oma MQTT maaklerit:
 
 Configure your node to point to your private broker with appropriate credentials.
 
-## Map Reporting
+## Kaardiaruannete koostamine
 
 Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnakaardil:
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
+- Nähtav aadressil [meshmap.net](https://meshmap.net) ja sarnastes kogukonna kaarditeenustes
 - Only position and node info are shared
 - Disable this if you don't want your location publicly visible
 
@@ -83,17 +91,17 @@ Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnak
 | **Üleslink** | Sõnumid kärgvõrgust → MQTT maakler |
 | **Allalink** | Sõnumid MQTT maaklerist → kärgvõrk |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+Konfi iga kanali kohta, millised suunad on aktiivsed, et kontrollida sõnumivoogu ja eetriaega.
 
-## Message Formats
+## Sõnumivormingud
 
 MQTT kasutab protobuf-sõnumivormingut:
 
-| Format       | Kirjeldus                              | Use case                   |
+| Vorming      | Kirjeldus                              | Use case                   |
 | ------------ | -------------------------------------- | -------------------------- |
 | **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
 
-> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. Säte `json_enabled` on rakenduses endiselt nähtav, et näha ka pärandühilduvust, kuid see ei mõjuta praegusi püsivara versioone.
 
 ## Encryption & Privacy
 
@@ -120,13 +128,13 @@ Understanding the layered encryption model:
 - **Kontrolli WiFit** – lüüssõlmel peab olema aktiivne internetiühendus (WiFi või Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
 - **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
 - **Tulemüür** — port 1883 (MQTT) või 8883 (MQTT+TLS) peab olema avatud. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- **DNS-i lahendamine** – kui kasutad kohandatud maakleri hostinime, veenduge, et sõlm suudab seda lahendada. Try the broker's IP address directly.
 
 ### Messages Not Bridging
 
 - **Kontrolli üleslingi/allalingi seadeid** — kui lubatud on ainult üleslink, liiguvad sõnumid võrgust MQTT-sse, aga mitte tagasi. Luba vastuvõtval lüüsil allalink.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- **Kanali mittevastavus** – mõlemad lüüsid peavad jagama sama kanalit sama PSK-ga. Vastuolu tähendab, et sõnumid on krüpteeritud erinevate võtmetega ja kuvatakse prügina.
+- **Teema mittevastavus** — veendu, et mõlemad lüüsid kasutaksid sama juurteemat. The default `msh` works for the public broker.
 
 ## Related Topics
 

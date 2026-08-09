@@ -332,6 +332,10 @@ actual fun isWifiUnavailable(): Boolean {
  * the transport reduction can delegate to the platform-agnostic [anyNetworkScanTransportAvailable] helper (which is
  * unit-tested in `commonTest`).
  */
+// ConnectivityManager.allNetworks is deprecated (API 31+) in favor of NetworkCallback-based discovery,
+// but a synchronous snapshot of active networks is exactly what this transport probe needs. Suppress
+// until a callback-based rewrite is warranted.
+@Suppress("DEPRECATION")
 private fun ConnectivityManager.hasLocalNetwork(): Boolean {
     val transports =
         allNetworks.mapNotNull { network ->
@@ -391,10 +395,14 @@ actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntim
 @Composable
 actual fun rememberBluetoothPermissionState(): PermissionUiState {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // Pre-Android 12 has no runtime Bluetooth permission — BLE scanning is gated by the location permission, which
-        // callers request separately (the intro Location screen, the map/Privacy location flows). Report granted here
-        // so the Bluetooth surface itself is a no-op rather than masquerading as a location request.
-        return rememberGrantedPermissionState()
+        // Pre-Android 12 has no runtime Bluetooth permission — the platform gates BLE scanning on fine location
+        // instead. Reporting "granted" here left a user who declined location with an empty device list and no way to
+        // re-prompt, so surface the permission that actually blocks the scan. Fine specifically: API 29/30 return zero
+        // scan results on a coarse-only grant.
+        return rememberRuntimePermissionState(
+            permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+            requireAll = true,
+        )
     }
     return rememberRuntimePermissionState(
         permissions =

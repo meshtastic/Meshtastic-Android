@@ -27,7 +27,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import co.touchlab.kermit.Logger
+import kotlin.coroutines.cancellation.CancellationException
 
 private val lightScheme =
     lightColorScheme(
@@ -128,7 +133,30 @@ fun AppTheme(
             null
         } ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialExpressiveTheme(colorScheme = colorScheme, typography = AppTypography, motionScheme = expressive()) {
+    // When a device is on event firmware (and the event theme isn't opted out), swap the whole typescale to the event
+    // typeface. Null everywhere else (desktop, F-Droid, non-event, opted out) → default typography.
+    val eventFonts = LocalEventTheme.current?.fonts
+    val typography = remember(eventFonts) { eventFonts?.let { AppTypography.withEventFonts(it) } ?: AppTypography }
+
+    // Downloadable (Google) fonts referenced only through the theme's Typography are NOT auto-fetched during text
+    // layout — Compose silently renders the fallback. Preloading them into the font cache is the documented way to make
+    // them actually apply; once cached, the themed Text re-resolves to the real typeface. No-op when there are no event
+    // fonts (desktop / F-Droid / non-event / opted out).
+    val fontResolver = LocalFontFamilyResolver.current
+    LaunchedEffect(eventFonts, fontResolver) {
+        val fonts = eventFonts ?: return@LaunchedEffect
+        listOfNotNull(fonts.heading, fonts.body).forEach { family ->
+            try {
+                fontResolver.preload(family)
+            } catch (e: CancellationException) {
+                throw e // preload suspends; never swallow structured-concurrency cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Event font preload failed for $family; falling back to the default typeface" }
+            }
+        }
+    }
+
+    MaterialExpressiveTheme(colorScheme = colorScheme, typography = typography, motionScheme = expressive()) {
         content()
     }
 }

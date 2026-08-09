@@ -109,6 +109,8 @@
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
     <string name="app_version">Version</string>
     <string name="apply">Anwenden</string>
+    <!-- AQI -->
+    <string name="aqi_good">Gut</string>
     <string name="are_you_sure">Sind Sie sicher?</string>
     <string name="are_you_sure_change_default">Sind Sie sicher, dass Sie in den Standardkanal wechseln möchten?</string>
     <string name="audio">Audio</string>
@@ -244,7 +246,7 @@
     <string name="config_display_screen_on_secs_summary">Wie lange die Anzeige eingeschaltet bleibt, nachdem die Benutzertaste gedrückt oder Nachrichten empfangen wurden.</string>
     <string name="config_display_units_summary">Einheiten die angezeigt werden.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Erfordert, dass Ihr Gerät über einen Beschleunigungsmesser verfügt.</string>
-    <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn \"0\", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
+    <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn "0", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
     <string name="config_lora_hop_limit_summary">Legt die maximale Sprungweite fest. Der Standardwert ist 3. Eine Erhöhung der Sprungweite erhöht auch die Überlastung und sollte daher mit Vorsicht verwendet werden. Nachrichten mit Sprungweite 0 erhalten keine Bestätigung.</string>
     <string name="config_lora_modem_preset_summary">Verfügbare Modemvoreinstellungen, Standard ist LongFast.</string>
     <string name="config_lora_region_summary">Die Region, in der Sie das Funkgerät benutzen.</string>
@@ -263,6 +265,7 @@
     <string name="config_security_private_key">Wird verwendet, um einen gemeinsamen Schlüssel mit einem entfernten Gerät zu erstellen.</string>
     <string name="config_security_public_key">Wird aus Ihrem privaten Schlüssel generiert und an andere Knoten im Netzwerk gesendet, damit diese einen gemeinsamen geheimen Schlüssel berechnen können.</string>
     <string name="config_security_serial_enabled">Serielle Konsole über die Stream-API.</string>
+    <string name="configuration">Einstellungen</string>
     <string name="configure_bluetooth_permissions">Bluetooth Berechtigungen konfigurieren</string>
     <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
     <string name="configure_location_permissions">Standortberechtigungen konfigurieren</string>
@@ -285,7 +288,7 @@
     <string name="critical_alert">Kritischer Fehler!</string>
     <string name="critical_alerts">Kritische Warnungen</string>
     <string name="critical_alerts_dnd_request_text">Um sicherzustellen, dass Sie kritische Benachrichtigungen wie
-        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im \"Nicht stören\" Modus ist, müssen Sie eine spezielle
+        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im "Nicht stören" Modus ist, müssen Sie eine spezielle
         Berechtigung erteilen. Bitte aktivieren Sie dies in den Benachrichtigungseinstellungen.
     </string>
     <string name="current">Strom</string>
@@ -333,6 +336,7 @@
     <string name="demo_mode">Demo Modus</string>
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
     <string name="description">Beschreibung</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Beenden</string>
     <string name="desktop_tray_show">Meshtastic anzeigen</string>
@@ -362,6 +366,7 @@
     <string name="dew_point">Taupunkt</string>
     <string name="direct_message">Direktnachricht</string>
     <string name="direct_message_key">Schlüssel für direkte Nachrichten</string>
+    <string name="direct_messages">Direktnachrichten</string>
     <string name="discard_changes">Verwerfen</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="disconnected">Verbindung getrennt</string>
@@ -591,6 +596,7 @@
     <string name="fixed_position">Fester Standort</string>
     <string name="flip_screen">Bildschirm spiegeln</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Freier Speicher</string>
     <string name="free_memory_description">Verfügbarer Systemspeicher in Bytes</string>
     <string name="freq">Frequenz</string>
@@ -648,6 +654,7 @@
     <string name="ignore_incoming">Eingehende ignorieren</string>
     <string name="ignore_mqtt">MQTT ignorieren</string>
     <string name="ignore_remove">'%1$s' von der Ignorieren-Liste entfernen?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Einstellungen importieren</string>
     <string name="import_known_shared_contact_text">Warnung: Dieser Kontakt ist bekannt, beim Importieren werden die vorherigen Kontaktinformationen überschreiben.</string>
     <string name="import_label">Importieren</string>
@@ -815,7 +822,6 @@
     <string name="message_device_managed">Dieses Radio wird verwaltet und kann nur durch Fernverwaltung geändert werden.</string>
     <string name="message_input_label">Nachricht</string>
     <string name="message_status_delivered">Versand ins Netz</string>
-    <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
@@ -1001,6 +1007,7 @@
     <string name="override_duty_cycle">Duty-Cycle überschreiben</string>
     <string name="override_frequency_mhz">Frequenz überschreiben</string>
     <string name="pa_fan_disabled">PA Fan deaktiviert</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Kopplungsmodus</string>
     <string name="password">Passwort</string>
     <!-- PAX -->
@@ -1173,7 +1180,7 @@
     <string name="role_tracker_desc">GPS Standortnachricht mit Priorität gesendet.</string>
     <string name="root_topic">Hauptthema</string>
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>
-    <string name="router_role_confirmation_text">Ich habe die &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
+    <string name="router_role_confirmation_text">Ich habe die &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
     <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
@@ -1197,6 +1204,7 @@
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="rsyslog_server">rsyslog Server</string>
     <string name="sats">Satelliten</string>
+    <!-- SAVE -->
     <string name="save">Speichern</string>
     <string name="save_changes">Speichern</string>
     <string name="save_csv_in_storage_esp32_only">Speichere .CSV im Speicher (nur ESP32)</string>
@@ -1262,7 +1270,6 @@
     <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="share_contact">Kontakt teilen</string>
     <string name="share_location">Standort teilen</string>
-    <string name="share_location_description">Benutzen Sie das GPS Ihres Telefons um Standorte an Ihren Knoten zu senden, anstatt ein Hardware GPS in Ihrem Knoten zu verwenden.</string>
     <string name="share_to">Teile mit…</string>
     <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="short_name">Kurzname</string>
@@ -1281,6 +1288,8 @@
     <string name="shutdown_warning">⚠️ Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalqualität</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Anzeige</string>
     <string name="skip">Überspringen</string>
     <string name="slot">Position</string>
     <string name="smart_position">Intelligente Position</string>
@@ -1299,7 +1308,7 @@
     <string name="store_forward">Speichern &amp; Weiterleiten</string>
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
-    <string name="subnet">Subnet</string>
+    <string name="subnet">Subnetz</string>
     <string name="success">Erfolgreich</string>
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>
@@ -1524,5 +1533,6 @@
     <string name="wind_gust">Windböen</string>
     <string name="wind_lull">Windstille</string>
     <string name="wind_speed">Windgeschwindigkeit</string>
+    <!-- WRITE -->
     <string name="you">Du</string>
 </resources>

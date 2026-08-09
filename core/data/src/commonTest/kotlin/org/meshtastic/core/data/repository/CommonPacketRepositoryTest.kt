@@ -23,6 +23,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -34,6 +35,7 @@ abstract class CommonPacketRepositoryTest {
 
     protected lateinit var repository: PacketRepositoryImpl
 
+    @BeforeTest
     fun setupRepo() {
         dbProvider = FakeDatabaseProvider()
         repository = PacketRepositoryImpl(dbProvider, dispatchers)

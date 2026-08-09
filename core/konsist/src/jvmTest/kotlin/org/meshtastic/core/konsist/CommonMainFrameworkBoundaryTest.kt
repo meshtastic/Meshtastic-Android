@@ -16,9 +16,11 @@
  */
 package org.meshtastic.core.konsist
 
+// kotlin.test.Test, NOT org.junit.Test: the test runner here is JUnit Jupiter, which does not discover JUnit 4
+// annotations without the vintage engine. With `org.junit.Test` these two rules silently never executed.
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.verify.assertFalse
-import org.junit.Test
+import kotlin.test.Test
 
 /**
  * Enforces the KMP framework-bleed rule from AGENTS.md: shared code in any `commonMain` source set must never depend on

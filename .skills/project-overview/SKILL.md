@@ -3,7 +3,7 @@
 ## Description
 Module directory, namespacing conventions, environment setup, and troubleshooting for Meshtastic-Android.
 
-- **Build System:** Gradle (Kotlin DSL). JDK 21 REQUIRED. Target SDK: API 36. Min SDK: API 26.
+- **Build System:** Gradle (Kotlin DSL). JDK 25 REQUIRED. Target SDK: API 36. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
 - **Android-only Modules:** `core:barcode` (CameraX), `feature:widget` (Glance home-screen widget), `feature:car` (Android Auto via the Car App Library, `google` flavor only), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
 
@@ -45,7 +45,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 - **Legacy:** Maintain the `com.geeksville.mesh` Application ID.
 
 ## Environment Setup
-1. **JDK 21 MUST be used** to prevent Gradle sync/build failures.
+1. **JDK 25 MUST be used** to prevent Gradle sync/build failures.
 2. **Secrets:** Copy `secrets.defaults.properties` to `local.properties`:
    ```properties
    MAPS_API_KEY=dummy_key

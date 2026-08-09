@@ -62,7 +62,11 @@ interface BleConnection {
     /** Disconnects from the current device. */
     suspend fun disconnect()
 
-    /** Executes a block within a discovered profile. */
+    /**
+     * Executes [setup] after the requested BLE profile is available. This is shared by radio, OTA, and DFU flows, so
+     * implementations should keep profile-entry setup bounded and avoid transfer-hot-path work here when a caller can
+     * reuse an already discovered [BleService].
+     */
     suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration = 30.seconds,
@@ -85,6 +89,13 @@ interface BleConnection {
      * returns `false` for platforms that don't support it.
      */
     fun requestBalancedConnectionPriority(): Boolean = false
+
+    /**
+     * Clears the platform's cached GATT service table for the connected peripheral. Necessary when a device reboots
+     * into a different GATT profile (e.g., ESP32 OTA loader) on the same BLE MAC. Returns `true` if the cache was
+     * invalidated. Default implementation returns `false` for platforms without a service cache.
+     */
+    fun invalidateServiceCache(): Boolean = false
 }
 
 /** Represents a BLE service for commonMain. */
@@ -94,6 +105,9 @@ interface BleService {
 
     /** Returns true when the characteristic is present on the connected device. */
     fun hasCharacteristic(characteristic: BleCharacteristic): Boolean
+
+    /** Returns the UUIDs of all characteristics discovered for this service. Empty for non-Kable platforms. */
+    fun discoveredCharacteristicUuids(): List<Uuid> = emptyList()
 
     /** Observes notifications/indications from the characteristic. */
     fun observe(characteristic: BleCharacteristic): Flow<ByteArray>

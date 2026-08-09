@@ -20,18 +20,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.preview_custom_composable_line_one
 import org.meshtastic.core.resources.preview_custom_composable_line_two
+import org.meshtastic.core.resources.write_nfc
+import org.meshtastic.core.resources.write_nfc_failed
+import org.meshtastic.core.resources.write_nfc_success
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.SemanticColors
 
 /** A helper component that renders an [AlertManager.AlertData] using the same logic as MainScreen. */
 @Composable
@@ -109,6 +115,44 @@ fun PreviewMultipleChoiceAlert() {
                     message = "Pick a channel to join:",
                     choices = mapOf("Public" to {}, "Private" to {}, "Emergency" to {}),
                 ),
+            )
+        }
+    }
+}
+
+// Public because the screenshot-tests module renders this preview as a golden test.
+@Suppress("PreviewPublic")
+@Preview(showBackground = true, name = "NFC Write Success Alert")
+@Composable
+fun PreviewNfcWriteSuccessAlert() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            MeshtasticDialog(
+                onDismiss = {},
+                titleRes = Res.string.write_nfc,
+                messageRes = Res.string.write_nfc_success,
+                messageColor = SemanticColors.Success,
+                onConfirm = {},
+                confirmTextRes = Res.string.okay,
+            )
+        }
+    }
+}
+
+// Public because the screenshot-tests module renders this preview as a golden test.
+@Suppress("PreviewPublic")
+@Preview(showBackground = true, name = "NFC Write Failed Alert")
+@Composable
+fun PreviewNfcWriteFailedAlert() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            MeshtasticDialog(
+                onDismiss = {},
+                titleRes = Res.string.write_nfc,
+                messageRes = Res.string.write_nfc_failed,
+                messageColor = MaterialTheme.colorScheme.error,
+                onConfirm = {},
+                confirmTextRes = Res.string.okay,
             )
         }
     }

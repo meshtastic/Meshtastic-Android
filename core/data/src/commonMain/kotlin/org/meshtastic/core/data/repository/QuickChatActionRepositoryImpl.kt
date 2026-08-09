@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -32,23 +31,22 @@ class QuickChatActionRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : QuickChatActionRepository {
     override fun getAllActions(): Flow<List<QuickChatAction>> =
-        dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
+        dbManager.observeCurrentDb { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
+    // Writes go through withDb so they register with the cross-transport merge drain barrier (see DatabaseProvider).
     override suspend fun upsert(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().upsert(action) }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().upsert(action) } }
     }
 
     override suspend fun deleteAll() {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().deleteAll() }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().deleteAll() } }
     }
 
     override suspend fun delete(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().delete(action) }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().delete(action) } }
     }
 
     override suspend fun setItemPosition(uuid: Long, newPos: Int) {
-        withContext(dispatchers.io) {
-            dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos)
-        }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().updateActionPosition(uuid, newPos) } }
     }
 }

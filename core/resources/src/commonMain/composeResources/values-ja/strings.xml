@@ -28,6 +28,7 @@
     <string name="a11y_node_online">オンライン</string>
     <string name="a11y_node_role">役割 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
+    <string name="a11y_nodes_at_hop">ホップ %1$d：%2$d ノード</string>
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
     <!-- ACTION -->
@@ -111,7 +112,15 @@
     <string name="app_too_old">アプリを更新して下さい。</string>
     <string name="app_version">バージョン</string>
     <string name="apply">適用</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">良</string>
+    <string name="aqi_hazardous">危険</string>
+    <string name="aqi_moderate">普通</string>
+    <string name="aqi_unhealthy">健康に有害</string>
+    <string name="aqi_unhealthy_sensitive">敏感な人に有害</string>
+    <string name="aqi_value_with_severity">%1$d（%2$s）</string>
+    <string name="aqi_very_unhealthy">非常に有害</string>
     <string name="are_you_sure">よろしいですか？</string>
     <string name="are_you_sure_change_default">デフォルトチャンネルに変更しますか？</string>
     <string name="audio">オーディオ</string>
@@ -140,7 +149,12 @@
     <string name="bluetooth_feature_discovery">探索</string>
     <string name="bluetooth_feature_discovery_description">あなたの近くにあるMeshtasticデバイスを見つけて識別します。</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">位置情報サービスがオフです。近くのデバイスをスキャンするには、オンにしてください。</string>
+    <string name="bluetooth_scan_missing_permission">Bluetooth のスキャンには権限が必要です。「近くのデバイス」（または位置情報）の権限を許可してください。</string>
     <string name="bluetooth_scan_start_failed">Bluetooth スキャンを開始できませんでした。もう一度お試しください。問題が続く場合は Bluetooth をオフ/オンしてください。</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="other">Bluetooth スキャンの上限に達しました。%1$d 秒後にもう一度お試しください。</item>
+    </plurals>
     <string name="bold_heading">太字の見出し</string>
     <string name="bonding_failed_permissions">ペアリングに失敗しました。付近のデバイスの権限を許可して、もう一度お試しください。</string>
     <string name="bonding_failed_retry">ペアリングが完了しませんでした。もう一度ペアリングしてください。</string>
@@ -215,6 +229,8 @@
     <string name="close">閉じる</string>
     <string name="close_selection">選択を閉じる</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">CO₂ 湿度</string>
+    <string name="co2_temperature">CO₂ 温度</string>
     <string name="codec_2_enabled">CODEC 2 を有効化</string>
     <string name="codec2_sample_rate">CODEC2 サンプルレート</string>
     <string name="coding_rate">符号化レート</string>
@@ -265,12 +281,14 @@
     <string name="config_position_flags_summary">位置情報メッセージを構成する際に含めるオプションのフィールド。含めるフィールドが多いほどメッセージは大きくなり、エアタイムが長くなってパケット損失のリスクが高まります。</string>
     <string name="config_position_gps_update_interval_summary">GPS 位置情報を取得する頻度（&lt;10 秒で GPS をオンに保ちます）。</string>
     <string name="config_power_is_power_saving_summary">可能な限りすべてをスリープさせます。トラッカーおよびセンサーの役割の場合は、LoRa 無線機も対象になります。スマートフォンアプリでデバイスを使用したい場合や、ユーザーボタンのないデバイスを使用している場合は、この設定を使用しないでください。</string>
+    <string name="config_saved_restarting">ノードが再起動しており、しばらく接続できなくなります。</string>
     <string name="config_security_admin_key">このノードに管理メッセージを送信することを許可された公開鍵。</string>
     <string name="config_security_debug_log_api_enabled">シリアル経由でライブデバッグログを出力し、位置情報を秘匿したデバイスログを Bluetooth 経由で表示・エクスポートします。</string>
     <string name="config_security_is_managed">デバイスはメッシュ管理者によって管理されており、ユーザーはデバイス設定にアクセスできません。</string>
     <string name="config_security_private_key">リモートデバイスとの共有鍵を作成するために使用されます。</string>
     <string name="config_security_public_key">秘密鍵から生成され、メッシュ上の他のノードに送信されて、共有秘密鍵を計算できるようにします。</string>
     <string name="config_security_serial_enabled">Stream API 経由のシリアルコンソール。</string>
+    <string name="configuration">設定</string>
     <string name="configure_bluetooth_permissions">Bluetooth の権限を設定</string>
     <string name="configure_critical_alerts">重要なアラートを設定</string>
     <string name="configure_location_permissions">位置情報の権限を設定</string>
@@ -316,6 +334,7 @@
     <string name="debug_logcat_empty">表示するアプリログがありません</string>
     <string name="debug_logcat_refresh">更新</string>
     <string name="debug_logs_export">ログのエクスポート</string>
+    <string name="debug_logs_export_warning">このファイルには、メッセージの本文、正確な位置、ノードの詳細が含まれることがあります。公開して共有する前に内容を確認してください。</string>
     <string name="debug_logs_exported">ログをエクスポートしました</string>
     <string name="debug_panel">デバッグ</string>
     <string name="debug_search_clear">検索をクリア</string>
@@ -325,6 +344,10 @@
     <string name="debug_store_logs_title">メッシュログを保存</string>
     <string name="debug_tab_app_logs">アプリログ</string>
     <string name="debug_tab_packets">パケット</string>
+    <string name="deep_link_connect_message">リンクが、%1$s のデバイスへの接続をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>
+    <string name="deep_link_connect_title">このデバイスに接続しますか？</string>
+    <string name="deep_link_disconnect_message">リンクが、デバイスからの切断をこのアプリに要求しています。リンクの出所が信頼できる場合のみ続行してください。</string>
+    <string name="deep_link_disconnect_title">デバイスから切断しますか？</string>
     <string name="default_">デフォルト</string>
     <!-- DELETE -->
     <string name="delete">削除</string>
@@ -344,10 +367,14 @@
     <string name="demo_mode_replay">デモモード（リプレイ）</string>
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
     <string name="description">説明</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">終了</string>
     <string name="desktop_tray_show">Meshtastic を表示</string>
     <string name="desktop_tray_tooltip">Meshtastic デスクトップ</string>
+    <string name="desktop_update_available_message">Meshtastic デスクトップ %1$s をダウンロードできます。</string>
+    <string name="desktop_update_available_title">アプリの更新があります</string>
+    <string name="desktop_update_download">更新 %1$s をダウンロード</string>
     <string name="details">詳細</string>
     <string name="detection_sensor">検出センサー</string>
     <string name="detection_sensor_config">検出センサ設定</string>
@@ -376,6 +403,7 @@
     <string name="dew_point">露点</string>
     <string name="direct_message">ダイレクトメッセージ</string>
     <string name="direct_message_key">ダイレクトメッセージの鍵</string>
+    <string name="direct_messages">ダイレクトメッセージ</string>
     <string name="discard_changes">破棄</string>
     <string name="disconnect">切断</string>
     <string name="disconnected">切断</string>
@@ -393,6 +421,7 @@
     <string name="discovery_empty_history">探索セッションはまだありません</string>
     <string name="discovery_export_report">レポートをエクスポート</string>
     <string name="discovery_history">探索履歴</string>
+    <string name="discovery_interrupted_scan_restored">探索スキャンが中断されたため、無線機をホーム構成（%1$s）に戻しました</string>
     <string name="discovery_keep_screen_awake">画面をオンのままにする</string>
     <string name="discovery_keep_screen_awake_description">長時間のスキャン中に Android の Doze モードで無線パケットが破棄されるのを防ぎます。推奨。</string>
     <string name="discovery_local_mesh">ローカルメッシュ探索</string>
@@ -557,6 +586,7 @@
     <string name="ethernet_config">イーサネットオプション</string>
     <string name="ethernet_enabled">イーサネット有効</string>
     <string name="ethernet_ip">イーサネット IP：</string>
+    <string name="event_use_event_theme">イベントテーマを使用</string>
     <string name="exchange_position">位置交換</string>
     <string name="expand_chart">チャートを展開</string>
     <string name="expanded">展開済み</string>
@@ -595,6 +625,8 @@
     <!-- FIRMWARE -->
     <string name="firmware">ファームウェア</string>
     <string name="firmware_edition">ファームウェアエディション</string>
+    <string name="firmware_event_ended_banner">%1$s は終了しました。通常の機能に戻すには、標準の Meshtastic ファームウェアに戻してください。</string>
+    <string name="firmware_event_ended_button">ファームウェアを更新</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="firmware_recovery_banner">%1$s の更新を完了</string>
     <string name="firmware_recovery_ble_failed">Bluetooth 経由で更新を完了できませんでした。このデバイスの標準ブートローダーは、中断された更新を OTA で確実に完了できません。デバイスを復旧するには、USB でコンピューターに接続し、ベンダーのシリアル DFU ツール（例：adafruit-nrfutil）を使って再書き込みしてください。</string>
@@ -604,9 +636,15 @@
     <string name="firmware_too_old">ファームウェアの更新が必要です。</string>
     <string name="firmware_update_almost_there">もうすぐ完了します…</string>
     <string name="firmware_update_alpha">アルファ版</string>
+    <string name="firmware_update_archive_missing_target">「%1$s」内に %2$s（%3$s）向けのファームウェアが見つかりませんでした。</string>
+    <string name="firmware_update_available">ファームウェアの更新があります</string>
     <string name="firmware_update_battery_low">バッテリー残量が少なすぎます（%1$d%）。更新する前にデバイスを充電してください。</string>
     <string name="firmware_update_checking">更新を確認しています…</string>
+    <string name="firmware_update_confirm_file_button">書き込みを開始</string>
+    <string name="firmware_update_confirm_file_message">書き込む前に、選択したファイル名を最後まで確認してください。確認後にのみ書き込みが開始されます。</string>
+    <string name="firmware_update_confirm_file_title">ファームウェアファイルの確認</string>
     <string name="firmware_update_connecting_attempt">デバイスに接続しています（試行 %1$d/%2$d）…</string>
+    <string name="firmware_update_context_changed">確認中にデバイスの接続が変わりました。ファームウェアファイルを選び直してください。</string>
     <string name="firmware_update_copying">ハイタッチ！…の前に、ファームウェアをコピーしています…</string>
     <string name="firmware_update_currently_installed">現在インストール済み：%1$s</string>
     <string name="firmware_update_device">デバイス：%1$s</string>
@@ -622,9 +660,11 @@
     <string name="firmware_update_error">エラー：%1$s</string>
     <string name="firmware_update_extracting">ファームウェアを展開しています…</string>
     <string name="firmware_update_failed">更新失敗</string>
+    <string name="firmware_update_filename_unavailable">選択したファイル名を読み取れませんでした。ファイル名が表示されるローカルのファームウェアファイルを選んでください。</string>
     <string name="firmware_update_flashing">デバイスに書き込んでいます。お待ちください…</string>
     <string name="firmware_update_hang_tight">もうしばらくお待ちください。作業中です…</string>
     <string name="firmware_update_hash_rejected">ファームウェアのハッシュが拒否されました。デバイスにハッシュのプロビジョニングまたはブートローダーの更新が必要な可能性があります。</string>
+    <string name="firmware_update_invalid_local_file_detail">選択したファイル「%1$s」は %2$s（%3$s）と一致しません。このターゲット用のファームウェアファイルを選んでください。</string>
     <string name="firmware_update_keep_device_close">デバイスをスマートフォンの近くに置いてください。</string>
     <string name="firmware_update_latest">更新先：%1$s</string>
     <string name="firmware_update_local_file">ローカルファイル</string>
@@ -632,16 +672,27 @@
     <string name="firmware_update_method_detail">%1$s で更新</string>
     <string name="firmware_update_method_usb">USB ファイル転送</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">このデバイスのファームウェアターゲット情報を利用できません。</string>
+    <string name="firmware_update_nightly">ナイトリー版</string>
     <string name="firmware_update_no_device">デバイスが接続されていません</string>
     <string name="firmware_update_node_info_missing">ノードのユーザー情報がありません。</string>
     <string name="firmware_update_not_found_in_release">リリース内で %1$s のファームウェアが見つかりませんでした。</string>
+    <string name="firmware_update_notification_android">%1$s がインストールされています。安定版 %2$s が利用可能です。準備ができたら「ファームウェア更新」を開いてください。</string>
+    <string name="firmware_update_notification_flasher">%1$s がインストールされています。安定版 %2$s が利用可能です。このハードウェアを更新するには Meshtastic Flasher を開いてください。</string>
+    <string name="firmware_update_open">ファームウェア更新を開く</string>
+    <string name="firmware_update_open_flasher">Meshtastic Flasher を開く</string>
     <string name="firmware_update_ota_failed">OTA 更新に失敗しました：%1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">このデバイスの OTA ローダーが、要求された更新方法を拒否しました：%1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 では、ベンダー提供のシリアル DFU ツール（例：付属のブートローダー .zip ファイルを使った adafruit-nrfutil dfu serial）を使用してください。.uf2 ファイルをコピーするだけではブートローダーは更新されません。</string>
     <string name="firmware_update_rebooting">DFU モードへ再起動しています…</string>
     <string name="firmware_update_release_notes">リリースノート</string>
+    <string name="firmware_update_requires_bin">%1$s には、ターゲットに一致する .bin ファイルが必要です。</string>
+    <string name="firmware_update_requires_ota_zip">%1$s には、ターゲットに一致する OTA .zip ファイルが必要です。</string>
+    <string name="firmware_update_requires_uf2">%1$s には、ターゲットに一致する .uf2 ファイルが必要です。</string>
     <string name="firmware_update_retrieval_failed">ファームウェアファイルを取得できませんでした。</string>
     <string name="firmware_update_retry">再試行</string>
     <string name="firmware_update_save_dfu_file">.uf2 ファイルをデバイスの DFU ドライブに保存してください。</string>
+    <string name="firmware_update_searching_device">ネットワーク上で OTA デバイスを検索しています…</string>
     <string name="firmware_update_select_file">ローカルファイルを選択</string>
     <string name="firmware_update_slow_bootloader_hint">このデバイスのブートローダーでは更新が遅くなります。OTAFIX ブートローダーを書き込むと、BLE 更新が大幅に高速化します。</string>
     <string name="firmware_update_source_local">ソース：ローカルファイル</string>
@@ -656,6 +707,7 @@
     <string name="firmware_update_unknown_hardware">不明なハードウェアモデル：%1$d</string>
     <string name="firmware_update_unknown_release">不明なリモートリリース</string>
     <string name="firmware_update_unsupported_transport">このデバイスでは、この接続方法でのファームウェア更新はサポートされていません。更新するには別の方法（例：Bluetooth）で接続してください。</string>
+    <string name="firmware_update_unsupported_update_method">この更新方法では、ローカルのファームウェアファイルはサポートされていません。</string>
     <string name="firmware_update_uploading">ファームウェアをアップロードしています…</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s は通常、OTA 更新に対応していないブートローダーを搭載して出荷されます。OTA で書き込む前に、USB 経由で OTA 対応のブートローダーを書き込む必要がある場合があります。</string>
     <string name="firmware_update_usb_failed">USB 更新に失敗しました</string>
@@ -671,6 +723,12 @@
     <string name="fixed_position">固定位置</string>
     <string name="flip_screen">画面反転</string>
     <string name="for_more_information_see_our_privacy_policy">詳細については、プライバシーポリシーをご覧ください。</string>
+    <!-- FORMAT -->
+    <string name="format_bold">太字</string>
+    <string name="format_code">コード</string>
+    <string name="format_italic">斜体</string>
+    <string name="format_link">リンク</string>
+    <string name="format_strikethrough">取り消し線</string>
     <string name="free_memory">空きメモリ</string>
     <string name="free_memory_description">利用可能なシステムメモリ（バイト単位）</string>
     <string name="freq">周波数</string>
@@ -684,6 +742,8 @@
     <string name="generate_qr_code">QRコード生成</string>
     <!-- GEOFENCE -->
     <string name="geofence">ジオフェンス</string>
+    <string name="geofence_alerts_opt_in">通過を通知する</string>
+    <string name="geofence_alerts_opt_in_desc">ノードがこのジオフェンスに進入または退出したときに通知を受け取ります</string>
     <string name="geofence_box_author_confirm">エリアを確定</string>
     <string name="geofence_box_author_hint">2つの角をタップしてエリアを指定します</string>
     <string name="geofence_box_author_hint_viewport">マップを動かしてエリアを合わせ、「エリアを確定」をタップします</string>
@@ -724,6 +784,8 @@
     <string name="hide_password">パスワードを非表示</string>
     <string name="history_return_max">リクエスト可能な最大の履歴件数</string>
     <string name="history_return_window">リクエスト可能な履歴の期間  (分)</string>
+    <string name="hop_histogram_empty">この期間に受信したノードはありません</string>
+    <string name="hop_histogram_title">ホップごとのノード数</string>
     <string name="hop_limit">ホップ数</string>
     <string name="hops_away">ホップ数</string>
     <string name="host">ホスト</string>
@@ -745,7 +807,9 @@
     <string name="ignore_incoming">無視リスト (ノード番号を登録)</string>
     <string name="ignore_mqtt">MQTT を無視</string>
     <string name="ignore_remove">'%1$s'を無視リストから削除しますか？</string>
+    <!-- IMPORT -->
     <string name="import_configuration">設定をインポート</string>
+    <string name="import_export_label">インポート／エクスポート</string>
     <string name="import_known_shared_contact_text">警告: この連絡先は登録済です。インポートすると以前の連絡先情報が上書きされます。</string>
     <string name="import_label">インポート</string>
     <string name="import_shared_contact">連絡先をインポートしますか？</string>
@@ -754,6 +818,10 @@
     <string name="info">情報</string>
     <string name="input_channel_url">共有チャンネルの URL を入力</string>
     <string name="input_shared_contact_url">共有連絡先のURLを入力</string>
+    <string name="insert">挿入</string>
+    <string name="insert_link_message">選択したテキストの URL を入力してください</string>
+    <string name="insert_link_title">リンクを挿入</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">現在インストール済み</string>
     <string name="internal">内部</string>
     <string name="interval_always_on">常時オン</string>
@@ -783,6 +851,7 @@
     <string name="label_long_turbo">長距離・ターボ</string>
     <string name="label_medium_fast">中距離・高速</string>
     <string name="label_medium_slow">中距離・低速</string>
+    <string name="label_medium_turbo">中距離・ターボ</string>
     <string name="label_narrow_fast">狭帯域・高速</string>
     <string name="label_narrow_slow">狭帯域・低速</string>
     <string name="label_short_fast">短距離・高速</string>
@@ -977,9 +1046,17 @@
     <string name="message_delivery_status">メッセージ配信状況</string>
     <string name="message_device_managed">この無線機は管理されており、リモート管理者のみが変更できます。</string>
     <string name="message_input_label">メッセージ</string>
+    <string name="message_routing_error_max_retransmit">メッシュへの配信に失敗しました</string>
+    <string name="message_routing_error_no_channel">チャンネルが選択されていません</string>
+    <string name="message_routing_error_pki_failed">暗号化メッセージを送信できませんでした</string>
+    <string name="message_routing_error_pki_send_fail_public_key">受信者の鍵を利用できません</string>
+    <string name="message_routing_error_pki_unknown_pubkey">受信者にあなたの鍵が必要です</string>
+    <string name="message_routing_error_too_large">メッセージが大きすぎて送信できません</string>
     <string name="message_status_delivered">メッシュに配信済み</string>
-    <string name="message_status_enroute">相手の受信確認待ち</string>
+    <string name="message_status_enroute">送信中…</string>
     <string name="message_status_queued">送信待ち</string>
+    <string name="message_status_recipient_delivered">受信者に配信済み</string>
+    <string name="message_status_relayed_not_confirmed">中継済み、受信者による確認なし</string>
     <string name="message_status_sfpp_confirmed">SF++ チェーンで確認済み</string>
     <string name="message_status_sfpp_routing">SF++ チェーン経由でルーティング中…</string>
     <string name="message_status_unknown">不明</string>
@@ -1000,6 +1077,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT設定</string>
     <string name="mqtt_enabled">MQTTを有効化</string>
+    <string name="mqtt_error_connection_lost">MQTT：接続が失われました</string>
+    <string name="mqtt_error_credentials_rejected">MQTT：接続が拒否されました（認証情報を確認してください）</string>
+    <string name="mqtt_error_proxy_failed">MQTT プロキシに失敗しました：%1$s</string>
+    <string name="mqtt_error_rejected">MQTT：接続が拒否されました：%1$s</string>
     <string name="mqtt_probe_dns_failure">ホストが見つかりません</string>
     <string name="mqtt_probe_other_failure">接続に失敗しました</string>
     <string name="mqtt_probe_rejected">サーバーに拒否されました：%1$s</string>
@@ -1065,7 +1146,10 @@
     <string name="no_usb_devices_hint">シリアルを使用するには、USB データケーブルでデバイスを接続してください。</string>
     <string name="no_usb_devices_seen">USB デバイスが検出されません</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d 台オンライン</string>
+    <string name="node_count_shown">%1$d 台表示</string>
     <string name="node_count_template">（オンライン %1$d / 表示中 %2$d / 合計 %3$d）</string>
+    <string name="node_count_total">合計 %1$d 台</string>
     <string name="node_filter_exclude_infrastructure">インフラを除外</string>
     <string name="node_filter_exclude_mqtt">MQTT を除外</string>
     <string name="node_filter_ignored">無視されたノードを表示しています。\nノード一覧に戻るにはここを押してください。</string>
@@ -1103,6 +1187,7 @@
     <string name="node_list_help_title">ノードリストのヘルプ</string>
     <string name="node_list_long_click_label">ノードのオプション</string>
     <string name="node_number">ノード番号</string>
+    <string name="node_restarting">再起動中…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">ノードの並べ替えオプション</string>
     <string name="node_sort_channel">チャンネル</string>
@@ -1172,6 +1257,19 @@
     <string name="override_duty_cycle">デューティサイクルを上書き</string>
     <string name="override_frequency_mhz">周波数の上書き</string>
     <string name="pa_fan_disabled">PAファン無効</string>
+    <!-- PACKET -->
+    <string name="packet_authenticity">パケットの真正性</string>
+    <string name="packet_authenticity_balanced">バランス：認証済みを優先</string>
+    <string name="packet_authenticity_balanced_summary">推奨。署名することが分かっているノードからの、署名なしへのダウングレードを拒否します。</string>
+    <string name="packet_authenticity_compatible">互換：署名なしを許可</string>
+    <string name="packet_authenticity_compatible_summary">可能な場合はパケットを認証しますが、互換性を最大にするため署名なしの通信も受け入れます。</string>
+    <string name="packet_authenticity_level">保護レベル</string>
+    <string name="packet_authenticity_strict">厳格：認証を必須にする</string>
+    <string name="packet_authenticity_strict_confirm">厳格を有効にする</string>
+    <string name="packet_authenticity_strict_confirmation">厳格では、暗号的に認証されていないリモートのメッシュパケットをすべて無視します。古いファームウェア、PKI 鍵を持たない免許局やアマチュア無線のノード、大きすぎるパケットは表示されなくなることがあります。PKI で認証されたダイレクトメッセージは引き続き利用できます。</string>
+    <string name="packet_authenticity_strict_summary">暗号的に認証されたメッシュパケットのみを表示・処理します。古いノードや大きすぎるパケットは表示されなくなることがあります。</string>
+    <string name="packet_authenticity_strict_title">厳格な認証を有効にしますか？</string>
+    <string name="packet_authenticity_unsupported">この接続中のデバイスは、パケット署名の検証に対応していません。</string>
     <string name="pairing_mode">ペアリングモード</string>
     <string name="password">パスワード</string>
     <!-- PAX -->
@@ -1342,7 +1440,7 @@
     <string name="role_tracker_desc">GPSの位置情報パケットを優先してブロードキャストします。</string>
     <string name="root_topic">ルート トピック</string>
     <string name="rotary_encoder_1_enabled">ロータリーエンコーダ #1 を有効化</string>
-    <string name="router_role_confirmation_text">&lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
+    <string name="router_role_confirmation_text">&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">セッション鍵が不正です</string>
     <string name="routing_error_admin_public_key_unauthorized">許可されていない公開鍵</string>
@@ -1366,7 +1464,9 @@
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="rsyslog_server">rsyslogサーバー</string>
     <string name="sats">GPS衛星</string>
+    <!-- SAVE -->
     <string name="save">保存</string>
+    <string name="save_and_restart">保存して再起動</string>
     <string name="save_changes">保存</string>
     <string name="save_csv_in_storage_esp32_only">ストレージにCSVファイルを保存(ESP32のみ)</string>
     <string name="save_rangetest">レンジテストのパケットをエクスポート</string>
@@ -1441,7 +1541,7 @@
     <string name="share_connected_node">接続中のノードを共有</string>
     <string name="share_contact">連絡先を共有</string>
     <string name="share_location">位置情報を共有</string>
-    <string name="share_location_description">ノードのハードウェア GPS を使用する代わりに、スマートフォンの GPS を使ってノードに位置情報を送信します。</string>
+    <string name="share_location_description">ノードのハードウェア GPS を使う代わりに、スマートフォンの GPS を使って位置をノードに送信します。</string>
     <string name="share_to">共有…</string>
     <string name="share_your_location_in_real_time">統合された GPS 機能で位置情報をリアルタイムに共有し、グループの連携を保ちます。</string>
     <string name="short_name">短縮名</string>
@@ -1462,6 +1562,31 @@
     <string name="shutdown_warning">⚠️ ノードをシャットダウンします。再びオンにするには物理的な操作が必要になります。</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
+    <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">アンテナ利得（dBi）</string>
+    <string name="site_planner_antenna_height_meters">アンテナの高さ（m）</string>
+    <string name="site_planner_color_scale">カラーパレット</string>
+    <string name="site_planner_estimate">カバレッジを推定</string>
+    <string name="site_planner_estimating">カバレッジを推定中…</string>
+    <string name="site_planner_failed">カバレッジの推定に失敗しました</string>
+    <string name="site_planner_frequency_mhz">周波数（MHz）</string>
+    <string name="site_planner_high_resolution">高解像度の地形</string>
+    <string name="site_planner_invalid_latitude">−90〜90 を入力してください</string>
+    <string name="site_planner_invalid_longitude">−180〜180 を入力してください</string>
+    <string name="site_planner_invalid_positive">0 より大きい値にしてください</string>
+    <string name="site_planner_invalid_rx_sensitivity">−150〜−30 dBm を入力してください</string>
+    <string name="site_planner_max_range_km">最大範囲（km）</string>
+    <string name="site_planner_rx_height_meters">受信機の高さ（m）</string>
+    <string name="site_planner_rx_sensitivity_dbm">受信機の感度（dBm）</string>
+    <string name="site_planner_section_display">表示</string>
+    <string name="site_planner_section_receiver">受信機</string>
+    <string name="site_planner_section_simulation">シミュレーションのオプション</string>
+    <string name="site_planner_section_transmitter">サイト／送信機</string>
+    <string name="site_planner_subtitle">送信機の RF カバレッジを推定します</string>
+    <string name="site_planner_tx_power_watts">送信出力（W）</string>
+    <string name="site_planner_use_current_location">現在地を使用</string>
+    <string name="site_planner_use_map_center">マップの中心を使用</string>
+    <string name="site_planner_use_node_location">現在のノードの位置を使用</string>
     <string name="skip">スキップ</string>
     <string name="slot">スロット</string>
     <string name="smart_position">スマート位置情報</string>
@@ -1471,6 +1596,7 @@
     <string name="soil_temperature">土壌温度</string>
     <string name="speed">速度</string>
     <string name="speed_kmh">%1$d km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="spread_factor">拡散率</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状態のブロードキャスト間隔 (秒)</string>
@@ -1714,8 +1840,10 @@
     <string name="wind_gust">突風</string>
     <string name="wind_lull">風の弱まり</string>
     <string name="wind_speed">風速</string>
+    <!-- WRITE -->
     <string name="write_nfc">NFC タグに書き込む</string>
     <string name="write_nfc_failed">タグに書き込めませんでした。書き込み可能な空の NFC タグを使い、動かさずに近づけてください。</string>
+    <string name="write_nfc_subtext">書き込むと、この共有リンクが物理的な NFC タグに保存されます。誰でもスマートフォンでタグにタッチすると開けます。</string>
     <string name="write_nfc_success">タグに書き込みました</string>
     <string name="write_nfc_text">書き込み可能な NFC タグをスマートフォンの背面に近づけてください。</string>
     <string name="you">あなた</string>

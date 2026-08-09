@@ -42,8 +42,8 @@ interface PacketHandler {
     /** Processes queue status updates from the radio. */
     fun handleQueueStatus(queueStatus: QueueStatus)
 
-    /** Removes a pending response for a request. */
-    fun removeResponse(dataRequestId: Int, complete: Boolean)
+    /** Removes and completes a pending response for a request before the caller's lifecycle lease is released. */
+    suspend fun removeResponse(dataRequestId: Int, complete: Boolean)
 
     /** Stops the packet queue. */
     fun stopPacketQueue()

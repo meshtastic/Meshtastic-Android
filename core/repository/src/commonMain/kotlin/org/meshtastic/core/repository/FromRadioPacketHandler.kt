@@ -20,6 +20,6 @@ import org.meshtastic.proto.FromRadio
 
 /** Interface for dispatching non-packet [FromRadio] variants to their respective handlers. */
 interface FromRadioPacketHandler {
-    /** Processes a [FromRadio] message. */
-    fun handleFromRadio(proto: FromRadio)
+    /** Processes a [FromRadio] message admitted by [session]. */
+    fun handleFromRadio(proto: FromRadio, session: RadioSessionContext)
 }

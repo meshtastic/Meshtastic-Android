@@ -16,38 +16,33 @@
  */
 package org.meshtastic.core.data.datasource
 
-import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkDeviceHardware
 
 @Single
-class DeviceHardwareLocalDataSource(
-    private val dbManager: DatabaseProvider,
-    private val dispatchers: CoroutineDispatchers,
-) {
-    private val deviceHardwareDao
-        get() = dbManager.currentDb.value.deviceHardwareDao()
+class DeviceHardwareLocalDataSource(private val dbManager: DatabaseProvider) {
+    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) {
+        dbManager.withDb { it.deviceHardwareDao().insertAll(deviceHardware.map { hw -> hw.asEntity() }) }
+    }
 
-    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) =
-        withContext(dispatchers.io) { deviceHardwareDao.insertAll(deviceHardware.map { it.asEntity() }) }
-
-    suspend fun deleteAllDeviceHardware() = withContext(dispatchers.io) { deviceHardwareDao.deleteAll() }
+    suspend fun replaceAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) {
+        dbManager.withDb { it.deviceHardwareDao().replaceAll(deviceHardware.map { hw -> hw.asEntity() }) }
+    }
 
     suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity> =
-        withContext(dispatchers.io) { deviceHardwareDao.getByHwModel(hwModel) }
+        dbManager.withReadDb { it.deviceHardwareDao().getByHwModel(hwModel) }
 
     suspend fun getByTarget(target: String): DeviceHardwareEntity? =
-        withContext(dispatchers.io) { deviceHardwareDao.getByTarget(target) }
+        dbManager.withReadDb { it.deviceHardwareDao().getByTarget(target) }
 
     suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? =
-        withContext(dispatchers.io) { deviceHardwareDao.getByModelAndTarget(hwModel, target) }
+        dbManager.withReadDb { it.deviceHardwareDao().getByModelAndTarget(hwModel, target) }
 
-    suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { deviceHardwareDao.count() > 0 }
+    suspend fun hasAnyEntries(): Boolean = dbManager.withReadDb { it.deviceHardwareDao().count() > 0 }
 
     /** All known `platformioTarget` values — used to determine which msh.to links are vendor links. */
-    suspend fun getAllTargets(): List<String> = withContext(dispatchers.io) { deviceHardwareDao.getAllTargets() }
+    suspend fun getAllTargets(): List<String> = dbManager.withReadDb { it.deviceHardwareDao().getAllTargets() }
 }

@@ -27,10 +27,17 @@ interface MeshDataHandler {
      *
      * @param packet The received mesh packet.
      * @param myNodeNum The local node number.
+     * @param session The transport session that admitted this packet.
      * @param logUuid Optional UUID for logging purposes.
      * @param logInsertJob Optional job that tracks the insertion of the packet into the log.
      */
-    fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null)
+    fun handleReceivedData(
+        packet: MeshPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+        logUuid: String? = null,
+        logInsertJob: Job? = null,
+    )
 
     /**
      * Persists a data packet in the history and triggers notifications if necessary.
@@ -39,5 +46,10 @@ interface MeshDataHandler {
      * @param myNodeNum The local node number.
      * @param updateNotification Whether to trigger a notification for this packet.
      */
-    fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true)
+    fun rememberDataPacket(
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        updateNotification: Boolean = true,
+        session: RadioSessionContext? = null,
+    )
 }

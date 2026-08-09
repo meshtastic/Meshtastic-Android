@@ -588,6 +588,17 @@ class DefaultDocBundleLoader : DocBundleLoader {
             5400,
             "measurement",
         ),
+        KeywordIndexEntry(
+            "test-builds",
+            "Test Builds & Obtainium",
+            "developer",
+            "en/developer/test-builds.html",
+            10,
+            listOf("obtainium", "beta", "snapshot", "apk", "install", "channel", "prerelease"),
+            listOf("test-builds", "obtainium", "beta", "snapshot"),
+            18000,
+            "test-builds",
+        ),
     )
 
     private fun KeywordIndexEntry.toDocPage(): DocPage = DocPage(

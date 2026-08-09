@@ -56,6 +56,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.transport.HeartbeatSender
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
@@ -78,16 +79,15 @@ private val CONNECTION_TIMEOUT = 15.seconds
  */
 private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
-internal val TARGETED_SCAN_TIMEOUT = 2.seconds
-
 /**
  * Bounded scan duration used by both discovery paths in [findDevice]:
- * - Bonded escalation: after the 2s [TARGETED_SCAN_TIMEOUT] misses the low-duty advertisement window, this is the
- *   single bounded retry before falling back to the bonded handle.
- * - Non-bonded retry: each of the [SCAN_RETRY_COUNT] attempts uses this duration.
+ * - Bonded devices get one address-filtered scan before falling back to the bonded handle.
+ * - Non-bonded retries each use this duration.
  *
- * 5s covers multiple advertising intervals for typical BLE power-save slots (~1–2s each). If the bounded bonded scan
- * window still misses, [findDevice] falls back to the bonded handle and [attemptConnection] keeps that patient
+ * Keeping the bonded path to one scanner registration is important on Android, which throttles applications that start
+ * BLE scans too frequently. A single 5s window still covers multiple advertising intervals for typical power-save slots
+ * (~1–2s each), resolves immediately when the target advertises, and avoids consuming two scan starts per reconnect. If
+ * the scan misses, [findDevice] falls back to the bonded handle and [attemptConnection] keeps that patient
  * `autoConnect` path bounded through [CONNECTION_TIMEOUT].
  */
 internal val SCAN_TIMEOUT = 5.seconds
@@ -119,6 +119,12 @@ private val SUBSCRIPTION_READY_TIMEOUT = 5.seconds
  * significantly increases battery draw on both the phone and the radio.
  */
 private val PRIORITY_DOWNGRADE_DELAY = 30.seconds
+
+/**
+ * Settle delay after disconnecting to let the BLE stack release GATT resources before reconnecting post cache
+ * invalidation.
+ */
+private val POST_INVALIDATION_RECONNECT_DELAY = 500.milliseconds
 
 /**
  * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
@@ -235,23 +241,16 @@ class BleRadioTransport(
             bluetoothRepository.state.value.bondedDevices.firstOrNull { it.address.equals(address, ignoreCase = true) }
 
         if (bondedDevice != null) {
-            // Fast path: 2s targeted scan catches active advertising.
-            Logger.i {
-                "[${address.anonymize()}] Bonded device found; attempting short targeted scan for fresh advertisement"
-            }
-            scanForFreshDevice(TARGETED_SCAN_TIMEOUT)?.let {
+            // Use one bounded, address-filtered scan. Splitting this into a short scan plus an escalated scan consumed
+            // two Android scanner registrations per reconnect and could hit SCAN_FAILED_SCANNING_TOO_FREQUENTLY when a
+            // user switched devices while the reconnect policy and the Connections screen were also scanning.
+            Logger.i { "[${address.anonymize()}] Bonded device found; scanning once for a fresh advertisement" }
+            scanForFreshDevice(SCAN_TIMEOUT)?.let {
                 Logger.i { "[${address.anonymize()}] Fresh advertisement found; using scanned device" }
                 return it
             }
 
-            // Escalation: radio may be in a low-duty advertising slot. Try one bounded SCAN_TIMEOUT scan.
-            Logger.i { "[${address.anonymize()}] Targeted scan missed; escalating to bounded scan before fallback" }
-            scanForFreshDevice(SCAN_TIMEOUT)?.let {
-                Logger.i { "[${address.anonymize()}] Fresh advertisement found during escalated scan" }
-                return it
-            }
-
-            // If both scans miss, fall back to the bonded handle. Bonded-only devices have no fresh advertisement, so
+            // If the scan misses, fall back to the bonded handle. Bonded-only devices have no fresh advertisement, so
             // Kable uses autoConnect=true and Android can patiently wait for the device to advertise again.
             // This remains bounded by CONNECTION_TIMEOUT in connectAndAwait(), after which BleReconnectPolicy owns
             // retry/backoff.
@@ -281,7 +280,7 @@ class BleRadioTransport(
      *
      * One scan attempt only — no retry, no backoff. Both bonded and non-bonded paths in [findDevice] share this
      * primitive so retry policy stays centralized:
-     * - Bonded: escalated from [TARGETED_SCAN_TIMEOUT] to [SCAN_TIMEOUT] before [findDevice] returns the bonded handle.
+     * - Bonded: one address-filtered [SCAN_TIMEOUT] attempt before [findDevice] returns the bonded handle.
      * - Non-bonded: [SCAN_RETRY_COUNT] attempts at [SCAN_TIMEOUT] with [SCAN_RETRY_DELAY] between attempts.
      *
      * The outer [withTimeoutOrNull] is binding: the scanner receives [timeout] as a hint, but this coroutine resumes on
@@ -291,9 +290,8 @@ class BleRadioTransport(
      */
     private suspend fun scanForFreshDevice(timeout: Duration): BleDevice? = try {
         withTimeoutOrNull(timeout) {
-            // Pass both service UUID and address so the scanner can apply the most efficient platform filter.
-            // Android uses address (OS-level HW filter), while CoreBluetooth (macOS) needs the service UUID because
-            // it caches peripheral identifiers and may not re-report by address alone.
+            // Pass both service UUID and address; the scanner picks whichever filter the platform can honour
+            // (address natively on Android, service UUID elsewhere) and narrows to the address itself.
             scanner.scan(timeout = timeout, serviceUuid = SERVICE_UUID, address = address).first {
                 it.address.equals(address, ignoreCase = true)
             }
@@ -364,6 +362,29 @@ class BleRadioTransport(
 
         if (state !is BleConnectionState.Connected) {
             throw RadioNotConnectedException("Failed to connect to device at address $address")
+        }
+
+        // Post-OTA GATT cache invalidation: the device rebooted with potentially different
+        // BLE service table handles. Refresh Android's cache and reconnect to force fresh
+        // service discovery before proceeding with profile setup.
+        val radioServiceForCache = callback as? RadioInterfaceService
+        if (radioServiceForCache?.consumeGattCacheInvalidationRequest() == true) {
+            val invalidated = bleConnection.invalidateServiceCache()
+            Logger.d { "[${address.anonymize()}] Post-OTA GATT cache invalidation requested: $invalidated" }
+            if (invalidated) {
+                Logger.i {
+                    "[${address.anonymize()}] Reconnecting after GATT cache refresh to force service rediscovery"
+                }
+                bleConnection.disconnect()
+                delay(POST_INVALIDATION_RECONNECT_DELAY)
+                val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+                if (reconnectState !is BleConnectionState.Connected) {
+                    throw RadioNotConnectedException(
+                        "Failed to reconnect after post-OTA GATT cache refresh (state=$reconnectState)",
+                    )
+                }
+                Logger.i { "[${address.anonymize()}] Reconnected after GATT cache refresh" }
+            }
         }
 
         val gattConnectedAt = nowMillis
@@ -484,7 +505,10 @@ class BleRadioTransport(
         try {
             bleConnection.deviceFlow.first()?.let { device ->
                 val rssi = retryBleOperation(tag = address) { device.readRssi() }
-                Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
+                Logger.d {
+                    "[${address.anonymize()}] Connection confirmed. " +
+                        "Initial RSSI: ${rssi?.let { "$it dBm" } ?: "unknown"}"
+                }
             }
         } catch (e: CancellationException) {
             throw e
@@ -677,7 +701,9 @@ class BleRadioTransport(
                             return@withLock
                         }
                 try {
-                    retryBleOperation(tag = address) { currentService.sendToRadio(p) }
+                    retryBleOperation(tag = address, retryWhile = { currentService === radioService }) {
+                        currentService.sendToRadio(p)
+                    }
                     val sent = packetsSent.incrementAndGet()
                     val txBytes = bytesSent.addAndGet(p.size.toLong())
                     Logger.v {
@@ -696,7 +722,7 @@ class BleRadioTransport(
                         }
                         handleFailure(e)
                     } else {
-                        Logger.w(e) { "[$address] Stale write failure ignored (session was replaced)" }
+                        Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
                     }
                 }
             }

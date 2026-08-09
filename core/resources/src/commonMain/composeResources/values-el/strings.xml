@@ -29,6 +29,7 @@
     <!-- APP -->
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
     <string name="apply">Εφαρμογή</string>
+    <!-- AQI -->
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="audio">Ήχος</string>
     <string name="battery">Μπαταρία</string>
@@ -74,6 +75,7 @@
         <item quantity="other">Διαγραφή %1$s μηνυμάτων;</item>
     </plurals>
     <string name="description">Περιγραφή</string>
+    <!-- DESKTOP -->
     <string name="details">Λεπτομέρειες</string>
     <!-- DEVICE -->
     <string name="device">Συσκευή</string>
@@ -105,12 +107,14 @@
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
     <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού.</string>
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
     <string name="green">Πράσινο</string>
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
     <!-- IGNORE -->
     <string name="ignore">Παράβλεψη</string>
+    <!-- IMPORT -->
     <string name="info">Πληροφορίες</string>
     <string name="interval_unset">Αναίρεση</string>
     <string name="intro_show">Προβολή Εισαγωγής</string>
@@ -148,7 +152,6 @@
     <string name="message">Μήνυμα</string>
     <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
     <string name="message_input_label">Μήνυμα</string>
-    <string name="message_status_enroute">Αναμονή για αναγνώριση</string>
     <string name="messages">Μηνύματα</string>
     <string name="module_settings">Ρυθμίσεις πρόσθετου</string>
     <!-- MQTT -->
@@ -181,6 +184,7 @@
     <string name="one_day">24 Ώρες</string>
     <!-- OPEN -->
     <!-- OUTPUT -->
+    <!-- PACKET -->
     <string name="password">Κωδικός πρόσβασης</string>
     <!-- PAX -->
     <!-- POSITION -->
@@ -224,6 +228,7 @@
     <string name="routing_error_no_channel">Kein Kanal</string>
     <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
+    <!-- SAVE -->
     <string name="save">Αποθήκευση</string>
     <string name="save_changes">Αποθήκευση</string>
     <!-- SCAN -->
@@ -238,6 +243,8 @@
     <string name="share">Κοινοποίηση</string>
     <!-- SHOW -->
     <string name="shutdown">Τερματισμός λειτουργίας</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Οθόνη</string>
     <string name="ssid">SSID</string>
     <!-- TAK -->
     <string name="tak_team_blue">Μπλε</string>
@@ -278,5 +285,6 @@
     <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
     <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
     <!-- WIND -->
+    <!-- WRITE -->
     <string name="you">Εσύ</string>
 </resources>

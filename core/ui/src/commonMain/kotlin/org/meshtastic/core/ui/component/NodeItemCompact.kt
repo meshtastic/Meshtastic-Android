@@ -122,7 +122,9 @@ fun NodeItemCompact(
             Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
         }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode, system) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
     val unmessageable =
         remember(thatNode) {
@@ -143,7 +145,7 @@ fun NodeItemCompact(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, lastHeardIsRelative, a11yStrings, modemPreset) {
+        remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = longName,
                 isOnline = thatNode.isOnline,
@@ -153,8 +155,7 @@ fun NodeItemCompact(
                 hopsAway = thatNode.hopsAway,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snr,
-                rssi = thatNode.rssi,
+                snr = thatNode.snrOrNull,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
@@ -348,20 +349,18 @@ private fun CompactHealthRow(
             )
         }
 
-        // Signal quality
-        val hasDirectSignal = thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
-        if (showSignal && hasDirectSignal) {
-            val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+        // Signal quality, rated from SNR alone — RSSI is not part of the rating (#5446), so it must not gate it.
+        val directSnr = thatNode.snrOrNull?.takeIf { thatNode.hopsAway == 0 && !thatNode.viaMqtt }
+        if (showSignal && directSnr != null) {
+            val quality = determineSignalQuality(directSnr, LocalModemPreset.current)
             add(
                 @Composable {
-                    StatusSurface {
-                        IconInfo(
-                            icon = vectorResource(quality.icon),
-                            contentDescription = stringResource(quality.nameRes),
-                            contentColor = quality.color.invoke(),
-                            text = stringResource(quality.nameRes),
-                        )
-                    }
+                    IconInfo(
+                        icon = vectorResource(quality.icon),
+                        contentDescription = stringResource(quality.nameRes),
+                        contentColor = quality.color.invoke(),
+                        text = stringResource(quality.nameRes),
+                    )
                 },
             )
         }
@@ -449,8 +448,10 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
     val env = thatNode.environmentMetrics
     val segments =
         buildList<@Composable () -> Unit> {
-            if ((env.temperature ?: 0f) != 0f) {
-                val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
+            // Temperature carries presence, so `null` already means "no sensor" — testing against 0 hid an ordinary
+            // 0 °C reading. Mirrors the fix already made in NodeItem's gatherSensors.
+            env.temperature?.let { temperature ->
+                val temp = MetricFormatter.temperature(temperature, tempInFahrenheit)
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.Temperature,

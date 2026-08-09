@@ -23,11 +23,17 @@ import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-private val xmlParser = XML {
-    // xmlutil 1.0.0 moved repairNamespaces from the policy builder to the top-level XML config.
-    repairNamespaces = false
-    defaultPolicy { ignoreUnknownChildren() }
-}
+// XML.compat preserves xmlutil's pre-1.0 serialization defaults. The non-deprecated 1.0 builders
+// (XML.recommended/XML.V1) intentionally change serialization defaults, which would alter the CoT XML
+// wire format we exchange with ATAK/TAK servers. Staying on the compat policy until that migration can
+// be validated against real TAK interop; suppress the soft-deprecation on the factory itself.
+@Suppress("DEPRECATION")
+private val xmlParser =
+    XML.compat {
+        // xmlutil 1.0.0 moved repairNamespaces from the policy builder to the top-level XML config.
+        repairNamespaces = false
+        defaultPolicy { ignoreUnknownChildren() }
+    }
 
 class CoTXmlParser(private val xml: String) {
     fun parse(): Result<CoTMessage> = try {

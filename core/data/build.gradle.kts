@@ -18,8 +18,8 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -49,7 +49,7 @@ kotlin {
         }
 
         // Room / SQLite runtime shared between Android and Desktop JVM targets
-        val jvmAndroidMain by getting {
+        getByName("jvmAndroidMain") {
             dependencies {
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.room.paging)
@@ -62,16 +62,8 @@ kotlin {
             implementation(libs.androidx.core.location.altitude)
         }
 
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
 
-        val androidHostTest by getting {
-            dependencies {
-                // JVM variant provides the host-platform native for BundledSQLiteDriver (same as core:database)
-                runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")
-            }
-        }
+        getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }
 }

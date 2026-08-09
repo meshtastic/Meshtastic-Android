@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.prefs.appfunctions
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -27,17 +26,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.AppDataStore
 import org.meshtastic.core.repository.AppFunctionsPrefs
 
 @Single
 @Suppress("TooManyFunctions")
-class AppFunctionsPrefsImpl(
-    @Named("AppDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : AppFunctionsPrefs {
+class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: CoroutineDispatchers) :
+    AppFunctionsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val masterEnabled: StateFlow<Boolean> = booleanPref(KEY_MASTER, true)

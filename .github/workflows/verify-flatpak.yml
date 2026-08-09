@@ -8,6 +8,11 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - '.github/workflows/verify-flatpak.yml'
+      # The desktop module's build config shapes the uber jar the flatpak wraps.
+      - 'desktopApp/**'
+      # The offline manifest pins the Gradle distribution independently of the wrapper —
+      # a wrapper bump without a manifest update breaks the offline build silently.
+      - 'gradle/wrapper/**'
   workflow_dispatch:
 
 permissions:
@@ -22,21 +27,27 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
 
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
+          token: ${{ github.token }}
 
+      # JBR resolves its version list via the GitHub API — unauthenticated requests
+      # rate-limit on the shared runner IPs, so the token is required, not optional.
       - uses: actions/setup-java@v5
         with:
           distribution: jetbrains
-          java-version: 21
+          java-version: 25
+          token: ${{ github.token }}
 
       - uses: gradle/actions/setup-gradle@v6
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Generate flatpak-sources.json
         run: |
@@ -61,7 +72,7 @@ jobs:
         arch: [x86_64, aarch64]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
 
@@ -69,23 +80,23 @@ jobs:
         with:
           name: flatpak-sources
 
-      - name: Clone vid's flatpak repo
+      - name: Clone the Flathub packaging repo
         run: |
           git clone --depth 1 --recurse-submodules \
-            https://github.com/vidplace7/org.meshtastic.desktop.git \
-            "$RUNNER_TEMP/org.meshtastic.desktop"
+            https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
 
       - name: Wire overlay manifest + sources
         run: |
           cp scripts/verify-flatpak/desktop-offline.yaml \
-            "$RUNNER_TEMP/org.meshtastic.desktop/org.meshtastic.desktop.yaml"
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
           cp flatpak-sources.json \
-            "$RUNNER_TEMP/org.meshtastic.desktop/flatpak-sources.json"
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
           rsync -a --delete \
             --exclude='/build/' --exclude='/.gradle/' \
             --exclude='*/build/' --exclude='*/.gradle/' \
             --exclude='/.idea/' --exclude='/local.properties' \
-            ./ "$RUNNER_TEMP/org.meshtastic.desktop/meshtastic-android/"
+            ./ "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/meshtastic-android/"
 
       - name: Install flatpak-builder
         run: |
@@ -95,22 +106,22 @@ jobs:
             https://dl.flathub.org/repo/flathub.flatpakrepo
 
       - name: Build flatpak offline
-        working-directory: ${{ runner.temp }}/org.meshtastic.desktop
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
         run: |
           flatpak-builder --user --repo=repo --install-deps-from=flathub \
-            --force-clean builddir org.meshtastic.desktop.yaml
+            --force-clean builddir org.meshtastic.MeshtasticDesktop.yaml
 
       - name: Export .flatpak bundle
-        working-directory: ${{ runner.temp }}/org.meshtastic.desktop
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
         env:
           ARCH: ${{ matrix.arch }}
         run: |
-          flatpak build-bundle repo org.meshtastic.desktop.${ARCH}.flatpak \
-            org.meshtastic.desktop \
+          flatpak build-bundle repo "org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak" \
+            org.meshtastic.MeshtasticDesktop \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
           echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v7
         with:
           name: meshtastic-desktop-flatpak-${{ matrix.arch }}
-          path: ${{ runner.temp }}/org.meshtastic.desktop/org.meshtastic.desktop.${{ matrix.arch }}.flatpak
+          path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.${{ matrix.arch }}.flatpak

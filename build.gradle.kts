@@ -28,7 +28,6 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.kotlin.parcelize) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.aboutlibraries) apply false
     alias(libs.plugins.secrets) apply false
@@ -36,9 +35,8 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
-    alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.meshtastic.root)
-    id("meshtastic.docs")
+    alias(libs.plugins.meshtastic.docs)
 }
 
 plugins.withId("org.meshtastic.flatpak.sources") {

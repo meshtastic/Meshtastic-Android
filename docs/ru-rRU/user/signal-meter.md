@@ -2,8 +2,8 @@
 title: Как работает измеритель сигнала Meshtastic
 parent: Руководство пользователя
 nav_order: 15
-last_updated: 2026-06-25
-description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
+last_updated: 2026-07-08
+description: Как индикатор сигнала оценивает качество по SNR относительно пресетов модема LoRa — расширенная спектральная модуляция, предустановки и что на самом деле означают полоски.
 aliases:
   - signal
   - signal-meter
@@ -13,7 +13,7 @@ aliases:
 
 # Как работает измеритель сигнала Meshtastic
 
-The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the "bars" on a traditional cell phone or WiFi router.
+Измеритель сигнала Meshtastic — знакомые полоски или цвет состояния в приложении — рассчитывается совсем иначе, чем "полоски" на обычном мобильном телефоне или WiFi-роутере.
 
 Большинство потребительских устройств просто измеряют, насколько "громкий" сигнал. Однако, поскольку Meshtastic использует технологию **LoRa (Long Range)**, его измеритель сигнала оценивает, насколько **чистый** сигнал, относительно конкретных настроек вашей mesh-сети.
 
@@ -26,7 +26,7 @@ The Meshtastic signal meter — the familiar bars or status color in the app —
 - **RSSI (Индикатор уровня принятого сигнала):** **громкость** необработанного сигнала, поступающего на твою антенну.
 - **SNR (Соотношение сигнал/шум):** **Чёткость** сигнала по сравнению с фоновым шумом.
 
-> 💡 **Tip:** Here's an analogy — imagine you are trying to hear a friend talking to you.
+> 💡 **Совет:** Вот аналогия — представь, что пытаешься услышать, что тебе говорит друг.
 >
 > - **RSSI** — это громкость его голоса.
 > - **Минимальный уровень шума** — это фоновый шум в комнате (кондиционер, разговоры других людей, движение транспорта).
@@ -38,7 +38,7 @@ The Meshtastic signal meter — the familiar bars or status color in the app —
 
 ## 2. Магия LoRa: слышит "ниже уровня шума"
 
-For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
+Для обычных радиоприёмников (например, FM или WiFi), если фоновый шум громче сигнала (отрицательный SNR), приёмник просто слышит шум.
 
 LoRa особенная. Она использует модуляцию **"широкополосного спектра"**, которая позволяет радио математически извлекать сигнал из воздуха даже когда он глубоко _под_ фоновым шумом. Вот почему ты часто будете видеть **отрицательные значения SNR** в Meshtastic (например, -10 дБ, что означает, что сигнал на 10 децибел слабее фонового шума).
 
@@ -48,18 +48,18 @@ LoRa особенная. Она использует модуляцию **"ши�
 
 ## 3. Как измеритель сигнала рассчитывает качество
 
-The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, measured relative to the preset's SNR Limit** — the demodulation floor described above. It deliberately does **not** factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)
+Приложение оценивает качество сигнала (Нет, Плохо, Средне или Хорошо) только по **SNR, измеренному относительно установленного порога SNR** — той самой демодуляционной границы, о которой говорилось выше. Он намеренно **не** учитывает RSSI в оценке: без локального уровня шума RSSI не может сказать, можно ли реально декодировать сигнал, поэтому показатель SNR по сравнению с установленным лимитом является значимой мерой. (RSSI всё ещё отображается где-то ещё.)
 
-Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
+Поскольку рейтинг зависит от заранее заданного лимита, _один и тот же_ SNR может оцениваться по-разному на разных пресетах — `-15 dB` нормально для `LongSlow`, но непригодно для `ShortFast`. Допустим, `limit` — это предел SNR у активного пресета, вот как приложение выбирает полоски (или цвет):
 
-| Уровень     | Деления | Критерии                             | Значение                                                                                 |
-| ----------- | ------- | ------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Хороший     | 3       | SNR **above** the preset's `limit`   | Signal is comfortably above the demodulation floor — healthy connection. |
-| Средний     | 2       | within `5.5 dB` below the `limit`    | Decodable, but getting close to the floor.                               |
-| Плохой      | 1       | within `7.5 dB` below the `limit`    | At the very edge of what the preset can recover.                         |
-| Отсутствует | 0       | more than `7.5 dB` below the `limit` | Below the floor — transmission lost to noise.                            |
+| Уровень     | Деления | Критерии                            | Значение                                                                    |
+| ----------- | ------- | ----------------------------------- | --------------------------------------------------------------------------- |
+| Хороший     | 3       | SNR **выше** установленного `limit` | Сигнал с запасом выше порога демодуляции — связь в порядке. |
+| Средний     | 2       | меньше чем на `5,5 дБ` ниже `limit` | Понятно, но уже почти до пола.                              |
+| Плохой      | 1       | `5,5 дБ` до `7,5 дБ` ниже `limit`   | На самом пределе того, что может восстановить пресет.       |
+| Отсутствует | 0       | более чем на `7,5 дБ` ниже `limit`  | Ниже порога — сигнал потерян из-за помех.                   |
 
-> **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
+> **Примечание:** Фиксированные пороги SNR, которые вы могли видеть где-то ещё (`-7 дБ` / `-15 дБ`), теперь используются только для окрашивания отдельных хопов в результатах трассировки — а не для измерителя сигнала на каждой ноде, о которой идёт речь здесь.
 
 ---
 
@@ -67,9 +67,9 @@ Because the rating is relative to the preset limit, the _same_ SNR can rate diff
 
 Поскольку измеритель Meshtastic действует как **"Измеритель чёткости"**, он ведёт себя иначе, чем ожидает большинство людей:
 
-> 💡 **Tip:** Don't panic over low RSSI. You might see a seemingly terrible RSSI value like `-118 dBm`. На сотовом телефоне у тебя было бы ноль делений. Но если отношение сигнал/шум (SNR) `+2 дБ`, Meshtastic все равно покажет сильный сигнал! _Библиотека тихая, поэтому шепот слышен идеально._
+> 💡 **Совет:** Не паниковать из-за низкого RSSI. Вы можете увидеть, например, такой вроде бы ужасный показатель RSSI, как `-118 dBm`. На сотовом телефоне у тебя было бы ноль делений. Но если отношение сигнал/шум (SNR) `+2 дБ`, Meshtastic все равно покажет сильный сигнал! _Библиотека тихая, поэтому шепот слышен идеально._
 
-> ⚠️ **Warning:** Watch out for local noise. If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. Это означает, что у тебя есть местные помехи — возможно, дешевый источник питания, шумный компьютер или расположенная рядом радиовышка — создающие столько статического шума, что он заглушает сеть.
+> ⚠️ **Внимание:** Остерегайтесь локального шума. Если подключить огромную антенну и увидеть отличный RSSI (например, `-90 dBm`), но индикатор сигнала показывает всего **1 деление (Плохо)**, значит, у тебя проблема. Это означает, что у тебя есть местные помехи — возможно, дешевый источник питания, шумный компьютер или расположенная рядом радиовышка — создающие столько статического шума, что он заглушает сеть.
 
 ## Где появляется информация о сигнале
 
@@ -84,9 +84,9 @@ Because the rating is relative to the preset limit, the _same_ SNR can rate diff
 
 ## Связанные темы
 
-- [Nodes](nodes) — where signal bars appear in the node list
-- [Node Metrics](node-metrics) — SNR/RSSI history and the per-node signal quality reference
-- [Settings — Radio & User](settings-radio-user) — modem presets and their SNR limits
+- [Ноды](nodes) — там, где в списке нод появляются индикаторы сигнала
+- [Метрики ноды](node-metrics) — история SNR/RSSI и эталон качества сигнала для каждой ноды
+- [Настройки — Радио и Пользователь](settings-radio-user) — пресеты модема и их пределы SNR
 
 ---
 

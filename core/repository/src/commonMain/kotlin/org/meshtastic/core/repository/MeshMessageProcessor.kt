@@ -16,16 +16,15 @@
  */
 package org.meshtastic.core.repository
 
-import org.meshtastic.proto.MeshPacket
-
 /** Interface for processing incoming radio messages and mesh packets. */
 interface MeshMessageProcessor {
-    /** Handles a raw message received from the radio. */
-    fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?)
+    /**
+     * Handles [frame], a received radio message together with the immutable transport session that admitted it.
+     *
+     * @param myNodeNum local node number, or `null` while the current handshake has not resolved it
+     */
+    suspend fun handleFromRadio(frame: ReceivedRadioFrame, myNodeNum: Int?)
 
-    /** Handles a received mesh packet. */
-    fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?)
-
-    /** Clears the buffer of early received packets. */
-    fun clearEarlyPackets()
+    /** Clears buffered packets before a device boundary is published. */
+    suspend fun clearEarlyPackets()
 }

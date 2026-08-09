@@ -24,21 +24,23 @@ private const val MAX_LINE_LENGTH = 120
 internal fun Project.configureSpotless(extension: SpotlessExtension) {
     val ktlintVersion = libs.version("ktlint")
     val maxLineWidth = MAX_LINE_LENGTH
+    // Isolated-Projects-safe root access — never reach through `rootProject`.
+    val spotlessConfigDir = isolated.rootProject.projectDirectory.dir("config/spotless")
     extension.apply {
         ratchetFrom("origin/main")
         kotlin {
             target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
             targetExclude("**/build/**/*.kt")
             ktfmt(libs.version("ktfmt")).kotlinlangStyle().configure { it.setMaxWidth(maxLineWidth) }
-            ktlint(ktlintVersion).setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
-            licenseHeaderFile(rootProject.file("config/spotless/copyright.kt"))
+            ktlint(ktlintVersion).setEditorConfigPath(spotlessConfigDir.file(".editorconfig").asFile.path)
+            licenseHeaderFile(spotlessConfigDir.file("copyright.kt").asFile)
         }
         kotlinGradle {
             target("**/*.gradle.kts")
             targetExclude("**/build/**", "**/dependencies/**")
             ktfmt(libs.version("ktfmt")).kotlinlangStyle().configure { it.setMaxWidth(maxLineWidth) }
-            ktlint(ktlintVersion).setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
-            licenseHeaderFile(rootProject.file("config/spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
+            ktlint(ktlintVersion).setEditorConfigPath(spotlessConfigDir.file(".editorconfig").asFile.path)
+            licenseHeaderFile(spotlessConfigDir.file("copyright.kts").asFile, "(^(?![\\/ ]\\*).*$)")
         }
     }
 }

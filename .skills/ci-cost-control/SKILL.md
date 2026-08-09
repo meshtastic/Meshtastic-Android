@@ -15,7 +15,7 @@ gh run list --branch $(git branch --show-current) --limit 5
 
 ### 2. Local First
 NEVER use CI as a "remote compiler." 
-- You must run `./gradlew spotlessApply spotlessCheck detekt test allTests` locally before pushing.
+- You must run `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` locally before pushing.
 - If local tests fail, CI **will** fail. Do not waste the tokens or the compute.
 
 ### 3. Modular CI Invocations

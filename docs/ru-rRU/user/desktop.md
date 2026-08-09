@@ -2,8 +2,8 @@
 title: Настольное приложение
 parent: Руководство пользователя
 nav_order: 14
-last_updated: 2026-06-11
-description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
+last_updated: 2026-07-07
+description: Установка и использование приложения Meshtastic Desktop на Linux, macOS и Windows — подключения, функционал и сочетания клавиш.
 aliases:
   - desktop
   - linux
@@ -14,135 +14,137 @@ aliases:
 
 # Настольное приложение
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+Настольное приложение Meshtastic использует общий код с Android через Kotlin Multiplatform. Большинство функций работают одинаково на Linux, macOS и Windows.
 
 ## Установка
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
-- Or build from source using `./gradlew :desktopApp:run`
+- Скачайте пакет `.deb` или `.AppImage` со страницы релизов
+- Или соберите из исходного кода с помощью `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
-- Or build from source
+- Скачайте пакет `.dmg` из релизов
+- Или соберите из исходных кодов
 
 ### Windows
 
-- Download the `.msi` installer from releases
-- Or build from source
+- Загрузите установщик `.msi` со страницы релизов
+- Или соберите из исходных кодов
 
-## Connecting Your Radio
+## Подключение твоей радиостанции
 
-### USB Serial (Primary)
+### Последовательная USB (Основной)
 
-The most reliable connection method on Desktop:
+Наиболее надежный способ подключения к компьютеру:
 
-1. Connect your Meshtastic radio via USB cable.
-2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the Connect menu.
+1. Подключите свою радиостанцию Meshtastic через USB-кабель.
+2. Приложение должно автоматически определить последовательный порт.
+3. Если порт не определён, выберите правильный последовательный порт в меню "Подключение".
 
 ### TCP/IP
 
-For network-connected radios:
+Для радиостанций, подключённых по сети:
 
-1. Enter the radio's IP address and port (default: 4403).
-2. Click **Connect**.
+1. Введите IP-адрес и порт радиостанции (по умолчанию: 4403).
+2. Нажмите "**Подключиться**".
 
 ### Bluetooth (BLE)
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Bluetooth Low Energy поддерживается в настольном приложении с помощью библиотеки [Kable](https://github.com/JuulLabs/kable):
 
-1. Ensure your system has a Bluetooth adapter.
-2. The app scans for nearby Meshtastic radios automatically.
-3. Select your device from the Connect screen.
+1. Убедитесь, что ваша система оснащена Bluetooth-адаптером.
+2. Приложение автоматически сканирует находящиеся поблизости радиостанции Meshtastic.
+3. Выберите своё устройство на экране «Подключение».
 
-## Feature Parity
+## Паритет функций
 
-| Feature                                      | Android | Desktop | Заметки                                        |
-| -------------------------------------------- | ------- | ------- | ---------------------------------------------- |
-| Обмен сообщениями                            | ✓       | ✓       | Полное равенство                               |
-| Список узлов                                 | ✓       | ✓       | Полное равенство                               |
-| Карта                                        | ✓       | ✓       | Полное равенство                               |
-| Настройки                                    | ✓       | ✓       | Полное равенство                               |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                           |
-| Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
-| Notifications                                | ✓       | ✓       | Native OS notifications                        |
-| Виджеты                                      | ✓       | ✗       | Android-only                                   |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
+| Функция                                              | Android | Desktop | Заметки                                                                                                        |
+| ---------------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| Обмен сообщениями                                    | ✓       | ✓       | Полное равенство                                                                                               |
+| Список узлов                                         | ✓       | ✓       | Полное равенство                                                                                               |
+| Карта                                                | ✓       | ◐       | Вкладка карты присутствует в настольном приложении, но интерактивный просмотр карты доступен только на Android |
+| Настройки                                            | ✓       | ✓       | Полное равенство                                                                                               |
+| Bluetooth (BLE)                   | ✓       | ✓       | Через Kable в настольном приложении                                                                            |
+| Обновление прошивки                                  | ✓       | ✓       | Внутри приложенное обновление по USB, BLE и Wi-Fi (ESP32) работает так же, как на Android   |
+| Уведомления                                          | ✓       | ✓       | Системные уведомления                                                                                          |
+| Виджеты                                              | ✓       | ✗       | Только Android                                                                                                 |
+| Android Auto                                         | ✓       | ✗       | Только Android — недоступно в настольном приложении или iOS                                                    |
+| AI-ассистент (Chirpy)             | ✓\*     | ✗       | Только в Google-версии для Android                                                                             |
+| Функции приложения (системный ИИ) | ✓†      | ✗       | Только в Google-версии для Android                                                                             |
 
-\*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
+\*Chirpy AI требует Android 14+ в Google-версии на поддерживаемом оборудовании.
 
-†App Functions exposes app actions to the Android system AI on Google flavor builds. See [App Functions](app-functions).
+†Функции приложения предоставляют действия приложения системному ИИ Android в Google-версии. См. [Функции приложения](app-functions).
 
-## UI Differences
+## Различия интерфейса
 
-The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
+Настольное приложение использует тот же интерфейс на Compose Multiplatform с адаптациями для больших экранов и настольного взаимодействия.
 
-### Keyboard Shortcuts
+### Сочетания клавиш
 
-| Shortcut            | Action                 |
-| ------------------- | ---------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | Open Settings          |
-| **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
-| **⌘3** / **Ctrl+3** | Switch to Map tab      |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
+Сочетания клавиш используют ⌘ (Command) на macOS и Ctrl на Windows и Linux. (Клавиша Super / Windows не используется.)
 
-### Window & System Tray
+| Сочетание    | Действие                         |
+| ------------ | -------------------------------- |
+| **⌘/Ctrl+Q** | Выйти из приложения              |
+| **⌘/Ctrl+,** | Открыть настройки                |
+| **⌘/Ctrl+1** | Перейти во вкладку "Сообщения"   |
+| **⌘/Ctrl+2** | Перейти во вкладку "Узлы"        |
+| **⌘/Ctrl+3** | Перейти во вкладку "Карта"       |
+| **⌘/Ctrl+4** | Перейти во вкладку "Подключение" |
+| **⌘/Ctrl+/** | Открыть "О программе"            |
 
-- **Window resizing** — responsive layout adapts to window dimensions
-- **System tray** — minimize to system tray for background mesh operation
-- **Tray menu** — right-click the tray icon to show window or quit
-- **Mouse interaction** — hover states and standard desktop navigation
+### Окно и системный трей
 
-### Notification Preferences
+- **Изменение размера окна** — адаптивный макет подстраивается под размеры окна
+- **Системный трей** — сверните в системный трей для фоновой работы mesh-сети
+- **Меню трея** — щёлкните правой кнопкой мыши по значку в трее, чтобы показать окно или выйти
+- **Взаимодействие с мышью** — состояния при наведении и стандартная настольная навигация
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+### Настройки уведомлений
 
-## Built-in Documentation Browser
+Настольное приложение предоставляет встроенные переключатели для управления отображением уведомлений: сообщения, новые узлы и предупреждения о низком заряде батареи. Доступ к ним осуществляется через **Настройки → Уведомления** в самом приложении.
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+## Встроенный браузер документации
 
-![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
+Настольное приложение включает встроенный браузер документации для быстрого доступа к справочным материалам без выхода из приложения.
 
-The browser supports full-text search across all documentation:
+![Браузер документации с оглавлением](../../assets/screenshots/docs-browser_toc.png)
 
-![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
+Браузер поддерживает полнотекстовый поиск по всей документации:
 
-Individual doc pages render with full formatting:
+![Поиск в браузере документации](../../assets/screenshots/docs-browser_search.png)
 
-![A documentation page](../../assets/screenshots/docs-browser_page.png)
+Отдельные страницы документации отображаются с полным форматированием:
 
-## Building from Source
+![Страница документации](../../assets/screenshots/docs-browser_page.png)
+
+## Сборка из исходного кода
 
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
-Requirements:
+Требования:
 
 - JDK 21
-- No Android SDK required for desktop-only builds
+- Для сборки только настольной версии Android SDK не требуется
 
-## Known Limitations
+## Известные ограничения
 
-- No OTA firmware updates (use web flasher)
-- Some Android-specific features (widgets, specific notification channels) are unavailable
-- Performance may vary on low-spec hardware running Compose Desktop
-- BLE bonding is not yet supported on desktop (pairing works without bonding)
+- Интерактивный просмотр карты доступен только на Android — вкладка «Карта» присутствует в настольном приложении, но не отображает карту
+- Некоторые специфичные для Android функции (виджеты, отдельные каналы уведомлений) недоступны
+- Производительность может варьироваться на маломощном оборудовании при запуске Compose Desktop
+- BLE-связывание пока не поддерживается в настольном приложении (сопряжение работает без связывания)
 
-## Related Topics
+## Связанные темы
 
-- [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+- [Подключения](connections) — обзор методов подключения
+- [Обновление прошивки](firmware) — обновление по USB, BLE и Wi-Fi работает так же, как на Android
 
 ---
 

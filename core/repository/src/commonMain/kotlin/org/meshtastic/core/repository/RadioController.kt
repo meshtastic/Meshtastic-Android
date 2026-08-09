@@ -74,4 +74,10 @@ interface RadioController :
      * @param address The new device identifier.
      */
     suspend fun setDeviceAddress(address: String)
+
+    /**
+     * Requests that the next BLE connection invalidates Android's GATT service cache. Call before [setDeviceAddress]
+     * when reconnecting after a firmware update.
+     */
+    fun requestGattCacheInvalidationOnNextConnect()
 }

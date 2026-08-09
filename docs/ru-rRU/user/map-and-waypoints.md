@@ -1,110 +1,134 @@
 ---
-title: Map & Waypoints
+title: Карта и путевые точки
 parent: Руководство пользователя
 nav_order: 6
-last_updated: 2026-06-25
-description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
+last_updated: 2026-07-08
+description: Просматривайте расположение нод на карте, создавайте и делитесь путевыми точками, управляйте слоями карты и планировщиком участков, а также контролируйте передачу геоданных и приватность.
 aliases:
   - map
   - waypoints
   - gps
   - location
+  - site-planner
+  - map-layers
+  - geojson
+  - kml
 ---
 
-# Map & Waypoints
+# Карта и путевые точки
 
-The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.
+Экран карты показывает географическое положение нод твоей mesh-сети, а также общие путевые точки.
 
-## Map View
+## Вид карты
 
-The map displays:
+На карте отображаются:
 
-- **Node positions** — colored markers for each node reporting location
-- **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **Расположение нод** — цветные маркеры для каждой ноды, передающей свои координаты
+- **Путевые точки** — общие точки интереса
+- **Твоё местоположение** — твоё текущее местоположение по GPS
 
-### Node Markers
+### Маркеры нод
 
-Each node that reports a position is shown as a **node chip** marker displaying the node's short name. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. When a node's position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.
+Каждая нода, передающая своё местоположение, отображается в виде **маркера-бирки** с коротким именем ноды. Цвет бирки определяется собственным цветом идентификации ноды (постоянным цветом, получаемым из её номера) — тем же самым, что используется в списке нод, поэтому нода везде выглядит одинаково. Цвет маркера **не** отображает статус в сети/не в сети. Когда местоположение ноды обновляется в реальном времени, её маркер ненадолго подсвечивается пульсацией. Близко расположенные маркеры группируются в кластеры при уменьшении масштаба.
 
-### Map Controls
+### Управление картой
 
-- **Zoom** — pinch or use +/- buttons
-- **Pan** — drag to explore
-- **Center** — select the location button to center on your position
-- **Node tap** — tap a node marker to view details
+- **Масштаб** — используйте щипок или кнопки +/-
+- **Перемещение** — перетаскивайте карту для исследования
+- **Центрирование** — нажмите кнопку местоположения, чтобы отцентрировать карту на твоё местоположение
+- **Нажатие на ноду** — коснитесь маркера ноды для просмотра подробностей
 
-The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
+Плавающая панель инструментов предоставляет быстрый доступ к компасу, переключению слоёв, фильтрам нод, обновлению и отслеживанию местоположения. Нажмите на компас, чтобы сориентировать карту на север, или нажмите кнопку местоположения, чтобы отцентрироваться на твоей текущей позиции.
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![Элементы управления картой](../../assets/screenshots/map_controls_overlay.png)
 
-## Waypoints
+## Путевые точки
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+Путевые точки — это общие географические точки интереса, которые видят все участники mesh-сети.
 
-### Creating a Waypoint
+### Создание путевой точки
 
-1. Long-press on the map at the desired location.
-2. Enter a name and optional description.
-3. Choose an icon/emoji for the waypoint.
-4. Tap **Send** to share with the mesh.
+1. Нажмите и удерживайте карту в нужном месте.
+2. Введите имя и, при желании, описанье.
+3. Выберите значок/эмодзи для путевой точки.
+4. Нажмите **"Отправить"**, чтобы поделиться с mesh-сетью.
 
-### Waypoint Properties
+Путевые точки адресуются так же, как сообщения: по умолчанию они передаются в основном канале, но путевую точку также можно отправить на конкретном канале или как личное сообщение одной ноде.
 
-| Property      | Описание                                                |
-| ------------- | ------------------------------------------------------- |
-| Имя           | Short identifier (max 30 characters) |
-| Описание      | Optional longer description                             |
-| Icon          | Visual marker emoji on the map                          |
-| Заблокировано | If locked, only the creator can edit or delete          |
-| Expiration    | Optional auto-remove time                               |
+### Свойства путевой точки
 
-### Waypoint Expiration
+| Свойство        | Описание                                                                 |
+| --------------- | ------------------------------------------------------------------------ |
+| Имя             | Короткий идентификатор (не более 29 символов)         |
+| Описание        | Необязательное более длинное описание                                    |
+| Значок          | Визуальный эмодзи маркер на карте                                        |
+| Заблокировано   | Если заблокировано, только создатель может изменить или удалить          |
+| Истечение срока | Необязательная дата и время автоматического удаления                     |
+| Геозона         | Необязательная зона оповещения о входе/выходе — см. ниже |
 
-Waypoints can be set to expire automatically:
+### Истечение срока путевой точки
 
-- **Never** (default) — waypoint remains until manually deleted
-- **Timed** — waypoint is automatically removed after the specified duration (e.g., "remove after 2 hours"). Useful for temporary markers like rally points, hazards, or meeting locations.
+Для путевых точек можно настроить автоматическое истечение срока:
 
-Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown begins when the waypoint is created, not when other nodes receive it.
+- **Никогда** (по умолчанию) — путевая точка остаётся, пока не будет удалена вручную
+- **По времени** — выберите конкретные дату и время; путевая точка будет автоматически удалена, как только это время наступит. Полезно для временных меток, таких как точки сбора, опасности или места встреч.
 
-### Managing Waypoints
+Истёкшие путевые точки автоматически скрываются с карты, чтобы не загромождать отображение. Обратный отсчёт до истечения срока основан на заданном тобою абсолютном времени, а не на промежутке с момента создания или получения путевой точки.
 
-- Tap a waypoint on the map to view its details and coordinates
-- Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
-- Unlocked waypoints can be edited by any mesh member
+### Геозоны путевых точек
 
-## Position Sharing
+Любая путевая точка может также задавать **геозону** — область оповещения, — чтобы ты или другие участники получали уведомления, когда нода входит в неё или покидает её:
 
-### Enabling Position Sharing
+1. Задайте **радиус геозоны** с помощью готовых вариантов (или **"Выкл"**, чтобы отключить), либо нажмите **"Задать область на карте"**, чтобы нарисовать собственную прямоугольную область.
+2. После задания области включите переключатели **"Оповещать при входе"** и/или **"Оповещать при выходе"**.
+3. При необходимости включите **"Только избранные"**, чтобы ограничить оповещения только избранными нодами.
 
-Your node shares its GPS position based on:
+Поскольку путевые точки (и их геозоны) передаются всей mesh-сети, по умолчанию оповещается только **создатель**. Если кто-то другой поделился с вами путевой точкой с геозоной, в её подробностях отображается опция **"Оповещать меня о пересечениях"**, позволяющая тебе также получать оповещения о входе/выходе.
 
-- **Fixed interval** — broadcast position at regular intervals
-- **Smart position** — broadcast when movement exceeds a threshold
-- **Manual** — only share when explicitly requested
+### Управление путевыми точками
 
-Configure position behavior in **Settings → Position**.
+- Нажмите на путевую точку на карте, чтобы просмотреть её сведения и координаты
+- Редактируйте или удаляйте созданные тобою путевые точки
+- **Заблокированные путевые точки** не могут быть изменены или удалены другими нодами — только создатель может их редактировать
+- Незаблокированные путевые точки может редактировать любой участник mesh-сети
 
-### Privacy Considerations
+## Слои карты
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+Нажмите на значок слоёв на карте, чтобы открыть **"Управление слоями карты"**, где можно импортировать собственные слои в формате `.kml`, `.kmz` или GeoJSON — либо открыв файл с помощью Meshtastic, либо передав его в приложение из другой программы. Импортированные слои отображаются в списке с переключателем для показа/скрытия каждого и возможностью удалить слой. Доступно как в Google Play, так и в F-Droid сборках.
 
-## Map Sources
+### Планировщик участков
 
-The app supports multiple map tile sources:
+**Планировщик участков** оценивает радиочастотное покрытие для передатчика и отображает его на карте в виде цветового наложения. Откройте его с панели управления картой или со страницы сведений о ноде через **"Оценку покрытия"** (отображается только для нод с известным местоположением). Настройте передатчик (местоположение, частота, мощность передачи, усиление и высота антенны), приёмник (чувствительность, высота) и параметры симуляции (максимальная дальность, рельеф высокого разрешения, цветовая палитра), затем запустите расчёт. Как и слои карты, планировщик участков работает как в Google Play, так и в F-Droid сборках.
 
-- OpenStreetMap (default)
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+## Передача геоданных
 
-## Related Topics
+### Включение передачи геоданных
 
-- [Nodes](nodes) — view and filter your node list
-- [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
-- [Units & Locale](units-and-locale) — distance and coordinate display formats
+Твоя нода передаёт свои GPS-координаты на основе:
+
+- **Фиксированный интервал** — передача координат через равные промежутки времени
+- **Адаптивная передача** — передача при превышении порога движения
+- **Вручную** — делиться только по явному запросу
+
+Настройте поведение передачи геоданных в **Настройки → Геоданные**.
+
+### Вопросы приватности
+
+> 🔒 **Приватность:** Данные о местоположении передаются всем нодам на твоём канале. Если ты не хочешь раскрывать своё местоположение, отключите GPS в настройках или используйте фиксированное/фиктивное местоположение.
+
+## Источники карт
+
+Основная карта зависит от варианта сборки: сборки для **Google Play** используют Google Maps, а сборки **F-Droid** и настольные — OpenStreetMap. Поверх основной карты доступны дополнительные источники плиток в качестве наложений или альтернатив:
+
+- Спутниковый снимки (где доступно)
+- Офлайн-плитки (загружайте области карт для использования офлайн)
+
+## Связанные темы
+
+- [Ноды](nodes) — просмотр и фильтрация списка нод
+- [Метрики нод](node-metrics) — качество сигнала и история местоположения для отдельных нод
+- [Обнаружение](discovery) — трассировка и информация о соседях для понимания топологии mesh-сети
+- [Единицы измерения и регион](units-and-locale) — форматы отображения расстояний и координат
 
 ---
 

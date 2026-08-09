@@ -228,8 +228,9 @@ class AiFunctionProviderImpl(
                     voltage = node.deviceMetrics.voltage,
                     hardwareModel = node.metadata?.hw_model?.name ?: "Unknown",
                     firmwareVersion = node.metadata?.firmware_version ?: "Unknown",
-                    snr = node.snr,
-                    rssi = node.rssi,
+                    // Never surface the unset sentinels to a model — Float.MAX_VALUE reads as a superb signal.
+                    snr = node.snrOrNull,
+                    rssi = node.rssiOrNull,
                     hopsAway = node.hopsAway,
                     channel = node.channel,
                     lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
@@ -270,7 +271,7 @@ class AiFunctionProviderImpl(
                 when {
                     totalCount == 0 -> 0
                     onlineCount == 0 -> HEALTH_SCORE_DEGRADED
-                    else -> (HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount).toInt()
+                    else -> HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount
                 }
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)

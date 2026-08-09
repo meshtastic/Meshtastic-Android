@@ -17,6 +17,9 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    // Shares the bounded zip extraction (ZipExtraction.kt) between the Android and desktop JVM file handlers, which
+    // previously carried two independent copies of the same logic.
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
@@ -50,6 +53,8 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
+        // the skiko-awt runtime to read the system theme.
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

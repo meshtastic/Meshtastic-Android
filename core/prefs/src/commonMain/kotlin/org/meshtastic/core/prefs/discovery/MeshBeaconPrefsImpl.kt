@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.discovery
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
@@ -30,16 +28,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.MeshBeaconPrefs
 
 @Single
-class MeshBeaconPrefsImpl(
-    @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MeshBeaconPrefs {
+class MeshBeaconPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : MeshBeaconPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val storedBeacons: StateFlow<List<String>> =

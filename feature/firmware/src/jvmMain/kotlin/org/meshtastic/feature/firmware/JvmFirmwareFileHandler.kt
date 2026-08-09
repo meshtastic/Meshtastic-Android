@@ -168,21 +168,32 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         dest.toFirmwareArtifact()
     }
 
-    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
-        withContext(ioDispatcher) {
-            val entries = mutableMapOf<String, ByteArray>()
-            val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
-            ZipInputStream(file.inputStream()).use { zip ->
-                var entry = zip.nextEntry
-                while (entry != null) {
-                    if (!entry.isDirectory) {
-                        entries[entry.name] = zip.readBytes()
-                    }
-                    zip.closeEntry()
-                    entry = zip.nextEntry
+    override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
+        val localFile = uri.toLocalFileOrNull()
+        localFile?.name?.takeIf { it.isNotBlank() }
+            ?: run {
+                val scheme = runCatching { URI(uri.toString()).scheme }.getOrNull()
+                if (scheme == "file") {
+                    uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() }
+                } else {
+                    null
                 }
             }
-            entries
+    }
+
+    /**
+     * Fully expands [artifact] into memory, keyed by entry name.
+     *
+     * Shares [extractZipEntriesBounded] with the Android handler so the two cannot drift — they previously carried
+     * independent copies of this loop, and only one of them got bounded.
+     */
+    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+        withContext(ioDispatcher) {
+            val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
+            require(file.length() <= MAX_FIRMWARE_ZIP_BYTES) {
+                "Firmware archive is ${file.length()} bytes, over the $MAX_FIRMWARE_ZIP_BYTES limit"
+            }
+            file.inputStream().use { extractZipEntriesBounded(it) }
         }
 
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
@@ -201,7 +212,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return null
 
         val targetLowerCase = target.lowercase()

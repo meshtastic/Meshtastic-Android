@@ -19,9 +19,11 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,12 +33,15 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -52,6 +57,7 @@ class StoreForwardPacketHandlerImplTest {
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
+    private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -70,7 +76,8 @@ class StoreForwardPacketHandlerImplTest {
                 packetRepository = lazy { packetRepository },
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
-                scope = testScope,
+                radioInterfaceService = radioInterfaceService,
+                scope = testScope.asServiceScope(),
             )
     }
 
@@ -220,6 +227,28 @@ class StoreForwardPacketHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `SFPP update from a retired same-address generation is rejected`() = testScope.runTest {
+        val oldSession = RadioSessionContext(generation = 4L, address = "ble:same")
+        val sfpp =
+            StoreForwardPlusPlus(
+                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
+                encapsulated_id = 42,
+                encapsulated_from = 1000,
+                encapsulated_to = 2000,
+                message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04),
+            )
+        val packet = makeSfppPacket(999, sfpp)
+        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+
+        handler.handleStoreForwardPlusPlus(packet, oldSession)
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(0)) {
+            packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any())
+        }
     }
 
     // ---------- SF++: CANON_ANNOUNCE ----------

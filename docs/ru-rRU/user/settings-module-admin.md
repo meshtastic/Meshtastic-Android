@@ -2,7 +2,7 @@
 title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -18,13 +18,13 @@ aliases:
 
 Настройки модулей используют макет на основе карточек с переключателями, выпадающими списками, текстовыми полями и ползунками:
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![Переключатель](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![Выпадающий список](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![Текстовое поле](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![Настройки расположения карточек](../../assets/screenshots/settings_titled_card.png)
 
 ## Конфигурация модуля
 
@@ -32,73 +32,74 @@ aliases:
 
 Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
 
-| Настройка        | Описание                                                                 |
-| ---------------- | ------------------------------------------------------------------------ |
-| Включено         | Toggle MQTT bridge                                                       |
-| Сервер           | MQTT broker address                                                      |
-| Имя пользователя | Имя пользователя для аутентификации                                      |
-| Пароль           | Пароль аутентификации                                                    |
-| Шифрование       | Encrypt MQTT payloads                                                    |
-| ~~JSON Output~~  | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
-| TLS              | Use secure connection                                                    |
-| Корневая тема    | Base MQTT topic path                                                     |
-| Отчет карты      | Publish position for public map                                          |
+| Настройка        | Описание                                                                |
+| ---------------- | ----------------------------------------------------------------------- |
+| Включено         | Переключить MQTT мост                                                   |
+| Сервер           | Адрес MQTT брокера                                                      |
+| Имя пользователя | Имя пользователя для аутентификации                                     |
+| Пароль           | Пароль аутентификации                                                   |
+| Шифрование       | Зашифровать MQTT-пейлоады                                               |
+| ~~Вывод JSON~~   | ⚠️ **Устарело** — поддержка JSON удалена из прошивки; поле игнорируется |
+| TLS              | Использовать защищённое соединение                                      |
+| Корневая тема    | Базовый путь темы MQTT                                                  |
+| Отчет карты      | Опубликовать позицию на публичной карте                                 |
 
-See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
+См. [MQTT](mqtt) для подробного руководства по использованию, включая шифрование, конфиденциальность и настройку брокера.
 
-### Serial Module
+### Последовательный модуль
 
-Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
+Позволяет общаться через последовательный порт с внешними устройствами (GPS-модулями, датчиками или собственной техникой). Когда включено, последовательный порт ноды может отправлять и получать данные в формате protobuf или текст, что позволяет внешним микроконтроллерам или компьютерам взаимодействовать с сетью.
 
-| Настройка                                  | Описание                        |
-| ------------------------------------------ | ------------------------------- |
-| Включено                                   | Activate serial communication   |
-| Эхо                                        | Echo received serial data back  |
-| Режим обмена                               | Text, Protobuf, or NMEA output  |
-| RX/TX Pins                                 | GPIO pins for serial connection |
-| Скорость передачи (бод) | Serial communication speed      |
+| Настройка                                  | Описание                                     |
+| ------------------------------------------ | -------------------------------------------- |
+| Включено                                   | Включить последовательное соединение         |
+| Эхо                                        | Echo получил обратно последовательные данные |
+| Режим обмена                               | Вывод в формате текста, Protobuf или NMEA    |
+| Пины RX/TX                                 | GPIO-пины для последовательного соединения   |
+| Скорость передачи (бод) | Скорость последовательного соединения        |
 
-### External Notification Module
+### Модуль внешних уведомлений
 
-Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+Управляет зуммером, светодиодом или вибрацией на вашем радиооборудовании. Полезно для устройств, которым нужно физически сигнализировать о приходе сообщения — особенно удобно для неоснащенных персоналом или уличных установок.
 
-| Настройка                                 | Описание                    |
-| ----------------------------------------- | --------------------------- |
-| Включено                                  | Activate notifications      |
-| Включить уведомление о входящем сообщении | Notify on incoming messages |
-| Зуммер при уведомлении                    | Use buzzer for messages     |
-| Alert Message Vibra                       | Use vibration for messages  |
-| Уведомлять при 🔔                         | Notify on bell character    |
-| Output (GPIO)          | Pin for notification output |
-| Активный выход                            | High or Low active          |
-| Duration (ms)          | Notification length         |
-| Use I2S as Buzzer                         | Use I2S audio output        |
+| Настройка                                 | Описание                            |
+| ----------------------------------------- | ----------------------------------- |
+| Включено                                  | Включить уведомления                |
+| Включить уведомление о входящем сообщении | Уведомлять о входящих сообщениях    |
+| Зуммер при уведомлении                    | Использовать буззер для сообщений   |
+| Alert Message Vibra                       | Использовать вибрацию для сообщений |
+| Уведомлять при 🔔                         | Notify on bell character            |
+| Вывод (GPIO)           | Пин для вывода уведомления          |
+| Активный выход                            | High or Low active                  |
+| Длительность (мс)      | Длительность уведомления            |
+| Использовать I2S как буззер               | Использовать аудиовывод I2S         |
 
-### Store & Forward Module
+### Модуль Store & Forward
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Настройка                                  | Описание                   |
-| ------------------------------------------ | -------------------------- |
-| Включено                                   | Activate store and forward |
-| Heartbeat (s)           | Announcement interval      |
-| Записи                                     | Maximum stored messages    |
-| History Return (max)    | Max messages to replay     |
-| History Return (window) | Time window for replay     |
+| Настройка                                  | Описание                                                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Включено                                   | Activate store and forward                                                                                                                       |
+| Heartbeat                                  | Periodically announce this node's store-and-forward capability                                                                                   |
+| Записи                                     | Maximum stored messages                                                                                                                          |
+| History Return (max)    | Max messages to replay                                                                                                                           |
+| History Return (window) | Time window for replay                                                                                                                           |
+| Сервер                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
-### Range Test Module
+### Модуль проверки дальности
 
-Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
-| Настройка                              | Описание                          |
-| -------------------------------------- | --------------------------------- |
-| Включено                               | Activate range testing            |
-| Sender Interval (s) | Time between test transmissions   |
-| Save CSV                               | Log received test data to SD card |
+| Настройка                                | Описание                          |
+| ---------------------------------------- | --------------------------------- |
+| Включено                                 | Активировать проверку дальности   |
+| Интервал отправки (с) | Время между передачами проверок   |
+| Сохранить в CSV                          | Log received test data to SD card |
 
-### Telemetry Module
+### Модуль телеметрии
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
@@ -111,19 +112,19 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
-### Canned Message Module
+### Модуль шаблонных сообщений
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Настройка          | Описание                                                    |
-| ------------------ | ----------------------------------------------------------- |
-| ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
-| Сообщения          | Newline-separated list of messages                          |
-| Отправлять 🔔      | Play bell sound on send                                     |
-| Rotary Encoder     | Enable rotary encoder input                                 |
-| Up/Down/Press Pins | GPIO pin assignments for input                              |
+| Настройка          | Описание                                                                 |
+| ------------------ | ------------------------------------------------------------------------ |
+| ~~Включено~~       | ⚠️ **Устарело** — текущая прошивка может игнорировать этот переключатель |
+| Сообщения          | Список сообщений, разделённых новой строкой                              |
+| Отправлять 🔔      | Play bell sound on send                                                  |
+| Rotary Encoder     | Enable rotary encoder input                                              |
+| Up/Down/Press Pins | GPIO pin assignments for input                                           |
 
-### Audio Module
+### Звуковой модуль
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
@@ -141,47 +142,50 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
-| Настройка            | Описание                                                        |
-| -------------------- | --------------------------------------------------------------- |
-| Включено             | Activate remote GPIO access                                     |
-| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+| Настройка                     | Описание                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| Включено                      | Activate remote GPIO access                                                    |
+| Разрешить неопределенные пины | Разрешить доступ к любому GPIO-пину (риск для безопасности) |
+| Доступные пины                | Up to 4 GPIO pins this node exposes for remote read/write                      |
 
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Включать только на выделенных GPIO-нодах.
 
-### Neighbor Info Module
+### Модуль информации о соседях
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Настройка                              | Описание                             |
-| -------------------------------------- | ------------------------------------ |
-| Включено                               | Activate neighbor broadcasting       |
-| Update Interval (s) | How often to broadcast neighbor list |
+| Настройка                                  | Описание                                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Включено                                   | Activate neighbor broadcasting                                                                                                       |
+| Интервал обновления (с) | How often to broadcast neighbor list                                                                                                 |
+| Передача через LoRa                        | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Ambient Lighting Module
+### Модуль окружающего освещения
 
 Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
 
 | Настройка            | Описание                                                   |
 | -------------------- | ---------------------------------------------------------- |
-| Включено             | Activate LED control                                       |
-| Состояние светодиода | On, Off, or set specific color                             |
+| Состояние светодиода | Turn the LED on or off                                     |
+| Ток                  | LED current limit (0–31)                |
 | Red / Green / Blue   | Individual color channel values (0–255) |
 
 ### Detection Sensor Module
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Настройка                                | Описание                                                                |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| Включено                                 | Activate detection sensor                                               |
-| Пин датчика                              | GPIO pin connected to sensor                                            |
-| Detection Triggered High                 | Trigger when pin goes high (vs. low) |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                       |
-| Отправлять 🔔                            | Include bell character in alerts                                        |
-| Имя датчика                              | Custom name for this sensor                                             |
+| Настройка                                | Описание                                                                                                                                |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                                 | Activate detection sensor                                                                                                               |
+| Пин датчика                              | GPIO pin connected to sensor                                                                                                            |
+| Detection Trigger Type                   | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Use Input Pullup Mode                    | Enable the pin's internal pull-up resistor                                                                                              |
+| Minimum Broadcast (s) | Minimum time between alert broadcasts                                                                                                   |
+| State Broadcast (s)   | Periodic state broadcast interval                                                                                                       |
+| Отправлять 🔔                            | Include bell character in alerts                                                                                                        |
+| Имя датчика                              | Custom name for this sensor                                                                                                             |
 
 ### Paxcounter Module
 
@@ -202,12 +206,12 @@ Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [T
 
 ### Удаленное администрирование
 
-Remotely configure nodes that share your admin key:
+Удалённо настраивай ноды, которые используют твой ключ администрирования:
 
-1. Select the target node in the node list.
-2. Navigate to **Settings** for that node.
-3. Modify configuration.
-4. Tap **Save** — changes are sent over the mesh.
+1. Выбери целевую ноду в списке нод.
+2. Перейди в **Настройки** этой ноды.
+3. Измени конфигурацию.
+4. Нажми **Сохранить** — изменения отправляются через сеть.
 
 > ⚠️ **Requires:** Admin key configured on both your node and the target node.
 
@@ -215,9 +219,9 @@ Remotely configure nodes that share your admin key:
 
 Removes stale nodes from your local database that haven't been heard in a configurable time window.
 
-### Factory Reset
+### Сброс к заводским настройкам
 
-Resets all settings to factory defaults. **This cannot be undone.**
+Сбрасывает все настройки к заводским. **Это действие нельзя отменить.**
 
 ### Перезагрузка
 
@@ -225,23 +229,19 @@ Remotely reboot a connected or administered node.
 
 ### Панель отладки
 
-View detailed diagnostic information:
-
-- Protocol buffers debug output
-- Mesh packet log
-- Connection state details
+Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
 ### Troubleshooting Remote Admin
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
-- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Can't see remote settings** — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.
+- **Изменения не применены** — чтобы некоторые настройки вступили в силу, нужно перезагрузить устройство. Попробуй перезагрузить после сохранения.
+- **Не видны настройки удалённой ноды** — убедись, что твоя нода имеет админ-ключ для целевой ноды. Админ-канал настраивается автоматически, когда задан ключ администратора.
 
-## Related Topics
+## Связанные темы
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

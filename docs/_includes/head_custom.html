@@ -153,6 +153,35 @@
   .language-switcher-list a:hover {
     background-color: rgba(103, 234, 148, 0.15);
   }
+
+  /* Version switcher (shares the language-switcher dropdown styling) */
+  .version-switcher {
+    margin-left: 8px;
+  }
+
+  .version-switcher[hidden] {
+    display: none;
+  }
+
+  /* Link out to the upstream meshtastic.org docs */
+  .upstream-docs-link {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s ease;
+  }
+
+  .upstream-docs-link:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
 </style>
 
 <script>

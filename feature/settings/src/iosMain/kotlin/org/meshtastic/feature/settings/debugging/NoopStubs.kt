@@ -20,5 +20,4 @@ import androidx.compose.runtime.Composable
 
 @Composable actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit = { _ -> }
 
-// ponytail: no logcat on iOS; the App Logs tab shows an empty-state there.
 actual fun captureAppLogcat(): String = ""

@@ -19,10 +19,36 @@ package org.meshtastic.core.network.service
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
+import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
+
+/**
+ * Pointer to the nightly preview build published by CI to meshtastic.github.io. Served from GitHub Pages raw content
+ * (not api.meshtastic.org) as `text/plain`, so it is parsed manually rather than via content negotiation.
+ */
+private const val NIGHTLY_INDEX_URL =
+    "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-nightly/index.json"
+
+private val firmwareJson = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+}
+
+/**
+ * Decodes a GitHub release manifest independently of Ktor content negotiation. GitHub release assets commonly use
+ * `application/octet-stream` even when their payload is JSON.
+ */
+internal fun decodeFirmwareReleaseManifest(body: String): FirmwareReleaseManifest = firmwareJson.decodeFromString(body)
 
 /** Client for the Meshtastic public API (device hardware catalog and firmware releases). */
 interface ApiService {
@@ -34,6 +60,18 @@ interface ApiService {
 
     /** Fetches the list of available firmware releases from the Meshtastic API. */
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
+
+    /** Fetches the target manifest referenced by a firmware release's `zip_url`. */
+    suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest
+
+    /**
+     * Fetches the nightly preview build pointer from meshtastic.github.io. Returns null when no nightly is currently
+     * published (HTTP 404); throws on transport or server errors so callers can distinguish "gone" from "unreachable".
+     */
+    suspend fun getNightlyFirmware(): NetworkFirmwareNightly?
+
+    /** Fetches event-firmware display metadata (editions, welcome messages, links) from the Meshtastic API. */
+    suspend fun getEventFirmware(): EventFirmwareResponse
 }
 
 /**
@@ -51,4 +89,18 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = client.get("resource/deviceLinks").body()
 
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
+
+    override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
+        decodeFirmwareReleaseManifest(client.get(manifestUrl).bodyAsText())
+
+    override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
+        val response = client.get(NIGHTLY_INDEX_URL)
+        return when {
+            response.status == HttpStatusCode.NotFound -> null
+            response.status.isSuccess() -> firmwareJson.decodeFromString<NetworkFirmwareNightly>(response.bodyAsText())
+            else -> error("Unexpected HTTP ${response.status} fetching nightly firmware index")
+        }
+    }
+
+    override suspend fun getEventFirmware(): EventFirmwareResponse = client.get("resource/eventFirmware").body()
 }

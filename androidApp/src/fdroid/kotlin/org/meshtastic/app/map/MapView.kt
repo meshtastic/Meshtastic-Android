@@ -16,6 +16,10 @@
  */
 package org.meshtastic.app.map
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,12 +49,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -72,31 +78,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.R
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.app.map.component.CacheLayout
+import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.DownloadButton
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.geofence.toGeofence
+import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.isModifiableBy
+import org.meshtastic.core.model.util.toCodePointString
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.close
-import org.meshtastic.core.resources.delete_for_everyone
-import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
 import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.geofence_box_author_confirm
@@ -104,6 +116,7 @@ import org.meshtastic.core.resources.geofence_box_author_hint_viewport
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_cache_info
 import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_size
@@ -124,7 +137,6 @@ import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
@@ -132,6 +144,7 @@ import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Lens
+import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -140,13 +153,16 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -175,6 +191,13 @@ import org.meshtastic.proto.BoundingBox as ProtoBoundingBox
  * !is GeofenceOverlayPolygon }`) so persistent waypoint geofences are not wiped.
  */
 private class GeofenceOverlayPolygon : Polygon()
+
+private const val INITIAL_MAP_ZOOM = 1.5
+
+private fun MapView.saveCameraPosition(viewModel: MapViewModel) {
+    val center = mapCenter
+    viewModel.saveCameraPosition(center.latitude, center.longitude, zoomLevelDouble)
+}
 
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
@@ -229,6 +252,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
 @Suppress("CyclomaticComplexMethod", "LongMethod")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
@@ -286,20 +310,73 @@ fun MapView(
         }
     }
 
-    val initialCameraView = remember {
-        val nodes = mapViewModel.nodes.value
-        val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
-        BoundingBox.fromGeoPoints(geoPoints)
-    }
+    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
+    val initialCameraState by mapViewModel.initialCameraState.collectAsStateWithLifecycle()
+    if (initialCameraState is InitialCameraState.Loading) return
+    val initialCameraPosition = (initialCameraState as InitialCameraState.Ready).position
     val map =
         rememberMapViewWithLifecycle(
-            applicationId = mapViewModel.applicationId,
-            box = initialCameraView,
+            zoomLevel = initialCameraPosition?.zoom ?: INITIAL_MAP_ZOOM,
+            mapCenter = initialCameraPosition?.let { GeoPoint(it.latitude, it.longitude) } ?: GeoPoint(0.0, 0.0),
             tileSource = loadOnlineTileSourceBase(),
         )
+    var hasAppliedInitialNodeBounds by remember { mutableStateOf(initialCameraPosition != null) }
+
+    LaunchedEffect(nodes, hasAppliedInitialNodeBounds) {
+        val nodePoints = nodes.filter { it.validPosition != null }.map { GeoPoint(it.latitude, it.longitude) }
+        if (!hasAppliedInitialNodeBounds && nodePoints.isNotEmpty()) {
+            map.post {
+                if (nodePoints.size == 1) {
+                    map.controller.setCenter(nodePoints.first())
+                    map.controller.setZoom(WAYPOINT_ZOOM)
+                } else {
+                    map.zoomToBoundingBox(BoundingBox.fromGeoPoints(nodePoints), false)
+                }
+                map.saveCameraPosition(mapViewModel)
+            }
+            hasAppliedInitialNodeBounds = true
+        }
+    }
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
+
+    // --- Imported map layers (GeoJSON/KML overlays) — shared model/logic, F-Droid OSMdroid render ---
+    val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
+    val layerRenderer = remember { FdroidMapOverlayRenderer() }
+    var showLayersBottomSheet by remember { mutableStateOf(false) }
+    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
+    val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
+
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri -> mapViewModel.addMapLayer(uri, uri.getFileName(context)) }
+            }
+        }
+    val onAddLayerClicked = {
+        val intent =
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+                putExtra(
+                    Intent.EXTRA_MIME_TYPES,
+                    arrayOf(
+                        "application/vnd.google-earth.kml+xml",
+                        "application/vnd.google-earth.kmz",
+                        "application/vnd.geo+json",
+                        "application/geo+json",
+                        "application/json",
+                    ),
+                )
+            }
+        filePickerLauncher.launch(intent)
+    }
+
+    // Draw imported layers on the OSMdroid map, reconciling whenever the list changes; strip them on dispose (the
+    // MapView is kept alive by setDestroyMode(false), so leftover overlays would otherwise persist).
+    LaunchedEffect(mapLayers) { layerRenderer.reconcile(map, mapLayers, mapViewModel::getInputStreamFromUri) }
+    DisposableEffect(Unit) { onDispose { layerRenderer.removeAll(map) } }
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -352,7 +429,6 @@ fun MapView(
         }
     }
 
-    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
     val myId by mapViewModel.myId.collectAsStateWithLifecycle()
@@ -430,9 +506,8 @@ fun MapView(
             // Foreign geofences: read-only view hosting the receiver-local crossing-alert opt-in.
             waypoint.toGeofence() != null && !mapViewModel.isMyWaypoint(id) -> showGeofenceInfoDialog = waypoint
 
-            // edit only when unlocked or lockedTo myNodeNum
-            waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected ->
-                showEditWaypointDialog = waypoint
+            // edit only when unlocked or locked to us
+            waypoint.isModifiableBy(mapViewModel.myNodeNum) && isConnected -> showEditWaypointDialog = waypoint
 
             else -> showDeleteWaypointDialog = waypoint
         }
@@ -449,10 +524,11 @@ fun MapView(
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
-            val lock = if (pt.locked_to != 0) "\uD83D\uDD12" else ""
+            val lock = if (pt.isLocked) "\uD83D\uDD12" else ""
             val time = DateFormatter.formatDateTime(waypoint.time)
             val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt(), unknownText, nowText)
-            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            // pt.icon is untrusted input; toCodePointString substitutes a fallback rather than throwing.
+            val emoji = pt.icon.waypointIconOrDefault().toCodePointString()
             val now = nowMillis
             val expireTimeMillis = pt.expire * 1000L
             val expireTimeStr =
@@ -593,9 +669,27 @@ fun MapView(
         invalidate()
     }
 
+    val cameraSaveListener =
+        remember(mapViewModel) {
+            DelayedMapListener(
+                object : MapListener {
+                    override fun onScroll(event: ScrollEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+
+                    override fun onZoom(event: ZoomEvent): Boolean {
+                        event.source.saveCameraPosition(mapViewModel)
+                        return true
+                    }
+                },
+            )
+        }
+
     val boxOverlayListener =
         object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
+                cameraSaveListener.onScroll(event)
                 when {
                     downloadRegionBoundingBox != null -> event.source.generateBoxOverlay()
                     geofenceBoxDraft != null -> event.source.generateGeofenceBoxOverlay()
@@ -603,8 +697,26 @@ fun MapView(
                 return true
             }
 
-            override fun onZoom(event: ZoomEvent): Boolean = false
+            override fun onZoom(event: ZoomEvent): Boolean {
+                cameraSaveListener.onZoom(event)
+                return false
+            }
         }
+
+    // osmdroid runs the tile download on its own task for minutes and then calls back from there, not from a
+    // composable. The callback only queues the outcome; the toast is emitted by an effect that lives and dies with this
+    // screen, so a callback landing after the user left the map can no longer launch into a forgotten composition
+    // scope. A queue rather than a state value: outcomes are one-shot events, and two equal ones (two completions, or
+    // two failures with the same error count) must still produce two toasts.
+    val tileDownloadOutcomes = remember { Channel<TileDownloadOutcome>(Channel.UNLIMITED) }
+    LaunchedEffect(Unit) {
+        for (outcome in tileDownloadOutcomes) {
+            when (outcome) {
+                is TileDownloadOutcome.Complete -> context.showToast(Res.string.map_download_complete)
+                is TileDownloadOutcome.Failed -> context.showToast(Res.string.map_download_errors, outcome.errors)
+            }
+        }
+    }
 
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
@@ -623,11 +735,11 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        scope.launch { context.showToast(Res.string.map_download_complete) }
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Complete)
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        scope.launch { context.showToast(Res.string.map_download_errors, errors) }
+                        tileDownloadOutcomes.trySend(TileDownloadOutcome.Failed(errors))
                         writer.onDetach()
                     },
                 ),
@@ -718,10 +830,24 @@ fun MapView(
                     },
                     mapTypeContent = {
                         MapButton(
-                            icon = MeshtasticIcons.Layers,
+                            icon = MeshtasticIcons.Map,
                             contentDescription = stringResource(Res.string.map_style_selection),
                             onClick = { showMapStyleDialog = true },
                         )
+                    },
+                    layersContent = {
+                        MapButton(
+                            icon = MeshtasticIcons.Layers,
+                            contentDescription = stringResource(Res.string.manage_map_layers),
+                            onClick = { showLayersBottomSheet = true },
+                        )
+                    },
+                    // Hands node/channel-derived params to the hosted Site Planner and imports the returned coverage.
+                    onSitePlannerClick =
+                    if (sitePlannerAvailable()) {
+                        { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+                    } else {
+                        null
                     },
                     isLocationTrackingEnabled = myLocationOverlay != null,
                     onToggleLocationTracking = {
@@ -754,6 +880,53 @@ fun MapView(
         )
     }
 
+    if (showLayersBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+            CustomMapLayersSheet(
+                mapLayers = mapLayers,
+                onToggleVisibility = mapViewModel::toggleLayerVisibility,
+                onRemoveLayer = mapViewModel::removeMapLayer,
+                onAddLayerClicked = onAddLayerClicked,
+                onRefreshLayer = mapViewModel::refreshMapLayer,
+                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
+            )
+        }
+    }
+
+    // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
+    val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
+    LaunchedEffect(sitePlannerRequest) {
+        sitePlannerRequest?.let { node ->
+            sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                map.controller.animateTo(GeoPoint(node.latitude, node.longitude))
+            }
+            mapViewModel.consumeSitePlannerRequest()
+        }
+    }
+    sitePlannerInitial?.let { initial ->
+        SitePlannerHost(
+            initialParams = initial,
+            onDismiss = { sitePlannerInitial = null },
+            onImport = { name, geoJson, latitude, longitude ->
+                mapViewModel.addGeoJsonLayer(name, geoJson)
+                // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
+                map.controller.animateTo(GeoPoint(latitude, longitude))
+            },
+            // OSMdroid GPS fix (only when tracking is active + permission granted); no Play-services location on
+            // F-Droid.
+            onRequestCurrentLocation =
+            if (locationPermission.isGranted) {
+                { myLocationOverlay?.myLocation?.let { it.latitude to it.longitude } }
+            } else {
+                null
+            },
+            onUseNodeLocation =
+            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } },
+            onUseMapCenter = { map.mapCenter.let { it.latitude to it.longitude } },
+        )
+    }
+
     if (showCacheManagerDialog) {
         CacheManagerDialog(
             onClickOption = { option ->
@@ -780,13 +953,35 @@ fun MapView(
     }
 
     if (showPurgeTileSourceDialog) {
-        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
+        PurgeTileSourceDialog(
+            onDismiss = { showPurgeTileSourceDialog = false },
+            // Purging runs on the map screen's scope, not the dialog's: the dialog dismisses itself in the same click
+            // that starts the purge, so its own rememberCoroutineScope() is already forgotten by the time the work
+            // would run — which silently skipped the purge and its toast.
+            onPurge = { sources ->
+                scope.launch {
+                    sources.forEach { source ->
+                        // purgeCache does synchronous SQLite deletes over the tile cache; this scope dispatches on the
+                        // UI thread, so the delete has to move off it.
+                        val purged = withContext(ioDispatcher) { SqlTileWriterExt().purgeCache(source) }
+                        context.showToast(
+                            if (purged) {
+                                getString(Res.string.map_purge_success, source)
+                            } else {
+                                getString(Res.string.map_purge_fail)
+                            },
+                        )
+                    }
+                }
+            },
+        )
     }
 
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
             displayUnits = displayUnits,
+            myNodeNum = mapViewModel.myNodeNum,
             onSend = { waypoint ->
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
@@ -794,18 +989,10 @@ fun MapView(
                 val newId = if (waypoint.id == 0) mapViewModel.generatePacketId() else waypoint.id
                 val newName = if (waypoint.name.isNullOrEmpty()) "Dropped Pin" else waypoint.name
                 val newExpire = if (waypoint.expire == 0) Int.MAX_VALUE else waypoint.expire
-                val newLockedTo = if (waypoint.locked_to != 0) mapViewModel.myNodeNum ?: 0 else 0
-                val newIcon = if (waypoint.icon == 0) 128205 else waypoint.icon
+                val newIcon = waypoint.icon.waypointIconOrDefault()
 
-                mapViewModel.sendWaypoint(
-                    waypoint.copy(
-                        id = newId,
-                        name = newName,
-                        expire = newExpire,
-                        locked_to = newLockedTo,
-                        icon = newIcon,
-                    ),
-                )
+                // locked_to is already resolved by the editor (our node number when locked, 0 when not).
+                mapViewModel.sendWaypoint(waypoint.copy(id = newId, name = newName, expire = newExpire, icon = newIcon))
             },
             onDelete = { waypoint ->
                 Logger.d { "User clicked delete waypoint ${waypoint.id}" }
@@ -836,7 +1023,7 @@ fun MapView(
             // Unlocked foreign geofences can still be edited/re-broadcast (only while connected, since editing means
             // re-sending); locked ones stay read-only.
             onEdit =
-            if (waypoint.locked_to == 0 && isConnected) {
+            if (!waypoint.isLocked && isConnected) {
                 {
                     showGeofenceInfoDialog = null
                     showEditWaypointDialog = waypoint
@@ -844,53 +1031,32 @@ fun MapView(
             } else {
                 null
             },
+            // Dropping our local copy needs no mesh permission, so it's offered even for a locked foreign geofence.
+            onDeleteForMe = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showGeofenceInfoDialog = null
+            },
         )
     }
 
-    if (showDeleteWaypointDialog != null) {
-        val waypoint = showDeleteWaypointDialog ?: return
-        val canDeleteForEveryone = waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected
-        androidx.compose.material3.AlertDialog(
+    showDeleteWaypointDialog?.let { waypoint ->
+        DeleteWaypointDialog(
+            canDeleteForEveryone = waypoint.isModifiableBy(mapViewModel.myNodeNum) && isConnected,
+            onDeleteForMe = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showDeleteWaypointDialog = null
+            },
+            onDeleteForEveryone = {
+                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
+                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                mapViewModel.deleteWaypoint(waypoint.id)
+                showDeleteWaypointDialog = null
+            },
             onDismissRequest = {
                 Logger.d { "User canceled marker delete dialog" }
                 showDeleteWaypointDialog = null
-            },
-            title = { Text(stringResource(Res.string.waypoint_delete)) },
-            // Both deletes are confirmations; Cancel is the dismiss action (mirrors the old neutral button).
-            confirmButton = {
-                Column {
-                    TextButton(
-                        onClick = {
-                            Logger.d { "User deleted waypoint ${waypoint.id} for me" }
-                            mapViewModel.deleteWaypoint(waypoint.id)
-                            showDeleteWaypointDialog = null
-                        },
-                    ) {
-                        Text(stringResource(Res.string.delete_for_me))
-                    }
-                    if (canDeleteForEveryone) {
-                        TextButton(
-                            onClick = {
-                                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
-                                mapViewModel.deleteWaypoint(waypoint.id)
-                                showDeleteWaypointDialog = null
-                            },
-                        ) {
-                            Text(stringResource(Res.string.delete_for_everyone))
-                        }
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        Logger.d { "User canceled marker delete dialog" }
-                        showDeleteWaypointDialog = null
-                    },
-                ) {
-                    Text(stringResource(Res.string.cancel))
-                }
             },
         )
     }
@@ -1046,16 +1212,14 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
         onDismiss = onDismiss,
         negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
     ) {
-        val capacityMb = (cacheCapacity / (1024 * 1024)).toLong()
-        val usageMb = (currentCacheUsage / (1024 * 1024)).toLong()
+        val capacityMb = cacheCapacity / (1024 * 1024)
+        val usageMb = currentCacheUsage / (1024 * 1024)
         Text(modifier = Modifier.padding(16.dp), text = stringResource(Res.string.map_cache_info, capacityMb, usageMb))
     }
 }
 
 @Composable
-private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit, onPurge: (List<String>) -> Unit) {
     val cache = SqlTileWriterExt()
 
     val sourceList by remember { derivedStateOf { cache.sources.map { it.source as String } } }
@@ -1068,19 +1232,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
             TextButton(
                 enabled = selected.isNotEmpty(),
                 onClick = {
-                    selected.forEach { selectedIndex ->
-                        val source = sourceList[selectedIndex]
-                        scope.launch {
-                            context.showToast(
-                                if (cache.purgeCache(source)) {
-                                    getString(Res.string.map_purge_success, source)
-                                } else {
-                                    getString(Res.string.map_purge_fail)
-                                },
-                            )
-                        }
-                    }
-
+                    onPurge(selected.map { sourceList[it] })
                     onDismiss()
                 },
             ) {
@@ -1180,4 +1332,14 @@ private fun GeofenceBoxAuthoringBar(onConfirm: () -> Unit, onCancel: () -> Unit,
             Button(onClick = onConfirm) { Text(stringResource(Res.string.geofence_box_author_confirm)) }
         }
     }
+}
+
+/**
+ * Outcome of an osmdroid offline tile download, published as state so the toast is emitted from a composition-scoped
+ * effect rather than from the CacheManager's own callback thread.
+ */
+private sealed interface TileDownloadOutcome {
+    data object Complete : TileDownloadOutcome
+
+    data class Failed(val errors: Int) : TileDownloadOutcome
 }

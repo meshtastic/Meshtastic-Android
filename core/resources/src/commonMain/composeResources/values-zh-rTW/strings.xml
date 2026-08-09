@@ -92,6 +92,8 @@
     <string name="app_too_old">需要應用程式更新</string>
     <string name="app_version">版本</string>
     <string name="apply">套用</string>
+    <!-- AQI -->
+    <string name="aqi_good">良好</string>
     <string name="are_you_sure">你確定嗎？</string>
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>
     <string name="audio">音頻</string>
@@ -238,6 +240,7 @@
     <string name="config_security_private_key">用於與遠端設備交換密鑰。</string>
     <string name="config_security_public_key">從您的私鑰生成並傳送給網狀網路中的其他節點，以供它們計算出共享密鑰。</string>
     <string name="config_security_serial_enabled">透過 API 串流的序列主控台。</string>
+    <string name="configuration">設定</string>
     <string name="configure_bluetooth_permissions">設定藍牙權限</string>
     <string name="configure_critical_alerts">設定緊急警示</string>
     <string name="configure_location_permissions">設定定位權限</string>
@@ -307,6 +310,7 @@
     <string name="demo_mode">展示模式</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="description">描述說明</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">離開</string>
     <string name="desktop_tray_show">顯示 Meshtastic</string>
@@ -336,6 +340,7 @@
     <string name="dew_point">露點</string>
     <string name="direct_message">直通訊息</string>
     <string name="direct_message_key">私訊金鑰</string>
+    <string name="direct_messages">私訊</string>
     <string name="discard_changes">放棄變更</string>
     <string name="disconnect">中斷連線</string>
     <string name="disconnected">已中斷連線</string>
@@ -544,6 +549,7 @@
     <string name="fixed_position">固定位置</string>
     <string name="flip_screen">翻轉畫面</string>
     <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
+    <!-- FORMAT -->
     <string name="free_memory">可用記憶體</string>
     <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="freq">頻率</string>
@@ -600,6 +606,7 @@
     <string name="ignore_incoming">忽略來訊</string>
     <string name="ignore_mqtt">無視MQTT</string>
     <string name="ignore_remove">從忽略清單中移除 '%1$s' 嗎？</string>
+    <!-- IMPORT -->
     <string name="import_configuration">匯入設定</string>
     <string name="import_known_shared_contact_text">警告:聯絡人已存在，匯入將會覆蓋先前的聯絡人資訊。</string>
     <string name="import_label">匯入</string>
@@ -762,7 +769,6 @@
     <string name="message_device_managed">該裝置已受託管理，並只能由遠端管理員進行變更。</string>
     <string name="message_input_label">訊息:</string>
     <string name="message_status_delivered">已傳送至 Mesh</string>
-    <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 鏈上確認</string>
     <string name="message_status_sfpp_routing">透過 SF++ 鏈路由…</string>
@@ -945,6 +951,7 @@
     <string name="override_duty_cycle">覆蓋工作週期/佔空比</string>
     <string name="override_frequency_mhz">手動設定頻率</string>
     <string name="pa_fan_disabled">停用PA風扇</string>
+    <!-- PACKET -->
     <string name="pairing_mode">配對模式</string>
     <string name="password">密碼</string>
     <!-- PAX -->
@@ -1109,7 +1116,7 @@
     <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="root_topic">根話題</string>
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>
-    <string name="router_role_confirmation_text">我已閱讀&lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
+    <string name="router_role_confirmation_text">我已閱讀&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">無效的會話金鑰</string>
     <string name="routing_error_admin_public_key_unauthorized">無法識別公鑰</string>
@@ -1133,6 +1140,7 @@
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="rsyslog_server">rsyslog伺服器</string>
     <string name="sats">衛星數</string>
+    <!-- SAVE -->
     <string name="save">儲存</string>
     <string name="save_changes">儲存</string>
     <string name="save_csv_in_storage_esp32_only">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>
@@ -1198,7 +1206,6 @@
     <string name="share_channels_qr">分享頻道 QR Code</string>
     <string name="share_contact">分享聯絡人</string>
     <string name="share_location">分享位置</string>
-    <string name="share_location_description">使用您手機的 GPS 來向節點發送位置，而不是使用節點上的 GPS 模組。</string>
     <string name="share_to">分享至…</string>
     <string name="share_your_location_in_real_time">透過整合的 GPS 功能，即時分享你的位置，並保持團隊協調一致。</string>
     <string name="short_name">裝置短名稱</string>
@@ -1217,6 +1224,8 @@
     <string name="shutdown_warning">⚠️ 這將會關閉節點。需要實體操作才能重新開啟。</string>
     <string name="signal">信號</string>
     <string name="signal_quality">信號品質</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">顯示器</string>
     <string name="skip">跳過</string>
     <string name="slot">時隙</string>
     <string name="smart_position">智慧定位</string>
@@ -1235,7 +1244,7 @@
     <string name="store_forward">儲存 &amp; 轉發</string>
     <string name="store_forward_config">儲存 &amp; 轉發設定</string>
     <string name="store_forward_enabled">已啟用儲存 &amp; 轉發</string>
-    <string name="subnet">子網路</string>
+    <string name="subnet">子網</string>
     <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>
@@ -1457,5 +1466,6 @@
     <string name="wind_gust">陣風</string>
     <string name="wind_lull">風停</string>
     <string name="wind_speed">風速</string>
+    <!-- WRITE -->
     <string name="you">你</string>
 </resources>

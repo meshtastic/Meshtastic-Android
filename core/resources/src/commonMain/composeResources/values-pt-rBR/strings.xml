@@ -50,6 +50,8 @@
     <string name="app_notifications">Notificações do Aplicativo</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
     <string name="apply">Aplicar</string>
+    <!-- AQI -->
+    <string name="aqi_good">Bom</string>
     <string name="are_you_sure">Você tem certeza?</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="audio">Áudio</string>
@@ -129,7 +131,7 @@
     <string name="critical_alert">Alerta Crítico!</string>
     <string name="critical_alerts">Alertas críticos</string>
     <string name="critical_alerts_dnd_request_text">Para garantir que você receba alertas críticos, como mensagens de
-        SOS, mesmo quando o seu dispositivo estiver no modo \"Não Perturbe\", você precisa conceder
+        SOS, mesmo quando o seu dispositivo estiver no modo "Não Perturbe", você precisa conceder
         permissão especial. Por favor, habilite isso nas configurações de notificação.
     </string>
     <string name="current">Atual</string>
@@ -164,6 +166,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
     <string name="description">Descrição</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="details">Detalhes</string>
     <string name="detection_sensor">Sensor de Detecção</string>
@@ -245,6 +248,7 @@
     <string name="firmware_version">Versão do firmware: %1$s</string>
     <string name="fixed_pin">PIN fixo</string>
     <string name="flip_screen">Inverter tela</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memória Livre</string>
     <string name="freq">Freq</string>
     <string name="friendly_name">Nome amigável</string>
@@ -289,6 +293,7 @@
     <string name="ignore_incoming">Ignorar entrada</string>
     <string name="ignore_mqtt">Ignorar MQTT</string>
     <string name="ignore_remove">Remover '%1$s' da lista de ignorados?</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Importar configurações</string>
     <string name="import_known_shared_contact_text">Aviso: Esse contato é conhecido, importar irá escrever por cima da informação anterior.</string>
     <string name="import_label">Importar</string>
@@ -385,7 +390,6 @@
     <string name="message_delivery_status">Status de entrega de mensagem</string>
     <string name="message_device_managed">Este rádio é gerenciado e só pode ser alterado por um administrador remoto.</string>
     <string name="message_input_label">Mensagem</string>
-    <string name="message_status_enroute">Esperando para ser reconhecido</string>
     <string name="message_status_queued">Programado para envio</string>
     <string name="message_status_unknown">Desconhecido</string>
     <string name="messages">Mensagens</string>
@@ -472,6 +476,7 @@
     <string name="override_console_serial_port">Substituir porta série do console</string>
     <string name="override_duty_cycle">Ignorar ciclo de trabalho</string>
     <string name="pa_fan_disabled">Ventilador do PA desativado</string>
+    <!-- PACKET -->
     <string name="pairing_mode">Modo de pareamento</string>
     <string name="password">Senha</string>
     <!-- PAX -->
@@ -479,7 +484,7 @@
     <string name="paxcounter">Medidor de Fluxo de Pessoas</string>
     <string name="paxcounter_config">Configuração do Contador de Pessoas</string>
     <string name="paxcounter_enabled">Contador de Pessoas ativado</string>
-    <string name="permission_missing_31">Meshtastic precisa das permissões de \"Dispositivos próximos\" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
+    <string name="permission_missing_31">Meshtastic precisa das permissões de "Dispositivos próximos" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
     <string name="phone_location">Localização do Telefone</string>
     <string name="phone_location_description">Meshtastic usa a localização do seu telefone para habilitar vários recursos. Você pode atualizar as permissões de localização a qualquer momento a partir das configurações.</string>
     <!-- POSITION -->
@@ -593,6 +598,7 @@
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de potência que está sendo recebida pela antena. Um valor maior de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
     <string name="sats">Sats</string>
+    <!-- SAVE -->
     <string name="save">Salvar</string>
     <string name="save_changes">Salvar</string>
     <string name="save_csv_in_storage_esp32_only">Salvar .CSV no armazenamento (apenas ESP32)</string>
@@ -638,7 +644,6 @@
     <string name="share">Compartilhar</string>
     <string name="share_contact">Compartilhar Contato</string>
     <string name="share_location">Compartilhar Localização</string>
-    <string name="share_location_description">Use o GPS do seu telefone para enviar locais para seu nó em vez de usar um módulo GPS no seu nó.</string>
     <string name="share_to">Compartilhar com…</string>
     <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
     <string name="should_update">Para se beneficiar das últimas correções e recursos, por favor, atualize o seu firmware de nó.\n\nÚltima versão de firmwares estáveis: %1$s</string>
@@ -651,6 +656,8 @@
     <string name="shutdown">Desligar</string>
     <string name="signal">Sinal</string>
     <string name="signal_quality">Qualidade do sinal</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Tela</string>
     <string name="skip">Pular</string>
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
@@ -659,6 +666,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
     <string name="stay_connected_anywhere">Fique Conectado em Qualquer Lugar</string>
+    <string name="subnet">Subnet</string>
     <string name="supported">Suportado</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
     <!-- TAK -->
@@ -748,5 +756,6 @@
     <string name="wifi_rssi_threshold_defaults_to_80">Limite de RSSI do Wi-Fi (o padrão é -80)</string>
     <!-- WIND -->
     <string name="wind">Vento</string>
+    <!-- WRITE -->
     <string name="you">Você</string>
 </resources>

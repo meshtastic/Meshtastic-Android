@@ -2,7 +2,7 @@
 title: Sätted - moodulid & admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -18,13 +18,13 @@ Konfi valikulisi funktsioonimooduleid ja teosta seadme haldamist. Moodulid laien
 
 Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, tekstiväljade ja liuguritega:
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![Lülituslüliti](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![Rippmenüü valija](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![Teksti väli](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![Kaardi paigutuse seaded](../../assets/screenshots/settings_titled_card.png)
 
 ## Mooduli konf
 
@@ -42,13 +42,13 @@ Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. 
 | ~~JSON Output~~ | ⚠️ **Vananenud** — JSON tugi püsivarast eemaldatud; välja ignoreeritakse |
 | TLS             | Use secure connection                                                    |
 | Root Topic      | Baas MQTT teema teekond                                                  |
-| Map Report      | Publish position for public map                                          |
+| Kaardiaruanne   | Avalda asukoht avalikul kaardil                                          |
 
 Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
 ### Jadapordi moodul
 
-Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaport saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
+Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaühendus saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
 | Sätted          | Kirjeldus                      |
 | --------------- | ------------------------------ |
@@ -60,47 +60,48 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 
 ### Välise teavitusmoodul
 
-Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Kasulik seadmetele, mis peavad sõnumi saabumisest füüsiliselt märku andma – eriti kasulik järelevalveta või välistingimustes paigaldamise korral.
 
-| Sätted                           | Kirjeldus                     |
-| -------------------------------- | ----------------------------- |
-| Lubatud                          | Activate notifications        |
-| Alert Message                    | Notify on incoming messages   |
-| Alert Message Buzzer             | Use buzzer for messages       |
-| Alert Message Vibra              | Use vibration for messages    |
-| Hoiatuskell                      | Teavita hoiatuskella märgist  |
-| Output (GPIO) | Sisend teavitusväljundi jaoks |
-| Active                           | High or Low active            |
-| Duration (ms) | Notification length           |
-| Use I2S as Buzzer                | Use I2S audio output          |
+| Sätted                            | Kirjeldus                     |
+| --------------------------------- | ----------------------------- |
+| Lubatud                           | Aktiveeri märguanded          |
+| Alert Message                     | Notify on incoming messages   |
+| Alert Message Buzzer              | Use buzzer for messages       |
+| Alert Message Vibra               | Use vibration for messages    |
+| Hoiatuskell                       | Teavita hoiatuskella märgist  |
+| Väljund (GPIO) | Sisend teavitusväljundi jaoks |
+| Active                            | High or Low active            |
+| Duration (ms)  | Notification length           |
+| Use I2S as Buzzer                 | Use I2S audio output          |
 
 ### Salvesta & edasta moodul
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Sätted                                     | Kirjeldus                  |
-| ------------------------------------------ | -------------------------- |
-| Lubatud                                    | Activate store and forward |
-| Südamelöök(id)          | Announcement interval      |
-| Records                                    | Maximum stored messages    |
-| History Return (max)    | Max messages to replay     |
-| History Return (window) | Time window for replay     |
+| Sätted                                     | Kirjeldus                                                                                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lubatud                                    | Aktiveeri salvesta ja saada                                                                                                                      |
+| Südamelöögid                               | Periodically announce this node's store-and-forward capability                                                                                   |
+| Records                                    | Maximum stored messages                                                                                                                          |
+| History Return (max)    | Max messages to replay                                                                                                                           |
+| History Return (window) | Time window for replay                                                                                                                           |
+| Server                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Vihje:** Salvesta ja edasta töötab kõige paremini rohke mäluga sõlmedes (ESP32 koos PSRAM-iga). Router nodes are ideal candidates since they're typically always-on.
 
 ### Kaugustesti moodul
 
-Automated range testing tool for evaluating link quality between nodes. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. Vastuvõtusõlm logib need sõnumid, võimaldades kõndida või minema sõita ning hiljem analüüsida, millisel kaugusel sõnumite saabumine lakkas.
 
 | Sätted                                 | Kirjeldus                         |
 | -------------------------------------- | --------------------------------- |
-| Lubatud                                | Activate range testing            |
+| Lubatud                                | Aktiveeri levi test               |
 | Sender Interval (s) | Time between test transmissions   |
 | Salvesta CSV                           | Log received test data to SD card |
 
 ### Telemeetria moodul
 
-Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
+Controls what telemetry data your node shares with the mesh. Telemeetria sisaldab seadme tervist (aku, tööaeg) ja keskkonnaandurite andmeid (temperatuur, niiskus, rõhk).
 
 | Sätted                       | Kirjeldus                               |
 | ---------------------------- | --------------------------------------- |
@@ -125,7 +126,7 @@ Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pö�
 
 ### Audio moodul
 
-Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
+Codec2 audio support for low-bandwidth voice communication over the mesh. See on **eksperimentaalne** funktsioon, mis kodeerib hääle Codec2 koodeki abil väga väikesteks andmepakettideks.
 
 | Sätted          | Kirjeldus                        |
 | --------------- | -------------------------------- |
@@ -139,25 +140,27 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 ### Kaugriistvara moodul
 
-GPIO control over the mesh network. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
+GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
 
 | Sätted                     | Kirjeldus                                                               |
 | -------------------------- | ----------------------------------------------------------------------- |
-| Lubatud                    | Activate remote GPIO access                                             |
+| Lubatud                    | Aktiveeri kaugjuurdepääs GPIO-le                                        |
 | Luba määratlemata sisendid | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
+| Available Pins             | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  |
 
-> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
+> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Luba ainult spetsiaalsetel GPIO sõlmedel.
 
 ### Naabriinfo moodul
 
 Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
-| Sätted                                     | Kirjeldus                             |
-| ------------------------------------------ | ------------------------------------- |
-| Lubatud                                    | Aktiveeri naabrite leviring           |
-| Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada |
+| Sätted                                     | Kirjeldus                                                                                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri naabrite leviring                                                                                                                 |
+| Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada                                                                                                       |
+| Transmit Over LoRa                         | Edasta naabriinfot ka LoRa kaudu, mitte ainult MQTT/telefoni kaudu. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+Vaata [Avasta](Discovery) kuidas kasutada naabri-andmeid kärgvõrgu topoloogia uurimiseks.
 
 ### Ambientvalguse moodul
 
@@ -165,32 +168,33 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be 
 
 | Sätted             | Kirjeldus                                                          |
 | ------------------ | ------------------------------------------------------------------ |
-| Lubatud            | LED juhtimise aktiveerimine                                        |
-| LED olek           | Sees, Väljas või määrake konkreetne värv                           |
+| LED olek           | Turn the LED on or off                                             |
+| Pinge              | LED current limit (0–31)                        |
 | Red / Green / Blue | Individuaalsete värvikanalite väärtused (0–255) |
 
 ### Tuvastusanduri moodul
 
 Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                     | Kirjeldus                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| Lubatud                                    | Aktiveeri tuvastusandur                                                    |
-| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                          |
-| Tuvastus käivitus kõrgel tasemel           | Käivitub, kui sisend läheb kõrgeks (võrreldes madalaga) |
-| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                  |
-| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                    |
-| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                    |
-| Friendly Name                              | Custom name for this sensor                                                |
+| Sätted                                     | Kirjeldus                                                                                                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri tuvastusandur                                                                                           |
+| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                                                                 |
+| Detection Trigger Type                     | Kuidas klemmi olek vastab tuvastussündmusele (nt aktiivne kõrge/madal, serva poolt käivitatav) |
+| Use Input Pullup Mode                      | Enable the pin's internal pull-up resistor                                                                        |
+| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                         |
+| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                           |
+| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                           |
+| Friendly Name                              | Selle anduri kohandatud nimi                                                                                      |
 
 ### Paxloenduri moodul
 
 Inimeste loendur WiFi ja BLE päringute abil. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Sätted                                     | Kirjeldus                  |
-| ------------------------------------------ | -------------------------- |
-| Lubatud                                    | Activate people counting   |
-| Värskendusintervall(id) | How often to report counts |
+| Sätted                                     | Kirjeldus                     |
+| ------------------------------------------ | ----------------------------- |
+| Lubatud                                    | Aktiveeri inimeste loendamine |
+| Värskendusintervall(id) | How often to report counts    |
 
 > 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Counts are approximate — one person may carry multiple devices.
 
@@ -202,7 +206,7 @@ Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõim
 
 ### Kaughaldus
 
-Remotely configure nodes that share your admin key:
+Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 
 1. Select the target node in the node list.
 2. Mine selle sõlme **Seadetesse**.
@@ -221,27 +225,23 @@ Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
 
 ### Taaskäivita
 
-Remotely reboot a connected or administered node.
+Ühendatud või hallatava sõlme kaugkäivitamine.
 
 ### Arendaja paneel
 
-View detailed diagnostic information:
+Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaatamiseks, filtreerimiseks ja eksportimiseks. See [Debug Logs](debug-logs) for the full walkthrough.
 
-- Protocol buffers debug output
-- Mesh packet log
-- Ühenduse oleku üksikasjad
+### Kaug-admin tõrkeotsing
 
-### Troubleshooting Remote Admin
-
-- **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
-- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
+- **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Veendu, et administraatori võti sobiks mõlemas sõlmele.
+- **Muudatused ei rakendu** — mõnede sätete jõustumiseks on vaja taaskäivitada. Pärast salvestamist proovi taaskäivitust.
 - **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 
 ## Related Topics
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
-- [KKK](https://meshtastic.org/docs/about/faq) — meshtastic.org levinud küsimused
+- [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused
 
 ---
 

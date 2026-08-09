@@ -11,8 +11,10 @@ The `:core:common` module contains low-level utility functions, extensions, and 
 ### 1. `util` package
 Contains general-purpose extensions and helpers:
 - **Coroutines**: Helpers for structured concurrency and Flow transformations.
-- **Time**: Utilities for handling timestamps and durations.
+- **Time**: Utilities for handling timestamps and durations, plus `DateFormatter` for display dates.
 - **Exceptions**: Standardized exception types for common error scenarios.
+- **`NumberFormatter`**: Locale-aware number formatting (pre-format floats before Compose display).
+- **`UrlUtils` / `CommonUri`**: URL helpers and a multiplatform URI abstraction.
 
 ### 2. `MetricFormatter.kt`
 Centralized utility for display strings — temperature, voltage, current, percent, humidity, pressure, SNR, RSSI. Ensures consistent unit spacing and formatting across all UI surfaces.

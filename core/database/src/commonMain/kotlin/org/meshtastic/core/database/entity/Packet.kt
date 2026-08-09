@@ -46,7 +46,8 @@ data class PacketEntity(
             node = node,
             fromLocal = isFromLocal,
             text = data.text.orEmpty(),
-            time = getShortDateTime(data.time),
+            meshTime = data.time,
+            time = getShortDateTime(data.time.takeIf { it > 0 } ?: received_time),
             snr = snr,
             rssi = rssi,
             hopsAway = hopsAway,
@@ -54,7 +55,15 @@ data class PacketEntity(
             status = data.status,
             routingError = routingError,
             packetId = packetId,
-            emojis = reactions.filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }.toReaction(getNode),
+            emojis =
+            reactions
+                .filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }
+                // myNodeNum is part of the reactions primary key, so the legacy 0 bucket can hold the same
+                // (user, emoji) as this node's. The UI keys reaction rows on that pair, so keep one — the
+                // current node's, which carries the live delivery status.
+                .sortedBy { it.myNodeNum == 0 }
+                .distinctBy { it.userId to it.emoji }
+                .toReaction(getNode),
             replyId = data.replyId,
             viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
@@ -93,8 +102,10 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
-    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
+    /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
+    @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
@@ -152,8 +163,10 @@ data class ReactionEntity(
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
     val timestamp: Long,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
-    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
+    /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
+    @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "status", defaultValue = "0") val status: MessageStatus = MessageStatus.UNKNOWN,

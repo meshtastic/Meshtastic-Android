@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2025 Meshtastic LLC -->
+<component type="desktop-application">
+  <id>org.meshtastic.MeshtasticDesktop</id>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Meshtastic Desktop</name>
+  <summary>Communicate off-grid with Meshtastic mesh radio devices</summary>
+
+  <description>
+    <p>
+      Meshtastic is an open-source, off-grid mesh networking project that lets
+      you send messages and view node locations over long distances without
+      cellular service or the internet, using inexpensive LoRa radio hardware.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Text messaging between nodes on the mesh network</li>
+      <li>Encrypted channels for private group communication</li>
+      <li>Node management and device configuration</li>
+      <li>Works entirely offline — no internet required</li>
+    </ul>
+    <p>
+      Connect to your Meshtastic device over Bluetooth, USB serial, or Wi-Fi.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.meshtastic.MeshtasticDesktop.desktop</launchable>
+
+  <developer id="org.meshtastic">
+    <name>Meshtastic LLC</name>
+  </developer>
+
+  <url type="homepage">https://meshtastic.org</url>
+  <url type="bugtracker">https://github.com/meshtastic/Meshtastic-Android/issues</url>
+  <url type="vcs-browser">https://github.com/meshtastic/Meshtastic-Android</url>
+  <url type="donation">https://opencollective.com/meshtastic</url>
+  <url type="contribute">https://meshtastic.org/docs/contributing/</url>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#47c66e</color>
+    <color type="primary" scheme_preference="dark">#2d7d46</color>
+  </branding>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+  <requires>
+    <display_length compare="ge">640</display_length>
+  </requires>
+
+  <categories>
+    <category>Network</category>
+    <category>Chat</category>
+    <category>HamRadio</category>
+  </categories>
+
+  <keywords>
+    <keyword>mesh</keyword>
+    <keyword>LoRa</keyword>
+    <keyword>radio</keyword>
+    <keyword>off-grid</keyword>
+    <keyword>communication</keyword>
+    <keyword>ham</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-location">intense</content_attribute>
+  </content_rating>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Track every node on the mesh at a glance</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-02-nodes.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Chat with your mesh, channel by channel</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-03-messages.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Connect over Bluetooth, USB, or Wi-Fi</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-01-connections.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Full radio and module configuration</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-04-settings.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="2.8.1" date="2026-08-02">
+      <description>
+        <p>In-app update notifications, native OS notifications, deep-link handling, keyboard shortcuts, window-state persistence, and many stability fixes.</p>
+      </description>
+    </release>
+    <release version="2.7.14" date="2026-06-03">
+      <description>
+        <p>Initial release of Meshtastic Desktop.</p>
+      </description>
+    </release>
+  </releases>
+</component>

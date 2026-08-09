@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.import_export_label
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.input_channel_url
 import org.meshtastic.core.resources.input_shared_contact_url
@@ -206,12 +207,15 @@ fun MeshtasticImportFAB(
         onExpandedChange = { expanded = it },
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
-        contentDescription = stringResource(Res.string.import_label),
+        contentDescription = stringResource(importFabContentDescriptionRes(onShareChannels, onShareContact)),
         testTag = testTag,
     )
 }
 
 internal fun normalizeImportContents(contents: String?): String? = contents?.trim()?.takeIf { it.isNotEmpty() }
+
+private fun importFabContentDescriptionRes(onShareChannels: (() -> Unit)?, onShareContact: (() -> Unit)?) =
+    if (onShareChannels != null || onShareContact != null) Res.string.import_export_label else Res.string.import_label
 
 @Composable
 private fun NfcScanningDialog(onDismiss: () -> Unit) {

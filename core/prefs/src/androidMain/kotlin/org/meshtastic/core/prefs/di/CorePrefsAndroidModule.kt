@@ -25,7 +25,6 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 
@@ -40,110 +39,72 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class CorePrefsAndroidModule {
 
     @Single
-    @Named("AnalyticsDataStore")
-    fun provideAnalyticsDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "analytics-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("analytics_ds") },
-        )
+    fun provideAnalyticsDataStore(context: Context, dispatchers: CoroutineDispatchers): AnalyticsDataStore =
+        store(context, dispatchers, legacyName = "analytics-prefs", fileName = "analytics_ds").asAnalyticsDataStore()
 
     @Single
-    @Named("HomoglyphEncodingDataStore")
-    fun provideHomoglyphEncodingDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "homoglyph-encoding-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("homoglyph_encoding_ds") },
-        )
+    fun provideHomoglyphEncodingDataStore(
+        context: Context,
+        dispatchers: CoroutineDispatchers,
+    ): HomoglyphEncodingDataStore =
+        store(context, dispatchers, legacyName = "homoglyph-encoding-prefs", fileName = "homoglyph_encoding_ds")
+            .asHomoglyphEncodingDataStore()
 
     @Single
-    @Named("AppDataStore")
-    fun provideAppDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("app_ds") },
-        )
+    fun provideAppDataStore(context: Context, dispatchers: CoroutineDispatchers): AppDataStore =
+        store(context, dispatchers, legacyName = "prefs", fileName = "app_ds").asAppDataStore()
 
     @Single
-    @Named("CustomEmojiDataStore")
-    fun provideCustomEmojiDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "org.geeksville.emoji.prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("custom_emoji_ds") },
-        )
+    fun provideCustomEmojiDataStore(context: Context, dispatchers: CoroutineDispatchers): CustomEmojiDataStore =
+        store(context, dispatchers, legacyName = "org.geeksville.emoji.prefs", fileName = "custom_emoji_ds")
+            .asCustomEmojiDataStore()
 
     @Single
-    @Named("MapDataStore")
-    fun provideMapDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "map_prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("map_ds") },
-        )
+    fun provideMapDataStore(context: Context, dispatchers: CoroutineDispatchers): MapDataStore =
+        store(context, dispatchers, legacyName = "map_prefs", fileName = "map_ds").asMapDataStore()
 
     @Single
-    @Named("MapConsentDataStore")
-    fun provideMapConsentDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "map_consent_preferences")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("map_consent_ds") },
-        )
+    fun provideMapConsentDataStore(context: Context, dispatchers: CoroutineDispatchers): MapConsentDataStore =
+        store(context, dispatchers, legacyName = "map_consent_preferences", fileName = "map_consent_ds")
+            .asMapConsentDataStore()
 
     @Single
-    @Named("MapTileProviderDataStore")
-    fun provideMapTileProviderDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "map_tile_provider_prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("map_tile_provider_ds") },
-        )
+    fun provideMapTileProviderDataStore(context: Context, dispatchers: CoroutineDispatchers): MapTileProviderDataStore =
+        store(context, dispatchers, legacyName = "map_tile_provider_prefs", fileName = "map_tile_provider_ds")
+            .asMapTileProviderDataStore()
 
     @Single
-    @Named("MeshDataStore")
-    fun provideMeshDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "mesh-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("mesh_ds") },
-        )
+    fun provideMeshDataStore(context: Context, dispatchers: CoroutineDispatchers): MeshDataStore =
+        store(context, dispatchers, legacyName = "mesh-prefs", fileName = "mesh_ds").asMeshDataStore()
 
     @Single
-    @Named("RadioDataStore")
-    fun provideRadioDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "radio-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("radio_ds") },
-        )
+    fun provideRadioDataStore(context: Context, dispatchers: CoroutineDispatchers): RadioDataStore =
+        store(context, dispatchers, legacyName = "radio-prefs", fileName = "radio_ds").asRadioDataStore()
 
     @Single
-    @Named("UiDataStore")
-    fun provideUiDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "ui-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("ui_ds") },
-        )
+    fun provideUiDataStore(context: Context, dispatchers: CoroutineDispatchers): UiDataStore =
+        store(context, dispatchers, legacyName = "ui-prefs", fileName = "ui_ds").asUiDataStore()
 
     @Single
-    @Named("MeshLogDataStore")
-    fun provideMeshLogDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "meshlog-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("meshlog_ds") },
-        )
+    fun provideMeshLogDataStore(context: Context, dispatchers: CoroutineDispatchers): MeshLogDataStore =
+        store(context, dispatchers, legacyName = "meshlog-prefs", fileName = "meshlog_ds").asMeshLogDataStore()
 
     @Single
-    @Named("FilterDataStore")
-    fun provideFilterDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            migrations = listOf(SharedPreferencesMigration(context, "filter-prefs")),
-            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
-            produceFile = { context.preferencesDataStoreFile("filter_ds") },
-        )
+    fun provideFilterDataStore(context: Context, dispatchers: CoroutineDispatchers): FilterDataStore =
+        store(context, dispatchers, legacyName = "filter-prefs", fileName = "filter_ds").asFilterDataStore()
 }
+
+/**
+ * [legacyName] is the SharedPreferences file this domain migrates from, [fileName] the DataStore file it lives in now.
+ * Both are on-disk identities — changing either orphans existing user data.
+ */
+private fun store(
+    context: Context,
+    dispatchers: CoroutineDispatchers,
+    legacyName: String,
+    fileName: String,
+): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+    migrations = listOf(SharedPreferencesMigration(context, legacyName)),
+    scope = CoroutineScope(dispatchers.io + SupervisorJob()),
+    produceFile = { context.preferencesDataStoreFile(fileName) },
+)

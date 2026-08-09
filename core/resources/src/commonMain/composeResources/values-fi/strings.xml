@@ -28,6 +28,7 @@
     <string name="a11y_node_online">online-tilassa</string>
     <string name="a11y_node_role">rooli %1$s</string>
     <string name="a11y_node_signal">signaali %1$s</string>
+    <string name="a11y_nodes_at_hop">Hyppy %1$d: %2$d radiota</string>
     <string name="accept">Hyväksy</string>
     <string name="acknowledgements">Kiitokset</string>
     <!-- ACTION -->
@@ -111,7 +112,15 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="app_version">Versio</string>
     <string name="apply">Hyväksy</string>
+    <!-- AQI -->
     <string name="aqi">AQI</string>
+    <string name="aqi_good">Hyvä</string>
+    <string name="aqi_hazardous">Vaarallinen</string>
+    <string name="aqi_moderate">Kohtalainen</string>
+    <string name="aqi_unhealthy">Epäterveellinen</string>
+    <string name="aqi_unhealthy_sensitive">Epäterveellinen herkille ryhmille</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Erittäin epäterveellinen</string>
     <string name="are_you_sure">Oletko varma?</string>
     <string name="are_you_sure_change_default">Oletko varma, että haluat vaihtaa oletuskanavan?</string>
     <string name="audio">Ääni</string>
@@ -140,7 +149,13 @@
     <string name="bluetooth_feature_discovery">Haku</string>
     <string name="bluetooth_feature_discovery_description">Etsi ja tunnista lähelläsi olevia Meshtastic-laitteita.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Sijaintipalvelut ovat pois käytöstä. Ota ne käyttöön etsiäksesi lähistöllä olevia laitteita.</string>
+    <string name="bluetooth_scan_missing_permission">Bluetooth-laitteiden haku edellyttää käyttöoikeutta. Myönnä lähistön laitteet (tai sijainti) käyttöoikeus, jotta laitteita voidaan etsiä.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth-skannaus ei onnistunut. Yritä uudelleen tai ota bluetooth-yhteys uudelleen käyttöön jos ongelma jatkuu.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Bluetooth-haun enimmäismäärä on saavutettu. Yritä uudelleen %1$d sekunnin kuluttua.</item>
+        <item quantity="other">Bluetooth-haun enimmäismäärä on saavutettu. Yritä uudelleen %1$d sekunnin kuluttua.</item>
+    </plurals>
     <string name="bold_heading">Lihavoitu otsikko</string>
     <string name="bonding_failed_permissions">Pariliitos epäonnistui. Myönnä lupa lähellä olevien laitteiden käyttöön ja yritä uudelleen.</string>
     <string name="bonding_failed_retry">Paritus ei onnistunut. Yritä uudelleen.</string>
@@ -215,6 +230,8 @@
     <string name="close">Sulje</string>
     <string name="close_selection">Sulje valinta</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">CO₂ kosteus</string>
+    <string name="co2_temperature">CO₂ lämpötila</string>
     <string name="codec_2_enabled">CODEC 2 käytössä</string>
     <string name="codec2_sample_rate">CODEC2 näytteenottotaajuus</string>
     <string name="coding_rate">Koodausnopeus</string>
@@ -265,12 +282,14 @@
     <string name="config_position_flags_summary">Valinnaiset kentät, jotka sisällytetään sijaintiviesteihin. Mitä enemmän kenttiä sisällytetään, sitä suurempi viesti on, mikä pidentää lähetysaikaa ja lisää pakettihäviön riskiä.</string>
     <string name="config_position_gps_update_interval_summary">Kuinka usein yritetään hakea GPS-sijainti (&lt;10 sekuntia pitää GPS:n päällä).</string>
     <string name="config_power_is_power_saving_summary">Asetus laittaa kaiken mahdollisen lepotilaan. Seuranta- ja anturiroolissa tämä sisältää myös LoRa-radion. Älä käytä tätä asetusta, jos haluat käyttää laitetta puhelinsovellusten kanssa tai laitetta ilman käyttäjäpainiketta.</string>
+    <string name="config_saved_restarting">Radio käynnistyy uudelleen ja on hetken aikaa tavoittamattomissa.</string>
     <string name="config_security_admin_key">Julkinen avain, jolla on oikeus lähettää hallintaviestejä tälle laitteelle.</string>
     <string name="config_security_debug_log_api_enabled">Tulosta reaaliaikainen virheenkorjausloki sarjaportin kautta, ja tarkastele sekä vie Bluetoothin kautta laitteesta poistettuja sijaintitietoja sisältäviä lokitiedostoja.</string>
     <string name="config_security_is_managed">Laite on verkon ylläpitäjän hallinnoima, eikä käyttäjä pääse muokkaamaan laitteen asetuksia.</string>
     <string name="config_security_private_key">Käytetään jaetun avaimen luomiseen etälaitteen kanssa.</string>
     <string name="config_security_public_key">Luotu yksityisestä avaimestasi ja lähetetty muille verkon laitteille, jotta ne voivat laskea yhteisen salaisen avaimen.</string>
     <string name="config_security_serial_enabled">Sarjaporttikonsoli käyttöön Stream API:n kautta.</string>
+    <string name="configuration">Asetukset</string>
     <string name="configure_bluetooth_permissions">Määritä Bluetooth-oikeudet</string>
     <string name="configure_critical_alerts">Määritä kriittiset hälytykset</string>
     <string name="configure_location_permissions">Määritä sijainnin käyttöoikeudet</string>
@@ -319,6 +338,7 @@
     <string name="debug_logcat_empty">Ei näytettäviä sovelluslokitietoja</string>
     <string name="debug_logcat_refresh">Päivitä</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
+    <string name="debug_logs_export_warning">Tämä tiedosto voi sisältää viestiesi tekstin, tarkat sijaintitiedot ja radion tiedot. Tarkista tiedoston sisältö ennen sen jakamista julkisesti.</string>
     <string name="debug_logs_exported">Lokitiedot viety</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_search_clear">Tyhjennä haku</string>
@@ -328,6 +348,10 @@
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_tab_app_logs">Sovelluslokitiedot</string>
     <string name="debug_tab_packets">Paketit</string>
+    <string name="deep_link_connect_message">Linkki osoitteessa %1$s pyytää tätä sovellusta muodostamaan yhteyden laitteeseen. Jatka vain, jos luotat linkin lähteeseen.</string>
+    <string name="deep_link_connect_title">Muodostetaanko yhteys tähän laitteeseen?</string>
+    <string name="deep_link_disconnect_message">Linkki pyytää tätä sovellusta katkaisemaan yhteyden laitteeseesi. Jatka vain, jos luotat linkin lähteeseen.</string>
+    <string name="deep_link_disconnect_title">Katkaistaanko yhteys tähän laitteeseen?</string>
     <string name="default_">Oletus</string>
     <!-- DELETE -->
     <string name="delete">Poista</string>
@@ -348,10 +372,14 @@
     <string name="demo_mode_replay">Demotila (toisto)</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="description">Kuvaus</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Lopeta</string>
     <string name="desktop_tray_show">Näytä Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic työpöytä</string>
+    <string name="desktop_update_available_message">Meshtastic työpöytä %1$s on valmis ladattavaksi.</string>
+    <string name="desktop_update_available_title">Sovelluksen päivitys on saatavilla</string>
+    <string name="desktop_update_download">Lataa päivitys %1$s</string>
     <string name="details">Tiedot</string>
     <string name="detection_sensor">Havaitsemisanturi</string>
     <string name="detection_sensor_config">Tunnistinsensorin asetukset</string>
@@ -380,6 +408,7 @@
     <string name="dew_point">Kastepiste</string>
     <string name="direct_message">Yksityisviesti</string>
     <string name="direct_message_key">Suoran viestin avain</string>
+    <string name="direct_messages">Yksityisviestit</string>
     <string name="discard_changes">Hylkää</string>
     <string name="disconnect">Katkaise yhteys</string>
     <string name="disconnected">Ei yhdistetty</string>
@@ -397,6 +426,7 @@
     <string name="discovery_empty_history">Ei vielä skannaussessioita</string>
     <string name="discovery_export_report">Vie raportti</string>
     <string name="discovery_history">Skannaushistoria</string>
+    <string name="discovery_interrupted_scan_restored">Radio palautettiin kotiasetukseen (%1$s) keskeytyneen etsinnän jälkeen</string>
     <string name="discovery_keep_screen_awake">Pidä näyttö päällä</string>
     <string name="discovery_keep_screen_awake_description">Estää Androidin Doze-tilan aiheuttamaa radiopakettien katoamista pitkien skannausten aikana. Suositeltu asetus.</string>
     <string name="discovery_local_mesh">Paikallisen mesh-verkon skannaus</string>
@@ -561,6 +591,7 @@
     <string name="ethernet_config">Verkon asetukset</string>
     <string name="ethernet_enabled">Ethernet käytössä</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="event_use_event_theme">Käytä tapahtuman teemaa</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expanded">Avattu</string>
@@ -599,6 +630,8 @@
     <!-- FIRMWARE -->
     <string name="firmware">Laiteohjelmisto</string>
     <string name="firmware_edition">Laiteohjelmistoversio</string>
+    <string name="firmware_event_ended_banner">%1$s on päättynyt. Palaa tavalliseen Meshtastic-laiteohjelmistoon palauttaaksesi normaalit ominaisuudet.</string>
+    <string name="firmware_event_ended_button">Päivitä laiteohjelmisto</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
     <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
@@ -608,9 +641,15 @@
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_archive_missing_target">Laiteohjelmistoa kohteelle %2$s (%3$s) ei löytynyt arkistosta "%1$s".</string>
+    <string name="firmware_update_available">Laiteohjelmiston päivitys saatavilla</string>
     <string name="firmware_update_battery_low">Akun varaus liian alhainen (%1$d%). Lataa laite ennen päivitystä.</string>
     <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
+    <string name="firmware_update_confirm_file_button">Aloita päivitys</string>
+    <string name="firmware_update_confirm_file_message">Tarkista valitsemasi tiedoston koko nimi ennen päivityksen aloittamista. Päivitys alkaa vasta vahvistuksesi jälkeen.</string>
+    <string name="firmware_update_confirm_file_title">Vahvista laiteohjelmistotiedosto</string>
     <string name="firmware_update_connecting_attempt">Yhdistetään laitteeseen (yritys %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">Laitteen yhteys muuttui vahvistuksen aikana. Valitse laiteohjelmistotiedosto uudelleen.</string>
     <string name="firmware_update_copying">Ylävitonen! Odota, laiteohjelmistoa kopioidaan…</string>
     <string name="firmware_update_currently_installed">Nyt asennettu: %1$s</string>
     <string name="firmware_update_device">Laite: %1$s</string>
@@ -626,9 +665,11 @@
     <string name="firmware_update_error">Virhe: %1$s</string>
     <string name="firmware_update_extracting">Puretaan laiteohjainta...</string>
     <string name="firmware_update_failed">Päivitys epäonnistui</string>
+    <string name="firmware_update_filename_unavailable">Valitun tiedoston nimeä ei voitu lukea. Valitse paikallinen laiteohjelmistotiedosto, jonka tiedostonimi on näkyvissä.</string>
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_hang_tight">Odota, prosessi on käynnissä...</string>
     <string name="firmware_update_hash_rejected">Laiteohjelmiston tarkistussumma hylättiin. Laite saattaa vaatia tiivisteen alustamisen tai käynnistyslataimen päivityksen.</string>
+    <string name="firmware_update_invalid_local_file_detail">Valittu tiedosto "%1$s" ei vastaa kohdetta %2$s (%3$s). Valitse tälle kohteelle tarkoitettu laiteohjelmistotiedosto.</string>
     <string name="firmware_update_keep_device_close">Pidä laitteesi lähellä puhelinta.</string>
     <string name="firmware_update_latest">Päivitä versioon %1$s</string>
     <string name="firmware_update_local_file">Paikallinen tiedosto</string>
@@ -636,16 +677,27 @@
     <string name="firmware_update_method_detail">Päivitä %1$s kautta</string>
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">Laiteohjelmistoston tiedot eivät ole saatavilla tälle laitteelle.</string>
+    <string name="firmware_update_nightly">Kehitysversio</string>
     <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
     <string name="firmware_update_node_info_missing">Laitteen käyttäjätiedot puuttuvat.</string>
     <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
+    <string name="firmware_update_notification_android">%1$s on asennettu. Vakaa versio %2$s on saatavilla. Avaa laiteohjelmiston päivitykset, kun olet valmis päivittämään.</string>
+    <string name="firmware_update_notification_flasher">%1$s on asennettu. Vakaa versio %2$s on saatavilla. Avaa Meshtastic Flasher päivittääksesi tämän laitteen laiteohjelmiston.</string>
+    <string name="firmware_update_open">Avaa laiteohjelmistopäivitykset</string>
+    <string name="firmware_update_open_flasher">Avaa Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -laitteelle valmistajan sarjamuotoista DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial toimitetun bootloader .zip -tiedoston kanssa). Pelkän .uf2-tiedoston kopiointi ei päivitä bootloaderia.</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_release_notes">Julkaisutiedot</string>
+    <string name="firmware_update_requires_bin">%1$s edellyttää kohteeseen sopivaa .bin-tiedostoa.</string>
+    <string name="firmware_update_requires_ota_zip">%1$s edellyttää kohteeseen sopivaa OTA .zip-tiedostoa.</string>
+    <string name="firmware_update_requires_uf2">%1$s edellyttää kohteeseen sopivaa .uf2-tiedostoa.</string>
     <string name="firmware_update_retrieval_failed">Laiteohjelmistotiedostoa ei voitu noutaa.</string>
     <string name="firmware_update_retry">Yritä uudelleen</string>
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
+    <string name="firmware_update_searching_device">Etsitään OTA-laitetta verkosta...</string>
     <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
     <string name="firmware_update_slow_bootloader_hint">Päivitykset ovat hitaita tämän laitteen käynnistyslataimella. OTAFIX-käynnistyslataimen asentaminen mahdollistaa huomattavasti nopeammat bluetooth-päivitykset.</string>
     <string name="firmware_update_source_local">Lähde: Paikallinen tiedosto</string>
@@ -660,6 +712,7 @@
     <string name="firmware_update_unknown_hardware">Tuntematon laitemalli: %1$d</string>
     <string name="firmware_update_unknown_release">Tuntematon etäjulkaisu</string>
     <string name="firmware_update_unsupported_transport">Laiteohjelmiston päivityksiä ei tueta tällä yhteystavalla kyseiselle laitteelle. Muodosta yhteys toisella tavalla (esim. Bluetoothin kautta) päivittääksesi laitteen.</string>
+    <string name="firmware_update_unsupported_update_method">Paikallisia laiteohjelmistotiedostoja ei tueta tällä päivitystavalla.</string>
     <string name="firmware_update_uploading">Lähetetään laiteohjelmistostoa...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="firmware_update_usb_failed">USB-päivitys epäonnistui</string>
@@ -676,6 +729,12 @@
     <string name="fixed_position">Kiinteä sijainti</string>
     <string name="flip_screen">Käännä näyttö</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
+    <!-- FORMAT -->
+    <string name="format_bold">Lihavoitu</string>
+    <string name="format_code">Koodi</string>
+    <string name="format_italic">Kursivoitu</string>
+    <string name="format_link">Linkki</string>
+    <string name="format_strikethrough">Yliviivattu</string>
     <string name="free_memory">Vapaa muisti</string>
     <string name="free_memory_description">Käytettävissä oleva järjestelmämuisti tavuina</string>
     <string name="freq">Taajuus</string>
@@ -689,6 +748,8 @@
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <!-- GEOFENCE -->
     <string name="geofence">Aluerajaus</string>
+    <string name="geofence_alerts_opt_in">Ilmoita aluerajan ylityksistä</string>
+    <string name="geofence_alerts_opt_in_desc">Saat ilmoituksen, kun radiot saapuvat tälle aluerajaukselle tai poistuvat siltä</string>
     <string name="geofence_box_author_confirm">Vahvista alue</string>
     <string name="geofence_box_author_hint">Määritä alue napauttamalla kahta kulmaa</string>
     <string name="geofence_box_author_hint_viewport">Rajaa haluamasi alue karttanäkymään ja napauta vahvista alue</string>
@@ -729,6 +790,8 @@
     <string name="hide_password">Piilota salasana</string>
     <string name="history_return_max">Historian maksimimäärä</string>
     <string name="history_return_window">Historian aikamäärä</string>
+    <string name="hop_histogram_empty">Tässä näkymässä ei kuultu yhtään radiota</string>
+    <string name="hop_histogram_title">Radiot hyppymäärän mukaan</string>
     <string name="hop_limit">Hyppyjen määrä</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="host">Isäntälaite</string>
@@ -750,7 +813,9 @@
     <string name="ignore_incoming">Ohita saapuvat</string>
     <string name="ignore_mqtt">Ohita MQTT</string>
     <string name="ignore_remove">Poistetaanko '%1$s' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
+    <!-- IMPORT -->
     <string name="import_configuration">Asetusten tuonti</string>
+    <string name="import_export_label">Tuonti ja vienti</string>
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="import_label">Tuo</string>
     <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
@@ -759,6 +824,10 @@
     <string name="info">Tiedot</string>
     <string name="input_channel_url">Anna jaettujen kanavien URL-osoite</string>
     <string name="input_shared_contact_url">Syötä jaetun yhteystiedon URL-osoite</string>
+    <string name="insert">Lisää</string>
+    <string name="insert_link_message">Syötä valitun tekstin URL-osoite</string>
+    <string name="insert_link_title">Lisää linkki</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Asennettu</string>
     <string name="internal">Sisäinen</string>
     <string name="interval_always_on">Aina päällä</string>
@@ -788,6 +857,7 @@
     <string name="label_long_turbo">Long Range - Turbo</string>
     <string name="label_medium_fast">Medium Range - Fast</string>
     <string name="label_medium_slow">Medium Range - Slow</string>
+    <string name="label_medium_turbo">Medium Range - Turbo</string>
     <string name="label_narrow_fast">Narrow - Fast</string>
     <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">Short Range - Fast</string>
@@ -984,9 +1054,17 @@
     <string name="message_delivery_status">Viestin toimitustila</string>
     <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
     <string name="message_input_label">Viesti</string>
+    <string name="message_routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
+    <string name="message_routing_error_no_channel">Kanavaa ei ole valittu</string>
+    <string name="message_routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
+    <string name="message_routing_error_too_large">Viesti on liian suuri lähetettäväksi</string>
     <string name="message_status_delivered">Toimitettu mesh-verkkoon</string>
-    <string name="message_status_enroute">Odottaa vahvistusta</string>
+    <string name="message_status_enroute">Lähetetään...</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="message_status_recipient_delivered">Toimitettu vastaanottajalle</string>
+    <string name="message_status_relayed_not_confirmed">Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa</string>
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_unknown">Tuntematon</string>
@@ -1007,6 +1085,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT asetukset</string>
     <string name="mqtt_enabled">MQTT käytössä</string>
+    <string name="mqtt_error_connection_lost">MQTT: yhteys katkesi</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: yhteys hylättiin (tarkista tunnistetiedot)</string>
+    <string name="mqtt_error_proxy_failed">MQTT-välityspalvelin epäonnistui: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: yhteys hylätty: %1$s</string>
     <string name="mqtt_probe_dns_failure">Palvelinta ei löytynyt</string>
     <string name="mqtt_probe_other_failure">Yhdistäminen epäonnistui</string>
     <string name="mqtt_probe_rejected">Välityspalvelin ei hyväksynyt: %1$s</string>
@@ -1072,7 +1154,10 @@
     <string name="no_usb_devices_hint">Yhdistä laite USB-datakaapelilla sarjaportin käyttöä varten.</string>
     <string name="no_usb_devices_seen">USB-laitteita ei löytynyt</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d verkossa</string>
+    <string name="node_count_shown">%1$d nähty</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>
+    <string name="node_count_total">%1$d yhteensä</string>
     <string name="node_filter_exclude_infrastructure">Ohita infrastruktuurilaitteet</string>
     <string name="node_filter_exclude_mqtt">Rajaa MQTT pois</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
@@ -1110,6 +1195,7 @@
     <string name="node_list_help_title">Radiolistan ohje</string>
     <string name="node_list_long_click_label">Radion asetukset</string>
     <string name="node_number">Laitteen numero</string>
+    <string name="node_restarting">Käynnistetään uudelleen…</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_channel">Kanava</string>
@@ -1179,6 +1265,19 @@
     <string name="override_duty_cycle">Ohita käyttöaste (Duty Cycle)</string>
     <string name="override_frequency_mhz">Taajuuden ohitus</string>
     <string name="pa_fan_disabled">PA tuuletin pois käytöstä</string>
+    <!-- PACKET -->
+    <string name="packet_authenticity">Pakettien aitous</string>
+    <string name="packet_authenticity_balanced">Tasapainoinen – Suosi todennettuja paketteja</string>
+    <string name="packet_authenticity_balanced_summary">Suositeltu. Hylkää allekirjoittamattomat tason alentamisyritykset radioilta, joiden tiedetään allekirjoittavan paketit.</string>
+    <string name="packet_authenticity_compatible">Yhteensopiva – Hyväksy allekirjoittamattomat paketit</string>
+    <string name="packet_authenticity_compatible_summary">Todenna paketit aina kun mahdollista, mutta hyväksy myös allekirjoittamaton liikenne parhaan yhteensopivuuden varmistamiseksi.</string>
+    <string name="packet_authenticity_level">Suojaustaso</string>
+    <string name="packet_authenticity_strict">Tiukka – Vaadi pakettien todentamista</string>
+    <string name="packet_authenticity_strict_confirm">Ota tiukka tila käyttöön</string>
+    <string name="packet_authenticity_strict_confirmation">Tiukka tila ohittaa kaikki etäverkon paketit, joita ei ole todennettu kryptografisesti. Vanhemmat laiteohjelmistot, lisensoidut tai ilman PKI-avaimia toimivat HAM-radiot sekä ylikokoiset paketit eivät välttämättä enää toimi. PKI-todennetut suoraviestit ovat edelleen käytettävissä.</string>
+    <string name="packet_authenticity_strict_summary">Näytä ja käsittele vain kryptografisesti todennetut mesh-paketit. Vanhemmat radiot ja ylikokoiset paketit eivät välttämättä enää toimi.</string>
+    <string name="packet_authenticity_strict_title">Otetaanko tiukka tila käyttöön?</string>
+    <string name="packet_authenticity_unsupported">Tämä yhdistetty laite ei tue pakettien allekirjoitusten vahvistamista.</string>
     <string name="pairing_mode">Paritustila</string>
     <string name="password">Salasana</string>
     <!-- PAX -->
@@ -1194,7 +1293,7 @@
     <string name="paxcounter_config">PAX-laskurin asetukset</string>
     <string name="paxcounter_enabled">PAX-laskuri käytössä</string>
     <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>
-    <string name="permission_missing_31">Meshtastic tarvitsee \"lähistön laitteet\" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
+    <string name="permission_missing_31">Meshtastic tarvitsee "lähistön laitteet" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="phone_location">Puhelimen sijainti</string>
     <string name="phone_location_description">Meshtastic hyödyntää puhelimen sijaintia tarjotakseen erilaisia toimintoja. Voit muuttaa sijaintioikeuksia koska tahansa asetuksista.</string>
     <string name="play">Aloita</string>
@@ -1353,7 +1452,7 @@
     <string name="role_tracker_desc">Lähettää GPS-sijaintitiedot ensisijaisesti.</string>
     <string name="root_topic">Palvelimen osoite (root topic)</string>
     <string name="rotary_encoder_1_enabled">Kiertovalitsin #1 käytössä</string>
-    <string name="router_role_confirmation_text">Olen lukenut &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
+    <string name="router_role_confirmation_text">Olen lukenut &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
     <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>
@@ -1377,7 +1476,9 @@
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="rsyslog_server">rsyslog-palvelin</string>
     <string name="sats">Satelliitit</string>
+    <!-- SAVE -->
     <string name="save">Tallenna</string>
+    <string name="save_and_restart">Tallenna &amp; käynnistä uudelleen</string>
     <string name="save_changes">Tallenna</string>
     <string name="save_csv_in_storage_esp32_only">Tallenna .CSV (ESP32 ainoastaan)</string>
     <string name="save_rangetest">Vie kuuluvuustestin paketit</string>
@@ -1452,7 +1553,7 @@
     <string name="share_connected_node">Jaa yhdistetty radio</string>
     <string name="share_contact">Jaa yhteystieto</string>
     <string name="share_location">Jaa sijainti</string>
-    <string name="share_location_description">Lähetä sijaintitiedot puhelimen GPS:llä laitteen oman GPS:n sijasta.</string>
+    <string name="share_location_description">Lähetä sijainnit radiollesi puhelimesi GPS:n avulla radion oman GPS-vastaanottimen sijaan.</string>
     <string name="share_to">Jaa…</string>
     <string name="share_your_location_in_real_time">Jaa sijaintisi reaaliaikaisesti ja varmista ryhmäsi yhteistoiminta GPS-toimintojen avulla.</string>
     <string name="short_name">Lyhytnimi</string>
@@ -1473,6 +1574,31 @@
     <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
     <string name="signal">Signaali </string>
     <string name="signal_quality">Signaalin laatu</string>
+    <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Antennin vahvistus (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Antennin korkeus (m)</string>
+    <string name="site_planner_color_scale">Väripaletti</string>
+    <string name="site_planner_estimate">Arvio peittoalueesta</string>
+    <string name="site_planner_estimating">Arvioidaan peittoaluetta…</string>
+    <string name="site_planner_failed">Peittoalueen arviointi epäonnistui</string>
+    <string name="site_planner_frequency_mhz">Taajuus (MHz)</string>
+    <string name="site_planner_high_resolution">Korkearesoluutioinen maasto</string>
+    <string name="site_planner_invalid_latitude">Anna arvo väliltä −90...90</string>
+    <string name="site_planner_invalid_longitude">Anna arvo väliltä −180...180</string>
+    <string name="site_planner_invalid_positive">Arvon on oltava suurempi kuin 0</string>
+    <string name="site_planner_invalid_rx_sensitivity">Anna arvo väliltä −150...−30 dBm</string>
+    <string name="site_planner_max_range_km">Enimmäisetäisyys (km)</string>
+    <string name="site_planner_rx_height_meters">Vastaanottimen korkeus (m)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Vastaanottimen herkkyys (dBm)</string>
+    <string name="site_planner_section_display">Näyttö</string>
+    <string name="site_planner_section_receiver">Vastaanotin</string>
+    <string name="site_planner_section_simulation">Simulaation asetukset</string>
+    <string name="site_planner_section_transmitter">Sivusto / lähetin</string>
+    <string name="site_planner_subtitle">Arvio lähettimen kuuluvuusalueesta</string>
+    <string name="site_planner_tx_power_watts">TX-lähetysteho (W)</string>
+    <string name="site_planner_use_current_location">Käytä nykyistä sijaintia</string>
+    <string name="site_planner_use_map_center">Käytä kartan keskikohtaa</string>
+    <string name="site_planner_use_node_location">Käytä nykyistä radion sijaintia</string>
     <string name="skip">Ohita</string>
     <string name="slot">Paikka</string>
     <string name="smart_position">Älykäs sijainti</string>
@@ -1482,6 +1608,7 @@
     <string name="soil_temperature">Maaperän lämpötila</string>
     <string name="speed">Nopeus</string>
     <string name="speed_kmh">%1$d Km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="spread_factor">Levennyskerroin (Spread Factor)</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Tilatiedon lähetys (sekuntia)</string>
@@ -1517,6 +1644,8 @@
     <string name="tak_server_enabled_desc">Avaa paikallisen salatun TLS-palvelinyhteyden porttiin 8089, jotta ATAK/iTAK voi yhdistää siihen</string>
     <string name="tak_server_export_data_package_desc">Luo .zip-asetustiedosto ATAK/iTAK-sovellukselle, jotta se voi yhdistää tähän palvelimeen</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
+    <string name="tak_server_mesh_to_cot_desc">Näytä Meshtastic radiot ATAK/iTAK -kartalla kontakteina</string>
     <string name="tak_server_section">Palvelin</string>
     <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
     <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
@@ -1726,8 +1855,10 @@
     <string name="wind_gust">Tuulen puuska</string>
     <string name="wind_lull">Alin tuulen nopeus</string>
     <string name="wind_speed">Tuulen nopeus</string>
+    <!-- WRITE -->
     <string name="write_nfc">Kirjoita NFC-tunnisteeseen</string>
     <string name="write_nfc_failed">Tunnisteeseen kirjoittaminen epäonnistui. Käytä tyhjää, kirjoitettavaa NFC-tunnistetta ja pidä sitä paikallaan.</string>
+    <string name="write_nfc_subtext">Kirjoittaminen tallentaa tämän jakolinkin fyysiselle NFC-tunnisteelle. Kuka tahansa voi avata linkin napauttamalla tunnistetta puhelimellaan.</string>
     <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>
     <string name="write_nfc_text">Pidä kirjoitettavaa NFC-tunnistetta puhelimesi takapuolta vasten.</string>
     <string name="you">Sinä</string>

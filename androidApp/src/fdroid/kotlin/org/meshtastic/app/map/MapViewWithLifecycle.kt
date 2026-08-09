@@ -29,7 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -44,7 +43,6 @@ private const val DEFAULT_ZOOM_LEVEL = 15.0
 @Suppress("MagicNumber")
 @Composable
 fun rememberMapViewWithLifecycle(
-    applicationId: String,
     box: BoundingBox,
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
@@ -55,18 +53,12 @@ fun rememberMapViewWithLifecycle(
             DEFAULT_ZOOM_LEVEL
         }
     val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-    return rememberMapViewWithLifecycle(
-        applicationId = applicationId,
-        zoomLevel = zoom,
-        mapCenter = center,
-        tileSource = tileSource,
-    )
+    return rememberMapViewWithLifecycle(zoomLevel = zoom, mapCenter = center, tileSource = tileSource)
 }
 
 @Suppress("LongMethod")
 @Composable
 internal fun rememberMapViewWithLifecycle(
-    applicationId: String,
     zoomLevel: Double = MIN_ZOOM_LEVEL,
     mapCenter: GeoPoint = GeoPoint(0.0, 0.0),
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
@@ -88,8 +80,6 @@ internal fun rememberMapViewWithLifecycle(
         MapView(context).apply {
             clipToOutline = true
 
-            // Required to get online tiles
-            Configuration.getInstance().userAgentValue = applicationId
             setTileSource(tileSource)
             isVerticalMapRepetitionEnabled = false // disables map repetition
             setMultiTouchControls(true)
@@ -130,7 +120,11 @@ internal fun rememberMapViewWithLifecycle(
 
         lifecycle.addObserver(observer)
 
-        onDispose { lifecycle.removeObserver(observer) }
+        onDispose {
+            savedCenter = mapView.projection.currentCenter
+            savedZoom = mapView.zoomLevelDouble
+            lifecycle.removeObserver(observer)
+        }
     }
     return mapView
 }

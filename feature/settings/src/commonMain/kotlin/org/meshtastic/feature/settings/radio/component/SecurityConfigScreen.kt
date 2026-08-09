@@ -36,6 +36,7 @@ import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.encodeToString
+import org.meshtastic.core.model.util.platformRandomBytes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
 import org.meshtastic.core.resources.admin_keys
@@ -66,8 +67,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.lockdown.LockdownModeSetting
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.Config
-import kotlin.random.Random
 
 @Composable
 expect fun SecurityKeyBackupActions(
@@ -108,6 +109,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.security),
         onBack = onBack,
         configState = formState,
@@ -119,6 +121,14 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             viewModel.setConfig(config)
         },
     ) {
+        item {
+            PacketAuthenticitySetting(
+                selectedPolicy = formState.value.packet_signature_policy,
+                connected = state.connected,
+                supported = state.metadata?.has_xeddsa,
+                onPolicyChange = { policy -> formState.value = formState.value.copy(packet_signature_policy = policy) },
+            )
+        }
         item {
             TitledCard(title = stringResource(Res.string.direct_message_key)) {
                 EditBase64Preference(
@@ -147,7 +157,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                             formState.value = formState.value.copy(private_key = it)
                         }
                     },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.private_key.encodeToString()) },
+                    trailingIcon = {
+                        CopyIconButton(valueToCopy = formState.value.private_key.encodeToString(), sensitive = true)
+                    },
                 )
                 HorizontalDivider()
                 NodeActionButton(
@@ -248,8 +260,9 @@ fun PrivateKeyRegenerateDialog(
             titleRes = Res.string.regenerate_private_key,
             messageRes = Res.string.regenerate_keys_confirmation,
             onConfirm = {
-                // Generate a random "f" value
-                val f = ByteArray(32).apply { Random.nextBytes(this) }
+                // Generate a random "f" value. This is long-term key material, so it must come from the platform CSPRNG
+                // — kotlin.random.Random is a small-state, clock-seeded PRNG and is not acceptable here.
+                val f = platformRandomBytes(PRIVATE_KEY_SIZE)
                 // Adjust the value to make it valid as an "s" value for eval().
                 // According to the specification we need to mask off the 3
                 // right-most bits of f[0], mask off the left-most bit of f[31],
@@ -262,5 +275,8 @@ fun PrivateKeyRegenerateDialog(
         )
     }
 }
+
+/** X25519 private key length in bytes. */
+private const val PRIVATE_KEY_SIZE = 32
 
 private const val SECONDS_PER_MINUTE = 60

@@ -1,9 +1,9 @@
 ---
-title: Debug Logs
+title: デバッグログ
 parent: ユーザーガイド
 nav_order: 22
-last_updated: 2026-07-01
-description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
+last_updated: 2026-07-08
+description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
   - logcat
@@ -11,48 +11,48 @@ aliases:
   - bug-report
 ---
 
-# Debug Logs
+# デバッグログ
 
-When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+何か不具合が起きたとき、アプリのデバッグログは、バグ報告に添付できる最も役立つものです。 Meshtastic は、**アプリ内で自動的に**ログをキャプチャできます。収集に `adb` やデスクトップのツールは不要になりました。
 
-Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
+「**設定 → 詳細設定 → デバッグパネル**」から「**デバッグパネル**」を開きます。
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+> 📎 **issue を作成しますか？** ログをエクスポートし（下記参照）、[github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues) の報告に `.txt` ファイルを添付してください。 問題が起きた瞬間を含むログのキャプチャは、「動かない」という報告を、開発者が実際に追跡できるものに変えます。
 
-## The two tabs
+## 2 つのタブ
 
-The Debug Panel has two tabs:
+デバッグパネルには 2 つのタブがあります：
 
-- **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
-- **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
+- **パケット**：無線機が送受信した、デコード済みのメッシュトラフィック（プロトコルレベルのメッセージ）。 メッシュやルーティングの動作を診断するのに役立ちます。
+- **アプリログ**：アプリ自身の診断ログ（Android の _logcat_）。アプリからの警告、エラー、スタックトレースを含みます。 通常、バグ報告に必要なのはこちらです。
 
-Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
+各タブには独自の**エクスポート**ボタンがあり、それぞれ別のファイルを生成するため、関連する方を、または両方を取得できます。
 
-## Viewing app logs
+## アプリログを表示する
 
-The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
+「**アプリログ**」タブは、**このアプリのみ**の最新のログ行を表示します。デバイス上の他のアプリのものは表示しません。
 
-- **Search** — type in the search box to filter to matching lines.
-- **Level filter** — the **V / D / I / W / E** chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
-- **Refresh** — the refresh icon re-reads the latest logs.
+- **検索**：検索ボックスに入力すると、一致する行に絞り込めます。
+- **レベルフィルター**：**V／D／I／W／E** のチップで、Verbose、Debug、Info、Warn、Error の行を切り替えます。 レベルをタップすると非表示になり、もう一度タップすると再表示されます。 Fatal の行は常に表示されます。
+- **更新**：更新アイコンで最新のログを読み直します。
 
-Error and warning lines are tinted so problems stand out.
+エラーと警告の行は色付けされ、問題が目立つようになっています。
 
-## Exporting
+## エクスポート
 
-Tap the **download** icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+**ダウンロード**アイコンをタップすると、現在のログをファイルに保存できます。 保存先はシステムのファイル選択画面で選び、ファイルにはタイムスタンプ付きの名前（例：`meshtastic_logcat_20260701_143312.txt`）が付くため、繰り返しエクスポートしても互いに上書きされることはありません。
 
-Attach that file to your GitHub issue.
+そのファイルを GitHub の issue に添付してください。
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Even so, logs can contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **プライバシー：** エクスポートは、ファイルに書き込む前に、秘密鍵・管理者鍵・セッションパスキーを自動的に**秘匿化**します。 チャンネルの PSK は**秘匿化されません**。また、ログにはノード名、位置、その他の識別情報が含まれることがあります。公開して共有する前にファイルにざっと目を通し、少しでも不安があれば非公開で共有してください。
 
-## Desktop
+## デスクトップ
 
-The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
+デスクトップアプリにはシステムの logcat がないため、「**アプリログ**」タブは代わりに、アプリ自身がキャプチャしたログ出力を表示します。 検索、絞り込み、エクスポートは同じように機能します。
 
-## Related Topics
+## 関連トピック
 
-- [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
-- [Connections](connections) — if the problem is getting connected to your radio in the first place
+- [ヘルプとアプリ内ドキュメント](help-and-docs)：このドキュメントをアプリ内でオフラインで読む
+- [コネクション](connections)：そもそも無線機に接続できないことが問題の場合
 
 ---

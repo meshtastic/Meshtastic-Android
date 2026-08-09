@@ -1329,6 +1329,7 @@
       "RAK"
     ],
     "images": [
+      "rak6421.svg",
       "meshtasticd_tux.svg"
     ]
   },
@@ -1497,11 +1498,56 @@
     "hwModelSlug": "HELTEC_MESH_NODE_T1",
     "platformioTarget": "heltec-mesh-node-t1",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec Mesh Node T1",
     "tags": [
       "Heltec"
+    ],
+    "images": [
+      "heltec-meshnode-t1.svg"
+    ]
+  },
+  {
+    "hwModel": 128,
+    "hwModelSlug": "MESH_TRACKER_X1",
+    "platformioTarget": "seeed_mesh_tracker_X1",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Seeed MeshTracker X1",
+    "tags": [
+      "Seeed"
+    ]
+  },
+  {
+    "hwModel": 130,
+    "hwModelSlug": "THINKNODE_M8",
+    "platformioTarget": "thinknode_m8",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Elecrow ThinkNode M8",
+    "tags": [
+      "Elecrow"
+    ],
+    "images": [
+      "thinknode-m8.svg"
+    ]
+  },
+  {
+    "hwModel": 124,
+    "hwModelSlug": "TBEAM_BPF",
+    "platformioTarget": "t-beam-bpf",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 3,
+    "displayName": "LilyGo T-Beam BPF",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "tbeam-bpf.svg"
     ]
   }
 ]

@@ -19,3 +19,6 @@ package org.meshtastic.app.map
 import org.meshtastic.core.ui.util.MapViewProvider
 
 fun getMapViewProvider(): MapViewProvider = FdroidMapViewProvider()
+
+/** Site Planner (coverage-estimate) — the F-Droid map renders imported coverage as OSMdroid overlays (see #6138). */
+fun sitePlannerAvailable(): Boolean = true

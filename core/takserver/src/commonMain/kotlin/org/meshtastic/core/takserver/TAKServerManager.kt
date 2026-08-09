@@ -38,6 +38,14 @@ interface TAKServerManager {
     val connectionCount: StateFlow<Int>
     val inboundMessages: SharedFlow<InboundCoTMessage>
 
+    /**
+     * Emits once each time a TAK client connects.
+     *
+     * [TAKServer.onClientConnected] is a single callback slot already owned by the offline-queue drain, so consumers
+     * that need the connect event observe it here instead of replacing that callback.
+     */
+    val clientConnected: SharedFlow<Unit>
+
     /** Start the TAK server using [scope]. Port is fixed at [TAKServer] construction time. */
     fun start(scope: CoroutineScope)
 
@@ -61,6 +69,9 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
 
     private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
     override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
+
+    private val _clientConnected = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
+    override val clientConnected: SharedFlow<Unit> = _clientConnected.asSharedFlow()
 
     // Offline message queue — buffers mesh-originated CoT messages when no TAK
     // clients are connected, then drains them when a client reconnects. Entries
@@ -94,7 +105,10 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
                     Logger.w { "TAK inbound message buffer full; dropping message from ${clientInfo?.id}" }
                 }
             }
-            takServer.onClientConnected = { drainOfflineQueue() }
+            takServer.onClientConnected = {
+                drainOfflineQueue()
+                _clientConnected.tryEmit(Unit)
+            }
 
             val result = takServer.start(scope)
             if (result.isSuccess) {
@@ -102,8 +116,9 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
                 Logger.i { "TAK Server started" }
             } else {
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
-                // Clear onMessage if start failed so we don't hold a reference unnecessarily
+                // Clear both callbacks if start failed so we don't hold a reference unnecessarily
                 takServer.onMessage = null
+                takServer.onClientConnected = null
             }
         }
     }
@@ -116,6 +131,7 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
         _isRunning.value = false
         scope = null
         takServer.onMessage = null
+        takServer.onClientConnected = null
         takServer.stop()
         Logger.i { "TAK Server stopped" }
     }

@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -51,12 +52,16 @@ import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ServiceEnvelope
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -176,6 +181,40 @@ class MQTTRepositoryImplTest {
     @Test
     fun `custom server respects tlsEnabled true`() {
         assertEquals(true, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = true))
+    }
+
+    // endregion
+
+    // region effectiveCredentials — firmware-parity credential defaulting.
+
+    @Test
+    fun `empty address substitutes the public broker's well-known credentials`() {
+        // Mirrors firmware PubSubConfig: lockdown-redacted (zeroed) configs must not connect anonymously.
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "", password = ""))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `null config substitutes the public broker's well-known credentials`() {
+        assertEquals("meshdev" to "large4cats", effectiveCredentials(null))
+    }
+
+    @Test
+    fun `empty address ignores stored credentials entirely - firmware parity`() {
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "custom", password = "pw"))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `explicit address uses the stored credentials as-is`() {
+        val config = ModuleConfig.MQTTConfig(address = "broker.example.com", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
+    }
+
+    @Test
+    fun `explicit default server address uses the stored credentials as-is - firmware parity`() {
+        val config = ModuleConfig.MQTTConfig(address = "mqtt.meshtastic.org", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
     }
 
     // endregion
@@ -334,6 +373,74 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
+    fun `transport failure wrapped as ConnectionRejected retries instead of stopping the proxy`() = runTest {
+        // The MQTT library wraps ANY connect failure — timeout, TLS, socket EOF — as
+        // ConnectionRejected with UNSPECIFIED_ERROR. Treating those as unrecoverable stopped
+        // the proxy permanently and showed users a bogus "check credentials" dialog.
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.UNSPECIFIED_ERROR, "Connection failed: Connection timed out"),
+        )
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `credential rejection stops the proxy permanently`() = runTest {
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.BAD_USER_NAME_OR_PASSWORD, "Connection refused"),
+        )
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(1, harness.client.connectCalls.size)
+        assertIs<MqttException.ConnectionRejected>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
+    fun `only credential and identity reason codes classify as credential rejections`() {
+        val fatal =
+            listOf(
+                ReasonCode.BAD_USER_NAME_OR_PASSWORD,
+                ReasonCode.NOT_AUTHORIZED,
+                ReasonCode.BAD_AUTHENTICATION_METHOD,
+                ReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                ReasonCode.BANNED,
+            )
+        val transient =
+            listOf(
+                ReasonCode.UNSPECIFIED_ERROR,
+                ReasonCode.SERVER_UNAVAILABLE,
+                ReasonCode.SERVER_BUSY,
+                ReasonCode.CONNECTION_RATE_EXCEEDED,
+            )
+
+        fatal.forEach { code ->
+            assertTrue(MqttException.ConnectionRejected(code, "x").isCredentialRejection(), "expected fatal: $code")
+        }
+        transient.forEach { code ->
+            assertFalse(
+                MqttException.ConnectionRejected(code, "x").isCredentialRejection(),
+                "expected transient: $code",
+            )
+        }
+    }
+
+    @Test
     fun `subscription failures trigger reconnect retry`() = runTest {
         val harness = createHarness()
         harness.client.failSubscribeWith(MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "suback timeout"))
@@ -423,6 +530,89 @@ class MQTTRepositoryImplTest {
         assertTrue(jsonStr.contains("\"type\":\"text\""))
         assertTrue(jsonStr.contains("\"from\":12345678"))
         assertTrue(jsonStr.contains("\"payload\":\"Hello World\""))
+    }
+
+    // endregion
+
+    // region isUndeliverableDownlink — Tier 1 drop filter for MQTT client-proxy downlink packets.
+
+    private fun envelopeBytes(
+        channelId: String = "LongFast",
+        gatewayId: String = "!aabbccdd",
+        packet: MeshPacket? = MeshPacket(),
+    ): ByteArray =
+        ServiceEnvelope.ADAPTER.encode(ServiceEnvelope(packet = packet, channel_id = channelId, gateway_id = gatewayId))
+
+    @Test
+    fun `payload-less packet is undeliverable`() {
+        // The observed LongFast flood: a packet with neither decoded nor encrypted set.
+        val bytes = envelopeBytes(packet = MeshPacket(from = 1, to = 2))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `decoded packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(decoded = Data()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `encrypted packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(encrypted = byteArrayOf(1, 2, 3).toByteString()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `PKI payload-less packet is deliverable - guard`() {
+        val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `own echo payload-less packet is deliverable - guard`() {
+        val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `a different gateway's payload-less packet is undeliverable`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `null myId does not suppress dropping`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = null))
+    }
+
+    @Test
+    fun `packet-less envelope is deliverable - fail open`() {
+        val bytes = envelopeBytes(packet = null)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `garbage bytes are deliverable - fail open`() {
+        // Non-protobuf bytes must never be dropped.
+        val bytes = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0x42)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `payload-less downlink stubs are dropped before forwarding`() = runTest {
+        val harness = createHarness()
+        val stub = envelopeBytes(packet = MeshPacket(from = 1, to = 2)) // no payload → dropped
+        val real = envelopeBytes(packet = MeshPacket(decoded = Data())) // has payload → forwarded
+
+        val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
+        runCurrent()
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = stub, retain = false))
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = real, retain = false))
+
+        // first() returns the first *forwarded* message; the stub was dropped, so it must be `real`.
+        val proxyMessage = nextMessage.await()
+        assertContentEquals(real, proxyMessage.data_?.toByteArray())
     }
 
     // endregion

@@ -92,6 +92,20 @@ data class Node(
     val mismatchKey
         get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
 
+    /**
+     * Last measured SNR in dB, or null when this node has no reading yet ([snr] still holds [SNR_UNSET]).
+     *
+     * Every read of [snr] should go through this: 0 dB is a real, good reading, and the raw sentinel rates as an
+     * *excellent* signal if it reaches the preset-relative quality bands. Threshold comparisons such as `snr < 100f`
+     * are not equivalent — they also discard any genuine reading at or above the threshold.
+     */
+    val snrOrNull: Float?
+        get() = snr.takeIf { it != SNR_UNSET }
+
+    /** Last measured RSSI in dBm, or null when this node has no reading yet. 0 dBm is a real reading. */
+    val rssiOrNull: Int?
+        get() = rssi.takeIf { it != RSSI_UNSET }
+
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics()
 
@@ -142,30 +156,16 @@ data class Node(
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
-    @Suppress("CyclomaticComplexMethod")
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
-        val temp =
-            if ((temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        // These fields carry presence: `null` means "no sensor", so 0 °C / 0 V / 0 A / 0% are real readings and must
+        // still render. Humidity keeps its zero-guard because 0% RH is not physically reachable.
+        val temp = temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val humidity = if ((relative_humidity ?: 0f) != 0f) MetricFormatter.humidity(relative_humidity ?: 0f) else null
-        val soilTemperatureStr =
-            if ((soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(soil_temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        val soilTemperatureStr = soil_temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val soilMoistureRange = 0..100
-        val soilMoisture =
-            if ((soil_moisture ?: Int.MIN_VALUE) in soilMoistureRange && (soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.percent(soil_moisture ?: 0)
-            } else {
-                null
-            }
-        val voltage = if ((this.voltage ?: 0f) != 0f) MetricFormatter.voltage(this.voltage ?: 0f) else null
-        val current = if ((current ?: 0f) != 0f) MetricFormatter.current(current ?: 0f) else null
+        val soilMoisture = soil_moisture?.takeIf { it in soilMoistureRange }?.let { MetricFormatter.percent(it) }
+        val voltage = this.voltage?.let { MetricFormatter.voltage(it) }
+        val current = current?.let { MetricFormatter.current(it) }
         val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(
@@ -189,7 +189,18 @@ data class Node(
         private const val DEFAULT_ID_SUFFIX_LENGTH = 4
         private const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
-        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
+        /** Size (in bytes) of a Curve25519 public key as used by meshtastic firmware. */
+        const val PUBLIC_KEY_SIZE: Int = 32
+
+        /**
+         * Sentinels stored when a node has no radio-metric reading. They exist because [snr]/[rssi] are not nullable
+         * (the Room columns behind them are NOT NULL); resolve them with [snrOrNull]/[rssiOrNull] rather than comparing
+         * against them at call sites.
+         */
+        const val SNR_UNSET: Float = Float.MAX_VALUE
+        const val RSSI_UNSET: Int = Int.MAX_VALUE
+
+        val ERROR_BYTE_STRING: ByteString = ByteArray(PUBLIC_KEY_SIZE) { 0 }.toByteString()
 
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK

@@ -2,7 +2,7 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-06-25
+last_updated: 2026-07-11
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
@@ -57,15 +57,17 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 
 ### 訊息狀態
 
-| 狀態                          | 圖示 | 含義                                         |
-| --------------------------- | -- | ------------------------------------------ |
-| 佇列中                         | ⏳  | 訊息等待傳送中                                    |
-| 傳送中                         | ✓  | 已傳至無線電裝置，等待確認回應                            |
-| 已送達                         | ✓✓ | 已收到收件者的確認回應                                |
-| 已接收                         | ✓  | 已從 mesh 網路接收訊息（傳入）                         |
-| S&F 路由中 | 🔗 | 儲存與轉送：訊息正透過 S&F 節點進行路由 |
-| S&F 已確認 | 🔗 | 儲存與轉送：已透過 S&F 節點確認傳遞成功 |
-| 錯誤                          | ✗  | 重試後仍傳遞失敗                                   |
+A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
+
+| 狀態                                  | 含義                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
+| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                      |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
+| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
+| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                               |
+| 錯誤                                  | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
 
 ### 傳遞錯誤
 
@@ -116,11 +118,31 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.
 
 ### 訊息泡泡
 
 訊息以對話泡泡的形式顯示 — 已傳送的訊息在右側，收到的訊息在左側。 每個泡泡顯示傳送者、時間戳記及傳遞狀態。 含有回覆的訊息，會在回覆內容上方顯示原始訊息的引用預覽。
+
+### Text Formatting
+
+Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
+
+| 類型            | Syntax                         | Renders as           |
+| ------------- | ------------------------------ | -------------------- |
+| Bold          | `**bold**`                     | **bold**             |
+| Italic        | `*italic*`                     | _italic_             |
+| Strikethrough | `~~strike~~`                   | ~~strike~~           |
+| Inline code   | `` `code` ``                   | monospace `code`     |
+| Link          | `[label](https://example.com)` | a tappable **label** |
+
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+
+> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
+
+### Mentions
+
+Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
 
 ### 訊息回應
 
@@ -143,6 +165,7 @@ You can search the full history of any conversation directly from the chat scree
 - 複製 — 將訊息文字複製至剪貼簿
 - 回覆 — 在回覆中引用該訊息
 - 回應 — 新增表情符號回應
+- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
 - 刪除 — 移除您傳送的訊息（僅限本機刪除）
 
 ### 訊息優先順序
@@ -156,6 +179,7 @@ You can search the full history of any conversation directly from the chat scree
 ### 訊息限制
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
 - 速率限制：mesh 網路會執行無線電佔用時間公平性管制；大量訊息可能會被節流
 - 傳遞：若未收到確認回應，訊息將自動重試
 

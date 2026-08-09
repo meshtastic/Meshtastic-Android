@@ -21,6 +21,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.matches
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
@@ -30,6 +31,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -40,11 +42,13 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.ToRadio
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -80,7 +84,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
-                scope = TestScope(),
+                scope = TestScope().asServiceScope(),
             )
     }
 
@@ -129,7 +133,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
-                scope = TestScope(),
+                scope = TestScope().asServiceScope(),
             )
         assertEquals(0, commandSender.resolveNodeNum(NodeAddress.Local))
     }
@@ -200,6 +204,34 @@ class CommandSenderImplTest {
         commandSender.sendAdmin(DEST_NODE) { org.meshtastic.proto.AdminMessage(get_owner_request = true) }
 
         verifySuspend { packetHandler.sendToRadio(any<MeshPacket>()) }
+    }
+
+    // --- sendAdminImmediate ---
+
+    @Test
+    fun sendAdminImmediate_dispatchesDirectToRadioWithPasskeyAndNoResponse() {
+        val passkey = "secret".encodeUtf8()
+        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
+        every { packetHandler.sendToRadio(any<ToRadio>()) } returns Unit
+
+        commandSender.sendAdminImmediate(DEST_NODE) { AdminMessage(set_time_only = 12345) }
+
+        // Direct ToRadio dispatch (not the Connected-gated MeshPacket queue), correct destination,
+        // no want_response, and the session passkey injected into the admin payload.
+        verify {
+            packetHandler.sendToRadio(
+                matches<ToRadio> { toRadio ->
+                    val packet = toRadio.packet ?: return@matches false
+                    val decoded = packet.decoded ?: return@matches false
+                    val admin = AdminMessage.ADAPTER.decode(decoded.payload)
+                    packet.to == DEST_NODE &&
+                        decoded.portnum == PortNum.ADMIN_APP &&
+                        !decoded.want_response &&
+                        admin.set_time_only == 12345 &&
+                        admin.session_passkey == passkey
+                },
+            )
+        }
     }
 
     // --- requestTraceroute ---
@@ -273,7 +305,7 @@ class CommandSenderImplTest {
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 sessionManager = sessionManager,
-                scope = testScope,
+                scope = testScope.asServiceScope(),
             )
         testScope.testScheduler.advanceUntilIdle()
         everySuspend { packetHandler.sendToRadio(any<MeshPacket>()) } returns Unit

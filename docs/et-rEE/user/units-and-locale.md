@@ -1,12 +1,12 @@
 ---
-title: Units, Measurement & Locale
+title: Ühikud, mõõtühikud ja lokaat
 parent: User Guide
 nav_order: 16
-last_updated: 2026-05-12
-description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+last_updated: 2026-07-08
+description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.
 ---
 
-# Units, Measurement & Locale
+# Ühikud, mõõtühikud ja lokaat
 
 Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks sinu seade on seadistatud – rakenduses pole vaja sätteid muuta.
 
@@ -14,11 +14,11 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrid, °C, km/h, hPa jne). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrites, °C, m/s, hPa jne). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+On Android, your measurement preferences are determined by your system **Language & Region** settings. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 
-> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **Vihje:** Rakenduses pole kunagi vaja ühikuid vahetada. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
 ---
 
@@ -26,7 +26,7 @@ On Android, your measurement preferences are determined by your system **Languag
 
 Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![Keskkonna mõõdikud koos temperatuuriga](../../assets/screenshots/nodes_environment_metrics.png)
 
 | Sinu sätted | Teadmiseks |
 | ----------- | ---------- |
@@ -37,27 +37,27 @@ This affects all temperature displays throughout the app: node environment telem
 
 ## Distance & Altitude
 
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
+Sõlmede vahelised kaugused ja GPS kõrgused edastatakse **meetrites** ning skaleeritakse ja teisendatakse automaatselt.
 
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
+![Vahemaa info kuvamine](../../assets/screenshots/nodes_distance_info.png)
 
 | Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
 | -------------------------------- | -------------- | ---------------------- | -------- |
 | Meetriline                       | 350 m          | 2.5 km | 1,200 m  |
 | Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
-The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
+Rakendus kasutab loomulikku skaleerimist – lühikesed vahemaad jäävad meetritesse või jalgadesse, pikemad vahemaad aga muutuvad automaatselt kilomeetriteks või miilideks.
 
 ### Where these appear
 
 - **Node list** — distance and bearing to each node
 - **Node detail** — altitude, distance from your position
-- **Map** — waypoint distances, traceroute hop distances
+- **Kaart** — teekonnapunktide vahemaad, traceroute'i hüppevahemaad
 - **Compass** — distance to selected node
 
 ## Kiirus
 
-GPS ground speed is displayed in your locale's preferred speed unit.
+GPSi maapealne kiirus kuvatakse lokaadi eelistatud kiiruseühikus.
 
 | Sinu sätted                      | Teadmiseks |
 | -------------------------------- | ---------- |
@@ -86,24 +86,24 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 ## Units That Never Change
 
-Some units are international standards and are displayed the same way regardless of your locale:
+Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenemata lokaat:
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Baromeetrii rõhk                 | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Radiatsioon                      | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| Measurement                 | Unit                           | Why                                   |
+| --------------------------- | ------------------------------ | ------------------------------------- |
+| Baromeetrii rõhk            | hPa                            | International meteorological standard |
+| Heading / bearing           | ° (degrees) | Universal navigation convention       |
+| Radiatsioon                 | μR/hr                          | Standard dosimetry unit               |
+| GPS koordinaadid            | decimal degrees                | Universal geographic standard         |
+| Niiskus, aku, mulla niiskus | %                              | Universal                             |
 
 ## Date & Time
 
 All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
 
-| Sätted           | What It Controls | Example                                          |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
-| **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+| Sätted               | What It Controls | Example                                          |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| **24-Hour Time**     | Kella vorming    | 14:30 vs 2:30 PM |
+| **Kuupäeva vorming** | Date ordering    | 09/05/2026 vs 05/09/2026                         |
 
 The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
 
@@ -115,12 +115,13 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 2. Change your **Region** or **Measurement units** preference
 3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
-> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> 💡 **Vihje:** Kogu mõõtühikute vormindamine toimub tsentraalselt ja arvestab platvormi lokaaduga, seega püsivad ühikud kogu rakenduses ühtsed.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemeetia & Sensorid](telemetry-and-sensors) — andurid, mis neid mõõtmisi teevad
+- [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
 
 ---

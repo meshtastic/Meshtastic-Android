@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -56,7 +57,7 @@ class NeighborInfoHandlerImpl(
             ni.neighbors.joinToString("\n") { n ->
                 val user = nodeRepository.getUser(n.node_id)
                 val name = "${user.long_name} (${user.short_name})"
-                "• $name (SNR: ${n.snr})"
+                "• $name (SNR: ${MetricFormatter.snr(n.snr)})"
             }
 
         val fromUser = nodeRepository.getUser(from)

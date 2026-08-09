@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Templated-build manifest, selected in build.gradle.kts ONLY when -PenableCarTemplates=true
+  (Internal/Closed tracks). Production builds use src/main/AndroidManifest.xml, which must NOT
+  declare a CarAppService: Google Play statically reviews any declared androidx.car.app service
+  intent-filter — even one with android:enabled="false" — and rejects MESSAGING-category car apps
+  that hold location permissions ("Category not permitted", see v2.8.0-open.2 / versionCode
+  29321638 rejection, 2026-07-25).
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <service
+            android:name="org.meshtastic.feature.car.service.MeshtasticCarAppService"
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.MESSAGING" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="7" />
+
+        <!-- Required for Android Auto to surface MessagingStyle notifications and recognize the
+             template app. Without this the automotive_app_desc declarations never reach the host. -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+    </application>
+</manifest>

@@ -37,7 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -82,13 +82,15 @@ fun DeviceListItem(
     onDelete: (() -> Unit)? = null,
     rssi: Int? = null,
 ) {
-    // Throttle the RSSI updates to match the connected device polling rate
-    var displayedRssi by remember { mutableIntStateOf(rssi ?: 0) }
+    // Throttle the RSSI updates to match the connected device polling rate. The value stays nullable end-to-end:
+    // 0 dBm is the strongest reading on this scale, so defaulting to it would render an unknown signal as excellent.
+    // Keyed by address so a recycled list slot drops the previous device's reading instead of showing it for a tick.
+    var displayedRssi by remember(device.address) { mutableStateOf(rssi) }
     val currentRssi by rememberUpdatedState(rssi)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(device.address) {
         while (true) {
             delay(RSSI_UPDATE_RATE_MS)
-            displayedRssi = currentRssi ?: 0
+            displayedRssi = currentRssi
         }
     }
 
@@ -174,20 +176,30 @@ fun DeviceListItem(
 
 /**
  * Headline for a device row. When we have a [DeviceListEntry.node] in the local DB (i.e. we've previously connected and
- * learned the device's mesh identity), render the colored [NodeChip] + the node's long name so users can visually
- * identify the device at a glance. Otherwise fall back to the raw advertised device name.
+ * learned the device's mesh identity), render the colored [NodeChip] alongside the node's **long name** so users can
+ * distinguish devices that share a similar short/advertised name (see #5808). Otherwise fall back to the raw advertised
+ * name. The name is allowed to wrap to two lines so long names are legible rather than truncated at a single line.
  */
 @Composable
 private fun DeviceHeadline(device: DeviceListEntry) {
     val node = device.node
     if (node != null) {
-        NodeChip(node = node)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            NodeChip(node = node)
+            DeviceName(text = node.user.long_name.ifBlank { device.name }, modifier = Modifier.weight(1f))
+        }
     } else {
-        Text(
-            text = device.name,
-            style = MaterialTheme.typography.titleLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        DeviceName(text = device.name)
     }
+}
+
+@Composable
+private fun DeviceName(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+    )
 }

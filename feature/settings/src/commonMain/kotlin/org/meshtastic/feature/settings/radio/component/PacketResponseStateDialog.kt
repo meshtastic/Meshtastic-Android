@@ -39,6 +39,7 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.config_saved_restarting
 import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.delivery_confirmed_reboot_warning
 import org.meshtastic.core.resources.error
@@ -46,6 +47,7 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Error
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Success
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
@@ -56,6 +58,7 @@ fun <T> PacketResponseStateDialog(
     onDismiss: () -> Unit = {},
     onComplete: () -> Unit = {},
     onBack: () -> Unit = {},
+    rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
 ) {
     LaunchedEffect(state) {
         if (state is ResponseState.Success) {
@@ -81,7 +84,7 @@ fun <T> PacketResponseStateDialog(
                     }
 
                     is ResponseState.Success -> {
-                        SuccessContent()
+                        SuccessContent(rebootBehavior)
                     }
 
                     is ResponseState.Error -> {
@@ -136,7 +139,7 @@ private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit)
 }
 
 @Composable
-private fun SuccessContent() {
+private fun SuccessContent(rebootBehavior: RebootBehavior) {
     Icon(
         imageVector = MeshtasticIcons.Success,
         contentDescription = null,
@@ -149,12 +152,22 @@ private fun SuccessContent() {
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
-        Text(
-            text = stringResource(Res.string.delivery_confirmed_reboot_warning),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // The firmware applies most config sections with a node reboot; say what is actually happening for the
+        // section that was saved instead of a one-size-fits-all warning (and say nothing when nothing will happen).
+        val rebootNotice =
+            when (rebootBehavior) {
+                RebootBehavior.ALWAYS -> stringResource(Res.string.config_saved_restarting)
+                RebootBehavior.MAY_RESTART -> stringResource(Res.string.delivery_confirmed_reboot_warning)
+                RebootBehavior.NEVER -> null
+            }
+        rebootNotice?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

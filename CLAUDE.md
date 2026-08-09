@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude-Specific Instructions
 
-- **Think First:** Outline step-by-step reasoning inside `<thinking>` tags before writing code or shell commands.
 - **Skills:** Load only the `.skills/` module relevant to the current task — don't read them all. Start with `.skills/project-overview/SKILL.md` (codebase map, bootstrap, troubleshooting).
 - **Plan Mode:** Use it for changes spanning multiple modules; write plans to `.agent_plans/` (git-ignored).
 - **Delegate to keep context lean** (this is a 20+ module KMP repo):
@@ -19,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Reference
 
-JDK 21 is required. **Bootstrap before any Gradle task** (don't wait to be told) — full details in `.skills/project-overview/SKILL.md`:
+JDK 25 is required. **Bootstrap before any Gradle task** (don't wait to be told) — full details in `.skills/project-overview/SKILL.md`:
 ```bash
 [ -z "$ANDROID_HOME" ] && export ANDROID_HOME="$HOME/Library/Android/sdk"  # often unset in agent workspaces
 [ -f local.properties ] || cp secrets.defaults.properties local.properties # google flavor fails without it

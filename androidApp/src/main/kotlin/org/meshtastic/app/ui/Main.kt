@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import co.touchlab.kermit.Logger
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
@@ -37,6 +38,7 @@ import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
@@ -52,6 +54,7 @@ import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.lockdown.LockdownDialog
+import org.meshtastic.feature.settings.navigation.rememberSettingsRadioConfigViewModelProvider
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
@@ -59,18 +62,12 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
-    // Land on Connections for first-run / no-device-selected; otherwise on Nodes. Read synchronously
-    // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
-    val initialTab = remember {
-        if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
-            TopLevelDestination.Connect.route
-        } else {
-            NodesRoute.Nodes
-        }
-    }
+    // Land on Connections for first-run / no-device-selected; otherwise on Nodes (seeded from prefs).
+    val initialTab = remember { initialRoute(viewModel.currentDeviceAddressFlow.value) }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
     val scrollToTopEvents = viewModel.scrollToTopEventFlow
+    val settingsRadioConfigViewModelProvider = rememberSettingsRadioConfigViewModelProvider(backStack)
 
     AndroidAppVersionCheck(viewModel)
 
@@ -95,7 +92,9 @@ fun MainScreen() {
             uiViewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
         ) {
-            val provider =
+            MeshtasticNavDisplay(
+                multiBackstack = multiBackstack,
+                entryProvider =
                 entryProvider<NavKey> {
                     contactsGraph(backStack, scrollToTopEvents, onHandleDeepLink = viewModel::handleDeepLink)
                     nodesGraph(
@@ -110,19 +109,20 @@ fun MainScreen() {
                     channelsGraph(backStack)
                     connectionsGraph(backStack)
                     discoveryGraph(backStack)
-                    settingsGraph(backStack)
+                    settingsGraph(backStack, settingsRadioConfigViewModelProvider)
                     docsEntries(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)
-                }
-            MeshtasticNavDisplay(
-                multiBackstack = multiBackstack,
-                entryProvider = provider,
+                },
                 modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
+                analytics = koinInject<PlatformAnalytics>(),
             )
         }
     }
 }
+
+private fun initialRoute(deviceAddress: String?): NavKey =
+    if (deviceAddress.isNullOrSelectedNone()) TopLevelDestination.Connect.route else NodesRoute.Nodes
 
 /** True when no device address is persisted, or the address is the "none" sentinel (`"n"`). */
 private fun String?.isNullOrSelectedNone(): Boolean = isNullOrBlank() || this == "n"

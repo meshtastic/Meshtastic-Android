@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: Meshtastic arvuti rakendus pakub samu võrgusuhtluse funktsioone Linuxis, macOS-is ja Windowsis.
 aliases:
   - töölaud
@@ -16,21 +16,21 @@ aliases:
 
 Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplatformi kaudu. Most features work identically on Linux, macOS, and Windows.
 
-## Installation
+## Paigaldus
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
+- Lae väljalaske lehelt pakett `.deb` või `.AppImage`
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
+- Lae väljalaske lehelt `.dmg` pakett
 - Or build from source
 
 ### Windows
 
-- Download the `.msi` installer from releases
+- Lae väljalaske lehelt `.msi` paigaldus fail
 - Or build from source
 
 ## Connecting Your Radio
@@ -52,27 +52,27 @@ For network-connected radios:
 
 ### Sinihammas (BLE)
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/JuulLabs/kable) teegi kaudu:
 
-1. Ensure your system has a Bluetooth adapter.
+1. Veendu, et süsteemil on sinihamba adapter.
 2. Rakendus otsib automaatselt lähedalasuvaid Meshtastic raadioid.
 3. Select your device from the Connect screen.
 
 ## Feature Parity
 
-| Feature                                      | Android | Desktop | Sõnumid                                        |
-| -------------------------------------------- | ------- | ------- | ---------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                    |
-| Node List                                    | ✓       | ✓       | Full parity                                    |
-| Kaart                                        | ✓       | ✓       | Full parity                                    |
-| Sätted                                       | ✓       | ✓       | Full parity                                    |
-| Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                           |
-| Püsivara värskendus OTA kaudu                | ✓       | ✗       | Use web flasher                                |
-| Notifications                                | ✓       | ✓       | Native OS notifications                        |
-| Widgets                                      | ✓       | ✗       | Android-only                                   |
-| Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
+| Feature                                      | Android | Desktop | Sõnumid                                                                                                     |
+| -------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| Messaging                                    | ✓       | ✓       | Full parity                                                                                                 |
+| Node List                                    | ✓       | ✓       | Full parity                                                                                                 |
+| Kaart                                        | ✓       | ◐       | Kaardi vahekaart on küll töölaual olemas, aga interaktiivne kaardivaade on saadaval ainult Androidis        |
+| Sätted                                       | ✓       | ✓       | Full parity                                                                                                 |
+| Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                                                                                        |
+| Püsivara uuendus                             | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
+| Märguanded                                   | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                           |
+| Widgets                                      | ✓       | ✗       | Android-only                                                                                                |
+| Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                                              |
+| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                                  |
+| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                                  |
 
 \*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
 
@@ -82,16 +82,19 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
-### Keyboard Shortcuts
+### Kiirklahvid
 
-| Shortcut            | Action                 |
-| ------------------- | ---------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | Ava sätted             |
-| **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
-| **⌘3** / **Ctrl+3** | Switch to Map tab      |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
+Otseteed kasutavad macOS-is **⌘** (Command) ja Windowsis ning Linuxis **Ctrl**. (Super/Windowsi võti pole seotud.)
+
+| Otsetee      | Action                     |
+| ------------ | -------------------------- |
+| **⌘/Ctrl+Q** | Quit the application       |
+| **⌘/Ctrl+,** | Ava sätted                 |
+| **⌘/Ctrl+1** | Switch to Messages tab     |
+| **⌘/Ctrl+2** | Switch to Nodes tab        |
+| **⌘/Ctrl+3** | Lülitu kaardi vahekaardile |
+| **⌘/Ctrl+4** | Switch to Connect tab      |
+| **⌘/Ctrl+/** | Open About                 |
 
 ### Window & System Tray
 
@@ -102,28 +105,27 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 ### Notification Preferences
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+Töölauarakendus pakub rakendusesiseste kuvatavate märguannete juhtimist – sõnumite, uute sõlmede ja aku tühjenemise märguanded. Nendele pääsed ligi rakenduses menüüst **Seaded → Märguanded**.
 
 ## Built-in Documentation Browser
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+Töölauarakendusel on sisseehitatud dokumentatsioonibrauser, mis võimaldab kiiret juurdepääsu abisisule ilma rakendusest lahkumata.
 
-![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Dokumentide brauser sisukorraga](../../assets/screenshots/docs-browser_toc.png)
 
 The browser supports full-text search across all documentation:
 
-![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
+![Dokumentide brauserist otsimine](../../assets/screenshots/docs-browser_search.png)
 
 Individual doc pages render with full formatting:
 
-![A documentation page](../../assets/screenshots/docs-browser_page.png)
+![Dokumentatsioonileht](../../assets/screenshots/docs-browser_page.png)
 
 ## Building from Source
 
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
@@ -134,15 +136,15 @@ Requirements:
 
 ## Known Limitations
 
-- OTA püsivara värskendusi pole (kasuta veebivärskendajat)
-- Some Android-specific features (widgets, specific notification channels) are unavailable
+- Interaktiivne kaardivaade on saadaval ainult Androidile – kaardi vahekaart on olemas, kuid see ei kuva kaarti töölaual
+- Mõned Androidile omased funktsioonid (vidinad, kindlad teavituskanalid) pole saadaval
 - Performance may vary on low-spec hardware running Compose Desktop
 - Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)
 
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Püsivara värskendused] (firmware) – kasutage arvuti püsivara värskenduste jaoks [Web Flasherit] (https://flasher.meshtastic.org)
+- [Püsivara uuendus](firmware) — USB, BLE ja Wi-Fi värskendused toimivad samamoodi nagu Androidis
 
 ---
 

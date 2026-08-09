@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -28,10 +27,10 @@ import org.meshtastic.core.database.entity.NodeWithRelations
 class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) : NodeInfoReadDataSource {
 
     override fun myNodeInfoFlow(): Flow<MyNodeEntity?> =
-        dbManager.currentDb.flatMapLatest { db -> db.nodeInfoDao().getMyNodeInfo() }
+        dbManager.observeCurrentDb { db -> db.nodeInfoDao().getMyNodeInfo() }
 
     override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> =
-        dbManager.currentDb.flatMapLatest { db -> db.nodeInfoDao().nodeDBbyNum() }
+        dbManager.observeCurrentDb { db -> db.nodeInfoDao().nodeDBbyNum() }
 
     override fun getNodesFlow(
         sort: String,
@@ -39,7 +38,7 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
         includeUnknown: Boolean,
         hopsAwayMax: Int,
         lastHeardMin: Int,
-    ): Flow<List<NodeWithRelations>> = dbManager.currentDb.flatMapLatest { db ->
+    ): Flow<List<NodeWithRelations>> = dbManager.observeCurrentDb { db ->
         db.nodeInfoDao()
             .getNodes(
                 sort = sort,
@@ -51,8 +50,11 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
-        dbManager.withDb { it.nodeInfoDao().getNodesOlderThan(lastHeard) } ?: emptyList()
+        dbManager.withReadDb { it.nodeInfoDao().getNodesOlderThan(lastHeard) }
 
     override suspend fun getUnknownNodes(): List<NodeEntity> =
-        dbManager.withDb { it.nodeInfoDao().getUnknownNodes() } ?: emptyList()
+        dbManager.withReadDb { it.nodeInfoDao().getUnknownNodes() }
+
+    override suspend fun getNodeDbSnapshot(): Map<Int, NodeWithRelations> =
+        dbManager.withReadDb { it.nodeInfoDao().nodeDBbyNumSnapshot() }
 }

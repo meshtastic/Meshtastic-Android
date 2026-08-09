@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-05-20
+last_updated: 2026-07-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 設定
@@ -29,7 +29,7 @@ Configure your radio hardware and user identity parameters.
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
 
-## 無線電配置
+## 設定
 
 ### 設備設置
 
@@ -59,20 +59,22 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 | Preset             | 範圍                      | 速度                        | SNR Limit                | Best For                                                                                                 |
 | ------------------ | ----------------------- | ------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| 短 Turbo            | ~1 km   | 21.9 kbps | −5 dB                    | Dense urban with line-of-sight; data-heavy applications                                                  |
+| 短 Turbo            | ~1 km   | 21.9 kbps | −7.5 dB  | Dense urban with line-of-sight; data-heavy applications                                                  |
 | 短 快                | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                       |
 | 短 慢                | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban short-range; moderate building density                                                          |
-| 中等快                | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban areas; moderate building density                                                                |
-| 中等慢                | ~8 km   | 1.1 kbps  | −12.5 dB | Suburban/rural; moderate range with slower speed                                                         |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
-| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **General use (default)** — balanced range and speed                                  |
-| 長度中等的              | ~20 km  | 0.34 kbps | −15 dB                   | Rural with some terrain; occasional use                                                                  |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
+| 中等快                | ~5 km   | 5.5 kbps  | −12.5 dB | Suburban areas; moderate building density                                                                |
+| 中等慢                | ~8 km   | 1.1 kbps  | −15 dB                   | Suburban/rural; moderate range with slower speed                                                         |
+| Long Turbo         | ~10 km  | 4.4 kbps  | −12.5 dB | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
+| Long Fast          | ~10 km  | 1.1 kbps  | −17.5 dB | **General use (default)** — balanced range and speed                                  |
+| 長度中等的              | ~20 km  | 0.34 kbps | −17.5 dB | Rural with some terrain; occasional use                                                                  |
+| Lite Fast          | ~5 km   | 5.5 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
+| Lite Slow          | ~10 km  | 1.1 kbps  | −15 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
 | Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
 | Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
 | ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+
+> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
 
 #### Choosing a Modem Preset
 
@@ -145,15 +147,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### 安全性設定
 
-| 設定                        | 描述說明                                                                       |
-| ------------------------- | -------------------------------------------------------------------------- |
-| 公鑰                        | Your node's public key (read-only)                      |
-| 管理金鑰                      | Key for remote administration                                              |
-| 私鑰                        | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| 除錯日誌                      | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| 管理模式                      | Restrict non-admin channel changes                                         |
+| 設定                        | 描述說明                                                                                                                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公鑰                        | Your node's public key (read-only)                                                                                                                                                          |
+| 管理金鑰                      | Key for remote administration                                                                                                                                                                                  |
+| 私鑰                        | Your node's private key (handle securely)                                                                                                                                                   |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| 除錯日誌                      | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| 管理模式                      | Restrict non-admin channel changes                                                                                                                                                                             |
+| 備份金鑰                      | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

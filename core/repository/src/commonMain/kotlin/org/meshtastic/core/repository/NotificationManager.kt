@@ -24,7 +24,12 @@ package org.meshtastic.core.repository
  * [MeshNotificationManager], which composes over this dispatcher.
  */
 interface NotificationManager {
-    fun dispatch(notification: Notification)
+    /**
+     * Returns true only when the platform accepted the notification for delivery. Suspends until the platform resolves
+     * the send, so the result reflects the actual outcome rather than an optimistic guess (desktop native senders shell
+     * out to OS tools and complete asynchronously).
+     */
+    suspend fun dispatch(notification: Notification): Boolean
 
     fun cancel(id: Int)
 

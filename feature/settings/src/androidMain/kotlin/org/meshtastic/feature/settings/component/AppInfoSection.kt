@@ -58,8 +58,8 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun AppInfoSection(
     appVersionName: String,
-    excludedModulesUnlocked: Boolean,
-    onUnlockExcludedModules: () -> Unit,
+    hiddenFeaturesUnlocked: Boolean,
+    onUnlockHiddenFeatures: () -> Unit,
     onShowAppIntro: () -> Unit,
     onNavigateToAbout: () -> Unit,
 ) {
@@ -107,9 +107,9 @@ fun AppInfoSection(
         }
 
         AppVersionButton(
-            excludedModulesUnlocked = excludedModulesUnlocked,
+            hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             appVersionName = appVersionName,
-            onUnlockExcludedModules = onUnlockExcludedModules,
+            onUnlockHiddenFeatures = onUnlockHiddenFeatures,
         )
     }
 }
@@ -120,9 +120,9 @@ private const val UNLOCK_TIMEOUT_SECONDS = 1 // Timeout in seconds to reset the 
 
 @Composable
 private fun AppVersionButton(
-    excludedModulesUnlocked: Boolean,
+    hiddenFeaturesUnlocked: Boolean,
     appVersionName: String,
-    onUnlockExcludedModules: () -> Unit,
+    onUnlockHiddenFeatures: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -144,14 +144,14 @@ private fun AppVersionButton(
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
         when {
-            clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
+            clickCount == UNLOCKED_CLICK_COUNT && hiddenFeaturesUnlocked -> {
                 clickCount = 0
                 scope.launch { context.showToast(Res.string.modules_already_unlocked) }
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
-                onUnlockExcludedModules()
+                onUnlockHiddenFeatures()
                 scope.launch { context.showToast(Res.string.modules_unlocked) }
             }
         }
@@ -164,8 +164,8 @@ fun AppInfoSectionPreview() {
     AppTheme {
         AppInfoSection(
             appVersionName = "2.5.0",
-            excludedModulesUnlocked = false,
-            onUnlockExcludedModules = {},
+            hiddenFeaturesUnlocked = false,
+            onUnlockHiddenFeatures = {},
             onShowAppIntro = {},
             onNavigateToAbout = {},
         )

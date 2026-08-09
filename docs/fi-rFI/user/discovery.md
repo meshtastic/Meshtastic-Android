@@ -2,7 +2,7 @@
 title: Haku
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-06-11
+last_updated: 2026-07-27
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
   - mesh-verkon haku
@@ -27,7 +27,7 @@ Sovellus tarjoaa kaksi toisiaan täydentävää lähestymistapaa:
 
 Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Se kierrättää yhdistettyä radiota valitsemiesi esiasetusten läpi, kuuntelee jokaisella asetuksella määrätyn ajan kerätäkseen paketteja ja analysoi sekä pisteyttää tulokset.
 
-Avaa se kohdasta **Asetukset → Paikallinen verkon haku**.
+Avaa se kohdasta **Asetukset → Lisäasetukset → Paikallinen mesh-haku**. Työpöytäversiossa sille on oma kohta kohdassa **Asetukset → Paikallinen mesh-haku**.
 
 > ⚠️ **Huom:** Haku muuttaa radiosi LoRa-asetuksia väliaikaisesti skannauksen ajaksi ja palauttaa alkuperäisen konfiguraation sen päätyttyä. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
 
@@ -44,7 +44,6 @@ Ennen aloittamista määritä nämä asetukset:
 **Käynnistä**-painike ei ole käytettävissä ja näyttää syyn, kunnes skannaus voidaan suorittaa. Yleisiä syitä, miksi se on pois käytöstä:
 
 - Laite **ei ole yhdistetty**
-- Nykyinen kanava käyttää **oletuskanava-avainta** (käytä ensin yksilöllistä avainta — katso [Viestit ja kanavat](messages-and-channels)).
 - **Esiasetuksia ei ole valittu** skannattavaksi.
 - Valittu esiasetus käyttää **2,4 GHz -taajuutta**, jota laitteistosi ei tue.
 
@@ -89,6 +88,25 @@ Tuloksista saatavilla olevat lisätoiminnot:
 
 ---
 
+## Verkkokutsu
+
+Mesh Beacon antaa radioille mahdollisuuden kutsua muita liittymään mesh-verkkoon. Majakkatilassa oleva radio lähettää määräajoin kutsun, jossa voidaan ilmoittaa kanava, alue ja modeemiasetus. Näin lähistöllä olevat laitteet voivat havaita verkon jo ennen kuin niillä on yhteinen määritys.
+
+Määritä se kohdassa **Asetukset → Moduuliasetukset → Mesh Beacon**:
+
+- **Kuuntele majakoita** – vastaanota muiden radioiden lähettämiä liittymiskutsuja.
+- **Lähetä majakka** – lähetä oma liittymiskutsusi määritetyin väliajoin. Voit liittää mukaan viestin ja tarjotun kanavan.
+
+Vastaanotetut kutsut näkyvät **Mesh-kutsut** -korteissa haku-näytössä. Jokainen kortti näyttää lähettäjän viestin sekä tarjotun kanavan, alueen, esiasetuksen ja signaalin laadun. Käytettävissä ovat seuraavat toiminnot:
+
+- **Liity** – vaihda tarjottuun kanavaan ja esiasetukseen (radio palautetaan alkutilaan ja käynnistyy uudelleen). Jos tarjous vastaa nykyistä taajuuspaikkaasi, **Lisää kanava** lisää sen ilman uudelleenkäynnistystä.
+- **Tutki** – aloita Haku tarjotulla esiasetuksella, jotta voit tutkia mesh-verkkoa ennen liittymistä (näkyy vain, jos majakka tarjoaa esiasetuksen).
+- **Hylkää** – ohita kutsu.
+
+Majakoiden ilmoittamat kanavat näkyvät myös Haku-toiminnon asetuksissa kohdassa **Majakkakanavat**. Valitse kanava lisätäksesi sen hakukohteeksi.
+
+---
+
 ## Manuaalinen haku
 
 Alla olevat työkalut ovat käytettävissä milloin tahansa radiolistasta ja radion tietonäkymistä. Käytä niitä yksittäisten reittien tutkimiseen ja topologian muodostamiseen, joko osana skannausta tai sen sijaan.
@@ -114,12 +132,12 @@ Sinä → Radio A (SNR: 8.5, RSSI: -95) → Radio B (SNR: 5.2, RSSI: -108) → K
 
 Jokainen hyppy on välittäjä-radio, joka lähetti viestin eteenpäin. Jokaisen hypyn SNR- ja RSSI-arvot kertovat kyseisen yhteysvälin laadusta.
 
-| Mitä kannattaa tarkkailla                                                                            | Mitä se tarkoittaa                                                               |
-| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Kaikki hypyt näyttävät hyvää SNR-arvoa (> 5 dB)                                   | Hyvä reitti — viestit kulkevat luotettavasti                                     |
-| Yksi hyppy näyttää huonon SNR:n (< 0 dB) | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
-| Useita hyppyjä (4+)                                                               | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
-| Eri reitti uudelleenyrityksellä                                                                      | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
+| Mitä kannattaa tarkkailla                                                                                        | Mitä se tarkoittaa                                                               |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Kaikki hypyt näyttävät hyvän SNR:n (≥ −7 dB, vihreä)                          | Hyvä reitti — viestit kulkevat luotettavasti                                     |
+| Yksi hyppy näyttää huonon SNR:n (< −15 dB, punainen) | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
+| Useita hyppyjä (4+)                                                                           | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
+| Eri reitti uudelleenyrityksellä                                                                                  | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
 
 > Vinkki: Aja reitinselvitys useita kertoja muutaman minuutin aikana. Jos reitti muuttuu, verkossasi on varareittejä — merkki hyvin kytketystä verkosta.
 
@@ -170,7 +188,7 @@ Radiolista on itsessään tehokas hakutyökalu, kun käytät sen suodatus- ja la
 
 ### Infrastruktuurin tarkistus
 
-- Poista käytöstä **Ohita infrastruktuurilaitteet** nähdäksesi Router-, Repeater-, Router Late- ja Client Base -radiot.
+- Poista **Jätä infrastruktuuri pois** käytöstä, jos haluat nähdä Router-, Router Late- ja Client Base -radiot.
 - Tarkista niiden signaalin laatu ja viimeksi kuultu -ajat varmistaaksesi, että infrastruktuuriradiot ovat kunnossa.
 
 Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.

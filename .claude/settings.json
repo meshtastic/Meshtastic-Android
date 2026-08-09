@@ -22,7 +22,18 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit.sh\"",
             "timeout": 60,
-            "statusMessage": "Post-edit checks (strings sort / metadata length / module CI filter)"
+            "statusMessage": "Post-edit checks (strings sort / metadata length / module CI filter / Compose pitfalls)"
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/subagent-audit.sh\"",
+            "timeout": 15,
+            "statusMessage": "Subagent-audit (did the subagent touch the tree?)"
           }
         ]
       }

@@ -20,18 +20,27 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
@@ -56,89 +65,174 @@ class BleOtaTransport(
     private val otaChar = BleCharacteristic(OTA_WRITE_CHARACTERISTIC)
     private val txChar = BleCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
 
-    private val responseChannel = Channel<String>(Channel.UNLIMITED)
+    @Volatile private var otaService: BleService? = null
+
+    @Volatile private var responseChannel = Channel<String>(Channel.UNLIMITED)
 
     // Written from the connectionState collector (Dispatchers.Default) and read by the streaming loop's
     // connection-loss guard (Dispatchers.IO); @Volatile ensures the guard sees a mid-transfer disconnect.
     @Volatile private var isConnected = false
 
+    @Volatile private var notificationJob: Job? = null
+
+    @Volatile private var connectionStateJob: Job? = null
+
     /** Scan for the device by MAC address (or MAC+1 for OTA mode) with retries. */
     private suspend fun scanForOtaDevice(): BleDevice? {
         val otaAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, otaAddress)
-        Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
+        Logger.i { "BLE OTA: Will match target OTA device addresses" }
 
         return scanForBleDevice(scanner = scanner, tag = "BLE OTA", serviceUuid = OTA_SERVICE_UUID) {
             it.address in targetAddresses
         }
     }
 
-    @Suppress("MagicNumber")
+    @Suppress("MagicNumber", "LongMethod")
     override suspend fun connect(): Result<Unit> = safeCatching {
+        otaService = null
+        notificationJob?.cancel()
+        notificationJob = null
+        connectionStateJob?.cancel()
+        connectionStateJob = null
+        isConnected = false
+        responseChannel.close()
+        val connectResponseChannel = Channel<String>(Channel.UNLIMITED)
+        responseChannel = connectResponseChannel
+
         Logger.i { "BLE OTA: Waiting $REBOOT_DELAY for device to reboot into OTA mode..." }
         delay(REBOOT_DELAY)
 
-        Logger.i { "BLE OTA: Connecting to $address using Kable..." }
+        Logger.i { "BLE OTA: Connecting to OTA device using Kable..." }
 
         val device =
             scanForOtaDevice()
                 ?: throw OtaProtocolException.ConnectionFailed(
-                    "Device not found at address $address. " +
-                        "Ensure the device has rebooted into OTA mode and is advertising.",
+                    "Device not found. Ensure the device has rebooted into OTA mode and is advertising.",
                 )
 
-        bleConnection.connectionState
-            .onEach { state ->
-                Logger.d { "BLE OTA: Connection state changed to $state" }
-                isConnected = state is BleConnectionState.Connected
-            }
-            .launchIn(transportScope)
+        connectionStateJob =
+            bleConnection.connectionState
+                .onEach { state ->
+                    Logger.d { "BLE OTA: Connection state changed to $state" }
+                    isConnected = state is BleConnectionState.Connected
+                }
+                .launchIn(transportScope)
 
         try {
             val finalState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
             if (finalState is BleConnectionState.Disconnected) {
-                Logger.w { "BLE OTA: Failed to connect to ${device.address} (state=$finalState)" }
-                throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${device.address}")
+                Logger.w { "BLE OTA: Failed to connect to OTA device (state=$finalState)" }
+                throw OtaProtocolException.ConnectionFailed("Failed to connect to OTA device")
             }
         } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
-            Logger.w { "BLE OTA: Timed out waiting to connect to ${device.address}. Error: ${e.message}" }
-            throw OtaProtocolException.Timeout("Timed out connecting to device at address ${device.address}")
+            currentCoroutineContext().ensureActive()
+            Logger.w { "BLE OTA: Timed out waiting to connect to OTA device. Error: ${e.message}" }
+            throw OtaProtocolException.Timeout("Timed out connecting to OTA device")
         }
 
-        Logger.i { "BLE OTA: Connected to ${device.address}, discovering services..." }
+        val cacheInvalidated = bleConnection.invalidateServiceCache()
+        Logger.d { "BLE OTA: GATT cache invalidation requested: $cacheInvalidated" }
+        if (cacheInvalidated) {
+            Logger.i { "BLE OTA: Invalidated stale GATT service cache before OTA discovery" }
+        } else {
+            Logger.d { "BLE OTA: GATT cache invalidation not available; proceeding with existing service cache" }
+        }
 
-        bleConnection.profile(OTA_SERVICE_UUID) { service ->
-            // Log negotiated MTU for diagnostics
-            val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
-            Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
+        Logger.i { "BLE OTA: Connected to OTA device, discovering services..." }
 
-            // Collect responses. onSubscription fires when the CCCD write completes — a precise readiness
-            // signal; the settle below is a conservative cushion.
-            val subscribed = CompletableDeferred<Unit>()
-            service
-                .observe(txChar) {
-                    Logger.d { "BLE OTA: TX characteristic subscribed" }
-                    subscribed.complete(Unit)
-                }
-                .onEach { notifyBytes ->
-                    try {
-                        val response = notifyBytes.decodeToString()
-                        Logger.d { "BLE OTA: Received response: $response" }
-                        responseChannel.trySend(response)
-                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                        Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+        try {
+            discoverAndPrepareOtaService(device, connectResponseChannel, cacheInvalidated)
+        } catch (e: TimeoutCancellationException) {
+            otaService = null
+            currentCoroutineContext().ensureActive()
+            Logger.w { "BLE OTA: Timed out waiting for OTA service discovery. Error: ${e.message}" }
+            throw OtaProtocolException.Timeout("Timed out waiting for BLE OTA service discovery")
+        } catch (e: OtaProtocolException) {
+            otaService = null
+            throw e
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            otaService = null
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            otaService = null
+            Logger.w(e) { "BLE OTA: Failed to prepare OTA service" }
+            throw OtaProtocolException.ConnectionFailed("Failed to prepare BLE OTA service", e)
+        }
+    }
+
+    @Suppress("LongMethod")
+    private suspend fun discoverAndPrepareOtaService(
+        device: BleDevice,
+        connectResponseChannel: Channel<String>,
+        cacheInvalidated: Boolean,
+    ) {
+        suspend fun prepareProfile() {
+            bleConnection.profile(OTA_SERVICE_UUID) { service ->
+                service.requireOtaCharacteristics()
+
+                val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
+                Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
+
+                val notificationsReady = CompletableDeferred<Unit>()
+                notificationJob =
+                    launch(start = CoroutineStart.UNDISPATCHED) {
+                        service
+                            .observe(txChar) {
+                                Logger.d { "BLE OTA: TX characteristic subscribed" }
+                                notificationsReady.complete(Unit)
+                            }
+                            .onEach { notifyBytes ->
+                                try {
+                                    val response = notifyBytes.decodeToString()
+                                    Logger.d { "BLE OTA: Received response: $response" }
+                                    connectResponseChannel.trySend(response)
+                                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                                    Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+                                }
+                            }
+                            .catch { e ->
+                                Logger.e(e) { "BLE OTA: Error in TX characteristic notification flow" }
+                                if (!notificationsReady.isCompleted) {
+                                    notificationsReady.completeExceptionally(e)
+                                }
+                                connectResponseChannel.close(e)
+                            }
+                            .collect()
+                    }
+
+                val confirmed = withTimeoutOrNull(SUBSCRIPTION_SETTLE) { notificationsReady.await() } != null
+                if (confirmed) {
+                    Logger.i { "BLE OTA: TX notifications subscribed" }
+                } else {
+                    Logger.w {
+                        "BLE OTA: TX notification subscription not confirmed after $SUBSCRIPTION_SETTLE; " +
+                            "continuing with bounded settle fallback"
                     }
                 }
-                .catch { e ->
-                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                    Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
-                }
-                .launchIn(this)
+                otaService = service
+                Logger.i { "BLE OTA: Service discovered and ready" }
+            }
+        }
 
-            subscribed.await()
-            // Conservative settle after CCCD confirmation before issuing commands.
-            delay(SUBSCRIPTION_SETTLE)
-            Logger.i { "BLE OTA: Service discovered and ready" }
+        try {
+            prepareProfile()
+        } catch (e: OtaProtocolException.ConnectionFailed) {
+            if (!cacheInvalidated) throw e
+            Logger.i {
+                "BLE OTA: OTA characteristics missing after cache refresh; reconnecting to force service rediscovery"
+            }
+            notificationJob?.cancel()
+            notificationJob = null
+            otaService = null
+            bleConnection.disconnect()
+            delay(CACHE_REFRESH_RECONNECT_DELAY)
+            val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+            if (reconnectState is BleConnectionState.Disconnected) {
+                throw OtaProtocolException.ConnectionFailed("Failed to reconnect to OTA device after cache refresh")
+            }
+            Logger.i { "BLE OTA: Reconnected after cache refresh for OTA service rediscovery" }
+            prepareProfile()
         }
     }
 
@@ -264,6 +358,12 @@ class BleOtaTransport(
         }
 
     override suspend fun close() {
+        notificationJob?.cancel()
+        notificationJob = null
+        connectionStateJob?.cancel()
+        connectionStateJob = null
+        otaService = null
+        responseChannel.close()
         bleConnection.disconnect()
         isConnected = false
         transportScope.cancel()
@@ -275,6 +375,7 @@ class BleOtaTransport(
     }
 
     private suspend fun writeData(data: ByteArray, writeType: BleWriteType): Int {
+        val service = otaService ?: throw OtaProtocolException.TransferFailed("BLE OTA service is not ready")
         // takeIf { it > 0 }: a non-positive negotiated length would stall the loop (offset never advances); fall
         // back to a single whole-buffer write instead of looping forever.
         val maxLen = bleConnection.maximumWriteValueLength(writeType)?.takeIf { it > 0 } ?: data.size
@@ -286,7 +387,7 @@ class BleOtaTransport(
                 val chunkSize = minOf(data.size - offset, maxLen)
                 val packet = data.copyOfRange(offset, offset + chunkSize)
 
-                bleConnection.profile(OTA_SERVICE_UUID) { service -> service.write(otaChar, packet, writeType) }
+                service.write(otaChar, packet, writeType)
 
                 offset += chunkSize
                 packetsSent++
@@ -301,6 +402,31 @@ class BleOtaTransport(
         OtaProtocolException.Timeout("Timeout waiting for response after $timeout")
     }
 
+    private fun BleService.requireOtaCharacteristics() {
+        val missing = mutableListOf<String>()
+        if (!hasCharacteristic(txChar)) {
+            missing.add("TX notify characteristic $txChar")
+        }
+        if (!hasCharacteristic(otaChar)) {
+            missing.add("OTA write characteristic $otaChar")
+        }
+
+        if (missing.isNotEmpty()) {
+            val discovered = discoveredCharacteristicUuids()
+            val diagnostic =
+                if (discovered.isNotEmpty()) {
+                    " (discovered characteristics: $discovered)"
+                } else {
+                    " (no characteristics discovered for OTA service)"
+                }
+            throw OtaProtocolException.ConnectionFailed(
+                "ESP32 OTA service was missing required characteristics after BLE service discovery: " +
+                    missing.joinToString(separator = "; ") +
+                    diagnostic,
+            )
+        }
+    }
+
     companion object {
         private val CONNECTION_TIMEOUT = 15.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
@@ -308,6 +434,7 @@ class BleOtaTransport(
         private val ACK_TIMEOUT = 10.seconds
         private val VERIFICATION_TIMEOUT = 10.seconds
         private val REBOOT_DELAY = 5.seconds
+        private val CACHE_REFRESH_RECONNECT_DELAY = 1.seconds
         const val RECOMMENDED_CHUNK_SIZE = 512
 
         /** Fallback write payload when the MTU has not been negotiated (23-byte ATT MTU minus the 3-byte header). */

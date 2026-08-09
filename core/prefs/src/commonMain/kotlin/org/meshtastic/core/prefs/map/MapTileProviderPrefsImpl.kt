@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.map
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
@@ -27,16 +25,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MapTileProviderDataStore
 import org.meshtastic.core.repository.MapTileProviderPrefs
 
 @Single
-class MapTileProviderPrefsImpl(
-    @Named("MapTileProviderDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MapTileProviderPrefs {
+class MapTileProviderPrefsImpl(private val dataStore: MapTileProviderDataStore, dispatchers: CoroutineDispatchers) :
+    MapTileProviderPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customTileProviders: StateFlow<String?> =

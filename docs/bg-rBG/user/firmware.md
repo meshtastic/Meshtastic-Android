@@ -2,8 +2,8 @@
 title: Актуализации на фърмуера
 parent: Ръководство за потребители
 nav_order: 13
-last_updated: 2026-05-13
-description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.
+last_updated: 2026-07-07
+description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
   - update
@@ -17,7 +17,7 @@ aliases:
 
 ## Проверка за актуализации
 
-1. Отидете до **Настройки → Актуализация на фърмуера** или докоснете известието за фърмуера, ако е показано.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
 2. Приложението проверява за налични версии на фърмуера.
 3. Available updates show the version number and changelog summary.
 
@@ -39,19 +39,26 @@ aliases:
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB Flashing
+### In-App USB Update
 
-For recovery or when OTA is unavailable:
+When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+
+> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+
+### Other Flashing Options
+
+For recovery or when neither OTA nor in-app USB is available:
 
 - Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
 - Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
 
 ## Канали на версиите
 
-| Канал    | Описание                                               |
-| -------- | ------------------------------------------------------ |
-| Стабилен | Препоръчва се за повечето потребители; тествани версии |
-| Алфа     | Предварителни издания; може да съдържат грешки         |
+| Канал        | Описание                                                                   |
+| ------------ | -------------------------------------------------------------------------- |
+| Стабилен     | Препоръчва се за повечето потребители; тествани версии                     |
+| Алфа         | Предварителни издания; може да съдържат грешки                             |
+| Локален файл | Flash a firmware file you select yourself, instead of a downloaded release |
 
 ## Контролен списък преди актуализация
 
@@ -68,12 +75,12 @@ After the firmware is written, the app verifies the update and waits for the dev
 
 ![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+След като актуализацията е успешна:
 
 - Радиото ще се рестартира автоматично
 - Bluetooth връзката ще се възстанови
 - Проверете дали настройките ви са непокътнати
-- Проверете версията на фърмуера в **Настройки → Относно**
+- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
 
 ![Актуализацията на фърмуера е успешна](../../assets/screenshots/firmware_success.png)
 
@@ -89,7 +96,7 @@ If the update appears frozen:
 
 ![Грешка при актуализация на фърмуера](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### Устройството не се стартира след актуализация
 
 If your device fails to boot:
 
@@ -98,7 +105,7 @@ If your device fails to boot:
 3. Flash a known-good firmware version
 4. Check the Meshtastic Discord for device-specific recovery steps
 
-### Compatibility Warnings
+### Предупреждения за съвместимост
 
 The app may show warnings when:
 
@@ -108,12 +115,12 @@ The app may show warnings when:
 
 > ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
 
-## Related Topics
+## Свързани теми
 
 - [Connections](connections) — reconnecting after a firmware update
 - [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
 
 ---
 

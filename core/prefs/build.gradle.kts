@@ -17,7 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -34,7 +34,5 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
         }
-
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

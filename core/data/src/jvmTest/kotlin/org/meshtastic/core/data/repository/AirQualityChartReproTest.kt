@@ -17,8 +17,11 @@
 package org.meshtastic.core.data.repository
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -26,6 +29,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.manager.MeshMessageProcessorImpl
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -34,6 +38,9 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeMeshLogPrefs
@@ -197,8 +204,31 @@ class AirQualityChartReproTest {
 
             val myNodeNumFlow = MutableStateFlow<Int?>(null) // not yet resolved
             val nodeManager = mock<NodeManager>(MockMode.autofill)
+            val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
+            val session = RadioSessionContext(generation = 1L, address = "test:air-quality")
             every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
             every { nodeManager.myNodeNum } returns myNodeNumFlow
+            every { radioInterfaceService.isSessionActive(session) } returns true
+            everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
+                {
+                    @Suppress("UNCHECKED_CAST")
+                    val block = it.args[1] as (suspend () -> Unit)
+                    block()
+                    true
+                }
+            everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } calls
+                {
+                    @Suppress("UNCHECKED_CAST")
+                    val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
+                    block(
+                        object : RadioSessionLease {
+                            override val session: RadioSessionContext = session
+
+                            override fun isCurrent(): Boolean = true
+                        },
+                    )
+                    true
+                }
 
             val processor =
                 MeshMessageProcessorImpl(
@@ -207,11 +237,12 @@ class AirQualityChartReproTest {
                     meshLogRepository = lazy { repository },
                     dataHandler = lazy { mock<MeshDataHandler>(MockMode.autofill) },
                     fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill),
-                    scope = backgroundScope,
+                    radioInterfaceService = radioInterfaceService,
+                    scope = backgroundScope.asServiceScope(),
                 )
 
             // Arrives before MyNodeInfo resolves -> buffered, NOT written to the log table (so not orphaned in the DB).
-            processor.handleReceivedMeshPacket(airQualityPacket(), myNodeNum = null)
+            processor.handleReceivedMeshPacket(airQualityPacket(), myNodeNum = null, session = session)
             advanceUntilIdle()
             assertEquals(0, repository.getAllLogsUnbounded().first().size, "packet should be buffered, not yet stored")
 

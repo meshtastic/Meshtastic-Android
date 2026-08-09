@@ -52,6 +52,9 @@ internal fun processTcpServices(
             }
             DeviceListEntry.Tcp(displayName, address)
         }
+        // mDNS can resolve two services to one host:port (e.g. re-announce before the old record expires). The device
+        // list keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+        .distinctBy { it.fullAddress }
         .sortedBy { it.name }
 }
 
@@ -87,6 +90,9 @@ internal fun buildRecentTcpEntries(
 ): List<DeviceListEntry.Tcp> = recentAddresses
     .filterNot { discoveredAddresses.contains(it.address) }
     .map { DeviceListEntry.Tcp(it.name, it.address) }
+    // The persisted list is not guaranteed unique: only add() dedupes, and legacy blobs bypass it. The device list
+    // keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+    .distinctBy { it.fullAddress }
     .map { entry ->
         entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, nodeDb, databaseManager))
     }

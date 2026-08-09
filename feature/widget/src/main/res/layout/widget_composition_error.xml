@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!--
+    Last-resort UI for LocalStatsWidget, inflated by LocalStatsWidget.onCompositionError when the Glance
+    composition throws. It replaces Glance's default "Can't show content" layout.
+
+    This is a RemoteViews layout, so it is deliberately plain: no Compose, no theming, no click targets. The text is
+    left empty here and set at runtime via setTextViewText, because the user-facing string lives in the
+    Crowdin-managed Compose-resources catalog (core/resources) rather than in Android resources. Hardcoding a string
+    here would ship it untranslated.
+
+    textColorPrimary resolves against the host launcher's theme, which keeps the message legible in both light and
+    dark without us guessing at a background colour.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/widget_app_icon"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/widget_composition_error_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:maxLines="2"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="12sp" />
+
+</LinearLayout>

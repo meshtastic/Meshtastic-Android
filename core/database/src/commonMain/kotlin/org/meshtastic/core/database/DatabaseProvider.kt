@@ -16,15 +16,36 @@
  */
 package org.meshtastic.core.database
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Provides multiplatform access to the current [MeshtasticDatabase] and a safe transactional helper. Platform
  * implementations manage the concrete lifecycle (Room on Android, etc.).
+ *
+ * **Write policy:** every one-shot DAO *write* (insert/upsert/update/delete/clear) must go through [withDb], never
+ * `currentDb.value` directly. [withDb] registers the write with the cross-transport merge drain barrier (see
+ * [DatabaseManager.associateDevice]) so a merge can't snapshot a database while the write is still in flight and lose
+ * it when that database is retired. The callback is never replayed automatically after it starts: callers that need
+ * retries must make that policy explicit at a higher layer where idempotency is known.
+ *
+ * One-shot DAO *reads* use [withReadDb]. They stay out of writer admission and the serialized containment lane; the
+ * logical-retirement guarantee in [DatabaseManager] keeps a captured published pool alive for the process lifetime.
+ * Long-lived DAO Flows use [observeCurrentDb] so each implementation must make its database-switch/recovery policy
+ * explicit. [currentDb] remains the synchronous ownership source and the backing latch for existing Paging factories.
  */
 interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */
     val currentDb: StateFlow<MeshtasticDatabase>
+
+    /** Re-latches [query] whenever the active database changes. Production also recovers a wedged Room pool. */
+    fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T>
+
+    /**
+     * Execute one bounded read against the synchronously published current database without writer admission. The read
+     * is tracked through orderly shutdown and fails with [IllegalStateException] if admission starts after shutdown.
+     */
+    suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T
 
     /** Execute [block] against the current database, returning `null` if no database is available. */
     suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T?

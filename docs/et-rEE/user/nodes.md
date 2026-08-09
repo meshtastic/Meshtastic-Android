@@ -2,12 +2,13 @@
 title: Sõlmed
 parent: User Guide
 nav_order: 4
-last_updated: 2026-06-25
+last_updated: 2026-07-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
   - mesh-nodes
   - peers
+  - hop-histogram
 ---
 
 # Sõlmed
@@ -16,13 +17,13 @@ The Nodes screen displays all devices visible on your mesh network.
 
 ## Node List
 
-The node list shows every node your radio has heard, including:
+Sõlmede loend näitab kõiki sõlmi, mida raadio on kuulnud, sealhulgas:
 
 - **Sõlme nimi** — kasutaja pandud pikk nimi
-- **Short name** — 4-character identifier
+- **Lühinimi** — 4-tähemärgiline identifikaator
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
+- **Vahemaa** — hinnanguline vahemaa (kui positsioone jagatakse)
 - **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
 ### Node Status Indicators
@@ -45,27 +46,27 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
 | Klient-baas                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                                      |
 | Vaikne klient                    | Receives but doesn't retransmit                                                                                                                                         |
 | Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                                             |
-| Ruuter                           | Prioritizes message forwarding; stays awake to relay                                                                                                                    |
+| Ruuter                           | Prioriseerib sõnumi edastamist; jääb edastamiseks ärkvele                                                                                                               |
 | Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)                                |
 | ~~Router Client~~                | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.3.15) — enam mitte valitav; kasuta hoopis ruuterint või kliendina |
 | ~~Repeater~~                     | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
 | Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                                   |
 | Andur                            | Optimized for telemetry reporting                                                                                                                                       |
-| TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                                  |
-| Jälgitav TAK                     | TAK position reporting only                                                                                                                                             |
-| Lost & Found | Continuous position beacon for recovery                                                                                                                                 |
+| TAK                              | Ühildub TAK süsteemidega (saadab/võtab vastu CoT)                                                                                                    |
+| Jälgitav TAK                     | Ainult TAK asukoha aruandlus                                                                                                                                            |
+| Lost & Found | Pidev asukoha majakas taastamiseks                                                                                                                                      |
 
 ### Choosing a Role
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
+- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
 - **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
-- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
+- **Baas klient** – käsitleb lemmiksõlmedesse suunduvat ja sealt tulevaid liiklusi ruuteri hilinemise prioriteediga (tagades, et need sõnumid saavad täiendava edastuskatte), samal ajal kui kõike muud käsitletakse tavalise kliendina.
+- **Kliendi vaigistatud** — Soovid vastu võtta võrguliiklust, aga mitte edastamisse panustada. Useful for monitoring-only devices or to reduce congestion in dense areas.
 - **Jälgimisseade** – järelevalveta seade, mille ainus eesmärk on oma GPS asukoha levitamine (nt sõiduk, lemmikloom või vara). Aku säästmiseks magab saadete vahel.
 - **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
-- **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. See [TAK Integration](tak) for details.
+- **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. Üksikasjade saamiseks vaata [TAK integratsioon](tak).
 
 > 💡 **Vihje:** Kärgvõrk töötab kõige paremini, kui enamik sõlmi on **klient** või **ruuter**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
@@ -73,11 +74,11 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Nodes display encryption status icons next to their name:
 
-| Icon            | Meaning                                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Lukustatud   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Lukust lahti | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Ebakõla      | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Icon            | Meaning                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Lukustatud   | Suhtlus kasutab PKI-d (avaliku võtme infrastruktuuri) – otsast lõpuni krüpteeritud kontrollitud identiteediga |
+| 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                                 |
+| ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri)       |
 
 > 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
@@ -88,7 +89,7 @@ From the node list, you can:
 - **Puuduta** sõlmel, et vaadata üksikasjade lehte
 - **Long-press** for quick actions:
   - Mark/remove favorite
-  - Mute/unmute notifications
+  - Teavituste vaigistamine/vaigistuse tühistamine
   - Send a direct message
   - Trace route
   - Ignore/unignore
@@ -98,18 +99,18 @@ From the node list, you can:
 
 ### Text Search
 
-Type in the search field to filter nodes by name or short name. Filter uueneb reaalajas kirjutamise ajal.
+Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter uueneb reaalajas kirjutamise ajal.
 
 ### Filter Toggles
 
-| Filtreeri                  | Kirjeldus                                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 2 hours                                                  |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                        |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
+| Filtreeri                  | Kirjeldus                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| **Only online**            | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                   |
+| **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi         |
+| **Include unknown**        | Näita sõlmi, mis pole veel kasutajainfot saatnud                                     |
+| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
+| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                              |
+| **Kuva ignoreeritud**      | Kuva sõlmed, mille olete varem sulgenud või vaigistanud                              |
 
 ### Sort Options
 
@@ -118,10 +119,14 @@ Type in the search field to filter nodes by name or short name. Filter uueneb re
 | **Last heard** (default) | Most recently heard nodes first                                    |
 | **Alphabetical**                            | Sorted by node long name                                           |
 | **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
-| **Channel**                                 | Grouped by channel index                                           |
+| **Hüppe kaugusel**                          | Vähim vahendatud hüppeid esimesena                                 |
+| **Kanal**                                   | Rühmitatud kanali loendi alusel                                    |
 | **Läbi MQTT**                               | Rühmitatud MQTT ver raadiost kuuldud järgi                         |
 | **Favorites**                               | Favorited nodes first                                              |
+
+## Sõlme hüppe kohta
+
+Puuduta sõlmede loendi rakenduse ribal hüppehistogrammi ikooni, et avada tulpdiagramm, mis näitab, mitu sõlme asub igal hüppekaugusel (0 = otse, 1 = ühe relee kaugusel jne). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
 
 ## Node Detail
 
@@ -133,28 +138,28 @@ The detail screen includes device info, position, and action buttons:
 
 ![Sõlme üksikasjade jaotis](../../assets/screenshots/nodes_detail_section.png)
 
-Inline status indicators show key metrics at a glance:
+Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
-| Indicator       | Screenshot                                                    |
-| --------------- | ------------------------------------------------------------- |
-| Signal quality  | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
-| Battery level   | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
-| Hop count       | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
-| Viimati kuuldud | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
-| Kaugus          | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+| Indicator       | Screenshot                                                        |
+| --------------- | ----------------------------------------------------------------- |
+| Signal quality  | ![Signaal](../../assets/screenshots/nodes_signal_info.png)        |
+| Aku tase        | ![Aku](../../assets/screenshots/nodes_battery_info.png)           |
+| Hüppete loendur | ![Hüpet](../../assets/screenshots/nodes_hops_info.png)            |
+| Viimati kuuldud | ![Viimati kuuldud](../../assets/screenshots/nodes_last_heard.png) |
+| Kaugus          | ![Kaugus](../../assets/screenshots/nodes_distance_info.png)       |
 
-### Device Links ("I want one")
+### Seadme lingid ("Soovin ühte")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
-- [Messages & Channels](messages-and-channels) — send a direct message to a node
-- [Map & Waypoints](map-and-waypoints) — view node positions geographically
-- [Discovery](discovery) — traceroute and neighbor info for topology exploration
+- [Sõnumid ja kanalid](messages-and-channels) — saada otsesõnum sõlmele
+- [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede geograafilisi asukohti
+- [Avasta](Discovery) - traceroute ja naabri-info kärgvõrgu topoloogia uurimiseks
 - [Signal Meter](signal-meter) — understand what the signal bars mean
 
 ---

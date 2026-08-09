@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -62,7 +61,7 @@ dependencies {
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
-    compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly(libs.develocity.gradlePlugin)
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
@@ -128,6 +127,10 @@ gradlePlugin {
         register("androidLibraryCompose") {
             id = "meshtastic.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
+        register("androidScreenshot") {
+            id = "meshtastic.android.screenshot"
+            implementationClass = "AndroidScreenshotConventionPlugin"
         }
         register("androidApplicationCompose") {
             id = "meshtastic.android.application.compose"

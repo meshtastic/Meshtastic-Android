@@ -19,6 +19,12 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
+/**
+ * Whether Kable honours a scan filter on device address here. Android only: `Filter.Address` throws on Apple/JS, and
+ * the JVM/btleplug backend evaluates predicates with a hardcoded null address so it matches nothing.
+ */
+internal expect val supportsNativeAddressScanFilter: Boolean
+
 /** Platform-specific configuration for the Peripheral builder based on device type. */
 internal expect fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean)
 
@@ -44,3 +50,17 @@ internal expect fun Peripheral.requestHighConnectionPriority(): Boolean
  * operations complete. On platforms without an equivalent API (JVM/iOS) this is a no-op.
  */
 internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
+
+/**
+ * Clears the platform's cached GATT service table for the connected [Peripheral].
+ *
+ * Kable keeps Android's `BluetoothGatt` on an internal connection object owned by the peripheral. This extension
+ * searches the peripheral and its active connection for that field, then invokes the hidden `refresh()` API to clear
+ * the per-device service cache.
+ *
+ * Necessary when a device reboots into a different GATT profile (e.g., ESP32 OTA loader) using the same BLE MAC.
+ *
+ * Returns `true` if the cache was invalidated. On platforms without a cache (JVM/iOS) this is a no-op returning
+ * `false`.
+ */
+internal expect fun Peripheral.refreshGattCache(): Boolean

@@ -124,6 +124,13 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /**
+     * Whether to apply an event edition's ambient theme (accent wash + custom typeface) app-wide (opt-out; default on).
+     */
+    val eventThemeEnabled: StateFlow<Boolean>
+
+    fun setEventThemeEnabled(enabled: Boolean)
+
     /** Whether BLE scanning should auto-start when the Connections screen is opened. */
     val bleAutoScan: StateFlow<Boolean>
 
@@ -138,6 +145,12 @@ interface UiPrefs {
     val selectedConnectionTransport: StateFlow<DeviceType?>
 
     fun setSelectedConnectionTransport(type: DeviceType)
+
+    /** Keys for firmware-update notifications already scheduled on this device. */
+    val firmwareUpdateNotificationKeys: StateFlow<Set<String>>
+
+    /** Records a notification key after the platform notification has been scheduled successfully. */
+    fun recordFirmwareUpdateNotificationKey(key: String)
 
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
@@ -199,6 +212,19 @@ interface NotificationPrefs {
 
     val nodeEventsAutoDisabledForEvent: StateFlow<Boolean>
 
+    /**
+     * Applies the node-event notification default for the connected firmware, as a single atomic update.
+     *
+     * The decision reads both [nodeEventsEnabled] and [nodeEventsAutoDisabledForEvent] and conditionally writes both,
+     * so it cannot be expressed as separate reads and setter calls: the setters are asynchronous and the StateFlows lag
+     * them, so a caller doing it by hand can read stale values or clobber a concurrent user toggle.
+     *
+     * On event firmware, node events are disabled and the restore is claimed — but only if they were actually on, so a
+     * user who had already turned them off is not re-enabled later. On vanilla firmware, a previously claimed restore
+     * is honored and released.
+     */
+    fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean)
+
     fun setNodeEventsAutoDisabledForEvent(disabled: Boolean)
 
     val lowBatteryEnabled: StateFlow<Boolean>
@@ -215,6 +241,7 @@ interface NotificationPrefs {
 }
 
 /** Reactive interface for general map preferences. */
+@Suppress("TooManyFunctions")
 interface MapPrefs {
     val mapStyle: StateFlow<Int>
 
@@ -239,7 +266,33 @@ interface MapPrefs {
     val lastHeardTrackFilter: StateFlow<Long>
 
     fun setLastHeardTrackFilter(seconds: Long)
+
+    /** URIs of imported map layers the user has toggled off; a layer is visible unless its URI is in this set. */
+    val hiddenLayerUrls: StateFlow<Set<String>>
+
+    /** Atomically mutate [hiddenLayerUrls]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [hiddenLayerUrls]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitHiddenLayerUrls(): Set<String>
+
+    /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
+    val networkMapLayers: StateFlow<Set<String>>
+
+    /** Atomically mutate [networkMapLayers]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [networkMapLayers]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitNetworkMapLayers(): Set<String>
+
+    /** Persist the F-Droid map camera as one atomic preference update. */
+    fun setCameraPosition(position: MapCameraPosition)
+
+    /** Load the complete persisted camera, or null before the map has ever been positioned. */
+    suspend fun awaitCameraPosition(): MapCameraPosition?
 }
+
+data class MapCameraPosition(val latitude: Double, val longitude: Double, val zoom: Double)
 
 /** Reactive interface for map consent. */
 interface MapConsentPrefs {
@@ -293,6 +346,14 @@ interface TakPrefs {
     val isTakServerEnabled: StateFlow<Boolean>
 
     fun setTakServerEnabled(enabled: Boolean)
+
+    /**
+     * Whether mesh nodes are synthesized into CoT contacts for connected TAK clients. Opt-in and default off; only
+     * takes effect while [isTakServerEnabled] is also true.
+     */
+    val isMeshToCotEnabled: StateFlow<Boolean>
+
+    fun setMeshToCotEnabled(enabled: Boolean)
 }
 
 /** Reactive interface for App Functions (system AI integration) preferences. */

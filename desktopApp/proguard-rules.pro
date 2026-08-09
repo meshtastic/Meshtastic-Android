@@ -40,11 +40,20 @@
 -dontwarn sun.misc.Unsafe
 -dontwarn java.lang.invoke.**
 
-# ---- JNA (Java Native Access) — used by LinuxNotificationSender for libnotify ---
+# ---- JNA (Java Native Access) — libnotify sender + kable's btleplug BLE bindings ---
 # JNA uses reflection to bind native methods; keep its core and callback classes.
 -keep class com.sun.jna.** { *; }
 -keep class com.sun.jna.ptr.** { *; }
 -dontwarn com.sun.jna.**
+
+# JNA callbacks are only ever invoked from native code, so the shrinker sees the
+# abstract methods as unused and empties the interface. JNA then can't resolve
+# the callback method and rejects the whole vtable Structure at <clinit>:
+#   IllegalArgumentException: Structure field "uniffiFree" was declared as
+#   ...UniffiCallbackInterfaceFree, which is not supported within a Structure
+# which killed BLE scanning in every packaged desktop build (#6553).
+-keep class * implements com.sun.jna.Callback { *; }
+-keep class * extends com.sun.jna.Structure { *; }
 
 # ---- jSerialComm Android stubs (cross-platform serial library) --------------
 # jSerialComm bundles Android shims that reference android.* classes; harmless

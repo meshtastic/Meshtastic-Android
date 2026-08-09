@@ -19,6 +19,7 @@
 package org.meshtastic.feature.messaging
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
@@ -66,16 +68,23 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
@@ -91,6 +100,7 @@ import org.meshtastic.core.resources.message_input_label
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
+import org.meshtastic.core.ui.component.InlineStyle
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -99,6 +109,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
+import org.meshtastic.feature.messaging.component.FormattingToolbar
 import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
 import org.meshtastic.feature.messaging.component.MessageMenuAction
 import org.meshtastic.feature.messaging.component.MessageSearchBar
@@ -110,6 +121,9 @@ import org.meshtastic.feature.messaging.component.TranslationModelDownloadDialog
 
 private const val ROUNDED_CORNER_PERCENT = 100
 private const val MAX_LINES = 3
+
+// Minimum draft length before the markdown formatting toolbar appears (matches the iOS client).
+private const val FORMATTING_TOOLBAR_MIN_CHARS = 3
 
 /**
  * The main screen for displaying and sending messages to a contact or channel.
@@ -138,6 +152,13 @@ fun MessageScreen(
     val focusManager = LocalFocusManager.current
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val mentionCandidates by remember {
+        derivedStateOf {
+            nodes
+                .associate { it.user.id to MentionCandidate(it.user.id, it.user.long_name, it.user.short_name) }
+                .toPersistentMap()
+        }
+    }
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
@@ -423,7 +444,7 @@ fun MessageScreen(
                     isEnabled = connectionState is ConnectionState.Connected,
                     isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                     textFieldState = messageInputState,
-                    nodes = nodes,
+                    mentionCandidates = mentionCandidates,
                     onSendMessage = {
                         val messageText = messageInputState.text.toString().trim { it.isWhitespace() }
                         if (messageText.isNotEmpty()) {
@@ -519,22 +540,161 @@ internal fun currentMentionQuery(text: String, selection: TextRange): MentionQue
     return MentionQuery(at, cursor, query)
 }
 
-private fun Node.matchesMention(query: String): Boolean {
-    if (query.isEmpty()) return true
-    val q = query.lowercase()
-    return user.long_name.lowercase().contains(q) ||
-        user.short_name.lowercase().contains(q) ||
-        user.id.lowercase().contains(q)
+/**
+ * Lightweight mention target — contains only fields that affect composer presentation. A telemetry-only [Node] change
+ * leaves a [MentionCandidate] unchanged so the composable's recomposition scope stays narrow. Normalized fields are
+ * cached once so matching does not allocate three lowercase strings per candidate on every keystroke.
+ */
+internal data class MentionCandidate(val id: String, val longName: String, val shortName: String) {
+    private val normalizedId = id.lowercase()
+    private val normalizedLongName = longName.lowercase()
+    private val normalizedShortName = shortName.lowercase()
+
+    fun matchesNormalizedQuery(query: String): Boolean =
+        normalizedLongName.contains(query) || normalizedShortName.contains(query) || normalizedId.contains(query)
 }
 
-/** Displays `@!<hex>` tokens as `@FriendlyName` while typing; the stored buffer keeps the hex wire form. */
-private fun mentionOutputTransformation(nodesById: Map<String, Node>) = OutputTransformation {
+internal fun matchingMentionCandidates(
+    candidates: Collection<MentionCandidate>,
+    query: String,
+    limit: Int = MENTION_SUGGESTION_LIMIT,
+): List<MentionCandidate> = when {
+    limit <= 0 -> emptyList()
+
+    query.isEmpty() -> candidates.take(limit)
+
+    else -> {
+        val normalizedQuery = query.lowercase()
+        candidates.asSequence().filter { it.matchesNormalizedQuery(normalizedQuery) }.take(limit).toList()
+    }
+}
+
+/** Regex-backed inline-markdown style ranges for the live TextField path — avoids the IntelliJ GFM parser. */
+private val LIVE_BOLD = Regex("\\*\\*([^*]+)\\*\\*")
+private val LIVE_ITALIC = Regex("(?<!\\*)\\*([^*]+)\\*(?!\\*)") // single *, not part of **
+private val LIVE_STRIKE = Regex("~~([^~]+)~~")
+private val LIVE_CODE = Regex("`([^`]+)`")
+
+internal data class LiveStyleSpan(val range: IntRange, val style: InlineStyle)
+
+/**
+ * Detects live-markdown spans in [source] using simple regex patterns instead of a full GFM AST parser.
+ *
+ * The live composer intentionally previews only asterisk emphasis, strikethrough, and inline code. Underscore emphasis
+ * remains raw while editing, but the sent message still uses the full Markdown renderer.
+ */
+internal fun liveInlineMarkdownStyleRanges(source: String): List<LiveStyleSpan> {
+    if (!source.any { it in LIVE_STYLE_DELIMITER_SET }) return emptyList()
+    val codeMatches = LIVE_CODE.findAll(source).toList()
+    // Returns true when either delimiter boundary of this match falls inside a code span. Markdown entirely inside
+    // code, or malformed markdown crossing a code boundary, must not add styling. A code span nested inside outer
+    // emphasis is still allowed, so outer bold text can retain both its bold span and an inner code span.
+    val isBlockedByCodeSpan: (MatchResult) -> Boolean = { match ->
+        codeMatches.any { codeMatch -> match.range.first in codeMatch.range || match.range.last in codeMatch.range }
+    }
+    return buildList {
+        LIVE_BOLD.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Bold))
+        }
+        LIVE_ITALIC.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Italic))
+        }
+        LIVE_STRIKE.findAll(source).filterNot(isBlockedByCodeSpan).forEach {
+            add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Strikethrough))
+        }
+        codeMatches.forEach { add(LiveStyleSpan(it.groups[1]!!.range, InlineStyle.Code)) }
+    }
+        .sortedWith(compareBy<LiveStyleSpan>({ it.range.first }, { it.range.last }, { it.style.ordinal }))
+}
+
+private val LIVE_STYLE_DELIMITER_SET = setOf('*', '~', '`')
+
+internal data class MentionReplacement(val range: IntRange, val text: String)
+
+internal data class MentionOutputPlan(val replacements: List<MentionReplacement>, val styleSpans: List<LiveStyleSpan>)
+
+/**
+ * Builds presentation edits from the immutable source buffer. Markdown is parsed before friendly-name replacement so
+ * display names containing `*`, `~`, or backticks cannot introduce formatting that was not present in the stored text.
+ */
+internal fun mentionOutputPlan(source: String, candidatesById: Map<String, MentionCandidate>): MentionOutputPlan {
+    val replacements =
+        MENTION_TOKEN_REGEX.findAll(source)
+            .mapNotNull { match ->
+                val candidate = candidatesById[match.groupValues[1]] ?: return@mapNotNull null
+                MentionReplacement(match.range, "@" + candidate.longName.ifEmpty { candidate.shortName })
+            }
+            .toList()
+    val styleSpans = remapStyleSpans(liveInlineMarkdownStyleRanges(source), replacements)
+    return MentionOutputPlan(replacements, styleSpans)
+}
+
+/** Remaps source-buffer style ranges through non-overlapping mention replacements. */
+internal fun remapStyleSpans(spans: List<LiveStyleSpan>, replacements: List<MentionReplacement>): List<LiveStyleSpan> {
+    if (spans.isEmpty() || replacements.isEmpty()) return spans
+    val sortedReplacements = replacements.sortedBy { it.range.first }
+    return spans.mapNotNull { span ->
+        val start = remapBoundary(span.range.first, sortedReplacements, preferReplacementEnd = false)
+        val endExclusive = remapBoundary(span.range.last + 1, sortedReplacements, preferReplacementEnd = true)
+        if (start >= endExclusive) null else span.copy(range = start until endExclusive)
+    }
+}
+
+private fun remapBoundary(
+    sourceOffset: Int,
+    replacements: List<MentionReplacement>,
+    preferReplacementEnd: Boolean,
+): Int {
+    var delta = 0
+    var mappedOffset: Int? = null
+    val iterator = replacements.iterator()
+    while (iterator.hasNext() && mappedOffset == null) {
+        val replacement = iterator.next()
+        val sourceStart = replacement.range.first
+        val sourceEndExclusive = replacement.range.last + 1
+        mappedOffset =
+            when {
+                sourceOffset <= sourceStart -> sourceOffset + delta
+
+                sourceOffset < sourceEndExclusive ->
+                    sourceStart + delta + if (preferReplacementEnd) replacement.text.length else 0
+
+                else -> {
+                    delta += replacement.text.length - (sourceEndExclusive - sourceStart)
+                    null
+                }
+            }
+    }
+    return mappedOffset ?: sourceOffset + delta
+}
+
+/**
+ * Displays `@!<hex>` tokens as `@FriendlyName` and applies live inline-markdown styling (bold/italic/strikethrough/
+ * code) while typing. Both are presentation-only via [OutputTransformation]: the stored buffer keeps the hex wire form
+ * and the raw markdown delimiters, so the bytes sent are unchanged.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private fun mentionOutputTransformation(candidatesById: Map<String, MentionCandidate>) = OutputTransformation {
     val source = toString()
-    // ponytail: replace back-to-front so earlier offsets stay valid; editing inside a substituted token is imperfect
-    // but the caret sits outside tokens in normal use.
-    for (match in MENTION_TOKEN_REGEX.findAll(source).toList().asReversed()) {
-        val node = nodesById[match.groupValues[1]] ?: continue
-        replace(match.range.first, match.range.last + 1, "@" + node.user.long_name.ifEmpty { node.user.short_name })
+    // Fast path: plain text with no mention tokens or markdown delimiters — skip all scanning.
+    val hasMention = source.indexOf('@') >= 0
+    val needsStyle = hasMention || source.any { it in LIVE_STYLE_DELIMITER_SET }
+    if (!needsStyle) return@OutputTransformation
+
+    val plan = mentionOutputPlan(source, candidatesById)
+    for (replacement in plan.replacements.asReversed()) {
+        replace(replacement.range.first, replacement.range.last + 1, replacement.text)
+    }
+    for (span in plan.styleSpans) {
+        val spanStyle =
+            when (span.style) {
+                InlineStyle.Bold -> SpanStyle(fontWeight = FontWeight.Bold)
+                InlineStyle.Italic -> SpanStyle(fontStyle = FontStyle.Italic)
+                InlineStyle.Strikethrough -> SpanStyle(textDecoration = TextDecoration.LineThrough)
+                InlineStyle.Code -> SpanStyle(fontFamily = FontFamily.Monospace)
+                InlineStyle.Link -> continue
+            }
+        addStyle(spanStyle, span.range.first, span.range.last + 1)
     }
 }
 
@@ -543,7 +703,8 @@ private fun mentionOutputTransformation(nodesById: Map<String, Node>) = OutputTr
  *
  * @param isEnabled Whether the input field should be enabled.
  * @param textFieldState The [TextFieldState] managing the input's text.
- * @param nodes Known nodes, used for the `@`-mention autocomplete and friendly-name display.
+ * @param mentionCandidates Identity-stable node-id → mention entry. Only changes when a node's id or display name
+ *   changes — telemetry-only updates leave this map structurally identical, preventing recomposition churn.
  * @param modifier The modifier for this composable.
  * @param maxByteSize The maximum allowed size of the message in bytes.
  * @param onSendMessage Callback invoked when the send button is pressed or send IME action is triggered.
@@ -554,7 +715,7 @@ private fun MessageInput(
     isEnabled: Boolean,
     isHomoglyphEncodingEnabled: Boolean,
     textFieldState: TextFieldState,
-    nodes: List<Node>,
+    mentionCandidates: ImmutableMap<String, MentionCandidate>,
     modifier: Modifier = Modifier,
     maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
     onSendMessage: () -> Unit,
@@ -577,24 +738,23 @@ private fun MessageInput(
     val isOverLimit = currentByteLength > maxByteSize
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
-    val nodesById = remember(nodes) { nodes.associateBy { it.user.id } }
-    val mentionOutput = remember(nodesById) { mentionOutputTransformation(nodesById) }
+    val mentionOutput = remember(mentionCandidates) { mentionOutputTransformation(mentionCandidates) }
     val mentionQuery by
         remember(textFieldState) {
             derivedStateOf { currentMentionQuery(textFieldState.text.toString(), textFieldState.selection) }
         }
     val suggestions =
-        remember(mentionQuery, nodes) {
-            val query = mentionQuery?.query ?: return@remember emptyList<Node>()
-            nodes.filter { it.matchesMention(query) }.take(MENTION_SUGGESTION_LIMIT)
+        remember(mentionQuery, mentionCandidates) {
+            val query = mentionQuery?.query ?: return@remember emptyList<MentionCandidate>()
+            matchingMentionCandidates(mentionCandidates.values, query)
         }
 
     // While the mention popup is open, Enter / send completes the top suggestion instead of sending a raw @query.
     val mentionActive = mentionQuery != null && suggestions.isNotEmpty()
-    fun insertMention(node: Node) {
+    fun insertMention(candidate: MentionCandidate) {
         val q = mentionQuery ?: return
         textFieldState.edit {
-            val insert = "@${node.user.id} "
+            val insert = "@${candidate.id} "
             replace(q.start, q.end, insert)
             selection = TextRange(q.start + insert.length)
         }
@@ -607,21 +767,26 @@ private fun MessageInput(
         }
     }
 
+    var isFocused by remember { mutableStateOf(false) }
+
     Column(modifier = modifier.fillMaxWidth()) {
         if (mentionActive) {
             MentionSuggestions(suggestions = suggestions, onPick = ::insertMention)
         }
         OutlinedTextField(
             modifier =
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).onKeyEvent { keyEvent ->
-                val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
-                if (isEnterNoShift) {
-                    if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
-                    true // consume both KeyDown and KeyUp to prevent newline insertion
-                } else {
-                    false
-                }
-            },
+            Modifier.fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .onFocusChanged { isFocused = it.isFocused }
+                .onKeyEvent { keyEvent ->
+                    val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+                    if (isEnterNoShift) {
+                        if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
+                        true // consume both KeyDown and KeyUp to prevent newline insertion
+                    } else {
+                        false
+                    }
+                },
             state = textFieldState,
             outputTransformation = mentionOutput,
             lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
@@ -659,31 +824,37 @@ private fun MessageInput(
                 }
             },
         )
+        // Markdown formatting toolbar — shown once the field is focused and holds enough text to format (iOS parity).
+        if (isEnabled && isFocused && currentText.length >= FORMATTING_TOOLBAR_MIN_CHARS) {
+            FormattingToolbar(state = textFieldState, modifier = Modifier.padding(horizontal = 8.dp))
+        }
     }
 }
 
 @Composable
-private fun MentionSuggestions(suggestions: List<Node>, onPick: (Node) -> Unit) {
+private fun MentionSuggestions(suggestions: List<MentionCandidate>, onPick: (MentionCandidate) -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         tonalElevation = 3.dp,
         shape = RoundedCornerShape(12.dp),
     ) {
         Column {
-            suggestions.forEach { node ->
+            suggestions.forEach { candidate ->
                 Row(
                     modifier =
-                    Modifier.fillMaxWidth().clickable { onPick(node) }.padding(horizontal = 12.dp, vertical = 8.dp),
+                    Modifier.fillMaxWidth()
+                        .clickable { onPick(candidate) }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = node.user.short_name,
+                        text = candidate.shortName,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = node.user.long_name,
+                        text = candidate.longName,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -697,13 +868,14 @@ private fun MentionSuggestions(suggestions: List<Node>, onPick: (Node) -> Unit) 
 @PreviewLightDark
 @Composable
 fun MessageInputPreview() {
+    val mentionCandidates = persistentMapOf<String, MentionCandidate>()
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {
                 MessageInput(
                     isEnabled = true,
                     isHomoglyphEncodingEnabled = false,
-                    nodes = emptyList(),
+                    mentionCandidates = mentionCandidates,
                     textFieldState = rememberTextFieldState("Hello"),
                     onSendMessage = {},
                 )
@@ -711,7 +883,7 @@ fun MessageInputPreview() {
                 MessageInput(
                     isEnabled = false,
                     isHomoglyphEncodingEnabled = false,
-                    nodes = emptyList(),
+                    mentionCandidates = mentionCandidates,
                     textFieldState = rememberTextFieldState("Disabled"),
                     onSendMessage = {},
                 )
@@ -719,7 +891,7 @@ fun MessageInputPreview() {
                 MessageInput(
                     isEnabled = true,
                     isHomoglyphEncodingEnabled = false,
-                    nodes = emptyList(),
+                    mentionCandidates = mentionCandidates,
                     textFieldState =
                     rememberTextFieldState(
                         "A very long message that might exceed the byte limit " +
@@ -733,7 +905,7 @@ fun MessageInputPreview() {
                 MessageInput(
                     isEnabled = true,
                     isHomoglyphEncodingEnabled = false,
-                    nodes = emptyList(),
+                    mentionCandidates = mentionCandidates,
                     textFieldState = rememberTextFieldState("こんにちは世界"), // Hello World in Japanese
                     onSendMessage = {},
                     maxByteSize = 10,

@@ -76,7 +76,9 @@ actual fun rememberSaveFileLauncher(
 /** JVM — Opens a native file dialog to pick a file. */
 @Composable
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit = { _ ->
-    val dialog = FileDialog(null as? Frame, "Open File", FileDialog.LOAD)
+    // Explicit Frame? local disambiguates the FileDialog(Frame, ...) overload from FileDialog(Dialog, ...)
+    val parentFrame: Frame? = null
+    val dialog = FileDialog(parentFrame, "Open File", FileDialog.LOAD)
     dialog.isVisible = true
     val file = dialog.file
     val dir = dialog.directory

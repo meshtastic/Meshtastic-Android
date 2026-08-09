@@ -8,7 +8,7 @@ aliases:
   - sovellustoiminnot
   - järjestelmä-ai
   - gemini
-  - assistenttitoiminnot
+  - avustaja
 ---
 
 # Sovellustoiminnot

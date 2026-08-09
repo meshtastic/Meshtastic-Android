@@ -57,12 +57,15 @@ fun CommonUri.toChannelSet(): ChannelSet {
     val fragmentBytes =
         fragmentBase64.decodeBase64() ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment")
     val url = ChannelSet.ADAPTER.decode(fragmentBytes)
-    val shouldAdd =
-        fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")
-            ?: getBooleanQueryParameter("add", false)
+    val shouldAdd = fragment?.substringAfter('?', "")?.addParameter() ?: getBooleanQueryParameter("add", false)
 
     return if (shouldAdd) url.copy(lora_config = null) else url
 }
+
+private fun String.addParameter(): Boolean? = split('&')
+    .firstOrNull { it.substringBefore('=').equals("add", ignoreCase = true) }
+    ?.substringAfter('=', missingDelimiterValue = "true")
+    ?.equals("true", ignoreCase = true)
 
 /** @return A list of globally unique channel IDs usable with MQTT subscribe() */
 val ChannelSet.subscribeList: List<String>
@@ -128,16 +131,19 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
  * Builds the [ChannelSet] to hand the QR channel-import dialog for a given [option].
  *
  * [ADD][BeaconJoinOption.ADD] omits `lora_config` so the dialog merges the offered channel into a free secondary slot
- * with no reboot. [SWITCH][BeaconJoinOption.SWITCH] carries a `lora_config` derived from [currentLora] with only the
- * advertised preset+region applied and `channel_num` reset to 0 (firmware derives the frequency from the offered
- * channel name — Apple FR-006). Every other radio setting (`hop_limit`, `tx_power`, `tx_enabled`, …) is preserved from
- * [currentLora], so joining never silently zeroes them — the beacon proto advertises no such fields. Returns `null` for
+ * with no reboot. [SWITCH][BeaconJoinOption.SWITCH] carries a **fresh** `lora_config` (not a copy of [currentLora])
+ * with `use_preset = true`, the advertised preset+region applied, and every RF field left at its default — notably
+ * `channel_num`/`override_frequency` zeroed so firmware re-derives the frequency from the offered channel name (Apple
+ * FR-006). Starting blank guarantees no stale slot/frequency pin (`channel_num`, `override_frequency`, manual
+ * bandwidth/spread_factor/coding_rate) from the old mesh survives the retune. Only `region` is carried from
+ * [currentLora] when the beacon doesn't advertise one — this config is sent as a full LoRaConfig replacement, and a
+ * zero region disables transmit; `hop_limit`/`tx_enabled` fall back to the app's standard defaults. Returns `null` for
  * [NONE][BeaconJoinOption.NONE] or a beacon with no offered channel.
  *
  * Both paths strip position sharing from the offered channel ([withoutPositionSharing]) so joining a stranger's mesh
  * never leaks our location — matching Apple's `joinBeaconMesh`/`addBeaconChannel`.
  *
- * @param currentLora The radio's current [LoRaConfig]; a switch alters only preset/region/channel_num.
+ * @param currentLora The radio's current [LoRaConfig]; a switch reuses only its region/preset as fallbacks.
  */
 fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfig?): ChannelSet? {
     val offerChannel = (offer_channel ?: return null).withoutPositionSharing()
@@ -145,16 +151,16 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
         BeaconJoinOption.ADD -> ChannelSet(settings = listOf(offerChannel))
 
         BeaconJoinOption.SWITCH -> {
-            // Always ship a LoRaConfig so channel_num resets to 0 and firmware re-derives the frequency from the
-            // offered
-            // channel name (Apple FR-006) — even when no preset is offered (else an explicit channel_num override would
-            // strand the radio on the old slot). Preserve every current field; override only the advertised
-            // preset/region.
+            // Start from the shared device default ([Channel.default] — use_preset=true, hop_limit/tx_enabled set,
+            // every RF field blank) rather than a copy of the current config: any stale RF pin on the connected radio
+            // — an explicit channel_num, override_frequency, or manual bandwidth/spread_factor/coding_rate — would
+            // otherwise strand it on the old slot. use_preset + the default (zero) channel_num/override_frequency lets
+            // firmware re-derive the frequency from the offered channel name (Apple FR-006). This is sent as a full
+            // LoRaConfig replacement, so carry region (a zero region disables transmit); the beacon proto advertises
+            // no other RF fields.
             val base = currentLora ?: LoRaConfig()
             val loraConfig =
-                base.copy(
-                    use_preset = true,
-                    channel_num = 0,
+                Channel.default.loraConfig.copy(
                     modem_preset = offer_preset ?: base.modem_preset,
                     region = if (offer_region != RegionCode.UNSET) offer_region else base.region,
                 )
@@ -178,7 +184,7 @@ private fun ChannelSettings.withoutPositionSharing(): ChannelSettings =
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): CommonUri {
-    val channelBytes = ChannelSet.ADAPTER.encode(this)
+    val channelBytes = ChannelSet.ADAPTER.encode(if (shouldAdd) copy(lora_config = null) else this)
     val enc = channelBytes.toByteString().base64Url().replace("=", "")
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""

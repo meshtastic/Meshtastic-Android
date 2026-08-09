@@ -17,6 +17,8 @@
 package org.meshtastic.core.ui.viewmodel
 
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.proto.ClientNotification
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -45,5 +47,24 @@ class UIViewModelImportSummaryTest {
         val summary = CommonUri.parse("https://meshtastic.org/e/#").toSanitizedImportSummary()
 
         assertTrue(summary.contains("hasFragment=false"))
+    }
+
+    @Test
+    fun ota_status_notifications_are_suppressed() {
+        assertTrue(ClientNotification(message = "Rebooting to WiFi OTA").isOtaStatusNotification())
+        assertTrue(ClientNotification(message = "Rebooting to BLE OTA").isOtaStatusNotification())
+        assertTrue(
+            ClientNotification(message = "Cannot start OTA: OTA Loader partition not found.").isOtaStatusNotification(),
+        )
+        assertTrue(ClientNotification(message = "OTA Loader does not support WiFi").isOtaStatusNotification())
+        assertTrue(ClientNotification(message = "Unable to switch to the OTA partition.").isOtaStatusNotification())
+    }
+
+    @Test
+    fun non_ota_status_notifications_are_not_suppressed() {
+        assertFalse(ClientNotification(message = "Low battery").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Key verification requested").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "ROTATE credentials").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Quota exceeded").isOtaStatusNotification())
     }
 }

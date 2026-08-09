@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asFilterDataStore
 import org.meshtastic.core.repository.FilterPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -54,7 +55,7 @@ class FilterPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
+        filterPrefs = FilterPrefsImpl(dataStore.asFilterDataStore(), dispatchers)
     }
 
     @AfterTest

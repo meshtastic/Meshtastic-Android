@@ -161,7 +161,6 @@ fun TracerouteOsmMap(
 
     val mapView =
         rememberMapViewWithLifecycle(
-            applicationId = mapViewModel.applicationId,
             box = initialCameraView ?: BoundingBox(),
             tileSource = CustomTileSource.getTileSource(mapViewModel.mapStyleId),
         )

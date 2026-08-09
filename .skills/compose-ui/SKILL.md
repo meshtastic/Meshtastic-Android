@@ -41,8 +41,9 @@ Choose the right tool for the job:
 
 - **Workflow to Add a String:**
   1. Add to `core/resources/src/commonMain/composeResources/values/strings.xml`.
-  2. Use the generated `org.meshtastic.core.resources.<key>` symbol.
-  3. Validate UI presentation.
+  2. Run `python3 scripts/sort-strings.py` — keeps the file sorted and regenerates `strings-index.txt`.
+  3. Use the generated `org.meshtastic.core.resources.<key>` symbol.
+  4. Validate UI presentation.
 
 ## 3. Tooling & Capabilities
 - **Image Loading:** Use `libs.coil` (Coil Compose) in feature modules. Configuration/Networking for Coil (`coil-network-ktor3`) happens strictly in the `app` and `desktop` host modules.

@@ -43,6 +43,13 @@
     <!-- APP -->
     <string name="app_too_old">Nepohodno je ažuriranje aplikacije </string>
     <string name="apply">Примени</string>
+    <!-- AQI -->
+    <string name="aqi_good">Dobro</string>
+    <string name="aqi_hazardous">Опасно</string>
+    <string name="aqi_moderate">Умерено</string>
+    <string name="aqi_unhealthy">Нездраво</string>
+    <string name="aqi_unhealthy_sensitive">Нездраво за осетљиве групе</string>
+    <string name="aqi_very_unhealthy">Веома нездраво</string>
     <string name="are_you_sure">Да ли сте сигурни?</string>
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="back">Назад</string>
@@ -132,6 +139,7 @@
     <string name="delivery_confirmed">Испорука потврђена</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="description">Опис</string>
+    <!-- DESKTOP -->
     <string name="detection_sensor">Сензор откривања</string>
     <string name="detection_sensor_config">Подешавања ензора откривања</string>
     <!-- DEVICE -->
@@ -140,6 +148,7 @@
     <string name="device_metrics_log">Метрика уређаја</string>
     <string name="device_sleeping">Uređaj je u stanju spavanja</string>
     <string name="direct_message">Директне поруке</string>
+    <string name="direct_messages">Директне поруке</string>
     <string name="disconnect">Прекините везу</string>
     <string name="disconnected">Raskačeno</string>
     <!-- DISCOVERY -->
@@ -187,6 +196,7 @@
     <string name="firmware_update_no_device">Нема повезаних уређаја</string>
     <string name="firmware_update_release_notes">Белешке о издању</string>
     <string name="fixed_position">Фиксна локација</string>
+    <!-- FORMAT -->
     <string name="frequency_slot">Фреквенцијски слот</string>
     <string name="friendly_name">Пријатељски назив</string>
     <string name="generate_qr_code">Генерисање QR кода</string>
@@ -211,6 +221,7 @@
     <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
     <string name="ignore_mqtt">Игнориши MQTT</string>
     <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>
+    <!-- IMPORT -->
     <string name="indoor_air_quality_iaq">Квалитет ваздуха у затвореном простору (IAQ)</string>
     <string name="info">Информација</string>
     <string name="interval_always_on">Увек укључен</string>
@@ -276,7 +287,6 @@
     <string name="message">Порука</string>
     <string name="message_delivery_status">Status prijema poruke</string>
     <string name="message_input_label">Порука</string>
-    <string name="message_status_enroute">Čeka na potvrdu</string>
     <string name="message_status_queued">U redu za slanje</string>
     <string name="message_status_unknown">Непознато</string>
     <string name="messages">Поруке</string>
@@ -332,6 +342,7 @@
     <string name="options">Опције</string>
     <!-- OUTPUT -->
     <string name="override_frequency_mhz">Измена фреквенције</string>
+    <!-- PACKET -->
     <string name="password">Лозинка</string>
     <!-- PAX -->
     <!-- POSITION -->
@@ -423,6 +434,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator jačine primljenog signala RSSI, merenje koje se koristi za određivanje nivoa snage koji antena prima. Viša vrednost RSSI generalno ukazuje na jaču i stabilniju vezu.</string>
     <string name="sats">Сателита</string>
+    <!-- SAVE -->
     <string name="save">Сачувај</string>
     <string name="save_changes">Сачувај</string>
     <!-- SCAN -->
@@ -448,6 +460,8 @@
     <string name="shutdown">Искључи</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kvalitet signala</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Приказ</string>
     <string name="smart_position">Паметно позиционирање</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>
@@ -517,5 +531,6 @@
     <string name="wifi_qr_code_scan">Скенирај ВајФај QR код</string>
     <!-- WIND -->
     <string name="wind_speed">Брзина ветра</string>
+    <!-- WRITE -->
     <string name="you">Ti</string>
 </resources>

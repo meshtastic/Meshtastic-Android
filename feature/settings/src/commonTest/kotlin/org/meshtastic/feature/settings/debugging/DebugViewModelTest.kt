@@ -21,6 +21,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -196,5 +197,94 @@ class DebugViewModelTest {
     fun `requestDeleteAllLogs shows alert`() {
         viewModel.requestDeleteAllLogs()
         verify { alertManager.showAlert(titleRes = any(), messageRes = any(), onConfirm = any()) }
+    }
+
+    // Regression tests for #6520: Wire's toString prints int fields SIGNED and `=`-delimited
+    // (`from=-559038737,`), which the annotation regexes — written for protobuf-java's
+    // unsigned, whitespace-bounded text format — silently stopped matching. These go through
+    // the real generated toString, so they hold whichever wire format is in use.
+
+    @Test
+    fun `packet log annotates signed Wire-format from and to with hex`() = runTest {
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 0xDEADBEEF.toInt(), to = -1)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs.size shouldBe 1
+        logs[0].logMessage shouldContain "(!deadbeef)"
+        logs[0].logMessage shouldContain "(!ffffffff)"
+    }
+
+    @Test
+    fun `packet log annotates relay_node with the known node's name`() = runTest {
+        nodeRepository.setNodes(
+            listOf(
+                org.meshtastic.core.testing.TestDataFactory.createTestNode(
+                    num = 0x000001AA,
+                    userId = "!000001aa",
+                    longName = "Relay Node",
+                    lastHeard = 100,
+                ),
+            ),
+        )
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 5, to = -1, relayNode = 0xAA)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "relay_node=Relay Node (!000001aa)"
+    }
+
+    @Test
+    fun `packet log annotates unknown relay_node with hex`() = runTest {
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 5, to = -1, relayNode = 0xF5)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "(!000000f5)"
+    }
+
+    @Test
+    fun `node info log still annotates legacy protobuf-java text format`() = runTest {
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "NodeInfo",
+                received_date = 1L,
+                raw_message = "node_info {\n  num: 3735928559\n}",
+                fromRadio =
+                org.meshtastic.proto.FromRadio(node_info = org.meshtastic.proto.NodeInfo(num = 0xDEADBEEF.toInt())),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "num: 3735928559 (!deadbeef)"
     }
 }

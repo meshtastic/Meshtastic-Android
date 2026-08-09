@@ -1,0 +1,19 @@
+# Class A of "Recurring Defect Classes" in .skills/code-review/SKILL.md, enforced mechanically.
+# 0 is a real reading on these scales, so a zero-guard silently drops a genuine measurement.
+# Humidity is deliberately excluded: 0 %RH is not physically reachable, and
+# EnvironmentMetricsForGraphingTest.humidity_zeroFilteredOut asserts that guard on purpose.
+id: presence-vs-sentinel-zero-float
+language: kotlin
+severity: warning
+message: >-
+  Zero-guard on a zero-inclusive scale drops real readings. 0 is valid for temperature,
+  current, voltage and soil moisture, so `(x ?: 0f) != 0f` hides a genuine measurement and
+  conflates it with "not reported". Use a null check — `x?.let { }` — as NodeItem.kt does for
+  ambient temperature. Humidity is the one legitimate exception and is excluded from this rule.
+note: >-
+  See .skills/code-review/SKILL.md, "Recurring Defect Classes", class A.
+rule:
+  pattern: "($FIELD ?: 0f) != 0f"
+constraints:
+  FIELD:
+    regex: "\\.(temperature|soil_temperature|co2_temperature|current|voltage|soil_moisture)$"

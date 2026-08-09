@@ -2,7 +2,7 @@
 title: Връзки
 parent: Ръководство за потребители
 nav_order: 2
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Свържете телефона или настолния си компютър с Meshtastic радио чрез Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -23,15 +23,15 @@ Bluetooth Low Energy е методът за свързване по подраз
 
 1. Уверете се, че вашето радио Meshtastic е включено и е в режим на сдвояване.
 2. Отворете приложението и отидете в раздела **Свързване**.
-3. Натиснете **Сканиране за устройства** — ще се появят близките радиа Meshtastic.
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. Изберете вашето устройство от списъка.
 5. Приемете подканата за Bluetooth сдвояване, ако се покаже.
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
 
@@ -74,13 +74,13 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 
 Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-### Connecting over the Network
+### Свързване през мрежата
 
 1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
+2. On the Connect screen, select **Network** in the transport selector.
 3. Choose the radio one of two ways:
-   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
-   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
+   - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
+   - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
 
 > 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.

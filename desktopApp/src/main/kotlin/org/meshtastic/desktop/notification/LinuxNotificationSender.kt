@@ -29,6 +29,17 @@ import org.meshtastic.core.repository.Notification
  *
  * Only the minimal API surface needed for fire-and-forget desktop notifications is exposed. See:
  * https://developer-old.gnome.org/libnotify/stable/
+ *
+ * **The GLib entry points below MUST stay on this interface.** They are deliberately resolved through the *libnotify*
+ * handle rather than a separate `Native.load("gobject-2.0", ...)`. `dlsym()` on a library handle searches that library
+ * *and its dependency chain*, and libnotify has a `DT_NEEDED` on `libgobject-2.0.so.0`/`libglib-2.0.so.0` — so this
+ * guarantees we get the exact same GLib instance that libnotify itself is bound to.
+ *
+ * Loading `gobject-2.0` separately is NOT safe: a JVM process can easily have two distinct GLib copies mapped at once
+ * (e.g. the JDK/Compose Desktop AWT stack drags in a bundled GTK3 + GLib, while libnotify binds to the system GLib).
+ * Each copy owns a private `GType` registry, so freeing a `NotifyNotification` created by one copy with the other
+ * copy's `g_object_unref()` walks the wrong registry and jumps through a null vtable slot — an immediate SIGSEGV at
+ * `pc=0x0` inside `g_object_unref`, not a catchable exception.
  */
 @Suppress("FunctionNaming", "FunctionParameterNaming", "ktlint:standard:function-naming")
 private interface LibNotify : Library {
@@ -45,12 +56,12 @@ private interface LibNotify : Library {
     fun notify_notification_show(notification: Pointer, error: PointerByReference?): Boolean
 
     fun notify_uninit()
-}
 
-/** Minimal GLib bindings for GVariant creation and GObject ref-counting. */
-@Suppress("FunctionNaming", "FunctionParameterNaming", "ktlint:standard:function-naming")
-private interface GLib : Library {
+    // --- GLib, resolved via libnotify's own dependency chain. See the KDoc above before touching these. ---
+
     fun g_object_unref(obj: Pointer)
+
+    fun g_error_free(error: Pointer)
 
     fun g_variant_new_boolean(value: Boolean): Pointer
 
@@ -94,31 +105,31 @@ private object NotifyUrgency {
 class LinuxNotificationSender(
     private val appName: String = "Meshtastic",
     private val desktopEntry: String = appName.lowercase(),
-) : NativeNotificationSender {
+) : NativeNotificationSender,
+    AutoCloseable {
 
-    private val lib: LibNotify?
-    private val glib: GLib?
+    /**
+     * Cleared by [close]. Volatile so a [close] on the shutdown path is visible to any thread that is about to call
+     * [send]; a send already past its null check will still complete against the old handle, which is why [close] is
+     * documented as "once sends have stopped".
+     */
+    @Volatile private var lib: LibNotify?
 
     init {
         var loadedLib: LibNotify? = null
-        var loadedGLib: GLib? = null
         try {
             loadedLib = Native.load("notify", LibNotify::class.java) as LibNotify
-            loadedGLib = Native.load("gobject-2.0", GLib::class.java) as GLib
             if (loadedLib.notify_init(appName)) {
                 Logger.i { "libnotify initialized for '$appName'" }
             } else {
                 Logger.w { "notify_init('$appName') returned false" }
                 loadedLib = null
-                loadedGLib = null
             }
         } catch (e: UnsatisfiedLinkError) {
             Logger.w(e) { "libnotify not available — native Linux notifications disabled" }
             loadedLib = null
-            loadedGLib = null
         }
         lib = loadedLib
-        glib = loadedGLib
     }
 
     /** Whether libnotify was successfully loaded and initialized. */
@@ -151,8 +162,30 @@ class LinuxNotificationSender(
             }
             shown
         } finally {
-            glib?.g_object_unref(ptr)
+            // On failure libnotify hands us ownership of a GError; nothing else frees it, so without this every
+            // failed send leaks the struct and its message. Freed here rather than in the `if (!shown)` branch so
+            // it is released even if `show()` reports success while still having set an error. The message is read
+            // above, before the free — GErrorStruct dereferences the pointer.
+            errorRef.value?.let { libnotify.g_error_free(it) }
+            libnotify.g_object_unref(ptr)
         }
+    }
+
+    /**
+     * Releases libnotify's process-wide state — the D-Bus proxy and cached app name allocated by `notify_init()`.
+     *
+     * Idempotent: the second and later calls are no-ops. Afterwards [isAvailable] is false and [send] returns false
+     * rather than calling into a torn-down library.
+     *
+     * Call this once sends have stopped. `notify_uninit()` is resolved through the libnotify handle, so it runs against
+     * the same GLib instance that allocated the state — see the [LibNotify] KDoc for why that matters.
+     */
+    @Synchronized
+    override fun close() {
+        val libnotify = lib ?: return
+        lib = null
+        runCatching { libnotify.notify_uninit() }
+            .onFailure { Logger.w(it) { "notify_uninit() failed during shutdown" } }
     }
 
     private fun applyMetadata(libnotify: LibNotify, ptr: Pointer, notification: Notification) {
@@ -177,14 +210,11 @@ class LinuxNotificationSender(
 
         // desktop-entry hint associates notifications with the app's .desktop file,
         // enabling proper icon resolution and notification grouping by the daemon.
-        glib?.let { g ->
-            libnotify.notify_notification_set_hint(ptr, "desktop-entry", g.g_variant_new_string(desktopEntry))
-        }
+        // The GVariants below are floating refs; notify_notification_set_hint() sinks them, so we must not unref.
+        libnotify.notify_notification_set_hint(ptr, "desktop-entry", libnotify.g_variant_new_string(desktopEntry))
 
         if (notification.isSilent) {
-            glib?.let { g ->
-                libnotify.notify_notification_set_hint(ptr, "suppress-sound", g.g_variant_new_boolean(true))
-            }
+            libnotify.notify_notification_set_hint(ptr, "suppress-sound", libnotify.g_variant_new_boolean(true))
         }
     }
 }

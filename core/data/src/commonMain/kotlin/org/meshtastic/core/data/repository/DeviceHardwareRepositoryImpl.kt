@@ -17,15 +17,9 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
@@ -33,6 +27,7 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
 import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
@@ -45,6 +40,39 @@ import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
+import kotlin.time.Duration.Companion.minutes
+
+/**
+ * Bounds catalog refreshes when a model is missing or permanently incomplete. A successful full-catalog response is
+ * authoritative for [successTtlMs]; failed attempts may retry after [retryIntervalMs]. This prevents packet-driven UI
+ * lookups from turning an unsupported model into a continuous hardware + device-link network refresh loop.
+ */
+internal class DeviceHardwareRefreshGate(private val retryIntervalMs: Long, private val successTtlMs: Long) {
+    private val lastAttemptMs = atomic(NO_TIMESTAMP)
+    private val lastSuccessMs = atomic(NO_TIMESTAMP)
+
+    fun shouldRefresh(nowMs: Long, forceRefresh: Boolean, cacheNeedsRefresh: Boolean): Boolean = when {
+        forceRefresh -> true
+        !cacheNeedsRefresh -> false
+        isWithin(nowMs, lastSuccessMs.value, successTtlMs) -> false
+        else -> !isWithin(nowMs, lastAttemptMs.value, retryIntervalMs)
+    }
+
+    fun recordAttempt(nowMs: Long) {
+        lastAttemptMs.value = nowMs
+    }
+
+    fun recordSuccess(nowMs: Long) {
+        lastSuccessMs.value = nowMs
+    }
+
+    private fun isWithin(nowMs: Long, timestampMs: Long, intervalMs: Long): Boolean =
+        timestampMs != NO_TIMESTAMP && nowMs >= timestampMs && nowMs - timestampMs < intervalMs
+
+    private companion object {
+        private const val NO_TIMESTAMP = -1L
+    }
+}
 
 @Single
 class DeviceHardwareRepositoryImpl(
@@ -56,15 +84,31 @@ class DeviceHardwareRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
 
-    /** Guards [inFlightRefresh] so concurrent callers share one full-table refresh. */
-    private val refreshGuard = Mutex()
+    /**
+     * Shared full-table refresh; a caller that stops waiting (the node-details path bounds its wait) can't abort it.
+     */
+    private val refreshGate =
+        DeviceHardwareRefreshGate(
+            retryIntervalMs = FAILED_REFRESH_RETRY_INTERVAL_MS,
+            successTtlMs = CACHE_EXPIRATION_TIME_MS,
+        )
 
-    private var inFlightRefresh: Deferred<Unit>? = null
-
-    // This @Single lives for the entire app lifetime, so the SupervisorJob is never cancelled. Refreshes run here
-    // so a caller that stops waiting (the node-details path bounds its wait) can't abort the shared fetch — slow
-    // api.meshtastic.org responses (measured 20-60s) still land in the DB for the next lookup.
-    private val refreshScope = CoroutineScope(dispatchers.io + SupervisorJob())
+    private val refresher =
+        SingleFlightRefresher(dispatchers.io, "DeviceHardwareRepository") {
+            refreshGate.recordAttempt(nowMillis)
+            Logger.d { "DeviceHardwareRepository: fetching from remote API" }
+            val remoteHardware = remoteDataSource.getAllDeviceHardware()
+            Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
+            if (remoteHardware.isNotEmpty()) {
+                localDataSource.replaceAllDeviceHardware(remoteHardware)
+                refreshGate.recordSuccess(nowMillis)
+            } else {
+                Logger.w { "DeviceHardwareRepository: remote catalog was empty; retaining cached data" }
+            }
+            // Refresh msh.to device links from the API after a hardware refresh. Hardware freshness is recorded first:
+            // a link-refresh failure must not cause another full hardware fetch on the next packet-driven lookup.
+            deviceLinkRepository.reconcile()
+        }
 
     /**
      * Retrieves device hardware information by its model ID and optional target string.
@@ -85,15 +129,15 @@ class DeviceHardwareRepositoryImpl(
         }
 
         if (forceRefresh) {
-            Logger.d { "DeviceHardwareRepository: forceRefresh=true, clearing cache" }
-            localDataSource.deleteAllDeviceHardware()
+            Logger.d { "DeviceHardwareRepository: forceRefresh=true, bypassing refresh gate" }
         }
 
         ensureSeeded()
 
         var entities = lookupEntities(hwModel, target)
-        if (forceRefresh || entities.isEmpty() || entities.any { it.isStale() }) {
-            singleFlightRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+        val cacheNeedsRefresh = entities.isEmpty() || entities.any { it.isStale() }
+        if (refreshGate.shouldRefresh(nowMillis, forceRefresh, cacheNeedsRefresh)) {
+            refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
             entities = lookupEntities(hwModel, target)
         }
 
@@ -109,8 +153,11 @@ class DeviceHardwareRepositoryImpl(
             ensureSeeded()
             resolveHardware(hwModel, lookupEntities(hwModel, target), target)
         },
-        shouldFetch = { cached -> cached == null || lookupEntities(hwModel, target).any { it.isStale() } },
-        fetch = { singleFlightRefresh() },
+        shouldFetch = { cached ->
+            val cacheNeedsRefresh = cached == null || lookupEntities(hwModel, target).any { it.isStale() }
+            refreshGate.shouldRefresh(nowMillis, forceRefresh = false, cacheNeedsRefresh)
+        },
+        fetch = { refresher.refresh() },
         context = dispatchers.io,
         networkTimeoutMs = null,
         tag = "DeviceHardwareRepository",
@@ -132,39 +179,6 @@ class DeviceHardwareRepositoryImpl(
                 localDataSource.insertAllDeviceHardware(jsonHardware)
             }
                 .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
-        }
-    }
-
-    /**
-     * Starts (or joins) a single shared refresh running in [refreshScope]. When [maxWaitMs] is set, the caller waits at
-     * most that long before falling back to cached data; the refresh itself always runs to completion, bounded only by
-     * the HttpClient's own timeout/retry policy.
-     */
-    private suspend fun singleFlightRefresh(maxWaitMs: Long? = null) {
-        val refresh =
-            refreshGuard.withLock {
-                inFlightRefresh?.takeIf { it.isActive }
-                    ?: refreshScope
-                        .async {
-                            safeCatching {
-                                Logger.d { "DeviceHardwareRepository: fetching from remote API" }
-                                val remoteHardware = remoteDataSource.getAllDeviceHardware()
-                                Logger.d {
-                                    "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries"
-                                }
-                                localDataSource.insertAllDeviceHardware(remoteHardware)
-                                // Refresh msh.to device links from the API after a hardware refresh.
-                                deviceLinkRepository.reconcile()
-                            }
-                                .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }
-                            Unit
-                        }
-                        .also { inFlightRefresh = it }
-            }
-        if (maxWaitMs == null) {
-            refresh.join()
-        } else if (withTimeoutOrNull(maxWaitMs) { refresh.join() } == null) {
-            Logger.w { "DeviceHardwareRepository: refresh still in flight after ${maxWaitMs}ms; using cached data" }
         }
     }
 
@@ -221,6 +235,7 @@ class DeviceHardwareRepositoryImpl(
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+        private val FAILED_REFRESH_RETRY_INTERVAL_MS = 15.minutes.inWholeMilliseconds
 
         /** Maximum time a blocking lookup waits for an in-flight refresh before returning cached/bundled data. */
         private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L

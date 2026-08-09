@@ -2,7 +2,7 @@
 title: Fehlersuchprotokolle
 parent: Benutzerhandbuch
 nav_order: 22
-last_updated: 2026-07-01
+last_updated: 2026-07-08
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
 aliases:
   - debug-logs
@@ -44,7 +44,7 @@ Tap the **download** icon to save the current logs to a file. Sie wählen den Sp
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Dennoch können Protokolldateien Knotennamen, Positionen und andere identifizierende Angaben enthalten – werfen Sie einen Blick in die Datei, bevor Sie sie öffentlich machen, und geben Sie sie nur privat weiter, falls Sie unsicher sind.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Channel PSKs are **not** redacted, and logs can also contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## Desktop
 

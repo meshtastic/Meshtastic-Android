@@ -73,6 +73,14 @@ interface MeshNotificationManager {
 
     fun cancelMessageNotification(contactKey: String)
 
+    /**
+     * Called after an inline notification reply has been sent and persisted. Platforms that can should re-post the
+     * conversation notification silently with the sent reply appended — the MessagingStyle confirmation flow — so the
+     * RemoteInput spinner resolves with visible feedback instead of the notification vanishing. The default falls back
+     * to dismissing the conversation, which also resolves the spinner.
+     */
+    suspend fun refreshConversationAfterReply(contactKey: String) = cancelMessageNotification(contactKey)
+
     fun cancelLowBatteryNotification(node: Node)
 
     fun clearClientNotification(notification: ClientNotification)

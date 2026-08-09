@@ -148,6 +148,9 @@ interface AdminController {
      * coroutine, which is required for the firmware to associate them with one transaction.
      */
     suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit)
+
+    /** Runs [block] as an [editSettings] transaction against the local node. */
+    suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit)
 }
 
 /**

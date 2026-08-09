@@ -2,7 +2,7 @@
 title: 桌面版應用程式
 parent: 使用者指南
 nav_order: 14
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: 在 Linux、macOS 及 Windows 上安裝並使用 Meshtastic 桌面版應用程式——涵蓋連線方式、功能對等性與鍵盤快速鍵。
 aliases:
   - 桌面
@@ -60,19 +60,19 @@ Meshtastic 桌面版應用程式透過 Kotlin Multiplatform 與 Android 版共�
 
 ## 功能對等性
 
-| 功能                                           | Android | 桌面版 | 備註                                             |
-| -------------------------------------------- | ------- | --- | ---------------------------------------------- |
-| 訊息傳送                                         | ✓       | ✓   | 完全對等                                           |
-| 節點清單                                         | ✓       | ✓   | 完全對等                                           |
-| 地圖                                           | ✓       | ✓   | 完全對等                                           |
-| 設定                                           | ✓       | ✓   | 完全對等                                           |
-| 藍牙（BLE）                                      | ✓       | ✓   | 桌面版透過 Kable 支援                                 |
-| 韌體 OTA 更新                                    | ✓       | ✗   | 使用網頁燒錄工具                                       |
-| 通知                                           | ✓       | ✓   | 原生作業系統通知                                       |
-| 小工具                                          | ✓       | ✗   | 僅限 Android                                     |
-| Android Auto                                 | ✓       | ✗   | Android-only — not available on Desktop or iOS |
-| AI 助理（Chirpy）                                | ✓\*     | ✗   | 僅限 Google 版 Android                            |
-| App Functions (system AI) | ✓†      | ✗   | 僅限 Google 版 Android                            |
+| 功能                                           | Android | 桌面版 | 備註                                                                                        |
+| -------------------------------------------- | ------- | --- | ----------------------------------------------------------------------------------------- |
+| 訊息傳送                                         | ✓       | ✓   | 完全對等                                                                                      |
+| 節點清單                                         | ✓       | ✓   | 完全對等                                                                                      |
+| 地圖                                           | ✓       | ◐   | Map tab exists on desktop, but the interactive map view is Android-only                   |
+| 設定                                           | ✓       | ✓   | 完全對等                                                                                      |
+| 藍牙（BLE）                                      | ✓       | ✓   | 桌面版透過 Kable 支援                                                                            |
+| 韌體更新                                         | ✓       | ✓   | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
+| 通知                                           | ✓       | ✓   | 原生作業系統通知                                                                                  |
+| 小工具                                          | ✓       | ✗   | 僅限 Android                                                                                |
+| Android Auto                                 | ✓       | ✗   | Android-only — not available on Desktop or iOS                                            |
+| AI 助理（Chirpy）                                | ✓\*     | ✗   | 僅限 Google 版 Android                                                                       |
+| App Functions (system AI) | ✓†      | ✗   | 僅限 Google 版 Android                                                                       |
 
 \*Chirpy AI 需要 Google 版 Android 14 以上版本，且須搭配支援的硬體。
 
@@ -84,14 +84,17 @@ Meshtastic 桌面版應用程式透過 Kotlin Multiplatform 與 Android 版共�
 
 ### 鍵盤快速鍵
 
-| 快速鍵                 | 動作      |
-| ------------------- | ------- |
-| **⌘Q** / **Ctrl+Q** | 結束應用程式  |
-| **⌘,** / **Ctrl+,** | 開啟設定    |
-| **⌘1** / **Ctrl+1** | 切換至訊息頁籤 |
-| **⌘2** / **Ctrl+2** | 切換至節點頁籤 |
-| **⌘3** / **Ctrl+3** | 切換至地圖頁籤 |
-| **⌘4** / **Ctrl+4** | 切換至連線頁籤 |
+Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The Super / Windows key is not bound.)
+
+| 快速鍵          | 動作         |
+| ------------ | ---------- |
+| **⌘/Ctrl+Q** | 結束應用程式     |
+| **⌘/Ctrl+,** | 開啟設定       |
+| **⌘/Ctrl+1** | 切換至訊息頁籤    |
+| **⌘/Ctrl+2** | 切換至節點頁籤    |
+| **⌘/Ctrl+3** | 切換至地圖頁籤    |
+| **⌘/Ctrl+4** | 切換至連線頁籤    |
+| **⌘/Ctrl+/** | Open About |
 
 ### 視窗與系統匣
 
@@ -123,7 +126,6 @@ Meshtastic 桌面版應用程式透過 Kotlin Multiplatform 與 Android 版共�
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
@@ -134,7 +136,7 @@ git submodule update --init
 
 ## 已知限制
 
-- 不支援 OTA 韌體更新（請使用網頁燒錄工具）
+- The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
 - 部分 Android 專屬功能（小工具、特定通知頻道）無法使用
 - 在低規格硬體上執行 Compose Desktop 時，效能可能有所不同
 - 桌面版尚不支援 BLE 綁定（配對功能可在不綁定的情況下正常使用）
@@ -142,7 +144,7 @@ git submodule update --init
 ## 相關主題
 
 - 〔連線〕(connections) — 連線方式概覽
-- 〔韌體更新〕(firmware) — 桌面版韌體更新請使用〔網頁燒錄工具〕(https://flasher.meshtastic.org)
+- [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android
 
 ---
 

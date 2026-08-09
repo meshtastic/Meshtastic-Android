@@ -21,6 +21,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +40,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 /** Section for app appearance settings like language and theme. */
 @Composable
-fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
+internal fun ColumnScope.AppearanceSettingsContent(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -48,37 +49,35 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
     // picker for these devices.
     val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        ListItem(
-            text = stringResource(Res.string.preferences_language),
-            leadingIcon = MeshtasticIcons.Language,
-            trailingIcon = if (useInAppLangPicker) null else MeshtasticIcons.ChevronRight,
-        ) {
-            if (useInAppLangPicker) {
-                onShowLanguagePicker()
+    ListItem(
+        text = stringResource(Res.string.preferences_language),
+        leadingIcon = MeshtasticIcons.Language,
+        trailingIcon = if (useInAppLangPicker) null else MeshtasticIcons.ChevronRight,
+    ) {
+        if (useInAppLangPicker) {
+            onShowLanguagePicker()
+        } else {
+            val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
+            if (intent.resolveActivity(context.packageManager) != null) {
+                settingsLauncher.launch(intent)
             } else {
-                val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
-                if (intent.resolveActivity(context.packageManager) != null) {
-                    settingsLauncher.launch(intent)
-                } else {
-                    // Fall back to the in-app picker
-                    onShowLanguagePicker()
-                }
+                // Fall back to the in-app picker
+                onShowLanguagePicker()
             }
         }
+    }
 
-        ListItem(
-            text = stringResource(Res.string.theme),
-            leadingIcon = MeshtasticIcons.FormatPaint,
-            trailingIcon = null,
-        ) {
-            onShowThemePicker()
-        }
+    ListItem(text = stringResource(Res.string.theme), leadingIcon = MeshtasticIcons.FormatPaint, trailingIcon = null) {
+        onShowThemePicker()
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AppearanceSectionPreview() {
-    AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}) }
+    AppTheme {
+        ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+            AppearanceSettingsContent(onShowLanguagePicker = {}, onShowThemePicker = {})
+        }
+    }
 }

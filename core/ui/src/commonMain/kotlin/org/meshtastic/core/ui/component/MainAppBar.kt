@@ -19,8 +19,9 @@ package org.meshtastic.core.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -40,11 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
@@ -53,12 +52,15 @@ import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.LocalEventTheme
+import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.LocalEventBranding
-import org.meshtastic.core.ui.util.accentColorOrNull
-import org.meshtastic.core.ui.util.eventIconFor
 
 /** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
 private const val EVENT_ACCENT_ALPHA = 0.12f
+
+/** Height of the event brand rule under the app bar. A hairline: brand presence without stealing vertical space. */
+private val EVENT_BRAND_RULE_HEIGHT = 3.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -74,8 +76,10 @@ fun MainAppBar(
     onClickChip: (Node) -> Unit,
     brandingContent: @Composable () -> Unit = { EventAwareBranding() },
 ) {
-    // Ambient event theming: when connected to event firmware, tint the bar with a faint wash of its accent color.
-    val accent = LocalEventBranding.current?.accentColorOrNull()
+    // Ambient event theming: when connected to event firmware (and not opted out), tint the bar with a faint wash of
+    // the edition's accent color. Gated with the app-wide fonts via LocalEventTheme / the "Use event theme" toggle.
+    val eventTheme = LocalEventTheme.current
+    val accent = eventTheme?.accent
     val colors =
         if (accent != null) {
             TopAppBarDefaults.topAppBarColors(
@@ -85,45 +89,52 @@ fun MainAppBar(
         } else {
             TopAppBarDefaults.topAppBarColors()
         }
-    TopAppBar(
-        colors = colors,
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLargeEmphasized,
-            )
-        },
-        subtitle = {
-            subtitle?.let {
+    Column(modifier = modifier) {
+        TopAppBar(
+            colors = colors,
+            title = {
                 Text(
-                    text = it,
+                    text = title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
                 )
-            }
-        },
-        modifier = modifier,
-        navigationIcon =
-        if (canNavigateUp) {
-            {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = MeshtasticIcons.ArrowBack,
-                        contentDescription = stringResource(Res.string.navigate_back),
+            },
+            subtitle = {
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-        } else {
-            { brandingContent() }
-        },
-        actions = {
-            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
-        },
-    )
+            },
+            navigationIcon =
+            if (canNavigateUp) {
+                {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
+                    }
+                }
+            } else {
+                { brandingContent() }
+            },
+            actions = {
+                TopBarActions(
+                    ourNode = ourNode,
+                    showNodeChip = showNodeChip,
+                    actions = actions,
+                    onClickChip = onClickChip,
+                )
+            },
+        )
+        EventPaletteStrip(palette = eventTheme?.palette.orEmpty(), height = EVENT_BRAND_RULE_HEIGHT)
+    }
 }
 
 /** Reads [LocalEventBranding] to show event branding (tap → [EventInfoSheet]), or the default Meshtastic logo. */
@@ -134,24 +145,11 @@ private fun EventAwareBranding() {
         Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null)
         return
     }
-    // Every event edition is tappable for its info sheet; editions without a bundled icon reuse the Meshtastic logo.
+    // Every event edition is tappable for its info sheet. The icon prefers the hosted iconUrl, then a bundled
+    // drawable, then the Meshtastic logo — see EventBrandingIcon.
     var showSheet by remember { mutableStateOf(false) }
     val brandingModifier = Modifier.size(32.dp).clip(CircleShape).clickable(role = Role.Button) { showSheet = true }
-    val iconRes = eventIconFor(eventEdition.edition)
-    if (iconRes != null) {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = eventEdition.displayName,
-            contentScale = ContentScale.Fit,
-            modifier = brandingModifier,
-        )
-    } else {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_meshtastic),
-            contentDescription = eventEdition.displayName,
-            modifier = brandingModifier,
-        )
-    }
+    EventBrandingIcon(edition = eventEdition, modifier = brandingModifier)
     if (showSheet) {
         EventInfoSheet(edition = eventEdition, onDismiss = { showSheet = false })
     }

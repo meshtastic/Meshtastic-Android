@@ -16,18 +16,19 @@
  */
 package org.meshtastic.desktop.notification
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.desktop.DesktopNotificationManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class DesktopNotificationManagerTest {
 
@@ -41,118 +42,73 @@ class DesktopNotificationManagerTest {
         }
     }
 
-    /** Simple [NotificationPrefs] with all categories enabled by default. */
-    private class FakeNotificationPrefs(
-        messages: Boolean = true,
-        nodeEvents: Boolean = true,
-        lowBattery: Boolean = true,
-    ) : NotificationPrefs {
-        override val messagesEnabled = MutableStateFlow(messages)
-        override val nodeEventsEnabled = MutableStateFlow(nodeEvents)
-        override val nodeEventsAutoDisabledForEvent = MutableStateFlow(false)
-        override val lowBatteryEnabled = MutableStateFlow(lowBattery)
-
-        override fun setMessagesEnabled(enabled: Boolean) {
-            messagesEnabled.value = enabled
-        }
-
-        override fun setNodeEventsEnabled(enabled: Boolean) {
-            nodeEventsEnabled.value = enabled
-        }
-
-        override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
-            nodeEventsAutoDisabledForEvent.value = disabled
-        }
-
-        override fun setLowBatteryEnabled(enabled: Boolean) {
-            lowBatteryEnabled.value = enabled
-        }
-
-        override val geofenceAlertOptIns = MutableStateFlow<Set<Int>>(emptySet())
-
-        override fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) {
-            geofenceAlertOptIns.value =
-                geofenceAlertOptIns.value.toMutableSet().apply { if (enabled) add(waypointId) else remove(waypointId) }
-        }
-    }
-
     @Test
-    fun `dispatch sends to native sender when enabled`() {
+    fun `dispatch sends to native sender and reports success when enabled`() = runTest {
         val sender = FakeNativeSender()
         val manager = DesktopNotificationManager(FakeNotificationPrefs(), sender)
 
-        manager.dispatch(Notification(title = "Test", message = "Hello"))
+        val dispatched = manager.dispatch(Notification(title = "Test", message = "Hello"))
 
-        Thread.sleep(ASYNC_WAIT_MS)
+        assertTrue(dispatched)
         assertEquals(1, sender.sent.size)
         assertEquals("Test", sender.sent[0].title)
     }
 
     @Test
-    fun `dispatch respects disabled message preference`() {
+    fun `dispatch reports false and skips native sender when preference disabled`() = runTest {
         val sender = FakeNativeSender()
-        val manager = DesktopNotificationManager(FakeNotificationPrefs(messages = false), sender)
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setMessagesEnabled(false) }, sender)
 
-        manager.dispatch(Notification(title = "Msg", message = "Hi", category = Notification.Category.Message))
+        val dispatched =
+            manager.dispatch(Notification(title = "Msg", message = "Hi", category = Notification.Category.Message))
 
-        Thread.sleep(ASYNC_WAIT_MS)
+        assertFalse(dispatched)
         assertEquals(0, sender.sent.size, "Message notification should have been suppressed")
     }
 
     @Test
-    fun `alerts are always dispatched even when messages disabled`() {
+    fun `alerts are always dispatched even when messages disabled`() = runTest {
         val sender = FakeNativeSender()
-        val manager = DesktopNotificationManager(FakeNotificationPrefs(messages = false), sender)
+        val manager = DesktopNotificationManager(FakeNotificationPrefs().apply { setMessagesEnabled(false) }, sender)
 
-        manager.dispatch(Notification(title = "Alert", message = "Important", category = Notification.Category.Alert))
+        val dispatched =
+            manager.dispatch(
+                Notification(title = "Alert", message = "Important", category = Notification.Category.Alert),
+            )
 
-        Thread.sleep(ASYNC_WAIT_MS)
+        assertTrue(dispatched)
         assertEquals(1, sender.sent.size)
     }
 
     @Test
-    fun `fallback emitted when native sender fails`() {
+    fun `fallback emitted and dispatch still reports accepted when native sender fails`() = runTest {
         val sender = FakeNativeSender(shouldSucceed = false)
         val manager = DesktopNotificationManager(FakeNotificationPrefs(), sender)
         var fallback: androidx.compose.ui.window.Notification? = null
 
-        // Collect on a real thread since dispatch uses Dispatchers.IO
-        val job =
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-                fallback = manager.fallbackNotifications.first()
-            }
+        // UNDISPATCHED guarantees the collector subscribes before dispatch runs.
+        val collector = launch(start = CoroutineStart.UNDISPATCHED) { fallback = manager.fallbackNotifications.first() }
 
-        // Give the collector coroutine time to subscribe before dispatching
-        Thread.sleep(SUBSCRIBE_WAIT_MS)
-        manager.dispatch(Notification(title = "Fallback", message = "Test"))
+        val dispatched = manager.dispatch(Notification(title = "Fallback", message = "Test"))
+        collector.join()
 
-        // Block the test thread briefly to let the IO dispatcher process
-        Thread.sleep(ASYNC_WAIT_MS)
+        assertTrue(dispatched, "Tray fallback acceptance should count as delivery-accepted")
         assertNotNull(fallback, "Expected fallback notification to be emitted")
         assertEquals("Fallback", fallback!!.title)
-        job.cancel()
     }
 
     @Test
-    fun `no fallback when native sender succeeds`() {
+    fun `no fallback when native sender succeeds`() = runTest {
         val sender = FakeNativeSender(shouldSucceed = true)
         val manager = DesktopNotificationManager(FakeNotificationPrefs(), sender)
         var fallback: androidx.compose.ui.window.Notification? = null
 
-        val job =
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-                fallback = manager.fallbackNotifications.first()
-            }
+        val collector = launch(start = CoroutineStart.UNDISPATCHED) { fallback = manager.fallbackNotifications.first() }
 
-        manager.dispatch(Notification(title = "Success", message = "Test"))
+        val dispatched = manager.dispatch(Notification(title = "Success", message = "Test"))
 
-        Thread.sleep(ASYNC_WAIT_MS)
+        assertTrue(dispatched)
         assertNull(fallback, "Should not emit fallback when native sender succeeds")
-        job.cancel()
-    }
-
-    companion object {
-        private const val ASYNC_WAIT_MS = 300L
-        private const val SUBSCRIBE_WAIT_MS = 100L
+        collector.cancel()
     }
 }

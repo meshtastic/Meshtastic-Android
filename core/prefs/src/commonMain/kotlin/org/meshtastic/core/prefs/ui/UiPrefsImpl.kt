@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.prefs.ui
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -31,19 +30,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.prefs.cachedFlow
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.UiPrefs
 
 @Single
 @Suppress("TooManyFunctions")
-class UiPrefsImpl(
-    @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : UiPrefs {
+class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDispatchers) : UiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
@@ -135,6 +131,13 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
+    override val eventThemeEnabled: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_EVENT_THEME_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setEventThemeEnabled(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_EVENT_THEME_ENABLED] = enabled } }
+    }
+
     override val bleAutoScan: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_BLE_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
@@ -159,6 +162,30 @@ class UiPrefsImpl(
 
     override fun setSelectedConnectionTransport(type: DeviceType) {
         scope.launch { dataStore.edit { it[KEY_SELECTED_CONNECTION_TRANSPORT] = type.name } }
+    }
+
+    override val firmwareUpdateNotificationKeys: StateFlow<Set<String>> =
+        dataStore.data
+            .map { preferences ->
+                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]?.split('|')?.filter(String::isNotBlank)?.toSet()
+                    ?: emptySet()
+            }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun recordFirmwareUpdateNotificationKey(key: String) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val keys =
+                    preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS]
+                        ?.split('|')
+                        ?.filter(String::isNotBlank)
+                        ?.toMutableList() ?: mutableListOf()
+                keys.remove(key)
+                keys.add(key)
+                preferences[KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS] =
+                    keys.takeLast(MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS).joinToString("|")
+            }
+        }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
@@ -268,6 +295,7 @@ class UiPrefsImpl(
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
+        val KEY_EVENT_THEME_ENABLED = booleanPreferencesKey("event-theme-enabled")
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")
         val KEY_THEME = intPreferencesKey("theme")
@@ -282,9 +310,11 @@ class UiPrefsImpl(
         val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
         val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
         val KEY_SELECTED_CONNECTION_TRANSPORT = stringPreferencesKey("selected-connection-transport")
+        val KEY_FIRMWARE_UPDATE_NOTIFICATION_KEYS = stringPreferencesKey("firmware-update-notification-keys")
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+        private const val MAX_FIRMWARE_UPDATE_NOTIFICATION_KEYS = 100
 
         private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
 

@@ -35,7 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.anonymize
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -54,7 +56,7 @@ internal const val BOND_FAILED_OR_REJECTED_MESSAGE = "Bonding failed or rejected
 class AndroidBluetoothRepository(
     private val context: Context,
     private val dispatchers: CoroutineDispatchers,
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
 ) : BluetoothRepository {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -138,10 +140,10 @@ class AndroidBluetoothRepository(
             // removeBond() is a public-but-hidden BluetoothDevice API (no SDK stub); reflection is the standard access
             // path used across the Android BLE/DFU ecosystem (incl. Nordic's DFU library).
             val removed = remoteDevice.javaClass.getMethod("removeBond").invoke(remoteDevice) as? Boolean ?: false
-            Logger.i { "removeBond($address) -> $removed" }
+            Logger.i { "removeBond(${address.anonymize()}) -> $removed" }
             removed
         } catch (e: Exception) {
-            Logger.w(e) { "removeBond($address) reflection failed" }
+            Logger.w(e) { "removeBond(${address.anonymize()}) reflection failed" }
             false
         } finally {
             updateBluetoothState()

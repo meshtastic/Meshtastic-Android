@@ -106,7 +106,9 @@ fun NodeItem(
             Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
         }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode, system) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
@@ -133,7 +135,7 @@ fun NodeItem(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, a11yStrings, modemPreset) {
+        remember(thatNode, distance, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = originalLongName,
                 isOnline = thatNode.isOnline,
@@ -143,8 +145,7 @@ fun NodeItem(
                 hopsAway = thatNode.hopsAway,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snr,
-                rssi = thatNode.rssi,
+                snr = thatNode.snrOrNull,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 modemPreset = modemPreset,
@@ -282,8 +283,8 @@ private fun NodeBatteryPositionRow(
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
-    // The signal pill bundles SNR + RSSI + quality into one scrim-backed chip (legibility, see StatusSurface). It's
-    // wider than a 1/3 grid cell, so it renders on its own line at natural width; the short metrics flow in the grid.
+    // The signal pill bundles SNR + RSSI + quality into one row. It's wider than a 1/3 grid cell, so it renders on
+    // its own line at natural width; the short metrics flow in the grid.
     var signalChip: (@Composable () -> Unit)? = null
     val items =
         buildList<@Composable () -> Unit> {
@@ -310,20 +311,20 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                 if (thatNode.hopsAway > 0) {
                     add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    val showSnr = thatNode.snr < 100f
-                    val showRssi = thatNode.rssi < 0
-                    if (showSnr || showRssi) {
+                    val snr = thatNode.snrOrNull
+                    val rssi = thatNode.rssiOrNull
+                    if (snr != null || rssi != null) {
                         signalChip = {
-                            // Full-width pill: SNR left, RSSI center, quality right — the pre-scrim spread, now
-                            // scrimmed.
-                            StatusSurface(
+                            // Full-width row: SNR left, RSSI center, quality right.
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                if (showSnr) Snr(thatNode.snr)
-                                if (showRssi) Rssi(thatNode.rssi)
-                                if (showSnr && showRssi) {
-                                    val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                                Snr(snr)
+                                Rssi(rssi)
+                                if (snr != null) {
+                                    val quality = determineSignalQuality(snr, LocalModemPreset.current)
                                     IconInfo(
                                         icon = vectorResource(quality.icon),
                                         contentDescription = stringResource(Res.string.signal_quality),
@@ -354,21 +355,31 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
 private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: Color): List<@Composable () -> Unit> {
     val items = mutableListOf<@Composable () -> Unit>()
     val env = node.environmentMetrics
+    val aq = node.airQualityMetrics
     val pax = node.paxcounter
 
     if (pax.ble != 0 || pax.wifi != 0) {
         items.add { PaxcountInfo(pax = "B:${pax.ble} W:${pax.wifi}", contentColor = contentColor) }
     }
 
-    if ((env.temperature ?: 0f) != 0f) {
-        val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
+    // Temperature carries presence, so `null` already means "no sensor" — testing against 0 hid an ordinary 0 °C
+    // reading, which the temperature chart plots. Prefer the environment sensor, then the SCD4x CO₂ sensor's own.
+    (env.temperature ?: aq.co2_temperature)?.let { temperature ->
+        val temp = MetricFormatter.temperature(temperature, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
+
+    // Humidity keeps its zero-guard: 0% RH is not physically reachable, and the humidity chart filters it too.
     if ((env.relative_humidity ?: 0f) != 0f) {
         items.add {
             HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
         }
+    } else if ((aq.co2_humidity ?: 0f) != 0f) {
+        items.add {
+            HumidityInfo(humidity = MetricFormatter.humidity(aq.co2_humidity ?: 0f), contentColor = contentColor)
+        }
     }
+
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {
             PressureInfo(
@@ -377,26 +388,33 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
             )
         }
     }
-    if ((env.soil_temperature ?: 0f) != 0f) {
-        val temp = MetricFormatter.temperature(env.soil_temperature ?: 0f, tempInFahrenheit)
+    // Soil temperature, moisture, voltage and current all carry presence: `null` is "no sensor", 0 is a real reading.
+    env.soil_temperature?.let { soilTemperature ->
+        val temp = MetricFormatter.temperature(soilTemperature, tempInFahrenheit)
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
-    if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
-        items.add { SoilMoistureInfo(moisture = "${env.soil_moisture}%", contentColor = contentColor) }
-    }
-    if ((env.voltage ?: 0f) != 0f) {
+    // Range-checked to match Node.getTelemetryStrings — a sensor fault reporting 101% is not a reading.
+    val soilMoistureRange = 0..100
+    env.soil_moisture
+        ?.takeIf { it in soilMoistureRange }
+        ?.let { soilMoisture ->
+            items.add {
+                SoilMoistureInfo(moisture = MetricFormatter.percent(soilMoisture), contentColor = contentColor)
+            }
+        }
+    env.voltage?.let { voltage ->
         items.add {
             PowerInfo(
-                value = MetricFormatter.voltage(env.voltage ?: 0f),
+                value = MetricFormatter.voltage(voltage),
                 label = stringResource(Res.string.voltage),
                 contentColor = contentColor,
             )
         }
     }
-    if ((env.current ?: 0f) != 0f) {
+    env.current?.let { current ->
         items.add {
             PowerInfo(
-                value = MetricFormatter.current(env.current ?: 0f),
+                value = MetricFormatter.current(current),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )
@@ -436,29 +454,27 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
 }
 
 /**
- * [LastHeardInfo] backed by a scrim chip and tinted StatusGreen when [online] — the legible "online" affordance —
- * rendered plain otherwise. Shared by the complete and compact node rows.
+ * [LastHeardInfo] tinted StatusGreen when [online] — the "online" affordance — rendered plain otherwise. Shared by the
+ * complete and compact node rows.
  */
 @Composable
 internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor: Color, relative: Boolean = true) {
-    if (online) {
-        StatusSurface {
-            LastHeardInfo(
-                lastHeard = lastHeard,
-                showLabel = false,
-                relative = relative,
-                contentColor = MaterialTheme.colorScheme.StatusGreen,
-            )
-        }
-    } else {
-        LastHeardInfo(lastHeard = lastHeard, showLabel = false, relative = relative, contentColor = contentColor)
-    }
+    LastHeardInfo(
+        lastHeard = lastHeard,
+        showLabel = false,
+        relative = relative,
+        contentColor = if (online) MaterialTheme.colorScheme.StatusGreen else contentColor,
+    )
 }
 
-/** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
+/** Key status (always status-colored) + the signed-node shield. */
 @Composable
 fun NodeSecurityIcons(thatNode: Node, modifier: Modifier = Modifier, iconSize: Dp = 20.dp) {
-    StatusSurface(modifier = modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         if (thatNode.signsPackets) {
             NodeSignedStatusIcon(modifier = Modifier.size(iconSize))
         }

@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.close
@@ -62,7 +63,7 @@ fun BitwisePreference(
                 expanded = !expanded
             }
         },
-        modifier = modifier.padding(vertical = 8.dp),
+        modifier = modifier.padding(8.dp),
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
@@ -92,9 +93,9 @@ fun BitwisePreference(
             }
             PreferenceFooter(
                 enabled = enabled,
-                negativeText = org.jetbrains.compose.resources.stringResource(Res.string.clear),
+                negativeText = stringResource(Res.string.clear),
                 onNegativeClicked = { onItemSelected(0) },
-                positiveText = org.jetbrains.compose.resources.stringResource(Res.string.close),
+                positiveText = stringResource(Res.string.close),
                 onPositiveClicked = { expanded = false },
             )
         }

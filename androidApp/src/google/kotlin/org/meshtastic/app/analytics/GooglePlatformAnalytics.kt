@@ -35,6 +35,7 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumActionType
 import com.datadog.android.rum.RumConfiguration
+import com.datadog.android.rum.configuration.VitalsUpdateFrequency
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
 import com.datadog.android.sessionreplay.TextAndInputPrivacy
@@ -51,11 +52,12 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import io.opentelemetry.api.GlobalOpenTelemetry
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
+import org.meshtastic.core.common.log.shouldDowngradeForDatadog
+import org.meshtastic.core.common.log.shouldReportAsException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -139,10 +141,15 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
 
     private fun initDatadog(application: Application) {
         val configuration =
+            // Pin RUM/crash/trace to the same service as the Logger and OpenTelemetry (SERVICE_NAME). The core SDK
+            // otherwise defaults `service` to the applicationId (com.geeksville.mesh), splitting the app across two
+            // Datadog services. On dd-sdk-android v2+ the service name is a Configuration.Builder constructor argument
+            // (there is no setService() on the builder). See the PR description: this renames RUM/crash going forward.
             Configuration.Builder(
                 clientToken = BuildConfig.datadogClientToken,
                 env = if (BuildConfig.DEBUG) "Local" else "Production",
                 variant = BuildConfig.FLAVOR,
+                service = SERVICE_NAME,
             )
                 .useSite(DatadogSite.US5)
                 .setCrashReportsEnabled(true)
@@ -157,8 +164,11 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 .trackAnonymousUser(true)
                 .trackBackgroundEvents(true) // Match Apple: track background events for cross-platform parity
                 .trackFrustrations(false) // Disable click-tracking based frustration detection
-                .trackLongTasks()
-                .trackNonFatalAnrs(true)
+                // Match Apple: disable long-task detection and continuous vitals monitoring to cut idle
+                // CPU/battery drain (~15% savings). This app runs a 24/7 foreground service, so the same
+                // concern applies. iOS sets longTaskThreshold = nil and vitalsUpdateFrequency = nil.
+                .setVitalsUpdateFrequency(VitalsUpdateFrequency.NEVER)
+                .trackNonFatalAnrs(true) // Android-specific; no iOS equivalent
                 .setSessionSampleRate(sampleRate)
                 .build()
         Rum.enable(rumConfiguration)
@@ -169,8 +179,8 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(true).build()
         Trace.enable(traceConfig)
 
-        // Session Replay for debug builds only, matching Apple's TestFlight-only gating.
-        // Masks all text inputs to protect message content.
+        // Session Replay is Android-only debug tooling — iOS ships no Session Replay at all. Enabled for
+        // debug builds only, and masks all text inputs to protect message content.
         if (BuildConfig.DEBUG) {
             val sessionReplayConfig =
                 SessionReplayConfiguration.Builder(sampleRate)
@@ -265,6 +275,16 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         GlobalRumMonitor.get().addAction(RumActionType.CUSTOM, "connect", attributes)
     }
 
+    override fun startScreenView(key: String, name: String) {
+        if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
+        GlobalRumMonitor.get().startView(key = key, name = name)
+    }
+
+    override fun stopScreenView(key: String) {
+        if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
+        GlobalRumMonitor.get().stopView(key = key)
+    }
+
     private val isGooglePlayAvailable: Boolean
         get() =
             GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(context).let {
@@ -282,21 +302,18 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             // Add the log to the Crashlytics log buffer so it appears in reports
             Firebase.crashlytics.log("$severity/$tag: $message")
 
-            // Filter out normal coroutine cancellations
-            if (throwable is CancellationException) return
+            // Cancellations and expected conditions stay breadcrumbs only — see shouldReportAsException.
+            if (!shouldReportAsException(severity, throwable)) return
 
-            // Only record non-fatal exceptions for actual Errors (Severity.Error or Severity.Assert)
-            if (severity >= Severity.Error) {
-                if (throwable != null) {
-                    Firebase.crashlytics.recordException(throwable)
-                } else {
-                    Firebase.crashlytics.setCustomKeys {
-                        key(KEY_PRIORITY, severity.ordinal)
-                        key(KEY_TAG, tag)
-                        key(KEY_MESSAGE, message)
-                    }
-                    Firebase.crashlytics.recordException(Exception(message))
+            if (throwable != null) {
+                Firebase.crashlytics.recordException(throwable)
+            } else {
+                Firebase.crashlytics.setCustomKeys {
+                    key(KEY_PRIORITY, severity.ordinal)
+                    key(KEY_TAG, tag)
+                    key(KEY_MESSAGE, message)
                 }
+                Firebase.crashlytics.recordException(Exception(message))
             }
         }
     }
@@ -304,8 +321,13 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
     private inner class DatadogLogWriter : LogWriter() {
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
             val logger = datadogLogger ?: return
+            // The Datadog SDK turns any log at ERROR or above into a RUM error purely from the level — it has no
+            // per-call opt-out — so downgrading to WARN is the only way to keep an expected condition out of RUM
+            // error tracking while still emitting the log line. Note this deliberately keeps CancellationException
+            // at error here even though Crashlytics drops it; see shouldDowngradeForDatadog.
+            val effectiveSeverity = if (shouldDowngradeForDatadog(severity, throwable)) Severity.Warn else severity
             val datadogPriority =
-                when (severity) {
+                when (effectiveSeverity) {
                     Severity.Verbose -> android.util.Log.VERBOSE
                     Severity.Debug -> android.util.Log.DEBUG
                     Severity.Info -> android.util.Log.INFO

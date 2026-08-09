@@ -27,24 +27,32 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.firmware_version
+import org.meshtastic.core.resources.disconnect
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -55,32 +63,58 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_DELAY = 2
+private const val RSSI_DELAY = 3
 private const val RSSI_TIMEOUT = 1
+
+/**
+ * Plain text resolved outside the animated connected-device subtree.
+ *
+ * TODO(CMP-6615): Remove this bundle and the caller-provided component labels after upgrading from Compose
+ *   Multiplatform 1.11.1 to a release containing the Android resource-loading fix.
+ */
+@Immutable
+data class CurrentlyConnectedText(
+    val unknownLabel: String,
+    val rssiLabel: String,
+    val disconnectLabel: String,
+    val firmwareVersion: String?,
+)
 
 @Suppress("LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
+    text: CurrentlyConnectedText,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
     bleDevice: DeviceListEntry.Ble? = null,
 ) {
-    var rssi by remember { mutableIntStateOf(0) }
-    LaunchedEffect(bleDevice) {
+    // Null until the first successful read: 0 dBm is the strongest value on this scale, not "unknown".
+    var rssi by remember(bleDevice?.device?.address) { mutableStateOf<Int?>(null) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(bleDevice, lifecycle) {
         if (bleDevice == null) return@LaunchedEffect
-        while (bleDevice.device.isConnected) {
-            try {
-                rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
-            } catch (_: TimeoutCancellationException) {
-                Logger.d { "RSSI read timed out" }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.d(e) { "Failed to read RSSI ${e.message}" }
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            bleDevice.device.state.collectLatest { state ->
+                if (state != BleConnectionState.Connected) {
+                    if (rssi != null) rssi = null
+                    return@collectLatest
+                }
+                while (true) {
+                    try {
+                        val latestRssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
+                        if (latestRssi != rssi) rssi = latestRssi
+                    } catch (_: TimeoutCancellationException) {
+                        Logger.d { "RSSI read timed out" }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Logger.d(e) { "Failed to read RSSI" }
+                    }
+                    delay(RSSI_DELAY.seconds)
+                }
             }
-            delay(RSSI_DELAY.seconds)
         }
     }
     Column(modifier = modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -89,9 +123,9 @@ fun CurrentlyConnectedInfo(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
+            MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage, unknownLabel = text.unknownLabel)
             if (bleDevice != null) {
-                Rssi(rssi = rssi)
+                Rssi(rssi = rssi, label = text.rssiLabel)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -100,21 +134,18 @@ fun CurrentlyConnectedInfo(
             Column(modifier = Modifier.weight(1f, fill = true)) {
                 Text(text = node.user.long_name, style = MaterialTheme.typography.titleMediumEmphasized)
 
-                node.metadata
-                    ?.firmware_version
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { firmwareVersion ->
-                        Text(
-                            text = stringResource(Res.string.firmware_version, firmwareVersion),
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                text.firmwareVersion?.let { firmwareVersion ->
+                    Text(
+                        text = firmwareVersion,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
 
-        DisconnectButton(onClick = onClickDisconnect)
+        DisconnectButton(onClick = onClickDisconnect, label = text.disconnectLabel)
     }
 }
 
@@ -130,6 +161,13 @@ private fun CurrentlyConnectedInfoPreview() {
                 isIgnored = false,
                 paxcounter = Paxcount(ble = 10, wifi = 5),
                 environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
+            ),
+            text =
+            CurrentlyConnectedText(
+                unknownLabel = stringResource(Res.string.unknown),
+                rssiLabel = stringResource(Res.string.rssi),
+                disconnectLabel = stringResource(Res.string.disconnect),
+                firmwareVersion = null,
             ),
             onNavigateToNodeDetails = {},
             onClickDisconnect = {},

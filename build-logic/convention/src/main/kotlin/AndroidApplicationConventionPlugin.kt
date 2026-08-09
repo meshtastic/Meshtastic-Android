@@ -27,7 +27,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "com.android.application")
-            apply(plugin = "org.gradle.test-retry")
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
@@ -46,7 +45,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isShrinkResources = true
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
-                            rootProject.file("config/proguard/shared-rules.pro"),
+                            isolated.rootProject.projectDirectory.file("config/proguard/shared-rules.pro").asFile,
                             "proguard-rules.pro",
                         )
                     }
