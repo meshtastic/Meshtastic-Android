@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -428,6 +429,8 @@ private enum class ActiveSheet {
     Emoji,
 }
 
+internal val MessageStatusColorKey = SemanticsPropertyKey<Color>("MessageStatusColor")
+
 @Composable
 private fun MessageStatusLabel(
     status: MessageStatus,
@@ -443,6 +446,7 @@ private fun MessageStatusLabel(
         modifier
             .fillMaxWidth()
             .testTag(MESSAGE_STATUS_LABEL_TEST_TAG)
+            .semantics { this[MessageStatusColorKey] = statusColor }
             .clickable(
                 onClickLabel = stringResource(Res.string.action_show_message_status),
                 role = Role.Button,

@@ -19,6 +19,8 @@ package org.meshtastic.feature.messaging.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -31,7 +33,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Routing
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -205,17 +207,32 @@ class MessageItemTest {
     }
 
     @Test
-    fun channelKeyMismatch_isTerminalAndUsesErrorColor() = runComposeUiTest {
+    fun channelKeyMismatch_displaysTerminalStatusText() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().mickeyMouse
         val message =
             localMessage(node = testNode, status = MessageStatus.ERROR, routingError = Routing.Error.NO_CHANNEL.value)
-        var statusColor = Color.Unspecified
-        var errorColor = Color.Unspecified
+
+        setContent {
+            MessageItem(message = message, node = testNode, selected = false, onStatusClick = {}, ourNode = testNode)
+        }
+
+        onNodeWithText("Channel/key mismatch", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun retryableRoutingError_usesWarningStatusColor() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(
+                node = testNode,
+                status = MessageStatus.ERROR,
+                routingError = Routing.Error.MAX_RETRANSMIT.value,
+            )
+        var warningColor = Color.Unspecified
 
         setContent {
             AppTheme {
-                errorColor = MaterialTheme.colorScheme.StatusRed
-                statusColor = messageStatusColor(status = MessageStatus.ERROR, isWarning = message.isStatusRetryable())
+                warningColor = MaterialTheme.colorScheme.StatusYellow
                 MessageItem(
                     message = message,
                     node = testNode,
@@ -226,8 +243,8 @@ class MessageItemTest {
             }
         }
 
-        onNodeWithText("Channel/key mismatch", useUnmergedTree = true).assertIsDisplayed()
-        assertEquals(errorColor, statusColor)
+        onNodeWithTag(MESSAGE_STATUS_LABEL_TEST_TAG, useUnmergedTree = true)
+            .assert(SemanticsMatcher.expectValue(MessageStatusColorKey, warningColor))
     }
 
     @Test
