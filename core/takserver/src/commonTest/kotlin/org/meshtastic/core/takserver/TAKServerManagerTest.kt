@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -192,10 +193,11 @@ class TAKServerManagerTest {
         override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
         override var onClientConnected: (() -> Unit)? = null
 
-        val startResult = CompletableDeferred<Result<Unit>>()
+        val startResults = mutableListOf<CompletableDeferred<Result<Unit>>>()
         var stopCount = 0
 
-        override suspend fun start(scope: CoroutineScope): Result<Unit> = startResult.await()
+        override suspend fun start(scope: CoroutineScope): Result<Unit> =
+            CompletableDeferred<Result<Unit>>().also(startResults::add).await()
 
         override fun stop() {
             stopCount++
@@ -220,16 +222,26 @@ class TAKServerManagerTest {
     }
 
     @Test
-    fun `stop invalidates a pending successful start`() = runTest {
+    fun `next start waits for stale start cleanup`() = runTest {
         val delayedServer = DelayedTAKServer()
         val manager = TAKServerManagerImpl(delayedServer)
         manager.start(this)
+        runCurrent()
+        assertEquals(1, delayedServer.startResults.size)
 
         manager.stop()
-        delayedServer.startResult.complete(Result.success(Unit))
+        manager.start(this)
+        runCurrent()
+        assertEquals(1, delayedServer.startResults.size)
+
+        delayedServer.startResults[0].complete(Result.success(Unit))
+        runCurrent()
+        assertEquals(2, delayedServer.startResults.size)
+
+        delayedServer.startResults[1].complete(Result.success(Unit))
         advanceUntilIdle()
 
-        assertEquals(false, manager.isRunning.value)
+        assertTrue(manager.isRunning.value)
         assertEquals(2, delayedServer.stopCount)
     }
 

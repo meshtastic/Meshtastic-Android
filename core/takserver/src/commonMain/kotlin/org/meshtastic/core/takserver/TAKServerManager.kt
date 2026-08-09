@@ -94,6 +94,7 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
 
     private val offlineQueue = ArrayDeque<QueuedMessage>()
     private val offlineQueueMutex = Mutex()
+    private val lifecycleMutex = Mutex()
 
     companion object {
         private val OFFLINE_QUEUE_TTL = 5.minutes
@@ -114,35 +115,38 @@ internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServe
         this.scope = scope
 
         scope.launch {
-            // Wire up inbound message handler BEFORE starting so no messages are lost.
-            // Use tryEmit (non-suspending) with extraBufferCapacity to avoid launching a
-            // new coroutine per message, which would create unbounded coroutines under
-            // high message rates and could reorder messages.
-            takServer.onMessage = { cotMessage, clientInfo ->
-                if (!_inboundMessages.tryEmit(InboundCoTMessage(cotMessage, clientInfo))) {
-                    Logger.w { "TAK inbound message buffer full; dropping message from ${clientInfo?.id}" }
+            lifecycleMutex.withLock {
+                if (generation != startGeneration) return@withLock
+                // Wire up inbound message handler BEFORE starting so no messages are lost.
+                // Use tryEmit (non-suspending) with extraBufferCapacity to avoid launching a
+                // new coroutine per message, which would create unbounded coroutines under
+                // high message rates and could reorder messages.
+                takServer.onMessage = { cotMessage, clientInfo ->
+                    if (!_inboundMessages.tryEmit(InboundCoTMessage(cotMessage, clientInfo))) {
+                        Logger.w { "TAK inbound message buffer full; dropping message from ${clientInfo?.id}" }
+                    }
                 }
-            }
-            takServer.onClientConnected = {
-                drainOfflineQueue()
-                _clientConnected.tryEmit(Unit)
-            }
+                takServer.onClientConnected = {
+                    drainOfflineQueue()
+                    _clientConnected.tryEmit(Unit)
+                }
 
-            val result = takServer.start(scope)
-            if (generation != startGeneration) {
-                if (result.isSuccess) takServer.stop()
-                return@launch
-            }
-            _isStarting.value = false
-            if (result.isSuccess) {
-                _isRunning.value = true
-                Logger.i { "TAK Server started" }
-            } else {
-                _hasStartError.value = true
-                Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
-                // Clear both callbacks if start failed so we don't hold a reference unnecessarily
-                takServer.onMessage = null
-                takServer.onClientConnected = null
+                val result = takServer.start(scope)
+                if (generation != startGeneration) {
+                    if (result.isSuccess) takServer.stop()
+                    return@withLock
+                }
+                _isStarting.value = false
+                if (result.isSuccess) {
+                    _isRunning.value = true
+                    Logger.i { "TAK Server started" }
+                } else {
+                    _hasStartError.value = true
+                    Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
+                    // Clear both callbacks if start failed so we don't hold a reference unnecessarily
+                    takServer.onMessage = null
+                    takServer.onClientConnected = null
+                }
             }
         }
     }
