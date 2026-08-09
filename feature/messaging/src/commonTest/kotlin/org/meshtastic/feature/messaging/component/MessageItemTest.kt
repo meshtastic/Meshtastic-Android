@@ -310,6 +310,24 @@ class MessageItemTest {
     }
 
     @Test
+    fun messageStatusDialog_displaysRoutingFailureExplanation() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(
+                node = testNode,
+                status = MessageStatus.ERROR,
+                routingError = Routing.Error.MAX_RETRANSMIT.value,
+            )
+
+        setContent { MessageStatusDialog(message = message, resendOption = true, onResend = {}, onDismiss = {}) }
+
+        onNodeWithText("Failed to deliver to mesh").assertIsDisplayed()
+        onNodeWithText("No node confirmed this message. Try again when you have better signal or more mesh coverage.")
+            .assertIsDisplayed()
+        onNodeWithText("Resend").assertIsDisplayed()
+    }
+
+    @Test
     fun localMessageStatus_invokesStatusClick() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().mickeyMouse
         val message = localMessage(node = testNode, status = MessageStatus.QUEUED)

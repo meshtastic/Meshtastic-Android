@@ -21,19 +21,34 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.message_routing_error_admin_bad_session_key
+import org.meshtastic.core.resources.message_routing_error_admin_bad_session_key_detail
 import org.meshtastic.core.resources.message_routing_error_admin_public_key_unauthorized
+import org.meshtastic.core.resources.message_routing_error_admin_public_key_unauthorized_detail
 import org.meshtastic.core.resources.message_routing_error_bad_request
+import org.meshtastic.core.resources.message_routing_error_bad_request_detail
 import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit
+import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit_detail
 import org.meshtastic.core.resources.message_routing_error_max_retransmit
+import org.meshtastic.core.resources.message_routing_error_max_retransmit_detail
 import org.meshtastic.core.resources.message_routing_error_no_channel
+import org.meshtastic.core.resources.message_routing_error_no_channel_detail
 import org.meshtastic.core.resources.message_routing_error_no_interface
+import org.meshtastic.core.resources.message_routing_error_no_interface_detail
 import org.meshtastic.core.resources.message_routing_error_no_response
+import org.meshtastic.core.resources.message_routing_error_no_response_detail
+import org.meshtastic.core.resources.message_routing_error_no_route_detail
 import org.meshtastic.core.resources.message_routing_error_not_authorized
+import org.meshtastic.core.resources.message_routing_error_not_authorized_detail
 import org.meshtastic.core.resources.message_routing_error_pki_failed
+import org.meshtastic.core.resources.message_routing_error_pki_failed_detail
 import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key
+import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key_detail
 import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey_detail
 import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded
+import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded_detail
 import org.meshtastic.core.resources.message_routing_error_too_large
+import org.meshtastic.core.resources.message_routing_error_too_large_detail
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_recipient_delivered
@@ -122,6 +137,48 @@ fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = whe
 
     else -> getStringResFrom(routingError)
 }
+
+@Suppress("CyclomaticComplexMethod")
+fun getMessageRoutingErrorDetailResFrom(routingError: Int): StringResource? = when (routingError) {
+    Routing.Error.NO_ROUTE.value -> Res.string.message_routing_error_no_route_detail
+
+    Routing.Error.GOT_NAK.value,
+    Routing.Error.TIMEOUT.value,
+    Routing.Error.MAX_RETRANSMIT.value,
+    -> Res.string.message_routing_error_max_retransmit_detail
+
+    Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel_detail
+
+    Routing.Error.NO_INTERFACE.value -> Res.string.message_routing_error_no_interface_detail
+
+    Routing.Error.DUTY_CYCLE_LIMIT.value -> Res.string.message_routing_error_duty_cycle_limit_detail
+
+    Routing.Error.RATE_LIMIT_EXCEEDED.value -> Res.string.message_routing_error_rate_limit_exceeded_detail
+
+    Routing.Error.TOO_LARGE.value -> Res.string.message_routing_error_too_large_detail
+
+    Routing.Error.NO_RESPONSE.value -> Res.string.message_routing_error_no_response_detail
+
+    Routing.Error.BAD_REQUEST.value -> Res.string.message_routing_error_bad_request_detail
+
+    Routing.Error.NOT_AUTHORIZED.value -> Res.string.message_routing_error_not_authorized_detail
+
+    Routing.Error.PKI_FAILED.value -> Res.string.message_routing_error_pki_failed_detail
+
+    Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.message_routing_error_pki_unknown_pubkey_detail
+
+    Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.message_routing_error_pki_send_fail_public_key_detail
+
+    Routing.Error.ADMIN_BAD_SESSION_KEY.value -> Res.string.message_routing_error_admin_bad_session_key_detail
+
+    Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value ->
+        Res.string.message_routing_error_admin_public_key_unauthorized_detail
+
+    else -> null
+}
+
+fun getMessageStatusDetailRes(status: MessageStatus?, routingError: Int): StringResource? =
+    if (status == MessageStatus.ERROR) getMessageRoutingErrorDetailResFrom(routingError) else null
 
 fun getMessageStatusStringRes(
     status: MessageStatus?,
@@ -222,6 +279,8 @@ data class Message(
 
     fun getStatusStringRes(isDirectMessage: Boolean = false): Pair<StringResource, StringResource> =
         getMessageStatusStringRes(status, routingError, isDirectMessage)
+
+    fun getStatusDetailRes(): StringResource? = getMessageStatusDetailRes(status, routingError)
 
     fun isStatusRetryable(isDirectMessage: Boolean = false): Boolean =
         isMessageStatusRetryable(status, routingError, isDirectMessage)
