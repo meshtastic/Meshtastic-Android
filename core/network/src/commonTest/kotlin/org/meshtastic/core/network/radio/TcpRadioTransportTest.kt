@@ -19,6 +19,8 @@ package org.meshtastic.core.network.radio
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,9 +58,16 @@ class TcpRadioTransportTest {
                 connectedState.value = value
             }
 
-        val sentPackets = mutableListOf<ByteArray>()
-        var starts = 0
-        var stops = 0
+        private val sentPacketsLock = SynchronizedObject()
+        private val mutableSentPackets = mutableListOf<ByteArray>()
+        private val stopsState = atomic(0)
+
+        val sentPackets: List<ByteArray>
+            get() = synchronized(sentPacketsLock) { mutableSentPackets.toList() }
+
+        val stops: Int
+            get() = stopsState.value
+
         var stopStarted: CompletableDeferred<Unit>? = null
         var releaseStop: CompletableDeferred<Unit>? = null
         var sendStarted: CompletableDeferred<Unit>? = null
@@ -72,12 +81,10 @@ class TcpRadioTransportTest {
         override val isConnected: Boolean
             get() = connected
 
-        override fun start(address: String) {
-            starts++
-        }
+        override fun start(address: String) = Unit
 
         override fun stop() {
-            stops++
+            stopsState.incrementAndGet()
             stopObservedSendInFlightState.value = sendInFlight.value
             stopStarted?.complete(Unit)
             releaseStop?.let { gate -> runBlocking { withTimeout(5.seconds) { gate.await() } } }
@@ -89,7 +96,7 @@ class TcpRadioTransportTest {
             try {
                 sendStarted?.complete(Unit)
                 releaseSend?.await()
-                sentPackets += payload
+                synchronized(sentPacketsLock) { mutableSentPackets += payload }
             } finally {
                 sendInFlight.value = false
             }

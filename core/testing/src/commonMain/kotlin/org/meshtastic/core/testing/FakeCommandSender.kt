@@ -33,7 +33,10 @@ class FakeCommandSender :
     BaseFake(),
     CommandSender {
 
-    val sentPackets = mutableListOf<DataPacket>()
+    private val mutableSentPackets = mutableListOf<DataPacket>()
+    val sentPackets: List<DataPacket>
+        get() = mutableSentPackets.toList()
+
     private var nextPacketId = 1
 
     var lastPassphrase: String? = null
@@ -55,13 +58,13 @@ class FakeCommandSender :
         private set
 
     var awaitedAdminResult: AwaitedSendResult =
-        AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true, departureEpochAtDispatch = 0)
+        AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
     var sendDataFailure: PacketQueueRejectedException? = null
     var commandFailure: PacketQueueRejectedException? = null
 
     init {
         registerResetAction {
-            sentPackets.clear()
+            mutableSentPackets.clear()
             nextPacketId = 1
             lastPassphrase = null
             lastBoots = 0
@@ -69,8 +72,7 @@ class FakeCommandSender :
             lastMaxSessionSeconds = 0
             lastDisable = false
             lockNowCalled = false
-            awaitedAdminResult =
-                AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true, departureEpochAtDispatch = 0)
+            awaitedAdminResult = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
             sendDataFailure = null
             commandFailure = null
         }
@@ -90,21 +92,26 @@ class FakeCommandSender :
             throw failure
         }
         p.status = MessageStatus.QUEUED
-        sentPackets += p
+        mutableSentPackets += p
     }
 
     override suspend fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
         failCommandIfConfigured()
     }
 
-    override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) = Unit
+    override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
+        failCommandIfConfigured()
+    }
 
     override suspend fun sendAdminAwaitResult(
         destNum: Int,
         requestId: Int,
         wantResponse: Boolean,
         initFn: () -> AdminMessage,
-    ): AwaitedSendResult = awaitedAdminResult
+    ): AwaitedSendResult {
+        failCommandIfConfigured()
+        return awaitedAdminResult
+    }
 
     override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
         failCommandIfConfigured()

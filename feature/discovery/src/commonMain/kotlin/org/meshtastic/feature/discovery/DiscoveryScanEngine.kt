@@ -199,26 +199,30 @@ class DiscoveryScanEngine(
         require(targets.isNotEmpty()) { "At least one scan target is required" }
         require(dwellDurationSeconds > 0) { "Dwell duration must be positive" }
 
-        if (!homeRestorer.awaitBeforeScan(meshPrefs.deviceAddress.value)) {
-            refuseScan("Home configuration restoration is still pending")
-            return
-        }
-        if (!terminalCoordinator.resetForScan()) {
-            refuseScan("Previous discovery scan cleanup is still running")
-            return
-        }
+        val deviceAddress = meshPrefs.deviceAddress.value
+        val connectionVersion = serviceRepository.connectionLifecycle.value.version
+        if (!prepareScanStart(deviceAddress)) return
 
+        // These repository flows may suspend while their initial snapshots load. Keep that wait outside the engine
+        // mutex so stop/reset and packet collection remain responsive, then revalidate device and restore ownership
+        // under the mutex before publishing any scan state.
+        val snapshot = readInitialConfigSnapshot()
+        if (snapshot == null) {
+            refuseScan("Radio configuration snapshot is not available")
+            return
+        }
+        val (homeLora, initialPrimaryChannel) = snapshot
         mutex.withLock {
             if (isActive) {
                 Logger.w { "DiscoveryScanEngine: scan already active, ignoring startScan" }
+            } else if (!isScanPreparationCurrent(deviceAddress, connectionVersion)) {
+                _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
             } else if (homeRestorer.hasPendingRestoreFor(meshPrefs.deviceAddress.value)) {
                 // Interrupted-session recovery registers its restore under this mutex. Re-check here so a restore that
                 // won the race after the first wait cannot retune the radio underneath this scan.
                 _scanState.value = DiscoveryScanState.Failed("Home configuration restoration is still pending")
             } else {
                 _scanState.value = DiscoveryScanState.Preparing
-                val homeLora = radioConfigRepository.localConfigFlow.first().lora
-                val initialPrimaryChannel = radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
                 val requiresPrimaryRestore = targets.any { it.channel != null }
                 when {
                     homeLora == null -> refuseUnrestorableScanLocked("Home LoRa configuration is not available")
@@ -233,11 +237,33 @@ class DiscoveryScanEngine(
                             initialLoraConfig = homeLora,
                             initialPrimaryChannel = initialPrimaryChannel,
                             requiresPrimaryRestore = requiresPrimaryRestore,
+                            deviceAddress = deviceAddress,
+                            connectionVersion = connectionVersion,
                         )
                 }
             }
         }
     }
+
+    private suspend fun prepareScanStart(deviceAddress: String?): Boolean = when {
+        !homeRestorer.awaitBeforeScan(deviceAddress) -> {
+            refuseScan("Home configuration restoration is still pending")
+            false
+        }
+
+        !terminalCoordinator.resetForScan() -> {
+            refuseScan("Previous discovery scan cleanup is still running")
+            false
+        }
+
+        else -> true
+    }
+
+    private suspend fun readInitialConfigSnapshot(): Pair<Config.LoRaConfig?, ChannelSettings?>? =
+        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT_MS) {
+            radioConfigRepository.localConfigFlow.first().lora to
+                radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
+        }
 
     private suspend fun refuseScan(reason: String) {
         mutex.withLock { if (!isActive) _scanState.value = DiscoveryScanState.Failed(reason) }
@@ -254,6 +280,8 @@ class DiscoveryScanEngine(
         initialLoraConfig: Config.LoRaConfig,
         initialPrimaryChannel: ChannelSettings?,
         requiresPrimaryRestore: Boolean,
+        deviceAddress: String?,
+        connectionVersion: Long,
     ) {
         originalLoRaConfig = initialLoraConfig
         originalPrimaryChannel = initialPrimaryChannel
@@ -274,11 +302,19 @@ class DiscoveryScanEngine(
                 completionStatus = DiscoverySessionStatus.IN_PROGRESS,
                 userLatitude = (myPosition?.latitude_i ?: 0).toDouble() / POSITION_DIVISOR,
                 userLongitude = (myPosition?.longitude_i ?: 0).toDouble() / POSITION_DIVISOR,
-                deviceAddress = meshPrefs.deviceAddress.value,
+                deviceAddress = deviceAddress,
                 homeLoraConfig = initialLoraConfig,
                 homePrimaryChannel = initialPrimaryChannel.takeIf { requiresPrimaryRestore },
             )
-        sessionId = discoveryDao.insertSession(session)
+        val insertedSessionId = discoveryDao.insertSession(session)
+        if (!isScanPreparationCurrent(deviceAddress, connectionVersion)) {
+            discoveryDao.deleteSession(insertedSessionId)
+            originalLoRaConfig = null
+            originalPrimaryChannel = null
+            _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
+            return
+        }
+        sessionId = insertedSessionId
         _currentSession.value = session.copy(id = sessionId)
         collectorRegistry.collector = this
         _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
@@ -289,6 +325,10 @@ class DiscoveryScanEngine(
             scope.launch { runScanLoop(targets, dwellDurationSeconds) }
         }
     }
+
+    private fun isScanPreparationCurrent(deviceAddress: String?, connectionVersion: Long): Boolean =
+        meshPrefs.deviceAddress.value == deviceAddress &&
+            serviceRepository.connectionLifecycle.value.version == connectionVersion
 
     /** Stops the active scan and restores the home preset. */
     suspend fun stopScan() {
@@ -850,6 +890,7 @@ class DiscoveryScanEngine(
     // endregion
 
     companion object {
+        private const val CONFIG_SNAPSHOT_TIMEOUT_MS = 5_000L
         private const val RECONNECT_TIMEOUT_MS = 60_000L
         private const val TICK_INTERVAL_MS = 1_000L
         private const val POSITION_DIVISOR = 1e7

@@ -55,6 +55,7 @@ class ProcessRadioResponseUseCaseTest {
 
         // Assert
         assertTrue(result is RadioResponseResult.Error)
+        assertEquals(Routing.Error.NO_ROUTE, result.routingError)
     }
 
     @Test

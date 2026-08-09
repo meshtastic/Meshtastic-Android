@@ -40,6 +40,7 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.takserver)
 
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)
         }

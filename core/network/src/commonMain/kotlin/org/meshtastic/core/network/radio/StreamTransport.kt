@@ -109,7 +109,11 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
         callback.onConnect()
     }
 
-    /** Writes raw bytes to the underlying stream (serial port, TCP socket, etc.). */
+    /**
+     * Writes raw bytes to the underlying stream (serial port, TCP socket, etc.). Implementations may block until the
+     * driver accepts the bytes, so direct callers must already be running on an I/O dispatcher. Framed packet sends use
+     * [queueFramedSend], whose writer controls dispatcher confinement.
+     */
     abstract fun sendBytes(p: ByteArray)
 
     /** Flushes buffered bytes to the underlying stream. No-op by default. */

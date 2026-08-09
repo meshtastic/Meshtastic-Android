@@ -251,7 +251,7 @@ class CommandSenderImplTest {
     fun sendAdminAwaitResult_generatesNonZeroIdWhenCallerSuppliesZero() = runTest {
         val packets = mutableListOf<MeshPacket>()
         everySuspend { packetHandler.sendToRadioAndAwaitResult(capture(packets)) } returns
-            AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true, departureEpochAtDispatch = 0)
+            AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
 
         commandSender.sendAdminAwaitResult(DEST_NODE, requestId = 0) { AdminMessage(get_owner_request = true) }
 
@@ -260,7 +260,7 @@ class CommandSenderImplTest {
 
     @Test
     fun sendAdminAwaitResult_preservesNonAcceptedStatus() = runTest {
-        val expected = AwaitedSendResult(AwaitedSendStatus.REJECTED, dispatched = false)
+        val expected = AwaitedSendResult(AwaitedSendStatus.REJECTED)
         everySuspend { packetHandler.sendToRadioAndAwaitResult(any<MeshPacket>()) } returns expected
 
         val result = commandSender.sendAdminAwaitResult(DEST_NODE) { AdminMessage(get_owner_request = true) }
@@ -341,6 +341,18 @@ class CommandSenderImplTest {
     }
 
     // --- requestNeighborInfo ---
+
+    @Test
+    fun requestNeighborInfo_generatesNonZeroIdWhenCallerSuppliesZero() = runTest {
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadio(capture(packets)) } returns true
+
+        commandSender.requestNeighborInfo(requestId = 0, destNum = DEST_NODE)
+
+        val generatedId = packets.single().id
+        assertNotEquals(0, generatedId)
+        verify { neighborInfoHandler.recordStartTime(generatedId) }
+    }
 
     @Test
     fun requestNeighborInfo_localNode_usesCachedNeighborInfo() = runTest {

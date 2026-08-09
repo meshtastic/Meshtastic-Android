@@ -75,7 +75,7 @@ internal class DiscoveryInterruptedSessionRecovery(
                         recoverable.completionStatus,
                         default = DiscoverySessionStatus.UNRESTORABLE,
                     )
-                discoveryDao.updateSessionCompletionStatus(recoverable.id, finalStatus)
+                discoveryDao.updateRecoverableSessionCompletionStatus(recoverable.id, finalStatus)
                 null
             }
 

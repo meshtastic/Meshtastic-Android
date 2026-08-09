@@ -85,6 +85,7 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -480,6 +481,42 @@ class RadioConfigViewModelTest {
         runCurrent()
 
         assertEquals(listOf(1), writtenIndexes, "a terminal response must invalidate the rest of the batch")
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    @Test
+    fun `routing error cancels manual channel batches queued behind the active batch`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val old = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"), ChannelSettings(name = "C"))
+        val firstUpdate = listOf(old[0], old[2], old[1])
+        val secondUpdate = listOf(old[0], ChannelSettings(name = "D"), old[2])
+        val writtenIndexes = mutableListOf<Int>()
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any(), any()) } calls
+            {
+                writtenIndexes += (it.args[1] as Channel).index
+                it.args.onRequestIdArg()(41)
+                delay(10_000)
+                41
+            }
+
+        viewModel.updateChannels(firstUpdate, old)
+        runCurrent()
+        viewModel.updateChannels(secondUpdate, old)
+        runCurrent()
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        runCurrent()
+        advanceUntilIdle()
+
+        assertEquals(listOf(1), writtenIndexes, "terminal invalidation must cancel active and queued channel batches")
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
     }
 
@@ -1146,6 +1183,138 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `remote read accepts response after max retransmit before request deadline`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
+        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+        every { processRadioResponseUseCase(any(), 456, any()) } calls { response }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.loadConfigRoute(ConfigRoute.DEVICE)
+        runCurrent()
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        response = RadioResponseResult.ConfigResponse(config)
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertEquals(config.device, viewModel.radioConfigState.value.radioConfig.device)
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+    }
+
+    @Test
+    fun `remote read surfaces max retransmit at deadline and accepts later response`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
+        var nextRequestId = 42
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(nextRequestId)
+                nextRequestId
+            }
+        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
+        every { processRadioResponseUseCase(any(), 456, any()) } calls
+            {
+                val pendingRequestIds = it.args[2] as Set<Int>
+                if (42 in pendingRequestIds) response else null
+            }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.loadConfigRoute(ConfigRoute.DEVICE)
+        runCurrent()
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        advanceTimeBy(30_001)
+        runCurrent()
+
+        assertEquals(ResponseState.Error(maxRetransmit), viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(55_000)
+        nextRequestId = 43
+        viewModel.loadConfigRoute(ConfigRoute.DEVICE)
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        response = RadioResponseResult.Success
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        response = RadioResponseResult.ConfigResponse(config)
+        advanceTimeBy(5_000)
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertEquals(config.device, viewModel.radioConfigState.value.radioConfig.device)
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+    }
+
+    @Test
+    fun `remote write keeps max retransmit terminal`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
+        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+        every { processRadioResponseUseCase(any(), 456, any()) } returns
+            RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.setConfig(config)
+        runCurrent()
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertEquals(ResponseState.Error(maxRetransmit), viewModel.radioConfigState.value.responseState)
+
+        advanceTimeBy(31_000)
+        runCurrent()
+        assertEquals(ResponseState.Error(maxRetransmit), viewModel.radioConfigState.value.responseState)
+    }
+
+    @Test
     fun `Admin actions call correct useCases`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
@@ -1262,6 +1431,8 @@ class RadioConfigViewModelTest {
             }
 
         viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+        verifySuspend { radioConfigUseCase.getOwner(123, any()) }
 
         // state should be loading
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
@@ -1270,10 +1441,7 @@ class RadioConfigViewModelTest {
         advanceTimeBy(31_000)
         runCurrent()
 
-        // after timeout, the request ID should be removed, and if empty, sendError is called.
-        // It's hard to assert sendError directly without a mock on a channel, but we can verify it doesn't stay loading
-        // actually sendError updates the state? No, sendError sends an event.
-        // But the requestIds gets cleared.
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
     }
 
     @Test

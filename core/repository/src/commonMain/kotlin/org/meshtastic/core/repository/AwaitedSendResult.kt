@@ -38,21 +38,14 @@ enum class AwaitedSendStatus {
 }
 
 /**
- * Detailed result for an awaited send. [dispatched] is true only when an active transport accepted the outbound bytes
- * for asynchronous delivery. [departureEpochAtDispatch] captures the canonical departure counter at that admission
- * boundary, allowing callers to distinguish a later transport departure from one that happened while the packet was
- * still queued. Correlated responses received before dispatch are ignored, so an accepted result always belongs to an
- * admitted transport send.
+ * Detailed result for an awaited send. [departureEpochAtDispatch] captures the canonical departure counter when an
+ * active transport accepts the outbound bytes for asynchronous delivery. Its presence is also the single source of
+ * truth for [dispatched], allowing callers to distinguish a later transport departure from one that happened while the
+ * packet was still queued. Correlated responses received before dispatch are ignored, so an accepted result always
+ * belongs to an admitted transport send.
  */
-data class AwaitedSendResult(
-    val status: AwaitedSendStatus,
-    val dispatched: Boolean,
-    val departureEpochAtDispatch: Long? = null,
-) {
+data class AwaitedSendResult(val status: AwaitedSendStatus, val departureEpochAtDispatch: Long? = null) {
     init {
-        require(dispatched == (departureEpochAtDispatch != null)) {
-            "departureEpochAtDispatch must be set exactly when dispatched is true"
-        }
         require(status != AwaitedSendStatus.REJECTED || !dispatched) {
             "a REJECTED result must not come from an admitted transport send"
         }
@@ -66,6 +59,10 @@ data class AwaitedSendResult(
             "a TIMED_OUT result must come from an admitted transport send"
         }
     }
+
+    /** True only when an active transport admitted the outbound bytes. */
+    val dispatched: Boolean
+        get() = departureEpochAtDispatch != null
 
     val accepted: Boolean
         get() = status == AwaitedSendStatus.ACCEPTED

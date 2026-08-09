@@ -32,7 +32,7 @@ import kotlin.test.assertTrue
 /** Tests for session history: sorting, session load by ID, and delete behavior (D042). */
 class DiscoveryHistoryBehaviorTest {
 
-    private val dao = SharedInMemoryDiscoveryDao(flowBackedSessions = true)
+    private val dao = SharedInMemoryDiscoveryDao()
 
     // region History sorting
 

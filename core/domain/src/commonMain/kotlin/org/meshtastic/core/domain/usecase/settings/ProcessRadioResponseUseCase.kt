@@ -48,7 +48,7 @@ sealed class RadioResponseResult {
 
     data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult()
 
-    data class Error(val message: UiText) : RadioResponseResult()
+    data class Error(val message: UiText, val routingError: Routing.Error? = null) : RadioResponseResult()
 
     data object Success : RadioResponseResult()
 }
@@ -82,7 +82,10 @@ open class ProcessRadioResponseUseCase {
         val parsed = Routing.ADAPTER.decode(data.payload)
         return when {
             parsed.error_reason != Routing.Error.NONE ->
-                RadioResponseResult.Error(UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)))
+                RadioResponseResult.Error(
+                    message = UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)),
+                    routingError = parsed.error_reason,
+                )
 
             packet.from == destNum -> RadioResponseResult.Success
 

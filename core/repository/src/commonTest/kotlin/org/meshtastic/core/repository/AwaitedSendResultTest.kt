@@ -22,53 +22,40 @@ import kotlin.test.assertFailsWith
 
 class AwaitedSendResultTest {
     @Test
-    fun dispatchedResultRequiresDepartureEpoch() {
-        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = true) }
-    }
-
-    @Test
-    fun nonDispatchedResultRejectsDepartureEpoch() {
-        assertFailsWith<IllegalArgumentException> {
-            AwaitedSendResult(AwaitedSendStatus.REJECTED, dispatched = false, departureEpochAtDispatch = 7L)
-        }
-    }
-
-    @Test
     fun validDispatchPairingPreservesAcceptedMapping() {
-        val result =
-            AwaitedSendResult(status = AwaitedSendStatus.ACCEPTED, dispatched = true, departureEpochAtDispatch = 7L)
+        val result = AwaitedSendResult(status = AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 7L)
 
         assertEquals(true, result.accepted)
+        assertEquals(true, result.dispatched)
     }
 
     @Test
     fun acceptedStatusRequiresDispatch() {
-        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.ACCEPTED, dispatched = false) }
+        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.ACCEPTED) }
     }
 
     @Test
     fun rejectedStatusCannotClaimTransportDispatch() {
         assertFailsWith<IllegalArgumentException> {
-            AwaitedSendResult(AwaitedSendStatus.REJECTED, dispatched = true, departureEpochAtDispatch = 7L)
+            AwaitedSendResult(AwaitedSendStatus.REJECTED, departureEpochAtDispatch = 7L)
         }
     }
 
     @Test
     fun radioRejectedStatusRequiresTransportDispatch() {
-        assertFailsWith<IllegalArgumentException> {
-            AwaitedSendResult(AwaitedSendStatus.RADIO_REJECTED, dispatched = false)
-        }
+        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.RADIO_REJECTED) }
     }
 
     @Test
     fun timedOutStatusRequiresTransportDispatch() {
-        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.TIMED_OUT, dispatched = false) }
+        assertFailsWith<IllegalArgumentException> { AwaitedSendResult(AwaitedSendStatus.TIMED_OUT) }
     }
 
     @Test
     fun rejectedNonDispatchedResultIsValidAndNotAccepted() {
-        val result = AwaitedSendResult(AwaitedSendStatus.REJECTED, dispatched = false)
+        val result = AwaitedSendResult(AwaitedSendStatus.REJECTED)
 
         assertEquals(false, result.accepted)
+        assertEquals(false, result.dispatched)
     }
 }

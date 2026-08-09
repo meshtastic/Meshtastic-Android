@@ -111,18 +111,16 @@ class PacketHandlerImpl(
 
     private class PendingResponse(val persistence: StatusPersistence?) {
         val deferred: CompletableDeferred<AwaitedSendStatus> = CompletableDeferred()
-        private val dispatched = atomic(false)
         private val dispatchDepartureEpoch = atomic<Long?>(null)
 
         val wasDispatched: Boolean
-            get() = dispatched.value
+            get() = dispatchDepartureEpoch.value != null
 
         val departureEpochAtDispatch: Long?
             get() = dispatchDepartureEpoch.value
 
         fun recordDispatch(accepted: Boolean, departureEpoch: Long) {
             if (accepted) dispatchDepartureEpoch.value = departureEpoch
-            dispatched.value = accepted
         }
     }
 
@@ -200,24 +198,24 @@ class PacketHandlerImpl(
 
     override suspend fun sendToRadioAndAwaitResult(packet: MeshPacket): AwaitedSendResult = if (packet.id == 0) {
         Logger.w { "Rejecting awaited packet without an ID" }
-        AwaitedSendResult(status = AwaitedSendStatus.REJECTED, dispatched = false)
+        AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
     } else {
         when (val admission = enqueuePacket(packet)) {
             is QueueAdmission.Admitted -> awaitAdmittedPacket(packet, admission.pending)
 
             QueueAdmission.TransportUnavailable -> {
                 Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: radio is not connected" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = false)
+                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
             }
 
             QueueAdmission.ScopeInactive -> {
                 Logger.w { "Rejecting awaited packet id=${packet.id.toUInt()}: service scope is no longer active" }
-                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = false)
+                AwaitedSendResult(status = AwaitedSendStatus.TRANSPORT_STOPPED)
             }
 
             QueueAdmission.DuplicateId -> {
                 Logger.w { "Rejecting duplicate awaited packet id=${packet.id.toUInt()}" }
-                AwaitedSendResult(status = AwaitedSendStatus.REJECTED, dispatched = false)
+                AwaitedSendResult(status = AwaitedSendStatus.REJECTED)
             }
         }
     }
@@ -226,20 +224,18 @@ class PacketHandlerImpl(
     private suspend fun awaitAdmittedPacket(packet: MeshPacket, pending: PendingResponse): AwaitedSendResult = try {
         // The queue processor owns both the response timeout and the ID reservation. Permanent
         // service-scope shutdown is the only caller-observed terminal condition because no worker may exist.
-        AwaitedSendResult(
-            status = awaitPendingResponse(pending),
-            dispatched = pending.wasDispatched,
-            departureEpochAtDispatch = pending.departureEpochAtDispatch,
-        )
+        val status = awaitPendingResponse(pending)
+        val departureEpochAtDispatch = pending.departureEpochAtDispatch
+        AwaitedSendResult(status = status, departureEpochAtDispatch = departureEpochAtDispatch)
     } catch (e: CancellationException) {
         throw e // Preserve structured concurrency cancellation propagation.
     } catch (e: Exception) {
         Logger.w(e) { "sendToRadioAndAwait packet id=${packet.id.toUInt()} failed" }
         pending.deferred.complete(AwaitedSendStatus.SEND_FAILED)
+        val departureEpochAtDispatch = pending.departureEpochAtDispatch
         AwaitedSendResult(
             status = AwaitedSendStatus.SEND_FAILED,
-            dispatched = pending.wasDispatched,
-            departureEpochAtDispatch = pending.departureEpochAtDispatch,
+            departureEpochAtDispatch = departureEpochAtDispatch,
         )
     }
 

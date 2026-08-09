@@ -140,6 +140,7 @@ class StreamTransportTest {
         val transport = FakeStreamTransport(callback, backgroundScope)
         val firstWriteStarted = CompletableDeferred<Unit>()
         val releaseFirstWrite = CompletableDeferred<Unit>()
+        var rejectedCompletions = 0
 
         assertTrue(
             transport.queue(
@@ -155,11 +156,12 @@ class StreamTransportTest {
 
         val queuedAdmissions =
             List(StreamTransport.MAX_PENDING_SENDS + 1) { index ->
-                transport.queue(byteArrayOf(index.toByte()), writer = {}, onCompletion = {})
+                transport.queue(byteArrayOf(index.toByte()), writer = {}) { rejectedCompletions++ }
             }
 
         assertEquals(StreamTransport.MAX_PENDING_SENDS, queuedAdmissions.count { it })
         assertFalse(queuedAdmissions.last(), "the first send beyond capacity must be rejected")
+        assertEquals(1, rejectedCompletions, "a capacity-rejected send must release its owner exactly once")
         releaseFirstWrite.complete(Unit)
     }
 
@@ -190,7 +192,9 @@ class StreamTransportTest {
 
         fakeStream.close()
 
-        verify(mode = VerifyMode.not) { callback.onDisconnect(isPermanent = any(), errorMessage = any()) }
+        verify(mode = VerifyMode.not) {
+            callback.onDisconnect(isPermanent = any(), errorMessage = any(), reason = any())
+        }
     }
 
     @Test

@@ -223,16 +223,17 @@ class DiscoveryHomeRestorerTest {
         val result = restorer.schedule(plan)
         runCurrent()
 
+        assertTrue(result.isCompleted, "an invalid restore plan must terminate without entering the retry loop")
         assertFalse(result.await())
         assertTrue(radioController.configWrites.isEmpty())
     }
 
     @Test
-    fun queueRejectionRetriesWhileTheSameDeviceRemainsConnected() = runTest {
+    fun queueRejectionRetriesWithBackoffWhileTheSameDeviceRemainsConnected() = runTest {
         val device = "x:RETRY"
         val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress(device) }
         val serviceRepository = FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) }
-        val radioController = FakeRadioController().apply { rejectLocalConfigWritesRemaining = 1 }
+        val radioController = FakeRadioController().apply { rejectLocalConfigWritesRemaining = 2 }
         val discoveryDao = SharedInMemoryDiscoveryDao()
         val loraConfig = Config.LoRaConfig(use_preset = true)
         val sessionId =
@@ -269,6 +270,12 @@ class DiscoveryHomeRestorerTest {
         assertFalse(result.isCompleted)
         assertEquals(0, radioController.configWrites.size)
 
+        advanceTimeBy(DiscoveryHomeRestorer.RETRY_DELAY_MS)
+        runCurrent()
+        assertEquals(0, radioController.configWrites.size)
+        advanceTimeBy(DiscoveryHomeRestorer.RETRY_DELAY_MS)
+        runCurrent()
+        assertEquals(0, radioController.configWrites.size, "the second retry must use exponential backoff")
         advanceTimeBy(DiscoveryHomeRestorer.RETRY_DELAY_MS)
         runCurrent()
         assertEquals(1, radioController.configWrites.size)

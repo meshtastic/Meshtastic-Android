@@ -122,7 +122,7 @@ internal class DiscoveryTerminalCoordinator(
         beforeFinalize: suspend () -> Unit,
         generateAi: suspend () -> Unit,
     ): DiscoveryScanState.CompletionOutcome {
-        cancelScan()
+        val cancellationSucceeded = runBestEffort("scan cancellation failed during terminal cleanup", cancelScan)
         val persistedStatus =
             if (request.restorePlan == null) {
                 finalStatusForPendingRestore(request.pendingStatus, default = request.pendingStatus)
@@ -134,7 +134,7 @@ internal class DiscoveryTerminalCoordinator(
                 val beforeFinalizeSucceeded =
                     runBestEffort("dwell persistence failed during terminal cleanup", beforeFinalize)
                 val terminalPersistSucceeded = persistTerminalSession(request.sessionId, persistedStatus)
-                beforeFinalizeSucceeded && terminalPersistSucceeded
+                cancellationSucceeded && beforeFinalizeSucceeded && terminalPersistSucceeded
             } finally {
                 // Preserve aggregate-before-final-status ordering, but make restore scheduling cancellation-safe so a
                 // database cancellation cannot strand the radio on its scan configuration.

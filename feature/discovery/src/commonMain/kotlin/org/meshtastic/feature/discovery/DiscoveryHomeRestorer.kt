@@ -17,6 +17,7 @@
 package org.meshtastic.feature.discovery
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -24,7 +25,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
@@ -107,7 +107,7 @@ internal class DiscoveryHomeRestorer(
     private val meshPrefs: MeshPrefs,
 ) {
     private class RestoreStatus(initial: String) {
-        private val status = MutableStateFlow(initial)
+        private val status = atomic(initial)
 
         var value: String
             get() = status.value
@@ -230,6 +230,7 @@ internal class DiscoveryHomeRestorer(
             return false
         }
         var restored = false
+        var retryDelayMs = RETRY_DELAY_MS
         while (currentCoroutineContext().isActive && plan.matchesDevice(meshPrefs.deviceAddress.value) && !restored) {
             val attempt = safeCatching { awaitConnected(plan) && applyHomeConfiguration(plan) }
             val failure = attempt.exceptionOrNull()
@@ -243,19 +244,20 @@ internal class DiscoveryHomeRestorer(
                             "DiscoveryScanEngine: home restore rejected; retrying when admission recovers"
                         }
                         if (serviceRepository.connectionState.value is ConnectionState.Connected) {
-                            delay(RETRY_DELAY_MS)
+                            delay(retryDelayMs)
                         } else {
                             awaitConnected(plan)
                         }
                     }
 
-                    null -> delay(RETRY_DELAY_MS)
+                    null -> delay(retryDelayMs)
 
                     else -> {
-                        Logger.e(failure) { "DiscoveryScanEngine: home restore failed; waiting for reconnect" }
+                        Logger.w(failure) { "DiscoveryScanEngine: home restore failed; waiting for reconnect" }
                         awaitReconnect(plan)
                     }
                 }
+                retryDelayMs = (retryDelayMs * RETRY_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RETRY_DELAY_MS)
             }
         }
         return restored
@@ -311,6 +313,8 @@ internal class DiscoveryHomeRestorer(
 
     internal companion object {
         const val RETRY_DELAY_MS = 1_000L
+        internal const val MAX_RETRY_DELAY_MS = 30_000L
+        private const val RETRY_BACKOFF_MULTIPLIER = 2L
         const val POST_RESTORE_SETTLE_DELAY_MS = 3_000L
         private val START_WAIT_TIMEOUT = 15.seconds
     }

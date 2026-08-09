@@ -218,6 +218,7 @@ class FakeRadioController :
             rejectLocalChannelWritesRemaining--
             throw PacketQueueRejectedException("Local channel")
         }
+        failChannelWriteAfter?.let { if (localChannels.size >= it) error("Fake channel write failure") }
         localChannels.add(channel)
     }
 

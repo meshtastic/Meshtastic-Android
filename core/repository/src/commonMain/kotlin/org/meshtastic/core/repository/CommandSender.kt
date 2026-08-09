@@ -106,7 +106,12 @@ interface CommandSender {
     /** Requests telemetry from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
 
-    /** Requests neighbor info from a specific node, or throws if the outbound queue rejects it. */
+    /**
+     * Requests neighbor info from a specific node.
+     *
+     * @throws LocalNodeUnavailableException when the local node identity is unavailable before admission.
+     * @throws PacketQueueRejectedException when the outbound queue rejects the request.
+     */
     suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 
     /**

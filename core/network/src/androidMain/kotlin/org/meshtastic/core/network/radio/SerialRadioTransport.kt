@@ -326,14 +326,13 @@ class SerialRadioTransport(
 
     private fun handleConnected(connectionToken: ConnectionToken, stats: ConnectionStats) {
         val operation = admitConnectionOperation(connectionToken, requireReady = false) ?: return
+        var wakeFailure: Exception? = null
         try {
             stats.connectedAt = nowMillis
             val connectionTime = stats.connectedAt - stats.connectStartedAt
             Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
-            val wakeFailure = sendWakeBytes(operation.connection)
-            if (wakeFailure != null) {
-                handleWakeFailure(connectionToken, wakeFailure)
-            } else {
+            wakeFailure = sendWakeBytes(operation.connection)
+            if (wakeFailure == null) {
                 val readyToPublish =
                     synchronized(connectionAdmissionLock) {
                         ownsConnectionLocked(connectionToken, operation.connection).also { owns ->
@@ -353,6 +352,7 @@ class SerialRadioTransport(
         } finally {
             operation.lease.release()
         }
+        wakeFailure?.let { handleWakeFailure(connectionToken, it) }
     }
 
     private fun sendWakeBytes(connection: SerialConnection): Exception? = try {
@@ -474,7 +474,7 @@ class SerialRadioTransport(
         val token = synchronized(connectionAdmissionLock) { activeConnectionToken }
         val operation =
             transportLease?.let { token?.let { active -> admitConnectionOperation(active, requireReady = false) } }
-        if (operation == null) {
+        if (transportLease == null || operation == null) {
             transportLease?.release()
             Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
             return

@@ -142,10 +142,7 @@ class MeshConnectionManagerImplTest {
         every { serviceRepository.connectionLifecycle } returns connectionLifecycleFlow
         every { serviceRepository.setConnectionState(any()) } calls
             { call ->
-                val state = call.arg<ConnectionState>(0)
-                connectionStateFlow.value = state
-                val current = connectionLifecycleFlow.value
-                connectionLifecycleFlow.value = current.copy(version = current.version + 1, state = state)
+                applyConnectionState(call.arg<ConnectionState>(0))
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
@@ -179,6 +176,18 @@ class MeshConnectionManagerImplTest {
         scope.asServiceScope(),
         NodeRestartTracker(scope),
     )
+
+    private fun applyConnectionState(state: ConnectionState) {
+        val current = connectionLifecycleFlow.value
+        if (current.state == state) return
+        connectionLifecycleFlow.value =
+            current.copy(
+                version = current.version + 1,
+                state = state,
+                epochs = current.epochs.advance(current.state, state),
+            )
+        connectionStateFlow.value = state
+    }
 
     private fun restartTransportCallCounter(): () -> Int {
         var restartCalls = 0
@@ -497,7 +506,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
 
         manager = createManager(backgroundScope)
@@ -542,7 +551,7 @@ class MeshConnectionManagerImplTest {
                 { call ->
                     val state = call.arg<ConnectionState>(0)
                     observed.add(state)
-                    connectionStateFlow.value = state
+                    applyConnectionState(state)
                 }
 
             manager = createManager(backgroundScope)
@@ -915,7 +924,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
         every { serviceRepository.setConnectionProgress(any()) } calls
             { call ->
@@ -968,7 +977,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
         every { serviceRepository.setConnectionProgress(any()) } calls
             { call ->

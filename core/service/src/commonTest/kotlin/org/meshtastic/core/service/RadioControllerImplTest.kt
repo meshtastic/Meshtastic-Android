@@ -196,6 +196,7 @@ class RadioControllerImplTest {
         everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } calls
             {
                 beforeCommitDispatch(serviceRepository)
+                // Capture after the pre-dispatch hook; commitResult then models events that happen after admission.
                 val departureEpochAtDispatch = serviceRepository.connectionLifecycle.value.epochs.departures
                 commitResult(serviceRepository).let { result ->
                     if (result.dispatched) {
@@ -875,7 +876,7 @@ class RadioControllerImplTest {
     }
 
     private fun dispatchedSendResult(status: AwaitedSendStatus, departureEpochAtDispatch: Long = 0L) =
-        AwaitedSendResult(status, dispatched = true, departureEpochAtDispatch = departureEpochAtDispatch)
+        AwaitedSendResult(status, departureEpochAtDispatch = departureEpochAtDispatch)
 
     private fun acceptedSendResult() = dispatchedSendResult(AwaitedSendStatus.ACCEPTED)
 
@@ -1251,7 +1252,7 @@ class RadioControllerImplTest {
         val (controller, _) =
             createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
                 serviceRepository.setConnectionState(ConnectionState.Disconnected)
-                AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = false)
+                AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
             }
 
         val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }

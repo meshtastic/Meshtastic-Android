@@ -79,8 +79,8 @@ Raw hardware I/O contract for all physical transports (BLE, USB, TCP, Mock).
 ```kotlin
 interface RadioTransport {
     fun handleSendToRadio(p: ByteArray): Boolean
-    fun start()
-    fun keepAlive()
+    fun start() {}
+    fun keepAlive() {}
     suspend fun close()
 }
 ```

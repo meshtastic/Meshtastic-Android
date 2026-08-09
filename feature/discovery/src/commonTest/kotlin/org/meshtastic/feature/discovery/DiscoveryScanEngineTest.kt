@@ -82,11 +82,21 @@ private class FakeDiscoveryDao : DiscoveryDao {
     val sessions = mutableMapOf<Long, DiscoverySessionEntity>()
     val presetResults = mutableMapOf<Long, DiscoveryPresetResultEntity>()
     val discoveredNodes = mutableMapOf<Long, DiscoveredNodeEntity>()
+    var nextInsertSessionEntered: CompletableDeferred<Unit>? = null
+    var releaseNextInsertSession: CompletableDeferred<Unit>? = null
     var nextUpdateSessionEntered: CompletableDeferred<Unit>? = null
     var releaseNextUpdateSession: CompletableDeferred<Unit>? = null
     var nextUpdateSessionFailure: Exception? = null
 
     override suspend fun insertSession(session: DiscoverySessionEntity): Long {
+        nextInsertSessionEntered?.also { entered ->
+            nextInsertSessionEntered = null
+            entered.complete(Unit)
+        }
+        releaseNextInsertSession?.also { release ->
+            releaseNextInsertSession = null
+            release.await()
+        }
         val id = nextSessionId++
         sessions[id] = session.copy(id = id)
         return id
@@ -362,6 +372,32 @@ class DiscoveryScanEngineTest {
         // Wait for scan loop to start then clean up
         assertScanActive(engine)
         engine.stopScan()
+    }
+
+    @Test
+    fun deviceSwitchDuringSessionInsertAbortsScanBeforePublication() = runTest {
+        val firstDevice = "x:FIRST"
+        meshPrefs.setDeviceAddress(firstDevice)
+        val insertEntered = CompletableDeferred<Unit>()
+        val releaseInsert = CompletableDeferred<Unit>()
+        discoveryDao.nextInsertSessionEntered = insertEntered
+        discoveryDao.releaseNextInsertSession = releaseInsert
+        val engine = createEngine(this)
+
+        val startScan = async { engine.startScan(testPresets, dwellDurationSeconds = 10) }
+        insertEntered.await()
+        meshPrefs.setDeviceAddress("x:SECOND")
+        releaseInsert.complete(Unit)
+        startScan.await()
+
+        assertEquals(
+            DiscoveryScanState.Failed("Selected radio changed while preparing the scan"),
+            engine.scanState.value,
+        )
+        assertTrue(discoveryDao.sessions.isEmpty(), "Aborted preparation must not leave an in-progress session")
+        assertNull(engine.currentSession.value)
+        assertNull(collectorRegistry.collector)
+        assertTrue(radioController.configWrites.isEmpty())
     }
 
     @Test
@@ -697,6 +733,7 @@ class DiscoveryScanEngineTest {
         val homeWrites =
             radioController.configWrites.count { it.config.lora?.modem_preset == ChannelOption.LONG_FAST.modemPreset }
         assertEquals(1, homeWrites)
+        assertEquals(setOf(originalSessionId), discoveryDao.sessions.keys)
     }
 
     @Test
