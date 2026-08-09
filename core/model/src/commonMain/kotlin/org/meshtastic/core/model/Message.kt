@@ -165,7 +165,7 @@ fun isMessageStatusRetryable(status: MessageStatus?, routingError: Int, isDirect
         else -> true
     }
 
-private val nonRetryableMessageRoutingErrors = setOf(Routing.Error.TOO_LARGE.value)
+private val nonRetryableMessageRoutingErrors = setOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
 
 data class Message(
     val uuid: Long,

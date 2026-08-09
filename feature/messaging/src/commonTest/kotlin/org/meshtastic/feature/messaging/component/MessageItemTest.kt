@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -28,6 +30,8 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.proto.Routing
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -198,6 +202,32 @@ class MessageItemTest {
         }
 
         onNodeWithText("Failed to deliver to mesh", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun channelKeyMismatch_isTerminalAndUsesErrorColor() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(node = testNode, status = MessageStatus.ERROR, routingError = Routing.Error.NO_CHANNEL.value)
+        var statusColor = Color.Unspecified
+        var errorColor = Color.Unspecified
+
+        setContent {
+            AppTheme {
+                errorColor = MaterialTheme.colorScheme.StatusRed
+                statusColor = messageStatusColor(status = MessageStatus.ERROR, isWarning = message.isStatusRetryable())
+                MessageItem(
+                    message = message,
+                    node = testNode,
+                    selected = false,
+                    onStatusClick = {},
+                    ourNode = testNode,
+                )
+            }
+        }
+
+        onNodeWithText("Channel/key mismatch", useUnmergedTree = true).assertIsDisplayed()
+        assertEquals(errorColor, statusColor)
     }
 
     @Test

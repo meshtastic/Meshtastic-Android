@@ -420,7 +420,6 @@ class MessageTest {
             listOf(
                 Routing.Error.NO_INTERFACE.value,
                 Routing.Error.NO_RESPONSE.value,
-                Routing.Error.NO_CHANNEL.value,
                 Routing.Error.BAD_REQUEST.value,
                 Routing.Error.NOT_AUTHORIZED.value,
                 Routing.Error.DUTY_CYCLE_LIMIT.value,
@@ -437,7 +436,7 @@ class MessageTest {
         }
         assertTrue(messageWith(status = MessageStatus.DELIVERED).isStatusRetryable(isDirectMessage = true))
 
-        val nonRetryableRoutingErrors = listOf(Routing.Error.TOO_LARGE.value)
+        val nonRetryableRoutingErrors = listOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
 
         for (routingError in nonRetryableRoutingErrors) {
             assertFalse(messageWith(status = MessageStatus.ERROR, routingError = routingError).isStatusRetryable())
