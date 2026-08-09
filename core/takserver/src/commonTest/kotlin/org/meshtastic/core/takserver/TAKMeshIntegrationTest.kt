@@ -431,18 +431,25 @@ class TAKMeshIntegrationTest {
     // ── Firmware gating ──────────────────────────────────────────────────────
 
     @Test
-    fun `null firmware defaults to V2 protocol`() = runTest(UnconfinedTestDispatcher()) {
+    fun `unknown firmware uses V1 protocol`() = runTest(UnconfinedTestDispatcher()) {
         val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = null))
         h.integration.start(backgroundScope)
 
-        h.serverManager.emitInbound(createPli("test-v2-default"))
+        h.serverManager.emitInbound(createPli("test-v1-until-version-known"))
 
-        // In commonTest without TAKPacket-SDK, v2 path catches and falls back.
-        // Verify the code didn't crash and attempted to send.
-        if (h.commandSender.sentPackets.isNotEmpty()) {
-            val sent = h.commandSender.sentPackets.first()
-            assertEquals(PortNum.ATAK_PLUGIN_V2.value, sent.dataType)
-        }
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+    }
+
+    @Test
+    fun `V2-capable firmware sends V2 protocol`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v2-known"))
+
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN_V2.value, h.commandSender.sentPackets.single().dataType)
     }
 
     @Test
@@ -452,10 +459,8 @@ class TAKMeshIntegrationTest {
 
         h.serverManager.emitInbound(createPli("test-v1"))
 
-        if (h.commandSender.sentPackets.isNotEmpty()) {
-            val sent = h.commandSender.sentPackets.first()
-            assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
-        }
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
     }
 
     @Test
