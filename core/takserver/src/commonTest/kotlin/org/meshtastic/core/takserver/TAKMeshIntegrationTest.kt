@@ -202,50 +202,29 @@ class TAKMeshIntegrationTest {
     }
 
     private class FakeNodeRepository(firmwareVersion: String? = "2.8.0.0") : NodeRepository {
-        private val _myNodeInfo =
-            MutableStateFlow(
-                firmwareVersion?.let {
-                    MyNodeInfo(
-                        myNodeNum = 1,
-                        hasGPS = false,
-                        model = null,
-                        firmwareVersion = it,
-                        couldUpdate = false,
-                        shouldUpdate = false,
-                        currentPacketId = 0L,
-                        messageTimeoutMsec = 0,
-                        minAppVersion = 0,
-                        maxChannels = 8,
-                        hasWifi = false,
-                        channelUtilization = 0f,
-                        airUtilTx = 0f,
-                        deviceId = null,
-                    )
-                },
-            )
+        private val _myNodeInfo = MutableStateFlow(myNodeInfo(firmwareVersion))
         override val myNodeInfo: StateFlow<MyNodeInfo?> = _myNodeInfo
 
         fun setFirmwareVersion(version: String?) {
-            _myNodeInfo.value =
-                version?.let {
-                    MyNodeInfo(
-                        myNodeNum = 1,
-                        hasGPS = false,
-                        model = null,
-                        firmwareVersion = it,
-                        couldUpdate = false,
-                        shouldUpdate = false,
-                        currentPacketId = 0L,
-                        messageTimeoutMsec = 0,
-                        minAppVersion = 0,
-                        maxChannels = 8,
-                        hasWifi = false,
-                        channelUtilization = 0f,
-                        airUtilTx = 0f,
-                        deviceId = null,
-                    )
-                }
+            _myNodeInfo.value = myNodeInfo(version)
         }
+
+        private fun myNodeInfo(firmwareVersion: String?) = MyNodeInfo(
+            myNodeNum = 1,
+            hasGPS = false,
+            model = null,
+            firmwareVersion = firmwareVersion,
+            couldUpdate = false,
+            shouldUpdate = false,
+            currentPacketId = 0L,
+            messageTimeoutMsec = 0,
+            minAppVersion = 0,
+            maxChannels = 8,
+            hasWifi = false,
+            channelUtilization = 0f,
+            airUtilTx = 0f,
+            deviceId = null,
+        )
 
         override val ourNodeInfo: StateFlow<Node?> = MutableStateFlow(null)
         override val myId: StateFlow<String?> = MutableStateFlow(null)
