@@ -10,6 +10,7 @@ aliases:
   - messaging
   - conversations
 ---
+
 # Messages & Channels
 
 Meshtastic toetab kahte suhtlusrežiimi: **kanalite levitamine** ja **otsesõnumid**.
@@ -173,3 +174,4 @@ Messages are queued and transmitted based on priority:
 - [Kanali konf](https://meshtastic.org/docs/configuration/radio/channels) — üksikasjalikud kanali seaded leiate aadressilt meshtastic.org
 
 ---
+
