@@ -65,9 +65,9 @@ jobs:
           # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
           # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
           # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
-          # --no-isolated-projects must accompany it: Isolated Projects implies the configuration cache, and
+          # -Dorg.gradle.isolated-projects=false must accompany it: Isolated Projects implies the configuration cache, and
           # Gradle 9.7+ hard-errors when the cache is disabled while Isolated Projects is on.
-          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true --no-isolated-projects --no-configuration-cache
+          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
 
       - name: Detect baseline profile changes
         id: baseline

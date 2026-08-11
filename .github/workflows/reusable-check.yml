@@ -131,9 +131,9 @@ jobs:
           cache_configuration_cache: 'true' # VERSION_CODE pinned -> entries actually reuse
 
       - name: Screenshot Test Validation
-        # --no-isolated-projects: AGP's screenshot plugin iterates BuildServicesRegistry at
+        # -Dorg.gradle.isolated-projects=false: AGP's screenshot plugin iterates BuildServicesRegistry at
         # execution time, which Isolated Projects forbids (fatal since Gradle 9.7).
-        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true --no-isolated-projects
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true -Dorg.gradle.isolated-projects=false
 
       - name: Upload screenshot diff report
         if: failure()
@@ -452,9 +452,11 @@ jobs:
           echo "VERSION_NAME=${BASE}-SNAPSHOT" >> "$GITHUB_ENV"
 
       - name: Build Android APKs
-        # --no-isolated-projects: the dependency-graph plugin injected by setup-gradle force-resolves
-        # via allprojects{}, which Isolated Projects forbids (fatal since Gradle 9.7).
-        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache --no-isolated-projects --continue
+        # -Dorg.gradle.isolated-projects=false: the dependency-graph plugin injected by setup-gradle force-resolves
+        # via allprojects{}, which Isolated Projects forbids (fatal since Gradle 9.7). The property form is
+        # used everywhere instead of --no-isolated-projects: that flag only exists on Gradle 9.7+, and the
+        # wrapper is pinned to 9.6.1 until gradle/gradle#38787 ships in 9.7.1.
+        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
 
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}
@@ -578,7 +580,7 @@ jobs:
       # runtime classpath. :assemble alone would miss runtime-only deps (skiko, ktor-cio, …).
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew --no-build-cache --no-isolated-projects --no-configuration-cache -Pmeshtastic.flatpakSources=true
+          ./gradlew --no-build-cache -Dorg.gradle.isolated-projects=false --no-configuration-cache -Pmeshtastic.flatpakSources=true
           -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
           :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
 
