@@ -23,7 +23,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,19 +40,21 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.CompassSheetContent
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.proto.Config
 
 private sealed interface NodeDetailOverlay {
     data object SharedContact : NodeDetailOverlay
 
     data class FirmwareReleaseInfo(val release: FirmwareRelease) : NodeDetailOverlay
 
-    data object Compass : NodeDetailOverlay
+    data class Compass(val nodeNum: Int, val displayUnits: Config.DisplayConfig.DisplayUnits) : NodeDetailOverlay
 }
 
 @Composable
@@ -121,10 +122,8 @@ private fun NodeDetailScaffold(
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
 
-                    is NodeDetailAction.OpenCompass -> {
-                        actualCompassViewModel?.start(action.node, action.displayUnits)
-                        activeOverlay = NodeDetailOverlay.Compass
-                    }
+                    is NodeDetailAction.OpenCompass ->
+                        activeOverlay = NodeDetailOverlay.Compass(action.node.num, action.displayUnits)
 
                     else ->
                         handleNodeAction(
@@ -186,13 +185,16 @@ private fun NodeDetailOverlays(
             NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }
 
         is NodeDetailOverlay.Compass -> {
-            DisposableEffect(Unit) { onDispose { compassViewModel?.stop() } }
-            NodeDetailBottomSheet(
-                onDismiss = {
-                    compassViewModel?.stop()
-                    onDismiss()
-                },
-            ) {
+            val targetNode = node?.takeIf { it.num == overlay.nodeNum }
+            if (targetNode != null) {
+                compassViewModel?.let { viewModel ->
+                    ActiveWhileStarted(targetNode, overlay.displayUnits, viewModel) {
+                        viewModel.start(targetNode, overlay.displayUnits)
+                        viewModel::stop
+                    }
+                }
+            }
+            NodeDetailBottomSheet(onDismiss = onDismiss) {
                 CompassSheetContent(
                     uiState = compassUiState,
                     onRequestLocationPermission = onRequestLocationPermission,
