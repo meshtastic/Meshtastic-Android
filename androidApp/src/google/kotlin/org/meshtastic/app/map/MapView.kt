@@ -107,6 +107,9 @@ import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -146,11 +149,13 @@ import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
@@ -402,6 +407,13 @@ fun MapView(
     }
 
     val myNodeNum = mapViewModel.myNodeNum
+    val relativeTimeBucket = rememberRelativeTimeBucket()
+    val nodeClusterItems =
+        rememberNodeClusterItems(
+            nodes = if (mode is GoogleMapMode.Main) filteredNodes else emptyList(),
+            myNodeNum = myNodeNum,
+            relativeTimeBucket = relativeTimeBucket,
+        )
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
     val dark =
@@ -669,21 +681,7 @@ fun MapView(
             when (mode) {
                 is GoogleMapMode.Main ->
                     MainMapContent(
-                        nodeClusterItems =
-                        filteredNodes.map { node ->
-                            val latLng =
-                                LatLng(
-                                    (node.position.latitude_i ?: 0) * DEG_D,
-                                    (node.position.longitude_i ?: 0) * DEG_D,
-                                )
-                            NodeClusterItem(
-                                node = node,
-                                nodePosition = latLng,
-                                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
-                                nodeSnippet = "${node.user.long_name}",
-                                myNodeNum = myNodeNum,
-                            )
-                        },
+                        nodeClusterItems = nodeClusterItems,
                         mapFilterState = mapFilterState,
                         navigateToNodeDetails = navigateToNodeDetails,
                         displayableWaypoints = displayableWaypoints,
@@ -1021,6 +1019,53 @@ fun MapView(
     if (showCustomTileManagerSheet) {
         ModalBottomSheet(onDismissRequest = { showCustomTileManagerSheet = false }) {
             CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
+        }
+    }
+}
+
+private const val SECONDS_PER_MINUTE = 60L
+private const val MILLIS_PER_SECOND = 1_000L
+
+@Composable
+private fun rememberRelativeTimeBucket(): Long {
+    val buckets = remember { relativeTimeBuckets() }
+    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / SECONDS_PER_MINUTE).value
+}
+
+internal fun relativeTimeBuckets(now: () -> Long = { nowSeconds }): Flow<Long> = flow {
+    while (true) {
+        val currentSeconds = now()
+        emit(currentSeconds / SECONDS_PER_MINUTE)
+        val secondsUntilNextMinute = SECONDS_PER_MINUTE - currentSeconds.mod(SECONDS_PER_MINUTE)
+        delay(secondsUntilNextMinute * MILLIS_PER_SECOND)
+    }
+}
+
+/**
+ * Materializes the native clustering model used by the Google map.
+ *
+ * Camera state invalidates [MapView] on every movement frame, and its filters produce a new-but-equal [List] each time.
+ * Using that structural value as a key avoids rebuilding every [NodeClusterItem] (and its strings/[LatLng]) for
+ * camera-only changes. [relativeTimeBucket] deliberately refreshes the relative marker titles once per minute.
+ */
+@Composable
+internal fun rememberNodeClusterItems(
+    nodes: List<Node>,
+    myNodeNum: Int?,
+    relativeTimeBucket: Long,
+): List<NodeClusterItem> {
+    val unknownText = stringResource(Res.string.unknown)
+    val nowText = stringResource(Res.string.now)
+    return remember(nodes, myNodeNum, relativeTimeBucket, unknownText, nowText) {
+        nodes.map { node ->
+            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
+            NodeClusterItem(
+                node = node,
+                nodePosition = latLng,
+                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
+                nodeSnippet = node.user.long_name,
+                myNodeNum = myNodeNum,
+            )
         }
     }
 }
