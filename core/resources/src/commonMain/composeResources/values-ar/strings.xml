@@ -197,22 +197,10 @@
     <string name="reset_to_defaults">العودة إلى الإعدادات الأصلية</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">المفتاح المؤقت غير جيد</string>
-    <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
-    <string name="routing_error_bad_request">طلب غير جيد</string>
-    <string name="routing_error_duty_cycle_limit">عدد الرسائل تعدى الحد المخصص في منطقتك</string>
     <string name="routing_error_got_nak">لم يستلم</string>
-    <string name="routing_error_max_retransmit">وصول حد الإرسال الأعلى</string>
-    <string name="routing_error_no_channel">لا يوجد قناه</string>
-    <string name="routing_error_no_interface">لم يجد وسيط</string>
-    <string name="routing_error_no_response">لا يوجد رد</string>
     <string name="routing_error_no_route">لاطريق</string>
     <string name="routing_error_none">استلم</string>
-    <string name="routing_error_not_authorized">غير مسموح</string>
-    <string name="routing_error_pki_failed">فشل إرسال التشفير</string>
-    <string name="routing_error_pki_unknown_pubkey">المفتاح العام غير معروف</string>
     <string name="routing_error_timeout">استغرق وقت طويل</string>
-    <string name="routing_error_too_large">رسالة كبيره</string>
     <string name="rssi">مؤشر القوة النسبية</string>
     <!-- SAVE -->
     <string name="save">حفظ</string>

@@ -946,24 +946,10 @@
     <string name="root_topic">Temă rădăcină</string>
     <string name="rotary_encoder_1_enabled">Encoder rotativ #1 activat</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Cheie de sesiune incorectă</string>
-    <string name="routing_error_admin_public_key_unauthorized">Cheie publică neautorizată</string>
-    <string name="routing_error_bad_request">Solicitare invalidă</string>
-    <string name="routing_error_duty_cycle_limit">Limita regională a ciclului de funcționare atinsă</string>
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>
-    <string name="routing_error_max_retransmit">Retransmisie maximă atinsă</string>
-    <string name="routing_error_no_channel">Niciun canal</string>
-    <string name="routing_error_no_interface">Fără interfață</string>
-    <string name="routing_error_no_response">Nici un răspuns</string>
     <string name="routing_error_no_route">Nici o rută</string>
     <string name="routing_error_none">Confirmat</string>
-    <string name="routing_error_not_authorized">Neautorizat</string>
-    <string name="routing_error_pki_failed">Trimitere criptată nereușită</string>
-    <string name="routing_error_pki_send_fail_public_key">Trimiterea PKI nu a reușit, nici o cheie publică</string>
-    <string name="routing_error_pki_unknown_pubkey">Cheie publică necunoscută</string>
-    <string name="routing_error_rate_limit_exceeded">Rata limită depășită. Te rugăm să încerci din nou mai târziu.</string>
     <string name="routing_error_timeout">Expirat</string>
-    <string name="routing_error_too_large">Pachet prea mare</string>
     <string name="rssi"> RSSI</string>
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="rsyslog_server">server rsyslog</string>

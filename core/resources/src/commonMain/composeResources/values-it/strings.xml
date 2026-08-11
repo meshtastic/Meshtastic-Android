@@ -1054,7 +1054,6 @@
     <string name="message_device_managed">Questa radio è gestita e può essere modificata solo da un amministratore remoto.</string>
     <string name="message_input_label">Messaggio</string>
     <string name="message_routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
-    <string name="message_routing_error_no_channel">Nessun canale selezionato</string>
     <string name="message_routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
     <string name="message_routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
     <string name="message_routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>
@@ -1449,24 +1448,15 @@
     <string name="rotary_encoder_1_enabled">Encoder rotativo #1 abilitato</string>
     <string name="router_role_confirmation_text">Ho letto la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;documentazione sui ruoli del dispositivo&lt;/a&gt; e l'articolo del blog su &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;come scegliere il ruolo giusto per il dispositivo&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chiave di sessione non valida</string>
-    <string name="routing_error_admin_public_key_unauthorized">Chiave Pubblica non autorizzata</string>
-    <string name="routing_error_bad_request">Richiesta Non Valida</string>
-    <string name="routing_error_duty_cycle_limit">Raggiunto il limite del ciclo di lavoro regionale</string>
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
-    <string name="routing_error_max_retransmit">Tentativi di Ritrasmissione Esauriti</string>
-    <string name="routing_error_no_channel">Nessun Canale</string>
-    <string name="routing_error_no_interface">Nessuna Interfaccia</string>
-    <string name="routing_error_no_response">Nessuna risposta</string>
+    <string name="routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
     <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_none">Confermato</string>
-    <string name="routing_error_not_authorized">Non Autorizzato</string>
-    <string name="routing_error_pki_failed">Invio Cifrato Non Riuscito</string>
-    <string name="routing_error_pki_send_fail_public_key">Invio PKI non riuscito, nessuna chiave pubblica</string>
-    <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
-    <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi.</string>
+    <string name="routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
+    <string name="routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
+    <string name="routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Pacchetto troppo grande</string>
+    <string name="routing_error_too_large">Il messaggio è troppo grande per essere inviato</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
     <string name="rsyslog_server">server rsyslog</string>

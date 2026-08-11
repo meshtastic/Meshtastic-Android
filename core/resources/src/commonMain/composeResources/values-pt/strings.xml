@@ -469,22 +469,10 @@
     <string name="root_topic">Tópico principal</string>
     <string name="rotary_encoder_1_enabled">Ativar Codificador rotativo #1</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chave de sessão inválida</string>
-    <string name="routing_error_admin_public_key_unauthorized">Public Key não autorizada</string>
-    <string name="routing_error_bad_request">Pedido Inválido</string>
-    <string name="routing_error_duty_cycle_limit">Limite do Duty Cycle Regional Atingido</string>
     <string name="routing_error_got_nak">Recebida uma confirmação negativa</string>
-    <string name="routing_error_max_retransmit">Máximo de Retransmissão Atingido</string>
-    <string name="routing_error_no_channel">Sem canal</string>
-    <string name="routing_error_no_interface">Sem interface</string>
-    <string name="routing_error_no_response">Sem resposta</string>
     <string name="routing_error_no_route">Sem rota</string>
     <string name="routing_error_none">Confirmar</string>
-    <string name="routing_error_not_authorized">Não Autorizado</string>
-    <string name="routing_error_pki_failed">Envio cifrado falhou</string>
-    <string name="routing_error_pki_unknown_pubkey">Chave pública desconhecida</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Pacote demasiado grande</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de energia que está a ser recebido pela antena. Um valor mais elevado de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">servidor rsyslog</string>

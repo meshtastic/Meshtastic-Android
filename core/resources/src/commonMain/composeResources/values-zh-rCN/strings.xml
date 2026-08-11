@@ -1060,7 +1060,6 @@
     <string name="message_device_managed">此电台由远程管理员管理。</string>
     <string name="message_input_label">信息</string>
     <string name="message_routing_error_max_retransmit">发送至MESH失败</string>
-    <string name="message_routing_error_no_channel">未选择信道</string>
     <string name="message_routing_error_pki_failed">无法发送加密消息</string>
     <string name="message_routing_error_pki_send_fail_public_key">接收方密钥不可用</string>
     <string name="message_routing_error_pki_unknown_pubkey">接收方需要你的密钥</string>
@@ -1455,24 +1454,15 @@
     <string name="rotary_encoder_1_enabled">启用旋转编码器 #1 </string>
     <string name="router_role_confirmation_text">我已经阅读了 &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;选择合适的设备角色&lt;/a&gt;。</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">会话密钥错误</string>
-    <string name="routing_error_admin_public_key_unauthorized">未授权的公钥</string>
-    <string name="routing_error_bad_request">错误请求</string>
-    <string name="routing_error_duty_cycle_limit">区域占空比限制已达到</string>
     <string name="routing_error_got_nak">接收到否定确认</string>
-    <string name="routing_error_max_retransmit">已达到最大再传输量</string>
-    <string name="routing_error_no_channel">无频道</string>
-    <string name="routing_error_no_interface">无界面</string>
-    <string name="routing_error_no_response">无响应</string>
+    <string name="routing_error_max_retransmit">发送至MESH失败</string>
     <string name="routing_error_no_route">无路径</string>
     <string name="routing_error_none">已确认</string>
-    <string name="routing_error_not_authorized">未授权</string>
-    <string name="routing_error_pki_failed">加密发送失败！</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI 发送失败，无公钥</string>
-    <string name="routing_error_pki_unknown_pubkey">未知公钥</string>
-    <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
+    <string name="routing_error_pki_failed">无法发送加密消息</string>
+    <string name="routing_error_pki_send_fail_public_key">接收方密钥不可用</string>
+    <string name="routing_error_pki_unknown_pubkey">接收方需要你的密钥</string>
     <string name="routing_error_timeout">超时</string>
-    <string name="routing_error_too_large">数据包过大</string>
+    <string name="routing_error_too_large">消息太大，无法发送</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="rsyslog_server">rsyslog 服务器</string>

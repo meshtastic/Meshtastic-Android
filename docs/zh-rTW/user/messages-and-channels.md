@@ -73,18 +73,18 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
 當訊息傳遞失敗時，錯誤指示器將顯示問題原因：
 
-| 錯誤           | 含義            | 處理方式                                                                                           |
-| ------------ | ------------- | ---------------------------------------------------------------------------------------------- |
-| 無路由          | 無法找到通往目標節點的路徑 | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                                       |
-| 收到 NAK       | 下一個跳躍點節點拒絕轉送  | 中繼節點可能發生壅塞。 請稍候後重試。                                                                            |
-| Timeout - 超時 | 在重試時間內未收到確認回應 | 收件者可能剛好超出訊號範圍。 請嘗試提高跳躍限制，或移動至訊號較佳的位置。                                                          |
-| 無介面          | 無可用的無線電介面進行傳送 | 請確認無線電裝置已連線，且頻道已正確設定。                                                                          |
-| 已達最大重傳次數     | 所有重試次數均已用盡    | Mesh 網路路徑不穩定。 請嘗試切換至其他頻道，或等待網路狀況改善。                                                            |
-| 無頻道          | 目標頻道不存在       | 請確認兩個節點使用相同的頻道設定。                                                                              |
-| 訊息過大         | 訊息超過最大承載大小    | Shorten your message (max ~200 characters). |
-| 無回應          | 節點已收到訊息但未回應   | 收件者的無線電裝置可能正忙碌，或處於低功耗睡眠模式。                                                                     |
-| 佔空比限制        | 已達地區無線電佔用時間上限 | 您的無線電裝置已用完允許的傳輸時間。 請等待佔空比時間窗口重設（在歐盟地區通常為 1 小時）。                                                |
-| 錯誤請求         | 格式錯誤或無效的訊息    | 這通常表示存在軟體錯誤。 請嘗試重新啟動應用程式。                                                                      |
+| 錯誤                           | 含義                                           | 處理方式                                                                                 |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 無路由                          | 無法找到通往目標節點的路徑                                | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                             |
+| 收到 NAK                       | 下一個跳躍點節點拒絕轉送                                 | 中繼節點可能發生壅塞。 請稍候後重試。                                                                  |
+| Timeout - 超時                 | 在重試時間內未收到確認回應                                | 收件者可能剛好超出訊號範圍。 請嘗試提高跳躍限制，或移動至訊號較佳的位置。                                                |
+| No radio interface           | 無可用的無線電介面進行傳送                                | Check that your radio is connected and available.                    |
+| Failed to deliver to mesh    | 所有重試次數均已用盡                                   | Move closer, improve signal, or wait for mesh conditions to improve. |
+| Channel/key mismatch         | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                    |
+| Message is too large to send | 訊息超過最大承載大小                                   | Shorten the message and try again.                                   |
+| No app response              | App or plugin did not respond to the request | Retry or check the destination app or module state.                  |
+| Duty cycle limit             | 已達地區無線電佔用時間上限                                | Wait for the duty cycle window to reset.                             |
+| Invalid request              | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.         |
 
 > 💡 提示：大多數傳遞錯誤會自動解決。 若節點間歇性可到達，mesh 網路將自動重試。 若持續出現「無路由」錯誤，請確認中間的路由器節點是否在線。
 

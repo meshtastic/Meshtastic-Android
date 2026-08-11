@@ -1048,7 +1048,6 @@
     <string name="message_device_managed">この無線機は管理されており、リモート管理者のみが変更できます。</string>
     <string name="message_input_label">メッセージ</string>
     <string name="message_routing_error_max_retransmit">メッシュへの配信に失敗しました</string>
-    <string name="message_routing_error_no_channel">チャンネルが選択されていません</string>
     <string name="message_routing_error_pki_failed">暗号化メッセージを送信できませんでした</string>
     <string name="message_routing_error_pki_send_fail_public_key">受信者の鍵を利用できません</string>
     <string name="message_routing_error_pki_unknown_pubkey">受信者にあなたの鍵が必要です</string>
@@ -1443,24 +1442,15 @@
     <string name="rotary_encoder_1_enabled">ロータリーエンコーダ #1 を有効化</string>
     <string name="router_role_confirmation_text">&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;デバイスの役割に関するドキュメント&lt;/a&gt;と、&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;適切なデバイスの役割の選び方&lt;/a&gt;に関するブログ記事を読みました。</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">セッション鍵が不正です</string>
-    <string name="routing_error_admin_public_key_unauthorized">許可されていない公開鍵</string>
-    <string name="routing_error_bad_request">不正な要求</string>
-    <string name="routing_error_duty_cycle_limit">リージョンのデューティサイクル上限超過</string>
     <string name="routing_error_got_nak">相手が正常に受信できませんでした</string>
-    <string name="routing_error_max_retransmit">最大再送信回数に達しました</string>
-    <string name="routing_error_no_channel">チャンネルがありません</string>
-    <string name="routing_error_no_interface">インターフェースがありません</string>
-    <string name="routing_error_no_response">応答なし</string>
+    <string name="routing_error_max_retransmit">メッシュへの配信に失敗しました</string>
     <string name="routing_error_no_route">ルートがありません</string>
     <string name="routing_error_none">相手の受信を確認しました</string>
-    <string name="routing_error_not_authorized">承認されていません</string>
-    <string name="routing_error_pki_failed">暗号化された送信に失敗</string>
-    <string name="routing_error_pki_send_fail_public_key">PKIの送信に失敗しました。公開鍵がありません</string>
-    <string name="routing_error_pki_unknown_pubkey">不明な公開鍵</string>
-    <string name="routing_error_rate_limit_exceeded">レート制限を超えました。しばらくしてからもう一度お試しください。</string>
+    <string name="routing_error_pki_failed">暗号化メッセージを送信できませんでした</string>
+    <string name="routing_error_pki_send_fail_public_key">受信者の鍵を利用できません</string>
+    <string name="routing_error_pki_unknown_pubkey">受信者にあなたの鍵が必要です</string>
     <string name="routing_error_timeout">タイムアウト</string>
-    <string name="routing_error_too_large">パケットが大きすぎます</string>
+    <string name="routing_error_too_large">メッセージが大きすぎて送信できません</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="rsyslog_server">rsyslogサーバー</string>

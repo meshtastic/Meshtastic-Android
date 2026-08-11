@@ -949,7 +949,6 @@
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
     <string name="message_device_managed">Dieses Radio wird verwaltet und kann nur durch Fernverwaltung geändert werden.</string>
     <string name="message_input_label">Nachricht</string>
-    <string name="message_routing_error_no_channel">Kein Kanal ausgewählt</string>
     <string name="message_routing_error_pki_failed">Konnte verschlüsselte Nachricht nicht senden</string>
     <string name="message_routing_error_pki_send_fail_public_key">Empfängerschlüssel nicht verfügbar</string>
     <string name="message_routing_error_pki_unknown_pubkey">Empfänger benötigt deinen Schlüssel</string>
@@ -1339,24 +1338,14 @@
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>
     <string name="router_role_confirmation_text">Ich habe die &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
-    <string name="routing_error_bad_request">Ungültige Anfrage</string>
-    <string name="routing_error_duty_cycle_limit">Regionale Grenze des Betriebszyklus erreicht</string>
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
-    <string name="routing_error_max_retransmit">Maximale Weiterleitungen erreicht</string>
-    <string name="routing_error_no_channel">Kein Kanal</string>
-    <string name="routing_error_no_interface">Keine Schnittstelle</string>
-    <string name="routing_error_no_response">Keine Reaktion</string>
     <string name="routing_error_no_route">Keine Route</string>
     <string name="routing_error_none">Bestätigt</string>
-    <string name="routing_error_not_authorized">Nicht autorisiert</string>
-    <string name="routing_error_pki_failed">Verschlüsseltes Senden fehlgeschlagen</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI senden fehlgeschlagen, kein öffentlicher Schlüssel</string>
-    <string name="routing_error_pki_unknown_pubkey">Unbekannter öffentlicher Schlüssel</string>
-    <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
+    <string name="routing_error_pki_failed">Konnte verschlüsselte Nachricht nicht senden</string>
+    <string name="routing_error_pki_send_fail_public_key">Empfängerschlüssel nicht verfügbar</string>
+    <string name="routing_error_pki_unknown_pubkey">Empfänger benötigt deinen Schlüssel</string>
     <string name="routing_error_timeout">Zeitüberschreitung</string>
-    <string name="routing_error_too_large">Nachricht zu groß</string>
+    <string name="routing_error_too_large">Nachricht ist zu groß zum Senden</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="rsyslog_server">rsyslog Server</string>

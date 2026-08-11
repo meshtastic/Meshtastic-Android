@@ -1066,7 +1066,6 @@
     <string name="message_device_managed">Это радио управляется и может быть изменено только удаленным администратором.</string>
     <string name="message_input_label">Сообщение</string>
     <string name="message_routing_error_max_retransmit">Не удалось доставить в сеть</string>
-    <string name="message_routing_error_no_channel">Канал не выбран</string>
     <string name="message_routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
@@ -1473,24 +1472,15 @@
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
     <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Неверный ключ сессии</string>
-    <string name="routing_error_admin_public_key_unauthorized">Публичный ключ не авторизован</string>
-    <string name="routing_error_bad_request">Неверный запрос</string>
-    <string name="routing_error_duty_cycle_limit">Достигнут региональный предел рабочего цикла</string>
     <string name="routing_error_got_nak">Получено отрицательное подтверждение</string>
-    <string name="routing_error_max_retransmit">Достигнут лимит ретрансляции</string>
-    <string name="routing_error_no_channel">Нет канала</string>
-    <string name="routing_error_no_interface">Нет интерфейса</string>
-    <string name="routing_error_no_response">Нет ответа</string>
+    <string name="routing_error_max_retransmit">Не удалось доставить в сеть</string>
     <string name="routing_error_no_route">Нет маршрута</string>
     <string name="routing_error_none">Принято</string>
-    <string name="routing_error_not_authorized">Не авторизован</string>
-    <string name="routing_error_pki_failed">Ошибка шифрования отправки</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI не отправлен, нет открытого ключа</string>
-    <string name="routing_error_pki_unknown_pubkey">Неизвестный публичный ключ</string>
-    <string name="routing_error_rate_limit_exceeded">Превышен лимит запросов. Пожалуйста, повторите попытку позже.</string>
+    <string name="routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
+    <string name="routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
+    <string name="routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
     <string name="routing_error_timeout">Время ожидания истекло</string>
-    <string name="routing_error_too_large">Пакет слишком велик</string>
+    <string name="routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="rsyslog_server">Сервер rsyslog</string>

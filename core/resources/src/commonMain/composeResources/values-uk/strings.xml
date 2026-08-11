@@ -1075,24 +1075,10 @@
     <string name="rotary_encoder_1_enabled">Енкодер #1 активований</string>
     <string name="router_role_confirmation_text">Я прочитав(-ла) &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; і допис у блозі про &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Помилка ключа сеансу</string>
-    <string name="routing_error_admin_public_key_unauthorized">Несанкціонований відкритий ключ</string>
-    <string name="routing_error_bad_request">Невірний запит</string>
-    <string name="routing_error_duty_cycle_limit">Перевищено регіональний ліміт ефіру</string>
     <string name="routing_error_got_nak">Отримано негативне підтвердження</string>
-    <string name="routing_error_max_retransmit">Досягнуто ліміт спроб</string>
-    <string name="routing_error_no_channel">Канал відсутній</string>
-    <string name="routing_error_no_interface">Інтерфейс відсутній</string>
-    <string name="routing_error_no_response">Немає відповіді</string>
     <string name="routing_error_no_route">Маршрут відсутній</string>
     <string name="routing_error_none">Підтверджено</string>
-    <string name="routing_error_not_authorized">Не авторизований</string>
-    <string name="routing_error_pki_failed">Помилка зашифрованої передачі</string>
-    <string name="routing_error_pki_send_fail_public_key">Помилка надсилання PKI, відсутній публічний ключ</string>
-    <string name="routing_error_pki_unknown_pubkey">Невідомий відкритий ключ</string>
-    <string name="routing_error_rate_limit_exceeded">Перевищено ліміт запитів. Будь ласка, спробуйте пізніше.</string>
     <string name="routing_error_timeout">Таймаут</string>
-    <string name="routing_error_too_large">Пакет завеликий</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="rsyslog_server">rsyslog-сервер</string>
