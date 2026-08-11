@@ -368,9 +368,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createShareIntent(message: String): PendingIntent {
-        val deepLink = "$DEEP_LINK_BASE_URI/share?message=$message"
         val startActivityIntent =
-            Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
+            Intent(Intent.ACTION_VIEW, createShareMessageDeepLink(message), this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
@@ -393,3 +392,6 @@ class MainActivity : AppCompatActivity() {
         const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
     }
 }
+
+internal fun createShareMessageDeepLink(message: String): Uri =
+    "$DEEP_LINK_BASE_URI/share".toUri().buildUpon().appendQueryParameter("message", message).build()
