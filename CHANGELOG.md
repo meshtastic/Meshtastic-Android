@@ -12,6 +12,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 #### 🏗️ Features
 * feat(settings): add 2.8 amateur and EU Lite/Narrow LoRa regions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6548
 * feat(takserver): surface mesh nodes to ATAK as CoT contacts (mesh-to-CoT) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6554
+* feat: distinguish saved coverage estimates in the map layers sheet by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6578
+* Align Android message status wording by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6133
+* feat(settings): export the node database as JSON by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6610
 #### 🖥️ Desktop
 * fix(desktop): stop SIGSEGV on every Linux notification by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6543
 * fix(desktop): free the GError and release libnotify on shutdown by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6544
@@ -25,9 +28,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(docs): publish only screenshots a synced page references by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6557
 * fix(icons): differentiate google/fdroid debug launcher icons by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6564
 * fix(tak): re-encode bundled .p12 certs with legacy PKCS#12 algorithms for Android ≤ 9 ATAK compatibility by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6569
+* fix: Site Planner map/camera parity with iOS by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6577
+* fix(service): unwedge the inbound pipeline behind stale-Connected zombies by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6587
+* fix(map): scope location tracking to the visible lifecycle by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6602
+* fix(konsist): normalize source paths on Windows by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6604
+* fix(map): reuse cluster items across camera recompositions by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6605
+* fix(fdroid): ship 16 KB-compatible GeoPackage SQLite by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6606
+* fix(tak): gate V2 packets on known firmware by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6600
+* fix(messaging): wait for shared-contact routing ACK by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6603
 
 ## New Contributors
 * @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
+* @simulationstation made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6602
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
