@@ -459,7 +459,7 @@ jobs:
       # are runtime-only and would be missed by :assemble).
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew --no-build-cache --no-isolated-projects --no-configuration-cache -Pmeshtastic.flatpakSources=true
+          ./gradlew --no-build-cache -Dorg.gradle.isolated-projects=false --no-configuration-cache -Pmeshtastic.flatpakSources=true
           -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
           :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
 
