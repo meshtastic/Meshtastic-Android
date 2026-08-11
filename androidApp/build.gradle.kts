@@ -317,6 +317,10 @@ dependencies {
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    fdroidImplementation(libs.geopackage.android) {
+        because("6.7.5 depends on 16 KB page-size compatible SQLite Android Bindings")
+        exclude(group = "com.j256.ormlite")
+    }
     fdroidImplementation(libs.osmbonuspack)
 
     testImplementation(kotlin("test-junit"))
