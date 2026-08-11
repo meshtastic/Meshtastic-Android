@@ -81,6 +81,18 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.emoji_category_activities
+import org.meshtastic.core.resources.emoji_category_animals_nature
+import org.meshtastic.core.resources.emoji_category_flags
+import org.meshtastic.core.resources.emoji_category_food_drink
+import org.meshtastic.core.resources.emoji_category_objects
+import org.meshtastic.core.resources.emoji_category_people_body
+import org.meshtastic.core.resources.emoji_category_smileys_emotion
+import org.meshtastic.core.resources.emoji_category_symbols
+import org.meshtastic.core.resources.emoji_category_travel_places
+import org.meshtastic.core.resources.emoji_load_error
+import org.meshtastic.core.resources.emoji_no_results
+import org.meshtastic.core.resources.emoji_recently_used
 import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -151,7 +163,7 @@ fun EmojiPickerDialog(
         if (loadError) {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Unable to load emoji",
+                    text = stringResource(Res.string.emoji_load_error),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -419,7 +431,9 @@ private fun EmojiGrid(
         gridItems.forEach { item ->
             when (item) {
                 is GridItem.Header ->
-                    item(span = { GridItemSpan(maxLineSpan) }, key = item.key) { SectionHeader(title = item.title) }
+                    item(span = { GridItemSpan(maxLineSpan) }, key = item.key) {
+                        SectionHeader(title = localizedHeaderTitle(item))
+                    }
 
                 is GridItem.EmojiCell ->
                     item(key = item.key) {
@@ -437,7 +451,7 @@ private fun EmojiGrid(
         if (gridItems.none { it is GridItem.EmojiCell }) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "No emoji found",
+                    text = stringResource(Res.string.emoji_no_results),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -469,7 +483,8 @@ private fun buildGridItems(
         results.forEachIndexed { i, emoji -> add(GridItem.EmojiCell(emoji, "search_$i")) }
     } else {
         if (recentEmojis.isNotEmpty()) {
-            add(GridItem.Header("Recently Used", RECENTS_HEADER_KEY))
+            // Title resolved at render time via localizedHeaderTitle (recents key → string resource)
+            add(GridItem.Header("", RECENTS_HEADER_KEY))
             recentEmojis.forEachIndexed { i, emojiStr ->
                 add(GridItem.EmojiCell(Emoji(emojiStr), "$RECENTS_KEY_PREFIX$i"))
             }
@@ -525,6 +540,28 @@ private fun scoreEmoji(emoji: Emoji, query: String, recentSet: Set<String>): Flo
 }
 
 // ── Cell Components ────────────────────────────────────────────────────────────
+
+/**
+ * Resolves a grid header to localized text. Category names arrive as raw English strings from `emoji-data.json`, so
+ * they are mapped to string resources here; unknown names fall back to the raw value.
+ */
+@Composable
+private fun localizedHeaderTitle(header: GridItem.Header): String = if (header.key == RECENTS_HEADER_KEY) {
+    stringResource(Res.string.emoji_recently_used)
+} else {
+    when (header.title) {
+        "Smileys & Emotion" -> stringResource(Res.string.emoji_category_smileys_emotion)
+        "People & Body" -> stringResource(Res.string.emoji_category_people_body)
+        "Animals & Nature" -> stringResource(Res.string.emoji_category_animals_nature)
+        "Food & Drink" -> stringResource(Res.string.emoji_category_food_drink)
+        "Travel & Places" -> stringResource(Res.string.emoji_category_travel_places)
+        "Activities" -> stringResource(Res.string.emoji_category_activities)
+        "Objects" -> stringResource(Res.string.emoji_category_objects)
+        "Symbols" -> stringResource(Res.string.emoji_category_symbols)
+        "Flags" -> stringResource(Res.string.emoji_category_flags)
+        else -> header.title
+    }
+}
 
 @Composable
 private fun SectionHeader(title: String) {
