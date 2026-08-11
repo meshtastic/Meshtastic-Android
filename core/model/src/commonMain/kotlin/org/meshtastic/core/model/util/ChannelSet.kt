@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
+@file:Suppress("MagicNumber", "TooGenericExceptionCaught")
 
 package org.meshtastic.core.model.util
 
@@ -36,6 +36,7 @@ import org.meshtastic.proto.ModuleSettings
  *
  * @throws MalformedMeshtasticUrlException when not recognized as a valid Meshtastic URL
  */
+@Suppress("ThrowsCount")
 @Throws(MalformedMeshtasticUrlException::class)
 fun CommonUri.toChannelSet(): ChannelSet {
     val h = host ?: ""
@@ -56,7 +57,12 @@ fun CommonUri.toChannelSet(): ChannelSet {
     val fragmentBase64 = fragment!!.substringBefore('?').replace('-', '+').replace('_', '/')
     val fragmentBytes =
         fragmentBase64.decodeBase64() ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment")
-    val url = ChannelSet.ADAPTER.decode(fragmentBytes)
+    val url =
+        try {
+            ChannelSet.ADAPTER.decode(fragmentBytes)
+        } catch (e: Exception) {
+            throw MalformedMeshtasticUrlException("Failed to decode channel set: ${e::class.simpleName}", e)
+        }
     val shouldAdd = fragment?.substringAfter('?', "")?.addParameter() ?: getBooleanQueryParameter("add", false)
 
     return if (shouldAdd) url.copy(lora_config = null) else url

@@ -54,6 +54,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -1031,11 +1032,28 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel()
 
         val profile = DeviceProfile()
-        everySuspend { installProfileUseCase(any(), any(), any()) } returns Unit
+        everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } returns Unit
 
         viewModel.installProfile(profile)
 
-        verifySuspend { installProfileUseCase(123, profile, any()) }
+        verifySuspend { installProfileUseCase(123, profile, any(), null, true) }
+    }
+
+    @Test
+    fun `installProfile surfaces malformed channel URL in snackbar`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        val profile = DeviceProfile(channel_url = "not-a-channel-url")
+        everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } calls
+            {
+                throw MalformedMeshtasticUrlException("bad profile")
+            }
+
+        viewModel.installProfile(profile)
+        runCurrent()
+
+        verify { snackbarManager.showSnackbar(message = "This Channel URL is invalid and can not be used") }
     }
 
     @Test

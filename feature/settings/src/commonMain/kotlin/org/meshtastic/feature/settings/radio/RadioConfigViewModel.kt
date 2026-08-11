@@ -58,6 +58,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -77,6 +78,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
+import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.key_backup_deleted
 import org.meshtastic.core.resources.key_backup_not_found
 import org.meshtastic.core.resources.key_backup_restore_failed
@@ -727,7 +729,22 @@ open class RadioConfigViewModel(
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
+        val state = radioConfigState.value
+        val isLocal = this.destNum == null || destNum == myNodeNum
+        safeLaunch(tag = "installProfile") {
+            try {
+                installProfileUseCase(
+                    destNum = destNum,
+                    profile = protobuf,
+                    currentUser = destNode.value?.user,
+                    currentLoraConfig = state.radioConfig.lora,
+                    isLocal = isLocal,
+                )
+            } catch (_: MalformedMeshtasticUrlException) {
+                Logger.w { "[installProfile] Rejected invalid profile channel URL" }
+                snackbarManager.showSnackbar(message = UiText.Resource(Res.string.channel_invalid).resolve())
+            }
+        }
     }
 
     fun clearPacketResponse() {
