@@ -17,10 +17,11 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.Position as ModelPosition
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.Position as ProtoPosition
 
 /** Interface for sending commands and packets to the mesh network. */
 @Suppress("TooManyFunctions")
@@ -37,12 +38,32 @@ interface CommandSender {
     /** Generates a new unique packet ID. */
     fun generatePacketId(): Int
 
-    /** Sends a data packet to the mesh. */
+    /**
+     * Sends a data packet to the mesh. If the outbound queue refuses admission, the packet is marked
+     * [org.meshtastic.core.model.MessageStatus.ERROR] and [PacketQueueRejectedException] is thrown so the persistence
+     * owner can requeue or fail its durable record instead of treating a normal return as successful admission.
+     */
     suspend fun sendData(p: DataPacket)
 
-    /** Sends an admin message to a specific node. */
+    /** Sends an admin message to a specific node, or throws if the outbound queue rejects it. */
     suspend fun sendAdmin(
         destNum: Int,
+        requestId: Int = generatePacketId(),
+        wantResponse: Boolean = false,
+        initFn: () -> AdminMessage,
+    )
+
+    /**
+     * Sends an admin message only if [expectedConnectionVersion] still owns queue admission.
+     *
+     * Pass the `version` from [ConnectionStateProvider.connectionLifecycle] captured by the caller.
+     *
+     * @throws PacketQueueRejectedException when the expected version is stale or the outbound queue otherwise refuses
+     *   the command.
+     */
+    suspend fun sendAdminForConnection(
+        destNum: Int,
+        expectedConnectionVersion: Long,
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
         initFn: () -> AdminMessage,
@@ -59,7 +80,8 @@ interface CommandSender {
      * Sends an admin message and suspends until firmware processes it and returns a routing acknowledgement.
      *
      * This is used when the caller needs a processing barrier before proceeding, such as sending a shared contact
-     * before the first DM to a node.
+     * before the first DM to a node. Time spent behind existing FIFO entries does not count against the
+     * routing-response timeout; the timeout starts only after an active transport admits this packet.
      *
      * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
      *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
@@ -69,27 +91,59 @@ interface CommandSender {
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
         initFn: () -> AdminMessage,
-    ): Boolean
+    ): Boolean = sendAdminAwaitResult(destNum, requestId, wantResponse, initFn).accepted
 
-    /** Sends our current position to the mesh. */
-    suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false)
+    /**
+     * Detailed form of [sendAdminAwait], including whether an active transport admitted the packet. Queue or transport
+     * rejection is represented by a non-accepted [AwaitedSendResult] with `dispatched == false`; it is not reported as
+     * [PacketQueueRejectedException].
+     */
+    suspend fun sendAdminAwaitResult(
+        destNum: Int,
+        requestId: Int = generatePacketId(),
+        wantResponse: Boolean = false,
+        initFn: () -> AdminMessage,
+    ): AwaitedSendResult
 
-    /** Requests the position of a specific node. */
-    suspend fun requestPosition(destNum: Int, currentPosition: Position)
+    /** Sends our current position to the mesh, or throws if the outbound queue rejects it. */
+    suspend fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false)
 
-    /** Sets a fixed position for a node. */
-    suspend fun setFixedPosition(destNum: Int, pos: Position)
+    /** Requests the position of a specific node, or throws if the outbound queue rejects it. */
+    suspend fun requestPosition(destNum: Int, currentPosition: ModelPosition)
 
-    /** Requests user info from a specific node. */
+    /** Sets a fixed position for a node, or throws if the outbound queue rejects the admin command. */
+    suspend fun setFixedPosition(destNum: Int, pos: ModelPosition)
+
+    /** Requests user info from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestUserInfo(destNum: Int)
 
-    /** Requests a traceroute to a specific node. */
+    /** Requests a traceroute to a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTraceroute(requestId: Int, destNum: Int)
 
-    /** Requests telemetry from a specific node. */
+    /** Requests telemetry from a specific node, or throws if the outbound queue rejects it. */
     suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
 
-    /** Requests neighbor info from a specific node. */
+    /**
+     * Requests telemetry only if [expectedConnectionVersion] still owns queue admission.
+     *
+     * Pass the `version` from [ConnectionStateProvider.connectionLifecycle] captured by the caller.
+     *
+     * @throws PacketQueueRejectedException when the expected version is stale or the outbound queue otherwise refuses
+     *   the request.
+     */
+    suspend fun requestTelemetryForConnection(
+        requestId: Int,
+        destNum: Int,
+        typeValue: Int,
+        expectedConnectionVersion: Long,
+    )
+
+    /**
+     * Requests neighbor info from a specific node.
+     *
+     * @throws LocalNodeUnavailableException when the local node identity is unavailable before admission.
+     * @throws PacketQueueRejectedException when the outbound queue rejects the request.
+     */
     suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 
     /**

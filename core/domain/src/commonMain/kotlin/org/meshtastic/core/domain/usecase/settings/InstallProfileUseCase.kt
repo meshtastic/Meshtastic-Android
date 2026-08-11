@@ -49,6 +49,13 @@ constructor(
      * @param destNum The destination node number.
      * @param profile The device profile to install.
      * @param currentUser The current user configuration of the destination node (to preserve names if not in profile).
+     * @throws org.meshtastic.core.repository.PacketQueueRejectedException when any profile write is refused locally.
+     * @throws org.meshtastic.core.repository.EditSettingsTransactionException when the begin or commit boundary is
+     *   refused locally.
+     * @throws org.meshtastic.core.repository.LocalNodeUnavailableException when a fixed-position profile is installed
+     *   before the local node identity is available.
+     * @throws MalformedMeshtasticUrlException when the profile channel URL or channel set is invalid. This is raised
+     *   before the edit transaction opens, so no partial profile is applied.
      */
     open suspend operator fun invoke(
         destNum: Int,

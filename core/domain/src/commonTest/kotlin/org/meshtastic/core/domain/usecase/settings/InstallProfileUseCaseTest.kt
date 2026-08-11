@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.log.expectedConditionLabel
 import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioController.SettingsOperation
@@ -123,6 +124,28 @@ class InstallProfileUseCaseTest {
     }
 
     @Test
+    fun `fixed position queue rejection aborts profile installation after closing the edit transaction`() = runTest {
+        val rejection = PacketQueueRejectedException("Fixed position")
+        radioController.onSetFixedPosition = { _, _ -> throw rejection }
+        val profile = DeviceProfile(fixed_position = org.meshtastic.proto.Position(latitude_i = 1, longitude_i = 1))
+
+        val failure =
+            assertFailsWith<PacketQueueRejectedException> {
+                useCase(
+                    destNum = 1234,
+                    profile = profile,
+                    currentUser = User(),
+                    currentLoraConfig = null,
+                    isLocal = false,
+                )
+            }
+
+        assertEquals(rejection, failure)
+        assertEquals(listOf("begin", "commit"), radioController.adminOperations)
+        assertTrue(radioController.fixedPositions.isEmpty())
+    }
+
+    @Test
     fun `invoke installs is_unmessagable but never auto-installs is_licensed`() = runTest {
         val profile = DeviceProfile(is_unmessagable = true, is_licensed = true)
 
@@ -173,7 +196,9 @@ class InstallProfileUseCaseTest {
         )
 
         assertTrue(radioController.editSettingsCalled, "profile install transaction did not run")
-        assertEquals((0..7).toList(), radioController.localChannels.map(Channel::index))
+        val channelWrites = radioController.channelWrites
+        assertEquals(List(8) { 4321 }, channelWrites.map(FakeRadioController.ChannelWrite::destination))
+        assertEquals((0..7).toList(), channelWrites.map { it.channel.index })
         assertEquals(
             listOf(
                 Channel.Role.PRIMARY,
@@ -185,14 +210,17 @@ class InstallProfileUseCaseTest {
                 Channel.Role.DISABLED,
                 Channel.Role.DISABLED,
             ),
-            radioController.localChannels.map(Channel::role),
+            channelWrites.map { it.channel.role },
         )
-        assertEquals(listOf(primary, secondary), radioController.localChannels.take(2).map(Channel::settings))
+        assertEquals(listOf(primary, secondary), channelWrites.take(2).map { it.channel.settings })
         assertEquals(listOf(primary, secondary), radioConfigRepository.currentChannelSet.settings)
         assertEquals(urlLoraConfig, radioConfigRepository.currentChannelSet.lora_config)
-        assertEquals(listOf(Config(lora = urlLoraConfig)), radioController.localConfigs)
         assertEquals(
-            radioController.localChannels.map { SettingsOperation.SetChannel(it) } +
+            listOf(FakeRadioController.ConfigWrite(destination = 4321, config = Config(lora = urlLoraConfig))),
+            radioController.configWrites,
+        )
+        assertEquals(
+            channelWrites.map { SettingsOperation.SetChannel(it.channel) } +
                 SettingsOperation.SetConfig(Config(lora = urlLoraConfig)),
             radioController.settingsOperations,
         )
@@ -212,7 +240,10 @@ class InstallProfileUseCaseTest {
 
         assertTrue(radioController.editSettingsCalled)
         assertTrue(radioController.localChannels.isEmpty())
-        assertEquals(listOf(Config(lora = profileLoraConfig)), radioController.localConfigs)
+        assertEquals(
+            listOf(FakeRadioController.ConfigWrite(destination = 4321, config = Config(lora = profileLoraConfig))),
+            radioController.configWrites,
+        )
         assertEquals(
             listOf(FakeRadioConfigRepository.ChannelSetUpdate(settingsList = null, loraConfig = profileLoraConfig)),
             radioConfigRepository.channelSetUpdates,
@@ -268,7 +299,14 @@ class InstallProfileUseCaseTest {
 
         useCase(4321, profile, User(long_name = "Remote"), currentLoraConfig = null, isLocal = false)
 
-        assertEquals(remotePrimary, radioController.localChannels.first().settings)
+        assertEquals(
+            FakeRadioController.ChannelWrite(
+                4321,
+                Channel(index = 0, role = Channel.Role.PRIMARY, settings = remotePrimary),
+            ),
+            radioController.channelWrites.first(),
+        )
+        assertTrue(radioController.localChannels.isEmpty())
         assertEquals(cachedChannelSet, radioConfigRepository.currentChannelSet)
     }
 
@@ -301,7 +339,9 @@ class InstallProfileUseCaseTest {
     fun `invoke rejects an empty channel set before opening the transaction`() = runTest {
         val destinationPrimary =
             Channel(role = Channel.Role.PRIMARY, index = 0, settings = ChannelSettings(name = "Node B Primary"))
-        radioController.localChannels.add(destinationPrimary)
+        radioController.channelWrites.add(
+            FakeRadioController.ChannelWrite(destination = null, channel = destinationPrimary),
+        )
         val profile =
             DeviceProfile(
                 long_name = "Must Not Apply",
