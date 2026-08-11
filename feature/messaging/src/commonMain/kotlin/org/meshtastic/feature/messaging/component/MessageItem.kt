@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -145,6 +146,7 @@ fun MessageItem(
     val isLocal = node.num == ourNode.num
     val statusString = message.getStatusStringRes(isDirectMessage)
     val isDirectImplicitAck = message.status == MessageStatus.DELIVERED && isDirectMessage
+    val isRetryableFailure = message.status == MessageStatus.ERROR && message.isStatusRetryable(isDirectMessage)
     // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
     val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
     val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
@@ -403,7 +405,7 @@ fun MessageItem(
                             status = message.status ?: MessageStatus.UNKNOWN,
                             text = stringResource(statusString.second),
                             metadataStyle = metadataStyle,
-                            isWarning = isDirectImplicitAck,
+                            isWarning = isDirectImplicitAck || isRetryableFailure,
                             onStatusClick = onStatusClick,
                         )
                     }
@@ -432,6 +434,8 @@ private enum class ActiveSheet {
     Emoji,
 }
 
+internal val MessageStatusColorKey = SemanticsPropertyKey<Color>("MessageStatusColor")
+
 /** Row grouping a received message's mesh diagnostics (signature, signal or hops, transport). */
 @Composable
 private fun DiagnosticsRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
@@ -458,6 +462,7 @@ private fun MessageStatusLabel(
         modifier
             .fillMaxWidth()
             .testTag(MESSAGE_STATUS_LABEL_TEST_TAG)
+            .semantics { this[MessageStatusColorKey] = statusColor }
             .clickable(
                 onClickLabel = stringResource(Res.string.action_show_message_status),
                 role = Role.Button,

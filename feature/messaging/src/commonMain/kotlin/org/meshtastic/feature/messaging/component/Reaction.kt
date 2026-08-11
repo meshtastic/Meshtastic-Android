@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.getMessageStatusDetailRes
 import org.meshtastic.core.model.getMessageStatusStringRes
 import org.meshtastic.core.model.isMessageStatusRetryable
 import org.meshtastic.core.model.util.getShortDateTime
@@ -206,6 +207,7 @@ internal fun ReactionDialog(
         DeliveryInfo(
             title = title,
             text = text,
+            detail = getMessageStatusDetailRes(reaction.status, reaction.routingError),
             resendOption = isMessageStatusRetryable(reaction.status, reaction.routingError, isDirectMessage),
             onConfirm = {
                 onResend(reaction)
