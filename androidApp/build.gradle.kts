@@ -28,7 +28,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
-    alias(libs.plugins.secrets)
+    alias(libs.plugins.meshtastic.android.secrets)
     alias(libs.plugins.androidx.baselineprofile)
     alias(libs.plugins.meshtastic.aboutlibraries)
     // Version-less on purpose: mokkery is embedded in the convention-plugin jar (build-logic

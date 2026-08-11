@@ -370,7 +370,6 @@ mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
 # Google
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services-gradle" }
-secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
 
 # Firebase
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
@@ -395,6 +394,8 @@ meshtastic-android-library-compose = { id = "meshtastic.android.library.compose"
 meshtastic-android-library-flavors = { id = "meshtastic.android.library.flavors" }
 meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-screenshot = { id = "meshtastic.android.screenshot" }
+# Vendored google/secrets-gradle-plugin (Isolated-Projects-safe) — see build-logic/convention.
+meshtastic-android-secrets = { id = "meshtastic.android.secrets" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-docs = { id = "meshtastic.docs" }
 meshtastic-koin = { id = "meshtastic.koin" }
