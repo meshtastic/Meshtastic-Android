@@ -330,6 +330,34 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `saveNodeDbJson writes node database export via file service`() = runTest {
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 456))
+        nodeRepository.setNodes(
+            listOf(TestDataFactory.createTestNode(num = 123, longName = "Sender Node", shortName = "SN")),
+        )
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val uri = CommonUri.parse("content://test/nodedb.json")
+        viewModel.saveNodeDbJson(uri)
+        runCurrent()
+
+        verifySuspend { fileService.write(uri, any()) }
+
+        val jsonOutput = buffer.readUtf8()
+        assertTrue(jsonOutput.contains("\"schemaVersion\": 1"))
+        assertTrue(jsonOutput.contains("\"myNodeNum\": 456"))
+        assertTrue(jsonOutput.contains("\"num\": 123"))
+        assertTrue(jsonOutput.contains("\"longName\": \"Sender Node\""))
+    }
+
+    @Test
     fun `setDbCacheLimit updates manager`() = runTest {
         viewModel.setDbCacheLimit(200)
         databaseManager.cacheLimit.value shouldBe 10 // Clamped to MAX_CACHE_LIMIT
