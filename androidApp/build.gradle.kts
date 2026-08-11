@@ -185,10 +185,10 @@ configure<ApplicationExtension> {
 
     buildTypes {
         release {
+            // Unsigned when keystore.properties is absent — a release must never carry the public
+            // debug key. For an installable local release, point keystore.properties at config/debug.keystore.
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
             }
             isDebuggable = false
         }
