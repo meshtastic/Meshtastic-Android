@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -44,6 +45,7 @@ import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -121,7 +123,7 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `handleQueueStatus treats ERRNO_SHOULD_RELEASE as success`() = runTest(testDispatcher) {
+    fun `strict await treats ERRNO_SHOULD_RELEASE as immediate delivery success`() = runTest(testDispatcher) {
         // Firmware 2.8+ returns ErrorCode 35 (ERRNO_SHOULD_RELEASE) for self-addressed packets delivered
         // through the synchronous local loopback — a success, not a queue failure.
         connectionStateFlow.value = ConnectionState.Connected
@@ -136,7 +138,7 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `handleQueueStatus completes ERRNO_SHOULD_RELEASE even when queue is full`() = runTest(testDispatcher) {
+    fun `strict await completes ERRNO_SHOULD_RELEASE even when queue is full`() = runTest(testDispatcher) {
         // Regression: a self-addressed local-loopback delivery (res=35) can coincide with a full TX queue (free=0).
         // The success+full early return must not swallow it, or the response hangs until TIMEOUT (the very stall
         // this fix targets). Only the plain res=0 "accepted, now full" echo should be skipped.
@@ -152,7 +154,7 @@ class PacketHandlerImplTest {
     }
 
     @Test
-    fun `handleQueueStatus treats other nonzero res as failure`() = runTest(testDispatcher) {
+    fun `strict await treats queue rejection as failure`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
         val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 791)) }
@@ -160,6 +162,70 @@ class PacketHandlerImplTest {
 
         handler.handleQueueStatus(QueueStatus(mesh_packet_id = 791, res = 33, free = 16))
         testScheduler.runCurrent()
+
+        assertFalse(result.await())
+    }
+
+    @Test
+    fun `strict await fails immediately while disconnected`() = runTest(testDispatcher) {
+        val result = handler.sendToRadioAndAwait(MeshPacket(id = 796))
+
+        assertFalse(result)
+        assertEquals(0, testScheduler.currentTime)
+    }
+
+    @Test
+    fun `strict await fails immediately when transport send throws`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        every { radioInterfaceService.sendToRadio(any()) } throws IllegalStateException("transport failed")
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 797)) }
+        testScheduler.runCurrent()
+
+        assertTrue(result.isCompleted)
+        assertFalse(result.await())
+    }
+
+    @Test
+    fun `strict await does not complete on ordinary queue acceptance`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 793)) }
+        testScheduler.runCurrent()
+
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 793, res = 0, free = 16))
+        testScheduler.runCurrent()
+
+        assertFalse(result.isCompleted)
+
+        handler.removeResponse(793, complete = true)
+        assertTrue(result.await())
+    }
+
+    @Test
+    fun `strict await succeeds on routing ack`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 794)) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 794, res = 0, free = 16))
+        testScheduler.runCurrent()
+
+        handler.removeResponse(794, complete = true)
+
+        assertTrue(result.await())
+    }
+
+    @Test
+    fun `strict await fails on routing nak`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 795)) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 795, res = 0, free = 16))
+        testScheduler.runCurrent()
+
+        handler.removeResponse(795, complete = false)
 
         assertFalse(result.await())
     }

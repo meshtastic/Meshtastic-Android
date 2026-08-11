@@ -87,6 +87,7 @@ class PacketHandlerImpl(
 
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
+    private val routingResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
@@ -127,16 +128,17 @@ class PacketHandlerImpl(
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean {
-        // Pre-register the deferred so the queue processor and QueueStatus handler
-        // can find it immediately — no polling required.
-        val deferred = CompletableDeferred<Boolean>()
-        responseMutex.withLock { queueResponse[packet.id] = deferred }
-        queueMutex.withLock {
-            queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
-            queuedPackets.add(packet)
-            startPacketQueueLocked()
+        if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
+            Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} skipped: not connected" }
+            return false
         }
+
+        // QueueStatus(res=0) only means that firmware queued the packet. Keep a separate
+        // routing response so this strict caller waits for the later Routing ACK/NAK.
+        val deferred = CompletableDeferred<Boolean>()
+        responseMutex.withLock { routingResponse[packet.id] = deferred }
         return try {
+            sendToRadio(packet)
             withTimeout(TIMEOUT) { deferred.await() }
         } catch (e: TimeoutCancellationException) {
             Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} timeout" }
@@ -147,7 +149,7 @@ class PacketHandlerImpl(
             Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} failed: ${e.message}" }
             false
         } finally {
-            responseMutex.withLock { queueResponse.remove(packet.id) }
+            responseMutex.withLock { routingResponse.remove(packet.id) }
         }
     }
 
@@ -165,6 +167,8 @@ class PacketHandlerImpl(
             responseMutex.withLock {
                 queueResponse.values.forEach { if (!it.isCompleted) it.complete(false) }
                 queueResponse.clear()
+                routingResponse.values.forEach { if (!it.isCompleted) it.complete(false) }
+                routingResponse.clear()
             }
         }
     }
@@ -182,15 +186,24 @@ class PacketHandlerImpl(
             responseMutex.withLock {
                 if (requestId != 0) {
                     queueResponse.remove(requestId)?.complete(success)
+                    if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
+                        routingResponse.remove(requestId)?.complete(success)
+                    }
                 } else {
                     queueResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
+                    if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
+                        routingResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
+                    }
                 }
             }
         }
     }
 
     override suspend fun removeResponse(dataRequestId: Int, complete: Boolean) {
-        responseMutex.withLock { queueResponse.remove(dataRequestId)?.complete(complete) }
+        responseMutex.withLock {
+            queueResponse.remove(dataRequestId)?.complete(complete)
+            routingResponse.remove(dataRequestId)?.complete(complete)
+        }
     }
 
     /**
@@ -213,8 +226,7 @@ class PacketHandlerImpl(
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
                         } catch (e: TimeoutCancellationException) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
-                            // Clean up the deferred for this packet. sendToRadioAndAwait callers
-                            // also clean up in their own finally block (idempotent remove).
+                            // Clean up the transport-queue deferred for this packet.
                             responseMutex.withLock { queueResponse.remove(packet.id) }
                         } catch (e: CancellationException) {
                             throw e // Preserve structured concurrency cancellation propagation.
@@ -259,7 +271,7 @@ class PacketHandlerImpl(
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun sendPacket(packet: MeshPacket): Deferred<Boolean> {
-        // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
+        // Register the transport-queue response before sending so an immediate QueueStatus cannot be missed.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
             if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
@@ -268,10 +280,10 @@ class PacketHandlerImpl(
             sendToRadio(ToRadio(packet = packet))
         } catch (ex: RadioNotConnectedException) {
             Logger.w(ex) { "sendToRadio skipped: Not connected to radio" }
-            deferred.complete(false)
+            removeResponse(packet.id, complete = false)
         } catch (ex: Exception) {
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
-            deferred.complete(false)
+            removeResponse(packet.id, complete = false)
         }
         // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can await it
         // without being able to complete the underlying CompletableDeferred; cancellation is

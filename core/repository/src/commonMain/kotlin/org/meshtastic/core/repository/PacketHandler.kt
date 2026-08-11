@@ -29,13 +29,13 @@ interface PacketHandler {
     suspend fun sendToRadio(packet: MeshPacket)
 
     /**
-     * Adds a mesh packet to the queue and suspends until the radio acknowledges it via [QueueStatus].
+     * Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.
      *
-     * Unlike [sendToRadio], which is fire-and-forget, this method provides back-pressure so the caller can ensure a
-     * packet has been accepted by the radio before proceeding. This is critical for operations where ordering matters
-     * (e.g., sending a shared contact before the first DM).
+     * A successful [QueueStatus] only means that firmware accepted the packet into its transport queue; it does not
+     * prove that a self-addressed admin command has been processed. This stricter acknowledgement is required when a
+     * later packet depends on that command, such as installing a shared contact before sending the first DM.
      *
-     * @return `true` if the radio accepted the packet, `false` on timeout or failure.
+     * @return `true` on a routing ACK, `false` on a routing NAK, queue rejection, or timeout.
      */
     suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean
 

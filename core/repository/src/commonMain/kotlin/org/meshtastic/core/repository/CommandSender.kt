@@ -56,12 +56,12 @@ interface CommandSender {
     fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage)
 
     /**
-     * Sends an admin message and suspends until the radio acknowledges it.
+     * Sends an admin message and suspends until firmware processes it and returns a routing acknowledgement.
      *
-     * This is used when the caller needs to guarantee a packet has been accepted by the radio before proceeding, such
-     * as sending a shared contact before the first DM to a node.
+     * This is used when the caller needs a processing barrier before proceeding, such as sending a shared contact
+     * before the first DM to a node.
      *
-     * @return `true` if the radio accepted the packet, `false` on timeout or failure.
+     * @return `true` on a routing ACK, `false` on a routing NAK, queue rejection, or timeout.
      */
     suspend fun sendAdminAwait(
         destNum: Int,
