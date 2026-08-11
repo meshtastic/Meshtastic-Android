@@ -556,6 +556,7 @@
     <string name="expand_chart">Diagramm einblenden</string>
     <string name="expanded">Erweitert</string>
     <string name="expires">Gültig bis</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Einstellungen exportieren</string>
     <string name="export_data_csv">Alle Pakete exportieren</string>
     <string name="export_gpx">GPX exportieren</string>

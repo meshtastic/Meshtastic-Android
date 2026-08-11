@@ -77,6 +77,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Restauració dels paràmetres de fàbrica</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->

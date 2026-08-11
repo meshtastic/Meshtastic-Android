@@ -412,6 +412,7 @@
     <string name="exchange_position">Обмін місцеположенням</string>
     <string name="expand_chart">Розгорнути графік</string>
     <string name="expires">Діє до</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Експортувати налаштування</string>
     <string name="export_data_csv">Експортувати всі пакети</string>
     <string name="export_gpx">Експортувати GPX</string>

@@ -91,6 +91,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Gamyklinis atstatymas</string>
     <string name="fair">Pakankamas</string>
     <!-- FILTER -->

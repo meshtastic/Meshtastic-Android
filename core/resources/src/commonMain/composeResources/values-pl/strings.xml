@@ -273,6 +273,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Poproś o pozycję</string>
     <string name="expires">Wygasa</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Eksport konfiguracji</string>
     <string name="export_data_csv">Eksportuj wszystkie pakiety</string>
     <string name="external_notification">Zewnętrzne Powiadomienie</string>

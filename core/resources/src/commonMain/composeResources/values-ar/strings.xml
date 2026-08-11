@@ -89,6 +89,7 @@
     <string name="encryption_psk">مفتاح مشترك</string>
     <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
+    <!-- EXPORT -->
     <string name="fair">مناسب</string>
     <string name="favorite">المفضلة</string>
     <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>

@@ -94,6 +94,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Napaka</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Povrnitev tovarniških nastavitev</string>
     <string name="fair">Precejšen</string>
     <!-- FILTER -->

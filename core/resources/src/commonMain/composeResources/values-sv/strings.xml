@@ -444,6 +444,7 @@
     <string name="expand_chart">Expandera diagrammet</string>
     <string name="expanded">Expanderad</string>
     <string name="expires">Upphör att gälla</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportera konfiguration</string>
     <string name="export_data_csv">Exportera alla paket</string>
     <string name="export_gpx">Exportera GPX</string>

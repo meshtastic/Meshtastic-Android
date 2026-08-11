@@ -299,6 +299,7 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="expires">Caduca</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuración</string>
     <string name="export_data_csv">Exportar todos los paquetes</string>
     <string name="external_notification">Notificaciones Externas</string>

@@ -302,6 +302,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Pozíciócsere</string>
     <string name="expires">Lejárat</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Beállítás exportálása</string>
     <string name="export_data_csv">Minden csomag exportálása</string>
     <string name="external_notification">Külső értesítés</string>

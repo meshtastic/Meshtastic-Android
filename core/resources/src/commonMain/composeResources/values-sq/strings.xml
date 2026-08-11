@@ -92,6 +92,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Gabim</string>
     <string name="error_duty_cycle">Cikli i detyrës ka arritur kufirin. Nuk mund të dërgoni mesazhe tani, ju lutem provoni përsëri më vonë.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Përditësim i fabrikës</string>
     <string name="fair">Mesatar</string>
     <!-- FILTER -->

@@ -105,6 +105,7 @@
     <string name="environment">Асяроддзе</string>
     <string name="error">Памылка</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <!-- EXPORT -->
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->
     <string name="filter_icon">Фільтраваць</string>

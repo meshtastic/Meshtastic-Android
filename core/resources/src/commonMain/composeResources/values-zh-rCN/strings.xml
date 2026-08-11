@@ -595,6 +595,7 @@
     <string name="expand_chart">展开图表</string>
     <string name="expanded">展开</string>
     <string name="expires">有效期</string>
+    <!-- EXPORT -->
     <string name="export_configuration">导出配置</string>
     <string name="export_data_csv">导出所有数据包</string>
     <string name="export_gpx">导出 GPX 文件</string>

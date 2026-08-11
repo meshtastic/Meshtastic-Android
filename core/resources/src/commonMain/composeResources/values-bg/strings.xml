@@ -397,6 +397,7 @@
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
     <string name="expires">Изтича</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="export_data_csv">Експортиране на всички пакети</string>
     <string name="export_gpx">Експортиране на GPX</string>

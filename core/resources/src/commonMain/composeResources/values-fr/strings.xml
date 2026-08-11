@@ -473,6 +473,7 @@
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
     <string name="expires">Expire</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exporter la configuration</string>
     <string name="export_data_csv">Exporter tous les paquets</string>
     <string name="export_tak_data_package">Exporter le paquet de données TAK</string>

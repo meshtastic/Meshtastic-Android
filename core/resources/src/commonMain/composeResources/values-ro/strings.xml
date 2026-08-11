@@ -355,6 +355,7 @@
     <string name="exchange_position">Schimb de poziție</string>
     <string name="expand_chart">Extindeți graficul</string>
     <string name="expires">Expiră la</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportă configurația</string>
     <string name="export_data_csv">Exportă toate pachetele</string>
     <string name="external_notification">Notificare externă</string>

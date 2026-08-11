@@ -90,6 +90,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Earráid</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Athshocraigh an fhactaraí</string>
     <string name="fair">Ceart go leor</string>
     <!-- FILTER -->

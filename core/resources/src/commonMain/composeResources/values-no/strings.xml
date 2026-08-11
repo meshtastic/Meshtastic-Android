@@ -92,6 +92,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Feil</string>
     <string name="error_duty_cycle">Grensen for sykluser er nådd. Kan ikke sende meldinger akkurat nå, prøv igjen senere.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Tilbakestill til fabrikkstandard</string>
     <string name="fair">Middelmådig</string>
     <!-- FILTER -->

@@ -83,6 +83,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Pogreška</string>
     <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Vraćanje na tvorničke postavke</string>
     <!-- FILTER -->
     <string name="filter_icon">Filtriraj</string>

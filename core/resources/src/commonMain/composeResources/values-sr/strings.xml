@@ -178,6 +178,7 @@
     <string name="error_duty_cycle">Достигнут је лимит циклуса рада. Не могу слати поруке тренутно, молимо вас покушајте касније.</string>
     <string name="ethernet_config">Етернет опције</string>
     <string name="expires">Истиче</string>
+    <!-- EXPORT -->
     <string name="external_notification">Спољна обавештења</string>
     <string name="external_notification_config">Подешавање спољних обавештења</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>

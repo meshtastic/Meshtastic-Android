@@ -436,6 +436,7 @@
     <string name="ethernet_enabled">Ethernet povolen</string>
     <string name="exchange_position">Vyžádat pozici</string>
     <string name="expires">Platnost do</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportovat nastavení</string>
     <string name="export_data_csv">Exportovat všechny pakety</string>
     <string name="external_notification">Externí oznámení</string>

@@ -87,6 +87,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Erè</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Reyajiste nan faktori</string>
     <string name="fair">Mwayen</string>
     <!-- FILTER -->
