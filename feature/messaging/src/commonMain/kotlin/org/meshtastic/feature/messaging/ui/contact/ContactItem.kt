@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -123,7 +123,9 @@ private fun ContactHeader(
         AssistChip(
             onClick = onNodeChipClick,
             modifier =
-            Modifier.width(IntrinsicSize.Min).height(32.dp).semantics { contentDescription = contact.shortName },
+            Modifier.width(IntrinsicSize.Min).heightIn(min = 32.dp).semantics {
+                contentDescription = contact.shortName
+            },
             label = {
                 Text(
                     text = contact.shortName,

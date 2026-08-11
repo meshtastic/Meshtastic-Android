@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -267,7 +267,7 @@ fun MessageItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                NodeChip(node = node, onClick = onClickChip, modifier = Modifier.height(28.dp))
+                NodeChip(node = node, onClick = onClickChip, modifier = Modifier.heightIn(min = 28.dp))
                 Text(
                     text = node.user.long_name,
                     modifier = Modifier.weight(1f, fill = false),
