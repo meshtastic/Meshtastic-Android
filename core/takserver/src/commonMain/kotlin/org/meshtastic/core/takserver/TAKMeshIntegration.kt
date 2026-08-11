@@ -165,12 +165,11 @@ class TAKMeshIntegration(
 
     /**
      * Determine the outbound TAK protocol version based on the connected radio's firmware version. Evaluated per-send
-     * (not cached) so the bridge picks up firmware upgrades during a session without restart. If the firmware version
-     * is unavailable (radio not yet handshook), default to V2 — the v2 firmware was released widely enough that
-     * defaulting to legacy would be a regression for the common case.
+     * (not cached) so the bridge picks up firmware upgrades during a session without restart. Until the version is
+     * known, use the legacy format which every TAK-capable firmware version supports.
      */
     private fun useTakV2(): Boolean {
-        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return true
+        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return false
         return Capabilities(fw).supportsTakV2
     }
 
