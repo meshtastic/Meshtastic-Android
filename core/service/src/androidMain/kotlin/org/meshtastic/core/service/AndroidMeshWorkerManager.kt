@@ -22,19 +22,28 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshWorkerManager
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.service.worker.SendMessageWorker
 
 @Single
 class AndroidMeshWorkerManager(private val workManager: WorkManager) : MeshWorkerManager {
-    override fun enqueueSendMessage(packetId: Int) {
+    override fun enqueueSendMessage(persistedId: PersistedPacketId) {
         val workRequest =
             OneTimeWorkRequestBuilder<SendMessageWorker>()
-                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .setInputData(
+                    workDataOf(
+                        SendMessageWorker.KEY_PACKET_UUID to persistedId.uuid,
+                        SendMessageWorker.KEY_MY_NODE_NUM to persistedId.myNodeNum,
+                    ),
+                )
                 .build()
 
+        // This UUID name does not replace a persisted legacy `send_message_<packetId>` job. Both can briefly coexist
+        // after upgrade, but their transactional row claim allows only one send owner. KEEP also prevents repeated
+        // scheduling of this exact row from cancelling an active worker after it has handed the packet to the radio.
         workManager.enqueueUniqueWork(
-            "${SendMessageWorker.WORK_NAME_PREFIX}$packetId",
-            ExistingWorkPolicy.REPLACE,
+            "${SendMessageWorker.WORK_NAME_PREFIX}${persistedId.myNodeNum}_${persistedId.uuid}",
+            ExistingWorkPolicy.KEEP,
             workRequest,
         )
     }

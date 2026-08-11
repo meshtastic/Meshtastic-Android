@@ -34,7 +34,6 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioNotConnectedException
@@ -44,6 +43,7 @@ import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
@@ -106,14 +106,14 @@ class PacketHandlerImpl(
     private val routingResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
 
     private val timeoutMutex = Mutex()
-    private val sendAckTimeoutJobs = mutableMapOf<Int, Job>()
+    private val sendAckTimeoutJobs = mutableMapOf<PersistedPacketId, Job>()
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
         val b = p.encode()
 
         radioInterfaceService.sendToRadio(b)
-        p.packet?.id?.let { changeStatus(it, MessageStatus.ENROUTE) }
+        p.packet?.let { changeStatus(it, MessageStatus.ENROUTE) }
 
         val packet = p.packet
         if (packet?.decoded != null) {
@@ -274,24 +274,26 @@ class PacketHandlerImpl(
             }
     }
 
-    private fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {
-        if (packetId != 0) {
-            getDataPacketById(packetId)?.let { p ->
-                if (p.status != m) {
-                    packetRepository.value.updateMessageStatus(p, m)
+    private fun changeStatus(packet: MeshPacket, status: MessageStatus) = scope.handledLaunch {
+        if (packet.id != 0) {
+            val persistedId =
+                withTimeoutOrNull(1.seconds) {
+                    var id: PersistedPacketId? = null
+                    while (id == null) {
+                        id = packetRepository.value.updateOutgoingMessageStatus(packet, status)
+                        if (id == null) delay(100.milliseconds)
+                    }
+                    id
                 }
-                if (m == MessageStatus.ENROUTE) {
-                    scheduleSendAckTimeout(packetId)
-                }
-            }
+            if (status == MessageStatus.ENROUTE && persistedId != null) scheduleSendAckTimeout(persistedId)
         }
     }
 
     override fun rearmSendAckTimeouts() {
         scope.handledLaunch {
-            packetRepository.value.getEnroutePackets().forEach { p ->
-                val remaining = p.time + SEND_ACK_TIMEOUT.inWholeMilliseconds - nowMillis
-                scheduleSendAckTimeout(p.id, remaining.milliseconds.coerceAtLeast(REARM_GRACE))
+            packetRepository.value.getEnroutePackets().forEach { persisted ->
+                val remaining = persisted.packet.time + SEND_ACK_TIMEOUT.inWholeMilliseconds - nowMillis
+                scheduleSendAckTimeout(persisted.id, remaining.milliseconds.coerceAtLeast(REARM_GRACE))
             }
         }
     }
@@ -301,30 +303,21 @@ class PacketHandlerImpl(
      * response arrived) would stay ENROUTE — "Sending…" — forever. Stamp it as a retryable timeout instead; a late ACK
      * still upgrades it via handleAckNak.
      *
-     * One timer per packet: re-arming supersedes the pending one, so repeated reconnects cannot pile up timers for the
-     * same send. Timers deliberately survive a disconnect — the ack genuinely never arrived, and the resulting state is
-     * retryable — so a user who never reconnects still sees the send resolve.
+     * One timer per persisted row: re-arming supersedes the pending one, so repeated reconnects cannot pile up timers
+     * for same send. Timers deliberately survive a disconnect — the ack genuinely never arrived, and the resulting
+     * state is retryable — so a user who never reconnects still sees the send resolve.
      */
-    private suspend fun scheduleSendAckTimeout(packetId: Int, delayFor: Duration = SEND_ACK_TIMEOUT) {
+    private suspend fun scheduleSendAckTimeout(id: PersistedPacketId, delayFor: Duration = SEND_ACK_TIMEOUT) {
         timeoutMutex.withLock {
-            sendAckTimeoutJobs.remove(packetId)?.cancel()
+            sendAckTimeoutJobs.remove(id)?.cancel()
             sendAckTimeoutJobs.values.removeAll { it.isCompleted }
-            sendAckTimeoutJobs[packetId] =
+            sendAckTimeoutJobs[id] =
                 scope.handledLaunch {
                     delay(delayFor)
                     // Conditional in the DAO transaction: an ACK/NAK landing while this timer waited must win.
-                    packetRepository.value.timeOutEnroutePacket(packetId, Routing.Error.TIMEOUT.value)
+                    packetRepository.value.timeOutEnroutePacket(id, Routing.Error.TIMEOUT.value)
                 }
         }
-    }
-
-    private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1.seconds) {
-        var dataPacket: DataPacket? = null
-        while (dataPacket == null) {
-            dataPacket = packetRepository.value.getPacketById(packetId)
-            if (dataPacket == null) delay(100.milliseconds)
-        }
-        dataPacket
     }
 
     @Suppress("TooGenericExceptionCaught")

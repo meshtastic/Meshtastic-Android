@@ -30,6 +30,8 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
     alias(libs.plugins.meshtastic.kover)
     alias(libs.plugins.meshtastic.aboutlibraries)
+    // Version-less because Mokkery is embedded in the convention-plugin classpath.
+    id("dev.mokkery")
 }
 
 configureGraphTasks()

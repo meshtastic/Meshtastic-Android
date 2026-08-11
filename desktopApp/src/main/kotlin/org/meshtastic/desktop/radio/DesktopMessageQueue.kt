@@ -17,6 +17,7 @@
 package org.meshtastic.desktop.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioController
 
 /**
@@ -40,9 +42,9 @@ class DesktopMessageQueue(
 ) : MessageQueue {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 
-    override suspend fun enqueue(packetId: Int) {
+    override suspend fun enqueue(persistedId: PersistedPacketId) {
         scope.launch {
-            if (packetId == 0) return@launch
+            if (persistedId.uuid <= 0L) return@launch
 
             // Verify we are connected before attempting to send to avoid unnecessary Exception bubbling
             if (radioController.connectionState.value != ConnectionState.Connected) {
@@ -52,16 +54,15 @@ class DesktopMessageQueue(
                 return@launch
             }
 
-            val packetData =
-                packetRepository.getPacketByPacketId(packetId)
-                    ?: return@launch // Packet no longer exists in DB? Do not retry.
+            val claimed = packetRepository.claimQueuedPacket(persistedId) ?: return@launch
+            if (claimed.packet.status != MessageStatus.QUEUED) return@launch
 
             try {
-                radioController.sendMessage(packetData)
-                packetRepository.updateMessageStatus(packetData, MessageStatus.ENROUTE)
+                radioController.sendMessage(claimed.packet)
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.w(e) { "Failed to send packet ${packetData.id}, re-queuing" }
-                packetRepository.updateMessageStatus(packetData, MessageStatus.QUEUED)
+                Logger.w(e) { "Failed to send packet ${claimed.packet.id}, re-queuing" }
+                packetRepository.rollbackEnroutePacket(claimed.id)
+                if (e is CancellationException) throw e
             }
         }
     }

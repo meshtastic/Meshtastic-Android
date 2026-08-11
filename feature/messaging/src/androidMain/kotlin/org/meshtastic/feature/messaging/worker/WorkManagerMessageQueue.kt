@@ -16,28 +16,14 @@
  */
 package org.meshtastic.feature.messaging.worker
 
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
-import org.meshtastic.core.service.worker.SendMessageWorker
+import org.meshtastic.core.repository.PersistedPacketId
 
 /** Android implementation of [MessageQueue] that uses [WorkManager] for reliable background transmission. */
 @Single
-class WorkManagerMessageQueue(private val workManager: WorkManager) : MessageQueue {
+class WorkManagerMessageQueue(private val workerManager: MeshWorkerManager) : MessageQueue {
 
-    override suspend fun enqueue(packetId: Int) {
-        val workRequest =
-            OneTimeWorkRequestBuilder<SendMessageWorker>()
-                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-                .build()
-
-        workManager.enqueueUniqueWork(
-            "${SendMessageWorker.WORK_NAME_PREFIX}$packetId",
-            ExistingWorkPolicy.REPLACE,
-            workRequest,
-        )
-    }
+    override suspend fun enqueue(persistedId: PersistedPacketId) = workerManager.enqueueSendMessage(persistedId)
 }

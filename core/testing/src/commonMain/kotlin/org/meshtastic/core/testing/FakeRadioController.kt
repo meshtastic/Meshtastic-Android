@@ -58,6 +58,9 @@ class FakeRadioController :
 
     var throwOnSend: Boolean = false
 
+    /** Deterministic suspension/fault hook invoked before a packet is recorded as sent. */
+    var onSendMessage: suspend (DataPacket) -> Unit = {}
+
     /** When true, [setLocalConfig] throws — simulates the radio link dropping mid config write. */
     var throwOnSetLocalConfig: Boolean = false
 
@@ -87,6 +90,7 @@ class FakeRadioController :
             localConfigs.clear()
             localChannels.clear()
             throwOnSend = false
+            onSendMessage = {}
             throwOnSetLocalConfig = false
             failChannelWriteAfter = null
             lastSetDeviceAddress = null
@@ -100,6 +104,7 @@ class FakeRadioController :
     }
 
     override suspend fun sendMessage(packet: DataPacket) {
+        onSendMessage(packet)
         if (throwOnSend) error("Fake send failure")
         sentPackets.add(packet)
     }

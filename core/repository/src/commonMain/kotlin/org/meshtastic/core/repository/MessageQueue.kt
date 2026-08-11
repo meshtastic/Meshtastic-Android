@@ -21,5 +21,5 @@ package org.meshtastic.core.repository
  * transmission without depending on Android-specific WorkManager.
  */
 interface MessageQueue {
-    suspend fun enqueue(packetId: Int)
+    suspend fun enqueue(persistedId: PersistedPacketId)
 }

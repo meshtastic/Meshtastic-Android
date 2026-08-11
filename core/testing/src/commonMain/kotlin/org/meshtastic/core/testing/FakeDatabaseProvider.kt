@@ -33,11 +33,17 @@ class FakeDatabaseProvider : DatabaseProvider {
     private val _currentDb = MutableStateFlow(db)
     override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
 
+    /** Optional barrier/fault hook used to prove overlapping repository writes before they enter Room. */
+    var beforeWithDb: suspend () -> Unit = {}
+
     override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = currentDb.flatMapLatest(query)
 
     override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(db)
 
-    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = block(db)
+    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
+        beforeWithDb()
+        return block(db)
+    }
 
     /**
      * Simulates the active-DB switch that happens when the app selects a different device — the new DB has no rows, so
