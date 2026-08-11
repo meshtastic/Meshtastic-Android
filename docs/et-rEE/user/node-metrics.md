@@ -140,7 +140,7 @@ Iga hüpe esindab vahendussõlme, mis sõnumi edastas.
 
 ## Asukoha logi
 
-Historical position data for nodes that share their location:
+Asukohta jagavate sõlmede ajaloolised asukohaandmed:
 
 - GPS koordinaadid
 - Kõrgus

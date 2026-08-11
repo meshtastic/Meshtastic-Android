@@ -1,5 +1,5 @@
 ---
-title: Settings — Radio & User
+title: Seaded — raadio ja kasutaja
 parent: User Guide
 nav_order: 7
 last_updated: 2026-07-27
@@ -11,11 +11,11 @@ aliases:
   - lora
 ---
 
-# Settings — Radio & User
+# Seaded — raadio ja kasutaja
 
 Configure your radio hardware and user identity parameters.
 
-## User Settings
+## Kasutaja seaded
 
 ### User Profile
 
@@ -163,7 +163,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 
-Settings use standard preference controls — dropdowns, toggles, and sliders:
+Seaded kasutavad standardseid eelistuste juhtelemente – rippmenüüsid, lülitid ja liugurid:
 
 | Control  | Screenshot                                                   |
 | -------- | ------------------------------------------------------------ |

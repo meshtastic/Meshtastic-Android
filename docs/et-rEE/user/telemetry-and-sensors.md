@@ -23,13 +23,13 @@ Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, ener
 
 Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
-| Meetriline       | Kirjeldus                      | Tüüpiline ulatus                   |
-| ---------------- | ------------------------------ | ---------------------------------- |
-| Aku tase         | Charge percentage              | 0–100%                             |
-| Vool             | Aku pinge                      | 3,0–4,2V (LiPo) |
-| Kanali kasutus   | % of airtime used locally      | 0–100%                             |
-| Eetri kasutus TX | % of airtime used by this node | 0–100%                             |
-| Töötamise aeg    | Seconds since last boot        | Varies                             |
+| Meetriline       | Kirjeldus                              | Tüüpiline ulatus                   |
+| ---------------- | -------------------------------------- | ---------------------------------- |
+| Aku tase         | Charge percentage                      | 0–100%                             |
+| Vool             | Aku pinge                              | 3,0–4,2V (LiPo) |
+| Kanali kasutus   | Kohalikult kasutatud eetriaja %        | 0–100%                             |
+| Eetri kasutus TX | Selle sõlme poolt kasutatud eetriaja % | 0–100%                             |
+| Töötamise aeg    | Seconds since last boot                | Varies                             |
 
 ## Environment Sensors
 

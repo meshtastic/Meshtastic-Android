@@ -103,6 +103,7 @@
     <string name="ip_address">IP Adresa:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>

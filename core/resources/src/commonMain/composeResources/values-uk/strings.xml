@@ -612,6 +612,7 @@
     <string name="latest_alpha_firmware">Остання альфа</string>
     <string name="latest_stable_firmware">Остання стабільна</string>
     <string name="latitude">Широта</string>
+    <!-- LAYER -->
     <string name="learn_more">Докладніше</string>
     <string name="led_heartbeat">Частота мигання світлодіоду</string>
     <string name="led_state">Стан світлодіоду</string>

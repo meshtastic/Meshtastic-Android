@@ -865,6 +865,7 @@
     <string name="latest_alpha_firmware">最新のアルファ版</string>
     <string name="latest_stable_firmware">最新の安定版</string>
     <string name="latitude">緯度</string>
+    <!-- LAYER -->
     <string name="learn_more">詳細</string>
     <string name="led_heartbeat">LED ハートビート</string>
     <string name="led_state">LEDの状態</string>
@@ -1563,6 +1564,7 @@
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
     <!-- SITE -->
+    <string name="site_planner">サイトプランナー</string>
     <string name="site_planner_antenna_gain_dbi">アンテナ利得（dBi）</string>
     <string name="site_planner_antenna_height_meters">アンテナの高さ（m）</string>
     <string name="site_planner_color_scale">カラーパレット</string>

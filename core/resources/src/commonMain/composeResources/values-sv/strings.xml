@@ -634,6 +634,7 @@
     <string name="latest_alpha_firmware">Senaste alfa</string>
     <string name="latest_stable_firmware">Senaste stabila</string>
     <string name="latitude">Latitud</string>
+    <!-- LAYER -->
     <string name="learn_more">Läs mer</string>
     <string name="led_heartbeat">LED pulsering</string>
     <string name="led_state">LED-läge</string>

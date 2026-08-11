@@ -98,6 +98,7 @@
     <string name="ip_address">Adreça IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Accés al posicionament deshabilitat, no es pot proveir la posició a la xarxa.</string>

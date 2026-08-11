@@ -29,7 +29,7 @@ Kaardil kuvatakse:
 
 ### Node Markers
 
-Iga positsiooni teatav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. Kiip on värvitud sõlme enda identiteedivärviga (stabiilne värv, mis on tuletatud sõlme numbrist) – sama kiip, mida kasutatakse sõlmede loendis, seega näeb sõlm kõikjal ühesugune välja. Markeri värv **ei kodeeri** võrguühenduseta/võrguühenduseta olekut. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
+Iga asukohta teavitav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. Kiip on värvitud sõlme enda identiteedivärviga (stabiilne värv, mis on tuletatud sõlme numbrist) – sama kiip, mida kasutatakse sõlmede loendis, seega näeb sõlm kõikjal ühesugune välja. Markeri värv **ei kodeeri** võrguühenduseta/võrguühenduseta olekut. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
 
 ### Kaardi juhtnupud
 
@@ -71,7 +71,7 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 Waypoints can be set to expire automatically:
 
 - **Never** (default) — waypoint remains until manually deleted
-- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. Useful for temporary markers like rally points, hazards, or meeting locations.
+- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. Kasulik ajutiste märkide, näiteks kogunemispunktide, ohtude või kohtumispaikade jaoks.
 
 Aegunud teekonnapunktid peidetakse kaardilt automaatselt, et need ekraani ei risustaks. The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.
 
@@ -104,17 +104,17 @@ Puuduta kaardil kihtide ikooni, et avada **Kaardikihtide haldamine**, kus saad i
 
 ### Enabling Position Sharing
 
-Sõlm jagab oma GPS positsiooni järgmise alusel:
+Sõlm jagab oma GPS asukohta järgmise alusel:
 
 - **Fikseeritud intervall** – levitamine regulaarsete intervallidega
 - **Nutikas asukoht** – levitatakse, kui liikumine ületab lävendi
 - **Manual** — only share when explicitly requested
 
-Configure position behavior in **Settings → Position**.
+Asukoha käitumist saab seadistada menüüs **Seaded → Asukoht**.
 
 ### Privacy Considerations
 
-> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. Kui sa ei soovi, et sinu asukohta jagataks, keela GPS-positsioon seadetes või kasuta fikseeritud/võltspositsiooni.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. Kui sa ei soovi, et sinu asukohta jagataks, keela GPS asukohta seadetes või kasuta fikseeritud/võltsasukohta.
 
 ## Kaardi allikad
 

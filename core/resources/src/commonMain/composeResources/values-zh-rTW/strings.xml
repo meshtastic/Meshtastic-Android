@@ -650,6 +650,7 @@
     <string name="latest_alpha_firmware">最新測試版韌體</string>
     <string name="latest_stable_firmware">最新穩定版韌體</string>
     <string name="latitude">緯度</string>
+    <!-- LAYER -->
     <string name="learn_more">瞭解詳情</string>
     <string name="led_heartbeat">LED 心跳指示</string>
     <string name="led_state">LED狀態</string>

@@ -16,7 +16,7 @@ Tere tulemast Meshtasticusse! See juhend juhendab sind Meshtastic Androidi raken
 
 ## First Launch
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
+Rakenduse esmakordsel avamisel juhendatakse sind sissejuhatavas voos, mis aitab konfigureerida olulisi õigusi ja sätteid. Iga sammu saab läbida järjekorras või võid selle vahele jätta ja õigused hiljem Androidi seadetes konfigureerida.
 
 ### Tervituskuva
 
@@ -43,7 +43,7 @@ Sinihammas on peamine ühendusmeetod sinu telefoni ja Meshtastic raadio vahel:
 
 Grant both permissions when prompted. Ilma sinihambata peate kasutama USB- või TCP-ühendusi.
 
-### Location Permission
+### Asukoha luba
 
 > ⚠️ **Miks on sinihamba ​​jaoks vaja asukohateavet?** Android vajab lähedalasuvate sinihamba madala energia seadmete avastamiseks asukohale juurdepääsu luba. See on Androidi süsteeminõue, mitte Meshtastic põhine valik.
 
@@ -77,7 +77,7 @@ On supported devices, the app may request permission for critical alerts:
 - Need on kõrge prioriteediga märguanded, mis võivad režiimist „Ära sega” läbi murda
 - Useful for emergency mesh alerts or urgent messages
 - Võid selle sammu **vahele jätta**, kui te kõrge prioriteediga märguandeid ei vaja
-- Configure or revoke later in Android notification settings
+- Seadistada või tühistada hiljem Androidi teavitusseadetes
 
 ## Peale seadistamist
 
@@ -93,7 +93,7 @@ Kui raadioga on ühendus loodud, uuri:
 - [Sõnumid ja kanalid](messages-and-channels) — saada oma esimene sõnum
 - [Seadmed](nodes) — vaata, kes on sinu võrgus
 - [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede asukohti
-- [Settings](settings-radio-user) — configure your radio and user profile
+- [Seaded](settings-radio-user) — raadio ja kasutajaprofiili seadistamine
 
 Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja esimest võrgu seadistamist.
 

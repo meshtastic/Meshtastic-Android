@@ -67,140 +67,140 @@ aliases:
 | Включено                                  | Включить уведомления                |
 | Включить уведомление о входящем сообщении | Уведомлять о входящих сообщениях    |
 | Зуммер при уведомлении                    | Использовать буззер для сообщений   |
-| Alert Message Vibra                       | Использовать вибрацию для сообщений |
-| Уведомлять при 🔔                         | Notify on bell character            |
+| Вибрация при уведомлении                  | Использовать вибрацию для сообщений |
+| Уведомлять при 🔔                         | Уведомлять о символе колокола       |
 | Вывод (GPIO)           | Пин для вывода уведомления          |
-| Активный выход                            | High or Low active                  |
+| Активный выход                            | Высокая или низкая активность       |
 | Длительность (мс)      | Длительность уведомления            |
 | Использовать I2S как буззер               | Использовать аудиовывод I2S         |
 
 ### Модуль Store & Forward
 
-Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
+Буферизирует сообщения для узлов, которые временно были недоступны, а затем ретранслирует их, когда эти узлы переподключаются. Важное значение для сеток, где узлы входят и выходят вне диапазона регулярно - обеспечивает отсутствие потери сообщений при коротких разъединениях.
 
-| Настройка                                  | Описание                                                                                                                                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Включено                                   | Activate store and forward                                                                                                                       |
-| Heartbeat                                  | Periodically announce this node's store-and-forward capability                                                                                   |
-| Записи                                     | Maximum stored messages                                                                                                                          |
-| History Return (max)    | Max messages to replay                                                                                                                           |
-| History Return (window) | Time window for replay                                                                                                                           |
-| Сервер                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
+| Настройка                                  | Описание                                                                                                                               |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                                   | Активировать режим хранения и пересылки                                                                                                |
+| Heartbeat                                  | Периодически объявлять о наличии функции хранения и пересылки у этого узла                                                             |
+| Записи                                     | Максимальное количество сохраненных сообщений                                                                                          |
+| История возврата (макс) | Максимум сообщений для повтора                                                                                                         |
+| Возврат истории (окно)  | Окно времени для повтора                                                                                                               |
+| Сервер                                     | Действовать как сервер хранения и пересылки для mesh-сети (требуется большой объем памяти, например, ESP32 с PSRAM) |
 
-> 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
+> 💡 **Совет:** Хранение и пересылка лучше всего работает на узлах с достаточной памятью (ESP32 с PSRAM). Узлы маршрутизатора являются идеальными кандидатами, так как они обычно всегда включены.
 
 ### Модуль проверки дальности
 
 Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
-| Настройка                                | Описание                          |
-| ---------------------------------------- | --------------------------------- |
-| Включено                                 | Активировать проверку дальности   |
-| Интервал отправки (с) | Время между передачами проверок   |
-| Сохранить в CSV                          | Log received test data to SD card |
+| Настройка                                | Описание                                      |
+| ---------------------------------------- | --------------------------------------------- |
+| Включено                                 | Активировать проверку дальности               |
+| Интервал отправки (с) | Время между передачами проверок               |
+| Сохранить в CSV                          | Журнал полученных тестовых данных на SD-карту |
 
 ### Модуль телеметрии
 
-Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
+Контролирует какими телеметрическими данными ваш узел делится с сеткой. Телеметрия включает данные о состоянии устройства (заряд батареи, время работы) и данные с датчиков окружающей среды (температура, влажность, давление).
 
-| Настройка                    | Описание                                |
-| ---------------------------- | --------------------------------------- |
-| Device Metrics Interval      | How often to report device metrics      |
-| Environment Metrics Interval | How often to report environment sensors |
-| Телеметрия воздуха           | Report particulate sensor data          |
-| Power Metrics Enabled        | Report power usage                      |
+| Настройка                             | Описание                                       |
+| ------------------------------------- | ---------------------------------------------- |
+| Интервал обновления метрик устройства | Как часто сообщать о показателях устройства    |
+| Интервал обновления метрик среды      | Как часто сообщать о датчиках окружающей среды |
+| Телеметрия воздуха                    | Сообщить данные датчика частиц                 |
+| Включены метрики энергии              | Сообщать об энергопотреблении                  |
 
-See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
+Посмотрите [Телеметрия и датчики](telemetry-and-sensors) — для получения информации о поддерживаемых датчиках и рекомендациях по настройке.
 
 ### Модуль шаблонных сообщений
 
-Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+Предварительно настроенные сообщения, доступные через физические кнопки устройства (для радиостанций с поворотными энкодерами, кнопочными панелями или аналогичным оборудованием ввода). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
 
-| Настройка          | Описание                                                                 |
-| ------------------ | ------------------------------------------------------------------------ |
-| ~~Включено~~       | ⚠️ **Устарело** — текущая прошивка может игнорировать этот переключатель |
-| Сообщения          | Список сообщений, разделённых новой строкой                              |
-| Отправлять 🔔      | Play bell sound on send                                                  |
-| Rotary Encoder     | Enable rotary encoder input                                              |
-| Up/Down/Press Pins | GPIO pin assignments for input                                           |
+| Настройка               | Описание                                                                 |
+| ----------------------- | ------------------------------------------------------------------------ |
+| ~~Включено~~            | ⚠️ **Устарело** — текущая прошивка может игнорировать этот переключатель |
+| Сообщения               | Список сообщений, разделённых новой строкой                              |
+| Отправлять 🔔           | Воспроизвести звук колокола при отправке                                 |
+| Поворотный энкодер      | Включить ввод поворотного энкодера                                       |
+| Пины поворота и нажатия | Задания GPIO PIN-кода для ввода                                          |
 
 ### Звуковой модуль
 
-Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
+Поддержка аудио Codec2 для низкополосной голосовой связи через сетку. Это **экспериментальная функция**, которая кодирует голос в очень маленькие пакеты данных с помощью кодека Codec2.
 
-| Настройка       | Описание                         |
-| --------------- | -------------------------------- |
-| Включено        | Activate audio module            |
-| Codec2 Rate     | Audio quality/bandwidth tradeoff |
-| I2S Word Select | GPIO pin for I2S WS              |
-| I2S Data In     | GPIO pin for I2S DIN             |
-| I2S Data Out    | GPIO pin for I2S DOUT            |
+| Настройка           | Описание                                               |
+| ------------------- | ------------------------------------------------------ |
+| Включено            | Активировать модуль аудио                              |
+| Частота кодирования | Компромисс между качеством звука и полосой пропускания |
+| Выбор слов I2S      | GPIO контакт для I2S WS                                |
+| I2S Вход данных     | Пин GPIO для I2S DIN                                   |
+| I2S Выход данных    | Пин GPIO для I2S DOUT                                  |
 
-> ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
+> ⚠️ Примечание: Для работы аудио требуется специальное аппаратное обеспечение (I2S-микрофон и динамик). Качество голоса очень низкополосное — представьте себе «разборчивую радиосвязь», а не качество телефонного звонка.
 
-### Remote Hardware Module
+### Удаленный аппаратный модуль
 
-GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
+Управление GPIO через mesh-сеть. Позволяет удалённому узлу читать и записывать состояния выводов GPIO на другом узле — полезно для активации реле, опроса переключателей или удалённого управления внешним оборудованием.
 
-| Настройка                     | Описание                                                                       |
-| ----------------------------- | ------------------------------------------------------------------------------ |
-| Включено                      | Activate remote GPIO access                                                    |
-| Разрешить неопределенные пины | Разрешить доступ к любому GPIO-пину (риск для безопасности) |
-| Доступные пины                | Up to 4 GPIO pins this node exposes for remote read/write                      |
+| Настройка                     | Описание                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| Включено                      | Активировать удаленный GPIO доступ                                              |
+| Разрешить неопределенные пины | Разрешить доступ к любому GPIO-пину (риск для безопасности)  |
+| Доступные пины                | До 4 пинов GPIO, которые этот узел предоставляет для удалённого чтения и записи |
 
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Включать только на выделенных GPIO-нодах.
+> ⚠️ Предупреждение: Включение опции «Разрешить неопределённые пины» даёт удалённым узлам доступ ко всем выводам GPIO, что может нарушить работу собственного аппаратного обеспечения радио. Включать только на выделенных GPIO-нодах.
 
 ### Модуль информации о соседях
 
-Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
+Транслирует информацию о доступных услышанных соседей, включив ячейку сеточной топологии. Каждый включенный узел периодически делится списком других узлов которые он может слышать и их качество сигнала.
 
-| Настройка                                  | Описание                                                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Включено                                   | Activate neighbor broadcasting                                                                                                       |
-| Интервал обновления (с) | How often to broadcast neighbor list                                                                                                 |
-| Передача через LoRa                        | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
+| Настройка                                  | Описание                                                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Включено                                   | Включить трансляцию соседей                                                                                                                      |
+| Интервал обновления (с) | Как часто транслировать список соседей                                                                                                           |
+| Передача через LoRa                        | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+Смотрите [Discovery](discovery) за тем как использовать соседние данные для сеточно топологического исследования.
 
 ### Модуль окружающего освещения
 
-Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
+Управляет встроенными светодиодами NeoPixel или другими адресуемыми RGB-светодиодами на поддерживаемом оборудовании. Может использоваться для визуальных статусовых индикаторов, световых уведомлений, или декоративных эффектов.
 
-| Настройка            | Описание                                                   |
-| -------------------- | ---------------------------------------------------------- |
-| Состояние светодиода | Turn the LED on or off                                     |
-| Ток                  | LED current limit (0–31)                |
-| Red / Green / Blue   | Individual color channel values (0–255) |
+| Настройка                 | Описание                                                         |
+| ------------------------- | ---------------------------------------------------------------- |
+| Состояние светодиода      | Включить или выключить светодиод                                 |
+| Ток                       | Текущий лимит светодиодов (0–31)              |
+| Красный / Зеленый / Синий | Индивидуальные значения цветов канала (0–255) |
 
-### Detection Sensor Module
+### Модуль определения датчика
 
-Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
+Превращает ваш узел в систему сигнализации на основе датчика движения или открытия двери. При обнаружении изменения состояния на выводе GPIO (например, сработал датчик движения или открылась дверь) узел отправляет по меш-сети оповещение.
 
-| Настройка                                | Описание                                                                                                                                |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Включено                                 | Activate detection sensor                                                                                                               |
-| Пин датчика                              | GPIO pin connected to sensor                                                                                                            |
-| Detection Trigger Type                   | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
-| Use Input Pullup Mode                    | Enable the pin's internal pull-up resistor                                                                                              |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                                                                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                                                                                       |
-| Отправлять 🔔                            | Include bell character in alerts                                                                                                        |
-| Имя датчика                              | Custom name for this sensor                                                                                                             |
+| Настройка                                                | Описание                                                                                                                                           |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                                                 | Активировать датчик обнаружения                                                                                                                    |
+| Пин датчика                                              | Пин GPIO, подключенный к датчику                                                                                                                   |
+| Триггер срабатывания                                     | Как состояние пина интерпретируется как событие обнаружения (например, активный высокий/низкий уровень, срабатывание по фронту) |
+| Использовать режим подтяжки входа                        | Включить внутренний подтягивающий резистор пина                                                                                                    |
+| Минимальное количество трансляций (с) | Минимальный интервал между оповещениями                                                                                                            |
+| Трансляция состояния (с)              | Интервал периодической отправки состояния                                                                                                          |
+| Отправлять 🔔                                            | Включать символ колокола в оповещения                                                                                                              |
+| Имя датчика                                              | Пользовательское имя для этого датчика                                                                                                             |
 
-### Paxcounter Module
+### Paxcounter Модуль
 
-People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+Подсчёт количества людей по Wi-Fi и BLE-запросам от устройств. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
 
-| Настройка                              | Описание                   |
-| -------------------------------------- | -------------------------- |
-| Включено                               | Activate people counting   |
-| Update Interval (s) | How often to report counts |
+| Настройка                                  | Описание                         |
+| ------------------------------------------ | -------------------------------- |
+| Включено                                   | Активировать подсчет людей       |
+| Интервал обновления (с) | Как часто сообщать подсчитывания |
 
-> 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
+> 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
 
-### TAK Module
+### Модуль TAK
 
-Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
+Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. См. [TAK Integration](tak) для детальной настройки и использования.
 
 ## Администрирование
 
@@ -213,11 +213,11 @@ Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [T
 3. Измени конфигурацию.
 4. Нажми **Сохранить** — изменения отправляются через сеть.
 
-> ⚠️ **Requires:** Admin key configured on both your node and the target node.
+> ⚠️ **Требуется:** Ключ администратора настроенный как на вашем узле, так и на целевом узле.
 
 ### Очистить базу данных нод
 
-Removes stale nodes from your local database that haven't been heard in a configurable time window.
+Удаляет устаревшие узлы из локальной базы данных, которые не были услышаны в настраиваемом окне времени.
 
 ### Сброс к заводским настройкам
 
@@ -225,23 +225,23 @@ Removes stale nodes from your local database that haven't been heard in a config
 
 ### Перезагрузка
 
-Remotely reboot a connected or administered node.
+Удаленно перезагрузить подключенный или управляемый узел.
 
 ### Панель отладки
 
-Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
+Открывает вкладки **Пакет** и **Журналы приложений** для просмотра, фильтрации и экспорта диагностических выходов. См. [Отладочные журналы](debug-logs) для полного прохождения.
 
-### Troubleshooting Remote Admin
+### Устранение неполадок удалённого администрирования
 
-- **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
+- **"Нет ответа от целевого узла"** — цель может находиться вне диапазона, в автономном режиме или иметь несоответствующий ключ администратора. Проверьте соответствие ключа администратора на обоих узлах.
 - **Изменения не применены** — чтобы некоторые настройки вступили в силу, нужно перезагрузить устройство. Попробуй перезагрузить после сохранения.
 - **Не видны настройки удалённой ноды** — убедись, что твоя нода имеет админ-ключ для целевой ноды. Админ-канал настраивается автоматически, когда задан ключ администратора.
 
 ## Связанные темы
 
-- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
-- [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
-- [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
+- [Настройки — Радио и Пользователь](settings-radio-user) — основные настройки радио и профиля пользователя
+- [Ссылка на конфигурацию модуля](https://meshtastic.org/docs/configuration/module) — подробная документация по модулям на meshtastic.org
+- [FAQ](https://meshtastic.org/docs/faq/) — общие вопросы на meshtastic.org
 
 ---
 

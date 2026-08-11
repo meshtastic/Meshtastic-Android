@@ -23,7 +23,7 @@ Sõlmede loend näitab kõiki sõlmi, mida raadio on kuulnud, sealhulgas:
 - **Lühinimi** — 4-tähemärgiline identifikaator
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
-- **Vahemaa** — hinnanguline vahemaa (kui positsioone jagatakse)
+- **Vahemaa** — hinnanguline vahemaa (kui asukohta jagatakse)
 - **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
 ### Node Status Indicators
@@ -60,7 +60,7 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
+- **Ruuter** — Teil on sõlm fikseeritud, kõrgemal asuvas asukohas, millel on usaldusväärne toide (katusel, mäetipul). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
 - **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
 - **Baas klient** – käsitleb lemmiksõlmedesse suunduvat ja sealt tulevaid liiklusi ruuteri hilinemise prioriteediga (tagades, et need sõnumid saavad täiendava edastuskatte), samal ajal kui kõike muud käsitletakse tavalise kliendina.
 - **Kliendi vaigistatud** — Soovid vastu võtta võrguliiklust, aga mitte edastamisse panustada. Useful for monitoring-only devices or to reduce congestion in dense areas.
@@ -152,7 +152,7 @@ Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
 Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.
 
-A full, browsable directory of every link is also available under **Settings → Help & Documentation → Device Links**.
+Täielik ja sirvitav kataloog kõikidest linkidest on saadaval ka menüüs **Seaded → Abi ja dokumentatsioon → Seadme lingid**.
 
 ## Related Topics
 

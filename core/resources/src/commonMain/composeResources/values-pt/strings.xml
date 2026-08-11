@@ -258,6 +258,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
     <string name="led_state">Estado do LED</string>
     <string name="legacy_admin_channel">Canal de administração antigo</string>
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a encriptação e não é compatível com a rede Meshtastic normal.</string>

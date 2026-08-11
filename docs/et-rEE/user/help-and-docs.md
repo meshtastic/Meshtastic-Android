@@ -13,7 +13,7 @@ aliases:
 
 # Help & In-App Docs
 
-Sama kasutajadokumentatsioon on **rakenduse sees**, nii et saate seda lugeda võrguühenduseta ilma Meshtasticust lahkumata. Open it from **Settings → Help & Documentation**.
+Sama kasutajadokumentatsioon on **rakenduse sees**, nii et saate seda lugeda võrguühenduseta ilma Meshtasticust lahkumata. Ava see menüüst **Seaded → Abi ja dokumentatsioon**.
 
 ## Browsing
 
