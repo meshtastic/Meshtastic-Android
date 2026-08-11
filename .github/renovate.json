@@ -95,6 +95,13 @@
       "automerge": false
     },
     {
+      "description": "Block Gradle 9.7.0: its ExecOperations.exec spec defaults standardOutput to null, crashing the Compose Multiplatform proguardReleaseJars task (ExternalToolRunner reads the stream back). Lift once a fixed Gradle patch or a CMP release that stops reading spec.standardOutput is out.",
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
+      "allowedVersions": "!/^9\\.7\\.0$/"
+    },
+    {
       "description": "Disable automerge for major updates (safety net)",
       "matchUpdateTypes": [
         "major"
