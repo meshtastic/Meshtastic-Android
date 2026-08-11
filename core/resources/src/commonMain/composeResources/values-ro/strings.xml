@@ -545,6 +545,7 @@
     <string name="latest_alpha_firmware">Ultimul alfa</string>
     <string name="latest_stable_firmware">Ultimul stabil</string>
     <string name="latitude">Latitudine</string>
+    <!-- LAYER -->
     <string name="led_heartbeat">Puls LED</string>
     <string name="led_state">Stare LED</string>
     <string name="legacy_admin_channel">Canal implicit de administrator</string>

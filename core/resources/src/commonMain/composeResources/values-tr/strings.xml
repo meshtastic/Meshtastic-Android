@@ -278,6 +278,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Enlem</string>
+    <!-- LAYER -->
     <string name="led_state">LED durumu</string>
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>

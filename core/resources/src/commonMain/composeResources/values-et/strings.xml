@@ -870,6 +870,8 @@
     <string name="latest_alpha_firmware">Viimane alfa</string>
     <string name="latest_stable_firmware">Viimane stabiilne</string>
     <string name="latitude">Laiuskraad</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="learn_more">Lisateave</string>
     <string name="led_heartbeat">Südamelöögi LED</string>
     <string name="led_state">LED olek</string>
@@ -1590,7 +1592,9 @@
     <string name="site_planner_section_transmitter">Asupaik / saatja</string>
     <string name="site_planner_subtitle">Saatja raadiosagedusliku leviala hindamine</string>
     <string name="site_planner_tx_power_watts">TX võimsus (W)</string>
+    <string name="site_planner_use_current_location">Kasuta praegust asukohta</string>
     <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
+    <string name="site_planner_use_node_location">Kasuta praegust sõlme asukohta</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>

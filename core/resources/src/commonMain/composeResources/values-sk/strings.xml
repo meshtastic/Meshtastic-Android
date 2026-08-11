@@ -216,6 +216,7 @@
     <string name="label_short_slow">Krátky Dosah - Pomali</string>
     <string name="label_short_turbo">Krátky Dosah - Turbo</string>
     <string name="label_very_long_slow">Veľmi Ďaleký Dosah - Pomali</string>
+    <!-- LAYER -->
     <string name="led_state">Stav LED</string>
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>

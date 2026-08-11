@@ -115,6 +115,7 @@
     <string name="ip_address">IP adresas:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>

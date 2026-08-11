@@ -573,6 +573,7 @@
     <string name="latest_alpha_firmware">Най-новия алфа</string>
     <string name="latest_stable_firmware">Най-новия стабилен</string>
     <string name="latitude">Географска ширина</string>
+    <!-- LAYER -->
     <string name="learn_more">Научете повече</string>
     <string name="led_state">LED за състояние</string>
     <string name="library_count">%1$d библиотеки</string>
