@@ -24,6 +24,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.app.map.model.NodeClusterItem
@@ -36,7 +44,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class MapNodeClusterItemsTest {
@@ -98,6 +106,26 @@ class MapNodeClusterItemsTest {
         runOnIdle { relativeTimeBucket += 1 }
         waitForIdle()
         assertNotSame(changedNodeItems, latestItems)
+    }
+
+    @Test
+    fun `relative time bucket advances at the next minute boundary`() = runTest {
+        val startSeconds = FIXED_TIME_BUCKET * 60 + 30
+        val observedBuckets = mutableListOf<Long>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            relativeTimeBuckets { startSeconds + testScheduler.currentTime / 1_000 }.take(2).toList(observedBuckets)
+        }
+
+        runCurrent()
+        assertEquals(listOf(FIXED_TIME_BUCKET), observedBuckets)
+
+        advanceTimeBy(29_999)
+        runCurrent()
+        assertEquals(listOf(FIXED_TIME_BUCKET), observedBuckets)
+
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(listOf(FIXED_TIME_BUCKET, FIXED_TIME_BUCKET + 1), observedBuckets)
     }
 
     private fun testNodes(count: Int): List<Node> = List(count) { index ->

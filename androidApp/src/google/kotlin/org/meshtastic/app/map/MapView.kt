@@ -108,6 +108,9 @@ import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -407,11 +410,12 @@ fun MapView(
     }
 
     val myNodeNum = mapViewModel.myNodeNum
+    val relativeTimeBucket = rememberRelativeTimeBucket()
     val nodeClusterItems =
         rememberNodeClusterItems(
             nodes = if (mode is GoogleMapMode.Main) filteredNodes else emptyList(),
             myNodeNum = myNodeNum,
-            relativeTimeBucket = nowSeconds / SECONDS_PER_MINUTE,
+            relativeTimeBucket = relativeTimeBucket,
         )
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
@@ -1032,6 +1036,22 @@ fun MapView(
 }
 
 private const val SECONDS_PER_MINUTE = 60L
+private const val MILLIS_PER_SECOND = 1_000L
+
+@Composable
+private fun rememberRelativeTimeBucket(): Long {
+    val buckets = remember { relativeTimeBuckets() }
+    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / SECONDS_PER_MINUTE).value
+}
+
+internal fun relativeTimeBuckets(now: () -> Long = { nowSeconds }): Flow<Long> = flow {
+    while (true) {
+        val currentSeconds = now()
+        emit(currentSeconds / SECONDS_PER_MINUTE)
+        val secondsUntilNextMinute = SECONDS_PER_MINUTE - currentSeconds.mod(SECONDS_PER_MINUTE)
+        delay(secondsUntilNextMinute * MILLIS_PER_SECOND)
+    }
+}
 
 /**
  * Materializes the native clustering model used by the Google map.
