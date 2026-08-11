@@ -211,9 +211,33 @@ class PacketHandlerImplTest {
         handler.handleQueueStatus(QueueStatus(mesh_packet_id = 794, res = 0, free = 16))
         testScheduler.runCurrent()
 
+        assertFalse(result.isCompleted)
+
         handler.removeResponse(794, complete = true)
 
         assertTrue(result.await())
+    }
+
+    @Test
+    fun `zero id queue status completes only its correlated routing response`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+
+        val awaitingRoutingAck = async { handler.sendToRadioAndAwait(MeshPacket(id = 798)) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 798, res = 0, free = 16))
+        testScheduler.runCurrent()
+        assertFalse(awaitingRoutingAck.isCompleted)
+
+        val synchronousLoopback = async { handler.sendToRadioAndAwait(MeshPacket(id = 799)) }
+        testScheduler.runCurrent()
+        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 0, res = 35, free = 16))
+        testScheduler.runCurrent()
+
+        assertTrue(synchronousLoopback.await())
+        assertFalse(awaitingRoutingAck.isCompleted)
+
+        handler.removeResponse(798, complete = true)
+        assertTrue(awaitingRoutingAck.await())
     }
 
     @Test

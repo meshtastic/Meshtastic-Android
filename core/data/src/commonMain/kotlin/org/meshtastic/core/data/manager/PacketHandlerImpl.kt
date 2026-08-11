@@ -190,10 +190,14 @@ class PacketHandlerImpl(
                         routingResponse.remove(requestId)?.complete(success)
                     }
                 } else {
-                    queueResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
-                    if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
-                        routingResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
-                    }
+                    queueResponse.entries
+                        .firstOrNull { !it.value.isCompleted }
+                        ?.let { (packetId, response) ->
+                            response.complete(success)
+                            if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
+                                routingResponse.remove(packetId)?.complete(success)
+                            }
+                        }
                 }
             }
         }

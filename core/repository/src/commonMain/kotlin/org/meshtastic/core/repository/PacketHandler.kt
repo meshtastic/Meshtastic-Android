@@ -35,7 +35,8 @@ interface PacketHandler {
      * prove that a self-addressed admin command has been processed. This stricter acknowledgement is required when a
      * later packet depends on that command, such as installing a shared contact before sending the first DM.
      *
-     * @return `true` on a routing ACK, `false` on a routing NAK, queue rejection, or timeout.
+     * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
+     *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
      */
     suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean
 

@@ -61,7 +61,8 @@ interface CommandSender {
      * This is used when the caller needs a processing barrier before proceeding, such as sending a shared contact
      * before the first DM to a node.
      *
-     * @return `true` on a routing ACK, `false` on a routing NAK, queue rejection, or timeout.
+     * @return `true` on a routing ACK or synchronous local-loopback delivery (`ERRNO_SHOULD_RELEASE`); `false` when
+     *   disconnected, transport sending fails, a routing NAK or queue rejection arrives, or the operation times out.
      */
     suspend fun sendAdminAwait(
         destNum: Int,
