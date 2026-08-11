@@ -185,6 +185,7 @@
     <string name="error_duty_cycle">Limite do ciclo de trabalho atingido. Não é possível enviar mensagens no momento. Tente novamente mais tarde.</string>
     <string name="ethernet_enabled">Ethernet ativada</string>
     <string name="exchange_position">Intercâmbio de posições</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuração</string>
     <string name="external_notification">Notificação externa</string>
     <string name="external_notification_config">Configuração de Notificação Externa</string>

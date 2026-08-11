@@ -447,6 +447,7 @@
     <string name="exchange_position">交換位置</string>
     <string name="expand_chart">展開圖表</string>
     <string name="expires">到期時間</string>
+    <!-- EXPORT -->
     <string name="export_configuration">匯出設定</string>
     <string name="export_data_csv">匯出所有封包</string>
     <string name="export_tak_data_package">匯出 TAK 資料封包</string>

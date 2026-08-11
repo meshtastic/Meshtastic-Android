@@ -596,6 +596,7 @@
     <string name="expand_chart">Laienda diagrammi</string>
     <string name="expanded">Laiendatud</string>
     <string name="expires">Aegub</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Salvesta sätted</string>
     <string name="export_data_csv">Ekspordi kõik paketid</string>
     <string name="export_gpx">Salvesta GPX</string>

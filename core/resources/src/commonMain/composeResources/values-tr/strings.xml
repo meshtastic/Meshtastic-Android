@@ -200,6 +200,7 @@
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
     <string name="ethernet_enabled">Ethernet etkin</string>
     <string name="exchange_position">Konum takas et</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Ayarları dışa aktar</string>
     <string name="external_notification">Dış Bildirim</string>
     <string name="external_notification_config">Harici Bildirim Ayarı</string>

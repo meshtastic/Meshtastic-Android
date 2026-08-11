@@ -99,6 +99,7 @@
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
     <!-- ENVIRONMENT -->
     <string name="error">Σφάλμα</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
     <string name="favorite">Αγαπημένο</string>
     <!-- FILTER -->

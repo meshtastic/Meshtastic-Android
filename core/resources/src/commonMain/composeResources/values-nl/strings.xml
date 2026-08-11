@@ -149,6 +149,7 @@
     <string name="error_duty_cycle">Limiet van Duty Cycle bereikt. Kan nu geen berichten verzenden, probeer het later opnieuw.</string>
     <string name="ethernet_enabled">Ethernet ingeschakeld</string>
     <string name="exchange_position">Positie uitwisselen</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Configuratie exporteren</string>
     <string name="external_notification">Externe Melding</string>
     <string name="factory_reset">Reset naar fabrieksinstellingen</string>

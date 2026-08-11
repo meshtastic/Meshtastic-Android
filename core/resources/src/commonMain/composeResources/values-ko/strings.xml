@@ -185,6 +185,7 @@
     <string name="ethernet_enabled">이더넷 활성화</string>
     <string name="exchange_position">위치 교환</string>
     <string name="expires">만료</string>
+    <!-- EXPORT -->
     <string name="export_configuration">설정 내보내기</string>
     <string name="external_notification">외부 알림</string>
     <string name="external_notification_config">외부 알림 설정</string>

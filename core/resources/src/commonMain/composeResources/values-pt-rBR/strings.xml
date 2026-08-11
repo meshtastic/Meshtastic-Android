@@ -264,6 +264,7 @@
     <string name="ethernet_enabled">Ethernet ativado</string>
     <string name="exchange_position">Trocar posições</string>
     <string name="expires">Expira em</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configurações</string>
     <string name="external_notification">Notificação Externa</string>
     <string name="external_notification_config">Configuração de Notificações Externas</string>

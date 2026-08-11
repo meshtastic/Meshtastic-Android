@@ -591,6 +591,7 @@
     <string name="expand_chart">チャートを展開</string>
     <string name="expanded">展開済み</string>
     <string name="expires">有効期限</string>
+    <!-- EXPORT -->
     <string name="export_configuration">設定をエクスポート</string>
     <string name="export_data_csv">すべてのパケットをエクスポート</string>
     <string name="export_gpx">GPX をエクスポート</string>

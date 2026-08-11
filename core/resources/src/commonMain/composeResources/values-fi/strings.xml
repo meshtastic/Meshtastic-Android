@@ -596,6 +596,7 @@
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expanded">Avattu</string>
     <string name="expires">Päättyy</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Asetusten vienti</string>
     <string name="export_data_csv">Vie kaikki paketit</string>
     <string name="export_gpx">Vie GPX</string>

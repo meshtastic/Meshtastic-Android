@@ -156,6 +156,7 @@
     <string name="ethernet_enabled">Ethernet zapnutý</string>
     <string name="ethernet_ip">Eternet IP:</string>
     <string name="exchange_position">Vymeniť si pozície</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportovať konfiguráciu</string>
     <string name="external_notification">Externá notifikácia</string>
     <string name="factory_reset">Obnova do výrobných nastavení</string>

@@ -69,6 +69,7 @@
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Grunnstilla</string>
     <!-- FILTER -->
     <!-- FIRMWARE -->
