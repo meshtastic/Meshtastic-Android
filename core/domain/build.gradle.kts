@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.koin)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
@@ -37,6 +38,7 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.json.okio)
         }
         commonTest.dependencies { implementation(projects.core.testing) }
     }

@@ -572,9 +572,11 @@ exchange_position
 expand_chart
 expanded
 expires
+### EXPORT ###
 export_configuration
 export_data_csv
 export_gpx
+export_node_db
 export_tak_data_package
 external_notification
 external_notification_config
