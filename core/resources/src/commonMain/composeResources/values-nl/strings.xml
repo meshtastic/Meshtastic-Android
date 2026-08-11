@@ -384,22 +384,10 @@
     <string name="role_tak_tracker_desc">Activeer automatisch zenden TAK PLI en beperk routine zendingen.</string>
     <string name="role_tracker_desc">Zendt GPS-positiepakketten met prioriteit uit.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Ongeldige sessiesleutel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Publieke sleutel onbevoegd</string>
-    <string name="routing_error_bad_request">Ongeldige aanvraag</string>
-    <string name="routing_error_duty_cycle_limit">Regionale limiet inschakeltijd bereikt</string>
     <string name="routing_error_got_nak">Negatieve bevestiging ontvangen</string>
-    <string name="routing_error_max_retransmit">Maximum Pogingen Bereikt</string>
-    <string name="routing_error_no_channel">Geen Kanaal</string>
-    <string name="routing_error_no_interface">Geen Interface</string>
-    <string name="routing_error_no_response">Geen antwoord</string>
     <string name="routing_error_no_route">Geen route</string>
     <string name="routing_error_none">Bevestigd</string>
-    <string name="routing_error_not_authorized">Niet Bevoegd</string>
-    <string name="routing_error_pki_failed">Versleuteld verzenden mislukt</string>
-    <string name="routing_error_pki_unknown_pubkey">Onbekende publieke sleutel</string>
     <string name="routing_error_timeout">Time-Out</string>
-    <string name="routing_error_too_large">Pakket te groot</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="rsyslog_server">rsyslog server</string>

@@ -238,22 +238,10 @@
     <string name="role_tak_tracker_desc">Aktivizon transmetimet automatikisht TAK PLI dhe zvogëlon transmetimet rutinë.</string>
     <string name="role_tracker_desc">Transmeton paketa pozicioni GPS si prioritet.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Çelës sesioni i gabuar</string>
-    <string name="routing_error_admin_public_key_unauthorized">Çelësi publik i paautorizuar</string>
-    <string name="routing_error_bad_request">Kërkesë e gabuar</string>
-    <string name="routing_error_duty_cycle_limit">Arritur kufiri i ciklit të detyrës rajonale</string>
     <string name="routing_error_got_nak">Marrë një njohje negative</string>
-    <string name="routing_error_max_retransmit">Arritur kufiri i ri-dërgimeve</string>
-    <string name="routing_error_no_channel">Nuk ka kanal</string>
-    <string name="routing_error_no_interface">Nuk ka ndërfaqe</string>
-    <string name="routing_error_no_response">Nuk ka përgjigje</string>
     <string name="routing_error_no_route">Nuk ka rrugë</string>
     <string name="routing_error_none">Pranuar</string>
-    <string name="routing_error_not_authorized">Nuk jeni të autorizuar</string>
-    <string name="routing_error_pki_failed">Dërgesa e enkriptuar ka dështuar</string>
-    <string name="routing_error_pki_unknown_pubkey">Çelësi publik i panjohur</string>
     <string name="routing_error_timeout">Koha e skaduar</string>
-    <string name="routing_error_too_large">Paketa shumë e madhe</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
     <!-- SAVE -->
     <string name="save">Ruaj</string>

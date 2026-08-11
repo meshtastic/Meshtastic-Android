@@ -1119,24 +1119,10 @@
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>
     <string name="router_role_confirmation_text">我已閱讀&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">無效的會話金鑰</string>
-    <string name="routing_error_admin_public_key_unauthorized">無法識別公鑰</string>
-    <string name="routing_error_bad_request">錯誤請求</string>
-    <string name="routing_error_duty_cycle_limit">已達區域工作週期之上限</string>
     <string name="routing_error_got_nak">接收到拒絕確認</string>
-    <string name="routing_error_max_retransmit">已達最大重新發送次數</string>
-    <string name="routing_error_no_channel">無頻道</string>
-    <string name="routing_error_no_interface">無介面</string>
-    <string name="routing_error_no_response">無回應</string>
     <string name="routing_error_no_route">無路徑</string>
     <string name="routing_error_none">已確認</string>
-    <string name="routing_error_not_authorized">未授權</string>
-    <string name="routing_error_pki_failed">加密發送錯誤</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI 傳送失敗，無公開金鑰</string>
-    <string name="routing_error_pki_unknown_pubkey">未知公鑰</string>
-    <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="routing_error_timeout">逾時</string>
-    <string name="routing_error_too_large">封包過大</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="rsyslog_server">rsyslog伺服器</string>

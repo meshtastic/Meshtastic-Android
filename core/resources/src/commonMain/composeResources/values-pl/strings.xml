@@ -680,23 +680,10 @@
     <string name="role_tracker_desc">Tracker - Do użytku z urządzeniami przeznaczonymi jako śledzenie GPS. Pakiety pozycyjne wysyłane z tego urządzenia będą miały wyższy priorytet, z nadawaniem pozycji co dwie minuty. Inteligentna transmisja pozycji będzie domyślnie wyłączona.</string>
     <string name="root_topic">Główny temat</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Nieprawidłowy klucz sesji</string>
-    <string name="routing_error_admin_public_key_unauthorized">Nieautoryzowany klucz publiczny</string>
-    <string name="routing_error_bad_request">Błędne żądanie</string>
-    <string name="routing_error_duty_cycle_limit">Osiągnięto okresowy limit nadawania dla tego regionu</string>
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
-    <string name="routing_error_max_retransmit">Przekroczono czas lub liczbę retransmisji</string>
-    <string name="routing_error_no_channel">Brak kanału</string>
-    <string name="routing_error_no_interface">Brak interfejsu</string>
-    <string name="routing_error_no_response">Brak odpowiedzi</string>
     <string name="routing_error_no_route">Brak trasy</string>
     <string name="routing_error_none">Potwierdzone</string>
-    <string name="routing_error_not_authorized">Brak autoryzacji</string>
-    <string name="routing_error_pki_failed">Zaszyfrowane wysyłanie nie powiodło się</string>
-    <string name="routing_error_pki_send_fail_public_key">Nie wysłano PKI, brak klucza publicznego</string>
-    <string name="routing_error_pki_unknown_pubkey">Nieznany klucz publiczny</string>
     <string name="routing_error_timeout">Upłynął limit czasu</string>
-    <string name="routing_error_too_large">Pakiet jest zbyt duży</string>
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="rsyslog_server">Serwer rsyslog</string>

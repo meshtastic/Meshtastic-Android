@@ -1085,24 +1085,10 @@
     <string name="role_tracker_desc">Nod som prioriterar GPS meddelanden.</string>
     <string name="root_topic">Rotämne (root topic)</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Felaktig sessionsnyckel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Obehörig publik nyckel</string>
-    <string name="routing_error_bad_request">Misslyckad</string>
-    <string name="routing_error_duty_cycle_limit">Gränsen för intermittensfaktor uppnådd</string>
     <string name="routing_error_got_nak">Misslyckad kvittens</string>
-    <string name="routing_error_max_retransmit">Maximalt antal sändningar nådd</string>
-    <string name="routing_error_no_channel">Ingen kanal</string>
-    <string name="routing_error_no_interface">Inget gränssnitt</string>
-    <string name="routing_error_no_response">Inget svar</string>
     <string name="routing_error_no_route">Ingen rutt</string>
     <string name="routing_error_none">Kvitterad</string>
-    <string name="routing_error_not_authorized">Ej behörig</string>
-    <string name="routing_error_pki_failed">Krypterad sändning misslyckades</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI-sändningen misslyckades, ingen offentlig nyckel</string>
-    <string name="routing_error_pki_unknown_pubkey">Okänd publik nyckel</string>
-    <string name="routing_error_rate_limit_exceeded">Sändningsgräns uppnådd. Försök igen senare.</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Paket för stort</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
     <string name="rsyslog_server">rsyslog-server</string>

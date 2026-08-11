@@ -1101,23 +1101,13 @@
     <string name="root_topic">Kořenové téma</string>
     <string name="rotary_encoder_1_enabled">Rotační enkodér #1 povolen</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Špatný klíč relace</string>
-    <string name="routing_error_admin_public_key_unauthorized">Veřejný klíč není autorizován</string>
-    <string name="routing_error_bad_request">Špatný požadavek</string>
-    <string name="routing_error_duty_cycle_limit">Dosažen regionální časový limit</string>
     <string name="routing_error_got_nak">Obdrženo negativní potvrzení</string>
-    <string name="routing_error_max_retransmit">Dosaženo max. počet přeposlání</string>
-    <string name="routing_error_no_channel">Žádný kanál</string>
-    <string name="routing_error_no_interface">Žádné rozhraní</string>
-    <string name="routing_error_no_response">Žádná odpověď</string>
+    <string name="routing_error_max_retransmit">Nepodařilo se doručit do mesh sítě</string>
     <string name="routing_error_no_route">Žádná trasa</string>
     <string name="routing_error_none">Potvrzený příjem</string>
-    <string name="routing_error_not_authorized">Neautorizovaný</string>
-    <string name="routing_error_pki_failed">Chyba při poslání šifrované zprávy</string>
-    <string name="routing_error_pki_send_fail_public_key">Odeslání PKI selhalo, chybí veřejný klíč.</string>
-    <string name="routing_error_pki_unknown_pubkey">Neznámý veřejný klíč</string>
+    <string name="routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
     <string name="routing_error_timeout">Vypršel čas spojení</string>
-    <string name="routing_error_too_large">Příliš velký paket</string>
+    <string name="routing_error_too_large">Zpráva je příliš dlouhá pro odeslání</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="rsyslog_server">rsyslog server</string>

@@ -1059,7 +1059,6 @@
     <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
     <string name="message_input_label">Viesti</string>
     <string name="message_routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
-    <string name="message_routing_error_no_channel">Kanavaa ei ole valittu</string>
     <string name="message_routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
     <string name="message_routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
     <string name="message_routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
@@ -1458,24 +1457,15 @@
     <string name="rotary_encoder_1_enabled">Kiertovalitsin #1 käytössä</string>
     <string name="router_role_confirmation_text">Olen lukenut &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
-    <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>
-    <string name="routing_error_bad_request">Virheellinen pyyntö</string>
-    <string name="routing_error_duty_cycle_limit">Alueellisen toimintasyklin raja saavutettu</string>
     <string name="routing_error_got_nak">Vastaanotettu kielteinen vahvistus</string>
-    <string name="routing_error_max_retransmit">Maksimimäärä uudelleenlähetyksiä saavutettu</string>
-    <string name="routing_error_no_channel">Ei Kanavaa</string>
-    <string name="routing_error_no_interface">Ei Käyttöliittymää</string>
-    <string name="routing_error_no_response">Ei vastausta</string>
+    <string name="routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
     <string name="routing_error_no_route">Ei reittiä</string>
     <string name="routing_error_none">Vahvistettu</string>
-    <string name="routing_error_not_authorized">Ei oikeuksia</string>
-    <string name="routing_error_pki_failed">Salatun viestin lähetys epäonnistui</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI-lähetys epäonnistui, julkinen avain puuttu</string>
-    <string name="routing_error_pki_unknown_pubkey">Tuntematon julkinen avain</string>
-    <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
+    <string name="routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
+    <string name="routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
+    <string name="routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
     <string name="routing_error_timeout">Aikakatkaisu</string>
-    <string name="routing_error_too_large">Paketti on liian suuri</string>
+    <string name="routing_error_too_large">Viesti on liian suuri lähetettäväksi</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="rsyslog_server">rsyslog-palvelin</string>

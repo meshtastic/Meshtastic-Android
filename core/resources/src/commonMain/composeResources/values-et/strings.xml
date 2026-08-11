@@ -1055,7 +1055,6 @@
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
     <string name="message_device_managed">Seda raadio on hallatud ja muudab ainult kaughaldur.</string>
     <string name="message_input_label">Sõnum</string>
-    <string name="message_routing_error_no_channel">Kanalit pole valitud</string>
     <string name="message_routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
     <string name="message_routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
     <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
@@ -1452,24 +1451,12 @@
     <string name="rotary_encoder_1_enabled">Pöördvalik #1 lubatud</string>
     <string name="router_role_confirmation_text">Olen lugenud &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Seadme rolli dokumenti&lt;/a&gt; ja blogi postitust &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; Kuidas valida seadmele õige roll&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Vigane sessiooni võti</string>
-    <string name="routing_error_admin_public_key_unauthorized">Avalik võti autoriseerimata</string>
-    <string name="routing_error_bad_request">Vigane päring</string>
-    <string name="routing_error_duty_cycle_limit">Piirkondlik töötsükli piirang saavutatud</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
-    <string name="routing_error_max_retransmit">Maksimaalne kordusedastus on saavutatud</string>
-    <string name="routing_error_no_channel">Kanalit pole</string>
-    <string name="routing_error_no_interface">Liidest pole</string>
-    <string name="routing_error_no_response">Vastust pole</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
     <string name="routing_error_none">Kinnitatud</string>
-    <string name="routing_error_not_authorized">Autoriseerimata</string>
-    <string name="routing_error_pki_failed">Krüpteeritud saatmine nurjus</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI saatmine ebaõnnestus, avalikku võtit pole</string>
-    <string name="routing_error_pki_unknown_pubkey">Tundmatu avalik võti</string>
-    <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
+    <string name="routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
+    <string name="routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
     <string name="routing_error_timeout">Aegunud</string>
-    <string name="routing_error_too_large">Liiga suur pakett</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="rsyslog_server">rsyslog server</string>

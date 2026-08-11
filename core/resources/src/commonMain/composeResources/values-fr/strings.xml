@@ -1126,24 +1126,10 @@
     <string name="rotary_encoder_1_enabled">Encodeur rotatif #1 activé</string>
     <string name="router_role_confirmation_text">J'ai lu la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Mauvaise clé de session</string>
-    <string name="routing_error_admin_public_key_unauthorized">Clé publique non autorisée</string>
-    <string name="routing_error_bad_request">Mauvaise requête</string>
-    <string name="routing_error_duty_cycle_limit">Limite du temps d'émission autorisé par heure (duty cycle) atteinte</string>
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
-    <string name="routing_error_max_retransmit">Nombre de retransmissions atteint</string>
-    <string name="routing_error_no_channel">Pas de canal ou d'autorisation</string>
-    <string name="routing_error_no_interface">Pas d'interface</string>
-    <string name="routing_error_no_response">Aucune réponse</string>
     <string name="routing_error_no_route">Pas de routage</string>
     <string name="routing_error_none">Entendu par un autre nœud (mais dans le cas d'un message direct, nous n'avons pas reçu la confirmation de réception par le destinataire : soit il n'a pas reçu le message, soit sa confirmation ne nous est pas parvenue)</string>
-    <string name="routing_error_not_authorized">Non Autorisé</string>
-    <string name="routing_error_pki_failed">Échec de l'envoi chiffré</string>
-    <string name="routing_error_pki_send_fail_public_key">Échec de l'envoi de clé privée, pas de clé publique</string>
-    <string name="routing_error_pki_unknown_pubkey">Clé publique inconnue</string>
-    <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="routing_error_timeout">Délai dépassé</string>
-    <string name="routing_error_too_large">Paquet trop grand</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicateur de force du signal reçu, une mesure utilisée pour déterminer le niveau de puissance reçu par l'antenne. Une valeur RSSI plus élevée indique généralement une connexion plus forte et plus stable.</string>
     <string name="rsyslog_server">Serveur Rsyslog</string>

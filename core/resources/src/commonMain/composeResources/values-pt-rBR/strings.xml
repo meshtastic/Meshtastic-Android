@@ -616,23 +616,10 @@
     <string name="root_topic">Tópico principal</string>
     <string name="rotary_encoder_1_enabled">Codificador rotativo #1 ativado</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chave de sessão incorreta</string>
-    <string name="routing_error_admin_public_key_unauthorized">Chave Publica não autorizada</string>
-    <string name="routing_error_bad_request">Requisição Inválida</string>
-    <string name="routing_error_duty_cycle_limit">Limite Regional de Ciclo de Trabalho Alcançado</string>
     <string name="routing_error_got_nak">Recebi uma negativa de reconhecimento</string>
-    <string name="routing_error_max_retransmit">Limite de Retransmissões Atingido</string>
-    <string name="routing_error_no_channel">Nenhum canal</string>
-    <string name="routing_error_no_interface">Sem interface</string>
-    <string name="routing_error_no_response">Nenhuma resposta</string>
     <string name="routing_error_no_route">Sem rota</string>
     <string name="routing_error_none">Reconhecido</string>
-    <string name="routing_error_not_authorized">Não Autorizado</string>
-    <string name="routing_error_pki_failed">Falha de Envio Criptografado</string>
-    <string name="routing_error_pki_unknown_pubkey">Chave Pública Desconhecida</string>
-    <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="routing_error_timeout">Tempo esgotado</string>
-    <string name="routing_error_too_large">Pacote grande demais</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de potência que está sendo recebida pela antena. Um valor maior de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>

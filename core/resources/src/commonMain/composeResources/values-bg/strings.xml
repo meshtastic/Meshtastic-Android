@@ -690,7 +690,6 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
-    <string name="message_routing_error_no_channel">Няма избран канал</string>
     <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
@@ -995,21 +994,13 @@
     <string name="role_tracker_desc">Излъчва приоритетно пакети за GPS позиция</string>
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Невалиден ключ за сесия</string>
-    <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
-    <string name="routing_error_bad_request">Невалидна заявка</string>
-    <string name="routing_error_duty_cycle_limit">Достигнат е регионален лимит на работния цикъл</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
-    <string name="routing_error_max_retransmit">Достигнат максимален брой препращания</string>
-    <string name="routing_error_no_channel">Няма канал</string>
-    <string name="routing_error_no_interface">Няма интерфейс</string>
-    <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_none">Признато</string>
-    <string name="routing_error_not_authorized">Не е оторизиран</string>
-    <string name="routing_error_pki_failed">Провалено шифрирано изпращане</string>
-    <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
-    <string name="routing_error_too_large">Пакетът е твърде голям</string>
+    <string name="routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
+    <string name="routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
+    <string name="routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
+    <string name="routing_error_too_large">Съобщението е твърде голямо за изпращане</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="rsyslog_server">rsyslog сървър</string>

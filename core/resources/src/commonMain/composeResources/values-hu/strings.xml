@@ -736,23 +736,10 @@
     <string name="root_topic">Gyökér téma</string>
     <string name="rotary_encoder_1_enabled">1. forgóenkóder engedélyezve</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Hibás munkamenet kulcs</string>
-    <string name="routing_error_admin_public_key_unauthorized">Nem Engedélyezett Publikus Kulcs</string>
-    <string name="routing_error_bad_request">Hibás kérés</string>
-    <string name="routing_error_duty_cycle_limit">Helyi Üzemciklus Határ Elérve</string>
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
-    <string name="routing_error_max_retransmit">Maximális Újraküldés Elérve</string>
-    <string name="routing_error_no_channel">Nincs Csatorna</string>
-    <string name="routing_error_no_interface">Nincs Interfész</string>
-    <string name="routing_error_no_response">Nincs Válasz</string>
     <string name="routing_error_no_route">Nincs út</string>
     <string name="routing_error_none">Visszaigazolva</string>
-    <string name="routing_error_not_authorized">Nem Engedélyezett</string>
-    <string name="routing_error_pki_failed">Titkosított Küldés Sikertelen</string>
-    <string name="routing_error_pki_unknown_pubkey">Nem Ismert Publikus Kulcs</string>
-    <string name="routing_error_rate_limit_exceeded">Túllépted a sebességkorlátot. Próbáld újra később.</string>
     <string name="routing_error_timeout">Időtúllépés</string>
-    <string name="routing_error_too_large">Túl nagy csomag</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="rsyslog_server">rsyslog szerver</string>
