@@ -62,6 +62,14 @@ configure<ApplicationExtension> {
     }
 
     signingConfigs {
+        // Shared debug key (checked in; debug keys are not secret) so local builds and CI snapshots
+        // stay update-compatible — AGP's default per-machine key makes every snapshot un-sideloadable.
+        getByName("debug") {
+            storeFile = isolated.rootProject.projectDirectory.file("config/debug.keystore").asFile
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?
