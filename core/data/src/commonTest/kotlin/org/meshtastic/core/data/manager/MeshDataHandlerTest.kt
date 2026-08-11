@@ -509,58 +509,40 @@ class MeshDataHandlerTest {
 
     // --- Routing/ACK-NAK handling ---
 
-    @Test
-    fun `routing packet with successful ack broadcasts and removes response`() = testScope.runTest {
-        val routing = Routing(error_reason = Routing.Error.NONE)
+    private fun routingPacket(error: Routing.Error): MeshPacket {
+        val routing = Routing(error_reason = error)
         val packet =
             MeshPacket(
                 from = 456,
                 decoded =
                 Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
             )
-        val dataPacket =
+        every { dataMapper.toDataPacket(packet) } returns
             DataPacket(
                 from = "!remote",
                 to = NodeAddress.ID_BROADCAST,
                 bytes = routing.encode().toByteString(),
                 dataType = PortNum.ROUTING_APP.value,
             )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
         every { nodeManager.toNodeID(456) } returns "!remote"
-
-        handler.handleReceivedData(packet, 123)
-        advanceUntilIdle()
-
-        verifySuspend { packetHandler.removeResponse(99, complete = true) }
+        return packet
     }
 
     @Test
-    fun `routing packet with nak fails pending response`() = testScope.runTest {
-        val routing = Routing(error_reason = Routing.Error.NO_ROUTE)
-        val packet =
-            MeshPacket(
-                from = 456,
-                decoded =
-                Data(
-                    portnum = PortNum.ROUTING_APP,
-                    payload = routing.encode().toByteString(),
-                    request_id = 100,
-                ),
-            )
-        val dataPacket =
-            DataPacket(
-                from = "!remote",
-                to = NodeAddress.ID_BROADCAST,
-                bytes = routing.encode().toByteString(),
-                dataType = PortNum.ROUTING_APP.value,
-            )
-        every { dataMapper.toDataPacket(packet) } returns dataPacket
-        every { nodeManager.toNodeID(456) } returns "!remote"
-
-        handler.handleReceivedData(packet, 123)
+    fun `routing ack completes dispatched response as accepted`() = testScope.runTest {
+        handler.handleReceivedData(routingPacket(Routing.Error.NONE), 123)
         advanceUntilIdle()
 
-        verifySuspend { packetHandler.removeResponse(100, complete = false) }
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = true) }
+    }
+
+    @Test
+    fun `routing nak completes dispatched response as rejected`() = testScope.runTest {
+        // NO_ROUTE keeps this ownership test independent of errors that also raise localized UI warnings.
+        handler.handleReceivedData(routingPacket(Routing.Error.NO_ROUTE), 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetHandler.completeDispatchedResponse(99, complete = false) }
     }
 
     @Test
@@ -589,7 +571,7 @@ class MeshDataHandlerTest {
         verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
-        verifySuspend(exactly(0)) { packetHandler.removeResponse(any(), any()) }
+        verifySuspend(exactly(0)) { packetHandler.completeDispatchedResponse(any(), any()) }
     }
 
     @Test

@@ -33,6 +33,12 @@ data class PersistedPacketId(val myNodeNum: Int, val uuid: Long)
 /** A persisted packet paired with the stable row identity needed by durable background work. */
 data class PersistedPacket(val id: PersistedPacketId, val packet: DataPacket)
 
+/** Stable identity of one persisted reaction row within its owning node database. */
+data class PersistedReactionId(val myNodeNum: Int, val replyId: Int, val userId: String, val emoji: String)
+
+/** A persisted reaction paired with the exact row identity needed by durable background work. */
+data class PersistedReaction(val id: PersistedReactionId, val reaction: Reaction)
+
 /**
  * Repository interface for managing mesh packets and message history.
  *
@@ -83,6 +89,9 @@ interface PacketRepository {
     /** Returns all sent packets still awaiting a routing ACK/NAK, including stable persisted-row identities. */
     suspend fun getEnroutePackets(): List<PersistedPacket>
 
+    /** Returns all sent reactions still awaiting a routing ACK/NAK, including stable persisted-row identities. */
+    suspend fun getEnrouteReactions(): List<PersistedReaction>
+
     /**
      * Atomically marks a still-[MessageStatus.ENROUTE] packet as failed with [routingError], leaving it untouched if an
      * ACK/NAK already resolved it.
@@ -90,6 +99,14 @@ interface PacketRepository {
      * @return true if the packet was timed out.
      */
     suspend fun timeOutEnroutePacket(id: PersistedPacketId, routingError: Int): Boolean
+
+    /**
+     * Atomically marks a still-[MessageStatus.ENROUTE] reaction as failed with [routingError], leaving it untouched if
+     * an ACK/NAK already resolved it.
+     *
+     * @return true if a reaction was timed out.
+     */
+    suspend fun timeOutEnrouteReaction(id: PersistedReactionId, routingError: Int): Boolean
 
     /**
      * Persists a packet in the database.
@@ -159,6 +176,24 @@ interface PacketRepository {
      * updating the wrong packet.
      */
     suspend fun updateOutgoingMessageStatus(packet: MeshPacket, status: MessageStatus): PersistedPacketId?
+
+    /**
+     * Resolves the single persisted row matching an outgoing mesh packet without changing its status. Returns null when
+     * the row is not present yet or the available packet identity is ambiguous.
+     */
+    suspend fun resolveOutgoingPacket(packet: MeshPacket): PersistedPacket?
+
+    /**
+     * Atomically resolves and conditionally applies a queue-stage packet status, returning the pre-update row. Returns
+     * null when the row is not persisted yet or when the mesh identity matches more than one row.
+     */
+    suspend fun applyOutgoingQueueStatus(packet: MeshPacket, status: MessageStatus): PersistedPacket?
+
+    /**
+     * Atomic reaction equivalent of [applyOutgoingQueueStatus]. Returns null when no non-received reaction row carries
+     * [packetId] or when [packetId] matches more than one such row.
+     */
+    suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): PersistedReaction?
 
     /** Updates the identifier of a persisted packet. */
     suspend fun updateMessageId(d: DataPacket, id: Int)
