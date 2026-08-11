@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.testing
 
+import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -77,6 +78,11 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private var sessionDrainWaiter: CompletableDeferred<Unit>? = null
     private val sessionOperationMutex = Mutex()
 
+    /** Number of lease-release invariant violations observed by this fake. Finally paths record rather than throw. */
+    private var sessionLeaseInvariantViolationsState: Int = 0
+    val sessionLeaseInvariantViolations: Int
+        get() = synchronized(sessionAdmissionLock) { sessionLeaseInvariantViolationsState }
+
     override fun isSessionActive(session: RadioSessionContext): Boolean =
         synchronized(sessionAdmissionLock) { sessionAdmissionOpen && _activeSession.value == session }
 
@@ -91,16 +97,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         session: RadioSessionContext,
         block: suspend (RadioSessionLease) -> Unit,
     ): Boolean {
-        val admittedSession =
-            synchronized(sessionAdmissionLock) {
-                val active = _activeSession.value
-                if (!sessionAdmissionOpen || active != session) {
-                    null
-                } else {
-                    admittedSessionOperations++
-                    active
-                }
-            } ?: return false
+        val admittedSession = admitSessionOperation(session) ?: return false
 
         val lease =
             object : RadioSessionLease {
@@ -114,20 +111,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
             block(lease)
             return true
         } finally {
-            val waiter =
-                synchronized(sessionAdmissionLock) {
-                    check(_activeSession.value == admittedSession) {
-                        "Fake session changed before an admitted operation released its lease"
-                    }
-                    check(admittedSessionOperations > 0) { "Session operation count underflow" }
-                    admittedSessionOperations--
-                    if (admittedSessionOperations == 0) {
-                        sessionDrainWaiter.also { sessionDrainWaiter = null }
-                    } else {
-                        null
-                    }
-                }
-            waiter?.complete(Unit)
+            releaseSessionOperation(admittedSession)
         }
     }
 
@@ -145,7 +129,15 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _connectionError = MutableSharedFlow<String>()
     override val connectionError: Flow<String> = _connectionError.asFlow()
 
-    val sentToRadio = mutableListOf<ByteArray>()
+    private val _sentToRadio = mutableListOf<ByteArray>()
+
+    /** Thread-safe lifetime history of writes accepted across all admitted fake transport sessions. */
+    val sentToRadio: List<ByteArray>
+        get() = synchronized(sessionAdmissionLock) { _sentToRadio.map { it.copyOf() } }
+
+    /** Set to true to simulate an admitted transport rejecting the byte handoff. */
+    var rejectAdmittedSends: Boolean = false
+
     var connectCalled = false
     var restartTransportCalled: Boolean = false
         private set
@@ -155,8 +147,19 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     /** No capture asset in tests; flip per-test when exercising replay-gated behaviour. */
     override var isReplayTransportAvailable: Boolean = false
 
-    override fun sendToRadio(bytes: ByteArray) {
-        sentToRadio.add(bytes)
+    /**
+     * Records [bytes] only while a transport session is admitted. Tests must select a non-null device address and call
+     * [connect] before sending; attempts outside that lifecycle return false and leave [sentToRadio] unchanged.
+     */
+    override fun trySendToRadio(bytes: ByteArray): Boolean {
+        val admittedSession = admitSessionOperation() ?: return false
+        return try {
+            val accepted = !rejectAdmittedSends
+            if (accepted) synchronized(sessionAdmissionLock) { _sentToRadio.add(bytes.copyOf()) }
+            accepted
+        } finally {
+            releaseSessionOperation(admittedSession)
+        }
     }
 
     override fun connect() {
@@ -182,6 +185,42 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
         _currentDeviceAddressFlow.value = deviceAddr
         return true
+    }
+
+    private fun admitSessionOperation(expectedSession: RadioSessionContext? = null): RadioSessionContext? =
+        synchronized(sessionAdmissionLock) {
+            val active = _activeSession.value
+            val matchesExpectedSession = expectedSession == null || active == expectedSession
+            if (!sessionAdmissionOpen || active == null || !matchesExpectedSession) {
+                null
+            } else {
+                admittedSessionOperations++
+                active
+            }
+        }
+
+    private fun releaseSessionOperation(admittedSession: RadioSessionContext) {
+        val waiter =
+            synchronized(sessionAdmissionLock) {
+                if (_activeSession.value != admittedSession) {
+                    sessionLeaseInvariantViolationsState++
+                    Logger.e { "Fake session changed before an admitted operation released its lease" }
+                    return@synchronized null
+                }
+                if (admittedSessionOperations <= 0) {
+                    sessionLeaseInvariantViolationsState++
+                    Logger.e { "Fake session operation count underflow" }
+                    sessionDrainWaiter.also { sessionDrainWaiter = null }
+                } else {
+                    admittedSessionOperations--
+                    if (admittedSessionOperations == 0) {
+                        sessionDrainWaiter.also { sessionDrainWaiter = null }
+                    } else {
+                        null
+                    }
+                }
+            }
+        waiter?.complete(Unit)
     }
 
     private fun admitSelectedSession() {

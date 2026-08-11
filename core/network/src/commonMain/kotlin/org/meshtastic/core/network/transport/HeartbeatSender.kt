@@ -17,6 +17,8 @@
 package org.meshtastic.core.network.transport
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.atomics.AtomicInt
@@ -29,29 +31,42 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  * expiring. Each call uses a monotonically increasing nonce to prevent the firmware's per-connection duplicate-write
  * filter from silently dropping it.
  *
- * @param sendToRadio callback to transmit the encoded heartbeat bytes to the radio
+ * @param sendToRadio callback that reports whether the transport accepted the encoded heartbeat bytes
  * @param afterHeartbeat optional suspend callback invoked after sending (e.g. to schedule a drain)
  * @param logTag tag for log messages
  */
 class HeartbeatSender(
-    private val sendToRadio: (ByteArray) -> Unit,
+    private val sendToRadio: (ByteArray) -> Boolean,
     private val afterHeartbeat: (suspend () -> Unit)? = null,
     private val logTag: String = "HeartbeatSender",
 ) {
     @OptIn(ExperimentalAtomicApi::class)
     private val nonce = AtomicInt(0)
+    private val nonceMutex = Mutex()
 
     /**
      * Sends a heartbeat to the radio.
      *
      * The firmware responds to heartbeats by queuing a `queueStatus` FromRadio packet, proving the link is alive and
      * keeping the local node's lastHeard timestamp current.
+     *
+     * @return `true` when the transport accepted the heartbeat handoff.
      */
     @OptIn(ExperimentalAtomicApi::class)
-    suspend fun sendHeartbeat() {
-        val n = nonce.fetchAndAdd(1)
-        Logger.v { "[$logTag] Sending ToRadio heartbeat (nonce=$n)" }
-        sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = n)).encode())
+    suspend fun sendHeartbeat(): Boolean {
+        val accepted =
+            nonceMutex.withLock {
+                val n = nonce.load()
+                Logger.v { "[$logTag] Sending ToRadio heartbeat (nonce=$n)" }
+                val admitted = sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = n)).encode())
+                if (admitted) nonce.fetchAndAdd(1)
+                admitted
+            }
+        if (!accepted) {
+            Logger.w { "[$logTag] Heartbeat handoff was rejected by the transport" }
+            return false
+        }
         afterHeartbeat?.invoke()
+        return true
     }
 }

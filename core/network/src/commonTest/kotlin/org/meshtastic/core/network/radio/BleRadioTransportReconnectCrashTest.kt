@@ -332,6 +332,62 @@ class BleRadioTransportReconnectCrashTest {
         }
     }
 
+    @Test
+    fun `retired BLE profile cannot dispatch inbound packets after reconnect`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Radio")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        val retiredService = connection.service
+        val replacementService = FakeBleService()
+        listOf(retiredService, replacementService).forEach { bleService ->
+            bleService.addCharacteristic(FROMNUM_CHARACTERISTIC)
+            bleService.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        }
+        connection.profileServiceProvider = { call -> if (call == 1) retiredService else replacementService }
+        var dispatchedPackets = 0
+        every { service.handleFromRadio(any()) } calls { dispatchedPackets++ }
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        try {
+            bleTransport.start()
+            advanceTimeBy(4_000L)
+            // Virtual time lets profile setup settle; stability is based on wall-clock uptime instead.
+            advanceTimeBy(6_000L)
+
+            connection.simulateRemoteDisconnect(reason = DisconnectReason.Timeout)
+            testScheduler.runCurrent()
+            // Connection uptime is wall-clock time (nowMillis), so a slow host can classify this disconnect as
+            // stable instead of unstable. Budget enough virtual time to cover either retry path before asserting.
+            advanceTimeBy(30_000L)
+            assertTrue(
+                connection.profileCalls >= 2,
+                "Reconnect must publish a replacement BLE profile (actual: ${connection.profileCalls})",
+            )
+
+            // FakeBleConnection intentionally leaves the retired profile collector active. Drive each profile's
+            // service independently so shared queue draining cannot decide which generation consumes the packet.
+            retiredService.enqueueRead(FROMRADIO_CHARACTERISTIC, byteArrayOf(1, 2, 3))
+            retiredService.emitNotification(FROMNUM_CHARACTERISTIC, byteArrayOf(1))
+            testScheduler.runCurrent()
+            assertEquals(0, dispatchedPackets, "The retired BLE profile must not dispatch a late inbound packet")
+
+            replacementService.enqueueRead(FROMRADIO_CHARACTERISTIC, byteArrayOf(4, 5, 6))
+            replacementService.emitNotification(FROMNUM_CHARACTERISTIC, byteArrayOf(1))
+            testScheduler.runCurrent()
+            assertEquals(1, dispatchedPackets, "The replacement BLE profile must still dispatch inbound packets")
+        } finally {
+            bleTransport.close()
+        }
+    }
+
     // ─── Session-failure recovery ────────────────────────────────────────────────────────────────
 
     @Test

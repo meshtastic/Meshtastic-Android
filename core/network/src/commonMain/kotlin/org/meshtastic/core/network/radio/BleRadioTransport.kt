@@ -20,9 +20,12 @@ package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -92,6 +96,12 @@ private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
  */
 internal val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
+private val BLE_WRITE_OPERATION_TIMEOUT = 10.seconds
+private const val BLE_MAX_PENDING_WRITES = 4
+private val BLE_OPERATION_DRAIN_TIMEOUT = 45.seconds
+
+// An active profile and one predecessor cleanup can each consume a drain budget before their bounded GATT releases.
+private val BLE_TEARDOWN_TIMEOUT = BLE_OPERATION_DRAIN_TIMEOUT * 2 + GATT_CLEANUP_TIMEOUT * 2 + 5.seconds
 
 /**
  * Bounded wait for the connectionState StateFlow to reflect Connected after connectAndAwait returns.
@@ -162,22 +172,19 @@ class BleRadioTransport(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
         if (throwable !is CancellationException) {
-            // Record the cause BEFORE the CAS so there is no window where another coroutine
-            // sees sessionFailed == true but sessionFailureCause == null. first-cause is
-            // preserved: a concurrent loser only overwrites if still null.
-            recordSessionFailureCause(throwable)
-            if (sessionFailed.compareAndSet(expect = false, update = true)) {
-                radioService = null
-                isFullyConnected = false
-                val (isPermanent, msg) = throwable.toDisconnectReason()
-                callback.onDisconnect(isPermanent, errorMessage = msg)
-            }
-        }
-        cleanupScope.launch {
-            try {
-                bleConnection.disconnect()
-            } catch (e: Exception) {
-                Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
+            val session = activeSession.value
+            if (session != null) {
+                handleFailure(throwable, session)
+            } else {
+                cleanupScope.launch {
+                    awaitPendingSessionCleanup()
+                    // A replacement can publish while cleanup is pending; never disconnect its GATT handle.
+                    if (activeSession.value == null) {
+                        disconnectGatt("exception handler")
+                    } else {
+                        Logger.d { "[$address] Skipping exception-handler GATT release; a new session is active" }
+                    }
+                }
             }
         }
     }
@@ -186,6 +193,21 @@ class BleRadioTransport(
         CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext.job) + exceptionHandler)
     private val bleConnection: BleConnection = connectionFactory.create(connectionScope, address)
     private val writeMutex: Mutex = Mutex()
+    private val writePermits = Semaphore(BLE_MAX_PENDING_WRITES)
+    private val lifecycle =
+        TransportLifecycleGate(
+            "BLE",
+            operationDrainTimeout = BLE_OPERATION_DRAIN_TIMEOUT,
+            teardownTimeout = BLE_TEARDOWN_TIMEOUT,
+        )
+    private val activeSession = atomic<BleSession?>(null)
+    private val sessionCleanupLock = SynchronizedObject()
+    private var pendingSessionCleanup: Job? = null
+
+    private class BleSession(val profile: MeshtasticRadioProfile) {
+        val lifecycle = TransportLifecycleGate("BLE session", operationDrainTimeout = BLE_OPERATION_DRAIN_TIMEOUT)
+        val failureCause = atomic<Throwable?>(null)
+    }
 
     @Volatile private var connectionStartTime: Long = 0
 
@@ -207,12 +229,6 @@ class BleRadioTransport(
     // only the caller that wins the compareAndSet(false, true) fires onDisconnect.
     private val sessionFailed = atomic(false)
 
-    // Captures the exception that caused handleFailure() to tear down the session, so
-    // attemptConnection() can distinguish an internal-failure disconnect from a genuine
-    // LocalDisconnect (user-initiated or clean close). When non-null, the reconnect policy
-    // treats the disconnect as unintentional and applies backoff escalation.
-    @Volatile private var sessionFailureCause: Throwable? = null
-
     // Never give up while the user has this device selected. Higher layers (SharedRadioInterfaceService)
     // own the explicit-disconnect lifecycle and will close() us when the user picks a different device or
     // toggles the connection off; until then, retry forever with the policy's exponential-backoff cap (60 s).
@@ -220,10 +236,10 @@ class BleRadioTransport(
 
     private val heartbeatSender =
         HeartbeatSender(
-            sendToRadio = ::handleSendToRadio,
+            sendToRadio = { handleSendToRadio(it) },
             afterHeartbeat = {
                 delay(HEARTBEAT_DRAIN_DELAY)
-                radioService?.requestDrain()
+                activeSession.value?.profile?.requestDrain()
             },
             logTag = address,
         )
@@ -350,10 +366,10 @@ class BleRadioTransport(
     @Suppress("CyclomaticComplexMethod", "LongMethod", "ReturnCount")
     private suspend fun attemptConnection(): BleReconnectPolicy.Outcome {
         connectionStartTime = nowMillis
-        sessionFailed.value = false
-        sessionFailureCause = null
         Logger.i { "[$address] BLE connection attempt started" }
 
+        awaitPendingSessionCleanup()
+        sessionFailed.value = false
         val device = findDevice()
 
         bondDeviceBeforeConnect(device)
@@ -391,15 +407,13 @@ class BleRadioTransport(
         isFullyConnected = true
         onConnected()
 
-        discoverServicesAndSetupCharacteristics()
+        val session = discoverServicesAndSetupCharacteristics()
 
         // If a fatal session failure (fromRadio/logRadio error) forced disconnect during setup,
         // skip the Connected gate — return a retryable failure so BleReconnectPolicy handles it.
-        if (sessionFailureCause != null) {
-            Logger.w(sessionFailureCause) {
-                "[$address] Session failed during profile setup — returning failed outcome"
-            }
-            return BleReconnectPolicy.Outcome.Failed(sessionFailureCause ?: RuntimeException("Session setup failed"))
+        session.failureCause.value?.let { failure ->
+            Logger.w(failure) { "[$address] Session failed during profile setup — returning failed outcome" }
+            return BleReconnectPolicy.Outcome.Failed(failure)
         }
 
         // Wait for the StateFlow to actually reflect Connected before watching for the next
@@ -408,30 +422,33 @@ class BleRadioTransport(
         // may lag. Without this gate the next .first { Disconnected } below could match the
         // *previous* cycle's stale Disconnected value and fire immediately, breaking reconnect.
         //
-        // RACE GUARD: A fatal fromRadio/logRadio failure can land AFTER the sessionFailureCause
+        // RACE GUARD: A fatal fromRadio/logRadio failure can land AFTER the session failure-cause
         // check above but BEFORE connectionState reaches Connected. handleFailure() forces
         // bleConnection.disconnect(), which should emit Disconnected — but if the StateFlow was
         // already at a stale Disconnected value, it may NOT re-emit (StateFlow suppresses
         // duplicate values). A bounded timeout ensures we cannot hang: if Connected doesn't
-        // arrive within CONNECTED_GATE_TIMEOUT, we check sessionFailureCause and return a
+        // arrive within CONNECTED_GATE_TIMEOUT, we check this session's failure cause and return a
         // retryable Failed outcome.
         val connectedReached =
             withTimeoutOrNull(CONNECTED_GATE_TIMEOUT) {
                 bleConnection.connectionState.first { it is BleConnectionState.Connected }
             }
         if (connectedReached == null) {
-            val failure = sessionFailureCause ?: RuntimeException("Timed out waiting for Connected state gate")
+            val failure = session.failureCause.value ?: RuntimeException("Timed out waiting for Connected state gate")
             Logger.w(failure) { "[$address] Session failed before Connected gate — returning failed outcome" }
-            // CRITICAL: force GATT cleanup before returning Failed so we don't start a new
-            // attempt over an uncleared session. Without this, a timeout caused by flow lag or
-            // a stale-Disconnected state mismatch would leave a live/half-live GATT handle behind.
-            radioService = null
+            // Force cleanup only for this exact profile generation. If another path already retired it, await that
+            // generation's cleanup instead of issuing a second disconnect that could race later lifecycle work.
             isFullyConnected = false
             withContext(NonCancellable) {
-                try {
-                    bleConnection.disconnect()
-                } catch (ignored: Exception) {
-                    Logger.w(ignored) { "[$address] disconnect() failed during Connected-gate timeout cleanup" }
+                val retired = retireActiveSession(session)
+                if (retired != null) {
+                    runSerializedSessionCleanup(
+                        retired,
+                        phase = "Connected-gate timeout cleanup",
+                        disconnectGatt = true,
+                    )
+                } else {
+                    awaitPendingSessionCleanup()
                 }
             }
             return BleReconnectPolicy.Outcome.Failed(failure)
@@ -446,7 +463,7 @@ class BleRadioTransport(
         val disconnectReason = disconnectedState.reason
         if (isFullyConnected) {
             isFullyConnected = false
-            onDisconnected()
+            onDisconnected(session)
         }
 
         Logger.i { "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect" }
@@ -454,7 +471,7 @@ class BleRadioTransport(
         // Internal session failures (write/read exceptions that triggered handleFailure →
         // disconnect) must NOT be treated as intentional/user disconnects — the reconnect policy
         // needs to escalate backoff for these.
-        val internalFailure = sessionFailureCause
+        val internalFailure = session.failureCause.value
         if (internalFailure != null) {
             Logger.w(internalFailure) { "[$address] Session forced disconnect due to internal failure" }
         }
@@ -517,57 +534,54 @@ class BleRadioTransport(
         }
     }
 
-    private fun onDisconnected() {
-        radioService = null
-        // Atomic first-writer-wins: if handleFailure already claimed this session's failure
-        // callback (or another onDisconnected raced), CAS returns false and we skip the
-        // duplicate. The forced disconnect() from handleFailure causes Kable to emit
-        // Disconnected, which routes here — without this guard the UI would see two
-        // onDisconnect calls (one with the real error message from handleFailure, one
-        // generic from here).
+    private fun onDisconnected(expectedSession: BleSession) {
+        val retired = retireActiveSession(expectedSession) ?: return
+        scheduleSessionCleanup(retired, disconnectGatt = false, phase = "remote disconnect")
+        // Atomic first-writer-wins: if another failure already claimed this session's callback, skip the duplicate.
         val firstWriter = sessionFailed.compareAndSet(expect = false, update = true)
         Logger.i { "[$address] BLE disconnected - ${formatSessionStats()}" }
-        if (firstWriter) {
-            // Signal immediately so the UI reflects the disconnect while reconnect continues.
-            callback.onDisconnect(isPermanent = false)
-        }
+        if (firstWriter) callback.onDisconnect(isPermanent = false)
     }
 
     @Suppress("LongMethod", "ThrowsCount")
-    private suspend fun discoverServicesAndSetupCharacteristics() {
+    private suspend fun discoverServicesAndSetupCharacteristics(): BleSession {
+        var setupSession: BleSession? = null
         try {
             bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
                 val radioService = service.toMeshtasticRadioProfile()
+                val session = BleSession(radioService)
+                setupSession = session
+                check(activeSession.compareAndSet(expect = null, update = session)) {
+                    "BLE profile published while another profile generation is still active"
+                }
 
                 radioService.fromRadio
                     .onEach { packet ->
                         Logger.v { "[$address] Received packet fromRadio (${packet.size} bytes)" }
-                        dispatchPacket(packet)
+                        dispatchPacket(packet, session)
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in fromRadio flow" }
-                        handleFailure(e)
+                        handleFailure(e, session)
                     }
                     .launchIn(this)
 
                 radioService.logRadio
                     .onEach { packet ->
                         Logger.v { "[$address] Received packet logRadio (${packet.size} bytes)" }
-                        dispatchPacket(packet)
+                        dispatchPacket(packet, session)
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in logRadio flow" }
-                        handleFailure(e)
+                        handleFailure(e, session)
                     }
                     .launchIn(this)
-
-                this@BleRadioTransport.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
                 // Wait for FROMNUM CCCD write before triggering the Meshtastic handshake.
                 // Bounded: if fromRadio fails before subscriptionReady completes, handleFailure
-                // sets sessionFailureCause. The timeout also prevents a hang if FROMNUM observe
+                // records this session's failure cause. The timeout also prevents a hang if FROMNUM observe
                 // never completes for reasons other than a fatal exception (e.g., firmware doesn't
                 // send CCCD confirmation). We MUST abort setup on timeout — proceeding without
                 // subscription readiness creates a half-initialized session.
@@ -578,7 +592,8 @@ class BleRadioTransport(
                     } ?: false
                 if (!subscriptionReady || sessionFailed.value) {
                     val cause =
-                        sessionFailureCause ?: RuntimeException("Timed out waiting for FROMNUM subscription readiness")
+                        session.failureCause.value
+                            ?: RuntimeException("Timed out waiting for FROMNUM subscription readiness")
                     Logger.w(cause) {
                         val reason = if (!subscriptionReady) "timed out" else "failed"
                         "[$address] Subscription wait $reason — aborting setup"
@@ -605,47 +620,62 @@ class BleRadioTransport(
                 //   - The gate-timeout path returns Outcome.Failed, which drives BleReconnectPolicy
                 //     (Retry backoff immediately; onTransientDisconnect → DeviceSleep once
                 //     consecutiveFailures reaches failureThreshold, default 3).
-                //   - The timeout path nulls radioService and forces bleConnection.disconnect()
-                //     under NonCancellable, so handleSendToRadio() fails fast against a null
-                //     service and the next attempt starts over a clean GATT handle.
+                //   - The timeout path retires the active profile generation and forces bleConnection.disconnect()
+                //     under NonCancellable, so handleSendToRadio() fails fast once generation admission closes and the
+                //     next attempt starts over a clean GATT handle.
                 // The net worst case is a brief Connected indication while the transport cycles a
                 // sub-threshold retry — a cosmetic UX lag, not a correctness or data issue.
                 // Deferring onConnect until after the gate would require a structural refactor of
                 // the profile-setup callback and introduce its own races, so the current ordering
                 // is retained.
-                if (!sessionFailed.value) {
-                    this@BleRadioTransport.callback.onConnect()
-                } else {
-                    Logger.w { "[$address] Session failed during setup — skipping onConnect" }
+                val published =
+                    if (!sessionFailed.value && activeSession.value === session) {
+                        lifecycle.runIfOpen { this@BleRadioTransport.callback.onConnect() } != null
+                    } else {
+                        false
+                    }
+                if (!published) {
+                    Logger.w { "[$address] Session failed or transport closed during setup — skipping onConnect" }
                 }
             }
+            return checkNotNull(setupSession) { "BLE profile setup completed without publishing a session" }
         } catch (e: CancellationException) {
             // Scope was cancelled externally — still ensure GATT cleanup runs so we don't
             // leak a BluetoothGatt handle and trigger GATT status 133 on the next attempt.
-            radioService = null
-            isFullyConnected = false
-            withContext(NonCancellable) {
-                try {
-                    bleConnection.disconnect()
-                } catch (ignored: Exception) {
-                    Logger.w(ignored) { "[$address] disconnect() failed during cancellation cleanup" }
-                }
-            }
+            withContext(NonCancellable) { cleanupProfileSetupFailure("cancellation cleanup", setupSession) }
             throw e
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
-            // Clear stale state so the next attempt starts clean — if failure happened after
-            // radioService assignment but before callback.onConnect(), stale state would survive.
-            radioService = null
-            isFullyConnected = false
-            withContext(NonCancellable) {
-                try {
-                    bleConnection.disconnect()
-                } catch (ignored: Exception) {
-                    Logger.w(ignored) { "[$address] disconnect() failed after profile error" }
-                }
-            }
+            // Retire any partially-published profile so the next attempt starts clean. Without this, a failure after
+            // profile publication but before callback.onConnect() could leave a stale generation behind.
+            withContext(NonCancellable) { cleanupProfileSetupFailure("profile error cleanup", setupSession) }
             throw e // Re-throw so attemptConnection() returns Outcome.Failed(e) for policy backoff.
+        }
+    }
+
+    private suspend fun cleanupProfileSetupFailure(phase: String, expectedSession: BleSession?) {
+        val currentSession = activeSession.value
+        if (expectedSession != null && currentSession != null && currentSession !== expectedSession) {
+            Logger.w { "[$address] Ignoring $phase from an unpublished BLE profile generation" }
+            return
+        }
+
+        isFullyConnected = false
+        if (expectedSession == null) {
+            if (currentSession == null) {
+                awaitPendingSessionCleanup()
+                disconnectGatt(phase)
+            }
+            return
+        }
+
+        val retired = retireActiveSession(expectedSession)
+        if (retired != null) {
+            runSerializedSessionCleanup(retired, phase = phase, disconnectGatt = true)
+        } else {
+            // Another failure path may already own cleanup for this exact generation. Wait for it, but never disconnect
+            // a replacement profile that became active after the failing generation retired.
+            awaitPendingSessionCleanup()
         }
     }
 
@@ -667,8 +697,6 @@ class BleRadioTransport(
         }
     }
 
-    @Volatile private var radioService: MeshtasticRadioProfile? = null
-
     // --- RadioTransport Implementation ---
 
     /**
@@ -682,49 +710,76 @@ class BleRadioTransport(
      * [retryBleOperation]'s 3-attempt retry before reaching this catch.
      *
      * @param p The packet to send.
+     * @return true when the current BLE profile generation accepted responsibility for the bounded write attempt.
+     *   Delivery is confirmed later by the protocol, not by this result.
      */
-    override fun handleSendToRadio(p: ByteArray) {
-        // Fast-path check: skip coroutine launch entirely if no transport is active.
-        if (radioService == null) {
-            Logger.w { "[$address] toRadio characteristic unavailable, can't send data" }
-            return
-        }
-        connectionScope.launch {
-            writeMutex.withLock {
-                // Re-read radioService UNDER the lock — handleFailure may have nulled it
-                // between the outer check and lock acquisition. Without this, a queued send
-                // can retry writes against a stale/dead profile.
-                val currentService =
-                    radioService
-                        ?: run {
-                            Logger.w { "[$address] toRadio characteristic cleared during write queue" }
-                            return@withLock
-                        }
-                try {
-                    retryBleOperation(tag = address, retryWhile = { currentService === radioService }) {
-                        currentService.sendToRadio(p)
-                    }
-                    val sent = packetsSent.incrementAndGet()
-                    val txBytes = bytesSent.addAndGet(p.size.toLong())
-                    Logger.v {
-                        "[$address] Wrote packet #$sent " + "to toRadio (${p.size} bytes, total TX: $txBytes bytes)"
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    // Guard: only call handleFailure if this write was against the CURRENT session.
-                    // If radioService was replaced (new reconnect cycle) or cleared (handleFailure
-                    // already ran), this is a stale write from the old session — silently discard.
-                    if (currentService === radioService) {
-                        Logger.w(e) {
-                            "[$address] Failed to write packet to toRadioCharacteristic after " +
-                                "${packetsSent.value} successful writes"
-                        }
-                        handleFailure(e)
+    override fun handleSendToRadio(p: ByteArray): Boolean {
+        val transportLease = lifecycle.tryAcquire()
+        return if (transportLease == null) {
+            false
+        } else {
+            val session = activeSession.value
+            val sessionLease = session?.lifecycle?.tryAcquire()
+            val writePermit = session != null && sessionLease != null && writePermits.tryAcquire()
+            if (session == null || sessionLease == null || !writePermit || activeSession.value !== session) {
+                if (writePermit) writePermits.release()
+                sessionLease?.release()
+                transportLease.release()
+                Logger.w {
+                    if (!writePermit && session != null && sessionLease != null) {
+                        "[$address] BLE write backlog is full, cannot admit ${p.size} bytes"
                     } else {
-                        Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
+                        "[$address] toRadio characteristic unavailable, cannot send ${p.size} bytes"
                     }
                 }
+                false
+            } else {
+                val sendJob = connectionScope.launch { runBleWrite(session, p) }
+                sendJob.invokeOnCompletion {
+                    writePermits.release()
+                    sessionLease.release()
+                    transportLease.release()
+                }
+                !sendJob.isCancelled
+            }
+        }
+    }
+
+    private suspend fun runBleWrite(session: BleSession, packet: ByteArray) {
+        // Admission bounds the number of queued writes. Start the per-write timeout only after this operation reaches
+        // the front of that bounded queue, so normal backlog does not masquerade as a dead BLE link. Four admitted
+        // writes at the worst-case 10s write bound fit inside the 45s lifecycle drain budget.
+        val completed =
+            writeMutex.withLock {
+                withTimeoutOrNull(BLE_WRITE_OPERATION_TIMEOUT) {
+                    writePacket(session, packet)
+                    true
+                } == true
+            }
+        if (!completed && activeSession.value === session) {
+            handleFailure(RadioNotConnectedException("BLE write timed out after $BLE_WRITE_OPERATION_TIMEOUT"), session)
+        }
+    }
+
+    private suspend fun writePacket(session: BleSession, packet: ByteArray) {
+        try {
+            retryBleOperation(tag = address, retryWhile = { activeSession.value === session }) {
+                session.profile.sendToRadio(packet)
+            }
+            val sent = packetsSent.incrementAndGet()
+            val txBytes = bytesSent.addAndGet(packet.size.toLong())
+            Logger.v { "[$address] Wrote packet #$sent to toRadio (${packet.size} bytes, total TX: $txBytes bytes)" }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (activeSession.value === session) {
+                Logger.w(e) {
+                    "[$address] Failed to write packet to toRadioCharacteristic after " +
+                        "${packetsSent.value} successful writes"
+                }
+                handleFailure(e, session)
+            } else {
+                Logger.d(e) { "[$address] Stale write failure ignored because the session was replaced" }
             }
         }
     }
@@ -738,79 +793,116 @@ class BleRadioTransport(
 
     /** Closes the connection to the device. */
     override suspend fun close() {
-        Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
-        connectionScope.cancel()
-        // GATT cleanup must run under NonCancellable so a cancelled caller cannot skip it,
-        // which would leak BluetoothGatt and trigger status 133 on the next reconnect.
-        // Using withContext (not runBlocking) keeps the caller's thread free — this is
-        // critical when close() is invoked from the main thread during process shutdown.
-        withContext(NonCancellable) {
-            try {
-                withTimeoutOrNull(GATT_CLEANUP_TIMEOUT) { bleConnection.disconnect() }
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.w(e) { "[$address] Failed to disconnect in close()" }
+        var completed = false
+        try {
+            completed =
+                lifecycle.close {
+                    // Closing the outer gate rejects new sends while allowing writes admitted before close to finish.
+                    // Once those leases drain, cancel reconnect/heartbeat work before retiring the profile and GATT.
+                    connectionScope.cancel()
+                    Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
+                    val session = retireActiveSession()
+                    val sessionClosed = session?.lifecycle?.close() ?: true
+                    awaitPendingSessionCleanup()
+                    disconnectGatt("close")
+                    if (!sessionClosed) {
+                        Logger.w { "[$address] BLE profile teardown did not complete within its lifecycle bounds" }
+                    }
+                }
+            if (!completed) Logger.w { "[$address] BLE teardown did not complete within its lifecycle bounds" }
+        } finally {
+            if (!completed) {
+                // The cleanup scope is detached, so a timed-out outer gate needs one final bounded GATT release attempt
+                // before that scope is retired. This does not claim to preempt blocking native I/O.
+                withContext(NonCancellable) { disconnectGatt("close fallback") }
             }
+            cleanupScope.cancel()
         }
-        // Our own disconnect succeeded — the exception-handler safety net is no longer
-        // needed. Cancel the detached cleanup scope so it doesn't outlive us in tests
-        // or process lifetime.
-        cleanupScope.cancel()
     }
 
-    private fun dispatchPacket(packet: ByteArray) {
-        val received = packetsReceived.incrementAndGet()
-        val rxBytes = bytesReceived.addAndGet(packet.size.toLong())
-        Logger.v { "[$address] Dispatching packet #$received " + "(${packet.size} bytes, total RX: $rxBytes bytes)" }
-        callback.handleFromRadio(packet)
+    private fun dispatchPacket(packet: ByteArray, expectedSession: BleSession) {
+        val dispatched =
+            expectedSession.lifecycle.runIfOpen {
+                if (activeSession.value !== expectedSession) return@runIfOpen false
+                val received = packetsReceived.incrementAndGet()
+                val rxBytes = bytesReceived.addAndGet(packet.size.toLong())
+                Logger.v {
+                    "[$address] Dispatching packet #$received " + "(${packet.size} bytes, total RX: $rxBytes bytes)"
+                }
+                callback.handleFromRadio(packet)
+                true
+            } == true
+        if (!dispatched) Logger.d { "Dropping packet from a retired BLE profile generation" }
     }
 
-    /**
-     * Preserves the first session-failure cause across concurrent failures. Called before the [sessionFailed] CAS in
-     * [handleFailure] and [exceptionHandler] to eliminate the window where [sessionFailed] is true but
-     * [sessionFailureCause] is still null.
-     */
-    private fun recordSessionFailureCause(throwable: Throwable) {
-        if (sessionFailureCause == null) sessionFailureCause = throwable
+    /** Preserves the first failure cause on the exact profile generation that observed it. */
+    private fun recordSessionFailureCause(throwable: Throwable, expectedSession: BleSession) {
+        expectedSession.failureCause.compareAndSet(expect = null, update = throwable)
     }
 
-    private fun handleFailure(throwable: Throwable) {
-        // CancellationException signals intentional scope cancellation (close() called).
-        // Never surface it as a user-facing disconnect error.
+    private fun handleFailure(throwable: Throwable, expectedSession: BleSession) {
         if (throwable is CancellationException) return
-
-        // Record the cause BEFORE the CAS so there is no window where another coroutine
-        // sees sessionFailed == true but sessionFailureCause == null. first-cause is
-        // preserved: a concurrent loser only overwrites if still null.
-        recordSessionFailureCause(throwable)
-
-        // Deduplicate via atomic CAS: only the first failure per connection attempt triggers
-        // session teardown. Heartbeat writes that arrive after the first failure must not spam
-        // callbacks. compareAndSet(false, true) returns true iff THIS caller is the first.
-        if (!sessionFailed.compareAndSet(expect = false, update = true)) return
-
-        // Tear down stale session state immediately so future writes fail-fast without retrying
-        // against a dead GATT handle.
-        radioService = null
+        recordSessionFailureCause(throwable, expectedSession)
+        val retired = retireActiveSession(expectedSession)
+        if (retired == null) {
+            Logger.d(throwable) { "[$address] Ignoring failure from a retired BLE profile generation" }
+            return
+        }
+        val firstFailure = sessionFailed.compareAndSet(expect = false, update = true)
         isFullyConnected = false
-
-        val (isPermanent, msg) = throwable.toDisconnectReason()
-        // Silent recovery for non-permanent failures: the transport tears down stale GATT state
-        // and reconnects automatically, so surfacing a modal for a transient session failure is
-        // confusing UX. Permanent failures (pairing, missing characteristic, etc.) remain
-        // user-facing.
-        callback.onDisconnect(isPermanent, errorMessage = if (isPermanent) msg else null)
-
+        if (firstFailure) {
+            val (isPermanent, msg) = throwable.toDisconnectReason()
+            callback.onDisconnect(isPermanent, errorMessage = if (isPermanent) msg else null)
+        }
         Logger.w(throwable) { "[$address] Session failure — forcing cleanup for reconnect" }
+        scheduleSessionCleanup(retired, disconnectGatt = true, phase = "session failure")
+    }
 
-        // Force GATT disconnect on the detached cleanupScope (matching the pattern used by
-        // the exceptionHandler defined above). This causes Kable's connectionState
-        // to emit Disconnected, unblocking attemptConnection so BleReconnectPolicy iterates.
-        cleanupScope.launch {
-            try {
-                bleConnection.disconnect()
-            } catch (e: Exception) {
-                Logger.w(e) { "[$address] Failed to disconnect after session failure" }
+    private fun retireActiveSession(expected: BleSession? = activeSession.value): BleSession? {
+        expected ?: return null
+        return expected.takeIf { activeSession.compareAndSet(expect = it, update = null) }
+    }
+
+    private fun scheduleSessionCleanup(session: BleSession, disconnectGatt: Boolean, phase: String) {
+        val cleanup =
+            synchronized(sessionCleanupLock) {
+                val predecessor = pendingSessionCleanup
+                cleanupScope
+                    .launch(start = CoroutineStart.LAZY) {
+                        predecessor?.join()
+                        val completed =
+                            if (disconnectGatt) {
+                                session.lifecycle.close { disconnectGatt(phase) }
+                            } else {
+                                session.lifecycle.close()
+                            }
+                        if (!completed) Logger.w { "[$address] BLE profile cleanup timed out during $phase" }
+                    }
+                    .also { pendingSessionCleanup = it }
             }
+        cleanup.invokeOnCompletion {
+            synchronized(sessionCleanupLock) { if (pendingSessionCleanup === cleanup) pendingSessionCleanup = null }
+        }
+        cleanup.start()
+    }
+
+    /** Registers [session] in the serialized cleanup chain and waits until its cleanup is complete. */
+    private suspend fun runSerializedSessionCleanup(session: BleSession, phase: String, disconnectGatt: Boolean) {
+        scheduleSessionCleanup(session, disconnectGatt = disconnectGatt, phase = phase)
+        awaitPendingSessionCleanup()
+    }
+
+    private suspend fun awaitPendingSessionCleanup() {
+        synchronized(sessionCleanupLock) { pendingSessionCleanup }?.join()
+    }
+
+    private suspend fun disconnectGatt(phase: String) {
+        try {
+            withTimeoutOrNull(GATT_CLEANUP_TIMEOUT) { bleConnection.disconnect() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.w(e) { "[$address] Failed to disconnect during $phase" }
         }
     }
 

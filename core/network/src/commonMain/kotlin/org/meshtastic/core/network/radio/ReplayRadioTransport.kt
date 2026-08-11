@@ -17,7 +17,12 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import okio.Buffer
 import okio.EOFException
@@ -74,9 +79,9 @@ import org.meshtastic.proto.ToRadio
  * - **Stage 2** ([HandshakeConstants.NODE_INFO_NONCE]) → emit the node section, then `config_complete_id`, then start
  *   streaming the packet section **once** (a re-issued Stage-2 request does not restart it).
  *
- * The packet stream is paced at [packetDelayMs] and does not loop; it stops when [scope] is cancelled. Outbound
- * [ToRadio] traffic other than want_config (heartbeats, app packets) is ignored — the replay is strictly read-only, and
- * frames are held in memory, so [close] has nothing to release.
+ * The packet stream is paced at [packetDelayMs] and does not loop; it stops when [scope] or this transport is closed.
+ * Outbound [ToRadio] traffic other than want_config (heartbeats, app packets) is ignored — the replay is strictly
+ * read-only. [close] is terminal: it rejects later handshakes and cancels transport-owned replay work.
  *
  * ### Robustness
  * The asset is parsed up front and every length is validated against the bytes actually remaining, so a truncated or
@@ -104,55 +109,84 @@ class ReplayRadioTransport(
         packetFrames = buffer.readSection(counted = false, label = "packet")
     }
 
-    private var packetsStarted = false
+    private val packetsStarted = atomic(false)
+    private val lifecycle = TransportLifecycleGate("Replay")
+    private val transportJob = SupervisorJob(scope.coroutineContext[Job])
+    private val transportScope = CoroutineScope(scope.coroutineContext + transportJob)
+    private val handshakeQueue = Channel<Int>(capacity = Channel.UNLIMITED)
+    private val started = atomic(false)
 
     override fun start() {
-        Logger.i {
-            "Starting replay transport: ${configFrames.size} config, ${nodeFrames.size} node, " +
-                "${packetFrames.size} packet frames"
+        lifecycle.runIfOpen {
+            if (!started.compareAndSet(expect = false, update = true)) return@runIfOpen
+            // Once start is published, the channel can safely buffer a racing nonce until this worker begins.
+            transportScope.handledLaunch { for (nonce in handshakeQueue) replayHandshake(nonce) }
+            Logger.i {
+                "Starting replay transport: ${configFrames.size} config, ${nodeFrames.size} node, " +
+                    "${packetFrames.size} packet frames"
+            }
+            callback.onConnect()
         }
-        callback.onConnect()
     }
 
-    override fun handleSendToRadio(p: ByteArray) {
-        // Undecodable ToRadio is ignored rather than thrown: the replay must tolerate any bytes the app — or a fuzz
-        // harness — hands it, exactly as it tolerates a malformed asset.
+    override fun handleSendToRadio(p: ByteArray): Boolean = lifecycle.runIfOpen {
+        if (!started.value) return@runIfOpen false
+        // Undecodable ToRadio is ignored rather than thrown: the replay must tolerate any bytes the app — or a
+        // fuzz test harness — hands it, exactly as it tolerates a malformed asset.
         val wantConfigId = runCatching { ToRadio.ADAPTER.decode(p).want_config_id }.getOrNull()
         when (wantConfigId) {
-            HandshakeConstants.CONFIG_NONCE ->
-                scope.handledLaunch {
-                    emit(configFrames)
-                    complete(HandshakeConstants.CONFIG_NONCE)
-                }
+            HandshakeConstants.CONFIG_NONCE,
+            HandshakeConstants.NODE_INFO_NONCE,
+            -> handshakeQueue.trySend(wantConfigId).isSuccess
 
-            HandshakeConstants.NODE_INFO_NONCE ->
-                scope.handledLaunch {
-                    emit(nodeFrames)
-                    complete(HandshakeConstants.NODE_INFO_NONCE)
-                    if (!packetsStarted) {
-                        packetsStarted = true
-                        streamPackets()
-                    }
+            // Accepted but intentionally ignored: replay is a read-only sink for ordinary outbound traffic.
+            else -> true
+        }
+    } ?: false
+
+    private suspend fun replayHandshake(nonce: Int) {
+        when (nonce) {
+            HandshakeConstants.CONFIG_NONCE -> {
+                emit(configFrames)
+                complete(HandshakeConstants.CONFIG_NONCE)
+            }
+
+            HandshakeConstants.NODE_INFO_NONCE -> {
+                emit(nodeFrames)
+                complete(HandshakeConstants.NODE_INFO_NONCE)
+                if (packetsStarted.compareAndSet(expect = false, update = true)) {
+                    transportScope.handledLaunch { streamPackets() }
                 }
-            // All other ToRadio traffic (heartbeats, outbound packets) is ignored — this is a read-only replay.
+            }
         }
     }
 
-    private fun emit(frames: List<ByteArray>) = frames.forEach { callback.handleFromRadio(it) }
+    private fun emit(frames: List<ByteArray>) {
+        frames.forEach { frame -> if (lifecycle.runIfOpen { callback.handleFromRadio(frame) } == null) return }
+    }
 
-    private fun complete(nonce: Int) = callback.handleFromRadio(FromRadio(config_complete_id = nonce).encode())
+    private fun complete(nonce: Int) {
+        lifecycle.runIfOpen { callback.handleFromRadio(FromRadio(config_complete_id = nonce).encode()) }
+    }
 
     private suspend fun streamPackets() {
         Logger.d { "Replay streaming ${packetFrames.size} packets at ${packetDelayMs}ms spacing" }
         for (frame in packetFrames) {
-            callback.handleFromRadio(frame)
+            if (lifecycle.runIfOpen { callback.handleFromRadio(frame) } == null) return
             if (packetDelayMs > 0) delay(packetDelayMs)
         }
         Logger.i { "Replay finished (${packetFrames.size} packets)" }
     }
 
     override suspend fun close() {
-        // Frames live in memory; the streaming coroutine is cancelled with the scope.
+        val completed =
+            lifecycle.close(
+                beforeDrain = {
+                    handshakeQueue.close()
+                    transportJob.cancelAndJoin()
+                },
+            )
+        if (!completed) Logger.w { "Replay transport teardown did not complete within its lifecycle bounds" }
     }
 
     /**

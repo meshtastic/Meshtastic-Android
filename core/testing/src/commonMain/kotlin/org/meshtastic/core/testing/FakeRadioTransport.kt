@@ -16,27 +16,53 @@
  */
 package org.meshtastic.core.testing
 
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import org.meshtastic.core.repository.RadioTransport
 
 /** A test double for [RadioTransport] that tracks sent data. */
 class FakeRadioTransport : RadioTransport {
-    val sentData = mutableListOf<ByteArray>()
-    var closeCalled = false
-    var closeCount = 0
-        private set
+    private val lock = SynchronizedObject()
+    private val mutableSentData = mutableListOf<ByteArray>()
+    val sentData: List<ByteArray>
+        get() = synchronized(lock) { mutableSentData.map { it.copyOf() } }
 
-    var keepAliveCalled = false
+    /** Clears the recorded payload history without changing transport lifecycle state. */
+    fun clearSentData() {
+        synchronized(lock) { mutableSentData.clear() }
+    }
 
-    override fun handleSendToRadio(p: ByteArray) {
-        sentData.add(p)
+    /** Clears the recorded heartbeat without changing transport lifecycle state. */
+    fun clearKeepAlive() {
+        synchronized(lock) { keepAliveCalledState = false }
+    }
+
+    private var closeCalledState = false
+    val closeCalled: Boolean
+        get() = synchronized(lock) { closeCalledState }
+
+    private var closeCountState = 0
+    val closeCount: Int
+        get() = synchronized(lock) { closeCountState }
+
+    private var keepAliveCalledState = false
+    val keepAliveCalled: Boolean
+        get() = synchronized(lock) { keepAliveCalledState }
+
+    override fun handleSendToRadio(p: ByteArray): Boolean = synchronized(lock) {
+        if (closeCalledState) return@synchronized false
+        mutableSentData.add(p.copyOf())
+        true
     }
 
     override fun keepAlive() {
-        keepAliveCalled = true
+        synchronized(lock) { if (!closeCalledState) keepAliveCalledState = true }
     }
 
     override suspend fun close() {
-        closeCalled = true
-        closeCount++
+        synchronized(lock) {
+            closeCalledState = true
+            closeCountState++
+        }
     }
 }

@@ -26,9 +26,7 @@ import org.meshtastic.core.repository.RadioTransport
  * the service layer.
  */
 class NopRadioTransport(val address: String) : RadioTransport {
-    override fun handleSendToRadio(p: ByteArray) {
-        // No-op
-    }
+    override fun handleSendToRadio(p: ByteArray): Boolean = false
 
     override suspend fun close() {
         // No-op

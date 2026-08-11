@@ -24,10 +24,14 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
@@ -47,6 +51,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioTransportTest {
@@ -102,6 +107,90 @@ class BleRadioTransportTest {
                 address = address,
             )
         assertEquals(address, bleTransport.address)
+    }
+
+    @Test
+    fun `send is rejected before the BLE profile is available`() = runTest {
+        val bleTransport =
+            BleRadioTransport(
+                scope = backgroundScope,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+
+        try {
+            assertFalse(bleTransport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `close drains every write admitted by the active BLE profile generation`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        val firstWriteStarted = CompletableDeferred<Unit>()
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        val secondWriteStarted = CompletableDeferred<Unit>()
+        val releaseSecondWrite = CompletableDeferred<Unit>()
+        val firstPayload = byteArrayOf(1, 2, 3)
+        val secondPayload = byteArrayOf(4, 5, 6)
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+
+        try {
+            bleTransport.start()
+            advanceTimeBy(4_000L)
+            connection.service.beforeWrite = { _, data ->
+                when {
+                    data.contentEquals(firstPayload) -> {
+                        firstWriteStarted.complete(Unit)
+                        releaseFirstWrite.await()
+                    }
+
+                    data.contentEquals(secondPayload) -> {
+                        secondWriteStarted.complete(Unit)
+                        releaseSecondWrite.await()
+                    }
+                }
+            }
+
+            assertTrue(bleTransport.handleSendToRadio(firstPayload))
+            runCurrent()
+            withTimeout(5.seconds) { firstWriteStarted.await() }
+            assertTrue(bleTransport.handleSendToRadio(secondPayload))
+            runCurrent()
+
+            val closeJob = async { bleTransport.close() }
+            runCurrent()
+            assertFalse(closeJob.isCompleted, "close must drain admitted BLE writes before GATT teardown")
+            assertEquals(0, connection.disconnectCalls, "GATT teardown must not overtake an admitted write")
+
+            releaseFirstWrite.complete(Unit)
+            runCurrent()
+            withTimeout(5.seconds) { secondWriteStarted.await() }
+            assertEquals(0, connection.disconnectCalls, "queued admitted work must run before GATT teardown")
+            assertFalse(closeJob.isCompleted, "close must wait until the second admitted write finishes")
+            releaseSecondWrite.complete(Unit)
+            withTimeout(5.seconds) { closeJob.await() }
+            assertEquals(1, connection.disconnectCalls)
+        } finally {
+            releaseFirstWrite.complete(Unit)
+            releaseSecondWrite.complete(Unit)
+            connection.service.beforeWrite = null
+            bleTransport.close()
+        }
     }
 
     /**

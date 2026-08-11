@@ -70,7 +70,9 @@ class ReplayFuzzTest {
         ReplayFuzz.forSeeds { random, seed ->
             val input = if (seed % 2 == 0) ReplayFuzz.mutate(random, validAsset()) else ReplayFuzz.randomBytes(random)
             val error =
-                runCatching { ReplayRadioTransport(Sink(), this, address = "", frames = input, packetDelayMs = 0) }
+                runCatching {
+                    ReplayRadioTransport(Sink(), backgroundScope, address = "", frames = input, packetDelayMs = 0)
+                }
                     .exceptionOrNull()
             assertTrue(
                 error == null || error is IllegalArgumentException,
@@ -82,17 +84,23 @@ class ReplayFuzzTest {
     /** The transport must absorb any outbound bytes — undecodable [ToRadio] is dropped, not thrown. */
     @Test
     fun `handleSendToRadio tolerates arbitrary outbound bytes`() = runTest {
-        val transport = ReplayRadioTransport(Sink(), this, address = "", frames = validAsset(), packetDelayMs = 0)
-        ReplayFuzz.forSeeds { random, seed ->
-            val error =
-                runCatching {
-                    transport.handleSendToRadio(ReplayFuzz.mutate(random, ToRadio(want_config_id = 1).encode()))
-                    transport.handleSendToRadio(ReplayFuzz.randomBytes(random))
-                }
-                    .exceptionOrNull()
-            assertTrue(error == null, "seed=$seed: handleSendToRadio threw $error")
+        val transport =
+            ReplayRadioTransport(Sink(), backgroundScope, address = "", frames = validAsset(), packetDelayMs = 0)
+        transport.start()
+        try {
+            ReplayFuzz.forSeeds { random, seed ->
+                val error =
+                    runCatching {
+                        transport.handleSendToRadio(ReplayFuzz.mutate(random, ToRadio(want_config_id = 1).encode()))
+                        transport.handleSendToRadio(ReplayFuzz.randomBytes(random))
+                    }
+                        .exceptionOrNull()
+                assertTrue(error == null, "seed=$seed: handleSendToRadio threw $error")
+            }
+            testScheduler.runCurrent()
+        } finally {
+            transport.close()
         }
-        testScheduler.advanceUntilIdle()
     }
 
     /**
@@ -117,17 +125,21 @@ class ReplayFuzzTest {
         val transport =
             ReplayRadioTransport(
                 callback = sink,
-                scope = this,
+                scope = backgroundScope,
                 address = "",
                 frames = ReplayFuzz.asset(sampleConfig, nodes, packets),
                 packetDelayMs = 0,
             )
 
-        transport.start()
-        transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
-        testScheduler.advanceUntilIdle()
+        try {
+            transport.start()
+            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            testScheduler.runCurrent()
 
-        assertTrue(sink.frames.isNotEmpty())
-        sink.frames.forEach { FromRadio.ADAPTER.decode(it) } // round-trip held under hostile field values
+            assertTrue(sink.frames.isNotEmpty())
+            sink.frames.forEach { FromRadio.ADAPTER.decode(it) } // round-trip held under hostile field values
+        } finally {
+            transport.close()
+        }
     }
 }

@@ -26,6 +26,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
@@ -33,12 +34,13 @@ import org.meshtastic.proto.MeshPacket
 @Suppress("TooManyFunctions")
 class FakeServiceRepository : ServiceRepository {
     /** Canonical app-level connection state — the single source of truth for UI/feature tests. */
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState
+    private val connectionStateHolder = ConnectionStateHolder()
+    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
+    override val connectionState = connectionStateHolder.connectionState
+    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
-    override fun setConnectionState(connectionState: ConnectionState) {
-        _connectionState.value = connectionState
-    }
+    override fun setConnectionState(connectionState: ConnectionState) =
+        connectionStateHolder.setConnectionState(connectionState)
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification

@@ -29,3 +29,53 @@ sealed interface ConnectionState {
     /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
     data object DeviceSleep : ConnectionState
 }
+
+/**
+ * One atomically published view of canonical connection state and its lifecycle evidence.
+ *
+ * Consumers that need to correlate a state with departure or handshake counters must observe this snapshot instead of
+ * reading [ConnectionState] and [ConnectionEpochs] flows independently.
+ */
+data class ConnectionLifecycle(
+    /**
+     * Monotonically increasing identity of this snapshot. Consumers capture it before a long operation and reject the
+     * result if the current value differs.
+     */
+    val version: Long = 0,
+    val state: ConnectionState = ConnectionState.Disconnected,
+    val epochs: ConnectionEpochs = ConnectionEpochs(),
+)
+
+/**
+ * Monotonic counters for connection lifecycle events that cannot be inferred reliably from transient [ConnectionState]
+ * values. A fast disconnect/reconnect may be observed only as the final state, while these counters retain both
+ * lifecycle boundaries.
+ *
+ * @property departures Number of transitions away from [ConnectionState.Connected].
+ * @property completedHandshakes Number of transitions into [ConnectionState.Connected].
+ * @property handshakesAtLastDeparture Completed-handshake count captured at the most recent departure. This preserves
+ *   event ordering when a fast departure/reconnect pair is conflated into one observed state-flow value.
+ * @property lastDepartureState State entered by the most recent departure. Consumers that react after a fast reconnect
+ *   can use this event evidence instead of rereading the already-advanced live connection state.
+ */
+data class ConnectionEpochs(
+    val departures: Long = 0,
+    val completedHandshakes: Long = 0,
+    val handshakesAtLastDeparture: Long = 0,
+    val lastDepartureState: ConnectionState? = null,
+) {
+    /** Returns the counters after applying one canonical connection-state transition. */
+    fun advance(previous: ConnectionState, current: ConnectionState): ConnectionEpochs = when {
+        previous is ConnectionState.Connected && current !is ConnectionState.Connected ->
+            copy(
+                departures = departures + 1,
+                handshakesAtLastDeparture = completedHandshakes,
+                lastDepartureState = current,
+            )
+
+        previous !is ConnectionState.Connected && current is ConnectionState.Connected ->
+            copy(completedHandshakes = completedHandshakes + 1)
+
+        else -> this
+    }
+}
