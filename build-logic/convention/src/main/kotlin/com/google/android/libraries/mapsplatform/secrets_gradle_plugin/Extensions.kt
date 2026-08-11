@@ -19,6 +19,7 @@
 //  - Legacy Variant API helpers (AppExtension/LibraryExtension/InternalBaseVariant) removed and
 //    buildConfigFields null-safe (nullable since AGP 9):
 //    the legacy classes no longer exist in AGP 9 and were dead code paths here.
+//  - the properties stream is closed via use {} instead of leaking a descriptor per load.
 
 @file:Suppress("UnstableApiUsage")
 
@@ -50,7 +51,7 @@ fun Project.loadPropertiesFile(fileName: String): Properties {
 
     // Load contents into properties object
     val properties = Properties()
-    properties.load(propertiesFile.inputStream())
+    propertiesFile.inputStream().use { properties.load(it) }
     return properties
 }
 
