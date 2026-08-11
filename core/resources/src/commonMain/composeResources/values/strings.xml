@@ -599,9 +599,11 @@
     <string name="expand_chart">Expand chart</string>
     <string name="expanded">Expanded</string>
     <string name="expires">Expires</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Export configuration</string>
     <string name="export_data_csv">Export all packets</string>
     <string name="export_gpx">Export GPX</string>
+    <string name="export_node_db">Export node database</string>
     <string name="export_tak_data_package">Export TAK Data Package</string>
     <string name="external_notification">External Notification</string>
     <string name="external_notification_config">External Notification Config</string>

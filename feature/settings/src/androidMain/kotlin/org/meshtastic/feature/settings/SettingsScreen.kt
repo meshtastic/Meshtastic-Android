@@ -266,6 +266,7 @@ fun SettingsScreen(
                         onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                         nodeShortName = ourNode?.user?.short_name ?: "",
                         onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                        onExportNodeDb = { settingsViewModel.saveNodeDbJson(it) },
                     )
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),
