@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.UnitConversions
@@ -201,7 +202,8 @@ internal fun EnvironmentMetrics(
                 add(
                     VectorMetricInfo(
                         label = Res.string.weight,
-                        value = "${NumberFormatter.format(w, 2)} kg",
+                        value =
+                        MetricFormatter.weight(w, displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
                         icon = MeshtasticIcons.Weight,
                     )
                         .asGroup(),

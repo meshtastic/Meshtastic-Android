@@ -133,9 +133,8 @@ import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.kmhIn
 import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.mpsToKmph
-import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.model.util.waypointIconOrDefault
@@ -153,6 +152,8 @@ import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
+import org.meshtastic.core.resources.speed_kmh
+import org.meshtastic.core.resources.speed_mph
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
 import org.meshtastic.core.resources.unknown
@@ -1303,16 +1304,9 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
 
 @Composable
 private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
-    val speedInMps = position.ground_speed ?: 0
-    val mpsText = "%d m/s".format(speedInMps)
-    return if (speedInMps > 10) {
-        when (displayUnits) {
-            DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
-            DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-        }
-    } else {
-        mpsText
-    }
+    // Position.ground_speed is km/h on the wire (proto canon), not m/s.
+    val speedRes = if (displayUnits == DisplayUnits.IMPERIAL) Res.string.speed_mph else Res.string.speed_kmh
+    return stringResource(speedRes, (position.ground_speed ?: 0).kmhIn(displayUnits))
 }
 
 // endregion

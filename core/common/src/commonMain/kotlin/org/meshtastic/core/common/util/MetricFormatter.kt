@@ -69,6 +69,12 @@ object MetricFormatter {
         val unit = if (isImperial) "in" else "mm"
         return "${NumberFormatter.format(value, decimalPlaces)} $unit"
     }
+
+    fun weight(kilograms: Float, isImperial: Boolean, decimalPlaces: Int = 2): String {
+        val value = if (isImperial) kilograms * LBS_PER_KG else kilograms
+        val unit = if (isImperial) "lb" else "kg"
+        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    }
 }
 
 /** Shown in place of a metric the radio did not report. A symbol, so it needs no translation. */
@@ -78,3 +84,4 @@ private const val FAHRENHEIT_SCALE = 1.8f
 private const val FAHRENHEIT_OFFSET = 32
 private const val MPH_PER_MPS = 2.23694f
 private const val MM_PER_INCH = 25.4f
+private const val LBS_PER_KG = 2.20462f
