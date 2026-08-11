@@ -23,7 +23,6 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Location
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
@@ -158,6 +157,7 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
@@ -346,27 +346,24 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(isLocationTrackingEnabled, locationPermission.isGranted) {
-        if (isLocationTrackingEnabled && locationPermission.isGranted) {
-            val locationRequest =
-                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
-                    .setMinUpdateIntervalMillis(2000L)
-                    .build()
-            try {
-                @Suppress("MissingPermission")
-                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-                Logger.d { "Started location tracking" }
-            } catch (e: SecurityException) {
-                Logger.d { "Location permission not available: ${e.message}" }
-                isLocationTrackingEnabled = false
-            }
-        } else {
+    ActiveWhileStarted(isLocationTrackingEnabled && locationPermission.isGranted) {
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L).setMinUpdateIntervalMillis(2000L).build()
+        try {
+            @Suppress("MissingPermission")
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+            Logger.d { "Started location tracking" }
+        } catch (e: SecurityException) {
+            Logger.d { "Location permission not available: ${e.message}" }
+            isLocationTrackingEnabled = false
+        }
+
+        val cleanup: () -> Unit = {
             fusedLocationClient.removeLocationUpdates(locationCallback)
             Logger.d { "Stopped location tracking" }
         }
+        cleanup
     }
-
-    DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     // --- Node & waypoint data ---
     val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
@@ -585,16 +582,7 @@ fun MapView(
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
-    // --- Keep screen on while location tracking ---
-    LaunchedEffect(isLocationTrackingEnabled) {
-        val activity = context as? Activity ?: return@LaunchedEffect
-        val window = activity.window
-        if (isLocationTrackingEnabled) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
+    KeepScreenOn(isLocationTrackingEnabled && locationPermission.isGranted)
 
     // --- Main UI ---
     val isMainMode = mode is GoogleMapMode.Main
