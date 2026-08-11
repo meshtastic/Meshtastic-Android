@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,6 +58,9 @@ class MeshPrefsImpl(private val dataStore: MeshDataStore, dispatchers: Coroutine
             }
         }
     }
+
+    override suspend fun awaitDeviceAddress(): String? =
+        dataStore.data.first()[KEY_DEVICE_ADDRESS_PREF] ?: NO_DEVICE_SELECTED
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = cachedFlow(storeForwardFlows, address) {
         val key = intPreferencesKey(storeForwardKey(address))

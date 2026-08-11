@@ -336,6 +336,9 @@ interface MeshPrefs {
 
     fun setDeviceAddress(address: String?)
 
+    /** Persisted selected-device address; suspends for the first disk load instead of returning the flow's default. */
+    suspend fun awaitDeviceAddress(): String?
+
     fun getStoreForwardLastRequest(address: String?): StateFlow<Int>
 
     fun setStoreForwardLastRequest(address: String?, timestamp: Int)
