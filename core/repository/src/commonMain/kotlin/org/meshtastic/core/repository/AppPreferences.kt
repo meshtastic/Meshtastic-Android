@@ -46,6 +46,9 @@ interface FilterPrefs {
     fun setFilterWords(words: Set<String>)
 }
 
+/** Persisted policy used by background mesh-log cleanup. */
+data class MeshLogCleanupPolicy(val loggingEnabled: Boolean, val retentionDays: Int)
+
 /** Reactive interface for mesh log preferences. */
 interface MeshLogPrefs {
     val retentionDays: StateFlow<Int>
@@ -55,6 +58,9 @@ interface MeshLogPrefs {
     val loggingEnabled: StateFlow<Boolean>
 
     fun setLoggingEnabled(enabled: Boolean)
+
+    /** Both cleanup settings from one persisted snapshot; suspends until the store's initial load completes. */
+    suspend fun awaitCleanupPolicy(): MeshLogCleanupPolicy
 
     companion object {
         const val DEFAULT_RETENTION_DAYS = 30
