@@ -55,13 +55,13 @@ class BleAddressLoggingTest {
         .files
         // scopeFromProject sweeps .claude/worktrees/ checkouts too; stale copies there
         // resurface long-fixed lines as phantom offenders (paths match "/core/ble/").
-        .filterNot { "/.claude/" in it.path }
-        .filter { file -> scannedPathFragments.any { it in file.path } }
-        .filterNot { file -> identityUseAllowlist.any { file.path.endsWith(it) } }
+        .filterNot { "/.claude/" in it.path.normalizedProjectPath() }
+        .filter { file -> scannedPathFragments.any { it in file.path.normalizedProjectPath() } }
+        .filterNot { file -> identityUseAllowlist.any { file.path.normalizedProjectPath().endsWith(it) } }
 
     @Test
     fun `the scan actually reaches the BLE sources`() {
-        val paths = scannedFiles().map { it.path }
+        val paths = scannedFiles().map { it.path.normalizedProjectPath() }
 
         assertTrue(paths.isNotEmpty(), "scoped scan matched no files at all — the path filter is wrong")
         assertTrue(
@@ -79,7 +79,8 @@ class BleAddressLoggingTest {
                     val interpolates = interpolatedAddress.containsMatchIn(line)
                     val anonymised = "anonymize" in line
                     if (isDiagnostic && interpolates && !anonymised) {
-                        "${file.path.substringAfterLast("/kotlin/")}:${index + 1}: ${line.trim()}"
+                        "${file.path.normalizedProjectPath().substringAfterLast("/kotlin/")}:${index + 1}: " +
+                            line.trim()
                     } else {
                         null
                     }
@@ -101,12 +102,13 @@ class BleAddressLoggingTest {
         val offenders =
             Konsist.scopeFromProject()
                 .files
-                .filterNot { "/.claude/" in it.path } // see scannedFiles()
-                .filter { "/core/ble/" in it.path }
+                .filterNot { "/.claude/" in it.path.normalizedProjectPath() } // see scannedFiles()
+                .filter { "/core/ble/" in it.path.normalizedProjectPath() }
                 .flatMap { file ->
                     file.text.lines().withIndex().mapNotNull { (index, line) ->
                         if ("identifier =" in line && "address" in line && "anonymize" !in line) {
-                            "${file.path.substringAfterLast("/kotlin/")}:${index + 1}: ${line.trim()}"
+                            "${file.path.normalizedProjectPath().substringAfterLast("/kotlin/")}:${index + 1}: " +
+                                line.trim()
                         } else {
                             null
                         }
