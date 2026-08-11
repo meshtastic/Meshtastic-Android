@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Vendored unmodified from google/secrets-gradle-plugin v2.0.1 — see SecretsPlugin.kt for why.
+// Vendored from google/secrets-gradle-plugin v2.0.1 — see SecretsPlugin.kt for why.
+// Deviation from upstream: ignoreList copies defaultIgnoreList so projects don't share one mutable list.
 
 package com.google.android.libraries.mapsplatform.secrets_gradle_plugin
 
@@ -28,7 +29,7 @@ open class SecretsPluginExtension {
     /**
      * A list of keys this plugin should ignore and not inject. Defaults to $defaultIgnoreList
      */
-    var ignoreList: MutableList<String> = defaultIgnoreList
+    var ignoreList: MutableList<String> = defaultIgnoreList.toMutableList()
 
     /**
      * The name of the properties file containing secrets' default values.
