@@ -110,7 +110,7 @@ jobs:
             --baseurl /${{ github.event.repository.name }}/main &
           jekyll_pid=$!
           if [ "$BUILD_DOKKA" = "true" ]; then
-            ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+            ./gradlew dokkaGeneratePublicationHtml --no-isolated-projects --no-configuration-cache
           else
             echo "No Dokka-relevant changes — skipping API reference rebuild."
           fi

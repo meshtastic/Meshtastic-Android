@@ -74,6 +74,10 @@ tasks {
     }
 }
 
+// Isolated Projects forbids reaching into another project; ".." escapes the included build
+// to the repo root, where the shared config lives.
+val repoConfigDir = isolated.rootProject.projectDirectory.dir("../config")
+
 spotless {
     ratchetFrom("origin/main")
     kotlin {
@@ -81,22 +85,20 @@ spotless {
         // secrets_gradle_plugin is vendored third-party code (Apache-2.0) keeping Google's header.
         targetExclude("**/build/**/*.kt", "**/secrets_gradle_plugin/**")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get())
-            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
-        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kt"))
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(repoConfigDir.file("spotless/.editorconfig").asFile.path)
+        licenseHeaderFile(repoConfigDir.file("spotless/copyright.kt").asFile)
     }
     kotlinGradle {
         target("**/*.gradle.kts")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get())
-            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
-        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(repoConfigDir.file("spotless/.editorconfig").asFile.path)
+        licenseHeaderFile(repoConfigDir.file("spotless/copyright.kts").asFile, "(^(?![\\/ ]\\*).*$)")
     }
 }
 
 detekt {
     toolVersion = libs.versions.detekt.get()
-    config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
+    config.setFrom(repoConfigDir.file("detekt/detekt.yml").asFile)
     buildUponDefaultConfig = true
     allRules = false
     baseline = file("detekt-baseline.xml")
