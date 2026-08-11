@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.SessionManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EnsureRemoteAdminSessionUseCaseTest {
@@ -120,6 +121,28 @@ class EnsureRemoteAdminSessionUseCaseTest {
     }
 
     @Test
+    fun `accepts a valid refresh arriving after the former ten second deadline`() = runTest {
+        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        val sessionManager = stubSessionManager(refreshFlow = refresh)
+        val controller = mock<RadioController>(MockMode.autofill)
+        everySuspend { controller.refreshMetadata(any()) } returns Unit
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
+
+        var observed: EnsureSessionResult? = null
+        val job = launch { observed = useCase(destNum) }
+        runCurrent()
+        // Keep the emission late while deriving the boundary from the production UX deadline.
+        advanceTimeBy(EnsureRemoteAdminSessionUseCase.UX_TIMEOUT.inWholeMilliseconds - 1.seconds.inWholeMilliseconds)
+        refresh.emit(destNum)
+        advanceUntilIdle()
+        job.join()
+
+        assertEquals(EnsureSessionResult.Refreshed, observed)
+        verifySuspend { controller.refreshMetadata(destNum) }
+    }
+
+    @Test
     fun `returns Timeout when no refresh arrives within deadline`() = runTest {
         val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val sessionManager = stubSessionManager(refreshFlow = refresh)
@@ -164,6 +187,35 @@ class EnsureRemoteAdminSessionUseCaseTest {
 
         assertEquals(EnsureSessionResult.Refreshed, secondCaller.await())
         assertEquals(1, dispatches)
+    }
+
+    @Test
+    fun `completed ensure is not reused by a later caller`() = runTest {
+        val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        val sessionManager = stubSessionManager(refreshFlow = refresh)
+        val controller = mock<RadioController>(MockMode.autofill)
+        var dispatches = 0
+        everySuspend { controller.refreshMetadata(any()) } calls
+            {
+                dispatches++
+                Unit
+            }
+        val useCase =
+            EnsureRemoteAdminSessionUseCase(sessionManager, controller, connectedRepo(), this.asServiceScope())
+
+        val first = async { useCase(destNum) }
+        runCurrent()
+        refresh.emit(destNum)
+        runCurrent()
+        assertEquals(EnsureSessionResult.Refreshed, first.await())
+
+        val second = async { useCase(destNum) }
+        runCurrent()
+        assertEquals(2, dispatches)
+        refresh.emit(destNum)
+        runCurrent()
+
+        assertEquals(EnsureSessionResult.Refreshed, second.await())
     }
 
     @Test
