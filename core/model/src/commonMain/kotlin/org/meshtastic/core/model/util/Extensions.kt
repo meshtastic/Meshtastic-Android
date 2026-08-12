@@ -79,21 +79,6 @@ fun Any.toPIIString() = if (!isDebug) {
 @Suppress("MagicNumber")
 fun ByteArray.toHexString() = joinToString("") { it.toUByte().toString(16).padStart(2, '0') }
 
-private const val MPS_TO_KMPH = 3.6f
-private const val KM_TO_MILES = 0.621371f
-
-fun Int.mpsToKmph(): Float {
-    // Convert meters per second to kilometers per hour
-    val kmph = this * MPS_TO_KMPH
-    return kmph
-}
-
-fun Int.mpsToMph(): Float {
-    // Convert meters per second to miles per hour
-    val mph = this * MPS_TO_KMPH * KM_TO_MILES
-    return mph
-}
-
 /** Returns true if this packet arrived via a LoRa transport mechanism. */
 fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||

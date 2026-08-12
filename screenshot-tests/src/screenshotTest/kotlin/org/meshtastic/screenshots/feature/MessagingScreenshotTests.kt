@@ -17,6 +17,7 @@
 package org.meshtastic.screenshots.feature
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.resources.Res
@@ -28,6 +29,7 @@ import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
+import org.meshtastic.feature.messaging.component.MessageActionsContentPreview
 import org.meshtastic.feature.messaging.component.MessageItemGroupedRunPreview
 import org.meshtastic.feature.messaging.component.MessageItemMarkdownPreview
 import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
@@ -110,4 +112,41 @@ fun ScreenshotMessageItemMarkdown() {
 @Composable
 fun ScreenshotMessageItemGroupedRun() {
     MessageItemGroupedRunPreview()
+}
+
+@PreviewTest
+@Preview(name = "MessageActions - narrow sheet", widthDp = 320)
+@Composable
+fun ScreenshotMessageActionsNarrow() {
+    MessageActionsContentPreview()
+}
+
+// Accessibility: largest Android font scale must not clip chips, reactions, or the composer.
+
+@PreviewTest
+@Preview(name = "MessageItemSigned - font scale 2x", widthDp = 411, fontScale = 2.0f)
+@Composable
+fun ScreenshotMessageItemSignedLargeFont() {
+    MessageItemSignedPreview()
+}
+
+@PreviewTest
+@Preview(name = "MessageItemGroupedRun - font scale 2x", widthDp = 411, fontScale = 2.0f)
+@Composable
+fun ScreenshotMessageItemGroupedRunLargeFont() {
+    MessageItemGroupedRunPreview()
+}
+
+@PreviewTest
+@Preview(name = "ReactionItem - font scale 2x", widthDp = 411, fontScale = 2.0f)
+@Composable
+fun ScreenshotReactionItemLargeFont() {
+    ReactionItemPreview()
+}
+
+@PreviewTest
+@Preview(name = "MessageInput - font scale 2x", widthDp = 411, fontScale = 2.0f)
+@Composable
+fun ScreenshotMessageInputLargeFont() {
+    MessageInputPreview()
 }
