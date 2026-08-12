@@ -236,7 +236,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
         quickEmojis.take(MAX_EMOJI_ROW_SIZE).forEach { emoji ->
             Box(
                 modifier =
-                Modifier.defaultMinSize(minWidth = 40.dp, minHeight = 40.dp)
+                Modifier.defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable(
@@ -253,7 +253,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
 
         IconButton(
             onClick = onMoreReactions,
-            modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+            modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
                 MeshtasticIcons.AddReaction,

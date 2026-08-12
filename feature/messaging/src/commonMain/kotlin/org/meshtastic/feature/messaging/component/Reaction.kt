@@ -37,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -87,7 +88,10 @@ internal fun ReactionItem(
     Surface(
         modifier =
         modifier
+            // Clickable wraps the M3 touch-target expansion, so the hit area meets the 44dp
+            // minimum while the drawn pill stays compact.
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .minimumInteractiveComponentSize()
             .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier),
         color =
         when {
