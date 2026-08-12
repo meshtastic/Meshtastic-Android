@@ -32,8 +32,8 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
  *   barrier (a mid-scan merge can't snapshot-then-retire the DB underneath an in-flight session write). A callback is
  *   never replayed after it starts, so higher layers must make any retry policy explicit where idempotency is known.
  *
- * `withDb` only returns null when no database is open, which [DatabaseProvider] guarantees can't happen (the default DB
- * is the floor), so the non-null coercions below are structural, not behavioral.
+ * `withDb` can return null while no database is available. Collection reads use empty defaults, count reads return
+ * zero, and operations that require a created row retain non-null checks so callers cannot proceed with an invalid id.
  */
 @Suppress("TooManyFunctions")
 class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : DiscoveryDao {
@@ -55,6 +55,35 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
 
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
         dbManager.withDb { it.discoveryDao().getSession(sessionId) }
+
+    override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String): Int =
+        dbManager.withDb { it.discoveryDao().updateSessionCompletionStatus(sessionId, status) } ?: 0
+
+    override suspend fun updateSessionAggregates(
+        sessionId: Long,
+        totalUniqueNodes: Int,
+        totalDwellSeconds: Long,
+        totalMessages: Int,
+        totalSensorPackets: Int,
+        furthestNodeDistance: Double,
+        avgChannelUtilization: Double,
+    ) {
+        dbManager.withDb {
+            it.discoveryDao()
+                .updateSessionAggregates(
+                    sessionId,
+                    totalUniqueNodes,
+                    totalDwellSeconds,
+                    totalMessages,
+                    totalSensorPackets,
+                    furthestNodeDistance,
+                    avgChannelUtilization,
+                )
+        }
+    }
+
+    override suspend fun updateRecoverableSessionCompletionStatus(sessionId: Long, status: String): Int =
+        dbManager.withDb { it.discoveryDao().updateRecoverableSessionCompletionStatus(sessionId, status) } ?: 0
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> =
         dbManager.observeCurrentDb { it.discoveryDao().getSessionFlow(sessionId) }
