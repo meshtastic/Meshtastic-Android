@@ -19,6 +19,7 @@ package org.meshtastic.core.repository.usecase
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
@@ -132,16 +133,22 @@ class SendMessageUseCaseImpl(
 
             // Enqueue for durable transmission via the platform-specific queue
             messageQueue.enqueue(packetId)
-            // Reported here rather than at transmission: the queue worker can run long after the RUM
-            // session ended, and re-runs the send on retry.
-            analytics.trackAction(
-                "message_send",
-                mapOf("num_bytes" to finalMessageText.length, "is_reply" to (replyId != null)),
-            )
         } catch (ex: Exception) {
             Logger.e(ex) { "Failed to enqueue message packet" }
             throw ex
         }
+
+        // Outside the enqueue error boundary: the message is already queued, so a telemetry failure must not
+        // surface as a send failure and drive the caller into a retry that queues a second packet. Reported
+        // here rather than at transmission because the queue worker can run after the RUM session ended, and
+        // re-runs the send on retry.
+        safeCatching {
+            analytics.trackAction(
+                "message_send",
+                mapOf("num_bytes" to finalMessageText.encodeToByteArray().size, "is_reply" to (replyId != null)),
+            )
+        }
+            .onFailure { Logger.w(it) { "Failed to report message_send action" } }
 
         return packetId
     }

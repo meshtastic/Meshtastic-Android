@@ -19,6 +19,7 @@ package org.meshtastic.core.repository.usecase
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Node
@@ -81,7 +82,7 @@ class SendMessageUseCaseTest {
     }
 
     @Test
-    fun `invoke reports a message_send analytics action`() = runTest {
+    fun `invoke reports a message_send analytics action exactly once`() = runTest {
         // Arrange
         val ourNode = Node(num = 1, user = User(id = "!1234"))
         nodeRepository.setOurNode(ourNode)
@@ -91,7 +92,21 @@ class SendMessageUseCaseTest {
         useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
 
         // Assert
-        verify { analytics.trackAction("message_send", mapOf("num_bytes" to 5, "is_reply" to false)) }
+        verify(exactly(1)) { analytics.trackAction("message_send", mapOf("num_bytes" to 5, "is_reply" to false)) }
+    }
+
+    @Test
+    fun `invoke reports message_send num_bytes as utf-8 length not character count`() = runTest {
+        // Arrange
+        val ourNode = Node(num = 1, user = User(id = "!1234"))
+        nodeRepository.setOurNode(ourNode)
+        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+
+        // Act — 3 characters, 6 UTF-8 bytes; must match the byte count DataPacket actually carries
+        useCase("é☃!", "0${NodeAddress.ID_BROADCAST}", null)
+
+        // Assert
+        verify(exactly(1)) { analytics.trackAction("message_send", mapOf("num_bytes" to 6, "is_reply" to false)) }
     }
 
     @Test

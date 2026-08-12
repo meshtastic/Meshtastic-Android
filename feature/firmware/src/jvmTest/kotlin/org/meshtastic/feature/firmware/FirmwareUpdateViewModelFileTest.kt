@@ -231,6 +231,9 @@ class FirmwareUpdateViewModelFileTest {
         viewModel.confirmLocalFirmwareFile()
         advanceUntilIdle()
 
+        // Prove the absent action came from the address rejection, not from an earlier bail-out.
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
         verify(exactly(0)) { analytics.trackAction("firmware_update_start", any()) }
     }
 
