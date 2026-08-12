@@ -144,9 +144,8 @@ open class MeshUtilApplication :
     }
 
     override fun onTerminate() {
-        // Shutdown managers (useful for Robolectric tests).
-        // Non-blocking: cancelAndJoin inside runBlocking on the main thread can deadlock
-        // if any active coroutine is dispatching to Dispatchers.Main.
+        // Robolectric never calls this, so unit tests booting this Application cannot rely on it.
+        // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
         applicationScope.cancel()
         try {
             runBlocking { get<DatabaseManager>().close() }

@@ -44,9 +44,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
+// A bare Application keeps MeshUtilApplication.onCreate out of this test: its fire-and-forget
+// applicationScope launches outlive the class and surface here as UncaughtExceptionsBeforeTest.
 @OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], application = android.app.Application::class)
 class MapNodeClusterItemsTest {
 
     @Test
