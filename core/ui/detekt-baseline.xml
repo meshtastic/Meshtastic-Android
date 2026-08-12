@@ -13,7 +13,6 @@
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt:@Suppress("MagicNumber", "LongMethod") @Composable fun MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:NodeChip.kt:@Composable fun NodeChip</ID>
     <ID>ComposableParamOrder:NodeKeyStatusIcon.kt:@Composable fun NodeKeyStatusIcon</ID>
-    <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:SignalInfo.kt:@Composable fun SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt:@Composable fun SwitchPreference</ID>
     <ID>CompositionLocalAllowlist:LocalAnalyticsIntroProvider.kt:val LocalAnalyticsIntroProvider = compositionLocalOf&lt;@Composable () -> Unit> { {} }</ID>
@@ -119,7 +118,6 @@
     <ID>PreviewPublic:PositionPrecisionPreference.kt:@Preview(showBackground = true) @Composable fun PositionPrecisionPreferencePreview</ID>
     <ID>PreviewPublic:PreferenceCategory.kt:@Preview(showBackground = true) @Composable fun PreferenceCategoryPreview</ID>
     <ID>PreviewPublic:RegularPreference.kt:@Preview(showBackground = true) @Composable fun RegularPreferencePreview</ID>
-    <ID>PreviewPublic:SatelliteCountInfo.kt:@PreviewLightDark @Composable fun SatelliteCountInfoPreview</ID>
     <ID>PreviewPublic:SecurityIcon.kt:@Preview(name = "All Security Icons with Dialog") @Composable fun PreviewAllSecurityIconsWithDialog</ID>
     <ID>PreviewPublic:SignalInfo.kt:@Composable @Preview(showBackground = true) fun SignalInfoSimplePreview</ID>
     <ID>PreviewPublic:SignalInfo.kt:@PreviewLightDark @Composable fun SignalInfoPreview</ID>
