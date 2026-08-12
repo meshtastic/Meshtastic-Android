@@ -558,7 +558,7 @@
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
-    <string name="downlink_enabled">Downlink enabled</string>
+    <string name="downlink_enabled">MQTT Downlink Enabled</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="download">Download</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
@@ -1811,7 +1811,7 @@
     <string name="update_interval">GPS Polling Interval</string>
     <string name="update_interval_seconds">Update interval (seconds)</string>
     <string name="updated">Updated</string>
-    <string name="uplink_enabled">Uplink enabled</string>
+    <string name="uplink_enabled">MQTT Uplink Enabled</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node's configured gateway.</string>
     <string name="uptime">Uptime</string>
     <!-- URL -->
