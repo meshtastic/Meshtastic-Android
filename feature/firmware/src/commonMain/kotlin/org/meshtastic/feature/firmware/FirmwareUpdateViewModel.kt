@@ -320,12 +320,13 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    fun startUpdate() {
-        val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
-        val release = currentState.release ?: return
-        // Explicit mapping instead of class-name reflection: FirmwareUpdateMethod is R8-obfuscated in release.
+    /**
+     * Emitted from every path that begins a flash, so the RUM action counts local-file sideloads alongside release
+     * updates. The method label is mapped explicitly because [FirmwareUpdateMethod] is obfuscated in release builds.
+     */
+    private fun trackUpdateStart(state: FirmwareUpdateState.Ready, releaseId: String) {
         val updateMethod =
-            when (currentState.updateMethod) {
+            when (state.updateMethod) {
                 FirmwareUpdateMethod.Usb -> "usb"
                 FirmwareUpdateMethod.Ble -> "ble"
                 FirmwareUpdateMethod.Wifi -> "wifi"
@@ -333,12 +334,14 @@ class FirmwareUpdateViewModel(
             }
         analytics.trackAction(
             "firmware_update_start",
-            mapOf(
-                "update_method" to updateMethod,
-                "is_recovery" to currentState.isRecovery,
-                "release_version" to release.id,
-            ),
+            mapOf("update_method" to updateMethod, "is_recovery" to state.isRecovery, "release_version" to releaseId),
         )
+    }
+
+    fun startUpdate() {
+        val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
+        val release = currentState.release ?: return
+        trackUpdateStart(currentState, release.id)
         if (currentState.isRecovery) {
             startRecoveryUpdate(currentState, release)
         } else {
@@ -727,6 +730,7 @@ class FirmwareUpdateViewModel(
             cleanupPendingLocalFirmwareArtifact(pendingArtifact)
             return
         }
+        trackUpdateStart(currentState, LOCAL_RELEASE_ID)
         originalDeviceAddress = radioPrefs.devAddr.value
 
         updateJob?.cancel()
