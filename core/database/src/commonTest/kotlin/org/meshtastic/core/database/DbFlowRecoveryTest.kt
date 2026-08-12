@@ -63,9 +63,7 @@ class DbFlowRecoveryTest {
             throw IllegalStateException("Connection pool is closed")
         }
             .retryOnDbPoolFailure("test")
-            .test(timeout = EMISSION_TIMEOUT) {
-                assertEquals("Connection pool is closed", awaitError().message)
-            }
+            .test(timeout = EMISSION_TIMEOUT) { assertEquals("Connection pool is closed", awaitError().message) }
 
         assertEquals(1, attempts, "a closed pool is handled by re-latching, not by retrying")
     }
