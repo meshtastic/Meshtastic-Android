@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -93,6 +94,17 @@ import org.meshtastic.core.ui.util.createClipEntry
 
 internal const val MESSAGE_STATUS_LABEL_TEST_TAG = "message_status_label"
 
+/** Selects the persisted compact label or formats the raw display instant with platform date/time conventions. */
+internal fun formatMessageTimestamp(
+    message: Message,
+    showFullMessageTimestamp: Boolean,
+    fullDateTimeFormatter: (Long) -> String = DateFormatter::formatDateTime,
+): String = if (showFullMessageTimestamp) {
+    fullDateTimeFormatter(message.displayTime)
+} else {
+    message.time
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -107,6 +119,7 @@ fun MessageItem(
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
     showUserName: Boolean = true,
+    showFullMessageTimestamp: Boolean = false,
     emojis: List<Reaction> = emptyList(),
     quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
     onClick: () -> Unit = {},
@@ -144,6 +157,7 @@ fun MessageItem(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isLocal = node.num == ourNode.num
+    val timestamp = formatMessageTimestamp(message, showFullMessageTimestamp)
     val statusString = message.getStatusStringRes(isDirectMessage)
     val isDirectImplicitAck = message.status == MessageStatus.DELIVERED && isDirectMessage
     val isRetryableFailure = message.status == MessageStatus.ERROR && message.isStatusRetryable(isDirectMessage)
@@ -188,7 +202,7 @@ fun MessageItem(
                         },
                         // Mesh time (rx_time), matching the bubble header. receivedTime is when this phone
                         // pulled the packet off the node, which is misleading after an offline backlog sync.
-                        timestamp = message.time,
+                        timestamp = timestamp,
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
                         translationRowState = translationRowStateFor(message, translationAvailable),
@@ -256,7 +270,7 @@ fun MessageItem(
     if (showUserName) {
         if (message.fromLocal) {
             Text(
-                text = message.time,
+                text = timestamp,
                 modifier = Modifier.align(Alignment.End).padding(end = 12.dp, bottom = 2.dp),
                 style = metadataStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -276,7 +290,7 @@ fun MessageItem(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(text = message.time, style = metadataStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = timestamp, style = metadataStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

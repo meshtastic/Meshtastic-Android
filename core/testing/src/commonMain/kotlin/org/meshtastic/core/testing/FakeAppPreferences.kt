@@ -152,6 +152,12 @@ class FakeUiPrefs : UiPrefs {
         showQuickChat.value = show
     }
 
+    override val showFullMessageTimestamps = MutableStateFlow(false)
+
+    override fun setShowFullMessageTimestamps(show: Boolean) {
+        showFullMessageTimestamps.value = show
+    }
+
     override val eventThemeEnabled = MutableStateFlow(true)
 
     override fun setEventThemeEnabled(enabled: Boolean) {

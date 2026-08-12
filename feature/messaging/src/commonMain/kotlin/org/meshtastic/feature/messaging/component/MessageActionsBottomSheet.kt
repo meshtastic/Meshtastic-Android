@@ -111,7 +111,7 @@ fun MessageActionsContent(
             )
         }
 
-        // Bubbles only show a short header time per run, so the sheet is where the full date-time lives.
+        // The caller supplies the same compact or full timestamp shown in the conversation header.
         if (timestamp != null) {
             ListItem(
                 headlineContent = {

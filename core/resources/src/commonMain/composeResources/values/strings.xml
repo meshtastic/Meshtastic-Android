@@ -1616,6 +1616,8 @@
     <string name="should_update_firmware">Firmware Update Recommended.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_full_message_timestamps">Show full message timestamps</string>
+    <string name="show_full_message_timestamps_summary">Always show the date and time in conversation headers and message actions</string>
     <string name="show_iaq_legend">Show air quality legend</string>
     <string name="show_layer">Show Layer</string>
     <string name="show_original">Show original</string>

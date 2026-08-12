@@ -126,6 +126,11 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /** Whether conversation message headers and actions always show both the date and time. */
+    val showFullMessageTimestamps: StateFlow<Boolean>
+
+    fun setShowFullMessageTimestamps(show: Boolean)
+
     /**
      * Whether to apply an event edition's ambient theme (accent wash + custom typeface) app-wide (opt-out; default on).
      */
