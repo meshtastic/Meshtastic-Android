@@ -592,12 +592,10 @@ open class RadioConfigViewModel(
 
     private fun sendAdminRequest(destNum: Int) {
         val route = radioConfigState.value.route
+        val isLocal = radioConfigState.value.isLocal
         _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
 
-        analytics.trackAction(
-            "admin_action",
-            mapOf("route" to route.lowercase(), "is_remote" to (destNum != myNodeNum)),
-        )
+        analytics.trackAction("admin_action", mapOf("route" to route.lowercase(), "is_remote" to !isLocal))
 
         val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
 
