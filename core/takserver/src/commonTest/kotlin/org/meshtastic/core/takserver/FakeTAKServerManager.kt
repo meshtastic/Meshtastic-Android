@@ -33,8 +33,16 @@ import kotlinx.coroutines.flow.asStateFlow
  * only exercise the connected-client / broadcast surface (not the start/stop lifecycle) can ignore it.
  */
 internal class FakeTAKServerManager : TAKServerManager {
+    override val isSupported = true
+
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
+    private val _isStarting = MutableStateFlow(false)
+    override val isStarting: StateFlow<Boolean> = _isStarting.asStateFlow()
+
+    private val _hasStartError = MutableStateFlow(false)
+    override val hasStartError: StateFlow<Boolean> = _hasStartError.asStateFlow()
 
     val connections = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = connections

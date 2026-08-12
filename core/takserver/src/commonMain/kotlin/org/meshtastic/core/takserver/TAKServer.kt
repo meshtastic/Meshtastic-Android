@@ -32,6 +32,10 @@ import org.meshtastic.core.di.CoroutineDispatchers
  */
 interface TAKServer {
 
+    /** Whether this platform provides a local TAK listener. */
+    val isSupported: Boolean
+        get() = true
+
     /** Observable count of currently-connected TAK clients (ATAK/iTAK). */
     val connectionCount: StateFlow<Int>
 

@@ -204,6 +204,63 @@ class MeshServiceOrchestratorTest {
     }
 
     @Test
+    fun testTakServerCanRetryAfterFailedStart() {
+        val takEnabledFlow = MutableStateFlow(false)
+        val takRunningFlow = MutableStateFlow(false)
+        val lifecycleEvents = mutableListOf<String>()
+        every { takServerManager.start(any()) } calls
+            {
+                lifecycleEvents += "start"
+                Unit
+            }
+        every { takServerManager.stop() } calls
+            {
+                lifecycleEvents += "stop"
+                Unit
+            }
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        // The mock never changes takRunningFlow, modeling a start attempt that failed before listening.
+        takEnabledFlow.value = true
+        takEnabledFlow.value = false
+        takEnabledFlow.value = true
+
+        assertEquals(listOf("start", "stop", "start"), lifecycleEvents)
+
+        orchestrator.stop()
+        assertEquals(listOf("start", "stop", "start", "stop"), lifecycleEvents)
+    }
+
+    @Test
+    fun testStopStopsTakServerWhileStarting() {
+        val takEnabledFlow = MutableStateFlow(true)
+        val takRunningFlow = MutableStateFlow(false)
+        val lifecycleEvents = mutableListOf<String>()
+        every { takServerManager.start(any()) } calls
+            {
+                lifecycleEvents += "start"
+                Unit
+            }
+        every { takServerManager.stop() } calls
+            {
+                lifecycleEvents += "stop"
+                Unit
+            }
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        orchestrator.stop()
+
+        takEnabledFlow.value = false
+        orchestrator.start()
+        takEnabledFlow.value = true
+        orchestrator.stop()
+
+        assertEquals(listOf("start", "stop", "start", "stop"), lifecycleEvents)
+    }
+
+    @Test
     fun testStartCallsSwitchActiveDatabase() {
         // New ordering: start() waits for currentDeviceAddressFlow to surface a valid address,
         // then switches the DB to it and connects. getDeviceAddress() is no longer consulted

@@ -1697,12 +1697,23 @@
     <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Enable Local TAK Server</string>
-    <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK/iTAK connections</string>
-    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK/iTAK to connect to this server</string>
+    <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK connections</string>
+    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK to connect to this server</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh to CoT Converter</string>
-    <string name="tak_server_mesh_to_cot_desc">Show Meshtastic nodes on the ATAK/iTAK map as contacts</string>
+    <string name="tak_server_mesh_to_cot_desc">Show Meshtastic nodes on the ATAK map as contacts</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Status</string>
+    <plurals name="tak_server_status_connected">
+        <item quantity="one">%1$d local client connection</item>
+        <item quantity="other">%1$d local client connections</item>
+    </plurals>
+    <string name="tak_server_status_failed">Unable to start TAK Server. Turn it off and on to retry.</string>
+    <string name="tak_server_status_not_running">TAK Server is not running</string>
+    <string name="tak_server_status_off">Off</string>
+    <string name="tak_server_status_starting">Starting TAK Server</string>
+    <string name="tak_server_status_unavailable">Local TAK Server is available in Meshtastic for Android</string>
+    <string name="tak_server_status_waiting">Listening on 127.0.0.1:8089 — waiting for ATAK</string>
     <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
     <string name="tak_server_test_idle">Send all %1$d test fixtures to mesh</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
