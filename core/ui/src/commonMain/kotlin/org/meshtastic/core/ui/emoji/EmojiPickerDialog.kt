@@ -30,10 +30,13 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -70,10 +73,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
@@ -103,6 +110,12 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 private val GRID_MIN_CELL_SIZE = 44.dp
 private const val EMOJI_FONT_SIZE = 24
+private val CELL_CONTENT_PADDING = 12.dp
+private val SKIN_TONE_CELL_MIN_SIZE = 44.dp
+private const val SKIN_TONE_FONT_SIZE = 22
+
+/** Wide enough for all six [SkinTone] variants at [SKIN_TONE_CELL_MIN_SIZE]; wider scales wrap instead. */
+private val SKIN_TONE_POPUP_MAX_WIDTH = 300.dp
 private const val CATEGORY_HEADER_KEY_PREFIX = "header_"
 private const val RECENTS_HEADER_KEY = "header_recents"
 private const val RECENTS_KEY_PREFIX = "recent_"
@@ -273,7 +286,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier.fillMaxWidth().height(52.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         placeholder = {
             Text(
                 text = stringResource(Res.string.search_emoji),
@@ -421,9 +434,10 @@ private fun EmojiGrid(
             }
     }
 
+    val cellSize = emojiCellSize()
     LazyVerticalGrid(
         state = gridState,
-        columns = GridCells.Adaptive(minSize = GRID_MIN_CELL_SIZE),
+        columns = GridCells.Adaptive(minSize = cellSize),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -439,6 +453,7 @@ private fun EmojiGrid(
                     item(key = item.key) {
                         EmojiCellWithSkinTone(
                             emoji = item.emoji,
+                            cellSize = cellSize,
                             isSelected = selectedEmojis.contains(item.emoji.base),
                             preferredSkinToneIndex = preferredSkinToneIndex,
                             onSkinToneSelect = onSkinToneSelect,
@@ -563,6 +578,16 @@ private fun localizedHeaderTitle(header: GridItem.Header): String = if (header.k
     }
 }
 
+/** Grid cell size that grows with the system font scale so emoji glyphs are never clipped. */
+@Composable
+private fun emojiCellSize(): Dp = emojiCellSizeFor(glyphSize = with(LocalDensity.current) { EMOJI_FONT_SIZE.sp.toDp() })
+
+/**
+ * Cell size for a glyph that measures [glyphSize] at the current font scale: never smaller than the glyph plus its
+ * padding, and never below [GRID_MIN_CELL_SIZE] so the cell stays a valid touch target.
+ */
+internal fun emojiCellSizeFor(glyphSize: Dp): Dp = max(GRID_MIN_CELL_SIZE, glyphSize + CELL_CONTENT_PADDING)
+
 @Composable
 private fun SectionHeader(title: String) {
     Text(
@@ -584,6 +609,7 @@ private fun SectionHeader(title: String) {
 @Suppress("LongParameterList")
 private fun EmojiCellWithSkinTone(
     emoji: Emoji,
+    cellSize: Dp,
     isSelected: Boolean,
     preferredSkinToneIndex: Int,
     onSkinToneSelect: (Int) -> Unit,
@@ -596,7 +622,7 @@ private fun EmojiCellWithSkinTone(
     Box {
         Box(
             modifier =
-            Modifier.size(GRID_MIN_CELL_SIZE)
+            Modifier.size(cellSize)
                 .clip(RoundedCornerShape(8.dp))
                 .then(
                     if (isSelected) {
@@ -648,23 +674,37 @@ private fun EmojiCellWithSkinTone(
 @Composable
 private fun SkinTonePopup(emoji: Emoji, onSelect: (String, Int) -> Unit, onDismiss: () -> Unit) {
     Popup(alignment = Alignment.TopCenter, onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shadowElevation = 8.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-            modifier = Modifier.widthIn(max = 280.dp),
+        SkinToneSurface(emoji = emoji, onSelect = onSelect)
+    }
+}
+
+/** Split out of [SkinTonePopup] so the scale-sensitive layout is reachable from a preview; [Popup] is not. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SkinToneSurface(emoji: Emoji, onSelect: (String, Int) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 8.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+        modifier = Modifier.widthIn(max = SKIN_TONE_POPUP_MAX_WIDTH),
+    ) {
+        // FlowRow so scale-grown cells wrap to a second line instead of clipping
+        FlowRow(
+            modifier = Modifier.padding(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            Row(modifier = Modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                SkinTone.entries.forEachIndexed { index, tone ->
-                    val variant = emoji.withSkinTone(tone)
-                    Box(
-                        modifier =
-                        Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable { onSelect(variant, index) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = variant, fontSize = 22.sp)
-                    }
+            SkinTone.entries.forEachIndexed { index, tone ->
+                val variant = emoji.withSkinTone(tone)
+                Box(
+                    modifier =
+                    Modifier.defaultMinSize(minWidth = SKIN_TONE_CELL_MIN_SIZE, minHeight = SKIN_TONE_CELL_MIN_SIZE)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onSelect(variant, index) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = variant, fontSize = SKIN_TONE_FONT_SIZE.sp)
                 }
             }
         }
@@ -771,6 +811,47 @@ fun EmojiPickerContentPreview() {
             )
         }
     }
+}
+
+/** A skin-tone-capable emoji, so the preview renders all six variants. */
+private val SKIN_TONE_PREVIEW_EMOJI = Emoji("👋", listOf("wave", "hand", "hello"), supportsSkinTone = true)
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@Preview(fontScale = 2.0f)
+@Composable
+fun EmojiPickerContentLargeFontPreview() {
+    AppTheme {
+        Surface {
+            EmojiPickerContent(
+                searchQuery = "",
+                debouncedQuery = "",
+                onSearchQueryChange = {},
+                selectedCategoryIndex = 0,
+                onCategorySelected = {},
+                selectedEmojis = setOf("😀", "👍"),
+                recentEmojis = listOf("😀", "❤️", "👍", "🔥", "😂", "🙏"),
+                categories = PREVIEW_CATEGORIES,
+                allEmojis = PREVIEW_CATEGORIES.flatMap { it.emojis },
+                preferredSkinToneIndex = 0,
+                onSkinToneSelect = {},
+                onEmojiSelected = {},
+            )
+        }
+    }
+}
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SkinTonePopupPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
+}
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@Preview(fontScale = 2.0f)
+@Composable
+fun SkinTonePopupLargeFontPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
 }
 
 @Suppress("UnusedPrivateMember", "PreviewPublic")
