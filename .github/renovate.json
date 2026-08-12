@@ -102,6 +102,13 @@
       "allowedVersions": "!/^9\\.7\\.0$/"
     },
     {
+      "description": "Block Compose Multiplatform 1.12.0-rc01: it breaks 18 tests across :core:service, :feature:connections and :feature:node — compose-resources lookups return wrong/null values in tests (ScannerViewModelTest asserts on string resources) and compose.uiTest idling times out (NodeDetailCompassLifecycleTest). Landed as PR #6662, reverted because it merged with its test shards cancelled. Lift once a CMP release fixes this or the tests are adapted to the new behaviour.",
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.compose/"
+      ],
+      "allowedVersions": "!/^1\\.12\\.0-rc01$/"
+    },
+    {
       "description": "Disable automerge for major updates (safety net)",
       "matchUpdateTypes": [
         "major"
