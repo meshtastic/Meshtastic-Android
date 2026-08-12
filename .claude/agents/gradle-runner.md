@@ -14,6 +14,18 @@ cd "$(git rev-parse --show-toplevel)" && pwd && export ANDROID_HOME="${ANDROID_H
 ```
 If a build complains `local.properties` is missing (Google-flavor tasks), `cp secrets.defaults.properties local.properties` first — it's git-ignored. Do not `cd` elsewhere mid-command.
 
+## If a build queue is installed, use it
+Some machines run many Claude sessions against one shared `~/.gradle`, where unqueued parallel builds cause daemon-registry and cache-lock contention. Those machines install a wrapper that admits N builds at a time and queues the rest FIFO. Probe once, and use it only if present — it is machine-local, not part of this repo:
+```bash
+GQ="$HOME/.claude/bin/gradle-queue"; [ -x "$GQ" ] && BUILD="$GQ --" || BUILD="./gradlew"
+cd "$(git rev-parse --show-toplevel)" && export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}" && $BUILD <tasks>
+```
+When the wrapper is in use, a PreToolUse hook also denies raw `./gradlew`; the denial text names the exact replacement command, so follow it rather than retrying. Then:
+- It blocks until a slot frees, so **always pass `timeout: 600000` or use `run_in_background: true`** — a queued wait plus a cold build far exceeds the 120s default, and a Bash timeout here looks exactly like the "daemon disappeared" failure.
+- `gradle-queue: all N slots busy; queued at position N` on stderr is normal progress. Never report it as a build failure.
+- **Exit code 75 is a queue-wait timeout, not a build failure.** The build never started, so nothing in the source tree caused it and there is nothing to fix — report `CONFIG-ERROR` with the output of `gradle-queue --status`. Never edit or revert files to make a 75 go away.
+- `--version`/`--status` pass through. `./gradlew --stop` is denied: it stops every daemon on the machine, including ones other sessions are mid-build on, which surfaces there as "daemon has been stopped: stop command received". Use `GRADLE_QUEUE_BYPASS=1` only if the caller explicitly asked.
+
 ## Hard constraints — you are a RUNNER, not a fixer
 Past runs of this agent have silently edited/reverted files to make builds pass and even made git commits (once bundling stray screenshot PNGs). Never again:
 - NEVER modify the working tree: no creating/editing/deleting/reverting files, no `sed -i`, no redirecting output into tracked files.
