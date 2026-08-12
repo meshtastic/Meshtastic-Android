@@ -53,8 +53,8 @@ interface PlatformAnalytics {
     }
 
     /**
-     * Tracks a key user interaction as a named custom RUM action. Auto-tracked tap targets are R8-obfuscated in
-     * release builds, so analytically important interactions must be reported explicitly with a stable name.
+     * Tracks a key user interaction as a named custom RUM action. Auto-tracked tap targets are R8-obfuscated in release
+     * builds, so analytically important interactions must be reported explicitly with a stable name.
      *
      * @param name Stable snake_case action name (e.g. "message_send", "traceroute_request").
      * @param attributes Optional structured attributes attached to the action.
