@@ -18,7 +18,12 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
+import com.juul.kable.ScannerBuilder
 import com.juul.kable.toIdentifier
+
+internal actual fun ScannerBuilder.platformScanConfig() {
+    // No-op: preConflate is Android-only.
+}
 
 // Kable's btleplug backend evaluates scan filters with a hardcoded `address = null`, so an address filter matches
 // nothing and the scan yields no advertisements at all.

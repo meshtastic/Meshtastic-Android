@@ -18,6 +18,10 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
+import com.juul.kable.ScannerBuilder
+
+/** Platform-specific configuration for the Scanner builder (e.g. Android's `preConflate`). */
+internal expect fun ScannerBuilder.platformScanConfig()
 
 /**
  * Whether Kable honours a scan filter on device address here. Android only: `Filter.Address` throws on Apple/JS, and
