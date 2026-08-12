@@ -20,6 +20,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -363,8 +364,60 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
         assertTrue(manager.currentDb.value !== original)
     }
 
+    /**
+     * The decisive #6608 path: Room's pool logs an acquire timeout and retries forever instead of throwing, so a leaked
+     * permit makes DAO flows hang silently. Recovery must be driven by the missing first emission, not an exception.
+     */
     @Test
-    fun flowPoolRecoveryStopsAfterIntermittentFailuresReachTheManagerLifetimeLimit() = runTest(testDispatcher) {
+    fun silentlyStalledFlowIsRecoveredWithoutAnyThrownFailure() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val wedged = manager.currentDb.value
+        val buildsBeforeRecovery = manager.builtDatabases.size
+
+        val value =
+            manager
+                .observeCurrentDb { database ->
+                    if (database === wedged) {
+                        // Never emits and never fails: exactly what a leaked pool permit looks like to a caller.
+                        flow<String> { awaitCancellation() }
+                    } else {
+                        flowOf("recovered")
+                    }
+                }
+                .first()
+
+        assertEquals("recovered", value)
+        assertEquals(buildsBeforeRecovery + 1, manager.builtDatabases.size)
+        assertTrue(manager.currentDb.value !== wedged)
+    }
+
+    /** A DAO flow that emits once and then stays legitimately quiet must not be treated as wedged. */
+    @Test
+    fun quietFlowAfterAFirstEmissionIsNotTreatedAsStalled() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val buildsBeforeCollection = manager.builtDatabases.size
+
+        val collected = mutableListOf<String>()
+        val collector = launch {
+            manager
+                .observeCurrentDb {
+                    flow {
+                        emit("first")
+                        awaitCancellation()
+                    }
+                }
+                .collect { collected += it }
+        }
+        advanceTimeBy(FLOW_FIRST_EMISSION_TIMEOUT_MS * 3)
+        runCurrent()
+
+        assertEquals(listOf("first"), collected)
+        assertEquals(buildsBeforeCollection, manager.builtDatabases.size, "a quiet flow must not trigger recovery")
+        collector.cancel()
+    }
+
+    @Test
+    fun flowPoolRecoveryStopsAfterIntermittentFailuresFillTheRateWindow() = runTest(testDispatcher) {
         manager.switchActiveDatabase("addrA")
         val buildsBeforeRecovery = manager.builtDatabases.size
         var successfulEmissions = 0
@@ -383,12 +436,80 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
             }
 
         assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
-        assertEquals(MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME + 1, successfulEmissions)
+        assertEquals(MAX_FLOW_POOL_RECOVERIES_PER_WINDOW + 1, successfulEmissions)
         assertEquals(
-            buildsBeforeRecovery + MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME,
+            buildsBeforeRecovery + MAX_FLOW_POOL_RECOVERIES_PER_WINDOW,
             manager.builtDatabases.size,
-            "successful emissions must not reset the manager-lifetime Flow recovery budget",
+            "successful emissions must not reset the Flow recovery rate window",
         )
+    }
+
+    /**
+     * Regression for #6608: a permit leak that recurs "multiple times within minutes" exhausted the former
+     * manager-lifetime cap, after which every later wedge was permanent. The budget is now a sliding rate window, so a
+     * later storm recovers once the window clears.
+     */
+    @Test
+    fun flowPoolRecoveryResumesAfterTheRateWindowClears() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        repeat(MAX_FLOW_POOL_RECOVERIES_PER_WINDOW + 1) {
+            runCatching {
+                manager
+                    .observeCurrentDb {
+                        flow {
+                            emit(Unit)
+                            throw roomPoolTimeout()
+                        }
+                    }
+                    .first { false }
+            }
+        }
+        val buildsAtWindowLimit = manager.builtDatabases.size
+        val wedged = manager.currentDb.value
+
+        manager.recoveryClockMillis += POOL_RECOVERY_WINDOW_MS
+
+        val value =
+            manager
+                .observeCurrentDb { database ->
+                    if (database === wedged) flow<String> { throw roomPoolTimeout() } else flowOf("recovered")
+                }
+                .first()
+
+        assertEquals("recovered", value)
+        assertEquals(buildsAtWindowLimit + 1, manager.builtDatabases.size)
+    }
+
+    /**
+     * A replaced pool has no provable last user: DAO Flow collectors are untracked and Paging factories latch a raw
+     * `currentDb.value`. Recovery must therefore never close a detached pool early — only [close] reclaims them —
+     * otherwise a live Paging source or collector meets "Connection pool is closed".
+     */
+    @Test
+    fun recurringFlowPoolRecoveryNeverClosesDetachedPoolsBeforeShutdown() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val recoveries = 8
+        repeat(recoveries) {
+            manager.recoveryClockMillis += POOL_RECOVERY_WINDOW_MS
+            val wedged = manager.currentDb.value
+            manager
+                .observeCurrentDb { database ->
+                    if (database === wedged) flow<String> { throw roomPoolTimeout() } else flowOf("ok")
+                }
+                .first()
+        }
+
+        assertEquals(
+            recoveries,
+            manager.debugDetachedPoolCount(),
+            "every replaced pool must be retained until close",
+        )
+        assertTrue(manager.closedDatabases.isEmpty(), "recovery must never close a pool a consumer may still hold")
+
+        manager.close()
+        manager.builtDatabases.forEach { database ->
+            assertEquals(1, manager.closedDatabases.count { it === database }, "close must reclaim every pool once")
+        }
     }
 
     @Test

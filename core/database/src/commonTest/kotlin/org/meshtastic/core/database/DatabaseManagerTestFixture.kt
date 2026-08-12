@@ -163,6 +163,11 @@ abstract class DatabaseManagerTestFixture {
         /** `limitedParallelism` on a test dispatcher would swap virtual-time scheduling for a real worker view. */
         override fun createPoolLane(): CoroutineDispatcher = testDispatchers.io
 
+        /** Drives the pool-recovery rate window without relying on wall-clock or virtual-time advancement. */
+        var recoveryClockMillis: Long = 0L
+
+        override fun recoveryNowMillis(): Long = recoveryClockMillis
+
         override fun buildDatabase(dbName: String): MeshtasticDatabase {
             failNextBuildWith?.let { failure ->
                 failNextBuildWith = null

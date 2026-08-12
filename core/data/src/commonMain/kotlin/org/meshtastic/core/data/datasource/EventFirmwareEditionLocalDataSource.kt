@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.EventFirmwareEditionEntity
+import org.meshtastic.core.database.retryOnDbPoolFailure
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @Single
@@ -38,8 +39,9 @@ class EventFirmwareEditionLocalDataSource(
         withContext(dispatchers.io) { dao.getByEdition(edition) }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?> =
-        dbManager.observeCurrentDb { db -> db.eventFirmwareEditionDao().observeByEdition(edition) }
+    fun observeByEdition(edition: String): Flow<EventFirmwareEditionEntity?> = dbManager
+        .observeCurrentDb { db -> db.eventFirmwareEditionDao().observeByEdition(edition) }
+        .retryOnDbPoolFailure("eventFirmwareEdition")
 
     suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) {
         withContext(dispatchers.io) { dbManager.withDb { it.eventFirmwareEditionDao().upsertAll(editions) } }

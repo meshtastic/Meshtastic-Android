@@ -98,7 +98,13 @@ class NodeRepositoryImpl(
         processLifecycle.coroutineScope.launch { localStatsDataSource.setLocalStats(stats) }
     }
 
-    /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
+    /**
+     * A reactive map from nodeNum to [Node] objects, representing the entire mesh.
+     *
+     * `SharingStarted.Eagerly` over the process lifecycle means a terminal upstream failure is unrecoverable for the
+     * process — re-navigation cannot restart the sharing coroutine. [NodeInfoReadDataSource] therefore restarts its DB
+     * flows after a recoverable Room pool failure, so this upstream never terminates on a pool wedge (#6608).
+     */
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
