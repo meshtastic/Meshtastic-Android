@@ -29,6 +29,7 @@ import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
+import org.meshtastic.feature.messaging.component.MessageActionsContentPreview
 import org.meshtastic.feature.messaging.component.MessageItemGroupedRunPreview
 import org.meshtastic.feature.messaging.component.MessageItemMarkdownPreview
 import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
@@ -111,6 +112,13 @@ fun ScreenshotMessageItemMarkdown() {
 @Composable
 fun ScreenshotMessageItemGroupedRun() {
     MessageItemGroupedRunPreview()
+}
+
+@PreviewTest
+@Preview(name = "MessageActions - narrow sheet", widthDp = 320)
+@Composable
+fun ScreenshotMessageActionsNarrow() {
+    MessageActionsContentPreview()
 }
 
 // Accessibility: largest Android font scale must not clip chips, reactions, or the composer.
