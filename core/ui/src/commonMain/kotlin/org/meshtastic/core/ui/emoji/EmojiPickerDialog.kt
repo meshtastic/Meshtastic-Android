@@ -580,10 +580,13 @@ private fun localizedHeaderTitle(header: GridItem.Header): String = if (header.k
 
 /** Grid cell size that grows with the system font scale so emoji glyphs are never clipped. */
 @Composable
-private fun emojiCellSize(): Dp {
-    val emojiTextSize = with(LocalDensity.current) { EMOJI_FONT_SIZE.sp.toDp() }
-    return max(GRID_MIN_CELL_SIZE, emojiTextSize + CELL_CONTENT_PADDING)
-}
+private fun emojiCellSize(): Dp = emojiCellSizeFor(glyphSize = with(LocalDensity.current) { EMOJI_FONT_SIZE.sp.toDp() })
+
+/**
+ * Cell size for a glyph that measures [glyphSize] at the current font scale: never smaller than the glyph plus its
+ * padding, and never below [GRID_MIN_CELL_SIZE] so the cell stays a valid touch target.
+ */
+internal fun emojiCellSizeFor(glyphSize: Dp): Dp = max(GRID_MIN_CELL_SIZE, glyphSize + CELL_CONTENT_PADDING)
 
 @Composable
 private fun SectionHeader(title: String) {
@@ -813,7 +816,6 @@ fun EmojiPickerContentPreview() {
 /** A skin-tone-capable emoji, so the preview renders all six variants. */
 private val SKIN_TONE_PREVIEW_EMOJI = Emoji("👋", listOf("wave", "hand", "hello"), supportsSkinTone = true)
 
-// Public because the screenshot-tests module renders this preview as a golden test.
 @Suppress("UnusedPrivateMember", "PreviewPublic")
 @Preview(fontScale = 2.0f)
 @Composable
@@ -838,7 +840,6 @@ fun EmojiPickerContentLargeFontPreview() {
     }
 }
 
-// Public because the screenshot-tests module renders this preview as a golden test.
 @Suppress("UnusedPrivateMember", "PreviewPublic")
 @PreviewLightDark
 @Composable
@@ -846,7 +847,6 @@ fun SkinTonePopupPreview() {
     AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
 }
 
-// Public because the screenshot-tests module renders this preview as a golden test.
 @Suppress("UnusedPrivateMember", "PreviewPublic")
 @Preview(fontScale = 2.0f)
 @Composable

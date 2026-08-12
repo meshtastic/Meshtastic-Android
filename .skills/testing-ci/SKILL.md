@@ -75,7 +75,7 @@ Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules —
 ./gradlew :screenshot-tests:copyDocsScreenshots         # copy doc images from BOTH modules → docs/assets
 ```
 
-Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run — `git checkout` it. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
+Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. **Exception — colour emoji: do NOT gate CI on them.** Layoutlib bundles the text fonts but resolves colour emoji through the host's emoji font, so glyph edges rasterise differently on macOS than on the Linux runner. Layout, text and vectors still match exactly; only the emoji anti-aliasing moves, which is enough to blow the 0.0005 `imageDifferenceThreshold` on an emoji-dense composition and cannot be fixed by re-running `update` locally (PR #6631). Assert the layout rule in a unit test instead — see `core/ui/src/commonTest/.../emoji/EmojiCellSizeTest.kt` — or put the composition in generate-only `:docs-screenshots`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run — `git checkout` it. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
 
 ## 3c) Fresh-install manual/agent testing: skip onboarding
 
