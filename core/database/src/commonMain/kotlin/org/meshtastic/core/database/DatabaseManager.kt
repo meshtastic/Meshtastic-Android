@@ -149,6 +149,16 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private val poolLanes = mutableMapOf<MeshtasticDatabase, CoroutineDispatcher>()
 
     /**
+     * Pools proven wedged that recovery has refused to replace, guarded by [writerTrackerMutex].
+     *
+     * Once the lifetime replacement budget is spent, a wedged pool stays published, so without this every later write
+     * would be admitted against it, wait the full deadline, and abandon another block that can never finish — an
+     * unbounded pile of parked coroutines and writer registrations under steady ingest. Admission fails fast instead.
+     * Entries are pruned wherever [poolLanes] entries are: a pool that is replaced or closed is no longer admissible.
+     */
+    private val unrecoverablePools = mutableSetOf<MeshtasticDatabase>()
+
+    /**
      * Builds the containment lane for one pool. Tests override this because `limitedParallelism` on a test dispatcher
      * would replace virtual-time scheduling with a real worker view.
      */
@@ -890,8 +900,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             throw failure
         }
         dbCache.remove(dbName)
-        // A closed pool can never be admitted again, so its lane is dead weight.
-        writerTrackerMutex.withLock { poolLanes.remove(database) }
+        // A closed pool can never be admitted again, so its lane and wedge verdict are dead weight.
+        writerTrackerMutex.withLock {
+            poolLanes.remove(database)
+            unrecoverablePools.remove(database)
+        }
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
@@ -993,8 +1006,11 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 detachedDatabases.add(NamedDatabase(expectedDbName, expectedDb))
             }
             // The replaced instance can no longer be admitted (beginWrite only ever hands out the published pool), so
-            // drop its lane. An abandoned wedged block keeps running on the lane instance it already captured.
-            writerTrackerMutex.withLock { poolLanes.remove(expectedDb) }
+            // drop its lane and any wedge verdict. An abandoned block keeps running on the lane it already captured.
+            writerTrackerMutex.withLock {
+                poolLanes.remove(expectedDb)
+                unrecoverablePools.remove(expectedDb)
+            }
 
             // Intentionally do not close expectedDb here. The public currentDb Flow exposes _currentDb directly,
             // so downstream flatMapLatest collectors may still be using the replaced Room instance after this
@@ -1084,6 +1100,32 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     }
 
     /**
+     * Stops admitting work against a pool that stayed published after recovery declined to replace it.
+     *
+     * Recovery declines once the lifetime replacement budget is spent, and it can also fail outright. Either way the
+     * wedged instance remains [_currentDb], so every later admission would park another block on it forever. Marking it
+     * turns those calls into an immediate failure. Recovery during shutdown is not a wedge verdict, and neither is a
+     * pool that has already been replaced, so both are left unmarked.
+     */
+    private suspend fun quarantineWedgedPoolIfStillPublished(database: MeshtasticDatabase) {
+        if (lifecycleState != LifecycleState.OPEN) return
+        val quarantined =
+            writerTrackerMutex.withLock {
+                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== database) {
+                    false
+                } else {
+                    unrecoverablePools.add(database)
+                }
+            }
+        if (quarantined) {
+            Logger.w {
+                "Marked the active DB pool unrecoverable after wedge recovery was refused; further database " +
+                    "operations fail fast until the active database is replaced"
+            }
+        }
+    }
+
+    /**
      * Resolves a [withDb] call whose bounded wait expired: cancels a block that never started, or abandons a started
      * one and recovers the pool.
      *
@@ -1119,6 +1161,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 Logger.w(recoveryFailure) { "withDb: failed to reopen active DB after abandoning a wedged callback" }
                 null
             }
+        if (reopened == null) quarantineWedgedPoolIfStillPublished(admission.database)
         Logger.w {
             if (reopened != null) {
                 "withDb callback exceeded ${timeoutMillis}ms; abandoned it and reopened the active DB so later " +
@@ -1205,6 +1248,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     val pendingGate = writerGate
                     if (pendingGate == null) {
                         val db = _currentDb.value
+                        if (db in unrecoverablePools) {
+                            throw DatabaseOperationTimeoutException(
+                                "database pool is wedged and recovery is exhausted; refusing to start another " +
+                                    "operation that cannot finish",
+                            )
+                        }
                         activeWriters[db] = (activeWriters[db] ?: 0) + 1
                         admitted =
                             AdmittedDatabase(
@@ -1411,8 +1460,10 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
 
         /**
-         * Upper bound on a single [withDb] call — lane wait plus callback. Generous enough that no legitimate one-shot
-         * write reaches it, and short enough that a pool wedge surfaces as a failure with recovery instead of a hang.
+         * Upper bound on the lane wait plus the callback itself. Writer admission is bounded separately by
+         * [WRITER_GATE_TIMEOUT_MS] and runs before this deadline starts, so a call blocked behind an association can
+         * take the sum of the two. Generous enough that no legitimate one-shot write reaches it, and short enough that
+         * a pool wedge surfaces as a failure with recovery instead of a hang.
          */
         internal const val WITH_DB_TIMEOUT_MS = 30_000L
 
@@ -1808,6 +1859,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     activeWriters.clear()
                     activeReaders.clear()
                     poolLanes.clear()
+                    unrecoverablePools.clear()
                     activeManagerOperations.clear()
                     writerGate?.completeExceptionally(IllegalStateException("DatabaseManager is closing or closed"))
                     writerGate = null

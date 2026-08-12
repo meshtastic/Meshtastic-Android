@@ -133,10 +133,12 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
     }
 
     /**
-     * The containment lane narrows Room churn; it must not turn concurrent one-shot writes into a strict queue. A
-     * suspended callback releases its lane, so a second call admitted against the same pool runs immediately — the
-     * behavior of the process-wide lane this replaced. Serializing across suspension instead would let any callback
-     * that awaits something stall every other write on the pool.
+     * Guards against `withDb` growing a lane-scoped lock or an explicit queue: a suspended callback must not stall
+     * other calls on the same pool, because any callback that awaits something would then block every other write.
+     *
+     * This asserts the absence of app-level serialization only. The fixture's lane is the shared test dispatcher, not
+     * production's `limitedParallelism(1)` view, so lane parallelism itself is out of scope here — a single-parallelism
+     * dispatcher releases its slot on suspension by construction.
      */
     @Test
     fun aSuspendedCallbackDoesNotSerializeOtherCallsOnTheSamePool() = runTest(testDispatcher) {
@@ -169,6 +171,56 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
 
         releaseParked.complete(Unit)
         assertTrue(parked.await().isSuccess)
+        assertEquals(0 to 0, manager.debugWriterCounts())
+    }
+
+    /**
+     * Once the lifetime replacement budget is spent, the wedged pool stays published. Admitting further work against it
+     * would park one more block that can never finish, so under steady ingest the parked coroutines and their writer
+     * registrations would grow without bound. Admission must fail immediately instead.
+     */
+    @Test
+    fun writesFailFastOnceWedgeRecoveryIsExhausted() = runTest(testDispatcher) {
+        manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
+        manager.switchActiveDatabase("addrA")
+        val releaseWedges = CompletableDeferred<Unit>()
+        var startedCallbacks = 0
+
+        // Spend the whole replacement budget, then wedge one more call against the pool recovery now refuses.
+        repeat(MAX_WEDGE_POOL_RECOVERIES_PER_MANAGER_LIFETIME + 1) {
+            val wedgeStarted = CompletableDeferred<Unit>()
+            async {
+                runCatching {
+                    manager.withDb {
+                        startedCallbacks += 1
+                        wedgeStarted.complete(Unit)
+                        releaseWedges.await()
+                        Unit
+                    }
+                }
+            }
+            wedgeStarted.await()
+            advanceTimeBy(DatabaseManager.WITH_DB_TIMEOUT_MS + 1)
+        }
+        val wedgedPool = manager.currentDb.value
+        val abandonedCallbacks = startedCallbacks
+
+        val failure = runCatching { manager.withDb { Unit } }.exceptionOrNull()
+        assertIs<DatabaseOperationTimeoutException>(failure, "admission must fail once recovery is exhausted")
+        assertEquals(abandonedCallbacks, startedCallbacks, "no further callback may be parked on the wedged pool")
+        assertEquals(
+            abandonedCallbacks to 0,
+            manager.debugWriterCounts(),
+            "a rejected call must not add a writer registration",
+        )
+        assertTrue(manager.currentDb.value === wedgedPool)
+
+        // Switching to another database publishes a healthy pool, so writes resume without a manager restart.
+        manager.switchActiveDatabase("addrB")
+        assertEquals(LATER_RESULT, manager.withDb { LATER_RESULT }, "a different pool must still accept writes")
+
+        releaseWedges.complete(Unit)
+        runCurrent()
         assertEquals(0 to 0, manager.debugWriterCounts())
     }
 
