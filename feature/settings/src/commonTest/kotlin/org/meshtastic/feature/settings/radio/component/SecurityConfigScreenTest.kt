@@ -35,6 +35,8 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class SecurityConfigScreenTest {
@@ -86,5 +88,19 @@ class SecurityConfigScreenTest {
         copiedPublicKey = null
         onNodeWithTag(SECURITY_PUBLIC_KEY_COPY_TEST_TAG).performClick()
         assertEquals(ByteString.EMPTY, copiedPublicKey)
+    }
+
+    @Test
+    fun `private key is redacted for a remote node until a new one is entered`() {
+        val remote = Config.SecurityConfig(public_key = ByteArray(32) { 1 }.toByteString())
+        assertTrue(isPrivateKeyRedacted(remote, isLocal = false))
+
+        // The local node always reports its own key, so nothing is withheld there.
+        val local = remote.copy(private_key = ByteArray(32) { 2 }.toByteString())
+        assertFalse(isPrivateKeyRedacted(local, isLocal = true))
+        assertFalse(isPrivateKeyRedacted(remote, isLocal = true))
+
+        // Older firmware that still returns the remote key has nothing left to redact.
+        assertFalse(isPrivateKeyRedacted(local, isLocal = false))
     }
 }

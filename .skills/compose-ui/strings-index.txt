@@ -266,6 +266,7 @@ config_security_admin_key
 config_security_debug_log_api_enabled
 config_security_is_managed
 config_security_private_key
+config_security_private_key_remote
 config_security_public_key
 config_security_serial_enabled
 configuration
@@ -1401,6 +1402,7 @@ rebroadcast_mode_none_desc
 recent_network_devices
 reconnecting
 red
+redacted
 refresh
 refresh_metadata
 regenerate_keys_confirmation
