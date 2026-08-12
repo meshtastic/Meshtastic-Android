@@ -17,6 +17,7 @@
 package org.meshtastic.app
 
 import androidx.appfunctions.AppFunctionConfiguration
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
 import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
@@ -36,7 +37,8 @@ class GoogleMeshUtilApplication :
         // Start the AppFunctions enabled-state sync. Resolved here (after startKoin has bound
         // androidContext) rather than via createdAtStart so that Koin graphs built outside a
         // running app — verification tests, previews — stay lazily constructible.
-        getKoin().get<AppFunctionStateSync>()
+        // Off-main: construction forces the AppFunctionsPrefs subgraph and fires AppSearch binder calls.
+        applicationScope.launch { getKoin().get<AppFunctionStateSync>() }
     }
 
     override val appFunctionConfiguration: AppFunctionConfiguration

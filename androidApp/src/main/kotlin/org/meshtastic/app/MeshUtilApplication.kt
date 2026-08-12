@@ -68,7 +68,7 @@ open class MeshUtilApplication :
     Configuration.Provider,
     SingletonImageLoader.Factory {
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    protected val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
@@ -83,8 +83,9 @@ open class MeshUtilApplication :
             workManagerFactory()
         }
 
-        // Schedule periodic MeshLog cleanup
-        scheduleMeshLogCleanup()
+        // Schedule periodic MeshLog cleanup. Off-main: WorkManager uses on-demand init here
+        // (the startup provider is removed), so getInstance() opens WorkManager's Room DB.
+        applicationScope.launch { scheduleMeshLogCleanup() }
 
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
