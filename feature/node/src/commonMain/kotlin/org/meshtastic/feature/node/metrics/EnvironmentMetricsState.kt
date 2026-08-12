@@ -20,10 +20,13 @@ import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.ui.theme.GraphColors.Amber
 import org.meshtastic.core.ui.theme.GraphColors.Blue
+import org.meshtastic.core.ui.theme.GraphColors.BlueGrey
+import org.meshtastic.core.ui.theme.GraphColors.Brown
 import org.meshtastic.core.ui.theme.GraphColors.Chartreuse
 import org.meshtastic.core.ui.theme.GraphColors.Coral
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.DeepOrange
+import org.meshtastic.core.ui.theme.GraphColors.DeepPurple
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Indigo
@@ -31,11 +34,16 @@ import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.core.ui.theme.GraphColors.LightGreen
 import org.meshtastic.core.ui.theme.GraphColors.Lime
 import org.meshtastic.core.ui.theme.GraphColors.Magenta
+import org.meshtastic.core.ui.theme.GraphColors.Maroon
+import org.meshtastic.core.ui.theme.GraphColors.Mustard
+import org.meshtastic.core.ui.theme.GraphColors.Olive
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.SeaGreen
 import org.meshtastic.core.ui.theme.GraphColors.SkyBlue
+import org.meshtastic.core.ui.theme.GraphColors.Slate
 import org.meshtastic.core.ui.theme.GraphColors.Teal
 import org.meshtastic.proto.Telemetry
 
@@ -77,39 +85,83 @@ enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.radiation
     },
     ONE_WIRE_TEMP_1(Amber) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(0)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch0
     },
     ONE_WIRE_TEMP_2(DeepOrange) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(1)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch1
     },
     ONE_WIRE_TEMP_3(Indigo) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(2)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch2
     },
     ONE_WIRE_TEMP_4(LightGreen) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(3)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch3
     },
     ONE_WIRE_TEMP_5(Magenta) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(4)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch4
     },
     ONE_WIRE_TEMP_6(SkyBlue) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(5)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch5
     },
     ONE_WIRE_TEMP_7(Chartreuse) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(6)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch6
     },
     ONE_WIRE_TEMP_8(Coral) {
-        override fun getValue(telemetry: Telemetry): Float? =
-            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(7)
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.one_wire_temperature_ch7
+    },
+    ADC_VOLTAGE_1(Brown) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch0
+    },
+    ADC_VOLTAGE_2(BlueGrey) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch1
+    },
+    ADC_VOLTAGE_3(Olive) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch2
+    },
+    ADC_VOLTAGE_4(DeepPurple) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch3
+    },
+    ADC_VOLTAGE_5(SeaGreen) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch4
+    },
+    ADC_VOLTAGE_6(Maroon) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch5
+    },
+    ADC_VOLTAGE_7(Mustard) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch6
+    },
+    ADC_VOLTAGE_8(Slate) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.adc_voltage_ch7
     }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float?
+
+    companion object {
+        /** The 1-Wire probe series, ordered to match `one_wire_temperature_ch0..ch7`. */
+        val oneWireTemperatures: List<Environment> =
+            listOf(
+                ONE_WIRE_TEMP_1,
+                ONE_WIRE_TEMP_2,
+                ONE_WIRE_TEMP_3,
+                ONE_WIRE_TEMP_4,
+                ONE_WIRE_TEMP_5,
+                ONE_WIRE_TEMP_6,
+                ONE_WIRE_TEMP_7,
+                ONE_WIRE_TEMP_8,
+            )
+
+        /** The multi-channel ADC series, ordered to match `adc_voltage_ch0..ch7`. */
+        val adcVoltages: List<Environment> =
+            listOf(
+                ADC_VOLTAGE_1,
+                ADC_VOLTAGE_2,
+                ADC_VOLTAGE_3,
+                ADC_VOLTAGE_4,
+                ADC_VOLTAGE_5,
+                ADC_VOLTAGE_6,
+                ADC_VOLTAGE_7,
+                ADC_VOLTAGE_8,
+            )
+    }
 }
 
 /**
@@ -246,18 +298,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // 1-Wire temperature sensors (up to 8 channels, Fahrenheit-aware)
-        val oneWireEntries =
-            listOf(
-                Environment.ONE_WIRE_TEMP_1,
-                Environment.ONE_WIRE_TEMP_2,
-                Environment.ONE_WIRE_TEMP_3,
-                Environment.ONE_WIRE_TEMP_4,
-                Environment.ONE_WIRE_TEMP_5,
-                Environment.ONE_WIRE_TEMP_6,
-                Environment.ONE_WIRE_TEMP_7,
-                Environment.ONE_WIRE_TEMP_8,
-            )
-        oneWireEntries.forEach { entry ->
+        Environment.oneWireTemperatures.forEach { entry ->
             val values = telemetries.mapNotNull { entry.getValue(it)?.takeIf { v -> !v.isNaN() } }
             if (values.isNotEmpty()) {
                 var minVal = values.minOf { it }
@@ -268,6 +309,17 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
                 }
                 minValues.add(minVal)
                 maxValues.add(maxVal)
+                shouldPlot[entry.ordinal] = true
+            }
+        }
+
+        // Multi-channel ADC voltage (up to 8 channels). Volts need no unit conversion. 0 V is a real reading, so only
+        // NaN is filtered here.
+        Environment.adcVoltages.forEach { entry ->
+            val values = telemetries.mapNotNull { entry.getValue(it)?.takeIf { v -> !v.isNaN() } }
+            if (values.isNotEmpty()) {
+                minValues.add(values.minOf { it })
+                maxValues.add(values.maxOf { it })
                 shouldPlot[entry.ordinal] = true
             }
         }

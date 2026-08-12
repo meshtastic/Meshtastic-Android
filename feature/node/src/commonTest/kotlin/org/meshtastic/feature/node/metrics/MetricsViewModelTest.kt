@@ -297,7 +297,12 @@ class MetricsViewModelTest {
                     wind_direction = 180,
                     soil_temperature = 18.75f,
                     soil_moisture = 65,
-                    one_wire_temperature = listOf(1f, 2f, 3f),
+                    one_wire_temperature_ch0 = 1f,
+                    one_wire_temperature_ch1 = 2f,
+                    one_wire_temperature_ch2 = 3f,
+                    // 0 V is a real reading on an unloaded ADC input, so it exports as 0.0, not empty.
+                    adc_voltage_ch0 = 3.3f,
+                    adc_voltage_ch1 = 0f,
                 ),
             )
 
@@ -331,12 +336,12 @@ class MetricsViewModelTest {
             val csvOutput = buffer.readUtf8()
             assertTrue(
                 csvOutput.startsWith(
-                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\"",
+                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\",\"adcVoltage1\",\"adcVoltage2\",\"adcVoltage3\",\"adcVoltage4\",\"adcVoltage5\",\"adcVoltage6\",\"adcVoltage7\",\"adcVoltage8\"",
                 ),
             )
             assertTrue(
                 csvOutput.contains(
-                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\"",
+                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\",\"3.3\",\"0.0\",\"\",\"\",\"\",\"\",\"\",\"\"",
                 ),
             )
 

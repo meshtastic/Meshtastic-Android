@@ -84,6 +84,20 @@ class EnvironmentChartUnitsTest {
     }
 
     @Test
+    fun adcVoltageSuffixIsVoltsRegardlessOfDisplayUnits() {
+        assertEquals(" V", unitSuffix(Environment.ADC_VOLTAGE_1, isFahrenheit = false, isImperial = false))
+        assertEquals(" V", unitSuffix(Environment.ADC_VOLTAGE_8, isFahrenheit = true, isImperial = true))
+    }
+
+    /** ADC readings are already in volts, so the chart must not unit-convert them. */
+    @Test
+    fun adcVoltageIsNotConverted() {
+        val t = telemetry(EnvironmentMetrics(adc_voltage_ch0 = 3.3f))
+
+        assertEquals(3.3f, chartValue(Environment.ADC_VOLTAGE_1, t, isImperial = true)!!, 0.001f)
+    }
+
+    @Test
     fun sharedAxisMetricsHaveNoSuffix() {
         assertEquals("", unitSuffix(Environment.HUMIDITY, isFahrenheit = true, isImperial = true))
         assertEquals("", unitSuffix(Environment.IAQ, isFahrenheit = true, isImperial = true))

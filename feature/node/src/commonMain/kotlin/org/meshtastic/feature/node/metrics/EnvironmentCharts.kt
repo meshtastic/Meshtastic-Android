@@ -36,10 +36,10 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
@@ -116,25 +116,26 @@ private val LEGEND_DATA_3 =
     )
 
 private val LEGEND_DATA_4 =
-    listOf(
-        Environment.ONE_WIRE_TEMP_1,
-        Environment.ONE_WIRE_TEMP_2,
-        Environment.ONE_WIRE_TEMP_3,
-        Environment.ONE_WIRE_TEMP_4,
-        Environment.ONE_WIRE_TEMP_5,
-        Environment.ONE_WIRE_TEMP_6,
-        Environment.ONE_WIRE_TEMP_7,
-        Environment.ONE_WIRE_TEMP_8,
-    )
-        .mapIndexed { index, entry ->
-            LegendData(
-                nameRes = Res.string.one_wire_temperature,
-                labelOverride = "1-Wire Temp ${index + 1}",
-                color = entry.color,
-                isLine = true,
-                metricKey = entry,
-            )
-        }
+    Environment.oneWireTemperatures.mapIndexed { index, entry ->
+        LegendData(
+            nameRes = Res.string.one_wire_temperature,
+            channelNumber = index + 1,
+            color = entry.color,
+            isLine = true,
+            metricKey = entry,
+        )
+    }
+
+private val LEGEND_DATA_5 =
+    Environment.adcVoltages.mapIndexed { index, entry ->
+        LegendData(
+            nameRes = Res.string.adc_voltage,
+            channelNumber = index + 1,
+            color = entry.color,
+            isLine = true,
+            metricKey = entry,
+        )
+    }
 
 private const val PRESSURE_DEFAULT_MIN = 950.0
 private const val PRESSURE_DEFAULT_MAX = 1050.0
@@ -168,20 +169,14 @@ internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: B
  * Unit suffix for a plotted metric's axis and marker labels, in the user's display units, or "" for metrics whose unit
  * would be noise on a shared axis. Includes any leading space, so it appends directly to a formatted value.
  */
-internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when (metric) {
-    Environment.TEMPERATURE,
-    Environment.SOIL_TEMPERATURE,
-    Environment.ONE_WIRE_TEMP_1,
-    Environment.ONE_WIRE_TEMP_2,
-    Environment.ONE_WIRE_TEMP_3,
-    Environment.ONE_WIRE_TEMP_4,
-    Environment.ONE_WIRE_TEMP_5,
-    Environment.ONE_WIRE_TEMP_6,
-    Environment.ONE_WIRE_TEMP_7,
-    Environment.ONE_WIRE_TEMP_8,
-    -> if (isFahrenheit) "°F" else "°C"
+internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when {
+    metric == Environment.TEMPERATURE ||
+        metric == Environment.SOIL_TEMPERATURE ||
+        metric in Environment.oneWireTemperatures -> if (isFahrenheit) "°F" else "°C"
 
-    Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
+    metric in Environment.adcVoltages -> " V"
+
+    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
 
     else -> ""
 }
@@ -208,7 +203,7 @@ fun EnvironmentMetricsChart(
         val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
         val allLegendData =
-            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4).filter {
+            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4 + LEGEND_DATA_5).filter {
                 graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
             }
 
@@ -219,7 +214,7 @@ fun EnvironmentMetricsChart(
                 allLegendData.indices.filter { (allLegendData[it].metricKey as? Environment) in hiddenMetrics }.toSet()
             }
 
-        val colorToLabel = allLegendData.associate { it.color to (it.labelOverride ?: stringResource(it.nameRes)) }
+        val colorToLabel = allLegendData.associate { it.color to legendLabel(it) }
         val colorToUnit =
             allLegendData.associate { legend ->
                 val metric = legend.metricKey as? Environment

@@ -118,7 +118,27 @@ data class EnvironmentMetricsExport(
     val rainfall24h: Float? = null,
     val soilMoisture: Int? = null,
     val soilTemperature: Float? = null,
+    /**
+     * Legacy repeated 1-Wire readings. Firmware 2.8 moved these to [oneWireTemperatureCh0]..[oneWireTemperatureCh7];
+     * retained so exports of telemetry stored before then keep their original shape.
+     */
     val oneWireTemperature: List<Float>? = null,
+    val oneWireTemperatureCh0: Float? = null,
+    val oneWireTemperatureCh1: Float? = null,
+    val oneWireTemperatureCh2: Float? = null,
+    val oneWireTemperatureCh3: Float? = null,
+    val oneWireTemperatureCh4: Float? = null,
+    val oneWireTemperatureCh5: Float? = null,
+    val oneWireTemperatureCh6: Float? = null,
+    val oneWireTemperatureCh7: Float? = null,
+    val adcVoltageCh0: Float? = null,
+    val adcVoltageCh1: Float? = null,
+    val adcVoltageCh2: Float? = null,
+    val adcVoltageCh3: Float? = null,
+    val adcVoltageCh4: Float? = null,
+    val adcVoltageCh5: Float? = null,
+    val adcVoltageCh6: Float? = null,
+    val adcVoltageCh7: Float? = null,
 )
 
 @Serializable

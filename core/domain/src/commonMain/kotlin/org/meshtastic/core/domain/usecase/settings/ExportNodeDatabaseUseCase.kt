@@ -130,6 +130,8 @@ private fun DeviceMetrics.toExport(): DeviceMetricsExport? = DeviceMetricsExport
 )
     .takeUnless { it == DeviceMetricsExport() }
 
+// Reads the deprecated repeated one_wire_temperature so pre-2.8 stored telemetry still round-trips.
+@Suppress("DEPRECATION")
 private fun EnvironmentMetrics.toExport(): EnvironmentMetricsExport? = EnvironmentMetricsExport(
     temperature = temperature,
     relativeHumidity = relative_humidity,
@@ -154,6 +156,22 @@ private fun EnvironmentMetrics.toExport(): EnvironmentMetricsExport? = Environme
     soilMoisture = soil_moisture,
     soilTemperature = soil_temperature,
     oneWireTemperature = one_wire_temperature.takeIf { it.isNotEmpty() },
+    oneWireTemperatureCh0 = one_wire_temperature_ch0,
+    oneWireTemperatureCh1 = one_wire_temperature_ch1,
+    oneWireTemperatureCh2 = one_wire_temperature_ch2,
+    oneWireTemperatureCh3 = one_wire_temperature_ch3,
+    oneWireTemperatureCh4 = one_wire_temperature_ch4,
+    oneWireTemperatureCh5 = one_wire_temperature_ch5,
+    oneWireTemperatureCh6 = one_wire_temperature_ch6,
+    oneWireTemperatureCh7 = one_wire_temperature_ch7,
+    adcVoltageCh0 = adc_voltage_ch0,
+    adcVoltageCh1 = adc_voltage_ch1,
+    adcVoltageCh2 = adc_voltage_ch2,
+    adcVoltageCh3 = adc_voltage_ch3,
+    adcVoltageCh4 = adc_voltage_ch4,
+    adcVoltageCh5 = adc_voltage_ch5,
+    adcVoltageCh6 = adc_voltage_ch6,
+    adcVoltageCh7 = adc_voltage_ch7,
 )
     .takeUnless { it == EnvironmentMetricsExport() }
 

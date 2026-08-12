@@ -61,6 +61,7 @@ import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
+import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.icon.Info
@@ -130,9 +131,15 @@ data class LegendData(
     val color: Color,
     val isLine: Boolean = false,
     val metricKey: Any? = null,
-    /** When non-null, overrides the resolved [nameRes] string in the legend label. */
-    val labelOverride: String? = null,
+    /** 1-based channel number appended to the resolved [nameRes], for multi-channel series. */
+    val channelNumber: Int? = null,
 )
+
+/** Resolves a legend's display label, appending [LegendData.channelNumber] when the series is one of several. */
+@Composable
+fun legendLabel(data: LegendData): String =
+    data.channelNumber?.let { stringResource(Res.string.metric_channel_label, stringResource(data.nameRes), it) }
+        ?: stringResource(data.nameRes)
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
 
@@ -158,7 +165,7 @@ fun Legend(
     ) {
         legendData.forEachIndexed { index, data ->
             val isVisible = index !in hiddenSet
-            val label = data.labelOverride ?: stringResource(data.nameRes)
+            val label = legendLabel(data)
             if (onToggle != null) {
                 FilterChip(
                     selected = isVisible,
