@@ -83,6 +83,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">المفتاح العام غير متطابق</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>

@@ -320,7 +320,6 @@
     <string name="doc_title_nodes">Noduri</string>
     <string name="done">Gata</string>
     <string name="double_tap_as_button_press">Apăsare dublă ca buton</string>
-    <string name="downlink_enabled">Downlink activat</string>
     <string name="downlink_feature_description">Mesajele provenite de la o un gateway public de internet sunt redirecționate către rețeaua locală. Datorită politicii de zero salturi, traficul provenit de la serverul MQTT implicit nu se va propaga mai departe de acest dispozitiv.</string>
     <string name="download">Descărcare</string>
     <string name="duplicated_public_key_title">Duplicat Cheie Publică detectată</string>
@@ -330,6 +329,7 @@
     <string name="edit">Editare</string>
     <string name="edit_custom_tile_source">Modifică sursa rețelei</string>
     <string name="eight_hours">8 Ore</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activează modul de economisire a energiei</string>
     <string name="enabled">Activat</string>
     <!-- ENCRYPTION -->
@@ -1169,7 +1169,6 @@
     <string name="update_interval">Interval de actualizare GPS</string>
     <string name="update_interval_seconds">Interval de actualizare (secunde)</string>
     <string name="updated">Actualizat</string>
-    <string name="uplink_enabled">Uplink activat</string>
     <string name="uplink_feature_description">Mesajele de la mesageria va fi trimise pe internet public prin intermediul oricărui portal configurat de nod.</string>
     <string name="uptime">Timp de functionare</string>
     <!-- URL -->

@@ -410,7 +410,6 @@
     <string name="done">完成</string>
     <string name="dont_show_again_for_device">不再為此裝置顯示</string>
     <string name="double_tap_as_button_press">雙擊觸發按鈕功能</string>
-    <string name="downlink_enabled">已啓用下行</string>
     <string name="downlink_feature_description">網際網路閘道的訊息會轉發到本地網狀網路，但因為採用零跳躍政策，來自預設 MQTT 伺服器的流量只會到達本裝置，不會再轉發給其他節點。</string>
     <string name="download">下載</string>
     <string name="duplicated_public_key_title">偵測到重複的公鑰</string>
@@ -420,6 +419,7 @@
     <string name="edit">編輯</string>
     <string name="edit_custom_tile_source">編輯自定義圖磚來源</string>
     <string name="eight_hours">8 小時</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">啟用省電模式</string>
     <string name="enabled">已啟用</string>
     <!-- ENCRYPTION -->
@@ -1254,8 +1254,6 @@
     <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
-    <string name="tak_server_enabled_desc">在連接埠 8089 啟動本地 TLS 伺服器，供 ATAK/iTAK 連線使用</string>
-    <string name="tak_server_export_data_package_desc">產生 .zip 檔供 ATAK/iTAK 連線至此伺服器</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">伺服器</string>
     <string name="tak_server_test_card_title">TAK Mesh 測試（除錯）</string>
@@ -1369,7 +1367,6 @@
     <string name="update_interval">GPS 輪詢間隔</string>
     <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="updated">已更新</string>
-    <string name="uplink_enabled">已啓用上行</string>
     <string name="uplink_feature_description">來自網狀網路的訊息會經由任何配置閘道的節點傳送到網際網路。</string>
     <string name="uptime">運行時間</string>
     <!-- URL -->

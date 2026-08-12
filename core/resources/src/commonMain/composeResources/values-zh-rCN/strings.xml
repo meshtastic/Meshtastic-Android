@@ -555,7 +555,6 @@
     <string name="done">完成</string>
     <string name="dont_show_again_for_device">此设备不再显示</string>
     <string name="double_tap_as_button_press">双击作为按钮</string>
-    <string name="downlink_enabled">启用下行</string>
     <string name="downlink_feature_description">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="download">下载</string>
     <string name="duplicated_public_key_title">检测到重复公钥</string>
@@ -565,6 +564,7 @@
     <string name="edit">编辑</string>
     <string name="edit_custom_tile_source">编辑网络图层源</string>
     <string name="eight_hours">8 小时</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">启用节能模式</string>
     <string name="enabled">启用</string>
     <!-- ENCRYPTION -->
@@ -1634,12 +1634,11 @@
     <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK 服务器</string>
     <string name="tak_server_enabled">启用本地 TAK 服务器</string>
-    <string name="tak_server_enabled_desc">在 8089 端口启动一个本地 TLS 服务器，用于 ATAK/iTAK 客户端连接</string>
-    <string name="tak_server_export_data_package_desc">生成zip压缩包,供 ATAK/iTAK 客户端连接到本服务器使用</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh 转 CoT 转换器</string>
-    <string name="tak_server_mesh_to_cot_desc">在 ATAK/iTAK 地图上将 Meshtastic 节点显示为联系人</string>
     <string name="tak_server_section">服务器</string>
+    <string name="tak_server_status">状态</string>
+    <string name="tak_server_status_off">关闭</string>
     <string name="tak_server_test_card_title">TAK 网状网络测试（调试模式）</string>
     <string name="tak_server_test_idle">全部发送 %1$d 将测试固件数据发送至网状网络</string>
     <string name="tak_server_test_result_bytes">%1$dB 节点状态正常</string>
@@ -1760,7 +1759,6 @@
     <string name="update_interval">GPS 轮询间隔</string>
     <string name="update_interval_seconds">更新间隔（秒）</string>
     <string name="updated">更新</string>
-    <string name="uplink_enabled">启用上传</string>
     <string name="uplink_feature_description">网格中的消息将通过节点配置的网关发送到公共互联网。</string>
     <string name="uptime">正常运行时间</string>
     <!-- URL -->

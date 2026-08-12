@@ -84,6 +84,7 @@
     <!-- DOC -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>

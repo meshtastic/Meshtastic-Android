@@ -85,6 +85,7 @@
     <!-- DOC -->
     <string name="edit">Redakto</string>
     <string name="eight_hours">8 Orë</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>

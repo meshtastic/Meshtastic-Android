@@ -87,6 +87,7 @@
     <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Ur</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="encryption_pkc">Šifriranje javnega ključa</string>

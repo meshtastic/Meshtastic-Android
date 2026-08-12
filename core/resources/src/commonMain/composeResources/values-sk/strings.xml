@@ -145,6 +145,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>

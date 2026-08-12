@@ -248,11 +248,11 @@
     <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
     <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
-    <string name="downlink_enabled">Odbiór włączony</string>
     <string name="download">Pobierz</string>
     <string name="echo_enabled">Włącz echo</string>
     <string name="edit">Edytuj</string>
     <string name="eight_hours">8 Godzin</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Włącz tryb oszczędzania energii</string>
     <string name="enabled">Włączony</string>
     <!-- ENCRYPTION -->
@@ -751,6 +751,7 @@
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
     <string name="tak_server_section">Serwer</string>
+    <string name="tak_server_status_off">Wyłączony</string>
     <string name="tak_team_blue">Niebieski</string>
     <string name="tak_team_green">Zielony</string>
     <string name="tak_team_red">Czerwony</string>
@@ -810,7 +811,6 @@
     <string name="unmonitored_or_infrastructure">Niemonitorowany lub infrastruktura</string>
     <string name="unrecognized">Nierozpoznany</string>
     <string name="update_interval_seconds">Częstotliwość aktualizacji (w sekundach)</string>
-    <string name="uplink_enabled">Wysył włączony</string>
     <string name="uptime">Czas pracy</string>
     <!-- URL -->
     <string name="url">URL</string>

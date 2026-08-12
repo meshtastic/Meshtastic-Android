@@ -556,7 +556,6 @@
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Ära selle seadme puhul enam kuva</string>
     <string name="double_tap_as_button_press">Topeltpuudutus nupuna</string>
-    <string name="downlink_enabled">Vastuvõtt lubatud</string>
     <string name="downlink_feature_description">Avaliku interneti ligipääsu sõnumid edastatakse kohalikku kärgvõrgu. Nullhüppe poliitika tõttu ei levi MQTT vaikeserverist tulev liiklus sellest seadmest kaugemale.</string>
     <string name="download">Lae alla</string>
     <string name="duplicated_public_key_title">Tuvastati korduv avalik võti</string>
@@ -566,6 +565,7 @@
     <string name="edit">Muuda</string>
     <string name="edit_custom_tile_source">Muuda võrgupaani allikat</string>
     <string name="eight_hours">8 tundi</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Luba energiasäästurežiim</string>
     <string name="enabled">Lubatud</string>
     <!-- ENCRYPTION -->
@@ -1625,12 +1625,11 @@
     <string name="tak_role_unspecified">Määramata</string>
     <string name="tak_server">TAK server</string>
     <string name="tak_server_enabled">Kohaliku TAK-serveri lubamine</string>
-    <string name="tak_server_enabled_desc">Käivitab ATAK/iTAK-ühenduste jaoks kohaliku TLS serveri, pordil 8089</string>
-    <string name="tak_server_export_data_package_desc">Genereeri selle serveriga ühendumiseks ATAK/iTAK-il .zip fail</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Kärgvõrgust CoTi konverter</string>
-    <string name="tak_server_mesh_to_cot_desc">Kuva Meshtastici sõlmed ATAK/iTAK kaardil kontaktidena</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Staatus</string>
+    <string name="tak_server_status_off">Väljas</string>
     <string name="tak_server_test_card_title">TAK kärgvõrgu test (arendaja)</string>
     <string name="tak_server_test_idle">Saada kõik %1$d testkinnitust kärgvõrku</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1751,7 +1750,6 @@
     <string name="update_interval">GPS-i küsimise intervall</string>
     <string name="update_interval_seconds">Uuenduste sagedus (sekundit)</string>
     <string name="updated">Uuendatud</string>
-    <string name="uplink_enabled">Saatmine lubatud</string>
     <string name="uplink_feature_description">Võrgusõlme sõnumid saadetakse avalikku internetti mis tahes sõlme konfigureeritud ligipääsu kaudu.</string>
     <string name="uptime">Töötamise aeg</string>
     <!-- URL -->

@@ -85,6 +85,7 @@
     <!-- DOC -->
     <string name="edit">Rediger</string>
     <string name="eight_hours">8 Timer</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>

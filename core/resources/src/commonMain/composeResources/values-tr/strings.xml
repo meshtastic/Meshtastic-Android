@@ -178,12 +178,12 @@
     <string name="doc_title_connections">Bağlantılar</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodelar</string>
-    <string name="downlink_enabled">Aşağı bağlantı etkinleştirildi</string>
     <string name="download">İndir</string>
     <string name="dynamic">Dinamik</string>
     <string name="echo_enabled">Eko etkin</string>
     <string name="edit">Düzenle</string>
     <string name="eight_hours">8 Saat</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Güç tasarrufu modunu etkinleştir</string>
     <string name="enabled">Açık</string>
     <!-- ENCRYPTION -->
@@ -601,7 +601,6 @@
     <string name="unrecognized">Tanınmayan</string>
     <string name="up_down_select_input_enabled">Yukarı/Aşağı/Seçme girişi etkinleştirildi</string>
     <string name="update_interval_seconds">Güncelleme aralığı (saniye)</string>
-    <string name="uplink_enabled">Yukarı bağlantı etkinleştirildi</string>
     <string name="uptime">Çalışma Süresi</string>
     <!-- URL -->
     <string name="url">URL</string>
