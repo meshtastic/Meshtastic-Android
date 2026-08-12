@@ -29,7 +29,10 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -37,6 +40,9 @@ import org.meshtastic.core.ui.util.AlertManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
@@ -82,6 +88,39 @@ class DebugViewModelTest {
         meshLogPrefs.retentionDays.value shouldBe 14
         meshLogRepository.lastDeletedOlderThan shouldBe 14
         viewModel.retentionDays.value shouldBe 14
+    }
+
+    @Test
+    fun `setRetentionDays one hour keeps the last hour instead of clearing the log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("recent", "TEXT", now - 30.minutes.inWholeMilliseconds, ""),
+                MeshLog("stale", "TEXT", now - 2.hours.inWholeMilliseconds, ""),
+            ),
+        )
+
+        viewModel.setRetentionDays(MeshLogRetention.ONE_HOUR)
+
+        meshLogPrefs.retentionDays.value shouldBe MeshLogRetention.ONE_HOUR
+        viewModel.retentionDays.value shouldBe MeshLogRetention.ONE_HOUR
+        meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("recent")
+    }
+
+    @Test
+    fun `setRetentionDays never keeps every log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("ancient", "TEXT", now - 400.days.inWholeMilliseconds, ""),
+                MeshLog("recent", "TEXT", now, ""),
+            ),
+        )
+
+        viewModel.setRetentionDays(MeshLogRetention.KEEP_FOREVER)
+
+        meshLogPrefs.retentionDays.value shouldBe MeshLogRetention.KEEP_FOREVER
+        meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("ancient", "recent")
     }
 
     @Test

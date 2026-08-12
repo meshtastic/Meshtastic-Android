@@ -19,8 +19,10 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -96,6 +98,9 @@ class FakeMeshLogRepository :
 
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
         lastDeletedOlderThan = retentionDays
+        val window = MeshLogRetention.windowOrNull(retentionDays) ?: return
+        val cutoff = nowMillis - window.inWholeMilliseconds
+        logsFlow.value = logsFlow.value.filter { it.received_date >= cutoff }
     }
 
     fun setLogs(logs: List<MeshLog>) {
