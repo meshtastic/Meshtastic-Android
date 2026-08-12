@@ -3,7 +3,7 @@ xmlutil = "1.0.2"
 
 # Android
 agp = "9.3.1"
-appcompat = "1.7.1"
+appcompat = "1.8.0"
 car-app = "1.7.0"
 appfunctions = "1.0.0-alpha10"
 
