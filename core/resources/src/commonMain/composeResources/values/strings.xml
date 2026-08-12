@@ -569,6 +569,19 @@
     <string name="edit_custom_tile_source">Edit Network Tile Source</string>
     <string name="eight_hours">8 Hours</string>
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <!-- EMOJI -->
+    <string name="emoji_category_activities">Activities</string>
+    <string name="emoji_category_animals_nature">Animals &amp; Nature</string>
+    <string name="emoji_category_flags">Flags</string>
+    <string name="emoji_category_food_drink">Food &amp; Drink</string>
+    <string name="emoji_category_objects">Objects</string>
+    <string name="emoji_category_people_body">People &amp; Body</string>
+    <string name="emoji_category_smileys_emotion">Smileys &amp; Emotion</string>
+    <string name="emoji_category_symbols">Symbols</string>
+    <string name="emoji_category_travel_places">Travel &amp; Places</string>
+    <string name="emoji_load_error">Unable to load emoji</string>
+    <string name="emoji_no_results">No emoji found</string>
+    <string name="emoji_recently_used">Recently Used</string>
     <string name="enable_power_saving_mode">Enable power saving mode</string>
     <string name="enabled">Enabled</string>
     <!-- ENCRYPTION -->
