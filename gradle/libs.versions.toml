@@ -251,7 +251,6 @@ junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", vers
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
-kotest-runner-junit6 = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
 konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
