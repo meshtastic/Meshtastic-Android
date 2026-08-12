@@ -75,6 +75,7 @@ open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleSca
 
     internal open fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {
         val scanner = Scanner {
+            platformScanConfig()
             logging { applyConfig(loggingConfig) }
             when (filter) {
                 KableScanFilter.None -> Unit
