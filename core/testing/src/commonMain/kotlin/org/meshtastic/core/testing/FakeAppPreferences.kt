@@ -334,9 +334,18 @@ class FakeMapConsentPrefs : MapConsentPrefs {
 
 class FakeMapTileProviderPrefs : MapTileProviderPrefs {
     override val customTileProviders = MutableStateFlow<String?>(null)
+    override val selectedCustomTileProviderId = MutableStateFlow<String?>(null)
 
-    override fun setCustomTileProviders(providers: String?) {
+    override suspend fun awaitCustomTileProviders(): String? = customTileProviders.value
+
+    override suspend fun awaitSelectedCustomTileProviderId(): String? = selectedCustomTileProviderId.value
+
+    override suspend fun setCustomTileProviders(providers: String?) {
         customTileProviders.value = providers
+    }
+
+    override suspend fun setSelectedCustomTileProviderId(providerId: String?) {
+        selectedCustomTileProviderId.value = providerId
     }
 }
 

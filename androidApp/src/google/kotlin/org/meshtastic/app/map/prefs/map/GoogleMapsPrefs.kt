@@ -27,6 +27,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -44,10 +45,14 @@ interface GoogleMapsPrefs {
 
     fun setSelectedCustomTileUrl(value: String?)
 
+    suspend fun awaitMapSelection(): GoogleMapSelectionPrefs
+
     val cameraPosition: Flow<GoogleCameraPosition?>
 
     fun setCameraPosition(value: GoogleCameraPosition)
 }
+
+data class GoogleMapSelectionPrefs(val mapType: String, val customTileUrl: String?)
 
 data class GoogleCameraPosition(
     val targetLat: Double,
@@ -92,6 +97,13 @@ class GoogleMapsPrefsImpl(private val dataStore: GoogleMapsDataStore, dispatcher
                 }
             }
         }
+    }
+
+    override suspend fun awaitMapSelection(): GoogleMapSelectionPrefs = dataStore.data.first().let { preferences ->
+        GoogleMapSelectionPrefs(
+            mapType = preferences[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] ?: MapType.NORMAL.name,
+            customTileUrl = preferences[KEY_SELECTED_CUSTOM_TILE_URL_PREF],
+        )
     }
 
     override val cameraPosition: Flow<GoogleCameraPosition?> =

@@ -77,4 +77,17 @@ class GoogleMapsPrefsTest {
 
         assertEquals(cameraPosition, prefs.cameraPosition.first())
     }
+
+    @Test
+    fun `selected custom tile URL is available from a load-aware snapshot`() = testScope.runTest {
+        prefs.setSelectedCustomTileUrl("https://tiles.example.org/{z}/{x}/{y}.png")
+
+        assertEquals(
+            GoogleMapSelectionPrefs(
+                mapType = "NORMAL",
+                customTileUrl = "https://tiles.example.org/{z}/{x}/{y}.png",
+            ),
+            prefs.awaitMapSelection(),
+        )
+    }
 }

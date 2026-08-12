@@ -22,9 +22,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MapTileProviderDataStore
@@ -38,20 +38,38 @@ class MapTileProviderPrefsImpl(private val dataStore: MapTileProviderDataStore, 
     override val customTileProviders: StateFlow<String?> =
         dataStore.data.map { it[KEY_CUSTOM_PROVIDERS_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
 
-    override fun setCustomTileProviders(providers: String?) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                if (providers == null) {
-                    prefs.remove(KEY_CUSTOM_PROVIDERS_PREF)
-                } else {
-                    prefs[KEY_CUSTOM_PROVIDERS_PREF] = providers
-                }
+    override val selectedCustomTileProviderId: StateFlow<String?> =
+        dataStore.data.map { it[KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+
+    override suspend fun awaitCustomTileProviders(): String? = dataStore.data.first()[KEY_CUSTOM_PROVIDERS_PREF]
+
+    override suspend fun awaitSelectedCustomTileProviderId(): String? =
+        dataStore.data.first()[KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF]
+
+    override suspend fun setCustomTileProviders(providers: String?) {
+        dataStore.edit { prefs ->
+            if (providers == null) {
+                prefs.remove(KEY_CUSTOM_PROVIDERS_PREF)
+            } else {
+                prefs[KEY_CUSTOM_PROVIDERS_PREF] = providers
+            }
+        }
+    }
+
+    override suspend fun setSelectedCustomTileProviderId(providerId: String?) {
+        dataStore.edit { prefs ->
+            if (providerId == null) {
+                prefs.remove(KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF)
+            } else {
+                prefs[KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF] = providerId
             }
         }
     }
 
     companion object {
         const val KEY_CUSTOM_PROVIDERS = "custom_tile_providers"
+        const val KEY_SELECTED_CUSTOM_PROVIDER_ID = "selected_custom_tile_provider_id"
         val KEY_CUSTOM_PROVIDERS_PREF = stringPreferencesKey(KEY_CUSTOM_PROVIDERS)
+        val KEY_SELECTED_CUSTOM_PROVIDER_ID_PREF = stringPreferencesKey(KEY_SELECTED_CUSTOM_PROVIDER_ID)
     }
 }
