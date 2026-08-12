@@ -38,6 +38,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
@@ -154,12 +155,45 @@ internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, D
     else -> PRESSURE_DEFAULT_MIN to PRESSURE_DEFAULT_MAX
 }
 
+/**
+ * Wind speed arrives in m/s; imperial locales chart it in mph to match the cards (design §10.5). Temperatures are
+ * already converted upstream by the view model, so they pass through here unchanged.
+ */
+internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: Boolean): Float? =
+    metric.getValue(telemetry)?.let {
+        if (metric == Environment.WIND_SPEED && isImperial) UnitConversions.metersPerSecondToMph(it) else it
+    }
+
+/**
+ * Unit suffix for a plotted metric's axis and marker labels, in the user's display units, or "" for metrics whose unit
+ * would be noise on a shared axis. Includes any leading space, so it appends directly to a formatted value.
+ */
+internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when (metric) {
+    Environment.TEMPERATURE,
+    Environment.SOIL_TEMPERATURE,
+    Environment.ONE_WIRE_TEMP_1,
+    Environment.ONE_WIRE_TEMP_2,
+    Environment.ONE_WIRE_TEMP_3,
+    Environment.ONE_WIRE_TEMP_4,
+    Environment.ONE_WIRE_TEMP_5,
+    Environment.ONE_WIRE_TEMP_6,
+    Environment.ONE_WIRE_TEMP_7,
+    Environment.ONE_WIRE_TEMP_8,
+    -> if (isFahrenheit) "°F" else "°C"
+
+    Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
+
+    else -> ""
+}
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
+    isFahrenheit: Boolean,
+    isImperial: Boolean,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
@@ -186,6 +220,11 @@ fun EnvironmentMetricsChart(
             }
 
         val colorToLabel = allLegendData.associate { it.color to (it.labelOverride ?: stringResource(it.nameRes)) }
+        val colorToUnit =
+            allLegendData.associate { legend ->
+                val metric = legend.metricKey as? Environment
+                legend.color to (metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: "")
+            }
 
         val showPressure =
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics
@@ -221,7 +260,7 @@ fun EnvironmentMetricsChart(
                 }
             }
 
-        LaunchedEffect(pressureData, otherMetricsData) {
+        LaunchedEffect(pressureData, otherMetricsData, isImperial) {
             modelProducer.runTransaction {
                 /* Pressure on its own layer/axis */
                 if (showPressure && pressureData.isNotEmpty()) {
@@ -237,7 +276,10 @@ fun EnvironmentMetricsChart(
                     val metricData = otherMetricsData[metric] ?: emptyList()
                     if (metricData.isNotEmpty()) {
                         lineModel {
-                            series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it)!! })
+                            series(
+                                x = metricData.map { it.time },
+                                y = metricData.map { chartValue(metric, it, isImperial)!! },
+                            )
                         }
                     }
                 }
@@ -249,7 +291,7 @@ fun EnvironmentMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     val label = colorToLabel[color] ?: ""
-                    formatString("%s: %.1f", label, value)
+                    formatString("%s: %.1f", label, value) + (colorToUnit[color] ?: "")
                 },
             )
 
@@ -322,9 +364,14 @@ fun EnvironmentMetricsChart(
                 },
                 endAxis =
                 if (otherMetrics.isNotEmpty()) {
+                    // The end axis is shared, so it can only carry a unit when every metric on it uses the same
+                    // one.
+                    val endAxisUnit =
+                        otherMetrics.map { unitSuffix(it, isFahrenheit, isImperial) }.distinct().singleOrNull()
+                            ?: ""
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f", value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f", value) + endAxisUnit },
                     )
                 } else {
                     null

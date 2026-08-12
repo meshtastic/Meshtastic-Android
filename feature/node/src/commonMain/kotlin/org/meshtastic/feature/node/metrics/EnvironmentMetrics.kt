@@ -85,6 +85,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         viewModel.saveEnvironmentMetricsCSV(uri, filteredTelemetries)
     }
 
+    val isImperial = state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL
+
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
@@ -108,6 +110,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                 modifier = modifier,
                 telemetries = filteredTelemetries.reversed(),
                 graphData = graphData,
+                isFahrenheit = state.isFahrenheit,
+                isImperial = isImperial,
                 vicoScrollState = vicoScrollState,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
@@ -123,8 +127,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
-                        isImperial =
-                        state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL,
+                        isImperial = isImperial,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
