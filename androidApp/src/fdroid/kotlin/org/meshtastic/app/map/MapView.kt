@@ -158,7 +158,6 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -345,7 +344,7 @@ fun MapView(
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
     val layerRenderer = remember { FdroidMapOverlayRenderer() }
     var showLayersBottomSheet by remember { mutableStateOf(false) }
-    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
+    var sitePlannerLaunch by remember { mutableStateOf<SitePlannerLaunch?>(null) }
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
 
@@ -838,7 +837,10 @@ fun MapView(
                     // Hands node/channel-derived params to the hosted Site Planner and imports the returned coverage.
                     onSitePlannerClick =
                     if (sitePlannerAvailable()) {
-                        { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+                        {
+                            sitePlannerLaunch =
+                                SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
+                        }
                     } else {
                         null
                     },
@@ -890,17 +892,18 @@ fun MapView(
     val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
-            sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            sitePlannerLaunch =
+                SitePlannerLaunch(initialParams = node.toSitePlannerParams(channelSet), selectedNode = node)
             if (node.validPosition != null) {
                 map.controller.animateTo(GeoPoint(node.latitude, node.longitude))
             }
-            mapViewModel.consumeSitePlannerRequest()
+            mapViewModel.consumeSitePlannerRequest(node.num)
         }
     }
-    sitePlannerInitial?.let { initial ->
+    sitePlannerLaunch?.let { launch ->
         SitePlannerHost(
-            initialParams = initial,
-            onDismiss = { sitePlannerInitial = null },
+            initialParams = launch.initialParams,
+            onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
                 // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
@@ -914,8 +917,7 @@ fun MapView(
             } else {
                 null
             },
-            onUseNodeLocation =
-            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } },
+            onUseNodeLocation = launch.nodeLocation(ourNodeInfo)?.let { location -> { location } },
             onUseMapCenter = { map.mapCenter.let { it.latitude to it.longitude } },
         )
     }

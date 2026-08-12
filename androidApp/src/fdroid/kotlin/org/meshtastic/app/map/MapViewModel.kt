@@ -22,7 +22,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.Node
@@ -107,15 +106,17 @@ class MapViewModel(
     suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? =
         mapLayersManager.getInputStreamFromUri(layerItem)
 
-    // Site Planner deep link from node detail: MapRoute.Map(sitePlannerNodeNum) → resolve to the node so the map can
-    // open the estimate dialog pre-filled with its position. Cleared once consumed so it doesn't re-open.
-    private val pendingSitePlannerNodeNum = MutableStateFlow(savedStateHandle.get<Int>("sitePlannerNodeNum"))
+    // Injected by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
+    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
     val sitePlannerRequest: StateFlow<Node?> =
-        combine(pendingSitePlannerNodeNum, nodeRepository.nodeDBbyNum) { num, db -> num?.let { db[it] } }
-            .stateInWhileSubscribed(initialValue = null)
+        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
 
-    fun consumeSitePlannerRequest() {
-        pendingSitePlannerNodeNum.value = null
+    fun setSitePlannerNodeNum(nodeNum: Int?) {
+        sitePlannerRequestState.setNodeNum(nodeNum)
+    }
+
+    fun consumeSitePlannerRequest(nodeNum: Int) {
+        sitePlannerRequestState.consume(nodeNum)
     }
 }
 

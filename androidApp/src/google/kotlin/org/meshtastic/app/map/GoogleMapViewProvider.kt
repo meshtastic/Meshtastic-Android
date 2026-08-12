@@ -27,9 +27,15 @@ import org.meshtastic.core.ui.util.MapViewProvider
 @Single
 class GoogleMapViewProvider : MapViewProvider {
     @Composable
-    override fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
+    override fun MapView(
+        modifier: Modifier,
+        navigateToNodeDetails: (Int) -> Unit,
+        waypointId: Int?,
+        sitePlannerNodeNum: Int?,
+    ) {
         val mapViewModel: MapViewModel = koinViewModel()
         LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
+        LaunchedEffect(sitePlannerNodeNum) { mapViewModel.setSitePlannerNodeNum(sitePlannerNodeNum) }
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,

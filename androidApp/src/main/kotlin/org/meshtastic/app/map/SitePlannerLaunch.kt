@@ -23,6 +23,13 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.math.pow
 
+/** A planner session and, for Node Details routes, the node whose location shortcut it must retain. */
+internal class SitePlannerLaunch(val initialParams: SitePlannerParams, private val selectedNode: Node? = null) {
+    fun nodeLocation(connectedNode: Node?): Pair<Double, Double>? = (selectedNode ?: connectedNode)
+        ?.takeIf { it.validPosition != null }
+        ?.let { node -> node.latitude to node.longitude }
+}
+
 /**
  * Seed Site Planner params from a node (name + position) and, when a radio is connected, from its actual config:
  * transmit frequency (from the primary channel), transmit power (dBm→W), and a receiver sensitivity derived from the
