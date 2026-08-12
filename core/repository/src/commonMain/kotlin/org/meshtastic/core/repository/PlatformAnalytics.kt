@@ -53,6 +53,17 @@ interface PlatformAnalytics {
     }
 
     /**
+     * Tracks a key user interaction as a named custom RUM action. Auto-tracked tap targets are R8-obfuscated in release
+     * builds, so analytically important interactions must be reported explicitly with a stable name.
+     *
+     * @param name Stable snake_case action name (e.g. "message_send", "traceroute_request").
+     * @param attributes Optional structured attributes attached to the action.
+     */
+    fun trackAction(name: String, attributes: Map<String, Any> = emptyMap()) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
      * Starts tracking a screen as a RUM view, aligned with the Meshtastic-Apple Datadog integration (which auto-tracks
      * SwiftUI views) so per-screen RUM data lines up across platforms.
      *

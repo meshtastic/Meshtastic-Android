@@ -275,6 +275,11 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         GlobalRumMonitor.get().addAction(RumActionType.CUSTOM, "connect", attributes)
     }
 
+    override fun trackAction(name: String, attributes: Map<String, Any>) {
+        if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
+        GlobalRumMonitor.get().addAction(RumActionType.CUSTOM, name, attributes)
+    }
+
     override fun startScreenView(key: String, name: String) {
         if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
         GlobalRumMonitor.get().startView(key = key, name = name)

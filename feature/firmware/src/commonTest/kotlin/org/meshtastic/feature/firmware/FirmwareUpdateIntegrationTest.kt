@@ -115,6 +115,7 @@ class FirmwareUpdateIntegrationTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
+        mock(MockMode.autofill),
     )
 
     @Test

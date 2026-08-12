@@ -55,6 +55,7 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
@@ -113,6 +114,7 @@ class FirmwareUpdateViewModel(
     private val fileHandler: FirmwareFileHandler,
     private val applicationScope: ApplicationCoroutineScope,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
+    private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -321,6 +323,22 @@ class FirmwareUpdateViewModel(
     fun startUpdate() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
+        // Explicit mapping instead of class-name reflection: FirmwareUpdateMethod is R8-obfuscated in release.
+        val updateMethod =
+            when (currentState.updateMethod) {
+                FirmwareUpdateMethod.Usb -> "usb"
+                FirmwareUpdateMethod.Ble -> "ble"
+                FirmwareUpdateMethod.Wifi -> "wifi"
+                FirmwareUpdateMethod.Unknown -> "unknown"
+            }
+        analytics.trackAction(
+            "firmware_update_start",
+            mapOf(
+                "update_method" to updateMethod,
+                "is_recovery" to currentState.isRecovery,
+                "release_version" to release.id,
+            ),
+        )
         if (currentState.isRecovery) {
             startRecoveryUpdate(currentState, release)
         } else {
