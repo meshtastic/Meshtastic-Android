@@ -254,8 +254,9 @@ internal fun EnvironmentMetrics(
                         add(
                             DrawableMetricInfo(
                                 label = Res.string.one_wire_temperature,
-                                value = "${channel + 1}: ${temp.toTempString(isFahrenheit)}",
+                                value = temp.toTempString(isFahrenheit),
                                 icon = Res.drawable.ic_soil_temperature,
+                                channelNumber = channel + 1,
                             )
                                 .asGroup(),
                         )
@@ -268,8 +269,9 @@ internal fun EnvironmentMetrics(
                         add(
                             DrawableMetricInfo(
                                 label = Res.string.adc_voltage,
-                                value = "${channel + 1}: ${MetricFormatter.voltage(volts)}",
+                                value = MetricFormatter.voltage(volts),
                                 icon = Res.drawable.ic_electric_bolt,
+                                channelNumber = channel + 1,
                             )
                                 .asGroup(),
                         )

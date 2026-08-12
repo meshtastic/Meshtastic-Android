@@ -38,41 +38,45 @@ class EnvironmentChannelMetricsTest {
     @Test
     fun zeroOneWireTemperatureIsShown() = runComposeUiTest {
         setEnvironmentMetrics(EnvironmentMetricsProto(one_wire_temperature_ch0 = 0f))
-        onNodeWithText("1: 0°C").assertIsDisplayed()
+        onNodeWithText("1-Wire Temp 1").assertIsDisplayed()
+        onNodeWithText("0°C").assertIsDisplayed()
     }
 
     @Test
     fun absentOneWireChannelIsHidden() = runComposeUiTest {
         setEnvironmentMetrics(EnvironmentMetricsProto())
-        onNodeWithText("1: 0°C").assertDoesNotExist()
+        onNodeWithText("1-Wire Temp 1").assertDoesNotExist()
     }
 
     @Test
     fun oneWireChannelsKeepTheirChannelNumber() = runComposeUiTest {
         // A gap in the middle must not renumber the channels above it.
         setEnvironmentMetrics(EnvironmentMetricsProto(one_wire_temperature_ch0 = 10f, one_wire_temperature_ch2 = 30f))
-        onNodeWithText("1: 10°C").assertIsDisplayed()
-        onNodeWithText("3: 30°C").assertIsDisplayed()
-        onNodeWithText("2: 30°C").assertDoesNotExist()
+        onNodeWithText("1-Wire Temp 1").assertIsDisplayed()
+        onNodeWithText("1-Wire Temp 3").assertIsDisplayed()
+        onNodeWithText("1-Wire Temp 2").assertDoesNotExist()
     }
 
     @Test
     fun zeroAdcVoltageIsShown() = runComposeUiTest {
         setEnvironmentMetrics(EnvironmentMetricsProto(adc_voltage_ch0 = 0f))
-        onNodeWithText("1: 0.00 V").assertIsDisplayed()
+        onNodeWithText("ADC Voltage 1").assertIsDisplayed()
+        onNodeWithText("0.00 V").assertIsDisplayed()
     }
 
     @Test
     fun absentAdcChannelIsHidden() = runComposeUiTest {
         setEnvironmentMetrics(EnvironmentMetricsProto())
-        onNodeWithText("1: 0.00 V").assertDoesNotExist()
+        onNodeWithText("ADC Voltage 1").assertDoesNotExist()
     }
 
     @Test
     fun adcChannelsKeepTheirChannelNumber() = runComposeUiTest {
         setEnvironmentMetrics(EnvironmentMetricsProto(adc_voltage_ch1 = 3.3f, adc_voltage_ch7 = 1.8f))
-        onNodeWithText("2: 3.30 V").assertIsDisplayed()
-        onNodeWithText("8: 1.80 V").assertIsDisplayed()
+        onNodeWithText("ADC Voltage 2").assertIsDisplayed()
+        onNodeWithText("3.30 V").assertIsDisplayed()
+        onNodeWithText("ADC Voltage 8").assertIsDisplayed()
+        onNodeWithText("1.80 V").assertIsDisplayed()
     }
 
     private fun ComposeUiTest.setEnvironmentMetrics(metrics: EnvironmentMetricsProto) = setContent {
