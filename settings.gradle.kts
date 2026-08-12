@@ -42,7 +42,7 @@ plugins {
 
 // The flatpak-sources plugin reads Gradle.extensions, which Isolated Projects forbids; Gradle 9.7
 // enforces that and fails every task in the build. Only :captureFlatpakSources needs the plugin, and
-// its callers already pass --no-isolated-projects, so gate it on an opt-in property. Remove the gate
+// its callers already pass -Dorg.gradle.isolated-projects=false, so gate it on an opt-in property. Remove the gate
 // once org.meshtastic.flatpak.sources.settings > 0.1.5 ships an Isolated-Projects-safe release.
 if (providers.gradleProperty("meshtastic.flatpakSources").isPresent) {
     pluginManager.apply("org.meshtastic.flatpak.sources.settings")

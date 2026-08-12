@@ -12,11 +12,11 @@ trap 'rm -rf "$WORKDIR"' EXIT
 
 echo "── Step 1: Verify aboutlibraries.json determinism ──"
 rm -f androidApp/src/main/resources/aboutlibraries.json
-./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-isolated-projects --no-configuration-cache
+./gradlew :androidApp:exportLibraryDefinitions -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
 cp androidApp/src/main/resources/aboutlibraries.json "$WORKDIR/aboutlibraries-run1.json"
 
 rm -f androidApp/src/main/resources/aboutlibraries.json
-./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-isolated-projects --no-configuration-cache --rerun-tasks
+./gradlew :androidApp:exportLibraryDefinitions -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache --rerun-tasks
 cp androidApp/src/main/resources/aboutlibraries.json "$WORKDIR/aboutlibraries-run2.json"
 
 if ! diff -q "$WORKDIR/aboutlibraries-run1.json" "$WORKDIR/aboutlibraries-run2.json"; then
@@ -27,7 +27,7 @@ fi
 echo "✅ aboutlibraries.json is deterministic"
 
 echo "── Step 2: Build fdroid release APK ──"
-./gradlew :androidApp:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-isolated-projects --no-configuration-cache
+./gradlew :androidApp:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
 
 APK=$(find androidApp/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
 if [ -z "$APK" ]; then
