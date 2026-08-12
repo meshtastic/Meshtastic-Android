@@ -17,6 +17,8 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
@@ -86,6 +88,17 @@ class FakeRadioController :
     var gattCacheInvalidationRequested = false
         private set
 
+    private val _sessionGeneration = mutableStateFlow(0L)
+    override val sessionGeneration: StateFlow<Long> = _sessionGeneration
+
+    private val deviceSwitchMutex = Mutex()
+
+    /** Test hook that can suspend while a conditional local-configuration restore owns device selection. */
+    var beforeRestoreLocalConfiguration: suspend () -> Unit = {}
+
+    /** Device identity currently owned by the conditional restore seam. */
+    var selectedDeviceAddress: String? = null
+
     /** Deterministic test hook invoked inside every [requestRebootOta] call with the request parameters. */
     var onRequestRebootOta: suspend (requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) -> Unit =
         { _, _, _, _ ->
@@ -110,6 +123,9 @@ class FakeRadioController :
             stopProvideLocationCalled = false
             onRequestRebootOta = { _, _, _, _ -> }
             gattCacheInvalidationRequested = false
+            beforeRestoreLocalConfiguration = {}
+            selectedDeviceAddress = null
+            _sessionGeneration.value = 0L
         }
     }
 
@@ -151,6 +167,18 @@ class FakeRadioController :
     override suspend fun setLocalChannel(channel: Channel) {
         localChannels.add(channel)
         settingsOperations.add(SettingsOperation.SetChannel(channel))
+    }
+
+    override suspend fun restoreLocalConfiguration(
+        expectedDeviceAddress: String?,
+        config: Config,
+        primaryChannel: Channel?,
+    ): Boolean = deviceSwitchMutex.withLock {
+        if (expectedDeviceAddress == null || selectedDeviceAddress != expectedDeviceAddress) return@withLock false
+        beforeRestoreLocalConfiguration()
+        primaryChannel?.let { channel -> setLocalChannel(channel) }
+        setLocalConfig(config)
+        true
     }
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
@@ -252,7 +280,8 @@ class FakeRadioController :
         stopProvideLocationCalled = true
     }
 
-    override suspend fun setDeviceAddress(address: String) {
+    override suspend fun setDeviceAddress(address: String) = deviceSwitchMutex.withLock {
+        selectedDeviceAddress = address
         lastSetDeviceAddress = address
     }
 
@@ -264,6 +293,10 @@ class FakeRadioController :
 
     fun setConnectionState(state: ConnectionState) {
         _connectionState.value = state
+    }
+
+    fun setSessionGeneration(generation: Long) {
+        _sessionGeneration.value = generation
     }
 
     fun setClientNotification(notification: ClientNotification?) {

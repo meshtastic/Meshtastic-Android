@@ -33,6 +33,7 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
+import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.MeshDataHandler
@@ -53,7 +54,9 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
 
 private data class AssociationSnapshot(
     val identity: ConnectionIdentity?,
@@ -61,6 +64,21 @@ private data class AssociationSnapshot(
     val sessionGeneration: Long,
     val activeSession: RadioSessionContext?,
 )
+
+internal suspend fun restoreLocalConfigurationIfOwned(
+    expectedDeviceAddress: String?,
+    currentDeviceAddress: String?,
+    config: Config,
+    primaryChannel: Channel?,
+    editLocalSettings: suspend (suspend AdminEditScope.() -> Unit) -> Unit,
+): Boolean {
+    if (expectedDeviceAddress == null || currentDeviceAddress != expectedDeviceAddress) return false
+    editLocalSettings {
+        primaryChannel?.let { setChannel(it) }
+        setConfig(config)
+    }
+    return true
+}
 
 /**
  * Platform-agnostic [RadioController] composition root for any target where the service runs in-process (Desktop, iOS,
@@ -108,6 +126,8 @@ class RadioControllerImpl(
     QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
 
     private val deviceSwitchMutex = Mutex()
+
+    override val sessionGeneration: StateFlow<Long> = radioInterfaceService.sessionGeneration
 
     init {
         // Reconcile the connection-session identity at every transport-session boundary (stop/start cycle), not only
@@ -208,6 +228,20 @@ class RadioControllerImpl(
     // ── Packet ID & Location ────────────────────────────────────────────────
 
     override fun generatePacketId(): Int = commandSender.generatePacketId()
+
+    override suspend fun restoreLocalConfiguration(
+        expectedDeviceAddress: String?,
+        config: Config,
+        primaryChannel: Channel?,
+    ): Boolean = deviceSwitchMutex.withLock {
+        restoreLocalConfigurationIfOwned(
+            expectedDeviceAddress = expectedDeviceAddress,
+            currentDeviceAddress = radioInterfaceService.getDeviceAddress(),
+            config = config,
+            primaryChannel = primaryChannel,
+            editLocalSettings = { block -> editLocalSettings(block) },
+        )
+    }
 
     override fun startProvideLocation() {
         locationManager.restart()
