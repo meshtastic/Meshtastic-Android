@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
@@ -86,15 +86,6 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
 
-    var publicKey by rememberSaveable { mutableStateOf(formState.value.public_key) }
-    LaunchedEffect(formState.value.private_key) {
-        if (formState.value.private_key != securityConfig.private_key) {
-            publicKey = ByteString.EMPTY
-        } else if (formState.value.private_key == securityConfig.private_key) {
-            publicKey = securityConfig.public_key
-        }
-    }
-
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
         showKeyGenerationDialog = showKeyGenerationDialog,
@@ -131,19 +122,10 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         }
         item {
             TitledCard(title = stringResource(Res.string.direct_message_key)) {
-                EditBase64Preference(
-                    title = stringResource(Res.string.public_key),
-                    summary = stringResource(Res.string.config_security_public_key),
-                    value = publicKey,
+                SecurityPublicKeyPreference(
+                    securityConfig = securityConfig,
+                    formState = formState,
                     enabled = state.connected,
-                    readOnly = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChange = {
-                        if (it.size == 32) {
-                            formState.value = formState.value.copy(public_key = it)
-                        }
-                    },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.public_key.encodeToString()) },
                 )
                 HorizontalDivider()
                 EditBase64Preference(
@@ -245,6 +227,46 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             }
         }
     }
+}
+
+internal const val SECURITY_PUBLIC_KEY_COPY_TEST_TAG = "security_public_key_copy"
+
+/**
+ * Public keys come from the device. Editing the private key invalidates that derived value until the device responds
+ * with the matching key pair, so display and copy must use the same resolved value.
+ */
+internal fun resolvedPublicKey(securityConfig: Config.SecurityConfig, editedPrivateKey: ByteString): ByteString =
+    if (editedPrivateKey == securityConfig.private_key) securityConfig.public_key else ByteString.EMPTY
+
+@Composable
+internal fun SecurityPublicKeyPreference(
+    securityConfig: Config.SecurityConfig,
+    formState: ConfigState<Config.SecurityConfig>,
+    enabled: Boolean,
+    publicKeyCopyButton: @Composable (ByteString) -> Unit = { publicKey ->
+        CopyIconButton(
+            valueToCopy = publicKey.encodeToString(),
+            modifier = Modifier.testTag(SECURITY_PUBLIC_KEY_COPY_TEST_TAG),
+        )
+    },
+) {
+    val focusManager = LocalFocusManager.current
+    val publicKey = resolvedPublicKey(securityConfig, formState.value.private_key)
+
+    EditBase64Preference(
+        title = stringResource(Res.string.public_key),
+        summary = stringResource(Res.string.config_security_public_key),
+        value = publicKey,
+        enabled = enabled,
+        readOnly = true,
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onValueChange = {
+            if (it.size == 32) {
+                formState.value = formState.value.copy(public_key = it)
+            }
+        },
+        trailingIcon = { publicKeyCopyButton(publicKey) },
+    )
 }
 
 @Suppress("MagicNumber")
