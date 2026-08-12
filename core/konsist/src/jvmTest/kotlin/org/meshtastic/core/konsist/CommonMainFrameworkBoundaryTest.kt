@@ -35,14 +35,14 @@ class CommonMainFrameworkBoundaryTest {
     private val commonMainFiles =
         Konsist.scopeFromProject()
             .files
-            .filterNot { "/.claude/" in it.path.normalizedProjectPath() }
-            .filter { "/src/commonMain/" in it.path.normalizedProjectPath() }
+            .filterNot { it.isNestedAgentWorktree() }
+            .filter { "/src/commonMain/" in it.scanPath }
 
     @Test
     fun `the scan actually reaches commonMain sources`() {
-        val paths = commonMainFiles.map { it.path.normalizedProjectPath() }
+        val paths = commonMainFiles.map { it.scanPath }
 
-        assertTrue(paths.isNotEmpty(), "commonMain scan matched no files at all — the path filter is wrong")
+        assertTrue(paths.isNotEmpty(), emptyScanMessage("commonMain scan"))
         assertTrue(
             paths.any { it.endsWith("/core/model/src/commonMain/kotlin/org/meshtastic/core/model/Message.kt") },
             "expected core/model commonMain sources in scope; got ${paths.size} files, e.g. ${paths.take(3)}",
