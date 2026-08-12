@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -26,65 +26,82 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
-class MapLifecycleEffectsTest {
+class ActiveWhileStartedTest {
 
     @Test
-    fun activeEffectStopsInBackgroundAndResumesOnlyWhenEnabled() = runComposeUiTest {
+    fun effectFollowsLifecycleEnablementRestartKeysAndDisposal() = runComposeUiTest {
         val lifecycleOwner = TestLifecycleOwner(Lifecycle.State.CREATED)
+        val starts = mutableListOf<Pair<String, Int>>()
+        val stops = mutableListOf<Pair<String, Int>>()
         var enabled by mutableStateOf(true)
+        var restartKey by mutableStateOf("first")
+        var effectVersion by mutableStateOf(1)
         var composed by mutableStateOf(true)
-        var starts = 0
-        var stops = 0
 
         setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
                 if (composed) {
-                    ActiveWhileStarted(enabled) {
-                        starts += 1
-                        { stops += 1 }
+                    ActiveWhileStarted(restartKey, enabled = enabled) {
+                        val startedKey = restartKey
+                        val startedVersion = effectVersion
+                        starts += startedKey to startedVersion
+                        { stops += startedKey to startedVersion }
                     }
                 }
             }
         }
 
-        assertEquals(0, starts)
+        assertEquals(emptyList(), starts, "CREATED must not start the effect")
+        assertEquals(emptyList(), stops)
+
         lifecycleOwner.moveTo(Lifecycle.State.STARTED)
         waitForIdle()
-        assertEquals(1, starts)
+        assertEquals(listOf("first" to 1), starts)
+
+        runOnIdle { effectVersion = 2 }
+        waitForIdle()
+        assertEquals(listOf("first" to 1), starts, "updating the callback alone must not restart the effect")
 
         lifecycleOwner.moveTo(Lifecycle.State.CREATED)
         waitForIdle()
-        assertEquals(1, stops, "ON_STOP must synchronously release active map work")
+        assertEquals(listOf("first" to 1), stops, "ON_STOP must invoke the active cleanup callback")
 
         lifecycleOwner.moveTo(Lifecycle.State.STARTED)
         waitForIdle()
-        assertEquals(2, starts, "ON_START must resume an enabled map tracker")
+        assertEquals(listOf("first" to 1, "first" to 2), starts, "resume must use the latest effect callback")
+
+        runOnIdle { restartKey = "second" }
+        waitForIdle()
+        assertEquals(listOf("first" to 1, "first" to 2), stops)
+        assertEquals(listOf("first" to 1, "first" to 2, "second" to 2), starts)
 
         runOnIdle { enabled = false }
         waitForIdle()
-        assertEquals(2, stops, "disabling tracking must release active work")
+        assertEquals(listOf("first" to 1, "first" to 2, "second" to 2), stops)
 
         lifecycleOwner.moveTo(Lifecycle.State.CREATED)
         lifecycleOwner.moveTo(Lifecycle.State.STARTED)
         waitForIdle()
-        assertEquals(2, starts, "a disabled tracker must remain stopped after resume")
+        assertEquals(3, starts.size, "a disabled effect must remain stopped across lifecycle changes")
+        assertEquals(3, stops.size)
 
         runOnIdle { enabled = true }
         waitForIdle()
-        assertEquals(3, starts)
+        assertEquals(listOf("first" to 1, "first" to 2, "second" to 2, "second" to 2), starts)
 
         runOnIdle { composed = false }
         waitForIdle()
-        assertEquals(3, stops, "composition disposal must release active map work")
+        assertEquals(listOf("first" to 1, "first" to 2, "second" to 2, "second" to 2), stops)
+
+        lifecycleOwner.moveTo(Lifecycle.State.CREATED)
+        lifecycleOwner.moveTo(Lifecycle.State.STARTED)
+        waitForIdle()
+        assertEquals(4, starts.size, "a disposed effect must not restart")
+        assertEquals(4, stops.size, "disposal must not double-clean")
     }
 
     private class TestLifecycleOwner(initialState: Lifecycle.State) : LifecycleOwner {

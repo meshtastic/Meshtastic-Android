@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,16 +22,17 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.LifecycleStartEffect
 
 /**
- * Runs [effect] only while the current lifecycle is at least STARTED and [enabled] is true.
+ * Runs [effect] while the current lifecycle is at least STARTED and [enabled] is true.
  *
- * The cleanup returned by [effect] runs synchronously on ON_STOP, disable, or composition disposal. This is important
- * for hardware work: a coroutine launched from an ON_STOP state change may not run after the host recomposer pauses.
+ * Changing a [restartKeys] value restarts an active effect. The returned cleanup callback is invoked synchronously on
+ * ON_STOP, disable, or composition disposal. If that callback cancels coroutine work, downstream cleanup such as a
+ * `callbackFlow` provider's `awaitClose` runs as cancellation resumes.
  */
 @Composable
-internal fun ActiveWhileStarted(enabled: Boolean, effect: () -> () -> Unit) {
+fun ActiveWhileStarted(vararg restartKeys: Any?, enabled: Boolean = true, effect: () -> () -> Unit) {
     val currentEffect by rememberUpdatedState(effect)
 
-    LifecycleStartEffect(enabled) {
+    LifecycleStartEffect(enabled, *restartKeys) {
         val cleanup = if (enabled) currentEffect() else ({})
         onStopOrDispose { cleanup() }
     }

@@ -162,6 +162,7 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
@@ -351,7 +352,7 @@ fun MapView(
         }
     }
 
-    ActiveWhileStarted(isLocationTrackingEnabled && locationPermission.isGranted) {
+    ActiveWhileStarted(enabled = isLocationTrackingEnabled && locationPermission.isGranted) {
         val locationRequest =
             LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L).setMinUpdateIntervalMillis(2000L).build()
         try {
