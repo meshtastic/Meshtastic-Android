@@ -80,6 +80,7 @@ class MessageViewModelTest {
 
     private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val showQuickChatFlow = MutableStateFlow(false)
+    private val showFullMessageTimestampsFlow = MutableStateFlow(false)
     private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
     private val contactSettingsFlow = MutableStateFlow<Map<String, ContactSettings>>(emptyMap())
 
@@ -91,6 +92,7 @@ class MessageViewModelTest {
 
         connectionStateFlow.value = ConnectionState.Disconnected
         showQuickChatFlow.value = false
+        showFullMessageTimestampsFlow.value = false
         customEmojiFrequencyFlow.value = null
         contactSettingsFlow.value = emptyMap()
 
@@ -106,6 +108,7 @@ class MessageViewModelTest {
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
         every { uiPrefs.showQuickChat } returns showQuickChatFlow
         every { uiPrefs.setShowQuickChat(any()) } returns Unit
+        every { uiPrefs.showFullMessageTimestamps } returns showFullMessageTimestampsFlow
 
         every { packetRepository.getContactSettings() } returns contactSettingsFlow
         every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)
@@ -209,6 +212,17 @@ class MessageViewModelTest {
             // Since setShowQuickChat is mocked to returns Unit, it doesn't update the flow.
             // In a real app, the flow would update. We simulate it here.
             showQuickChatFlow.value = true
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testShowFullMessageTimestampsReflectsUiPreference() = runTest {
+        viewModel.showFullMessageTimestamps.test {
+            assertEquals(false, awaitItem())
+
+            showFullMessageTimestampsFlow.value = true
             assertEquals(true, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }

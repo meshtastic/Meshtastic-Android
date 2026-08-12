@@ -1571,6 +1571,8 @@ should_update
 should_update_firmware
 ### SHOW ###
 show_all_key_title
+show_full_message_timestamps
+show_full_message_timestamps_summary
 show_iaq_legend
 show_layer
 show_original

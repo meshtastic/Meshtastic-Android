@@ -153,6 +153,12 @@ class SettingsViewModel(
         uiPrefs.setTheme(theme)
     }
 
+    val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
+    fun setShowFullMessageTimestamps(show: Boolean) {
+        uiPrefs.setShowFullMessageTimestamps(show)
+    }
+
     /** Set the application locale. Empty string means system default. */
     fun setLocale(languageTag: String) {
         uiPrefs.setLocale(languageTag)

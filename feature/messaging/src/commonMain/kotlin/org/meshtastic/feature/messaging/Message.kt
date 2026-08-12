@@ -174,6 +174,7 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message.ifEmpty { viewModel.draftMessage.value })
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by viewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
@@ -473,6 +474,7 @@ fun MessageScreen(
                     filteringDisabled = filteringDisabled,
                     searchQuery = if (isSearchActive) searchQuery else "",
                     translationAvailable = translationAvailable,
+                    showFullMessageTimestamps = showFullMessageTimestamps,
                 ),
                 handlers =
                 MessageListHandlers(

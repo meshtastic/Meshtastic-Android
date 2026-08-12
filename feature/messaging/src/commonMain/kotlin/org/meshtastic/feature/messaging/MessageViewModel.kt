@@ -146,6 +146,8 @@ class MessageViewModel(
 
     val showQuickChat = uiPrefs.showQuickChat
 
+    val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
@@ -360,6 +361,29 @@ class MessageItemTest {
 
         onNodeWithText("Sending...", useUnmergedTree = true).assertIsDisplayed()
         onNodeWithContentDescription("Message delivery status", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun fullMessageTimestampIsDisplayedInMessageHeader() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val meshTime = 1_700_000_000_000L
+        val message =
+            localMessage(node = testNode, status = MessageStatus.RECEIVED).copy(time = "compact", meshTime = meshTime)
+        val expectedTimestamp = DateFormatter.formatDateTime(meshTime)
+
+        setContent {
+            MessageItem(
+                message = message,
+                node = testNode,
+                selected = false,
+                onStatusClick = {},
+                ourNode = testNode,
+                showFullMessageTimestamp = true,
+            )
+        }
+
+        onNodeWithText(expectedTimestamp, useUnmergedTree = true).assertIsDisplayed()
+        onNodeWithText("compact", useUnmergedTree = true).assertDoesNotExist()
     }
 
     private fun localMessage(node: Node, status: MessageStatus, routingError: Int = 0) = Message(

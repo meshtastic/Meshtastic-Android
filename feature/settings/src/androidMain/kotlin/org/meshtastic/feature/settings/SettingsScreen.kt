@@ -103,6 +103,7 @@ fun SettingsScreen(
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by settingsViewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
@@ -258,6 +259,8 @@ fun SettingsScreen(
                         stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
                     )
                     AppearanceSettingsContent(
+                        showFullMessageTimestamps = showFullMessageTimestamps,
+                        onShowFullMessageTimestampsChange = settingsViewModel::setShowFullMessageTimestamps,
                         onShowLanguagePicker = { showLanguagePickerDialog = true },
                         onShowThemePicker = { showThemePickerDialog = true },
                     )
