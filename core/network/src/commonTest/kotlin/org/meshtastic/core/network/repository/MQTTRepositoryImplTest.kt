@@ -20,7 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -460,38 +460,157 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
-    fun `connection state flow reflects repository state updates`() {
-        val repository =
-            MQTTRepositoryImpl(
-                radioConfigRepository = FakeRadioConfigRepository(),
-                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
-                buildConfigProvider = buildConfigProvider,
-                dispatchers =
-                CoroutineDispatchers(
-                    io = Dispatchers.Default,
-                    main = Dispatchers.Default,
-                    default = Dispatchers.Default,
-                ),
-                mqttClientFactory = { FakeMqttClientSession() },
-            )
+    fun `connection state flow reflects active client state updates`() = runTest {
+        val harness = createHarness()
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
         val disconnectError = MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "link lost")
 
-        assertEquals(ConnectionState.Disconnected.Idle, repository.connectionState.value)
+        assertEquals(ConnectionState.Disconnected.Idle, harness.repository.connectionState.value)
 
-        repository.updateConnectionState(ConnectionState.Connecting)
-        assertEquals(ConnectionState.Connecting, repository.connectionState.value)
+        harness.client.emitState(ConnectionState.Connecting)
+        runCurrent()
+        assertEquals(ConnectionState.Connecting, harness.repository.connectionState.value)
 
-        repository.updateConnectionState(ConnectionState.Connected)
-        assertEquals(ConnectionState.Connected, repository.connectionState.value)
+        harness.client.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, harness.repository.connectionState.value)
 
-        repository.updateConnectionState(ConnectionState.Reconnecting(attempt = 2, lastError = disconnectError))
-        val reconnecting = assertIs<ConnectionState.Reconnecting>(repository.connectionState.value)
+        harness.client.emitState(ConnectionState.Reconnecting(attempt = 2, lastError = disconnectError))
+        runCurrent()
+        val reconnecting = assertIs<ConnectionState.Reconnecting>(harness.repository.connectionState.value)
         assertEquals(2, reconnecting.attempt)
         assertEquals("link lost", reconnecting.lastError?.message)
 
-        repository.updateConnectionState(ConnectionState.Disconnected(reason = disconnectError))
-        val disconnected = assertIs<ConnectionState.Disconnected>(repository.connectionState.value)
+        harness.client.emitState(ConnectionState.Disconnected(reason = disconnectError))
+        runCurrent()
+        val disconnected = assertIs<ConnectionState.Disconnected>(harness.repository.connectionState.value)
         assertEquals("link lost", disconnected.reason?.message)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `stale collector teardown closes only its session and preserves replacement state`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+        firstClient.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, repository.connectionState.value)
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        replacementClient.emitState(ConnectionState.Connecting)
+        runCurrent()
+
+        assertEquals(1, firstClient.closeCalls, "installing a replacement must close the displaced session")
+        assertEquals(0, replacementClient.closeCalls)
+        assertEquals(ConnectionState.Connecting, repository.connectionState.value)
+
+        firstClient.emitState(ConnectionState.Connected)
+        firstCollector.cancelAndJoin()
+        runCurrent()
+
+        assertEquals(1, firstClient.closeCalls, "stale awaitClose must not close its client twice")
+        assertEquals(0, replacementClient.closeCalls, "stale awaitClose must not close the replacement")
+        assertEquals(ConnectionState.Connecting, repository.connectionState.value, "stale state must not win")
+
+        replacementClient.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, repository.connectionState.value)
+
+        replacementCollector.cancelAndJoin()
+        runCurrent()
+        assertEquals(1, replacementClient.closeCalls)
+        assertEquals(ConnectionState.Disconnected.Idle, repository.connectionState.value)
+    }
+
+    @Test
+    fun `replacing a session cancels its delayed connection retry`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        firstClient.failConnectWith(MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "offline"))
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+        assertEquals(1, firstClient.connectCalls.size)
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        assertEquals(1, firstClient.closeCalls)
+        assertEquals(1, replacementClient.connectCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(1, firstClient.connectCalls.size, "retired session must not reconnect after its retry delay")
+
+        firstCollector.cancelAndJoin()
+        replacementCollector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `queued publish resolves the active session after waiting for a permit`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+        val publishGate = CompletableDeferred<Unit>()
+        firstClient.blockPublishesUntil(publishGate)
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+
+        repeat(20) { index -> repository.publish("busy/$index", byteArrayOf(index.toByte()), retained = false) }
+        runCurrent()
+        assertEquals(20, firstClient.publishStarted.size)
+
+        repository.publish("queued/after-replacement", byteArrayOf(42), retained = false)
+        runCurrent()
+        assertEquals(20, firstClient.publishStarted.size, "the target publish must still be waiting for a permit")
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        publishGate.complete(Unit)
+        runCurrent()
+
+        assertFalse(firstClient.publishedMessages.any { it.topic == "queued/after-replacement" })
+        assertTrue(replacementClient.publishedMessages.any { it.topic == "queued/after-replacement" })
+
+        firstCollector.cancelAndJoin()
+        replacementCollector.cancelAndJoin()
+        runCurrent()
     }
 
     // region MqttJsonPayload — keep the existing JSON contract tests.
@@ -668,11 +787,14 @@ class MQTTRepositoryImplTest {
         override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
         val connectCalls = mutableListOf<MqttEndpoint>()
         val subscribeCalls = mutableListOf<List<Subscription>>()
+        val publishStarted = mutableListOf<MqttMessage>()
+        val publishedMessages = mutableListOf<MqttMessage>()
         var closeCalls = 0
             private set
 
         private val connectFailures = ArrayDeque<Throwable>()
         private val subscribeFailures = ArrayDeque<Throwable>()
+        private var publishGate: CompletableDeferred<Unit>? = null
 
         override suspend fun connect(endpoint: MqttEndpoint) {
             connectCalls += endpoint
@@ -684,7 +806,11 @@ class MQTTRepositoryImplTest {
             if (subscribeFailures.isNotEmpty()) throw subscribeFailures.removeFirst()
         }
 
-        override suspend fun publish(message: MqttMessage) = Unit
+        override suspend fun publish(message: MqttMessage) {
+            publishStarted += message
+            publishGate?.await()
+            publishedMessages += message
+        }
 
         override suspend fun close() {
             closeCalls += 1
@@ -696,6 +822,10 @@ class MQTTRepositoryImplTest {
 
         fun failSubscribeWith(throwable: Throwable) {
             subscribeFailures.addLast(throwable)
+        }
+
+        fun blockPublishesUntil(gate: CompletableDeferred<Unit>) {
+            publishGate = gate
         }
 
         suspend fun emitMessage(message: MqttMessage) {
