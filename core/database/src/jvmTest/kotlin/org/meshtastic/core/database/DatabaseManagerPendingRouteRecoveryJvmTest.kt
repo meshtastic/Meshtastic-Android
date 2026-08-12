@@ -189,8 +189,8 @@ class DatabaseManagerPendingRouteRecoveryJvmTest {
             .setDriver(BundledSQLiteDriver())
             .build()
 
-        override val limitedIo: kotlinx.coroutines.CoroutineDispatcher
-            get() = testDispatchers.default
+        /** `limitedParallelism` on a test dispatcher would swap virtual-time scheduling for a real worker view. */
+        override fun createPoolLane(): kotlinx.coroutines.CoroutineDispatcher = testDispatchers.io
 
         override fun deleteDatabaseFiles(dbName: String) {
             listOf("$dbName.db", "$dbName.db-wal", "$dbName.db-shm", "$dbName.db-journal").forEach { fileName ->
