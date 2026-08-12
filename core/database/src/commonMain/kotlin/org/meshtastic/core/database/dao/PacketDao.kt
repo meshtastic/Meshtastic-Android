@@ -632,6 +632,22 @@ interface PacketDao {
     }
 
     /**
+     * Stamps [routingError] on a sent packet only while it is still [MessageStatus.ENROUTE]. The read and the write
+     * share one transaction so an ACK/NAK that resolves the packet concurrently is never overwritten by a send-ack
+     * timeout that sampled the row before it landed.
+     *
+     * @return true if a row was timed out.
+     */
+    @Transaction
+    suspend fun timeOutEnroutePacket(packetId: Int, routingError: Int): Boolean {
+        val enroute = findPacketsWithId(packetId).filter { it.data.status == MessageStatus.ENROUTE }
+        enroute.forEach { existing ->
+            update(existing.copy(data = existing.data.copy(status = MessageStatus.ERROR), routingError = routingError))
+        }
+        return enroute.isNotEmpty()
+    }
+
+    /**
      * Atomically finds reactions by [replacement]'s packetId + userId + emoji and updates every ownership-scoped copy,
      * borrowing [myNodeNum][ReactionEntity.myNodeNum] from each existing row. No-op if no match is found.
      */

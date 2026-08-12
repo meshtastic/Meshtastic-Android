@@ -495,6 +495,7 @@ class MeshConnectionManagerImpl(
     }
 
     override fun onRadioConfigLoaded() {
+        packetHandler.rearmSendAckTimeouts()
         scope.handledLaunch {
             val queuedPackets = packetRepository.getQueuedPackets()
             queuedPackets.forEach { packet ->
