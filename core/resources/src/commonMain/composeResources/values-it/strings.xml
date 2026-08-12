@@ -876,6 +876,7 @@
     <string name="led_state">LED di stato</string>
     <string name="legacy_admin_channel">Canale di Amministrazione legacy</string>
     <string name="library_count">%1$d librerie</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamatore con licenza (Ham)</string>
     <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
     <!-- LOAD -->

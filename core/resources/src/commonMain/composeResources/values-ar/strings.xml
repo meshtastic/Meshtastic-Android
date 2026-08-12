@@ -116,6 +116,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>

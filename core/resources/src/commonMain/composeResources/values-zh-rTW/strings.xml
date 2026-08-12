@@ -657,6 +657,7 @@
     <string name="led_state">LED狀態</string>
     <string name="legacy_admin_channel">舊版管理頻道</string>
     <string name="library_count">%1$d 函式庫</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">領有執照的業餘無線電台 (HAM)</string>
     <string name="licensed_amateur_radio_text">啟用此選項將停用訊息加密，並與預設的 Meshtastic 網路不相容。</string>
     <!-- LOAD -->

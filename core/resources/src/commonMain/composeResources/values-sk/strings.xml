@@ -220,6 +220,7 @@
     <string name="label_very_long_slow">Veľmi Ďaleký Dosah - Pomali</string>
     <!-- LAYER -->
     <string name="led_state">Stav LED</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>
     <!-- LOCAL -->

@@ -120,6 +120,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aksesimi në vendndodhje është i fikur, nuk mund të ofrohet pozita për rrjetin mesh.</string>

@@ -619,6 +619,7 @@
     <string name="led_state">Стан світлодіоду</string>
     <string name="legacy_admin_channel">Застарілий адмін канал</string>
     <string name="library_count">%1$d Бібліотеки</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Ліцензований радіоаматор (Ham)</string>
     <string name="licensed_amateur_radio_text">Включення цієї опції вимикає шифрування і не сумісне зі стандартною мережею Meshtastic.</string>
     <!-- LOAD -->

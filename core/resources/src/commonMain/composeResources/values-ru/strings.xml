@@ -884,6 +884,7 @@
     <string name="led_state">Состояние LED</string>
     <string name="legacy_admin_channel">Устаревший канал Администратора</string>
     <string name="library_count">%1$d библиотек</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензия радиолюбителя (HAM)</string>
     <string name="licensed_amateur_radio_text">Включение данной опции отключает шифрование и несовместимо с основной сетью Meshtastic.</string>
     <!-- LOAD -->

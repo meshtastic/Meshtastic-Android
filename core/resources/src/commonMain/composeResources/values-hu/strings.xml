@@ -417,6 +417,7 @@
     <string name="led_heartbeat">LED ütemjelzés</string>
     <string name="led_state">LED állapot</string>
     <string name="legacy_admin_channel">Régi admin csatorna</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
     <!-- LOAD -->
     <string name="load">Terhelés</string>

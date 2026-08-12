@@ -211,6 +211,7 @@
     <!-- LAYER -->
     <string name="led_state">LED status</string>
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>

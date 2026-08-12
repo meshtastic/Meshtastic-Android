@@ -884,6 +884,7 @@
     <string name="led_state">LED 状态</string>
     <string name="legacy_admin_channel">旧版管理频道</string>
     <string name="library_count">%1$d 库</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">业余无线电模式（Ham）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
     <!-- LOAD -->

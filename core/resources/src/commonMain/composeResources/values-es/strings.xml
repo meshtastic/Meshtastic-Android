@@ -423,6 +423,7 @@ Rango de Valores 0 - 500.</string>
     <string name="led_heartbeat">Latido LED</string>
     <string name="led_state">Estado de led</string>
     <string name="legacy_admin_channel">Canal de administración antiguo</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
     <!-- LOAD -->
     <string name="load">Carga</string>

@@ -551,6 +551,7 @@
     <string name="led_state">Stare LED</string>
     <string name="legacy_admin_channel">Canal implicit de administrator</string>
     <string name="library_count">Librării %1$d</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamator autorizat</string>
     <string name="licensed_amateur_radio_text">Activarea acestei opțiuni dezactivează criptarea și nu este compatibilă cu rețeaua implicită de Meshtastic.</string>
     <!-- LOAD -->

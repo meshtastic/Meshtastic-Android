@@ -121,6 +121,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>
