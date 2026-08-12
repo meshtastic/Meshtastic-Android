@@ -33,10 +33,17 @@ import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
+import org.meshtastic.core.model.util.adcVoltage
+import org.meshtastic.core.model.util.oneWireTemperature
+import org.meshtastic.core.model.util.withAdcVoltage
+import org.meshtastic.core.model.util.withLegacyOneWireTemperatures
+import org.meshtastic.core.model.util.withOneWireTemperature
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
 import org.meshtastic.core.repository.MeshLogRetention
+import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -115,7 +122,6 @@ open class MeshLogRepositoryImpl(
         .distinctUntilChanged()
         .conflate()
 
-    @Suppress("CyclomaticComplexMethod")
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         val decoded = log.fromRadio.packet?.decoded ?: return@runCatching null
         // Requests for telemetry (want_response = true) should not be logged as data points.
@@ -124,22 +130,7 @@ open class MeshLogRepositoryImpl(
         val telemetry = Telemetry.ADAPTER.decode(decoded.payload)
         telemetry.copy(
             time = (log.received_date / MILLIS_PER_SEC).toInt(),
-            environment_metrics =
-            telemetry.environment_metrics?.let { metrics ->
-                metrics.copy(
-                    temperature = metrics.temperature ?: Float.NaN,
-                    relative_humidity = metrics.relative_humidity ?: Float.NaN,
-                    soil_temperature = metrics.soil_temperature ?: Float.NaN,
-                    barometric_pressure = metrics.barometric_pressure ?: Float.NaN,
-                    gas_resistance = metrics.gas_resistance ?: Float.NaN,
-                    voltage = metrics.voltage ?: Float.NaN,
-                    current = metrics.current ?: Float.NaN,
-                    lux = metrics.lux ?: Float.NaN,
-                    uv_lux = metrics.uv_lux ?: Float.NaN,
-                    iaq = metrics.iaq ?: Int.MIN_VALUE,
-                    soil_moisture = metrics.soil_moisture ?: Int.MIN_VALUE,
-                )
-            },
+            environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings(),
         )
     }
         .getOrNull()
@@ -244,3 +235,35 @@ open class MeshLogRepositoryImpl(
         private const val TELEMETRY_SNAPSHOT_PAGE_SIZE = 512
     }
 }
+
+/**
+ * Replaces absent optional readings with the sentinel the graphing layer filters on, so every field reaches the charts
+ * through one representation.
+ *
+ * Only presence is normalized: a reported `0` is a real reading on every field here and is preserved. Historical logs
+ * predating firmware 2.8 carry 1-Wire temperatures in the deprecated repeated field, so those are lifted onto the
+ * per-channel fields first — see [withLegacyOneWireTemperatures].
+ */
+private fun EnvironmentMetrics.withSentinelsForAbsentReadings(): EnvironmentMetrics =
+    withLegacyOneWireTemperatures().withScalarSentinels().withChannelSentinels()
+
+private fun EnvironmentMetrics.withScalarSentinels(): EnvironmentMetrics = copy(
+    temperature = temperature ?: Float.NaN,
+    relative_humidity = relative_humidity ?: Float.NaN,
+    soil_temperature = soil_temperature ?: Float.NaN,
+    barometric_pressure = barometric_pressure ?: Float.NaN,
+    gas_resistance = gas_resistance ?: Float.NaN,
+    voltage = voltage ?: Float.NaN,
+    current = current ?: Float.NaN,
+    lux = lux ?: Float.NaN,
+    uv_lux = uv_lux ?: Float.NaN,
+    iaq = iaq ?: Int.MIN_VALUE,
+    soil_moisture = soil_moisture ?: Int.MIN_VALUE,
+)
+
+private fun EnvironmentMetrics.withChannelSentinels(): EnvironmentMetrics =
+    (0 until TELEMETRY_CHANNEL_COUNT).fold(this) { metrics, channel ->
+        metrics
+            .withOneWireTemperature(channel, metrics.oneWireTemperature(channel) ?: Float.NaN)
+            .withAdcVoltage(channel, metrics.adcVoltage(channel) ?: Float.NaN)
+    }

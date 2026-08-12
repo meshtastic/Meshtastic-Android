@@ -45,6 +45,7 @@
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
+    <string name="adc_voltage">ADC Voltage</string>
     <!-- ADD -->
     <string name="add">Add</string>
     <string name="add_a_note">Add a private note…</string>
@@ -1126,6 +1127,7 @@
     <string name="message_status_unknown">Unknown</string>
     <string name="message_translated_label">Translated</string>
     <string name="messages">Messages</string>
+    <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>

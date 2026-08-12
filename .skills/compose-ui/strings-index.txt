@@ -27,6 +27,7 @@ action_translate_message
 actions
 adc_multiplier_override
 adc_multiplier_override_ratio
+adc_voltage
 ### ADD ###
 add
 add_a_note
@@ -1093,6 +1094,7 @@ message_status_sfpp_routing
 message_status_unknown
 message_translated_label
 messages
+metric_channel_label
 micrograms_per_cubic_meter
 min
 minimum_broadcast_seconds
