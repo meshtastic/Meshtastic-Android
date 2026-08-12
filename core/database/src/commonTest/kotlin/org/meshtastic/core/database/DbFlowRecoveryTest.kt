@@ -50,12 +50,32 @@ class DbFlowRecoveryTest {
         assertEquals(3, attempts, "each recoverable pool failure must restart the upstream")
     }
 
+    /**
+     * A closed pool must NOT be retried. `observeCurrentDb` re-latches on the replacement by itself, so retrying adds
+     * nothing — and it would keep a flow alive that used to terminate, leaving a backoff loop running inside a scope
+     * that has already gone away.
+     */
     @Test
-    fun closedPoolFailureIsAlsoRestarted() = runTest {
+    fun closedPoolFailureIsNotRetried() = runTest {
+        var attempts = 0
+        flow<Int> {
+            attempts += 1
+            throw IllegalStateException("Connection pool is closed")
+        }
+            .retryOnDbPoolFailure("test")
+            .test(timeout = EMISSION_TIMEOUT) {
+                assertEquals("Connection pool is closed", awaitError().message)
+            }
+
+        assertEquals(1, attempts, "a closed pool is handled by re-latching, not by retrying")
+    }
+
+    @Test
+    fun stalledFlowIsRestarted() = runTest {
         var attempts = 0
         flow {
             attempts += 1
-            if (attempts == 1) throw IllegalStateException("Connection pool is closed")
+            if (attempts == 1) throw DbFlowStalledException("no first emission")
             emit(1)
         }
             .retryOnDbPoolFailure("test")
