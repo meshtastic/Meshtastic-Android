@@ -32,7 +32,9 @@ fun MessageActionsContentPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
             MessageActionsContent(
-                quickEmojis = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
+                // Text placeholders, not emoji: emoji glyphs are not host-deterministic, so the
+                // golden guards the row layout (44dp targets, scrolling) rather than emoji pixels.
+                quickEmojis = listOf("+1", "-1", "ha", "!!", "<3", "??"),
                 onReply = {},
                 onReact = {},
                 onMoreReactions = {},
