@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.config_security_admin_key
 import org.meshtastic.core.resources.config_security_debug_log_api_enabled
 import org.meshtastic.core.resources.config_security_is_managed
 import org.meshtastic.core.resources.config_security_private_key
+import org.meshtastic.core.resources.config_security_private_key_remote
 import org.meshtastic.core.resources.config_security_public_key
 import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
@@ -53,6 +54,7 @@ import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
 import org.meshtastic.core.resources.private_key
 import org.meshtastic.core.resources.public_key
+import org.meshtastic.core.resources.redacted
 import org.meshtastic.core.resources.regenerate_keys_confirmation
 import org.meshtastic.core.resources.regenerate_private_key
 import org.meshtastic.core.resources.security
@@ -128,20 +130,11 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     enabled = state.connected,
                 )
                 HorizontalDivider()
-                EditBase64Preference(
-                    title = stringResource(Res.string.private_key),
-                    summary = stringResource(Res.string.config_security_private_key),
-                    value = formState.value.private_key,
+                SecurityPrivateKeyPreference(
+                    securityConfig = securityConfig,
+                    formState = formState,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChange = {
-                        if (it.size == 32) {
-                            formState.value = formState.value.copy(private_key = it)
-                        }
-                    },
-                    trailingIcon = {
-                        CopyIconButton(valueToCopy = formState.value.private_key.encodeToString(), sensitive = true)
-                    },
+                    isLocal = state.isLocal,
                 )
                 HorizontalDivider()
                 NodeActionButton(
@@ -151,11 +144,15 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     icon = MeshtasticIcons.Warning,
                     onClick = { showKeyGenerationDialog = true },
                 )
-                SecurityKeyBackupActions(
-                    viewModel = viewModel,
-                    enabled = state.connected,
-                    securityConfig = securityConfig,
-                )
+                // Backup/restore operates on this phone's own key file, so it is meaningless for a remote node
+                // whose private key we never receive.
+                if (state.isLocal) {
+                    SecurityKeyBackupActions(
+                        viewModel = viewModel,
+                        enabled = state.connected,
+                        securityConfig = securityConfig,
+                    )
+                }
             }
         }
         item {
@@ -266,6 +263,50 @@ internal fun SecurityPublicKeyPreference(
             }
         },
         trailingIcon = { publicKeyCopyButton(publicKey) },
+    )
+}
+
+/**
+ * Firmware withholds the private key from remote admin responses, so a remote node reports an empty one. The field
+ * stays writable: a remote set of a new key is still honoured, and a set that omits it leaves the node's key alone.
+ */
+internal fun isPrivateKeyRedacted(securityConfig: Config.SecurityConfig, isLocal: Boolean): Boolean =
+    !isLocal && securityConfig.private_key.size != PRIVATE_KEY_SIZE
+
+@Composable
+internal fun SecurityPrivateKeyPreference(
+    securityConfig: Config.SecurityConfig,
+    formState: ConfigState<Config.SecurityConfig>,
+    enabled: Boolean,
+    isLocal: Boolean,
+) {
+    val focusManager = LocalFocusManager.current
+    val privateKey = formState.value.private_key
+    val redacted = isPrivateKeyRedacted(securityConfig, isLocal) && privateKey.size != PRIVATE_KEY_SIZE
+
+    EditBase64Preference(
+        title = stringResource(Res.string.private_key),
+        summary =
+        if (redacted) {
+            stringResource(Res.string.config_security_private_key_remote)
+        } else {
+            stringResource(Res.string.config_security_private_key)
+        },
+        value = privateKey,
+        enabled = enabled,
+        placeholderText = if (redacted) stringResource(Res.string.redacted) else null,
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onValueChange = {
+            if (it.size == PRIVATE_KEY_SIZE) {
+                formState.value = formState.value.copy(private_key = it)
+            }
+        },
+        trailingIcon =
+        if (privateKey.size == PRIVATE_KEY_SIZE) {
+            { CopyIconButton(valueToCopy = privateKey.encodeToString(), sensitive = true) }
+        } else {
+            null
+        },
     )
 }
 

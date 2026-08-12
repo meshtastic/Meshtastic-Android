@@ -287,6 +287,7 @@
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
+    <string name="config_security_private_key_remote">The device does not share its private key over remote administration. You can set a new key, but it can never be read back.</string>
     <string name="config_security_public_key">Generated from your private key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
     <string name="configuration">Configuration</string>
@@ -1443,6 +1444,7 @@
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="reconnecting">Reconnecting…</string>
     <string name="red">Red</string>
+    <string name="redacted" translatable="false">***[REDACTED]***</string>
     <string name="refresh">Refresh</string>
     <string name="refresh_metadata">Refresh metadata</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
