@@ -888,8 +888,13 @@
     <string name="led_state">LED state</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensed amateur radio (Ham)</string>
     <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
+    <string name="licensed_mode_enable_confirm">Enable licensed mode</string>
+    <string name="licensed_mode_enable_title">Enable licensed (Ham) mode?</string>
+    <string name="licensed_mode_enable_warning">Licensed mode removes channel encryption keys and disables the admin channel. All traffic is sent as plaintext that anyone can read, and it is not compatible with the default Meshtastic network. You are responsible for meeting the requirements of your amateur radio license and local regulations.</string>
+    <string name="licensed_mode_enable_warning_signed">Licensed mode removes channel encryption keys and disables the admin channel. All traffic is sent as plaintext that anyone can read, but it is digitally signed so other nodes can verify it came from you. Your node number may change one time to match your identity key, so favorites, message history, remote admin references, and other nodes may initially treat this node as new. You are responsible for meeting the requirements of your amateur radio license and local regulations.</string>
     <!-- LOAD -->
     <string name="load">Load</string>
     <string name="load_15_min">Load 15m</string>

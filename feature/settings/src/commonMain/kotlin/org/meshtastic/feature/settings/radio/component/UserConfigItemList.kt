@@ -34,8 +34,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.call_sign
 import org.meshtastic.core.resources.call_sign_summary
 import org.meshtastic.core.resources.hardware_model
-import org.meshtastic.core.resources.licensed_amateur_radio
-import org.meshtastic.core.resources.licensed_amateur_radio_text
 import org.meshtastic.core.resources.long_name
 import org.meshtastic.core.resources.node_id
 import org.meshtastic.core.resources.short_name
@@ -127,11 +125,10 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.licensed_amateur_radio),
-                    summary = stringResource(Res.string.licensed_amateur_radio_text),
+                LicensedModeSetting(
                     checked = formState.value.is_licensed,
                     enabled = state.connected,
+                    signingSupported = state.metadata?.has_xeddsa,
                     onCheckedChange = { licensed ->
                         val longName = formState.value.long_name
                         // The field becomes the callsign: clear an over-long name so the user enters one.
@@ -142,7 +139,6 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                                 long_name = if (clearForCallsign) "" else longName,
                             )
                     },
-                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }

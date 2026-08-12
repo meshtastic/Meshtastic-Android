@@ -861,8 +861,13 @@ led_heartbeat
 led_state
 legacy_admin_channel
 library_count
+### LICENSED ###
 licensed_amateur_radio
 licensed_amateur_radio_text
+licensed_mode_enable_confirm
+licensed_mode_enable_title
+licensed_mode_enable_warning
+licensed_mode_enable_warning_signed
 ### LOAD ###
 load
 load_15_min
