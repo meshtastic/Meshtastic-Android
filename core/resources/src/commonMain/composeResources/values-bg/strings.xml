@@ -361,7 +361,6 @@
     <string name="doc_title_translate">Превод на приложението</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
-    <string name="downlink_enabled">Downlink активиран</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="download">Изтегляне</string>
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
@@ -370,6 +369,7 @@
     <string name="echo_enabled">Echo е активирано</string>
     <string name="edit">Редактирай</string>
     <string name="eight_hours">8 часа</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="enabled">Активиран</string>
     <!-- ENCRYPTION -->
@@ -1117,6 +1117,7 @@
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Сървър</string>
+    <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team">Цвят на екипа</string>
@@ -1198,7 +1199,6 @@
     <string name="unset">Не е зададен - 0</string>
     <string name="update_interval_seconds">Интервал на актуализиране (секунди)</string>
     <string name="updated">Актуализирано</string>
-    <string name="uplink_enabled">Uplink активиран</string>
     <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
     <string name="uptime">Време на работа</string>
     <!-- URL -->

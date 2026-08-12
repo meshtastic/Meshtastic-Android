@@ -436,7 +436,6 @@
     <string name="done">Terminé</string>
     <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
-    <string name="downlink_enabled">Liaison descendante activée (MQTT vers LoRa)</string>
     <string name="downlink_feature_description">Les messages provenant d'une passerelle Internet publique sont transmis au maillage local. En raison de la politique zéro saut, le trafic du serveur MQTT par défaut ne se propagera pas plus loin que cet appareil.</string>
     <string name="download">Télécharger</string>
     <string name="duplicated_public_key_title">Clé publique dupliquée détectée</string>
@@ -446,6 +445,7 @@
     <string name="edit">Modifier</string>
     <string name="edit_custom_tile_source">Modifier le réseau de tuile personnalisée</string>
     <string name="eight_hours">8 Heures</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activer le mode économie d'énergie</string>
     <string name="enabled">Activé</string>
     <!-- ENCRYPTION -->
@@ -1260,6 +1260,7 @@
     <string name="tak_role_unspecified">Non spécifié</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
     <string name="tak_server_section">Serveur</string>
+    <string name="tak_server_status_off">Éteint</string>
     <string name="tak_team">Couleur de l'équipe</string>
     <string name="tak_team_blue">Bleu</string>
     <string name="tak_team_brown">Marron</string>
@@ -1362,7 +1363,6 @@
     <string name="update_interval">Fréquence de récupération GPS</string>
     <string name="update_interval_seconds">Intervalle de mise à jour (secondes)</string>
     <string name="updated">Mis à jour</string>
-    <string name="uplink_enabled">Liaison montante activée (LoRa vers MQTT)</string>
     <string name="uplink_feature_description">Les messages provenant du maillage seront envoyés à Internet public via la passerelle configurée sur n'importe quel nœud.</string>
     <string name="uptime">Durée de fonctionnement</string>
     <!-- URL -->

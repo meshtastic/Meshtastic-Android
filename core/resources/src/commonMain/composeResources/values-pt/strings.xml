@@ -165,11 +165,11 @@
     <string name="doc_title_connections">Ligações</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodes</string>
-    <string name="downlink_enabled">Downlink ativado</string>
     <string name="dynamic">Dinâmico</string>
     <string name="echo_enabled">Eco ativado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Ativar modo de poupança de energia</string>
     <!-- ENCRYPTION -->
     <string name="encryption_enabled">Encriptação ativada</string>
@@ -565,7 +565,6 @@
     <string name="unrecognized">Desconhecido</string>
     <string name="up_down_select_input_enabled">Entrada Cima/Baixo/Selecionar ativa</string>
     <string name="update_interval_seconds">Intervalo de atualização (segundos)</string>
-    <string name="uplink_enabled">Uplink ativado</string>
     <string name="uptime">Tempo ativo</string>
     <!-- URL -->
     <string name="url">URL</string>

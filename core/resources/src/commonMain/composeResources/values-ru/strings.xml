@@ -560,7 +560,6 @@
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
-    <string name="downlink_enabled">Downlink включен</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
     <string name="download">Скачать</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
@@ -570,6 +569,7 @@
     <string name="edit">Редактировать</string>
     <string name="edit_custom_tile_source">Редактировать источник сетевых плиток</string>
     <string name="eight_hours">8 часов</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Включить режим энергосбережения</string>
     <string name="enabled">Включено</string>
     <!-- ENCRYPTION -->
@@ -1652,12 +1652,11 @@
     <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_enabled">Включить локальный сервер TAK</string>
-    <string name="tak_server_enabled_desc">Запускает локальный TLS-сервер на порту 8089 для подключений ATAK/iTAK</string>
-    <string name="tak_server_export_data_package_desc">Создайте .zip для ATAK/iTAK, чтобы подключиться к этому серверу</string>
     <string name="tak_server_loading">...</string>
     <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
-    <string name="tak_server_mesh_to_cot_desc">Показывать ноды Meshtastic на карте ATAK/iTAK как контакты</string>
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_status">Статус</string>
+    <string name="tak_server_status_off">Выкл</string>
     <string name="tak_server_test_card_title">Сетевой тест TAK (Отладка)</string>
     <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>
     <string name="tak_server_test_result_bytes">%1$dБ ✓</string>
@@ -1781,7 +1780,6 @@
     <string name="update_interval">Интервал опроса GPS</string>
     <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
     <string name="updated">Обновлено</string>
-    <string name="uplink_enabled">Uplink включен</string>
     <string name="uplink_feature_description">Сообщения из сети будут отправляться в публичный интернет через любую ноду настроенного шлюза.</string>
     <string name="uptime">Аптайм</string>
     <!-- URL -->

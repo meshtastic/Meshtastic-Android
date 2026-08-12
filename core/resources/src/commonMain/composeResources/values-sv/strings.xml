@@ -408,7 +408,6 @@
     <string name="done">Klart</string>
     <string name="dont_show_again_for_device">Visa inte igen för denna enhet</string>
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
-    <string name="downlink_enabled">Nedlänk aktiverad</string>
     <string name="downlink_feature_description">Meddelanden från en offentlig internetgateway vidarebefordras till det lokala nätverket. På grund av noll-hopp-policyn kommer trafiken från standardservern MQTT inte att sprida sig längre än den här enheten.</string>
     <string name="download">Ladda ner</string>
     <string name="duplicated_public_key_title">Dubblett publik nyckel upptäckt</string>
@@ -417,6 +416,7 @@
     <string name="echo_enabled">Eko aktiverad</string>
     <string name="edit">Ändra</string>
     <string name="eight_hours">8 timmar</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Aktivera strömsparläge</string>
     <string name="enabled">Aktiverad</string>
     <!-- ENCRYPTION -->
@@ -1246,9 +1246,10 @@
     <string name="tak_role_unspecified">Ospecificerad</string>
     <string name="tak_server">TAK-server</string>
     <string name="tak_server_enabled">Aktivera lokal TAK-server</string>
-    <string name="tak_server_enabled_desc">Startar en lokal TLS-server på port 8089 för ATAK/iTAK-anslutningar</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Status</string>
+    <string name="tak_server_status_off">Av</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_results">%1$d passerade, %2$d misslyckades %3$d/%4$d</string>
@@ -1342,7 +1343,6 @@
     <string name="update_interval">Intervall för hämtning av GPS-position</string>
     <string name="update_interval_seconds">Uppdateringsintervall (sekunder)</string>
     <string name="updated">Uppdaterad</string>
-    <string name="uplink_enabled">Upplänk aktiverad</string>
     <string name="uplink_feature_description">Meddelanden från mesh-nätet kommer att skickas till internet via vilken nod som helst som är konfigurerad som gateway.</string>
     <string name="uptime">Upptid</string>
     <!-- URL -->

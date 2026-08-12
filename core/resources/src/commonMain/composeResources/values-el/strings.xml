@@ -93,6 +93,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
     <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>

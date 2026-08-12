@@ -555,7 +555,6 @@
     <string name="done">Fatto</string>
     <string name="dont_show_again_for_device">Non mostrare più per questo dispositivo</string>
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
-    <string name="downlink_enabled">Downlink attivato</string>
     <string name="downlink_feature_description">I messaggi provenienti da un gateway Internet pubblico vengono inoltrati alla rete mesh locale. A causa della politica zero-hop, il traffico proveniente dal server MQTT predefinito non si propagherà oltre questo dispositivo.</string>
     <string name="download">Scarica</string>
     <string name="duplicated_public_key_title">Rilevata chiave pubblica duplicata</string>
@@ -565,6 +564,7 @@
     <string name="edit">Modifica</string>
     <string name="edit_custom_tile_source">Modifica sorgente tile di rete</string>
     <string name="eight_hours">8 Ore</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Abilita modalità risparmio energetico</string>
     <string name="enabled">Abilitato</string>
     <!-- ENCRYPTION -->
@@ -1627,10 +1627,10 @@
     <string name="tak_role_unspecified">Non specificato</string>
     <string name="tak_server">Server TAK</string>
     <string name="tak_server_enabled">Abilita server TAK locale</string>
-    <string name="tak_server_enabled_desc">Avvia un server TLS locale sulla porta 8089 per le connessioni ATAK/iTAK</string>
-    <string name="tak_server_export_data_package_desc">Genera uno .zip per far connettere ATAK/iTAK a questo server</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Stato</string>
+    <string name="tak_server_status_off">Disattivato</string>
     <string name="tak_server_test_card_title">Test TAK Mesh (Debug)</string>
     <string name="tak_server_test_idle">Invia alla mesh tutte le %1$d fixture di test</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1752,7 +1752,6 @@
     <string name="update_interval">Intervallo Interrogazione GPS</string>
     <string name="update_interval_seconds">Intervallo di aggiornamento (secondi)</string>
     <string name="updated">Aggiornato</string>
-    <string name="uplink_enabled">Uplink attivato</string>
     <string name="uplink_feature_description">I messaggi provenienti dalla rete mesh saranno inviati alla rete Internet pubblica attraverso il gateway configurato di qualsiasi nodo.</string>
     <string name="uptime">Tempo di attività</string>
     <!-- URL -->

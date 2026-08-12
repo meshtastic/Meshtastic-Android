@@ -271,12 +271,12 @@
     <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
     <string name="double_tap_as_button_press">Doble pulsación como botón</string>
-    <string name="downlink_enabled">Baja de Paquetes Permitida</string>
     <string name="download">Descarga</string>
     <string name="dynamic">Dinámico</string>
     <string name="echo_enabled">Eco activado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activar el modo ahorro de energía</string>
     <string name="enabled">Habilitado</string>
     <!-- ENCRYPTION -->
@@ -883,7 +883,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="unset">Sin establecer - 0</string>
     <string name="up_down_select_input_enabled">Arriba/Abajo/Seleccionar Activado</string>
     <string name="update_interval_seconds">Intervalo de refresco (segundos)</string>
-    <string name="uplink_enabled">Subida de Paquetes Permitida</string>
     <string name="uplink_feature_description">Los mensajes de la malla se enviarán a la internet pública a través de la puerta de enlace configurada de cualquier nodo.</string>
     <string name="uptime">Tiempo encendido</string>
     <!-- URL -->

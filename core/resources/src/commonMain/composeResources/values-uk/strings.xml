@@ -377,7 +377,6 @@
     <string name="doc_title_nodes">Вузли</string>
     <string name="done">Готово</string>
     <string name="double_tap_as_button_press">Подвійний дотик як натискання кнопки</string>
-    <string name="downlink_enabled">Прийом увімкнений</string>
     <string name="download">Завантажити</string>
     <string name="duplicated_public_key_title">Виявлено дублікат публічного ключа</string>
     <string name="dynamic">Динамічна</string>
@@ -385,6 +384,7 @@
     <string name="echo_enabled">Відлуння активоване</string>
     <string name="edit">Редагувати</string>
     <string name="eight_hours">8 Годин</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Увімкнути енергоощадний режим</string>
     <string name="enabled">Увімкнено</string>
     <!-- ENCRYPTION -->
@@ -1203,6 +1203,7 @@
     <string name="tak_role_unspecified">Невизначений</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team_blue">Синій</string>
@@ -1293,7 +1294,6 @@
     <string name="update_interval">Інтервал опитування GPS</string>
     <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
     <string name="updated">Оновлено</string>
-    <string name="uplink_enabled">Передача увімкнена</string>
     <string name="uptime">Час роботи</string>
     <!-- URL -->
     <string name="url">URL</string>

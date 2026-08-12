@@ -551,7 +551,6 @@
     <string name="done">完了</string>
     <string name="dont_show_again_for_device">このデバイスでは今後表示しない</string>
     <string name="double_tap_as_button_press">ダブルタップをボタンとして使用</string>
-    <string name="downlink_enabled">ダウンリンクの有効化</string>
     <string name="downlink_feature_description">パブリックなインターネットゲートウェイからのメッセージが、ローカルメッシュに転送されます。ゼロホップポリシーにより、デフォルトの MQTT サーバーからのトラフィックはこのデバイスより先には伝播しません。</string>
     <string name="download">ダウンロード</string>
     <string name="duplicated_public_key_title">公開鍵の重複を検出</string>
@@ -561,6 +560,7 @@
     <string name="edit">編集</string>
     <string name="edit_custom_tile_source">ネットワークタイルソースを編集</string>
     <string name="eight_hours">8時間</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">省電力モードを有効化</string>
     <string name="enabled">有効</string>
     <!-- ENCRYPTION -->
@@ -1622,10 +1622,10 @@
     <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK サーバー</string>
     <string name="tak_server_enabled">ローカル TAK サーバーを有効化</string>
-    <string name="tak_server_enabled_desc">ATAK/iTAK 接続用に、ポート 8089 でローカル TLS サーバーを起動します</string>
-    <string name="tak_server_export_data_package_desc">ATAK/iTAK がこのサーバーに接続するための .zip を生成します</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">サーバー</string>
+    <string name="tak_server_status">ステータス</string>
+    <string name="tak_server_status_off">オフ</string>
     <string name="tak_server_test_card_title">TAK メッシュテスト（デバッグ）</string>
     <string name="tak_server_test_idle">%1$d 件のテストフィクスチャをすべてメッシュに送信</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1746,7 +1746,6 @@
     <string name="update_interval">GPS ポーリング間隔</string>
     <string name="update_interval_seconds">更新間隔 (秒)</string>
     <string name="updated">更新済み</string>
-    <string name="uplink_enabled">アップリンクの有効化</string>
     <string name="uplink_feature_description">メッシュからのメッセージは、いずれかのノードに設定されたゲートウェイを通じてパブリックなインターネットに送信されます。</string>
     <string name="uptime">連続稼働時間</string>
     <!-- URL -->

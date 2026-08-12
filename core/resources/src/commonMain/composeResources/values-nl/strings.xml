@@ -132,11 +132,11 @@
     <string name="distance">Afstand</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
-    <string name="downlink_enabled">Downlink ingeschakeld</string>
     <string name="dynamic">Dynamisch</string>
     <string name="echo_enabled">Echo ingeschakeld</string>
     <string name="edit">Wijzig</string>
     <string name="eight_hours">8 Uur</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Energiebesparingsmodus inschakelen</string>
     <!-- ENCRYPTION -->
     <string name="encryption_enabled">Encryptie ingeschakeld</string>
@@ -469,7 +469,6 @@
     <string name="unmute">Dempen opheffen</string>
     <string name="unrecognized">Niet herkend</string>
     <string name="update_interval_seconds">Update-interval (seconden)</string>
-    <string name="uplink_enabled">Uplink ingeschakeld</string>
     <string name="uptime">Tijd online</string>
     <!-- URL -->
     <string name="url">URL</string>

@@ -403,7 +403,6 @@
     <string name="done">Hotovo</string>
     <string name="dont_show_again_for_device">U tohoto zařízení již nezobrazovat</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
-    <string name="downlink_enabled">Stahování povoleno</string>
     <string name="downlink_feature_description">Zprávy z veřejné internetové brány jsou předávány do místní mesh sítě. Kvůli politice nulového počtu skoků se provoz z výchozího MQTT serveru nebude šířit dál než do tohoto zařízení.</string>
     <string name="download">Stáhnout</string>
     <string name="duplicated_public_key_title">Byl zjištěn duplicitní veřejný klíč</string>
@@ -411,6 +410,7 @@
     <string name="easily_set_up_private_mesh_networks">Jednoduché nastavení soukromých mesh sítí pro bezpečnou a spolehlivou komunikaci i v odlehlých místech.</string>
     <string name="edit">Upravit</string>
     <string name="eight_hours">8 hodin</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Povolit úsporný režim</string>
     <string name="enabled">Povoleno</string>
     <!-- ENCRYPTION -->
@@ -1243,9 +1243,9 @@
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Nastavení TAK</string>
     <string name="tak_server_enabled">Povolit lokální TAK server</string>
-    <string name="tak_server_enabled_desc">Spustí lokální TLS server na portu 8089 pro ATAK/iTAK připojení</string>
-    <string name="tak_server_export_data_package_desc">Generovat .zip pro ATAK/iTAK pro připojení k tomuto serveru</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Stav</string>
+    <string name="tak_server_status_off">Vypnuto</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
     <string name="tak_team_red">Červená</string>
@@ -1330,7 +1330,6 @@
     <string name="update_interval">Interval aktualizace GPS</string>
     <string name="update_interval_seconds">Interval aktualizace (v sekundách)</string>
     <string name="updated">Aktualizováno</string>
-    <string name="uplink_enabled">Odesílání povoleno</string>
     <string name="uplink_feature_description">Zprávy z mesh sítě budou odesílány do veřejného internetu prostřednictvím libovolného uzlu, který má nakonfigurovanou bránu.</string>
     <string name="uptime">Doba provozu</string>
     <!-- URL -->
