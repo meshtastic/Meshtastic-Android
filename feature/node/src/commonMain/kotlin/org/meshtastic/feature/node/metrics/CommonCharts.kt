@@ -46,11 +46,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
@@ -120,9 +122,16 @@ object CommonCharts {
         valueFormatter = dynamicTimeFormatter,
         itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 1 }, addExtremeLabelPadding = true),
         labelRotationDegrees = LABEL_ROTATION_DEGREES,
+        // Vico caps `Size.Auto` at a fixed 64.dp, which truncates the rotated label above ~1.75x font scale.
+        // `min` is applied after that cap, so it is the only lever that restores the height; it scales with the
+        // font scale because the label is sized in sp.
+        size = BaseAxis.Size.Auto(min = (MIN_HEIGHT_PER_FONT_SCALE_DP * LocalDensity.current.fontScale).dp),
     )
 
     private const val LABEL_ROTATION_DEGREES = 45f
+
+    /** Measured need for the rotated label is ~37.2.dp per unit of font scale; 38 leaves a margin. */
+    private const val MIN_HEIGHT_PER_FONT_SCALE_DP = 38f
 }
 
 data class LegendData(
