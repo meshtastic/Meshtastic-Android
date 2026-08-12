@@ -108,6 +108,18 @@ class UIViewModel(
     /** True while the connected node is expected to be mid-restart (reboot-applying config save or reboot command). */
     val nodeRestartExpected: StateFlow<Boolean> = nodeRestartTracker.restartExpected
 
+    /**
+     * True while the handshake-stall watchdog is force-reconnecting the transport, so the UI can present the transient
+     * Disconnected window as an in-progress recovery rather than a user-visible disconnect. Same signal contract as
+     * [ConnectionsViewModel.connectionStatus]'s RECONNECTING case.
+     */
+    val watchdogReconnectInFlight: StateFlow<Boolean> =
+        combine(serviceRepository.connectionState, serviceRepository.connectionProgress) { state, progress ->
+            state is ConnectionState.Disconnected && progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT
+        }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = false)
+
     private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
