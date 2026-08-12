@@ -48,4 +48,11 @@ interface PacketHandler {
 
     /** Stops the packet queue. */
     fun stopPacketQueue()
+
+    /**
+     * Re-arms the send-ACK timeout for every persisted packet still awaiting its routing ACK/NAK, so sends orphaned by
+     * a disconnect or app restart become retryable instead of showing as sending forever. Call once per connection,
+     * after the radio config is loaded.
+     */
+    fun rearmSendAckTimeouts()
 }

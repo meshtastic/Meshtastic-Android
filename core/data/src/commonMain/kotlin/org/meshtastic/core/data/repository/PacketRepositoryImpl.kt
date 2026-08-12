@@ -113,6 +113,10 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.currentDb.value.packetDao().getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
     }
 
+    override suspend fun getEnroutePackets(): List<DataPacket> = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().getAllDataPackets().filter { it.status == MessageStatus.ENROUTE }
+    }
+
     suspend fun insertRoomPacket(packet: RoomPacket) {
         withContext(dispatchers.io + NonCancellable) { dbManager.withDb { it.packetDao().insert(packet) } }
     }

@@ -20,9 +20,12 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.matches
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
@@ -33,7 +36,10 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -42,6 +48,7 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.ToRadio
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -49,6 +56,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class PacketHandlerImplTest {
 
@@ -274,5 +282,79 @@ class PacketHandlerImplTest {
         testScheduler.runCurrent()
 
         verifySuspend { meshLogRepository.insert(any()) }
+    }
+
+    private fun enrouteDataPacket(id: Int, time: Long = 0L) =
+        DataPacket(to = "!12345678", bytes = null, dataType = 1, id = id, time = time, status = MessageStatus.ENROUTE)
+
+    @Test
+    fun `unacked ENROUTE send times out to a retryable ERROR TIMEOUT`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        everySuspend { packetRepository.getPacketById(123) } returns enrouteDataPacket(123)
+
+        handler.sendToRadio(ToRadio(packet = MeshPacket(id = 123)))
+        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
+        testScheduler.runCurrent()
+
+        verifySuspend {
+            packetRepository.update(
+                matches { it.status == MessageStatus.ERROR },
+                matches { it == Routing.Error.TIMEOUT.value },
+            )
+        }
+    }
+
+    @Test
+    fun `send resolved before the timeout is left untouched`() = runTest(testDispatcher) {
+        connectionStateFlow.value = ConnectionState.Connected
+        everySuspend { packetRepository.getPacketById(124) } returns enrouteDataPacket(124)
+
+        handler.sendToRadio(ToRadio(packet = MeshPacket(id = 124)))
+        testScheduler.runCurrent()
+        everySuspend { packetRepository.getPacketById(124) } returns
+            enrouteDataPacket(124).also { it.status = MessageStatus.DELIVERED }
+        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
+        testScheduler.runCurrent()
+
+        verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
+    }
+
+    @Test
+    fun `rearm times out a stale persisted ENROUTE packet after the reconnect grace`() = runTest(testDispatcher) {
+        val stale = enrouteDataPacket(321, time = 0L)
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(stale)
+        everySuspend { packetRepository.getPacketById(321) } returns stale
+
+        handler.rearmSendAckTimeouts()
+        testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
+        testScheduler.runCurrent()
+
+        verifySuspend {
+            packetRepository.update(
+                matches { it.status == MessageStatus.ERROR },
+                matches { it == Routing.Error.TIMEOUT.value },
+            )
+        }
+    }
+
+    @Test
+    fun `rearm gives a fresh ENROUTE packet its full ack window`() = runTest(testDispatcher) {
+        val fresh = enrouteDataPacket(322, time = nowMillis)
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(fresh)
+        everySuspend { packetRepository.getPacketById(322) } returns fresh
+
+        handler.rearmSendAckTimeouts()
+        testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
+        testScheduler.runCurrent()
+        verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
+
+        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
+        testScheduler.runCurrent()
+        verifySuspend {
+            packetRepository.update(
+                matches { it.status == MessageStatus.ERROR },
+                matches { it == Routing.Error.TIMEOUT.value },
+            )
+        }
     }
 }

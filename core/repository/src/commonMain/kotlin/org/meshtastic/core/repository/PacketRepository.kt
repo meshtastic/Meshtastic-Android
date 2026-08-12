@@ -73,6 +73,9 @@ interface PacketRepository {
     /** Returns all packets currently queued for transmission. */
     suspend fun getQueuedPackets(): List<DataPacket>
 
+    /** Returns all sent packets still awaiting a routing ACK/NAK (status [MessageStatus.ENROUTE]). */
+    suspend fun getEnroutePackets(): List<DataPacket>
+
     /**
      * Persists a packet in the database.
      *
