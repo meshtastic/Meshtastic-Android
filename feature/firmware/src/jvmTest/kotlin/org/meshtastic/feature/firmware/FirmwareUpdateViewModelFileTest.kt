@@ -137,6 +137,7 @@ class FirmwareUpdateViewModelFileTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
+        mock(MockMode.autofill),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")

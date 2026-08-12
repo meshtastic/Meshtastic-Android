@@ -142,6 +142,7 @@ class ProfileRoundTripTest {
                 fileService = fileService,
                 mqttManager = mqttManager,
                 lockdownCoordinator = FakeLockdownCoordinator(),
+                analytics = mock(MockMode.autofill),
                 securityKeyBackupStore = securityKeyBackupStore,
                 snackbarManager = snackbarManager,
                 nodeRestartTracker = nodeRestartTracker,

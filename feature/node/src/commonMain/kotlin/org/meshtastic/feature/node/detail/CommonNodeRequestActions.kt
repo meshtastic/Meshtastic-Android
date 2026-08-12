@@ -25,6 +25,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -47,6 +48,7 @@ class CommonNodeRequestActions
 constructor(
     private val radioController: RadioController,
     private val snackbarManager: SnackbarManager,
+    private val analytics: PlatformAnalytics,
 ) : NodeRequestActions {
 
     private val _lastTracerouteTime = MutableStateFlow<Long?>(null)
@@ -62,6 +64,7 @@ constructor(
     override suspend fun requestUserInfo(destNum: Int, longName: String) {
         Logger.i { "Requesting UserInfo for '$destNum'" }
         radioController.requestUserInfo(destNum)
+        analytics.trackAction("user_info_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
     }
 
@@ -76,6 +79,7 @@ constructor(
     override suspend fun requestPosition(destNum: Int, longName: String, position: Position) {
         Logger.i { "Requesting position for '$destNum'" }
         radioController.requestPosition(destNum, position)
+        analytics.trackAction("position_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
     }
 
@@ -83,6 +87,7 @@ constructor(
         Logger.i { "Requesting telemetry for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestTelemetry(packetId, destNum, type.ordinal)
+        analytics.trackAction("telemetry_request", mapOf("telemetry_type" to type.name))
 
         val typeRes =
             when (type) {
@@ -102,6 +107,7 @@ constructor(
         Logger.i { "Requesting traceroute for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestTraceroute(packetId, destNum)
+        analytics.trackAction("traceroute_request")
         _lastTracerouteTime.value = nowMillis
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
     }

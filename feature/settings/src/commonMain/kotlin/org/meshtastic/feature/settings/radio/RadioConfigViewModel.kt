@@ -68,6 +68,7 @@ import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -161,6 +162,7 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
+    private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
@@ -591,6 +593,11 @@ open class RadioConfigViewModel(
     private fun sendAdminRequest(destNum: Int) {
         val route = radioConfigState.value.route
         _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
+
+        analytics.trackAction(
+            "admin_action",
+            mapOf("route" to route.lowercase(), "is_remote" to (destNum != myNodeNum)),
+        )
 
         val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
 

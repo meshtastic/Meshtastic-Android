@@ -138,6 +138,7 @@ class FirmwareUpdateViewModelTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
+        mock(MockMode.autofill),
     )
 
     @Test
