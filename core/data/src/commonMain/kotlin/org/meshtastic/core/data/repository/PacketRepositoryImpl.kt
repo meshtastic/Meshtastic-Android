@@ -117,6 +117,11 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.currentDb.value.packetDao().getAllDataPackets().filter { it.status == MessageStatus.ENROUTE }
     }
 
+    // A null from withDb means no database was available, so nothing was timed out.
+    override suspend fun timeOutEnroutePacket(packetId: Int, routingError: Int): Boolean = withContext(dispatchers.io) {
+        dbManager.withDb { it.packetDao().timeOutEnroutePacket(packetId, routingError) } ?: false
+    }
+
     suspend fun insertRoomPacket(packet: RoomPacket) {
         withContext(dispatchers.io + NonCancellable) { dbManager.withDb { it.packetDao().insert(packet) } }
     }

@@ -105,6 +105,9 @@ class PacketHandlerImpl(
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
     private val routingResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
 
+    private val timeoutMutex = Mutex()
+    private val sendAckTimeoutJobs = mutableMapOf<Int, Job>()
+
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
         val b = p.encode()
@@ -297,15 +300,21 @@ class PacketHandlerImpl(
      * A send whose routing ACK/NAK never reaches the app (typically because it was disconnected when the radio's
      * response arrived) would stay ENROUTE — "Sending…" — forever. Stamp it as a retryable timeout instead; a late ACK
      * still upgrades it via handleAckNak.
+     *
+     * One timer per packet: re-arming supersedes the pending one, so repeated reconnects cannot pile up timers for the
+     * same send. Timers deliberately survive a disconnect — the ack genuinely never arrived, and the resulting state is
+     * retryable — so a user who never reconnects still sees the send resolve.
      */
-    private fun scheduleSendAckTimeout(packetId: Int, delayFor: Duration = SEND_ACK_TIMEOUT) = scope.handledLaunch {
-        delay(delayFor)
-        val p = packetRepository.value.getPacketById(packetId) ?: return@handledLaunch
-        if (p.status == MessageStatus.ENROUTE) {
-            packetRepository.value.update(
-                p.copy(status = MessageStatus.ERROR),
-                routingError = Routing.Error.TIMEOUT.value,
-            )
+    private suspend fun scheduleSendAckTimeout(packetId: Int, delayFor: Duration = SEND_ACK_TIMEOUT) {
+        timeoutMutex.withLock {
+            sendAckTimeoutJobs.remove(packetId)?.cancel()
+            sendAckTimeoutJobs.values.removeAll { it.isCompleted }
+            sendAckTimeoutJobs[packetId] =
+                scope.handledLaunch {
+                    delay(delayFor)
+                    // Conditional in the DAO transaction: an ACK/NAK landing while this timer waited must win.
+                    packetRepository.value.timeOutEnroutePacket(packetId, Routing.Error.TIMEOUT.value)
+                }
         }
     }
 

@@ -22,7 +22,6 @@ import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
-import dev.mokkery.matcher.matches
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
@@ -296,65 +295,67 @@ class PacketHandlerImplTest {
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend {
-            packetRepository.update(
-                matches { it.status == MessageStatus.ERROR },
-                matches { it == Routing.Error.TIMEOUT.value },
-            )
-        }
+        verifySuspend { packetRepository.timeOutEnroutePacket(123, Routing.Error.TIMEOUT.value) }
     }
 
     @Test
-    fun `send resolved before the timeout is left untouched`() = runTest(testDispatcher) {
+    fun `the timeout never fires before its deadline`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
         everySuspend { packetRepository.getPacketById(124) } returns enrouteDataPacket(124)
 
         handler.sendToRadio(ToRadio(packet = MeshPacket(id = 124)))
-        testScheduler.runCurrent()
-        everySuspend { packetRepository.getPacketById(124) } returns
-            enrouteDataPacket(124).also { it.status = MessageStatus.DELIVERED }
-        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
+        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT - 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
+        verifySuspend(exactly(0)) { packetRepository.timeOutEnroutePacket(any(), any()) }
     }
 
     @Test
     fun `rearm times out a stale persisted ENROUTE packet after the reconnect grace`() = runTest(testDispatcher) {
         val stale = enrouteDataPacket(321, time = 0L)
         everySuspend { packetRepository.getEnroutePackets() } returns listOf(stale)
-        everySuspend { packetRepository.getPacketById(321) } returns stale
 
         handler.rearmSendAckTimeouts()
         testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend {
-            packetRepository.update(
-                matches { it.status == MessageStatus.ERROR },
-                matches { it == Routing.Error.TIMEOUT.value },
-            )
-        }
+        verifySuspend { packetRepository.timeOutEnroutePacket(321, Routing.Error.TIMEOUT.value) }
     }
 
     @Test
     fun `rearm gives a fresh ENROUTE packet its full ack window`() = runTest(testDispatcher) {
         val fresh = enrouteDataPacket(322, time = nowMillis)
         everySuspend { packetRepository.getEnroutePackets() } returns listOf(fresh)
-        everySuspend { packetRepository.getPacketById(322) } returns fresh
 
         handler.rearmSendAckTimeouts()
         testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
         testScheduler.runCurrent()
-        verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
+        verifySuspend(exactly(0)) { packetRepository.timeOutEnroutePacket(any(), any()) }
 
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
-        verifySuspend {
-            packetRepository.update(
-                matches { it.status == MessageStatus.ERROR },
-                matches { it == Routing.Error.TIMEOUT.value },
-            )
+        verifySuspend { packetRepository.timeOutEnroutePacket(322, Routing.Error.TIMEOUT.value) }
+    }
+
+    @Test
+    fun `rearming supersedes the pending timer instead of stacking a second one`() = runTest(testDispatcher) {
+        // Repeated reconnects must not accumulate timers for the same send, and the superseded timer must not
+        // fire on its own original deadline.
+        connectionStateFlow.value = ConnectionState.Connected
+        val packet = enrouteDataPacket(325, time = nowMillis)
+        everySuspend { packetRepository.getPacketById(325) } returns packet
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(packet)
+
+        handler.sendToRadio(ToRadio(packet = MeshPacket(id = 325)))
+        testScheduler.runCurrent()
+        repeat(3) {
+            handler.rearmSendAckTimeouts()
+            testScheduler.runCurrent()
         }
+
+        testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT * 2 + 1.seconds)
+        testScheduler.runCurrent()
+
+        verifySuspend(exactly(1)) { packetRepository.timeOutEnroutePacket(325, Routing.Error.TIMEOUT.value) }
     }
 }
