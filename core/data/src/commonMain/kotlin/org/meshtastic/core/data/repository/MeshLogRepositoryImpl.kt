@@ -36,6 +36,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -226,10 +227,14 @@ open class MeshLogRepositoryImpl(
         Unit
     }
 
-    /** Prunes the log database based on the configured [retentionDays]. */
-    @Suppress("MagicNumber")
+    /**
+     * Prunes the log database based on the configured [retentionDays]. The sentinel values are resolved by
+     * [MeshLogRetention], so "never delete" is a no-op and "1 hour" trims to the last hour rather than scaling the
+     * sentinel by days.
+     */
     override suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
-        val cutoffTime = nowMillis - (retentionDays.toLong() * 24 * 60 * 60 * 1000)
+        val window = MeshLogRetention.windowOrNull(retentionDays) ?: return@withContext
+        val cutoffTime = nowMillis - window.inWholeMilliseconds
         dbManager.withDb { it.meshLogDao().deleteOlderThan(cutoffTime) }
         Unit
     }

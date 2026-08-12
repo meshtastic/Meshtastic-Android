@@ -76,7 +76,10 @@ interface MeshLogRepository {
     /** Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry logs. */
     suspend fun deleteLocalStatsLogs(nodeNum: Int)
 
-    /** Prunes the log database based on the configured [retentionDays]. */
+    /**
+     * Prunes the log database based on the configured [retentionDays], which carries the [MeshLogRetention] sentinels:
+     * [MeshLogRetention.KEEP_FOREVER] deletes nothing and [MeshLogRetention.ONE_HOUR] keeps only the last hour.
+     */
     suspend fun deleteLogsOlderThan(retentionDays: Int)
 
     companion object {

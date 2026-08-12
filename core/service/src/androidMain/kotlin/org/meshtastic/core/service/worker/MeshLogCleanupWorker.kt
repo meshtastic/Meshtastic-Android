@@ -23,6 +23,7 @@ import co.touchlab.kermit.Logger
 import org.koin.android.annotation.KoinWorker
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.MeshLogRetention
 
 @KoinWorker
 class MeshLogCleanupWorker(
@@ -35,18 +36,13 @@ class MeshLogCleanupWorker(
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
         val retentionDays = meshLogPrefs.retentionDays.value
+        val retentionWindow = MeshLogRetention.windowOrNull(retentionDays)
         if (!meshLogPrefs.loggingEnabled.value) {
             logger.i { "Skipping cleanup because mesh log storage is disabled" }
-        } else if (retentionDays == 0) {
+        } else if (retentionWindow == null) {
             logger.i { "Skipping cleanup because retention is set to never delete" }
         } else {
-            val retentionLabel =
-                if (retentionDays == -1) {
-                    "1 hour"
-                } else {
-                    "$retentionDays days"
-                }
-            logger.d { "Cleaning logs older than $retentionLabel" }
+            logger.d { "Cleaning logs older than $retentionWindow" }
             meshLogRepository.deleteLogsOlderThan(retentionDays)
             logger.i { "Successfully cleaned old MeshLog entries" }
         }

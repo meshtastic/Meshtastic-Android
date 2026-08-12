@@ -29,6 +29,7 @@ import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.proto.Data
@@ -45,6 +46,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import org.meshtastic.core.common.util.nowMillis as realNowMillis
 
 abstract class CommonMeshLogRepositoryTest {
 
@@ -189,6 +194,44 @@ abstract class CommonMeshLogRepositoryTest {
         val remainingIds = repository.getAllLogsUnbounded().first().map { it.uuid }.toSet()
         assertEquals(setOf("device", "environment", "local-stats-request"), remainingIds)
     }
+
+    @Test
+    fun `deleteLogsOlderThan one hour sentinel keeps the last hour instead of wiping the table`() =
+        runTest(testDispatcher) {
+            val now = realNowMillis
+            repository.insert(retentionLog("recent", now - 30.minutes.inWholeMilliseconds))
+            repository.insert(retentionLog("stale", now - 2.hours.inWholeMilliseconds))
+
+            repository.deleteLogsOlderThan(MeshLogRetention.ONE_HOUR)
+
+            assertEquals(setOf("recent"), repository.getAllLogsUnbounded().first().map { it.uuid }.toSet())
+        }
+
+    @Test
+    fun `deleteLogsOlderThan keep forever sentinel deletes nothing`() = runTest(testDispatcher) {
+        val now = realNowMillis
+        repository.insert(retentionLog("ancient", now - 400.days.inWholeMilliseconds))
+        repository.insert(retentionLog("recent", now))
+
+        repository.deleteLogsOlderThan(MeshLogRetention.KEEP_FOREVER)
+
+        assertEquals(setOf("ancient", "recent"), repository.getAllLogsUnbounded().first().map { it.uuid }.toSet())
+    }
+
+    @Test
+    fun `deleteLogsOlderThan trims to the configured day count`() = runTest(testDispatcher) {
+        val now = realNowMillis
+        repository.insert(retentionLog("within", now - 6.days.inWholeMilliseconds))
+        repository.insert(retentionLog("outside", now - 8.days.inWholeMilliseconds))
+
+        repository.deleteLogsOlderThan(7)
+
+        assertEquals(setOf("within"), repository.getAllLogsUnbounded().first().map { it.uuid }.toSet())
+    }
+
+    /** Retention is measured against the real clock, so these rows are stamped relative to it. */
+    private fun retentionLog(uuid: String, receivedDate: Long) =
+        MeshLog(uuid = uuid, message_type = "TEXT", received_date = receivedDate, raw_message = "")
 
     private fun telemetryLog(
         uuid: String,

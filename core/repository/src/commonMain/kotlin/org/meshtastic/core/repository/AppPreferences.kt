@@ -58,7 +58,9 @@ interface MeshLogPrefs {
 
     companion object {
         const val DEFAULT_RETENTION_DAYS = 30
-        const val MIN_RETENTION_DAYS = -1
+
+        /** The lowest selectable setting is the one-hour sentinel, not a day count. */
+        const val MIN_RETENTION_DAYS = MeshLogRetention.ONE_HOUR
         const val MAX_RETENTION_DAYS = 365
     }
 }

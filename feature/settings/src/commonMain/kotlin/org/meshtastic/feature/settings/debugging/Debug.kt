@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
@@ -237,11 +238,11 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
     ) {
         @Suppress("MagicNumber")
         val retentionItems =
-            listOf((-1L) to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
+            listOf(MeshLogRetention.ONE_HOUR.toLong() to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
                 listOf(1, 3, 7, 14, 30, 60, 90, 180, 365).map { days ->
                     days.toLong() to pluralStringResource(Res.plurals.log_retention_days_quantity, days, days)
                 } +
-                listOf(0L to stringResource(Res.string.log_retention_never))
+                listOf(MeshLogRetention.KEEP_FOREVER.toLong() to stringResource(Res.string.log_retention_never))
         DropDownPreference(
             title = stringResource(Res.string.log_retention_days),
             enabled = loggingEnabled,
