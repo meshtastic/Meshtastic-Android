@@ -111,8 +111,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 private val GRID_MIN_CELL_SIZE = 44.dp
 private const val EMOJI_FONT_SIZE = 24
 private val CELL_CONTENT_PADDING = 12.dp
-private val SKIN_TONE_CELL_MIN_SIZE = 40.dp
+private val SKIN_TONE_CELL_MIN_SIZE = 44.dp
 private const val SKIN_TONE_FONT_SIZE = 22
+
+/** Wide enough for all six [SkinTone] variants at [SKIN_TONE_CELL_MIN_SIZE]; wider scales wrap instead. */
+private val SKIN_TONE_POPUP_MAX_WIDTH = 300.dp
 private const val CATEGORY_HEADER_KEY_PREFIX = "header_"
 private const val RECENTS_HEADER_KEY = "header_recents"
 private const val RECENTS_KEY_PREFIX = "recent_"
@@ -665,37 +668,40 @@ private fun EmojiCellWithSkinTone(
 
 // ── Skin Tone Popup ────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SkinTonePopup(emoji: Emoji, onSelect: (String, Int) -> Unit, onDismiss: () -> Unit) {
     Popup(alignment = Alignment.TopCenter, onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shadowElevation = 8.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-            modifier = Modifier.widthIn(max = 280.dp),
+        SkinToneSurface(emoji = emoji, onSelect = onSelect)
+    }
+}
+
+/** Split out of [SkinTonePopup] so the scale-sensitive layout is reachable from a preview; [Popup] is not. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SkinToneSurface(emoji: Emoji, onSelect: (String, Int) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 8.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+        modifier = Modifier.widthIn(max = SKIN_TONE_POPUP_MAX_WIDTH),
+    ) {
+        // FlowRow so scale-grown cells wrap to a second line instead of clipping
+        FlowRow(
+            modifier = Modifier.padding(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            // FlowRow so scale-grown cells wrap to a second line instead of clipping
-            FlowRow(
-                modifier = Modifier.padding(6.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                SkinTone.entries.forEachIndexed { index, tone ->
-                    val variant = emoji.withSkinTone(tone)
-                    Box(
-                        modifier =
-                        Modifier.defaultMinSize(
-                            minWidth = SKIN_TONE_CELL_MIN_SIZE,
-                            minHeight = SKIN_TONE_CELL_MIN_SIZE,
-                        )
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onSelect(variant, index) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = variant, fontSize = SKIN_TONE_FONT_SIZE.sp)
-                    }
+            SkinTone.entries.forEachIndexed { index, tone ->
+                val variant = emoji.withSkinTone(tone)
+                Box(
+                    modifier =
+                    Modifier.defaultMinSize(minWidth = SKIN_TONE_CELL_MIN_SIZE, minHeight = SKIN_TONE_CELL_MIN_SIZE)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onSelect(variant, index) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = variant, fontSize = SKIN_TONE_FONT_SIZE.sp)
                 }
             }
         }
@@ -804,6 +810,10 @@ fun EmojiPickerContentPreview() {
     }
 }
 
+/** A skin-tone-capable emoji, so the preview renders all six variants. */
+private val SKIN_TONE_PREVIEW_EMOJI = Emoji("👋", listOf("wave", "hand", "hello"), supportsSkinTone = true)
+
+// Public because the screenshot-tests module renders this preview as a golden test.
 @Suppress("UnusedPrivateMember", "PreviewPublic")
 @Preview(fontScale = 2.0f)
 @Composable
@@ -826,6 +836,22 @@ fun EmojiPickerContentLargeFontPreview() {
             )
         }
     }
+}
+
+// Public because the screenshot-tests module renders this preview as a golden test.
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SkinTonePopupPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
+}
+
+// Public because the screenshot-tests module renders this preview as a golden test.
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@Preview(fontScale = 2.0f)
+@Composable
+fun SkinTonePopupLargeFontPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
 }
 
 @Suppress("UnusedPrivateMember", "PreviewPublic")

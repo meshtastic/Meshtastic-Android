@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.ui.emoji.EmojiPickerContentLargeFontPreview
 import org.meshtastic.core.ui.emoji.EmojiPickerContentPreview
+import org.meshtastic.core.ui.emoji.SkinTonePopupLargeFontPreview
+import org.meshtastic.core.ui.emoji.SkinTonePopupPreview
 
 @PreviewTest
 @PreviewLightDark
@@ -35,4 +37,18 @@ fun ScreenshotEmojiPickerContent() {
 @Composable
 fun ScreenshotEmojiPickerContentLargeFont() {
     EmojiPickerContentLargeFontPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSkinTonePopup() {
+    SkinTonePopupPreview()
+}
+
+@PreviewTest
+@Preview(fontScale = 2.0f)
+@Composable
+fun ScreenshotSkinTonePopupLargeFont() {
+    SkinTonePopupLargeFontPreview()
 }
