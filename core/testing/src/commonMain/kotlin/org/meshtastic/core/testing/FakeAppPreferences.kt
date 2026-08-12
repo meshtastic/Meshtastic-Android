@@ -354,6 +354,8 @@ class FakeMeshPrefs : MeshPrefs {
         deviceAddress.value = address
     }
 
+    override suspend fun awaitDeviceAddress(): String? = deviceAddress.value
+
     private val lastRequest = mutableMapOf<String?, MutableStateFlow<Int>>()
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> =
