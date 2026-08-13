@@ -19,5 +19,5 @@ package org.meshtastic.core.repository
 /** Interface for managing background workers for mesh-related tasks. */
 interface MeshWorkerManager {
     /** Enqueues a worker to send a specific packet. */
-    fun enqueueSendMessage(packetId: Int)
+    fun enqueueSendMessage(persistedId: PersistedPacketId)
 }

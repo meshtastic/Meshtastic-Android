@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -247,6 +248,24 @@ class MessageViewModelTest {
         advanceUntilIdle()
 
         // Verify via mokkery
+        verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
+    }
+
+    @Test
+    fun `send persistence failure is shown through the snackbar manager`() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls
+            {
+                throw IllegalStateException("Message could not be saved")
+            }
+
+        snackbarManager.events.test {
+            viewModel.sendMessage("Hello", "0!12345678", null)
+            advanceUntilIdle()
+
+            assertEquals("Message could not be saved", awaitItem().message)
+            cancelAndIgnoreRemainingEvents()
+        }
+
         verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
     }
 

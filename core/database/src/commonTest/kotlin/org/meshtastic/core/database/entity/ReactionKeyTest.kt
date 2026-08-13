@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -98,13 +99,87 @@ class ReactionKeyTest {
         assertEquals(emptyList(), entity.toMessage(getNode).emojis)
     }
 
-    private fun packetEntity(reactions: List<ReactionEntity>) = PacketEntity(
+    @Test
+    fun `same reply id reaction attaches only to its conversation`() = runTest {
+        val reaction =
+            reaction(
+                myNodeNum = MY_NODE_NUM,
+                userId = "!bbbb0002",
+                emoji = "ðŸ‘",
+                status = MessageStatus.RECEIVED,
+                to = "!0000002a",
+            )
+        val collidingParent = packetEntity(reactions = listOf(reaction), contactKey = "0!aaaa0001")
+        val intendedParent = packetEntity(reactions = listOf(reaction), contactKey = "0!bbbb0002")
+
+        assertEquals(emptyList(), collidingParent.toMessage(getNode).emojis)
+        assertEquals(listOf("ðŸ‘"), intendedParent.toMessage(getNode).emojis.map { it.emoji })
+    }
+
+    @Test
+    fun `normalized inbound PKI reaction attaches to its direct-message parent`() = runTest {
+        val reaction =
+            reaction(
+                myNodeNum = MY_NODE_NUM,
+                userId = "!bbbb0002",
+                emoji = "PKI",
+                status = MessageStatus.RECEIVED,
+                to = "!0000002a",
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+
+        val intendedMessage = packetEntity(listOf(reaction), contactKey = "8!bbbb0002").toMessage(getNode)
+        val otherConversation = packetEntity(listOf(reaction), contactKey = "8!aaaa0001").toMessage(getNode)
+        val otherChannel = packetEntity(listOf(reaction), contactKey = "7!bbbb0002").toMessage(getNode)
+
+        assertEquals(listOf("PKI"), intendedMessage.emojis.map { it.emoji })
+        assertEquals(emptyList(), otherConversation.emojis)
+        assertEquals(emptyList(), otherChannel.emojis)
+    }
+
+    @Test
+    fun `pre-fix raw-channel inbound PKI reaction remains visible`() = runTest {
+        val legacyReaction =
+            reaction(
+                myNodeNum = MY_NODE_NUM,
+                userId = "!bbbb0002",
+                emoji = "legacy PKI",
+                status = MessageStatus.RECEIVED,
+                to = "!0000002a",
+                channel = 0,
+            )
+
+        val intendedMessage = packetEntity(listOf(legacyReaction), contactKey = "8!bbbb0002").toMessage(getNode)
+        val otherConversation = packetEntity(listOf(legacyReaction), contactKey = "8!aaaa0001").toMessage(getNode)
+
+        assertEquals(listOf("legacy PKI"), intendedMessage.emojis.map { it.emoji })
+        assertEquals(emptyList(), otherConversation.emojis)
+    }
+
+    @Test
+    fun `wrong non-PKI reaction channel remains excluded`() = runTest {
+        val reaction =
+            reaction(
+                myNodeNum = MY_NODE_NUM,
+                userId = "!bbbb0002",
+                emoji = "wrong channel",
+                status = MessageStatus.RECEIVED,
+                to = "!0000002a",
+                channel = 1,
+            )
+
+        val message = packetEntity(listOf(reaction), contactKey = "8!bbbb0002").toMessage(getNode)
+
+        assertEquals(emptyList(), message.emojis)
+    }
+
+    private fun packetEntity(reactions: List<ReactionEntity>, contactKey: String = "0^all") = PacketEntity(
         packet =
         Packet(
             uuid = 1L,
             myNodeNum = MY_NODE_NUM,
             port_num = 1,
-            contact_key = "0^all",
+            contact_key = contactKey,
             received_time = 1_000L,
             read = true,
             data = DataPacket(bytes = null, dataType = 1, from = "!abcd1234", time = 1_000L),
@@ -113,16 +188,24 @@ class ReactionKeyTest {
         reactions = reactions,
     )
 
-    private fun reaction(myNodeNum: Int, userId: String, emoji: String, status: MessageStatus = MessageStatus.UNKNOWN) =
-        ReactionEntity(
-            myNodeNum = myNodeNum,
-            replyId = PACKET_ID,
-            userId = userId,
-            emoji = emoji,
-            timestamp = 1_000L,
-            packetId = PACKET_ID,
-            status = status,
-        )
+    private fun reaction(
+        myNodeNum: Int,
+        userId: String,
+        emoji: String,
+        status: MessageStatus = MessageStatus.UNKNOWN,
+        to: String? = null,
+        channel: Int = 0,
+    ) = ReactionEntity(
+        myNodeNum = myNodeNum,
+        replyId = PACKET_ID,
+        userId = userId,
+        emoji = emoji,
+        timestamp = 1_000L,
+        packetId = PACKET_ID,
+        status = status,
+        to = to,
+        channel = channel,
+    )
 
     private val getNode: suspend (String?) -> Node = { userId -> Node(num = 1, user = User(id = userId.orEmpty())) }
 

@@ -41,6 +41,8 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PersistedPacket
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
@@ -59,6 +61,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class PacketHandlerImplTest {
 
+    companion object {
+        private val PERSISTED_ID = PersistedPacketId(myNodeNum = 123, uuid = 456L)
+    }
+
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val meshLogRepository: MeshLogRepository = mock(MockMode.autofill)
@@ -74,6 +80,7 @@ class PacketHandlerImplTest {
     @BeforeTest
     fun setUp() {
         every { serviceRepository.connectionState } returns connectionStateFlow
+        everySuspend { packetRepository.updateOutgoingMessageStatus(any(), any()) } returns PERSISTED_ID
 
         handler =
             PacketHandlerImpl(
@@ -97,6 +104,22 @@ class PacketHandlerImplTest {
         handler.sendToRadio(toRadio)
 
         verify { radioInterfaceService.sendToRadio(any()) }
+    }
+
+    @Test
+    fun `sendToRadio updates status using the full outgoing packet identity`() = runTest(testDispatcher) {
+        val packet =
+            MeshPacket(
+                from = 0x11111111,
+                to = 0x22222222,
+                id = 123,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
+            )
+
+        handler.sendToRadio(ToRadio(packet = packet))
+        testScheduler.runCurrent()
+
+        verifySuspend { packetRepository.updateOutgoingMessageStatus(packet, MessageStatus.ENROUTE) }
     }
 
     @Test
@@ -289,19 +312,17 @@ class PacketHandlerImplTest {
     @Test
     fun `unacked ENROUTE send times out to a retryable ERROR TIMEOUT`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        everySuspend { packetRepository.getPacketById(123) } returns enrouteDataPacket(123)
 
         handler.sendToRadio(ToRadio(packet = MeshPacket(id = 123)))
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend { packetRepository.timeOutEnroutePacket(123, Routing.Error.TIMEOUT.value) }
+        verifySuspend { packetRepository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
     }
 
     @Test
     fun `the timeout never fires before its deadline`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        everySuspend { packetRepository.getPacketById(124) } returns enrouteDataPacket(124)
 
         handler.sendToRadio(ToRadio(packet = MeshPacket(id = 124)))
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT - 1.seconds)
@@ -313,19 +334,19 @@ class PacketHandlerImplTest {
     @Test
     fun `rearm times out a stale persisted ENROUTE packet after the reconnect grace`() = runTest(testDispatcher) {
         val stale = enrouteDataPacket(321, time = 0L)
-        everySuspend { packetRepository.getEnroutePackets() } returns listOf(stale)
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(PersistedPacket(PERSISTED_ID, stale))
 
         handler.rearmSendAckTimeouts()
         testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend { packetRepository.timeOutEnroutePacket(321, Routing.Error.TIMEOUT.value) }
+        verifySuspend { packetRepository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
     }
 
     @Test
     fun `rearm gives a fresh ENROUTE packet its full ack window`() = runTest(testDispatcher) {
         val fresh = enrouteDataPacket(322, time = nowMillis)
-        everySuspend { packetRepository.getEnroutePackets() } returns listOf(fresh)
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(PersistedPacket(PERSISTED_ID, fresh))
 
         handler.rearmSendAckTimeouts()
         testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
@@ -334,7 +355,7 @@ class PacketHandlerImplTest {
 
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
-        verifySuspend { packetRepository.timeOutEnroutePacket(322, Routing.Error.TIMEOUT.value) }
+        verifySuspend { packetRepository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value) }
     }
 
     @Test
@@ -343,8 +364,7 @@ class PacketHandlerImplTest {
         // fire on its own original deadline.
         connectionStateFlow.value = ConnectionState.Connected
         val packet = enrouteDataPacket(325, time = nowMillis)
-        everySuspend { packetRepository.getPacketById(325) } returns packet
-        everySuspend { packetRepository.getEnroutePackets() } returns listOf(packet)
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(PersistedPacket(PERSISTED_ID, packet))
 
         handler.sendToRadio(ToRadio(packet = MeshPacket(id = 325)))
         testScheduler.runCurrent()
@@ -356,6 +376,24 @@ class PacketHandlerImplTest {
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT * 2 + 1.seconds)
         testScheduler.runCurrent()
 
-        verifySuspend(exactly(1)) { packetRepository.timeOutEnroutePacket(325, Routing.Error.TIMEOUT.value) }
+        verifySuspend(exactly(1)) {
+            packetRepository.timeOutEnroutePacket(PERSISTED_ID, Routing.Error.TIMEOUT.value)
+        }
+    }
+
+    @Test
+    fun `rearm keeps independent timers for persisted rows sharing one mesh packet id`() = runTest(testDispatcher) {
+        val firstId = PersistedPacketId(myNodeNum = 123, uuid = 456L)
+        val secondId = PersistedPacketId(myNodeNum = 123, uuid = 789L)
+        val first = PersistedPacket(firstId, enrouteDataPacket(id = 326, time = 0L))
+        val second = PersistedPacket(secondId, enrouteDataPacket(id = 326, time = 0L))
+        everySuspend { packetRepository.getEnroutePackets() } returns listOf(first, second)
+
+        handler.rearmSendAckTimeouts()
+        testScheduler.advanceTimeBy(PacketHandlerImpl.REARM_GRACE + 1.seconds)
+        testScheduler.runCurrent()
+
+        verifySuspend { packetRepository.timeOutEnroutePacket(firstId, Routing.Error.TIMEOUT.value) }
+        verifySuspend { packetRepository.timeOutEnroutePacket(secondId, Routing.Error.TIMEOUT.value) }
     }
 }
