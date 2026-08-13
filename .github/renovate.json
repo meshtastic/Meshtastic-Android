@@ -65,13 +65,14 @@
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(\\.\\d+-g[0-9a-f]+-SNAPSHOT)?$/"
     },
     {
-      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180)",
+      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180). Every artifact pinned to the `androidx-compose-bom-aligned` catalog ref must be listed here: bumping any one of them rewrites that shared ref, which AndroidCompose.kt's resolutionStrategy force-aligns across the whole androidx.compose group, so an ungrouped artifact silently drags the entire Android Compose stack out of step with CMP (see PR #6651, where a solo ui-text-google-fonts bump broke screenshot preview discovery).",
       "groupName": "compose-multiplatform",
       "matchPackageNames": [
         "/^org\\.jetbrains\\.compose/",
         "androidx.compose.runtime:runtime-tracing",
         "androidx.compose.ui:ui-test-manifest",
-        "androidx.compose.material:material"
+        "androidx.compose.material:material",
+        "androidx.compose.ui:ui-text-google-fonts"
       ]
     },
     {
@@ -100,13 +101,6 @@
         "gradle-wrapper"
       ],
       "allowedVersions": "!/^9\\.7\\.0$/"
-    },
-    {
-      "description": "Block Compose Multiplatform 1.12.0-rc01: it breaks 8 tests deterministically across :core:service and :feature:connections, and destabilises :core:ui and :feature:settings intermittently. Cause is in compose-resources AsyncCache.getOrLoad, which stopped resolving inline on the caller's dispatcher (1.11.1 used coroutineScope { async(LAZY) }.await()) and now loads on a private CoroutineScope(SupervisorJob()) with no dispatcher, i.e. Dispatchers.Default. Every cold resource read becomes a real cross-thread hop, so advanceUntilIdle() cannot drain it: tests reading state on the next line observe null, and a viewModelScope coroutine still awaiting a load when Dispatchers.resetMain() runs surfaces as 'Module with the Main dispatcher is missing' blamed on the next test. Because the cache is process-wide, whichever test touches a string first pays the cost, which is why the same class can pass or fail depending on execution order. Not in the CMP changelog. Landed as PR #6662, reverted because it merged with its test shards cancelled. Lift once a CMP release restores inline resolution or the affected tests are made robust to async resolution.",
-      "matchPackageNames": [
-        "/^org\\.jetbrains\\.compose/"
-      ],
-      "allowedVersions": "!/^1\\.12\\.0-rc01$/"
     },
     {
       "description": "Disable automerge for major updates (safety net)",
