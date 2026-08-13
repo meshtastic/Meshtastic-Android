@@ -25,6 +25,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bandwidth_required
+import org.meshtastic.core.resources.bandwidth_required_summary
 import org.meshtastic.core.resources.bandwidth_unsupported_summary
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.save_changes
@@ -41,7 +43,7 @@ import kotlin.test.assertNull
 class LoRaBandwidthUiTest {
 
     @Test
-    fun invalidPersistedValue_isVisibleAndCannotSendUntilReplaced() = runComposeUiTest {
+    fun invalidPersistedValues_explainWhyAndCannotSendUntilReplaced() = runComposeUiTest {
         val initialConfig =
             Config.LoRaConfig(use_preset = false, region = RegionCode.LORA_24, bandwidth = 125, hop_limit = 1)
         lateinit var configState: ConfigState<Config.LoRaConfig>
@@ -87,7 +89,13 @@ class LoRaBandwidthUiTest {
         onNodeWithText(getString(Res.string.save_changes)).assertIsNotEnabled().performClick()
         runOnIdle { assertNull(savedConfig) }
 
-        onNodeWithText("Unsupported (125 kHz)").performClick()
+        runOnIdle { configState.value = configState.value.copy(bandwidth = 0) }
+        onNodeWithText(getString(Res.string.bandwidth_required)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.bandwidth_required_summary)).assertIsDisplayed()
+        onNodeWithText(getString(Res.string.save_changes)).assertIsNotEnabled().performClick()
+        runOnIdle { assertNull(savedConfig) }
+
+        onNodeWithText(getString(Res.string.bandwidth_required)).performClick()
         onNodeWithText("406.25 kHz").performClick()
         onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
 

@@ -302,13 +302,10 @@ open class RadioConfigViewModel(
         nodeRepository.myNodeInfo
             .map { ni ->
                 val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
-                _radioConfigState.update { state ->
-                    state.copy(isLocal = isLocal, pioEnv = if (isLocal) ni?.pioEnv else null)
-                }
-                isLocal
+                isLocal to if (isLocal) ni?.pioEnv else null
             }
             .distinctUntilChanged()
-            .flatMapLatest { isLocal ->
+            .flatMapLatest { (isLocal, pioEnv) ->
                 if (isLocal) {
                     combine(
                         radioConfigRepository.channelSetFlow,
@@ -316,7 +313,13 @@ open class RadioConfigViewModel(
                         radioConfigRepository.moduleConfigFlow,
                     ) { cs, lc, mc ->
                         _radioConfigState.update {
-                            it.copy(isLocal = true, channelList = cs.settings, radioConfig = lc, moduleConfig = mc)
+                            it.copy(
+                                isLocal = true,
+                                pioEnv = pioEnv,
+                                channelList = cs.settings,
+                                radioConfig = lc,
+                                moduleConfig = mc,
+                            )
                         }
                     }
                 } else {
@@ -326,6 +329,7 @@ open class RadioConfigViewModel(
                         _radioConfigState.update {
                             it.copy(
                                 isLocal = false,
+                                pioEnv = null,
                                 channelList = emptyList(),
                                 radioConfig = LocalConfig(),
                                 moduleConfig = LocalModuleConfig(),

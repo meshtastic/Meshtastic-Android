@@ -40,6 +40,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth
 import org.meshtastic.core.resources.bandwidth_option_khz
+import org.meshtastic.core.resources.bandwidth_required
+import org.meshtastic.core.resources.bandwidth_required_summary
 import org.meshtastic.core.resources.bandwidth_unsupported
 import org.meshtastic.core.resources.bandwidth_unsupported_summary
 import org.meshtastic.core.resources.coding_rate
@@ -427,13 +429,14 @@ internal fun LoRaBandwidthPreference(
             }
             .toMutableList()
     selection.invalidPersistedValue?.let { invalidValue ->
-        val invalidLabel = stringResource(Res.string.bandwidth_option_khz, invalidValue.toString())
-        items +=
-            DropDownItem(
-                value = invalidValue,
-                label = stringResource(Res.string.bandwidth_unsupported, invalidLabel),
-                enabled = false,
-            )
+        val invalidLabel =
+            if (invalidValue == 0) {
+                stringResource(Res.string.bandwidth_required)
+            } else {
+                val value = stringResource(Res.string.bandwidth_option_khz, invalidValue.toString())
+                stringResource(Res.string.bandwidth_unsupported, value)
+            }
+        items += DropDownItem(value = invalidValue, label = invalidLabel, enabled = false)
     }
 
     DropDownPreference(
@@ -441,6 +444,8 @@ internal fun LoRaBandwidthPreference(
         summary =
         if (selection.isValid) {
             null
+        } else if (selection.invalidPersistedValue == 0) {
+            stringResource(Res.string.bandwidth_required_summary)
         } else {
             stringResource(Res.string.bandwidth_unsupported_summary)
         },

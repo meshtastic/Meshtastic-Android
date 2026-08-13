@@ -43,6 +43,8 @@ private val SX128X_ONLY_TARGETS =
         "betafpv_2400_tx_micro",
         "makerpython_nrf52840_sx1280_eink",
         "makerpython_nrf52840_sx1280_oled",
+        "my-esp32s3-diy-eink",
+        "my-esp32s3-diy-oled",
         "tlora-v2-1-1_8",
     )
 

@@ -72,6 +72,7 @@ import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -1269,6 +1270,38 @@ class RadioConfigViewModelTest {
 
         assertTrue(localVm.radioConfigState.value.isLocal)
         assertEquals("tlora-v2-1-1_8", localVm.radioConfigState.value.pioEnv)
+    }
+
+    @Test
+    fun `local destination updates its PlatformIO target when identity is unchanged`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-t3s3-v1"))
+        val localVm = createViewModel(destNum = 100)
+        runCurrent()
+
+        val beforeReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertFalse(beforeReflash.options.orEmpty().any { it.wireValue == 1600 })
+
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "my-esp32s3-diy-oled"))
+        runCurrent()
+
+        val afterReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertTrue(localVm.radioConfigState.value.isLocal)
+        assertEquals("my-esp32s3-diy-oled", localVm.radioConfigState.value.pioEnv)
+        assertTrue(afterReflash.options.orEmpty().any { it.wireValue == 1600 })
     }
 
     @Test

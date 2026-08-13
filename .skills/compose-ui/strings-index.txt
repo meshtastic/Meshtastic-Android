@@ -116,6 +116,8 @@ backup_restore
 bad
 bandwidth
 bandwidth_option_khz
+bandwidth_required
+bandwidth_required_summary
 bandwidth_unsupported
 bandwidth_unsupported_summary
 baro_pressure

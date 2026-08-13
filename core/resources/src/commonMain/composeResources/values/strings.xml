@@ -134,6 +134,8 @@
     <string name="bad">Bad</string>
     <string name="bandwidth">Bandwidth</string>
     <string name="bandwidth_option_khz">%1$s kHz</string>
+    <string name="bandwidth_required">Choose a bandwidth</string>
+    <string name="bandwidth_required_summary">Custom 2.4 GHz mode requires an explicit bandwidth. Choose a value before saving.</string>
     <string name="bandwidth_unsupported">Unsupported (%1$s)</string>
     <string name="bandwidth_unsupported_summary">This bandwidth is not supported by the connected radio in the selected region. Choose a supported value before saving.</string>
     <string name="baro_pressure">Baro</string>
@@ -1949,4 +1951,3 @@
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
 </resources>
-

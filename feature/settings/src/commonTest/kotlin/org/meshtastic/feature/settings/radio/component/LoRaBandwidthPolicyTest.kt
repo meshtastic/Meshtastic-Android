@@ -125,12 +125,23 @@ class LoRaBandwidthPolicyTest {
     }
 
     @Test
+    fun lora24CustomDefault_requiresExplicitBandwidth() {
+        val selection = loRaBandwidthSelection(0, RegionCode.LORA_24, hwModel = null, pioEnv = null)
+
+        assertEquals(0, selection.invalidPersistedValue)
+        assertFalse(selection.allowsSave(usePreset = false))
+        assertTrue(selection.allowsSave(usePreset = true))
+    }
+
+    @Test
     fun provenSx128xOnlyTargets_include1600() {
         val targets =
             listOf(
                 "betafpv_2400_tx_micro",
                 "makerpython_nrf52840_sx1280_eink",
                 "makerpython_nrf52840_sx1280_oled",
+                "my-esp32s3-diy-eink",
+                "my-esp32s3-diy-oled",
                 "tlora-v2-1-1_8",
             )
 
