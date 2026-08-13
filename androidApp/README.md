@@ -55,6 +55,7 @@ graph TB
   :androidApp -.-> :feature:firmware
   :androidApp -.-> :feature:wifi-provision
   :androidApp -.-> :feature:widget
+  :androidApp -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
