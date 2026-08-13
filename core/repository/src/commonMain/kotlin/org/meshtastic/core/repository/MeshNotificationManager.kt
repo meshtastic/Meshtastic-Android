@@ -71,7 +71,11 @@ interface MeshNotificationManager {
 
     fun showClientNotification(clientNotification: ClientNotification)
 
-    fun cancelMessageNotification(contactKey: String)
+    /**
+     * Suspending because Android rebuilds the group summary here, and the summary's labels come from string resources —
+     * resolving them must not block the caller's thread (see [org.meshtastic.core.resources.getStringSuspend]).
+     */
+    suspend fun cancelMessageNotification(contactKey: String)
 
     /**
      * Called after an inline notification reply has been sent and persisted. Platforms that can should re-post the

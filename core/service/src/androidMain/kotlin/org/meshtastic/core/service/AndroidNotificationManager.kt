@@ -26,12 +26,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
 import org.meshtastic.core.resources.meshtastic_low_battery_notifications
 import org.meshtastic.core.resources.meshtastic_mesh_beacon_notifications
@@ -52,23 +54,29 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
      * Tracks whether notification channels have been created.
      *
      * Channels are **not** created in the constructor because this singleton is instantiated by Koin during
-     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread. The CMP [getString] helper uses
-     * [kotlinx.coroutines.runBlocking] which can fail in that context, crashing the entire service startup chain.
-     * Instead, channels are lazily ensured before the first [dispatch] call. Note that
+     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread, and channel names come from string
+     * resources. Instead, channels are lazily ensured before the first [dispatch] call. Note that
      * [MeshNotificationManagerImpl.initChannels] already creates a superset of these channels when the orchestrator
      * starts, so this lazy path is only a safety net for notifications dispatched before orchestrator initialization.
+     *
+     * The mutex is load-bearing: resolving the names suspends, so without it two concurrent [dispatch] calls could both
+     * pass the flag check and post before the channels exist.
      */
     private var channelsInitialized = false
+    private val channelInitMutex = Mutex()
 
-    private fun ensureChannelsInitialized() {
-        if (channelsInitialized) return
+    private suspend fun ensureChannelsInitialized() = channelInitMutex.withLock {
+        if (channelsInitialized) return@withLock
         channelsInitialized = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channels =
                 listOf(
                     createChannel(Notification.Category.Message, Res.string.meshtastic_messages_notifications),
                     createChannel(Notification.Category.NodeEvent, Res.string.meshtastic_new_nodes_notifications),
-                    createChannel(Notification.Category.MeshBeacon, Res.string.meshtastic_mesh_beacon_notifications),
+                    createChannel(
+                        Notification.Category.MeshBeacon,
+                        Res.string.meshtastic_mesh_beacon_notifications,
+                    ),
                     createChannel(Notification.Category.Battery, Res.string.meshtastic_low_battery_notifications),
                     createChannel(Notification.Category.Alert, Res.string.meshtastic_alerts_notifications),
                     createChannel(Notification.Category.Service, Res.string.meshtastic_service_notifications),
@@ -78,12 +86,12 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         }
     }
 
-    private fun createChannel(
+    private suspend fun createChannel(
         category: Notification.Category,
         nameRes: org.jetbrains.compose.resources.StringResource,
     ): NotificationChannel {
         val channelConfig = category.channelConfig()
-        return NotificationChannel(channelConfig.id, getString(nameRes), channelConfig.importance)
+        return NotificationChannel(channelConfig.id, getStringSuspend(nameRes), channelConfig.importance)
     }
 
     // Keep category-to-channel mapping aligned with MeshNotificationManagerImpl.NotificationType IDs.
