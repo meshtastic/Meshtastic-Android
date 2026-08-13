@@ -89,6 +89,9 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      */
     val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
 
+    /** Demo Mode gate, backing `radioInterfaceService.mockTransportEnabled`. Flip it to assert the reactive path. */
+    val mockTransportEnabled = MutableStateFlow(false)
+
     val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /**
@@ -119,7 +122,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         }
 
     init {
-        every { radioInterfaceService.isMockTransport() } returns false
+        every { radioInterfaceService.mockTransportEnabled } returns mockTransportEnabled
         every { radioInterfaceService.isReplayTransportAvailable } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())

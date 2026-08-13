@@ -150,10 +150,12 @@ open class ScannerViewModel(
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
-    private val _showMockTransport = MutableStateFlow(false)
 
-    /** Whether the mock/demo transport is currently selected. */
-    val showMockTransport: StateFlow<Boolean> = _showMockTransport.asStateFlow()
+    /**
+     * Whether the Demo Mode entries belong in the device list. Observed rather than sampled once: in a release build
+     * the gate opens mid-session, when the user performs the hidden-features gesture in Settings.
+     */
+    val showMockTransport: StateFlow<Boolean> = radioInterfaceService.mockTransportEnabled
 
     private val _showReplayTransport = MutableStateFlow(false)
 
@@ -225,7 +227,8 @@ open class ScannerViewModel(
             .stateInWhileSubscribed(initialValue = DiscoveredDevices())
 
     init {
-        _showMockTransport.value = radioInterfaceService.isMockTransport()
+        // Sampled once, unlike [showMockTransport]: whether the replay capture ships is fixed when the build is
+        // assembled, so there is nothing for it to react to.
         _showReplayTransport.value = radioInterfaceService.isReplayTransportAvailable
         serviceRepository.connectionProgress.onEach { _connectionProgressText.value = it }.launchIn(viewModelScope)
         serviceRepository.connectionState

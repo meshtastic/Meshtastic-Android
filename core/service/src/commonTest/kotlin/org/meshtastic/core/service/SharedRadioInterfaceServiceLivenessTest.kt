@@ -260,7 +260,7 @@ class SharedRadioInterfaceServiceLivenessTest {
         every { networkRepository.resolvedList } returns MutableSharedFlow()
         every { analytics.isPlatformServicesAvailable } returns false
         every { transportFactory.supportedDeviceTypes } returns listOf(DeviceType.BLE)
-        every { transportFactory.isMockTransport() } returns false
+        every { transportFactory.mockTransportEnabled } returns MutableStateFlow(false)
         every { transportFactory.isAddressValid(any()) } returns true
         every { transportFactory.toInterfaceAddress(any(), any()) } returns address
         every { transportFactory.createTransport(any(), any()) } calls { transportProvider() }

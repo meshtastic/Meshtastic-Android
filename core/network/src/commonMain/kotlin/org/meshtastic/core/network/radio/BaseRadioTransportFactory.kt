@@ -45,11 +45,12 @@ abstract class BaseRadioTransportFactory(
             '!',
             -> true
 
-            // Virtual transports are development aids. A release build must never bind one: `connections?address=m` is
-            // reachable from any web page through the verified meshtastic.org app link.
+            // Virtual transports stay inadmissible until deliberately enabled: `connections?address=m` is reachable
+            // from any web page through the verified meshtastic.org app link, so a drive-by deep link must not be able
+            // to swap a user's real radio for a fake one.
             InterfaceId.MOCK.id,
             InterfaceId.REPLAY.id,
-            -> isMockTransport()
+            -> mockTransportEnabled.value
 
             else -> isPlatformAddressValid(address)
         }

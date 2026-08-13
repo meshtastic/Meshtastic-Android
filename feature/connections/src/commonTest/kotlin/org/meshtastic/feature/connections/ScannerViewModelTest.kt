@@ -100,6 +100,24 @@ class ScannerViewModelTest {
         assertNotNull(viewModel)
     }
 
+    /**
+     * Demo Mode's gate opens mid-session in a release build, when the user performs the hidden-features gesture in
+     * Settings. Sampling it once in `init` (as this used to) meant the Connections list never noticed.
+     */
+    @Test
+    fun `showMockTransport follows the transport gate after construction`() = runTest {
+        viewModel.showMockTransport.test {
+            assertEquals(false, awaitItem())
+
+            harness.mockTransportEnabled.value = true
+            assertEquals(true, awaitItem())
+
+            harness.mockTransportEnabled.value = false
+            assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `connectionProgressText reflects connectionProgress`() = runTest {
         viewModel.connectionProgressText.test {
@@ -371,13 +389,14 @@ class ScannerViewModelTest {
 
     /**
      * Builds a ViewModel against the given transport capabilities and returns the distinct `(showMock, showReplay)`
-     * pairs it asked the use case for. A fresh ViewModel is required because both flags are latched in `init`.
+     * pairs it asked the use case for. A fresh ViewModel is required because the replay flag is latched in `init` —
+     * the Demo Mode gate itself is observed, so it is set on the backing flow rather than stubbed.
      */
     private suspend fun requestedVisibility(
         mockTransport: Boolean,
         replayAvailable: Boolean,
     ): List<Pair<Boolean, Boolean>> {
-        every { harness.radioInterfaceService.isMockTransport() } returns mockTransport
+        harness.mockTransportEnabled.value = mockTransport
         every { harness.radioInterfaceService.isReplayTransportAvailable } returns replayAvailable
         harness.discoveryRequests.clear()
         val subject = harness.buildBase()
