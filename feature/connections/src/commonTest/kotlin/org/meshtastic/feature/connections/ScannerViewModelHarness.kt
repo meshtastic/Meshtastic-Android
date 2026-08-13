@@ -99,6 +99,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         object : GetDiscoveredDevicesUseCase {
             override fun invoke(
                 showMock: Boolean,
+                showReplay: Boolean,
                 resolvedList: Flow<List<DiscoveredService>>,
             ): Flow<DiscoveredDevices> = combine(baseDevicesFlow, resolvedList) { base, resolved ->
                 val tcpDevices =
@@ -109,6 +110,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
 
     init {
         every { radioInterfaceService.isMockTransport() } returns false
+        every { radioInterfaceService.isReplayTransportAvailable } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
         every { firmwareRecoveryDataSource.pending } returns flowOf(null)

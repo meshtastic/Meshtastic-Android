@@ -726,6 +726,9 @@ class SharedRadioInterfaceService(
 
     override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
 
+    override val isReplayTransportAvailable: Boolean
+        get() = transportFactory.isReplayTransportAvailable
+
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
         transportFactory.toInterfaceAddress(interfaceId, rest)
 

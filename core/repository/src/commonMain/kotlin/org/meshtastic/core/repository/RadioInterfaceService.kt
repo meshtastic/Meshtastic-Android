@@ -126,6 +126,12 @@ interface RadioInterfaceService :
     fun isMockTransport(): Boolean
 
     /**
+     * Whether this build carries the packet capture the replay transport needs. False means selecting a replay address
+     * would fall back to the plain mock, so callers offering a replay device must hide it.
+     */
+    val isReplayTransportAvailable: Boolean
+
+    /**
      * Flow of raw data received from the radio, bound to the transport session that admitted each frame.
      *
      * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware

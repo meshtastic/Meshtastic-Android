@@ -30,9 +30,16 @@ interface GetDiscoveredDevicesUseCase {
     /**
      * Returns a flow of all discovered devices (BLE, USB, TCP).
      *
+     * @param showMock whether the Demo Mode gate is open at all.
+     * @param showReplay whether the replay capture asset ships in this build. Nested inside [showMock] — a replay
+     *   device is never offered on its own, and without the asset the entry would just duplicate Demo Mode.
      * @param resolvedList the NSD/mDNS resolved services flow. On Android 15+, subscribing to
      *   `NetworkRepository.resolvedList` triggers a system consent dialog, so callers should pass `flowOf(emptyList())`
      *   unless the user has explicitly requested a network scan.
      */
-    fun invoke(showMock: Boolean, resolvedList: Flow<List<DiscoveredService>>): Flow<DiscoveredDevices>
+    fun invoke(
+        showMock: Boolean,
+        showReplay: Boolean,
+        resolvedList: Flow<List<DiscoveredService>>,
+    ): Flow<DiscoveredDevices>
 }

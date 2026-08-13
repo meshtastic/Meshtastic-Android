@@ -47,6 +47,9 @@ class DesktopRadioTransportFactory(
 
     override fun isMockTransport(): Boolean = false
 
+    /** Desktop bundles no capture asset, and [createPlatformTransport] does not wire a replay address. */
+    override val isReplayTransportAvailable: Boolean = false
+
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
         address.startsWith(InterfaceId.TCP.id) -> {
             TcpRadioTransport(

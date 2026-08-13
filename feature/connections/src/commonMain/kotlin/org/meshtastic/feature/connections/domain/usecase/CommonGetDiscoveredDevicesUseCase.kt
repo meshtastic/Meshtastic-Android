@@ -48,7 +48,11 @@ open class CommonGetDiscoveredDevicesUseCase(
     private val usbScanner: UsbScanner? = null,
 ) : GetDiscoveredDevicesUseCase {
 
-    override fun invoke(showMock: Boolean, resolvedList: Flow<List<DiscoveredService>>): Flow<DiscoveredDevices> {
+    override fun invoke(
+        showMock: Boolean,
+        showReplay: Boolean,
+        resolvedList: Flow<List<DiscoveredService>>,
+    ): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
         val usbFlow = usbScanner?.scanUsbDevices() ?: flowOf(emptyList())
 
@@ -69,10 +73,12 @@ open class CommonGetDiscoveredDevicesUseCase(
                 if (showMock) {
                     val label = safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode")
                     add(DeviceListEntry.Mock(label))
-                    val replayLabel =
-                        safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }
-                            .getOrDefault("Demo Mode (Replay)")
-                    add(DeviceListEntry.Replay(replayLabel))
+                    if (showReplay) {
+                        val replayLabel =
+                            safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }
+                                .getOrDefault("Demo Mode (Replay)")
+                        add(DeviceListEntry.Replay(replayLabel))
+                    }
                 }
             }
 

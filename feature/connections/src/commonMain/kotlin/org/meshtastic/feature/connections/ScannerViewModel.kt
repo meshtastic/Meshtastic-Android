@@ -155,6 +155,15 @@ open class ScannerViewModel(
     /** Whether the mock/demo transport is currently selected. */
     val showMockTransport: StateFlow<Boolean> = _showMockTransport.asStateFlow()
 
+    private val _showReplayTransport = MutableStateFlow(false)
+
+    /**
+     * Whether the replay demo entry should be offered alongside [showMockTransport]. The capture asset is a locally
+     * generated artifact that no clean-checkout build carries, and without it replay silently degrades to the plain
+     * mock — so the entry stays hidden rather than advertising behaviour it cannot deliver.
+     */
+    val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
+
     // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
     private val _connectionProgressText = MutableStateFlow<String?>(null)
 
@@ -209,12 +218,15 @@ open class ScannerViewModel(
         }
 
     private val discoveredDevicesFlow: StateFlow<DiscoveredDevices> =
-        showMockTransport
-            .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock, gatedResolvedList) }
+        combine(showMockTransport, showReplayTransport, ::Pair)
+            .flatMapLatest { (showMock, showReplay) ->
+                getDiscoveredDevicesUseCase.invoke(showMock, showReplay, gatedResolvedList)
+            }
             .stateInWhileSubscribed(initialValue = DiscoveredDevices())
 
     init {
         _showMockTransport.value = radioInterfaceService.isMockTransport()
+        _showReplayTransport.value = radioInterfaceService.isReplayTransportAvailable
         serviceRepository.connectionProgress.onEach { _connectionProgressText.value = it }.launchIn(viewModelScope)
         serviceRepository.connectionState
             .onEach { state ->

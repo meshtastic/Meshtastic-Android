@@ -86,6 +86,8 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override fun isMockTransport(): Boolean = false
 
+    override val isReplayTransportAvailable: Boolean = false
+
     override val receivedData = MutableSharedFlow<ReceivedRadioFrame>()
     override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>()
     override val connectionError: Flow<String> = MutableSharedFlow<String>()
