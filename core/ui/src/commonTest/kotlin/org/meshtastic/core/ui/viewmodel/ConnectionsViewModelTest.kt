@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
@@ -296,11 +297,14 @@ class ConnectionsViewModelTest {
     /**
      * From CMP 1.12 compose resources load each string once on a library-owned `Dispatchers.Default` scope, which
      * `advanceUntilIdle` cannot drain, so the notification dispatch lands after the assertions. Pre-loading keeps the
-     * path inside virtual time on any CMP version; must run before `setMain`.
+     * path inside virtual time on any CMP version; must run before `setMain`. Best-effort: a warm-up that cannot load
+     * (skiko's static initializer on the desktop test classpath) must leave the suite as it was, not fail every test.
      */
     private fun warmFirmwareNotificationStrings() {
-        getString(Res.string.firmware_update_available)
-        getString(Res.string.firmware_update_notification_android, "", "")
-        getString(Res.string.firmware_update_notification_flasher, "", "")
+        safeCatchingAll {
+            getString(Res.string.firmware_update_available)
+            getString(Res.string.firmware_update_notification_android, "", "")
+            getString(Res.string.firmware_update_notification_flasher, "", "")
+        }
     }
 }
