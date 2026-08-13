@@ -57,34 +57,34 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 ### Sõnumi olek
 
-A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
+Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste sissetulevate sõnumite puhul olekumärgist ei kuvata):
 
-| Olek                                | Tähendus                                                                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Sending…                            | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
-| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
-| Kärgvõrku kohale jõudnud            | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                      |
-| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
-| Marsruutimine SF++ ahela kaudu…     | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
-| Kinnitatud SF++ ahel                | Confirmed delivered via the SF++ chain                                                                                               |
-| Tõrge                               | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
+| Olek                              | Tähendus                                                                                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sending…                          | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
+| Saajale kätte toimetatud          | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
+| Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
+| Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
+| Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store & Forward Plus Plus chain                                                                   |
+| Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                       |
+| Tõrge                             | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                            |
 
 ### Delivery Errors
 
-When a message fails to deliver, the error indicator shows what went wrong:
+Kui sõnumit ei õnnestu kohale toimetada, näitab veaindikaator, mis valesti läks:
 
-| Tõrge            | Meaning                                  | What to Do                                                                                                                                                                  |
-| ---------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No Route         | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
-| Got NAK          | Järgmise-hüppe sõlm keeldus edastamast   | The relay node may be congested. Wait and retry.                                                                                            |
-| Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna.                                       |
-| Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
-| Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Proovi teist kanalit või oota, kuni olukord paraneb.                                                           |
-| Kanalit pole     | Sihtkanalit pole olemas                  | Veendu, et mõlemal sõlmel oleks sama kanali seadistus.                                                                                                      |
-| Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Lühenda oma sõnumit (maksimaalselt ~200 tähemärki).                                                                      |
-| Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
-| Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Proovi rakendust taaskäivitada.                                                                      |
+| Tõrge                        | Meaning                                      | What to Do                                                                                                                            |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| No Route                     | No path exists to the destination node       | The recipient may be offline or out of mesh range. Try later or move closer.                          |
+| Got NAK                      | Järgmise-hüppe sõlm keeldus edastamast       | Vahendussõlm võib olla ülekoormatud. Wait and retry.                                                  |
+| Aegunud                      | No acknowledgment within retry window        | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna. |
+| No radio interface           | No radio interface available to send         | Check that your radio is connected and available.                                                                     |
+| Failed to deliver to mesh    | All retry attempts exhausted                 | Move closer, improve signal, or wait for mesh conditions to improve.                                                  |
+| Channel/key mismatch         | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                                                                     |
+| Message is too large to send | Sõnum ületab maksimaalset sõnumi mahtu       | Shorten the message and try again.                                                                                    |
+| No app response              | App or plugin did not respond to the request | Retry or check the destination app or module state.                                                                   |
+| Duty cycle limit             | Regional airtime limit reached               | Wait for the duty cycle window to reset.                                                                              |
+| Invalid request              | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.                                                          |
 
 > 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
 
@@ -96,14 +96,14 @@ Eelsalvestatud sõnumid kiireks suhtluseks:
 
 - Juurdepääs läbi sõnumi sisestamise alas oleva kiirvestluse nupu
 - Choose from built-in phrases or custom messages
-- Customize quick chat messages in **Settings → Quick Chat**
+- Kohanda kiirvestluse sõnumeid menüüs **Seaded → Kiirvestlus**
 - Kasulik, kui trükkimine on ebapraktiline (kindad, väike ekraan, kiireloomuline)
 
-![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
+![Kiirvestluse võimalus](../../assets/screenshots/messages_quick_chat.png)
 
 Igal kiirvestluse kirjel on lühike **Nimi** (nupu silt), **Sõnum**, mille see lisab, ja **Saada kohe** lüliti – kui see on lubatud, saadetakse nupu puudutamisel sõnum kohe, selle asemel et see sisestada sisestusväljale redigeerimiseks:
 
-![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
+[Uus kiirvestluse dialoog nime, sõnumi ja kohese saatmise lülitiga](../../assets/screenshots/messages_edit_quick_chat.png)
 
 Kanalite loendis kuvatakse iga kanal koos selle viimase sõnumi eelvaatega.
 
@@ -116,13 +116,13 @@ You can search the full history of any conversation directly from the chat scree
 3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
 4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
 
-![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+![Sõnumite otsinguriba tulemuste loenduri ja eelmise/järgmise noolega](../../assets/screenshots/messages_search_bar.png)
 
 > 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. It matches against the messages already stored on your device, so it works fully offline.
 
 ### Message Bubbles
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+Messages appear as chat bubbles — sent messages on the right, received messages on the left. Iga mull näitab saatjat, ajatempli ja kohaletoimetamise olekut. Messages with replies include a quoted preview of the original message above the response.
 
 ### Teksti vormindamine
 
@@ -138,11 +138,11 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 
 When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Vali tekst ja puuduta stiili, et see murda (puuduta uuesti, et see eemaldada); kui valikut pole, lisab stiil tühja paari, kusjuures kursor on markerite vahel. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
 
-> 💡 **Vihje:** Vormindus kantakse võrgusilma literaalmärkidena – samad baidid, mida iOS saadab. Kliendid, mis ei toeta Markdowni (vanemad rakendused, tavalised püsivara kliendid), kuvavad toored `**`/`~~` märgid. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
+> 💡 **Vihje:** Vormindus kantakse kärgvõrgu literaalmärkidena – samad baidid, mida iOS saadab. Kliendid, mis ei toeta Markdowni (vanemad rakendused, tavalised püsivara kliendid), kuvavad toored `**`/`~~` märgid. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
 
 ### Mentions
 
-Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
+Type `@` while composing to mention a node — a picker suggests matching contacts as you type. Saadud sõnumis kuvatakse mainimine esiletõstetud kiibina, mis näitab sõlme nime; puuduta seda, et hüpata otse selle sõlme üksikasjade lehele.
 
 ### Reactions
 
@@ -154,7 +154,7 @@ React to messages with emoji:
 - Multiple users can react to the same message
 - React to your own messages or others' messages
 
-![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
+![Emotikonide reaktsioonimärgid kuvatakse sõnumi all](../../assets/screenshots/messages_reaction.png)
 
 > 💡 **Vihje:** Reaktsioonid on kerged – need kasutavad täistekstisõnumitega võrreldes minimaalselt võrgu ribalaiust.
 

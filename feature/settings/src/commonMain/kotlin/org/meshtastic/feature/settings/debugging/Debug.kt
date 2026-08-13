@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
@@ -92,7 +93,9 @@ import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 
-private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
+// No end-of-line anchor: Wire's toString is single-line, so annotations land mid-line
+// (`from=-1897181963 (!8ee6c775), to=…`), not at line ends as protobuf-java's format did.
+private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)")
 
 // Suppressions match this screen's pre-existing detekt baseline entries; editing the body reset the baseline hashes.
 @Suppress("LongMethod", "ViewModelForwarding", "ModifierMissing")
@@ -235,11 +238,11 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
     ) {
         @Suppress("MagicNumber")
         val retentionItems =
-            listOf((-1L) to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
+            listOf(MeshLogRetention.ONE_HOUR.toLong() to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
                 listOf(1, 3, 7, 14, 30, 60, 90, 180, 365).map { days ->
                     days.toLong() to pluralStringResource(Res.plurals.log_retention_days_quantity, days, days)
                 } +
-                listOf(0L to stringResource(Res.string.log_retention_never))
+                listOf(MeshLogRetention.KEEP_FOREVER.toLong() to stringResource(Res.string.log_retention_never))
         DropDownPreference(
             title = stringResource(Res.string.log_retention_days),
             enabled = loggingEnabled,

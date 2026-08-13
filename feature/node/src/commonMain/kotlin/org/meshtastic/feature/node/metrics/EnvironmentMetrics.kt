@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -43,17 +44,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
+import org.meshtastic.core.model.util.adcVoltage
+import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
+import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.env_metrics_log
 import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.rainfall_1h
@@ -85,6 +92,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         viewModel.saveEnvironmentMetricsCSV(uri, filteredTelemetries)
     }
 
+    val isImperial = state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL
+
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
@@ -108,6 +117,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                 modifier = modifier,
                 telemetries = filteredTelemetries.reversed(),
                 graphData = graphData,
+                isFahrenheit = state.isFahrenheit,
+                isImperial = isImperial,
                 vicoScrollState = vicoScrollState,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
@@ -123,8 +134,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
-                        isImperial =
-                        state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL,
+                        isImperial = isImperial,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
@@ -476,36 +486,56 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     }
 }
 
+/**
+ * One row per reporting 1-Wire probe. Values arrive already converted to the display unit by the view model, so they
+ * are only formatted here — a second conversion would double-count. An absent channel is `null`; 0°C is a real reading.
+ */
 @Composable
 private fun OneWireTemperatureDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
 ) {
-    val sensors = envMetrics.one_wire_temperature.filterNot { it.isNaN() }
-    if (sensors.isEmpty()) return
-    val oneWireEntries =
-        listOf(
-            Environment.ONE_WIRE_TEMP_1,
-            Environment.ONE_WIRE_TEMP_2,
-            Environment.ONE_WIRE_TEMP_3,
-            Environment.ONE_WIRE_TEMP_4,
-            Environment.ONE_WIRE_TEMP_5,
-            Environment.ONE_WIRE_TEMP_6,
-            Environment.ONE_WIRE_TEMP_7,
-            Environment.ONE_WIRE_TEMP_8,
+    val unit = if (environmentDisplayFahrenheit) "°F" else "°C"
+    Environment.oneWireTemperatures.forEachIndexed { idx, entry ->
+        val temp = envMetrics.oneWireTemperature(idx)?.takeIf { !it.isNaN() } ?: return@forEachIndexed
+        ChannelMetricRow(
+            color = entry.color,
+            label = stringResource(Res.string.one_wire_temperature),
+            channelNumber = idx + 1,
+            value = "${NumberFormatter.format(temp, 1)}$unit",
         )
-    val textFormat = if (environmentDisplayFahrenheit) "%s %d: %.1f°F" else "%s %d: %.1f°C"
-    sensors.forEachIndexed { idx, temp ->
-        val color = oneWireEntries.getOrNull(idx)?.color ?: Environment.ONE_WIRE_TEMP_1.color
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MetricIndicator(color)
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = formatString(textFormat, stringResource(Res.string.one_wire_temperature), idx + 1, temp),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
+    }
+}
+
+/** One row per reporting ADC channel. Volts need no unit conversion, and 0 V is a real reading. */
+@Composable
+private fun AdcVoltageDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    Environment.adcVoltages.forEachIndexed { idx, entry ->
+        val volts = envMetrics.adcVoltage(idx)?.takeIf { !it.isNaN() } ?: return@forEachIndexed
+        ChannelMetricRow(
+            color = entry.color,
+            label = stringResource(Res.string.adc_voltage),
+            channelNumber = idx + 1,
+            value = MetricFormatter.voltage(volts),
+        )
+    }
+}
+
+@Composable
+private fun ChannelMetricRow(color: Color, label: String, channelNumber: Int, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        MetricIndicator(color)
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text =
+            stringResource(
+                Res.string.device_metrics_label_value,
+                stringResource(Res.string.metric_channel_label, label, channelNumber),
+                value,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
 }
 
@@ -557,6 +587,7 @@ private fun EnvironmentMetricsContent(
         WindDisplay(envMetrics, isImperial)
         RainfallDisplay(envMetrics, isImperial)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
+        AdcVoltageDisplay(envMetrics)
     }
 }
 

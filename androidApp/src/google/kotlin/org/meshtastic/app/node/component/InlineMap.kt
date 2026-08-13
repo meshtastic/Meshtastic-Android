@@ -18,9 +18,11 @@ package org.meshtastic.app.node.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -50,6 +52,13 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val location = LatLng(node.latitude, node.longitude)
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
+        }
+        // Follow live position updates. Guarded on the current target so the initial composition, which
+        // rememberCameraPositionState has already centred, doesn't animate to where the camera sits.
+        LaunchedEffect(node.latitude, node.longitude) {
+            if (cameraState.position.target != location) {
+                cameraState.animate(CameraUpdateFactory.newLatLng(location))
+            }
         }
 
         GoogleMap(

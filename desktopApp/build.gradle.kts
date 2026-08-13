@@ -150,7 +150,8 @@ compose.desktop {
             obfuscate.set(false) // Open-source project — obfuscation adds no value
             optimize.set(true)
             configurationFiles.from(
-                rootProject.file("config/proguard/shared-rules.pro"),
+                // Isolated Projects forbids reaching into the root project via rootProject.file().
+                isolated.rootProject.projectDirectory.file("config/proguard/shared-rules.pro").asFile,
                 project.file("proguard-rules.pro"),
             )
         }

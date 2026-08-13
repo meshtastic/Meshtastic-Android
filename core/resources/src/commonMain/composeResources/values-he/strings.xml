@@ -73,10 +73,12 @@
     <!-- DISTANCE -->
     <string name="distance">מרחק</string>
     <!-- DOC -->
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error">שגיאה</string>
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">איפוס להגדרות היצרן</string>
     <!-- FILTER -->
     <string name="filter_icon">פילטר</string>
@@ -98,6 +100,7 @@
     <string name="ip_port">פורט:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">שירותי מיקום כבויים, לא ניתן לספק מיקום לרשת משטסטיק.</string>

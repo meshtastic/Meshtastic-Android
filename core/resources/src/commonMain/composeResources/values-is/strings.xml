@@ -66,9 +66,11 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <!-- DOC -->
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Grunnstilla</string>
     <!-- FILTER -->
     <!-- FIRMWARE -->
@@ -88,6 +90,7 @@
     <string name="ip_address">IP Tala:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aðgangur að staðsetningu ekki leyfður, staðsetning ekki send út á mesh.</string>

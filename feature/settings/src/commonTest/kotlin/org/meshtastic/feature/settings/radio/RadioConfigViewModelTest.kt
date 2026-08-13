@@ -185,6 +185,7 @@ class RadioConfigViewModelTest {
         fileService = fileService,
         mqttManager = mqttManager,
         lockdownCoordinator = FakeLockdownCoordinator(),
+        analytics = mock(MockMode.autofill),
     )
 
     @Test
@@ -976,6 +977,7 @@ class RadioConfigViewModelTest {
                 fileService = fileService,
                 mqttManager = mqttManager,
                 lockdownCoordinator = FakeLockdownCoordinator(),
+                analytics = mock(MockMode.autofill),
             )
         assertEquals(456, viewModel.destNode.value?.num)
     }

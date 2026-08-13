@@ -31,6 +31,9 @@ jobs:
   validate-and-build:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: write      # dependency-graph submission (android-check)
+      pull-requests: write
     with:
       run_lint: false
       run_unit_tests: true
@@ -72,6 +75,16 @@ jobs:
           name: app-debug-apks
           path: artifacts
 
+      # Desktop installers land in per-OS artifacts (desktop-app-<os>-<arch>). A matrix leg
+      # failing (e.g. one OS's packaging breaks) shouldn't block publishing the rest, so this
+      # doesn't fail the job if some/all are missing — see the !cancelled() gate above.
+      - name: Download desktop installers
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          pattern: desktop-app-*
+          path: desktop-artifacts
+
       # A moving tag reuses the same release URL forever, and Obtainium fingerprints the
       # asset URL — so without a changing filename it would never detect a new build.
       # Embed the (monotonic) versionCode in each APK name; same formula the app build uses.
@@ -87,6 +100,21 @@ jobs:
           done
           ls -l upload
 
+      # Desktop installer filenames already embed the OS/arch (jpackage) plus a "snapshot"
+      # version tag baked into the AppImage step, but stamp the versionCode on too so every
+      # asset in the release moves in lockstep and testers can tell builds apart at a glance.
+      - name: Stage desktop installers
+        run: |
+          mkdir -p desktop-artifacts
+          find desktop-artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.exe' \
+            -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' \) | while read -r f; do
+            base="$(basename "$f")"
+            ext="${base##*.}"
+            name="${base%.*}"
+            cp "$f" "upload/${name}-${VERSION_CODE}.${ext}"
+          done
+          ls -l upload
+
       # Delete the previous snapshot release AND its tag, then recreate both at HEAD. This
       # prunes the now-stale (differently-named) APKs so they don't pile up, and sidesteps the
       # Releases API refusing to retarget an already-existing tag.
@@ -99,9 +127,12 @@ jobs:
           Automated debug build from the latest commit on \`main\` ($GITHUB_SHA), versionCode $VERSION_CODE.
           Unsigned/debug-keyed, F-Droid and Google flavors. Not for production use — this release is replaced on every push to main.
 
+          Also includes unsigned desktop installers (macOS .dmg, Windows .msi/.exe, Linux .deb/.rpm/.AppImage)
+          built from the same commit, when that platform's build succeeded.
+
           **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
           EOF
-          gh release create snapshot upload/*.apk \
+          gh release create snapshot upload/* \
             --title "Snapshot $VERSION_CODE ($GITHUB_SHA)" \
             --target "$GITHUB_SHA" \
             --prerelease \

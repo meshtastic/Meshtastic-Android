@@ -70,6 +70,7 @@ class TAKMeshIntegration(
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
     private val nodeRepository: NodeRepository,
+    private val meshToCotBroadcaster: MeshToCotBroadcaster,
 ) {
     private val isRunning = AtomicBoolean(false)
 
@@ -142,6 +143,9 @@ class TAKMeshIntegration(
             )
 
         jobs = newJobs
+        // Node -> CoT contacts. Self-gates on its own opt-in pref; starting it here means it can
+        // only ever run while the TAK server is enabled.
+        meshToCotBroadcaster.start(scope)
         val fw = nodeRepository.myNodeInfo.value?.firmwareVersion
         val proto = if (Capabilities(fw).supportsTakV2) "v2 (port 78, zstd)" else "v1 (port 72, legacy)"
         Logger.i { "TAK Mesh Integration started — firmware=$fw, outbound=$proto" }
@@ -152,6 +156,7 @@ class TAKMeshIntegration(
         val toCancel = jobs
         jobs = emptyList()
         toCancel.forEach(Job::cancel)
+        meshToCotBroadcaster.stop()
         takServerManager.stop()
         Logger.i { "TAK Mesh Integration stopped" }
     }
@@ -160,12 +165,11 @@ class TAKMeshIntegration(
 
     /**
      * Determine the outbound TAK protocol version based on the connected radio's firmware version. Evaluated per-send
-     * (not cached) so the bridge picks up firmware upgrades during a session without restart. If the firmware version
-     * is unavailable (radio not yet handshook), default to V2 — the v2 firmware was released widely enough that
-     * defaulting to legacy would be a regression for the common case.
+     * (not cached) so the bridge picks up firmware upgrades during a session without restart. Until the version is
+     * known, use the legacy format which every TAK-capable firmware version supports.
      */
     private fun useTakV2(): Boolean {
-        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return true
+        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return false
         return Capabilities(fw).supportsTakV2
     }
 

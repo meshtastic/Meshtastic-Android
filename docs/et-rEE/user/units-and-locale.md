@@ -16,7 +16,7 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrites, °C, m/s, hPa jne). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
+Androidis määravad mõõteseaded süsteemi **Keel ja piirkond** seaded. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 
 > 💡 **Vihje:** Rakenduses pole kunagi vaja ühikuid vahetada. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
@@ -26,7 +26,7 @@ On Android, your measurement preferences are determined by your system **Languag
 
 Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![Keskkonna mõõdikud koos temperatuuriga](../../assets/screenshots/nodes_environment_metrics.png)
 
 | Sinu sätted | Teadmiseks |
 | ----------- | ---------- |
@@ -37,9 +37,9 @@ This affects all temperature displays throughout the app: node environment telem
 
 ## Distance & Altitude
 
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
+Sõlmede vahelised kaugused ja GPS kõrgused edastatakse **meetrites** ning skaleeritakse ja teisendatakse automaatselt.
 
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
+![Vahemaa info kuvamine](../../assets/screenshots/nodes_distance_info.png)
 
 | Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
 | -------------------------------- | -------------- | ---------------------- | -------- |
@@ -93,7 +93,7 @@ Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenem
 | Baromeetrii rõhk            | hPa                            | International meteorological standard |
 | Heading / bearing           | ° (degrees) | Universal navigation convention       |
 | Radiatsioon                 | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates             | decimal degrees                | Universal geographic standard         |
+| GPS koordinaadid            | decimal degrees                | Universal geographic standard         |
 | Niiskus, aku, mulla niiskus | %                              | Universal                             |
 
 ## Date & Time
@@ -111,7 +111,7 @@ The app also uses **relative time** where it makes sense — for example, "5 min
 
 On Android, your measurement system (metric vs imperial) is tied to your region setting:
 
-1. Open **Android Settings → System → Language & Region**
+1. Ava **Androidi seaded → Süsteem → Keel ja piirkond**
 2. Change your **Region** or **Measurement units** preference
 3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
@@ -122,7 +122,7 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemeetia & Sensorid](telemetry-and-sensors) — andurid, mis neid mõõtmisi teevad
 - [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
-- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — piirkonna säte, mis määrab üksuse valiku
 
 ---
 

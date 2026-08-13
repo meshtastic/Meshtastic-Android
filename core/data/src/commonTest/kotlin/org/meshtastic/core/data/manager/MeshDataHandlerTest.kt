@@ -532,6 +532,35 @@ class MeshDataHandlerTest {
     }
 
     @Test
+    fun `routing packet with nak fails pending response`() = testScope.runTest {
+        val routing = Routing(error_reason = Routing.Error.NO_ROUTE)
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded =
+                Data(
+                    portnum = PortNum.ROUTING_APP,
+                    payload = routing.encode().toByteString(),
+                    request_id = 100,
+                ),
+            )
+        val dataPacket =
+            DataPacket(
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = routing.encode().toByteString(),
+                dataType = PortNum.ROUTING_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.toNodeID(456) } returns "!remote"
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetHandler.removeResponse(100, complete = false) }
+    }
+
+    @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
         val routing = Routing(error_reason = Routing.Error.NONE)
         val packet =

@@ -42,13 +42,65 @@ fun TakConfigCardPreview() {
 @PreviewLightDark
 @Composable
 fun TakServerSectionDisabledPreview() {
-    AppTheme { TakServerSection(isTakServerEnabled = false, onEnabledChange = {}, onExport = {}) }
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = false,
+            onEnabledChange = {},
+            isMeshToCotEnabled = false,
+            onMeshToCotChange = {},
+            status = TakServerStatus.Off,
+            clientCount = 0,
+            onExport = {},
+        )
+    }
 }
 
 @PreviewLightDark
 @Composable
 fun TakServerSectionEnabledPreview() {
-    AppTheme { TakServerSection(isTakServerEnabled = true, onEnabledChange = {}, onExport = {}) }
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = true,
+            onEnabledChange = {},
+            isMeshToCotEnabled = true,
+            onMeshToCotChange = {},
+            status = TakServerStatus.WaitingForClient,
+            clientCount = 0,
+            onExport = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun TakServerSectionConnectedPreview() {
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = true,
+            onEnabledChange = {},
+            isMeshToCotEnabled = true,
+            onMeshToCotChange = {},
+            status = TakServerStatus.Connected,
+            clientCount = 1,
+            onExport = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun TakServerSectionFailedPreview() {
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = true,
+            onEnabledChange = {},
+            isMeshToCotEnabled = true,
+            onMeshToCotChange = {},
+            status = TakServerStatus.Failed,
+            clientCount = 0,
+            onExport = {},
+        )
+    }
 }
 
 @PreviewLightDark

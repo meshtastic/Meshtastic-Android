@@ -30,6 +30,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.resources.Res
@@ -37,12 +38,14 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.export_data_csv
+import org.meshtastic.core.resources.export_node_db
 import org.meshtastic.core.resources.save_rangetest
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Output
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val EXPORT_TIMESTAMP_FORMAT =
@@ -63,6 +66,7 @@ internal fun ColumnScope.PersistenceSettingsContent(
     onSetCacheLimit: (Int) -> Unit,
     nodeShortName: String,
     onExportData: (android.net.Uri) -> Unit,
+    onExportNodeDb: (CommonUri) -> Unit,
 ) {
     val timestamp =
         fromEpochMilliseconds(nowMillis)
@@ -122,6 +126,20 @@ internal fun ColumnScope.PersistenceSettingsContent(
             }
         exportDataLauncher.launch(intent)
     }
+
+    ExportNodeDbItem(nodeShortName = nodeShortName, timestamp = timestamp, onExportNodeDb = onExportNodeDb)
+}
+
+@Composable
+private fun ExportNodeDbItem(nodeShortName: String, timestamp: String, onExportNodeDb: (CommonUri) -> Unit) {
+    val exportNodeDbLauncher = rememberSaveFileLauncher { uri -> onExportNodeDb(uri) }
+    ListItem(
+        text = stringResource(Res.string.export_node_db),
+        leadingIcon = MeshtasticIcons.Output,
+        trailingIcon = null,
+    ) {
+        exportNodeDbLauncher("Meshtastic_nodedb_${nodeShortName}_$timestamp.json", "application/json")
+    }
 }
 
 @Preview(showBackground = true)
@@ -134,6 +152,7 @@ fun PersistenceSectionPreview() {
                 onSetCacheLimit = {},
                 nodeShortName = "TEST",
                 onExportData = {},
+                onExportNodeDb = {},
             )
         }
     }

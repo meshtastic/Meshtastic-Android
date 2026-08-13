@@ -13,23 +13,23 @@ aliases:
 
 # Help & In-App Docs
 
-Sama kasutajadokumentatsioon on **rakenduse sees**, nii et saate seda lugeda võrguühenduseta ilma Meshtasticust lahkumata. Open it from **Settings → Help & Documentation**.
+Sama kasutajadokumentatsioon on **rakenduse sees**, nii et saate seda lugeda võrguühenduseta ilma Meshtasticust lahkumata. Ava see menüüst **Seaded → Abi ja dokumentatsioon**.
 
 ## Browsing
 
 The docs browser lists every user-guide page. Selle lugemiseks klõpsa lehel; pildid ja ristlingid toimivad ka.
 
-![In-app documentation browser table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Rakendusesisese dokumentatsiooni brauseri sisukord](../../assets/screenshots/docs-browser_toc.png)
 
 ### Search
 
 Lehtede pealkirja ja märksõnade järgi filtreerimiseks puuduta otsinguikooni ja tippi – tulemused värskendatakse tippimise ajal.
 
-![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
+![Rakendusesisese dokumentatsiooni otsimine](../../assets/screenshots/docs-browser_search.png)
 
 A page open in the browser:
 
-![A documentation page rendered in the app](../../assets/screenshots/docs-browser_page.png)
+![Rakenduses kuvatav dokumentatsioonileht(../../assets/screenshots/docs-browser_page.png)
 
 ## Chirpy — the AI Assistant
 

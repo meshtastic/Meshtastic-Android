@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.proto.FromRadio
@@ -85,6 +86,7 @@ class MeshServiceOrchestratorTest {
     private val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun createOrchestrator(
         receivedData: MutableSharedFlow<ReceivedRadioFrame> = MutableSharedFlow(),
         connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
@@ -113,10 +115,15 @@ class MeshServiceOrchestratorTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
+        every { takPrefs.isMeshToCotEnabled } returns MutableStateFlow(false)
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
+        // Deliberately its own dispatcher, not the class-level testDispatcher: the broadcaster's
+        // scheduler doesn't need to be the same one driving this test, and a distinct name keeps
+        // that from reading as though the two are linked.
+        val broadcasterTestDispatcher = UnconfinedTestDispatcher()
         val takMeshIntegration =
             TAKMeshIntegration(
                 takServerManager = takServerManager,
@@ -124,6 +131,18 @@ class MeshServiceOrchestratorTest {
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
+                meshToCotBroadcaster =
+                MeshToCotBroadcaster(
+                    takServerManager = takServerManager,
+                    nodeRepository = nodeRepository,
+                    takPrefs = takPrefs,
+                    dispatchers =
+                    CoroutineDispatchers(
+                        io = broadcasterTestDispatcher,
+                        main = broadcasterTestDispatcher,
+                        default = broadcasterTestDispatcher,
+                    ),
+                ),
             )
 
         return MeshServiceOrchestrator(
@@ -182,6 +201,63 @@ class MeshServiceOrchestratorTest {
         verify { takServerManager.stop() }
 
         orchestrator.stop()
+    }
+
+    @Test
+    fun testTakServerCanRetryAfterFailedStart() {
+        val takEnabledFlow = MutableStateFlow(false)
+        val takRunningFlow = MutableStateFlow(false)
+        val lifecycleEvents = mutableListOf<String>()
+        every { takServerManager.start(any()) } calls
+            {
+                lifecycleEvents += "start"
+                Unit
+            }
+        every { takServerManager.stop() } calls
+            {
+                lifecycleEvents += "stop"
+                Unit
+            }
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        // The mock never changes takRunningFlow, modeling a start attempt that failed before listening.
+        takEnabledFlow.value = true
+        takEnabledFlow.value = false
+        takEnabledFlow.value = true
+
+        assertEquals(listOf("start", "stop", "start"), lifecycleEvents)
+
+        orchestrator.stop()
+        assertEquals(listOf("start", "stop", "start", "stop"), lifecycleEvents)
+    }
+
+    @Test
+    fun testStopStopsTakServerWhileStarting() {
+        val takEnabledFlow = MutableStateFlow(true)
+        val takRunningFlow = MutableStateFlow(false)
+        val lifecycleEvents = mutableListOf<String>()
+        every { takServerManager.start(any()) } calls
+            {
+                lifecycleEvents += "start"
+                Unit
+            }
+        every { takServerManager.stop() } calls
+            {
+                lifecycleEvents += "stop"
+                Unit
+            }
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
+
+        orchestrator.start()
+        orchestrator.stop()
+
+        takEnabledFlow.value = false
+        orchestrator.start()
+        takEnabledFlow.value = true
+        orchestrator.stop()
+
+        assertEquals(listOf("start", "stop", "start", "stop"), lifecycleEvents)
     }
 
     @Test

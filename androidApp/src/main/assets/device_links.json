@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-23T03:27:14.158Z",
+  "generatedAt": "2026-08-10T04:21:44.097Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -1918,7 +1918,7 @@
     {
       "shortCode": "aliexpress-wismesh-pocket-mini",
       "url": "https://msh.to/aliexpress-wismesh-pocket-mini",
-      "description": "WisMesh Pocket Mini (Rokland)",
+      "description": "WisMesh Pocket Mini (AliExpress)",
       "type": "marketplace",
       "targets": null,
       "hwModels": null,

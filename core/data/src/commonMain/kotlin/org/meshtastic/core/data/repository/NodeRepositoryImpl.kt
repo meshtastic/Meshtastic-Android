@@ -211,16 +211,12 @@ class NodeRepositoryImpl(
     override suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
 
     /** Deletes a node and its metadata by [num]. */
-    override suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNode(num)
-        nodeInfoWriteDataSource.deleteMetadata(num)
-    }
+    override suspend fun deleteNode(num: Int) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodeAndMetadata(num) }
 
     /** Deletes multiple nodes and their metadata. */
-    override suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNodes(nodeNums)
-        nodeNums.forEach { nodeInfoWriteDataSource.deleteMetadata(it) }
-    }
+    override suspend fun deleteNodes(nodeNums: List<Int>) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodesAndMetadata(nodeNums) }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() } }

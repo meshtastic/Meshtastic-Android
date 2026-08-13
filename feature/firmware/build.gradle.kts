@@ -38,6 +38,7 @@ kotlin {
             implementation(projects.core.navigation)
             implementation(projects.core.network)
             implementation(projects.core.prefs)
+            implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.service)
             implementation(projects.core.resources)

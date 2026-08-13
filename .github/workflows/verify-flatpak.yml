@@ -46,10 +46,12 @@ jobs:
           token: ${{ github.token }}
 
       - uses: gradle/actions/setup-gradle@v6
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Generate flatpak-sources.json
         run: |
-          ./gradlew --no-build-cache --no-configuration-cache \
+          ./gradlew --no-build-cache -Dorg.gradle.isolated-projects=false --no-configuration-cache -Pmeshtastic.flatpakSources=true \
             -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
             :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
           cp build/flatpak-sources.json flatpak-sources.json
@@ -114,7 +116,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
         run: |
-          flatpak build-bundle repo org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak \
+          flatpak build-bundle repo "org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak" \
             org.meshtastic.MeshtasticDesktop \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
           echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"

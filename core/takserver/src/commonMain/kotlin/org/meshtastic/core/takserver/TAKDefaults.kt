@@ -72,6 +72,44 @@ internal const val MAX_TAK_WIRE_PAYLOAD_BYTES = 225
 /** Default CoT type for PLI (Position Location Information) — friendly ground unit. */
 internal const val DEFAULT_PLI_COT_TYPE = "a-f-G-U-C"
 
+// ── Mesh-to-CoT (synthesized node contacts) ─────────────────────────────────
+// These values mirror Meshtastic-Apple's TAKMeshtasticBridge.createCoTFromNode so a
+// mesh node presents identically in ATAK whether the operator runs Android or iOS.
+// Changing any of them makes the same physical node appear as a different contact
+// depending on which phone is bridging.
+
+/**
+ * UID prefix for synthesized node CoT, e.g. `MESHTASTIC-A1B2C3D4`.
+ *
+ * The hex suffix is **upper-case, zero-padded to [MESH_NODE_UID_HEX_WIDTH]**, matching Apple's `String(format:
+ * "MESHTASTIC-%08X", node.num)`. ATAK keys a contact by UID and compares case-sensitively, so lower-casing this makes
+ * an Android-bridged node a *different* contact from the same iOS-bridged node — the mesh appears duplicated whenever
+ * both phones bridge into one TAK network.
+ */
+internal const val MESH_NODE_UID_PREFIX = "MESHTASTIC-"
+
+/** Hex digits in a node number, zero-padded — `%08X` on the Apple side. */
+internal const val MESH_NODE_UID_HEX_WIDTH = 8
+
+/** Team colour for synthesized node CoT. Remote nodes never report a TAK team, so Apple's fixed Green is used. */
+internal const val MESH_NODE_TAK_TEAM = "Green"
+
+/**
+ * Stale TTL for synthesized node CoT. Longer than [DEFAULT_TAK_STALE_MINUTES] because a mesh node's position updates
+ * far less often than a live TAK client's. [MESH_TO_COT_REFRESH_INTERVAL_MS] must stay comfortably below this or
+ * stationary nodes expire out of ATAK between refreshes.
+ */
+internal const val MESH_NODE_STALE_MINUTES = 15
+
+/**
+ * How often every eligible node is re-broadcast even when nothing about it changed. Keeps stationary nodes alive in
+ * ATAK, whose markers would otherwise expire at [MESH_NODE_STALE_MINUTES].
+ */
+internal const val MESH_TO_COT_REFRESH_INTERVAL_MS = 5L * 60L * 1_000L
+
+/** Spacing between consecutive node broadcasts so a full replay doesn't flood the TAK client. Matches Apple's 10ms. */
+internal const val MESH_TO_COT_BROADCAST_SPACING_MS = 10L
+
 /**
  * Max characters of raw CoT XML we'll write to logcat when dropping an oversized packet. ATAK can emit events several
  * KB long; logging the whole thing floods logcat and buries the signal. 1024 chars is enough to see the event type,

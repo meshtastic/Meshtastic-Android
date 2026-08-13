@@ -62,6 +62,12 @@ internal class MessagingControllerImpl(
         dataHandler.value.rememberDataPacket(packet, myNodeNum, false)
         val bytes = packet.bytes ?: ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", packet.dataType))
+        // Text messages report their own action from SendMessageUseCase, where the user acted; this path runs on
+        // the send-queue worker and re-runs on retry, so counting them here would double up.
+        if (packet.dataType != PortNum.TEXT_MESSAGE_APP.value) {
+            val actionName = if (packet.dataType == PortNum.WAYPOINT_APP.value) "waypoint_send" else "data_send"
+            analytics.trackAction(actionName, mapOf("port_num" to packet.dataType, "num_bytes" to bytes.size))
+        }
     }
 
     override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {
@@ -81,6 +87,7 @@ internal class MessagingControllerImpl(
             )
                 .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: NodeAddress.ID_LOCAL }
         commandSender.sendData(dataPacket)
+        analytics.trackAction("reaction_send")
         val user = nodeManager.nodeDBbyNodeNum[myNum]?.user ?: User(id = nodeManager.getMyId())
         packetRepository.value.insertReaction(
             Reaction(

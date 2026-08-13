@@ -23,35 +23,56 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import org.meshtastic.core.common.util.getParcelableExtraCompat
 import org.meshtastic.core.common.util.registerReceiverCompat
 
-private const val ACTION_USB_PERMISSION = "org.meshtastic.app.USB_PERMISSION"
+internal const val ACTION_USB_PERMISSION = "org.meshtastic.app.USB_PERMISSION"
 
-internal fun UsbManager.requestPermission(context: Context, device: UsbDevice): Flow<Boolean> = callbackFlow {
+internal fun UsbManager.requestPermission(context: Context, device: UsbDevice): Flow<Boolean> = usbPermissionResultFlow(
+    context = context,
+    device = device,
+    hasPermission = ::hasPermission,
+    requestPermission = { permissionIntent -> this.requestPermission(device, permissionIntent) },
+)
+
+internal fun usbPermissionResultFlow(
+    context: Context,
+    device: UsbDevice,
+    hasPermission: (UsbDevice) -> Boolean,
+    requestPermission: (android.app.PendingIntent) -> Unit,
+): Flow<Boolean> = callbackFlow {
     val receiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (ACTION_USB_PERMISSION == intent.action) {
-                    val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
-                    trySend(granted)
-                    close()
-                }
+                if (ACTION_USB_PERMISSION != intent.action) return
+                val resultDevice = intent.getParcelableExtraCompat<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                if (resultDevice != null && resultDevice != device) return
+
+                val granted =
+                    resultDevice != null &&
+                        intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false) &&
+                        hasPermission(device)
+                trySend(granted)
+                close()
             }
         }
     val permissionIntent =
-        PendingIntentCompat.getBroadcast(
-            context,
-            0,
-            Intent(ACTION_USB_PERMISSION).apply { `package` = context.packageName },
-            0,
-            true,
+        checkNotNull(
+            PendingIntentCompat.getBroadcast(
+                context,
+                0,
+                Intent(ACTION_USB_PERMISSION).apply { `package` = context.packageName },
+                0,
+                true,
+            ),
         )
     val filter = IntentFilter(ACTION_USB_PERMISSION)
-    context.registerReceiverCompat(receiver, filter)
-    requestPermission(device, permissionIntent)
+    context.registerReceiverCompat(receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+    requestPermission(permissionIntent)
 
     awaitClose { context.unregisterReceiver(receiver) }
 }

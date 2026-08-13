@@ -45,6 +45,7 @@
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
+    <string name="adc_voltage">ADC Voltage</string>
     <!-- ADD -->
     <string name="add">Add</string>
     <string name="add_a_note">Add a private note…</string>
@@ -290,6 +291,7 @@
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
+    <string name="config_security_private_key_remote">The device does not share its private key over remote administration. You can set a new key, but it can never be read back.</string>
     <string name="config_security_public_key">Generated from your private key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
     <string name="configuration">Configuration</string>
@@ -561,7 +563,7 @@
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
-    <string name="downlink_enabled">Downlink enabled</string>
+    <string name="downlink_enabled">MQTT Downlink Enabled</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="download">Download</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
@@ -572,6 +574,19 @@
     <string name="edit_custom_tile_source">Edit Network Tile Source</string>
     <string name="eight_hours">8 Hours</string>
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <!-- EMOJI -->
+    <string name="emoji_category_activities">Activities</string>
+    <string name="emoji_category_animals_nature">Animals &amp; Nature</string>
+    <string name="emoji_category_flags">Flags</string>
+    <string name="emoji_category_food_drink">Food &amp; Drink</string>
+    <string name="emoji_category_objects">Objects</string>
+    <string name="emoji_category_people_body">People &amp; Body</string>
+    <string name="emoji_category_smileys_emotion">Smileys &amp; Emotion</string>
+    <string name="emoji_category_symbols">Symbols</string>
+    <string name="emoji_category_travel_places">Travel &amp; Places</string>
+    <string name="emoji_load_error">Unable to load emoji</string>
+    <string name="emoji_no_results">No emoji found</string>
+    <string name="emoji_recently_used">Recently Used</string>
     <string name="enable_power_saving_mode">Enable power saving mode</string>
     <string name="enabled">Enabled</string>
     <!-- ENCRYPTION -->
@@ -602,9 +617,11 @@
     <string name="expand_chart">Expand chart</string>
     <string name="expanded">Expanded</string>
     <string name="expires">Expires</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Export configuration</string>
     <string name="export_data_csv">Export all packets</string>
     <string name="export_gpx">Export GPX</string>
+    <string name="export_node_db">Export node database</string>
     <string name="export_tak_data_package">Export TAK Data Package</string>
     <string name="external_notification">External Notification</string>
     <string name="external_notification_config">External Notification Config</string>
@@ -878,13 +895,24 @@
     <string name="latest_alpha_firmware">Latest alpha</string>
     <string name="latest_stable_firmware">Latest stable</string>
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Coverage estimate</string>
+    <string name="layer_type_geojson" translatable="false">GeoJSON</string>
+    <string name="layer_type_kml" translatable="false">KML</string>
+    <string name="layer_type_network">Network layer</string>
     <string name="learn_more">Learn more</string>
     <string name="led_heartbeat">LED Heartbeat</string>
     <string name="led_state">LED state</string>
     <string name="legacy_admin_channel">Legacy Admin channel</string>
     <string name="library_count">%1$d libraries</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensed amateur radio (Ham)</string>
     <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
+    <string name="licensed_mode_enable_confirm">Enable licensed mode</string>
+    <string name="licensed_mode_enable_title">Enable licensed (Ham) mode?</string>
+    <string name="licensed_mode_enable_warning">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — and this firmware cannot sign it, so other nodes cannot verify it came from you. This is not compatible with the default Meshtastic network, and you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
+    <string name="licensed_mode_enable_warning_signed">Licensed mode removes channel encryption keys and disables the admin channel, so all traffic is sent as plaintext that anyone can read — but it is digitally signed, letting other nodes verify it came from you. Your node number may change once to match your identity key, so favorites, message history, remote admin, and other nodes may initially treat it as new; you remain responsible for meeting your amateur radio license requirements and local regulations.</string>
     <!-- LOAD -->
     <string name="load">Load</string>
     <string name="load_15_min">Load 15m</string>
@@ -1061,12 +1089,37 @@
     <string name="message_delivery_status">Message delivery status</string>
     <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
     <string name="message_input_label">Message</string>
+    <string name="message_routing_error_admin_bad_session_key">Admin session expired</string>
+    <string name="message_routing_error_admin_bad_session_key_detail">The admin session key is missing, expired, or invalid. Request a new session before trying again.</string>
+    <string name="message_routing_error_admin_public_key_unauthorized">Admin key not authorized</string>
+    <string name="message_routing_error_admin_public_key_unauthorized_detail">The remote node does not authorize your admin key.</string>
+    <string name="message_routing_error_bad_request">Invalid request</string>
+    <string name="message_routing_error_bad_request_detail">The destination rejected this request as invalid.</string>
+    <string name="message_routing_error_duty_cycle_limit">Duty cycle limit</string>
+    <string name="message_routing_error_duty_cycle_limit_detail">Local airtime limits are temporarily blocking sends. Wait before trying again.</string>
+    <string name="message_routing_error_got_nak_detail">A node rejected this message. Try again when the route changes.</string>
     <string name="message_routing_error_max_retransmit">Failed to deliver to mesh</string>
-    <string name="message_routing_error_no_channel">No channel selected</string>
+    <string name="message_routing_error_max_retransmit_detail">No node confirmed this message. Try again when you have better signal or more mesh coverage.</string>
+    <string name="message_routing_error_no_channel">Channel/key mismatch</string>
+    <string name="message_routing_error_no_channel_detail">The sender or recipient could not use a matching channel/key for this message.</string>
+    <string name="message_routing_error_no_interface">No radio interface</string>
+    <string name="message_routing_error_no_interface_detail">The sender has no usable radio interface for this message.</string>
+    <string name="message_routing_error_no_response">No app response</string>
+    <string name="message_routing_error_no_response_detail">The destination received the request, but no app or module responded. Try again when the recipient is reachable.</string>
+    <string name="message_routing_error_no_route_detail">No route to the destination node was found in the mesh. Try again when more nodes are reachable.</string>
+    <string name="message_routing_error_not_authorized">Not authorized</string>
+    <string name="message_routing_error_not_authorized_detail">The destination refused this request because it is not authorized.</string>
     <string name="message_routing_error_pki_failed">Could not send encrypted message</string>
+    <string name="message_routing_error_pki_failed_detail">The encrypted send path could not be used. Wait for node info or keys to sync, then try again.</string>
     <string name="message_routing_error_pki_send_fail_public_key">Recipient key unavailable</string>
+    <string name="message_routing_error_pki_send_fail_public_key_detail">Your node does not have the recipient's public key yet. Wait for node info to sync, then try again.</string>
     <string name="message_routing_error_pki_unknown_pubkey">Recipient needs your key</string>
+    <string name="message_routing_error_pki_unknown_pubkey_detail">The recipient does not know your public key yet. Your node may share its info automatically; try again after it syncs.</string>
+    <string name="message_routing_error_rate_limit_exceeded">Rate limited</string>
+    <string name="message_routing_error_rate_limit_exceeded_detail">Messages are being sent too quickly. Wait before trying again.</string>
+    <string name="message_routing_error_timeout_detail">No acknowledgment was received in time. Try again when you have better signal or more mesh coverage.</string>
     <string name="message_routing_error_too_large">Message is too large to send</string>
+    <string name="message_routing_error_too_large_detail">Shorten the message and send it again.</string>
     <string name="message_status_delivered">Delivered to mesh</string>
     <string name="message_status_enroute">Sending...</string>
     <string name="message_status_queued">Queued for sending</string>
@@ -1077,6 +1130,7 @@
     <string name="message_status_unknown">Unknown</string>
     <string name="message_translated_label">Translated</string>
     <string name="messages">Messages</string>
+    <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>
@@ -1395,6 +1449,7 @@
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="reconnecting">Reconnecting…</string>
     <string name="red">Red</string>
+    <string name="redacted" translatable="false">***[REDACTED]***</string>
     <string name="refresh">Refresh</string>
     <string name="refresh_metadata">Refresh metadata</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
@@ -1465,24 +1520,24 @@
     <string name="rotary_encoder_1_enabled">Rotary encoder #1 enabled</string>
     <string name="router_role_confirmation_text">I have read the &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Device Role Documentation&lt;/a&gt; and the blog post about &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Bad session key</string>
-    <string name="routing_error_admin_public_key_unauthorized">Public Key unauthorized</string>
-    <string name="routing_error_bad_request">Bad Request</string>
-    <string name="routing_error_duty_cycle_limit">Regional Duty Cycle Limit Reached</string>
+    <string name="routing_error_admin_bad_session_key">Admin session expired</string>
+    <string name="routing_error_admin_public_key_unauthorized">Admin key not authorized</string>
+    <string name="routing_error_bad_request">Invalid request</string>
+    <string name="routing_error_duty_cycle_limit">Duty cycle limit</string>
     <string name="routing_error_got_nak">Received a negative acknowledgment</string>
-    <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
-    <string name="routing_error_no_channel">No Channel</string>
-    <string name="routing_error_no_interface">No Interface</string>
-    <string name="routing_error_no_response">No response</string>
+    <string name="routing_error_max_retransmit">Failed to deliver to mesh</string>
+    <string name="routing_error_no_channel">Channel/key mismatch</string>
+    <string name="routing_error_no_interface">No radio interface</string>
+    <string name="routing_error_no_response">No app response</string>
     <string name="routing_error_no_route">No route</string>
     <string name="routing_error_none">Acknowledged</string>
-    <string name="routing_error_not_authorized">Not Authorized</string>
-    <string name="routing_error_pki_failed">Encrypted Send Failed</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI send failed, no public key</string>
-    <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
-    <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
+    <string name="routing_error_not_authorized">Not authorized</string>
+    <string name="routing_error_pki_failed">Could not send encrypted message</string>
+    <string name="routing_error_pki_send_fail_public_key">Recipient key unavailable</string>
+    <string name="routing_error_pki_unknown_pubkey">Recipient needs your key</string>
+    <string name="routing_error_rate_limit_exceeded">Rate limited</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Packet too large</string>
+    <string name="routing_error_too_large">Message is too large to send</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="rsyslog_server">rsyslog server</string>
@@ -1573,6 +1628,8 @@
     <string name="should_update_firmware">Firmware Update Recommended.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_full_message_timestamps">Show full message timestamps</string>
+    <string name="show_full_message_timestamps_summary">Always show the date and time in conversation headers and message actions</string>
     <string name="show_iaq_legend">Show air quality legend</string>
     <string name="show_layer">Show Layer</string>
     <string name="show_original">Show original</string>
@@ -1654,10 +1711,23 @@
     <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Enable Local TAK Server</string>
-    <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK/iTAK connections</string>
-    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK/iTAK to connect to this server</string>
+    <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK connections</string>
+    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK to connect to this server</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Mesh to CoT Converter</string>
+    <string name="tak_server_mesh_to_cot_desc">Show Meshtastic nodes on the ATAK map as contacts</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Status</string>
+    <plurals name="tak_server_status_connected">
+        <item quantity="one">%1$d local client connection</item>
+        <item quantity="other">%1$d local client connections</item>
+    </plurals>
+    <string name="tak_server_status_failed">Unable to start TAK Server. Turn it off and on to retry.</string>
+    <string name="tak_server_status_not_running">TAK Server is not running</string>
+    <string name="tak_server_status_off">Off</string>
+    <string name="tak_server_status_starting">Starting TAK Server</string>
+    <string name="tak_server_status_unavailable">Local TAK Server is available in Meshtastic for Android</string>
+    <string name="tak_server_status_waiting">Listening on 127.0.0.1:8089 — waiting for ATAK</string>
     <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
     <string name="tak_server_test_idle">Send all %1$d test fixtures to mesh</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1779,7 +1849,7 @@
     <string name="update_interval">GPS Polling Interval</string>
     <string name="update_interval_seconds">Update interval (seconds)</string>
     <string name="updated">Updated</string>
-    <string name="uplink_enabled">Uplink enabled</string>
+    <string name="uplink_enabled">MQTT Uplink Enabled</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node's configured gateway.</string>
     <string name="uptime">Uptime</string>
     <!-- URL -->

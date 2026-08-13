@@ -23,6 +23,8 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
 import org.meshtastic.core.takserver.TAKServerManager
@@ -37,12 +39,27 @@ class CoreTakServerModule {
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
 
     @Single
+    fun provideMeshToCotBroadcaster(
+        takServerManager: TAKServerManager,
+        nodeRepository: NodeRepository,
+        takPrefs: TakPrefs,
+        dispatchers: CoroutineDispatchers,
+    ): MeshToCotBroadcaster = MeshToCotBroadcaster(takServerManager, nodeRepository, takPrefs, dispatchers)
+
+    @Single
     fun provideTAKMeshIntegration(
         takServerManager: TAKServerManager,
         commandSender: CommandSender,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
         nodeRepository: NodeRepository,
-    ): TAKMeshIntegration =
-        TAKMeshIntegration(takServerManager, commandSender, serviceRepository, meshConfigHandler, nodeRepository)
+        meshToCotBroadcaster: MeshToCotBroadcaster,
+    ): TAKMeshIntegration = TAKMeshIntegration(
+        takServerManager,
+        commandSender,
+        serviceRepository,
+        meshConfigHandler,
+        nodeRepository,
+        meshToCotBroadcaster,
+    )
 }

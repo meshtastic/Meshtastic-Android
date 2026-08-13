@@ -52,7 +52,12 @@ kotlin {
             implementation(libs.koin.androidx.workmanager)
         }
 
-        getByName("androidHostTest") { dependencies { implementation(libs.androidx.work.testing) } }
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.androidx.datastore.preferences)
+                implementation(libs.androidx.work.testing)
+            }
+        }
 
         commonTest.dependencies { implementation(projects.core.testing) }
     }

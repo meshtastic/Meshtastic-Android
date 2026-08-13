@@ -207,10 +207,6 @@ internal fun Project.configureKmpTestDependencies() {
                         implementation(libs.library("androidx-test-ext-junit"))
                     }
                 }
-
-            // Configure jvmTest lazily for the same reason.
-            matching { it.name == "jvmTest" }
-                .configureEach { dependencies { implementation(libs.library("kotest-runner-junit6")) } }
         }
     }
 }

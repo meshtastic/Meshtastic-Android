@@ -23,7 +23,6 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Location
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
@@ -108,6 +107,9 @@ import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -131,9 +133,8 @@ import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.isValidCodePoint
+import org.meshtastic.core.model.util.kmhIn
 import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.mpsToKmph
-import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.model.util.waypointIconOrDefault
@@ -147,17 +148,23 @@ import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
+import org.meshtastic.core.resources.speed_kmh
+import org.meshtastic.core.resources.speed_mph
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.ActiveWhileStarted
+import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
@@ -346,27 +353,24 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(isLocationTrackingEnabled, locationPermission.isGranted) {
-        if (isLocationTrackingEnabled && locationPermission.isGranted) {
-            val locationRequest =
-                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
-                    .setMinUpdateIntervalMillis(2000L)
-                    .build()
-            try {
-                @Suppress("MissingPermission")
-                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-                Logger.d { "Started location tracking" }
-            } catch (e: SecurityException) {
-                Logger.d { "Location permission not available: ${e.message}" }
-                isLocationTrackingEnabled = false
-            }
-        } else {
+    ActiveWhileStarted(enabled = isLocationTrackingEnabled && locationPermission.isGranted) {
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L).setMinUpdateIntervalMillis(2000L).build()
+        try {
+            @Suppress("MissingPermission")
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+            Logger.d { "Started location tracking" }
+        } catch (e: SecurityException) {
+            Logger.d { "Location permission not available: ${e.message}" }
+            isLocationTrackingEnabled = false
+        }
+
+        val cleanup: () -> Unit = {
             fusedLocationClient.removeLocationUpdates(locationCallback)
             Logger.d { "Stopped location tracking" }
         }
+        cleanup
     }
-
-    DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     // --- Node & waypoint data ---
     val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
@@ -405,6 +409,13 @@ fun MapView(
     }
 
     val myNodeNum = mapViewModel.myNodeNum
+    val relativeTimeBucket = rememberRelativeTimeBucket()
+    val nodeClusterItems =
+        rememberNodeClusterItems(
+            nodes = if (mode is GoogleMapMode.Main) filteredNodes else emptyList(),
+            myNodeNum = myNodeNum,
+            relativeTimeBucket = relativeTimeBucket,
+        )
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
     val dark =
@@ -585,16 +596,7 @@ fun MapView(
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
-    // --- Keep screen on while location tracking ---
-    LaunchedEffect(isLocationTrackingEnabled) {
-        val activity = context as? Activity ?: return@LaunchedEffect
-        val window = activity.window
-        if (isLocationTrackingEnabled) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
+    KeepScreenOn(isLocationTrackingEnabled && locationPermission.isGranted)
 
     // --- Main UI ---
     val isMainMode = mode is GoogleMapMode.Main
@@ -681,21 +683,7 @@ fun MapView(
             when (mode) {
                 is GoogleMapMode.Main ->
                     MainMapContent(
-                        nodeClusterItems =
-                        filteredNodes.map { node ->
-                            val latLng =
-                                LatLng(
-                                    (node.position.latitude_i ?: 0) * DEG_D,
-                                    (node.position.longitude_i ?: 0) * DEG_D,
-                                )
-                            NodeClusterItem(
-                                node = node,
-                                nodePosition = latLng,
-                                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
-                                nodeSnippet = "${node.user.long_name}",
-                                myNodeNum = myNodeNum,
-                            )
-                        },
+                        nodeClusterItems = nodeClusterItems,
                         mapFilterState = mapFilterState,
                         navigateToNodeDetails = navigateToNodeDetails,
                         displayableWaypoints = displayableWaypoints,
@@ -988,6 +976,9 @@ fun MapView(
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
             sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude)))
+            }
             mapViewModel.consumeSitePlannerRequest()
         }
     }
@@ -1030,6 +1021,53 @@ fun MapView(
     if (showCustomTileManagerSheet) {
         ModalBottomSheet(onDismissRequest = { showCustomTileManagerSheet = false }) {
             CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
+        }
+    }
+}
+
+private const val SECONDS_PER_MINUTE = 60L
+private const val MILLIS_PER_SECOND = 1_000L
+
+@Composable
+private fun rememberRelativeTimeBucket(): Long {
+    val buckets = remember { relativeTimeBuckets() }
+    return buckets.collectAsStateWithLifecycle(initialValue = nowSeconds / SECONDS_PER_MINUTE).value
+}
+
+internal fun relativeTimeBuckets(now: () -> Long = { nowSeconds }): Flow<Long> = flow {
+    while (true) {
+        val currentSeconds = now()
+        emit(currentSeconds / SECONDS_PER_MINUTE)
+        val secondsUntilNextMinute = SECONDS_PER_MINUTE - currentSeconds.mod(SECONDS_PER_MINUTE)
+        delay(secondsUntilNextMinute * MILLIS_PER_SECOND)
+    }
+}
+
+/**
+ * Materializes the native clustering model used by the Google map.
+ *
+ * Camera state invalidates [MapView] on every movement frame, and its filters produce a new-but-equal [List] each time.
+ * Using that structural value as a key avoids rebuilding every [NodeClusterItem] (and its strings/[LatLng]) for
+ * camera-only changes. [relativeTimeBucket] deliberately refreshes the relative marker titles once per minute.
+ */
+@Composable
+internal fun rememberNodeClusterItems(
+    nodes: List<Node>,
+    myNodeNum: Int?,
+    relativeTimeBucket: Long,
+): List<NodeClusterItem> {
+    val unknownText = stringResource(Res.string.unknown)
+    val nowText = stringResource(Res.string.now)
+    return remember(nodes, myNodeNum, relativeTimeBucket, unknownText, nowText) {
+        nodes.map { node ->
+            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
+            NodeClusterItem(
+                node = node,
+                nodePosition = latLng,
+                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
+                nodeSnippet = node.user.long_name,
+                myNodeNum = myNodeNum,
+            )
         }
     }
 }
@@ -1267,16 +1305,9 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
 
 @Composable
 private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
-    val speedInMps = position.ground_speed ?: 0
-    val mpsText = "%d m/s".format(speedInMps)
-    return if (speedInMps > 10) {
-        when (displayUnits) {
-            DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
-            DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-        }
-    } else {
-        mpsText
-    }
+    // Position.ground_speed is km/h on the wire (proto canon), not m/s.
+    val speedRes = if (displayUnits == DisplayUnits.IMPERIAL) Res.string.speed_mph else Res.string.speed_kmh
+    return stringResource(speedRes, (position.ground_speed ?: 0).kmhIn(displayUnits))
 }
 
 // endregion
@@ -1438,7 +1469,9 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
         kml.toLayer()
     }
 
-    LayerType.GEOJSON -> GeoJsonParser().parse(stream)?.toLayer()?.applySimpleStyleSpec()
+    LayerType.GEOJSON,
+    LayerType.COVERAGE,
+    -> GeoJsonParser().parse(stream)?.toLayer()?.applySimpleStyleSpec()
 }
 
 /**

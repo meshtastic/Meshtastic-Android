@@ -147,6 +147,7 @@ import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
@@ -419,15 +420,7 @@ fun MapView(
         }
     }
 
-    // Keep screen on while location tracking is active
-    LaunchedEffect(myLocationOverlay) {
-        val activity = context as? android.app.Activity ?: return@LaunchedEffect
-        if (myLocationOverlay != null) {
-            activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            activity.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
+    KeepScreenOn(myLocationOverlay != null && locationPermission.isGranted)
 
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
@@ -898,6 +891,9 @@ fun MapView(
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
             sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            if (node.validPosition != null) {
+                map.controller.animateTo(GeoPoint(node.latitude, node.longitude))
+            }
             mapViewModel.consumeSitePlannerRequest()
         }
     }

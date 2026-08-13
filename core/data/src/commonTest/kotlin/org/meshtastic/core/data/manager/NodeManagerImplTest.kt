@@ -1240,7 +1240,60 @@ class NodeManagerImplTest {
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
     }
 
-    // 6. Genuine new node
+    // 6. New-node notification admission
+
+    @Test
+    fun `user packet before node-db ready installs without persistence or notification`() {
+        val replayedNodeNum = 2999
+        val replayedKey = ByteArray(32) { (it + 90).toByte() }.toByteString()
+        val replayedUser =
+            User(
+                id = "!replayed",
+                long_name = "Replayed Node",
+                short_name = "RPL",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = replayedKey,
+            )
+
+        nodeManager.setAllowNodeDbWrites(true)
+        nodeManager.handleReceivedUser(replayedNodeNum, replayedUser)
+        testScope.advanceUntilIdle()
+
+        val result = nodeManager.nodeDBbyNodeNum[replayedNodeNum]
+        assertNotNull(result)
+        assertEquals("Replayed Node", result.user.long_name)
+        verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
+        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
+    fun `pre-ready user packet stays notification-suppressed across a CAS retry`() {
+        val replayedNodeNum = 2998
+        val replayedUser =
+            User(
+                id = "!retry",
+                long_name = "Retried Baseline Node",
+                short_name = "RTY",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = ByteArray(32) { (it + 91).toByte() }.toByteString(),
+            )
+        var reductionCount = 0
+        nodeManager.receivedUserReductionHook = {
+            reductionCount += 1
+            if (reductionCount == 1) {
+                nodeManager.setNodeDbReady(true)
+                nodeManager.setMyNodeNum(1234)
+            }
+        }
+
+        nodeManager.handleReceivedUser(replayedNodeNum, replayedUser)
+        testScope.advanceUntilIdle()
+
+        assertEquals("Retried Baseline Node", nodeManager.nodeDBbyNodeNum[replayedNodeNum]?.user?.long_name)
+        assertEquals(1234, nodeManager.myNodeNum.value)
+        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+        assertEquals(2, reductionCount, "the forced CAS mismatch must execute the reducer twice")
+    }
 
     @Test
     fun `genuine new node fires exactly one upsert and exactly one notification`() {
@@ -2086,6 +2139,34 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `User packet is discarded when clear starts a new session before CAS`() = testScope.runTest {
+        val num = 123456789
+        val key = ByteArray(32) { (it + 41).toByte() }.toByteString()
+        nodeManager.setNodeDbReady(true)
+        nodeManager.receivedUserReductionHook = {
+            nodeManager.receivedUserReductionHook = null
+            nodeManager.clear()
+        }
+
+        nodeManager.handleReceivedUser(
+            num,
+            User(
+                id = "!session-reset",
+                long_name = "Previous Session",
+                short_name = "OLD",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = key,
+            ),
+        )
+        testScope.advanceUntilIdle()
+
+        assertNull(nodeManager.nodeDBbyNodeNum[num])
+        assertFalse(nodeManager.isNodeDbReady.value)
+        verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
+        verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
+    }
+
+    @Test
     fun `reverse ID and public-key indexes stay consistent across put replacement and remove`() {
         val keyA = ByteArray(32) { 11 }.toByteString()
         val keyB = ByteArray(32) { 12 }.toByteString()
@@ -2168,6 +2249,7 @@ class NodeManagerImplTest {
 
     @Test
     fun `notification skipped when number retired between select and dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
         val num = 4000000000.toInt()
         val key = ByteArray(32) { 0x03 }.toByteString()
         val titleStarted = CompletableDeferred<Unit>()
@@ -2191,6 +2273,7 @@ class NodeManagerImplTest {
 
     @Test
     fun `notification skipped when number becomes local node before dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
         val num = 5000000000.toInt()
         val key = ByteArray(32) { 0x04 }.toByteString()
         val titleStarted = CompletableDeferred<Unit>()
@@ -2214,6 +2297,7 @@ class NodeManagerImplTest {
 
     @Test
     fun `notification skipped when identity changed before dispatch`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
         val num = 6000000000.toInt()
         val key1 = ByteArray(32) { 0x05 }.toByteString()
         val key2 = ByteArray(32) { 0x06 }.toByteString()
@@ -2288,6 +2372,7 @@ class NodeManagerImplTest {
         // not the initial sighting from the setup above.
         val dispatched = mutableListOf<Notification>()
         everySuspend { notificationManager.dispatch(capture(dispatched)) } returns true
+        nodeManager.setNodeDbReady(true)
         // Replay with different key — should be allowed as legitimate reuse
         nodeManager.handleReceivedUser(num, userWithKey(newKey, "New", "NW"), manuallyVerified = false)
         advanceUntilIdle()
@@ -2360,6 +2445,7 @@ class NodeManagerImplTest {
 
     @Test
     fun `genuine remote first sighting emits exactly one notification`() = testScope.runTest {
+        nodeManager.setNodeDbReady(true)
         val num = 9000000000.toInt()
         val key = ByteArray(32) { 0x0b }.toByteString()
         nodeManager.setMyNodeNum(1230588578)
@@ -2602,6 +2688,7 @@ class NodeManagerImplTest {
     @Test
     fun `repeated trusted migration preserves original hint and still permits distinct-key reuse`() =
         testScope.runTest {
+            nodeManager.setNodeDbReady(true)
             val num = 9009
             val oldKey = ByteArray(32) { 0x21 }.toByteString()
             val reuseKey = ByteArray(32) { 0x22 }.toByteString()

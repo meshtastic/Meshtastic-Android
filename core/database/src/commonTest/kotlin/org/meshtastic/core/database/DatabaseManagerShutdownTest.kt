@@ -21,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -334,6 +336,127 @@ class DatabaseManagerShutdownTest : DatabaseManagerTestFixture() {
         manager.close()
         assertEquals(1, manager.closedDatabases.count { it === original })
         assertEquals(1, manager.closedDatabases.count { it === reopened })
+    }
+
+    @Test
+    fun flowPoolTimeoutReopensAndRelatchesWithoutRepeatingTheFailedPool() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val original = manager.currentDb.value
+        var originalQueries = 0
+
+        val value =
+            manager
+                .observeCurrentDb { database ->
+                    if (database === original) {
+                        flow<String> {
+                            originalQueries += 1
+                            throw roomPoolTimeout()
+                        }
+                    } else {
+                        flowOf("recovered")
+                    }
+                }
+                .first()
+
+        assertEquals("recovered", value)
+        assertEquals(1, originalQueries)
+        assertTrue(manager.currentDb.value !== original)
+    }
+
+    @Test
+    fun flowPoolRecoveryStopsAfterIntermittentFailuresReachTheManagerLifetimeLimit() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val buildsBeforeRecovery = manager.builtDatabases.size
+        var successfulEmissions = 0
+
+        val failure =
+            assertFailsWith<IllegalStateException> {
+                manager
+                    .observeCurrentDb {
+                        flow {
+                            successfulEmissions += 1
+                            emit(Unit)
+                            throw roomPoolTimeout()
+                        }
+                    }
+                    .first { false }
+            }
+
+        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertEquals(MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME + 1, successfulEmissions)
+        assertEquals(
+            buildsBeforeRecovery + MAX_FLOW_POOL_RECOVERIES_PER_MANAGER_LIFETIME,
+            manager.builtDatabases.size,
+            "successful emissions must not reset the manager-lifetime Flow recovery budget",
+        )
+    }
+
+    @Test
+    fun flowPoolRecoveryStopsAfterConsecutiveReplacementPoolsFail() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val buildsBeforeRecovery = manager.builtDatabases.size
+        var queryAttempts = 0
+
+        val failure =
+            assertFailsWith<IllegalStateException> {
+                manager
+                    .observeCurrentDb<Unit> {
+                        flow {
+                            queryAttempts += 1
+                            throw roomPoolTimeout()
+                        }
+                    }
+                    .first()
+            }
+
+        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertEquals(MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES + 1, queryAttempts)
+        assertEquals(
+            buildsBeforeRecovery + MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES,
+            manager.builtDatabases.size,
+            "automatic recovery must bound the number of detached replacement pools",
+        )
+    }
+
+    @Test
+    fun flowPoolTimeoutRetainsItsOriginalFailureAfterShutdownClearsCurrentPublication() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val buildsBeforeFailure = manager.builtDatabases.size
+
+        val failure =
+            assertFailsWith<IllegalStateException> {
+                manager
+                    .observeCurrentDb<Unit> {
+                        flow {
+                            manager.close()
+                            throw roomPoolTimeout()
+                        }
+                    }
+                    .first()
+            }
+
+        assertTrue(failure.message.orEmpty().contains("Timed out attempting to acquire"))
+        assertEquals(buildsBeforeFailure, manager.builtDatabases.size, "shutdown must suppress Flow pool recovery")
+    }
+
+    @Test
+    fun flowRecoveryDoesNotSwallowUnrelatedDatabaseFailures() = runTest(testDispatcher) {
+        manager.switchActiveDatabase("addrA")
+        val original = manager.currentDb.value
+        val buildsBeforeFailure = manager.builtDatabases.size
+
+        val failure =
+            assertFailsWith<IllegalStateException> {
+                manager.observeCurrentDb<String> { flow { throw IllegalStateException("query failed") } }.first()
+            }
+
+        assertEquals("query failed", failure.message)
+        assertTrue(manager.currentDb.value === original)
+        assertEquals(
+            buildsBeforeFailure,
+            manager.builtDatabases.size,
+            "unrelated failures must not trigger recovery",
+        )
     }
 
     @Test

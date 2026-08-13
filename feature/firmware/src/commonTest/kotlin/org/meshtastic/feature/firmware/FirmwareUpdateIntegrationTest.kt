@@ -39,6 +39,7 @@ import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -68,6 +69,7 @@ class FirmwareUpdateIntegrationTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private val stableRelease = FirmwareRelease(id = "1", title = "2.5.0", zipUrl = "url", releaseNotes = "")
     private val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
@@ -115,6 +117,7 @@ class FirmwareUpdateIntegrationTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
+        analytics,
     )
 
     @Test

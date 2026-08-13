@@ -33,6 +33,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Update Graphs
@@ -64,7 +65,9 @@ jobs:
           # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
           # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
           # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
-          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true --no-configuration-cache
+          # -Dorg.gradle.isolated-projects=false must accompany it: Isolated Projects implies the configuration cache, and
+          # Gradle 9.7+ hard-errors when the cache is disabled while Isolated Projects is on.
+          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true -Dorg.gradle.isolated-projects=false --no-configuration-cache
 
       - name: Detect baseline profile changes
         id: baseline

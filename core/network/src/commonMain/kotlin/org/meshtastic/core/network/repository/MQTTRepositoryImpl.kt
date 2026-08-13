@@ -17,17 +17,24 @@
 package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -60,7 +67,6 @@ import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
-import kotlin.concurrent.Volatile
 import kotlin.uuid.Uuid
 
 @Single(binds = [MQTTRepository::class])
@@ -96,26 +102,26 @@ class MQTTRepositoryImpl(
         private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
-    @Volatile private var client: MqttClientSession? = null
     private var mqttClientFactory: (MqttClientSetup) -> MqttClientSession = ::defaultMqttClientFactory
+    private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
+    private val activeSession = MutableStateFlow<ActiveMqttSession?>(null)
 
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+    override val connectionState: StateFlow<ConnectionState> =
+        activeSession
+            .flatMapLatest { session -> session?.client?.connectionState ?: flowOf(ConnectionState.Disconnected.Idle) }
+            .onEach(::logConnectionState)
+            .stateIn(scope, SharingStarted.Eagerly, ConnectionState.Disconnected.Idle)
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
         exceptionsWithDebugInfo = false
     }
-    private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
     private val publishSemaphore = Semaphore(20)
 
     override fun disconnect() {
         Logger.i { "MQTT Disconnecting" }
-        val c = client
-        client = null
-        _connectionState.value = ConnectionState.Disconnected.Idle
-        scope.launch { safeCatching { c?.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } } }
+        closeSession(takeActiveSession())
     }
 
     // json_enabled is deprecated in the protobuf schema but remains the only way to toggle MQTT JSON
@@ -145,7 +151,8 @@ class MQTTRepositoryImpl(
                     logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN,
                 ),
             )
-        client = newClient
+        val session = ActiveMqttSession(newClient)
+        closeSession(replaceActiveSession(session))
 
         val subscriptions: List<Subscription> = buildList {
             channelSet.subscribeList.forEach { globalId ->
@@ -179,63 +186,97 @@ class MQTTRepositoryImpl(
         // that arrive immediately after SUBSCRIBE.
         launch { newClient.messages.collect { msg -> processMessage(msg) } }
 
-        // Forward the client's connection state to the repo-level StateFlow for UI observation.
-        // Also emit structured log messages on transitions so reconnect attempt counts and
-        // disconnect reason codes are visible in Crashlytics/Datadog without any PII.
-        launch { newClient.connectionState.collect { state -> updateConnectionState(state) } }
-
         // Retry the initial connect with exponential backoff. Once established,
         // autoReconnect handles subsequent drops and re-subscribes internally.
-        launch {
-            var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
-            while (true) {
-                val result = safeCatching {
-                    Logger.i {
-                        if (buildConfigProvider.isDebug) "MQTT Connecting to $endpoint" else "MQTT Connecting..."
-                    }
-                    newClient.connect(endpoint)
-                    if (subscriptions.isNotEmpty()) {
-                        Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
-                        newClient.subscribe(subscriptions)
-                    }
-                    Logger.i { "MQTT connected and subscribed" }
-                }
-                val failure = result.exceptionOrNull()
-                when {
-                    result.isSuccess -> return@launch
-
-                    failure is MqttException.ConnectionRejected && failure.isCredentialRejection() -> {
-                        Logger.e(failure) { "MQTT connection rejected (unrecoverable), stopping" }
-                        close(failure)
-                        return@launch
-                    }
-
-                    else -> {
-                        // Broker- and network-side failures are what this retry loop exists to absorb — an
-                        // unreachable host, a TLS problem, a dropped connection, or a broker that violates the
-                        // MQTT 5 spec (e.g. the topic-alias limit). None are defects in this app, and reporting
-                        // every retry as a non-fatal drowned real regressions.
-                        //
-                        // Anything else landing here is unexpected — a fault in our own connect/subscribe setup
-                        // rather than the peer's — so it keeps reporting.
-                        if (failure.isExpectedMqttRetryFailure()) {
-                            Logger.w(failure) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
-                        } else {
-                            Logger.e(failure) { "MQTT connect failed unexpectedly, retrying in ${reconnectDelay}ms" }
+        val connectJob =
+            launch(start = CoroutineStart.LAZY) {
+                var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                while (isActiveSession(session)) {
+                    val result = safeCatching {
+                        if (!isActiveSession(session)) return@launch
+                        Logger.i {
+                            if (buildConfigProvider.isDebug) "MQTT Connecting to $endpoint" else "MQTT Connecting..."
                         }
-                        delay(reconnectDelay)
-                        reconnectDelay =
-                            (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+                        newClient.connect(endpoint)
+                        if (!isActiveSession(session)) return@launch
+                        if (subscriptions.isNotEmpty()) {
+                            Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
+                            newClient.subscribe(subscriptions)
+                        }
+                        Logger.i { "MQTT connected and subscribed" }
+                    }
+                    val failure = result.exceptionOrNull()
+                    when {
+                        result.isSuccess -> return@launch
+
+                        failure is MqttException.ConnectionRejected && failure.isCredentialRejection() -> {
+                            Logger.e(failure) { "MQTT connection rejected (unrecoverable), stopping" }
+                            close(failure)
+                            return@launch
+                        }
+
+                        else -> {
+                            if (!isActiveSession(session)) return@launch
+                            // Broker- and network-side failures are what this retry loop exists to absorb — an
+                            // unreachable host, a TLS problem, a dropped connection, or a broker that violates the
+                            // MQTT 5 spec (e.g. the topic-alias limit). None are defects in this app, and reporting
+                            // every retry as a non-fatal drowned real regressions.
+                            //
+                            // Anything else landing here is unexpected — a fault in our own connect/subscribe setup
+                            // rather than the peer's — so it keeps reporting.
+                            if (failure.isExpectedMqttRetryFailure()) {
+                                Logger.w(failure) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                            } else {
+                                Logger.e(failure) {
+                                    "MQTT connect failed unexpectedly, retrying in ${reconnectDelay}ms"
+                                }
+                            }
+                            delay(reconnectDelay)
+                            reconnectDelay =
+                                (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+                        }
                     }
                 }
             }
+        session.connectJob.value = connectJob
+        if (isActiveSession(session)) {
+            connectJob.start()
+        } else {
+            session.connectJob.getAndSet(null)?.cancel()
         }
 
-        awaitClose { disconnect() }
+        awaitClose {
+            activeSession.compareAndSet(session, null)
+            closeSession(session)
+        }
     }
 
-    internal fun updateConnectionState(state: ConnectionState) {
-        _connectionState.value = state
+    private fun replaceActiveSession(replacement: ActiveMqttSession): ActiveMqttSession? {
+        while (true) {
+            val current = activeSession.value
+            if (activeSession.compareAndSet(current, replacement)) return current
+        }
+    }
+
+    private fun takeActiveSession(): ActiveMqttSession? {
+        while (true) {
+            val current = activeSession.value ?: return null
+            if (activeSession.compareAndSet(current, null)) return current
+        }
+    }
+
+    private fun closeSession(session: ActiveMqttSession?) {
+        if (session == null || !session.closeStarted.compareAndSet(expect = false, update = true)) return
+        session.connectJob.getAndSet(null)?.cancel()
+        scope.launch {
+            safeCatching { session.client.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } }
+        }
+    }
+
+    private fun isActiveSession(session: ActiveMqttSession): Boolean =
+        !session.closeStarted.value && activeSession.value === session
+
+    private fun logConnectionState(state: ConnectionState) {
         when (state) {
             ConnectionState.Connecting -> Logger.i { "MQTT connecting" }
 
@@ -289,21 +330,21 @@ class MQTTRepositoryImpl(
     }
 
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
-        val currentClient = client
-        if (currentClient == null) {
-            Logger.w {
-                if (buildConfigProvider.isDebug) {
-                    "MQTT publish to $topic dropped: client not connected"
-                } else {
-                    "MQTT publish dropped: client not connected"
-                }
-            }
-            return
-        }
         scope.launch {
             publishSemaphore.withPermit {
+                val session = activeSession.value
+                if (session == null || !isActiveSession(session)) {
+                    Logger.w {
+                        if (buildConfigProvider.isDebug) {
+                            "MQTT publish to $topic dropped: client not connected"
+                        } else {
+                            "MQTT publish dropped: client not connected"
+                        }
+                    }
+                    return@withPermit
+                }
                 safeCatching {
-                    currentClient.publish(
+                    session.client.publish(
                         MqttMessage(topic = topic, payload = data, qos = QoS.AT_LEAST_ONCE, retain = retained),
                     )
                 }
@@ -319,6 +360,11 @@ class MQTTRepositoryImpl(
             }
         }
     }
+}
+
+private class ActiveMqttSession(val client: MqttClientSession) {
+    val closeStarted = atomic(false)
+    val connectJob = atomic<Job?>(null)
 }
 
 /**

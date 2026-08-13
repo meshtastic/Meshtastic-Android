@@ -257,7 +257,10 @@ fun ChannelScreen(
                         isWaiting = true
                         radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
                     },
-                    onClickShare = { showShareDialog = true },
+                    onClickShare = {
+                        viewModel.trackShare()
+                        showShareDialog = true
+                    },
                 )
             }
             item {

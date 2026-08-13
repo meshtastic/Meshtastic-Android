@@ -19,7 +19,6 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -36,8 +35,8 @@ class TracerouteSnapshotRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : TracerouteSnapshotRepository {
 
-    override fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager.currentDb
-        .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
+    override fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager
+        .observeCurrentDb { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
         .distinctUntilChanged()
         .mapLatest { list -> list.associate { it.nodeNum to it.position } }
         .flowOn(dispatchers.io)

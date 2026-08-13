@@ -23,6 +23,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -76,6 +78,7 @@ class FirmwareUpdateViewModelTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -138,6 +141,7 @@ class FirmwareUpdateViewModelTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
+        analytics,
     )
 
     @Test
@@ -189,6 +193,28 @@ class FirmwareUpdateViewModelTest {
         val error = errorState.error
         assertTrue(error is UiText.Resource)
         assertEquals(Res.string.firmware_update_battery_low, error.res)
+    }
+
+    @Test
+    fun `startUpdate reports a firmware_update_start action with the release version`() = runTest {
+        // isBle() checks devAddr.value?.startsWith("x"), so use a BLE-prefixed address
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val currentState = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(currentState)
+        assertIs<FirmwareUpdateMethod.Ble>(currentState.updateMethod)
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        verify {
+            analytics.trackAction(
+                "firmware_update_start",
+                mapOf("update_method" to "ble", "is_recovery" to false, "release_version" to "1"),
+            )
+        }
     }
 
     @Test

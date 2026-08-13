@@ -48,9 +48,13 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.GeoConstants
+import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.adcVoltage
+import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.snrOrNull
+import org.meshtastic.core.model.util.withOneWireTemperature
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -145,16 +149,19 @@ open class MetricsViewModel(
             if (currentState.isFahrenheit) {
                 data.map { telemetry ->
                     val em = telemetry.environment_metrics ?: return@map telemetry
-                    telemetry.copy(
-                        environment_metrics =
+                    // Each 1-Wire channel converts independently; an absent channel must stay null rather than
+                    // becoming a converted zero.
+                    var converted =
                         em.copy(
                             temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                            soil_temperature =
-                            em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                            one_wire_temperature =
-                            em.one_wire_temperature.map { UnitConversions.celsiusToFahrenheit(it) },
-                        ),
-                    )
+                            soil_temperature = em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                        )
+                    for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
+                        val celsius = em.oneWireTemperature(channel) ?: continue
+                        converted =
+                            converted.withOneWireTemperature(channel, UnitConversions.celsiusToFahrenheit(celsius))
+                    }
+                    telemetry.copy(environment_metrics = converted)
                 }
             } else {
                 data
@@ -427,25 +434,32 @@ open class MetricsViewModel(
     }
 
     fun saveEnvironmentMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
-        val oneWireHeaders = (1..ONE_WIRE_SENSOR_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
+        val oneWireHeaders = (1..TELEMETRY_CHANNEL_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
+        val adcHeaders = (1..TELEMETRY_CHANNEL_COUNT).joinToString(",") { "\"adcVoltage$it\"" }
         exportCsv(
             uri = uri,
             header =
             "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
                 "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
-                "\"soilMoisture\",$oneWireHeaders\n",
+                "\"soilMoisture\",$oneWireHeaders,$adcHeaders\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
             val em = t.environment_metrics
-            val owt = em?.one_wire_temperature ?: emptyList()
+            // An absent channel exports as an empty field, keeping it distinguishable from a measured 0°C / 0 V.
             val oneWireValues =
-                (0 until ONE_WIRE_SENSOR_COUNT).joinToString(",") { i -> "\"${owt.getOrNull(i) ?: ""}\"" }
+                (0 until TELEMETRY_CHANNEL_COUNT).joinToString(",") { i ->
+                    "\"${em?.oneWireTemperature(i)?.takeIf { !it.isNaN() } ?: ""}\""
+                }
+            val adcValues =
+                (0 until TELEMETRY_CHANNEL_COUNT).joinToString(",") { i ->
+                    "\"${em?.adcVoltage(i)?.takeIf { !it.isNaN() } ?: ""}\""
+                }
             "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
                 "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
                 "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
                 "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
-                "\"${em?.soil_moisture ?: ""}\",$oneWireValues"
+                "\"${em?.soil_moisture ?: ""}\",$oneWireValues,$adcValues"
         }
     }
 
@@ -562,10 +576,6 @@ open class MetricsViewModel(
     }
 
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
-
-    companion object {
-        private const val ONE_WIRE_SENSOR_COUNT = 8
-    }
 }
 
 private fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName: String): String {

@@ -36,9 +36,11 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+// Graph assembly only builds entry providers, so a bare Application is enough. Booting
+// MeshUtilApplication here leaks its applicationScope launches into the rest of the fork.
 @OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], application = android.app.Application::class)
 class NavigationAssemblyTest {
 
     @Test

@@ -62,8 +62,9 @@ val syncDocsToComposeResources =
         description = "Syncs docs/en/ markdown source into composeResources for in-app bundling"
         group = "docs"
 
-        val docsEnDir = rootProject.layout.projectDirectory.dir("docs/en")
-        val screenshotsDir = rootProject.layout.projectDirectory.dir("docs/assets/screenshots")
+        // isolated.rootProject: Isolated Projects forbids reaching through rootProject.layout.
+        val docsEnDir = isolated.rootProject.projectDirectory.dir("docs/en")
+        val screenshotsDir = isolated.rootProject.projectDirectory.dir("docs/assets/screenshots")
         val composeResourcesTarget = layout.projectDirectory.dir("src/commonMain/composeResources/files/docs")
 
         from(docsEnDir) {
@@ -100,7 +101,7 @@ val syncTranslatedDocsToComposeResources =
         description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
         group = "docs"
 
-        val docsDir = rootProject.layout.projectDirectory.dir("docs")
+        val docsDir = isolated.rootProject.projectDirectory.dir("docs")
         val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources/files")
 
         from(docsDir) {

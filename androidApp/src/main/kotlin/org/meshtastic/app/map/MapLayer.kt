@@ -30,6 +30,12 @@ import kotlin.uuid.Uuid
 enum class LayerType {
     KML,
     GEOJSON,
+
+    /**
+     * A Site Planner coverage estimate. GeoJSON on the wire and parsed as such, but tracked as its own type so the
+     * layers sheet can distinguish an estimate we generated from a GeoJSON file the user imported.
+     */
+    COVERAGE,
 }
 
 data class MapLayerItem(
@@ -39,6 +45,8 @@ data class MapLayerItem(
     val isVisible: Boolean = true,
     val layerType: LayerType,
     val isNetwork: Boolean = false,
+    /** Wall-clock creation time, from the backing file's mtime. Null for network layers, which have no local file. */
+    val createdAt: Long? = null,
     /** UI indicator: whether a refresh is in flight (drives the sheet/toolbar spinner). */
     val isRefreshing: Boolean = false,
     /**
@@ -51,6 +59,48 @@ data class MapLayerItem(
 private val KML_EXTENSIONS = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
 private val GEOJSON_EXTENSIONS = listOf("geojson", "json")
 
+/** On-disk extension marking a saved coverage estimate, so [LayerType.COVERAGE] survives a restart. */
+const val COVERAGE_EXTENSION = "coverage"
+
+/**
+ * Coverage estimates append a random UUID to their on-disk name so two estimates saved under the same title don't
+ * collide. The layers list rebuilds its display name from that file name, so strip the suffix or the raw UUID shows up
+ * in the UI.
+ */
+private val TRAILING_UUID =
+    Regex("_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", RegexOption.IGNORE_CASE)
+
+/** Recover a layer's display name from its on-disk file name (sans extension). */
+fun displayNameFromFileName(fileNameWithoutExtension: String): String =
+    fileNameWithoutExtension.replace(TRAILING_UUID, "")
+
+/**
+ * Characters not allowed in an on-disk layer file name: path separators, so an import can't traverse out of
+ * `map_layers/`, plus control characters. Everything else — spaces, punctuation, non-Latin scripts — is kept, because
+ * the list rebuilds a layer's display name from this file name and users should see the name they chose.
+ */
+private val FILE_NAME_UNSAFE = Regex("""[/\\\p{Cntrl}]""")
+
+/**
+ * Longest sanitized base name kept, in characters. Bounds the total path length: the UUID suffix and extension add ~46
+ * bytes, and a non-Latin name can reach 4 bytes per character, which would otherwise overrun the 255-byte file name
+ * limit and fail the write.
+ */
+private const val MAX_BASE_NAME_CHARS = 40
+
+/**
+ * Build the on-disk file name for a layer from its [displayName].
+ *
+ * [displayName] is untrusted (a DISPLAY_NAME/lastPathSegment from another app's share/open-with), so separators are
+ * stripped to keep the write inside `map_layers/`. The UUID suffix is load-bearing, not cosmetic: two layers sharing a
+ * display name would otherwise resolve to the same path and the second write would truncate the first. It also means a
+ * name of `..` can never itself be the file name. [displayNameFromFileName] strips it back off for display.
+ */
+fun layerFileName(displayName: String, extension: String): String {
+    val safeBase = displayName.replace(FILE_NAME_UNSAFE, "_").take(MAX_BASE_NAME_CHARS)
+    return "${safeBase}_${Uuid.random()}.$extension"
+}
+
 /**
  * Resolve a file extension or MIME subtype (e.g. `geojson`, `vnd.geo+json`) to a [LayerType], or null if unsupported.
  */
@@ -58,6 +108,8 @@ fun resolveLayerType(extensionOrMime: String?): LayerType? = when (extensionOrMi
     in KML_EXTENSIONS -> LayerType.KML
 
     in GEOJSON_EXTENSIONS -> LayerType.GEOJSON
+
+    COVERAGE_EXTENSION -> LayerType.COVERAGE
 
     // MIME subtypes the content resolver may report for GeoJSON that aren't a bare "geojson"/"json".
     "geo+json",

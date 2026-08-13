@@ -22,7 +22,10 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.model.util.DistanceUnit
+import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.feature.discovery.ui.formatDuration
+import kotlin.math.roundToInt
 
 internal object DiscoveryReportFormatter {
 
@@ -62,7 +65,7 @@ internal object DiscoveryReportFormatter {
         append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")
         val distance = node.distanceFromUser
         if (distance != null) {
-            append(" | ${NumberFormatter.format(distance, 0)}m")
+            append(" | ${distance.roundToInt().toDistanceString(DistanceUnit.getFromLocale())}")
         }
     }
 

@@ -28,7 +28,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.meshtastic.koin)
-    alias(libs.plugins.secrets)
+    alias(libs.plugins.meshtastic.android.secrets)
     alias(libs.plugins.androidx.baselineprofile)
     alias(libs.plugins.meshtastic.aboutlibraries)
     // Version-less on purpose: mokkery is embedded in the convention-plugin jar (build-logic
@@ -62,6 +62,14 @@ configure<ApplicationExtension> {
     }
 
     signingConfigs {
+        // Shared debug key (checked in; debug keys are not secret) so local builds and CI snapshots
+        // stay update-compatible — AGP's default per-machine key makes every snapshot un-sideloadable.
+        getByName("debug") {
+            storeFile = isolated.rootProject.projectDirectory.file("config/debug.keystore").asFile
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?
             keyPassword = keystoreProperties["keyPassword"] as String?
@@ -177,10 +185,10 @@ configure<ApplicationExtension> {
 
     buildTypes {
         release {
+            // Unsigned when keystore.properties is absent — a release must never carry the public
+            // debug key. For an installable local release, point keystore.properties at config/debug.keystore.
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
             }
             isDebuggable = false
         }
@@ -317,6 +325,10 @@ dependencies {
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    fdroidImplementation(libs.geopackage.android) {
+        because("6.7.5 depends on 16 KB page-size compatible SQLite Android Bindings")
+        exclude(group = "com.j256.ormlite")
+    }
     fdroidImplementation(libs.osmbonuspack)
 
     testImplementation(kotlin("test-junit"))

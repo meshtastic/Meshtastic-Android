@@ -366,6 +366,28 @@ interface NodeInfoDao {
     @Query("DELETE FROM metadata WHERE num=:num")
     suspend fun deleteMetadata(num: Int)
 
+    @Query("DELETE FROM metadata WHERE num IN (:nodeNums)")
+    suspend fun deleteMetadataForNodes(nodeNums: List<Int>)
+
+    /** Atomically deletes one node and its separately stored device metadata. */
+    @Transaction
+    suspend fun deleteNodeAndMetadata(num: Int) {
+        deleteNode(num)
+        deleteMetadata(num)
+    }
+
+    /**
+     * Atomically deletes nodes and their metadata, chunking both `IN` queries below SQLite's bind-parameter limit.
+     * Every chunk participates in the same transaction, so cancellation or a query failure rolls back the whole batch.
+     */
+    @Transaction
+    suspend fun deleteNodesAndMetadata(nodeNums: List<Int>) {
+        for (chunk in nodeNums.chunked(MAX_BIND_PARAMS)) {
+            deleteNodes(chunk)
+            deleteMetadataForNodes(chunk)
+        }
+    }
+
     /** Snapshot used by DatabaseMerger to carry per-node DeviceMetadata across transports (newest timestamp wins). */
     @Query("SELECT * FROM metadata")
     suspend fun getAllMetadataSnapshot(): List<MetadataEntity>

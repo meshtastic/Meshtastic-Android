@@ -42,8 +42,10 @@ import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictC
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictPreview
 import org.meshtastic.feature.settings.radio.component.PacketAuthenticityUnsupportedPreview
 import org.meshtastic.feature.settings.radio.component.TakConfigCardPreview
+import org.meshtastic.feature.settings.radio.component.TakServerSectionConnectedPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionDisabledPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionEnabledPreview
+import org.meshtastic.feature.settings.radio.component.TakServerSectionFailedPreview
 import org.meshtastic.feature.settings.radio.component.TakTestCardIdlePreview
 import org.meshtastic.feature.settings.radio.component.TakTestCardResultsPreview
 import org.meshtastic.feature.settings.radio.component.TakTestCardRunningPreview
@@ -95,6 +97,20 @@ fun ScreenshotTakServerSectionDisabled() {
 @Composable
 fun ScreenshotTakServerSectionEnabled() {
     TakServerSectionEnabledPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotTakServerSectionConnected() {
+    TakServerSectionConnectedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotTakServerSectionFailed() {
+    TakServerSectionFailedPreview()
 }
 
 @PreviewTest

@@ -31,7 +31,6 @@ import org.meshtastic.core.ui.component.ListItemDisabledPreview
 import org.meshtastic.core.ui.component.ListItemPreview
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
-import org.meshtastic.core.ui.component.SatelliteCountInfoPreview
 import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.SwitchListItemPreview
 import org.meshtastic.core.ui.component.TitledCardPreview
@@ -120,13 +119,6 @@ fun ScreenshotTitledCard() {
 @Composable
 fun ScreenshotChannelInfo() {
     ChannelInfoPreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotSatelliteCountInfo() {
-    SatelliteCountInfoPreview()
 }
 
 @PreviewTest

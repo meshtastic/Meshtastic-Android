@@ -12,21 +12,21 @@ aliases:
 
 # Home Screen Widget
 
-Androidis pakub Meshtastic avakuva **vidinat**, mis näitab teie ühendatud raadio reaalajas kohalikku statistikat – rakendust pole vaja avada.
+Androidis pakub Meshtastic avakuva **vidinat**, mis näitab ühendatud raadio reaalajas kohalikku statistikat – rakendust pole vaja avada.
 
-## What It Shows
+## Mida see näitab
 
 The widget displays the **connected radio's** current local stats:
 
 - **Aku** – raadio aku tase või _Toitel_, kui see töötab välise toiteallikaga
 - **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
 - **AirUtil** — eetriaega (kui suurt osa töötsüklist raadio edastab)
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Liiklus** — edastatud/vastuvõetud paketid ja nähtud duplikaadid
+- **Vahendajad** — edastatud paketid ja edastuste tühistamised (kuvatakse raadio vahendusprotsessi ajal)
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.
 
-> 💡 **Vihje:** Väärtused kajastavad raadiojaama, millega olete hetkel ühendatud. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Vihje:** Väärtused kajastavad raadiojaama, millega olete hetkel ühendatud. Kui rakendus pole raadioga ühendatud, kuvab vidin viimaseid teadaolevaid andmeid kuni ühenduse taastamiseni.
 
 ## Adding the Widget
 
@@ -40,7 +40,7 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 ## Related Topics
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
-- [Connections](connections) — connect to a radio so the widget has stats to show
+- [Ühendused](connections) — loo ühendus raadioga, et vidinal oleks statistikat kuvada
 - [Avasta](Discovery) — kanali ja eetriaja kasutamine kärgvõrgu ulatuses
 
 ---

@@ -76,6 +76,9 @@ jobs:
     needs: check-changes
     if: github.repository == 'meshtastic/Meshtastic-Android' && needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       run_lint: true
       run_unit_tests: true

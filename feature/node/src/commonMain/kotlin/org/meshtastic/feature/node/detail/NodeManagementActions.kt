@@ -23,6 +23,7 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
@@ -46,6 +47,7 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val alertManager: AlertManager,
+    private val analytics: PlatformAnalytics,
 ) {
     open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
         alertManager.showAlert(
@@ -114,6 +116,7 @@ constructor(
 
     open suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
         radioController.setFavorite(nodeNum, favorite)
+        analytics.trackAction("node_favorite", mapOf("favorite" to favorite))
     }
 
     open suspend fun setNodeNotes(nodeNum: Int, notes: String) {

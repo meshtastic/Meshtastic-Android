@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -34,7 +35,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class UiPrefsImplTest {
@@ -124,6 +127,19 @@ class UiPrefsImplTest {
         }
 
         assertEquals(DeviceType.USB, prefs.selectedConnectionTransport.value)
+    }
+
+    @Test
+    fun `full message timestamps default to false`() =
+        testScope.runTest { assertFalse(prefs.showFullMessageTimestamps.value) }
+
+    @Test
+    fun `full message timestamps persist when enabled`() = testScope.runTest {
+        prefs.setShowFullMessageTimestamps(true)
+
+        val stored = dataStore.data.first { it[UiPrefsImpl.KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] == true }
+        assertTrue(prefs.showFullMessageTimestamps.value)
+        assertEquals(true, stored[UiPrefsImpl.KEY_SHOW_FULL_MESSAGE_TIMESTAMPS])
     }
 
     @Test

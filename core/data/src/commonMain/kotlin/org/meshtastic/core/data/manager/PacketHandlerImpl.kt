@@ -48,8 +48,11 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.Routing
 import org.meshtastic.proto.ToRadio
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -65,6 +68,19 @@ class PacketHandlerImpl(
 
     companion object {
         private val TIMEOUT = 5.seconds
+
+        /**
+         * Grace period after which a sent packet still [MessageStatus.ENROUTE] is stamped [Routing.Error.TIMEOUT]
+         * (retryable) instead of showing as sending forever. Generous — well past the radio's retransmit window — and
+         * matches iOS's sendAckTimeout so both apps time out alike.
+         */
+        internal val SEND_ACK_TIMEOUT = 5.minutes
+
+        /**
+         * Minimum re-arm delay on reconnect: the firmware's phone-queue backlog may still deliver the missing ACK/NAK
+         * just after the config handshake, so give it a moment before stamping a timeout.
+         */
+        internal val REARM_GRACE = 30.seconds
 
         /**
          * Firmware-internal `ErrorCode` (MeshTypes.h `ERRNO_SHOULD_RELEASE`) leaked into `QueueStatus.res`: "no error,
@@ -87,6 +103,10 @@ class PacketHandlerImpl(
 
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
+    private val routingResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
+
+    private val timeoutMutex = Mutex()
+    private val sendAckTimeoutJobs = mutableMapOf<Int, Job>()
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
@@ -127,16 +147,17 @@ class PacketHandlerImpl(
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean {
-        // Pre-register the deferred so the queue processor and QueueStatus handler
-        // can find it immediately — no polling required.
-        val deferred = CompletableDeferred<Boolean>()
-        responseMutex.withLock { queueResponse[packet.id] = deferred }
-        queueMutex.withLock {
-            queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
-            queuedPackets.add(packet)
-            startPacketQueueLocked()
+        if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
+            Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} skipped: not connected" }
+            return false
         }
+
+        // QueueStatus(res=0) only means that firmware queued the packet. Keep a separate
+        // routing response so this strict caller waits for the later Routing ACK/NAK.
+        val deferred = CompletableDeferred<Boolean>()
+        responseMutex.withLock { routingResponse[packet.id] = deferred }
         return try {
+            sendToRadio(packet)
             withTimeout(TIMEOUT) { deferred.await() }
         } catch (e: TimeoutCancellationException) {
             Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} timeout" }
@@ -147,7 +168,7 @@ class PacketHandlerImpl(
             Logger.d { "sendToRadioAndAwait packet id=${packet.id.toUInt()} failed: ${e.message}" }
             false
         } finally {
-            responseMutex.withLock { queueResponse.remove(packet.id) }
+            responseMutex.withLock { routingResponse.remove(packet.id) }
         }
     }
 
@@ -165,6 +186,8 @@ class PacketHandlerImpl(
             responseMutex.withLock {
                 queueResponse.values.forEach { if (!it.isCompleted) it.complete(false) }
                 queueResponse.clear()
+                routingResponse.values.forEach { if (!it.isCompleted) it.complete(false) }
+                routingResponse.clear()
             }
         }
     }
@@ -182,15 +205,28 @@ class PacketHandlerImpl(
             responseMutex.withLock {
                 if (requestId != 0) {
                     queueResponse.remove(requestId)?.complete(success)
+                    if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
+                        routingResponse.remove(requestId)?.complete(success)
+                    }
                 } else {
-                    queueResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
+                    queueResponse.entries
+                        .firstOrNull { !it.value.isCompleted }
+                        ?.let { (packetId, response) ->
+                            response.complete(success)
+                            if (!success || queueStatus.res == ERRNO_SHOULD_RELEASE) {
+                                routingResponse.remove(packetId)?.complete(success)
+                            }
+                        }
                 }
             }
         }
     }
 
     override suspend fun removeResponse(dataRequestId: Int, complete: Boolean) {
-        responseMutex.withLock { queueResponse.remove(dataRequestId)?.complete(complete) }
+        responseMutex.withLock {
+            queueResponse.remove(dataRequestId)?.complete(complete)
+            routingResponse.remove(dataRequestId)?.complete(complete)
+        }
     }
 
     /**
@@ -213,8 +249,7 @@ class PacketHandlerImpl(
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
                         } catch (e: TimeoutCancellationException) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
-                            // Clean up the deferred for this packet. sendToRadioAndAwait callers
-                            // also clean up in their own finally block (idempotent remove).
+                            // Clean up the transport-queue deferred for this packet.
                             responseMutex.withLock { queueResponse.remove(packet.id) }
                         } catch (e: CancellationException) {
                             throw e // Preserve structured concurrency cancellation propagation.
@@ -242,9 +277,44 @@ class PacketHandlerImpl(
     private fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {
         if (packetId != 0) {
             getDataPacketById(packetId)?.let { p ->
-                if (p.status == m) return@handledLaunch
-                packetRepository.value.updateMessageStatus(p, m)
+                if (p.status != m) {
+                    packetRepository.value.updateMessageStatus(p, m)
+                }
+                if (m == MessageStatus.ENROUTE) {
+                    scheduleSendAckTimeout(packetId)
+                }
             }
+        }
+    }
+
+    override fun rearmSendAckTimeouts() {
+        scope.handledLaunch {
+            packetRepository.value.getEnroutePackets().forEach { p ->
+                val remaining = p.time + SEND_ACK_TIMEOUT.inWholeMilliseconds - nowMillis
+                scheduleSendAckTimeout(p.id, remaining.milliseconds.coerceAtLeast(REARM_GRACE))
+            }
+        }
+    }
+
+    /**
+     * A send whose routing ACK/NAK never reaches the app (typically because it was disconnected when the radio's
+     * response arrived) would stay ENROUTE — "Sending…" — forever. Stamp it as a retryable timeout instead; a late ACK
+     * still upgrades it via handleAckNak.
+     *
+     * One timer per packet: re-arming supersedes the pending one, so repeated reconnects cannot pile up timers for the
+     * same send. Timers deliberately survive a disconnect — the ack genuinely never arrived, and the resulting state is
+     * retryable — so a user who never reconnects still sees the send resolve.
+     */
+    private suspend fun scheduleSendAckTimeout(packetId: Int, delayFor: Duration = SEND_ACK_TIMEOUT) {
+        timeoutMutex.withLock {
+            sendAckTimeoutJobs.remove(packetId)?.cancel()
+            sendAckTimeoutJobs.values.removeAll { it.isCompleted }
+            sendAckTimeoutJobs[packetId] =
+                scope.handledLaunch {
+                    delay(delayFor)
+                    // Conditional in the DAO transaction: an ACK/NAK landing while this timer waited must win.
+                    packetRepository.value.timeOutEnroutePacket(packetId, Routing.Error.TIMEOUT.value)
+                }
         }
     }
 
@@ -259,7 +329,7 @@ class PacketHandlerImpl(
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun sendPacket(packet: MeshPacket): Deferred<Boolean> {
-        // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
+        // Register the transport-queue response before sending so an immediate QueueStatus cannot be missed.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
             if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
@@ -268,10 +338,10 @@ class PacketHandlerImpl(
             sendToRadio(ToRadio(packet = packet))
         } catch (ex: RadioNotConnectedException) {
             Logger.w(ex) { "sendToRadio skipped: Not connected to radio" }
-            deferred.complete(false)
+            removeResponse(packet.id, complete = false)
         } catch (ex: Exception) {
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
-            deferred.complete(false)
+            removeResponse(packet.id, complete = false)
         }
         // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can await it
         // without being able to complete the underlying CompletableDeferred; cancellation is

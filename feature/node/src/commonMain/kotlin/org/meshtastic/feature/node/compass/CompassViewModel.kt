@@ -104,6 +104,10 @@ class CompassViewModel(
             }
     }
 
+    /**
+     * Marks the update job cancelled immediately. Provider listeners are unregistered by their `awaitClose` handlers as
+     * cancellation propagates through the flows.
+     */
     fun stop() {
         updatesJob?.cancel()
         updatesJob = null

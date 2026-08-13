@@ -68,7 +68,7 @@ open class MeshUtilApplication :
     Configuration.Provider,
     SingletonImageLoader.Factory {
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    protected val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
@@ -83,8 +83,9 @@ open class MeshUtilApplication :
             workManagerFactory()
         }
 
-        // Schedule periodic MeshLog cleanup
-        scheduleMeshLogCleanup()
+        // Schedule periodic MeshLog cleanup. Off-main: WorkManager uses on-demand init here
+        // (the startup provider is removed), so getInstance() opens WorkManager's Room DB.
+        applicationScope.launch { scheduleMeshLogCleanup() }
 
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
@@ -144,9 +145,8 @@ open class MeshUtilApplication :
     }
 
     override fun onTerminate() {
-        // Shutdown managers (useful for Robolectric tests).
-        // Non-blocking: cancelAndJoin inside runBlocking on the main thread can deadlock
-        // if any active coroutine is dispatching to Dispatchers.Main.
+        // Robolectric never calls this, so unit tests booting this Application cannot rely on it.
+        // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
         applicationScope.cancel()
         try {
             runBlocking { get<DatabaseManager>().close() }

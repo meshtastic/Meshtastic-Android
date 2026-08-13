@@ -27,7 +27,7 @@ aliases:
 
 ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 接続中の無線機を、選択した 1 つ以上のプリセットで順に切り替え、パケットを収集するために各プリセットで一定時間受信（「滞在」）し、その後、結果を分析してランク付けします。
 
-Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
+「**設定 → 詳細設定 → ローカルメッシュ探索**」から開きます。 デスクトップでは、独自の「**設定 → ローカルメッシュ探索**」の項目があります。
 
 > ⚠️ **注意：** 探索は、スキャン中に無線機の LoRa 設定を一時的に変更し、完了時に元の構成に戻します。 スキャンを実行するには、デバイスが接続されている必要があります。
 
@@ -90,20 +90,20 @@ Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it 
 
 ## メッシュビーコン
 
-Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+メッシュビーコンを使うと、ノードが他のノードを自分のメッシュに招待できます。 ビーコンを発信するノードは、招待を定期的にブロードキャストします（任意でチャンネル、リージョン、モデムプリセットを告知）。近くのデバイスは、設定を共有する前でもこれを受信できます。
 
-Configure it under **Settings → Module Config → Mesh Beacon**:
+「**設定 → モジュール設定 → メッシュビーコン**」で設定します：
 
-- **Listen for beacons** — receive invitations broadcast by other nodes.
-- **Broadcast beacon** — send your own invitation at a set interval, with an optional message and an offered channel.
+- **ビーコンを受信**：他のノードがブロードキャストする招待を受け取ります。
+- **ビーコンを発信**：一定間隔で自分の招待を送信します。任意でメッセージと提示するチャンネルを設定できます。
 
-Received invitations appear as **Mesh invitations** cards on the Discovery screen. Each card shows the sender's message plus the offered channel, region, preset, and signal quality, with these actions:
+受信した招待は、探索画面に「**メッシュへの招待**」カードとして表示されます。 各カードには、送信者のメッセージと、提示されたチャンネル・リージョン・プリセット・信号品質が表示され、次の操作ができます：
 
-- **Join** — switch to the offered channel and preset (retunes the radio and reboots). When the offer matches your current frequency slot, an **Add channel** action adds it without a reboot.
-- **Discover** — seed a Discovery scan with the offered preset so you can survey that mesh before joining (shown only when the beacon offers a preset).
-- **Dismiss** — ignore the invitation.
+- **参加**：提示されたチャンネルとプリセットに切り替えます（無線機を再調整して再起動します）。 提示内容が現在の周波数スロットと一致する場合は、再起動なしで追加できる「**チャンネルを追加**」の操作が表示されます。
+- **探索**：提示されたプリセットで探索スキャンを開始し、参加する前にそのメッシュを調べられます（ビーコンがプリセットを提示している場合のみ表示）。
+- **閉じる**：招待を無視します。
 
-Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
+ビーコンが告知したチャンネルは、スキャン設定にも「**ビーコンのチャンネル**」として表示されます。選択すると、スキャン対象に含められます。
 
 ---
 
@@ -188,7 +188,7 @@ Channels advertised by beacons also show up in the scan setup as **Beacon channe
 
 ### インフラの監査
 
-- Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
+- 「**インフラを除外**」を無効にすると、ルーター、ルーター・レイト、クライアント・ベースのノードが表示されます。
 - 信号品質と最後の通信時刻を確認して、インフラのノードが健全であることを確かめます。
 
 絞り込みと並べ替えのオプションの詳細については、[ノード](nodes) を参照してください。

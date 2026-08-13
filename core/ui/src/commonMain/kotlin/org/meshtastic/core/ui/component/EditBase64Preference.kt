@@ -61,6 +61,7 @@ fun EditBase64Preference(
     value: ByteString,
     enabled: Boolean,
     readOnly: Boolean = false,
+    placeholderText: String? = null,
     keyboardActions: KeyboardActions,
     onValueChange: (ByteString) -> Unit,
     onGenerateKey: (() -> Unit)? = null,
@@ -85,6 +86,7 @@ fun EditBase64Preference(
             onGenerateKey != null && !isFocused -> MeshtasticIcons.Refresh to stringResource(Res.string.reset)
             else -> null to null
         }
+    val placeholder: @Composable (() -> Unit)? = placeholderText?.let { text -> { Text(text = text) } }
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         OutlinedTextField(
             value = valueState,
@@ -96,6 +98,7 @@ fun EditBase64Preference(
             enabled = enabled,
             readOnly = readOnly,
             label = { Text(text = title) },
+            placeholder = placeholder,
             isError = isError,
             keyboardOptions =
             KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),

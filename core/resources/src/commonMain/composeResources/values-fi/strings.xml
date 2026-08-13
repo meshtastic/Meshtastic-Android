@@ -556,7 +556,6 @@
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>
-    <string name="downlink_enabled">Vastaanotto käytössä</string>
     <string name="downlink_feature_description">Julkisesta internet-yhdyskäytävästä tulevat viestit välitetään paikalliseen mesh-verkkoon. Nollahyppysääntöjen vuoksi oletuksena MQTT-palvelimelta tuleva liikenne ei etene tätä laitetta pidemmälle.</string>
     <string name="download">Lataa</string>
     <string name="duplicated_public_key_title">Päällekkäinen julkinen avain havaittu</string>
@@ -566,6 +565,7 @@
     <string name="edit">Muokkaa</string>
     <string name="edit_custom_tile_source">Muokkaa karttatiilien verkkolähteen asetuksia</string>
     <string name="eight_hours">8 tuntia</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Ota virransäästötila käyttöön</string>
     <string name="enabled">Käytössä</string>
     <!-- ENCRYPTION -->
@@ -596,6 +596,7 @@
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expanded">Avattu</string>
     <string name="expires">Päättyy</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Asetusten vienti</string>
     <string name="export_data_csv">Vie kaikki paketit</string>
     <string name="export_gpx">Vie GPX</string>
@@ -871,6 +872,10 @@
     <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
     <string name="latest_stable_firmware">Viimeisin vakaa (stable)</string>
     <string name="latitude">Leveyspiiri</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s · %2$s</string>
+    <string name="layer_type_coverage">Kuuluvuusalueen arvio</string>
+    <string name="layer_type_network">Verkkotaso</string>
     <string name="learn_more">Lue lisää</string>
     <string name="led_heartbeat">Ledin valvontasignaali</string>
     <string name="led_state">LED-tila</string>
@@ -1055,7 +1060,6 @@
     <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
     <string name="message_input_label">Viesti</string>
     <string name="message_routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
-    <string name="message_routing_error_no_channel">Kanavaa ei ole valittu</string>
     <string name="message_routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
     <string name="message_routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
     <string name="message_routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
@@ -1454,24 +1458,15 @@
     <string name="rotary_encoder_1_enabled">Kiertovalitsin #1 käytössä</string>
     <string name="router_role_confirmation_text">Olen lukenut &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentaation&lt;/a&gt; sekä blogikirjoituksen &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choosing The Right Device Role&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
-    <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>
-    <string name="routing_error_bad_request">Virheellinen pyyntö</string>
-    <string name="routing_error_duty_cycle_limit">Alueellisen toimintasyklin raja saavutettu</string>
     <string name="routing_error_got_nak">Vastaanotettu kielteinen vahvistus</string>
-    <string name="routing_error_max_retransmit">Maksimimäärä uudelleenlähetyksiä saavutettu</string>
-    <string name="routing_error_no_channel">Ei Kanavaa</string>
-    <string name="routing_error_no_interface">Ei Käyttöliittymää</string>
-    <string name="routing_error_no_response">Ei vastausta</string>
+    <string name="routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
     <string name="routing_error_no_route">Ei reittiä</string>
     <string name="routing_error_none">Vahvistettu</string>
-    <string name="routing_error_not_authorized">Ei oikeuksia</string>
-    <string name="routing_error_pki_failed">Salatun viestin lähetys epäonnistui</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI-lähetys epäonnistui, julkinen avain puuttu</string>
-    <string name="routing_error_pki_unknown_pubkey">Tuntematon julkinen avain</string>
-    <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
+    <string name="routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
+    <string name="routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
+    <string name="routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
     <string name="routing_error_timeout">Aikakatkaisu</string>
-    <string name="routing_error_too_large">Paketti on liian suuri</string>
+    <string name="routing_error_too_large">Viesti on liian suuri lähetettäväksi</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="rsyslog_server">rsyslog-palvelin</string>
@@ -1642,10 +1637,11 @@
     <string name="tak_role_unspecified">Määrittelemätön</string>
     <string name="tak_server">TAK palvelin</string>
     <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
-    <string name="tak_server_enabled_desc">Avaa paikallisen salatun TLS-palvelinyhteyden porttiin 8089, jotta ATAK/iTAK voi yhdistää siihen</string>
-    <string name="tak_server_export_data_package_desc">Luo .zip-asetustiedosto ATAK/iTAK-sovellukselle, jotta se voi yhdistää tähän palvelimeen</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
     <string name="tak_server_section">Palvelin</string>
+    <string name="tak_server_status">Tila</string>
+    <string name="tak_server_status_off">Pois</string>
     <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
     <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1767,7 +1763,6 @@
     <string name="update_interval">GPS-kyselyn aikaväli</string>
     <string name="update_interval_seconds">Päivityksen aikaväli (sekuntia)</string>
     <string name="updated">Päivitetty</string>
-    <string name="uplink_enabled">Lähetys käytössä</string>
     <string name="uplink_feature_description">Verkosta tulevat viestit lähetetään julkiseen internetiin minkä tahansa laitteen määritetyn yhdyskäytävän kautta.</string>
     <string name="uptime">Käyttöaika</string>
     <!-- URL -->

@@ -290,9 +290,8 @@ class BleRadioTransport(
      */
     private suspend fun scanForFreshDevice(timeout: Duration): BleDevice? = try {
         withTimeoutOrNull(timeout) {
-            // Pass both service UUID and address so the scanner can apply the most efficient platform filter.
-            // Android uses address (OS-level HW filter), while CoreBluetooth (macOS) needs the service UUID because
-            // it caches peripheral identifiers and may not re-report by address alone.
+            // Pass both service UUID and address; the scanner picks whichever filter the platform can honour
+            // (address natively on Android, service UUID elsewhere) and narrows to the address itself.
             scanner.scan(timeout = timeout, serviceUuid = SERVICE_UUID, address = address).first {
                 it.address.equals(address, ignoreCase = true)
             }

@@ -74,5 +74,5 @@ Agents **MUST** perform these steps automatically at the start of every session 
 
 ## Troubleshooting
 - **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
-- **Configuration Cache:** Add `--no-configuration-cache` if cache-related issues persist.
+- **Configuration Cache:** Add `-Dorg.gradle.isolated-projects=false --no-configuration-cache` if cache-related issues persist. Both flags are required: Isolated Projects (on by default here) implies the configuration cache, and Gradle 9.7+ fails the build if you disable the cache without also disabling Isolated Projects.
 - **Koin Injection Failures:** Verify the component is included in `AppKoinModule`.

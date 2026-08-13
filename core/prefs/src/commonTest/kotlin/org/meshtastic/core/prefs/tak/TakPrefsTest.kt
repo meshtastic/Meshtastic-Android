@@ -73,4 +73,27 @@ class TakPrefsTest {
         takPrefs.setTakServerEnabled(false)
         assertFalse(takPrefs.isTakServerEnabled.value)
     }
+
+    @Test
+    fun `isMeshToCotEnabled defaults to false`() = testScope.runTest { assertFalse(takPrefs.isMeshToCotEnabled.value) }
+
+    @Test
+    fun `setting isMeshToCotEnabled updates preference`() = testScope.runTest {
+        takPrefs.setMeshToCotEnabled(true)
+        assertTrue(takPrefs.isMeshToCotEnabled.value)
+
+        takPrefs.setMeshToCotEnabled(false)
+        assertFalse(takPrefs.isMeshToCotEnabled.value)
+    }
+
+    @Test
+    fun `mesh to CoT is independent of the server toggle`() = testScope.runTest {
+        takPrefs.setMeshToCotEnabled(true)
+
+        takPrefs.setTakServerEnabled(true)
+        assertTrue(takPrefs.isMeshToCotEnabled.value)
+
+        takPrefs.setTakServerEnabled(false)
+        assertTrue(takPrefs.isMeshToCotEnabled.value)
+    }
 }

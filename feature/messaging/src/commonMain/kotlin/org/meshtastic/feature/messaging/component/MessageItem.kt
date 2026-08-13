@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -92,6 +94,17 @@ import org.meshtastic.core.ui.util.createClipEntry
 
 internal const val MESSAGE_STATUS_LABEL_TEST_TAG = "message_status_label"
 
+/** Selects the persisted compact label or formats the raw display instant with platform date/time conventions. */
+internal fun formatMessageTimestamp(
+    message: Message,
+    showFullMessageTimestamp: Boolean,
+    fullDateTimeFormatter: (Long) -> String = DateFormatter::formatDateTime,
+): String = if (showFullMessageTimestamp) {
+    fullDateTimeFormatter(message.displayTime)
+} else {
+    message.time
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -106,6 +119,7 @@ fun MessageItem(
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
     showUserName: Boolean = true,
+    showFullMessageTimestamp: Boolean = false,
     emojis: List<Reaction> = emptyList(),
     quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
     onClick: () -> Unit = {},
@@ -143,8 +157,10 @@ fun MessageItem(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isLocal = node.num == ourNode.num
+    val timestamp = formatMessageTimestamp(message, showFullMessageTimestamp)
     val statusString = message.getStatusStringRes(isDirectMessage)
     val isDirectImplicitAck = message.status == MessageStatus.DELIVERED && isDirectMessage
+    val isRetryableFailure = message.status == MessageStatus.ERROR && message.isStatusRetryable(isDirectMessage)
     // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
     val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
     val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
@@ -186,7 +202,7 @@ fun MessageItem(
                         },
                         // Mesh time (rx_time), matching the bubble header. receivedTime is when this phone
                         // pulled the packet off the node, which is misleading after an offline backlog sync.
-                        timestamp = message.time,
+                        timestamp = timestamp,
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
                         translationRowState = translationRowStateFor(message, translationAvailable),
@@ -254,7 +270,7 @@ fun MessageItem(
     if (showUserName) {
         if (message.fromLocal) {
             Text(
-                text = message.time,
+                text = timestamp,
                 modifier = Modifier.align(Alignment.End).padding(end = 12.dp, bottom = 2.dp),
                 style = metadataStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -265,7 +281,7 @@ fun MessageItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                NodeChip(node = node, onClick = onClickChip, modifier = Modifier.height(28.dp))
+                NodeChip(node = node, onClick = onClickChip, modifier = Modifier.heightIn(min = 28.dp))
                 Text(
                     text = node.user.long_name,
                     modifier = Modifier.weight(1f, fill = false),
@@ -274,7 +290,7 @@ fun MessageItem(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(text = message.time, style = metadataStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = timestamp, style = metadataStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -403,7 +419,7 @@ fun MessageItem(
                             status = message.status ?: MessageStatus.UNKNOWN,
                             text = stringResource(statusString.second),
                             metadataStyle = metadataStyle,
-                            isWarning = isDirectImplicitAck,
+                            isWarning = isDirectImplicitAck || isRetryableFailure,
                             onStatusClick = onStatusClick,
                         )
                     }
@@ -432,6 +448,8 @@ private enum class ActiveSheet {
     Emoji,
 }
 
+internal val MessageStatusColorKey = SemanticsPropertyKey<Color>("MessageStatusColor")
+
 /** Row grouping a received message's mesh diagnostics (signature, signal or hops, transport). */
 @Composable
 private fun DiagnosticsRow(modifier: Modifier = Modifier, content: @Composable RowScope.() -> Unit) {
@@ -458,6 +476,7 @@ private fun MessageStatusLabel(
         modifier
             .fillMaxWidth()
             .testTag(MESSAGE_STATUS_LABEL_TEST_TAG)
+            .semantics { this[MessageStatusColorKey] = statusColor }
             .clickable(
                 onClickLabel = stringResource(Res.string.action_show_message_status),
                 role = Role.Button,

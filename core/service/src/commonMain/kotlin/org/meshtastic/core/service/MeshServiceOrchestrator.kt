@@ -115,7 +115,7 @@ class MeshServiceOrchestrator(
                 if (isEnabled && !takServerManager.isRunning.value) {
                     Logger.i { "TAK Server enabled by preference, starting integration" }
                     takMeshIntegration.start(newScope)
-                } else if (!isEnabled && takServerManager.isRunning.value) {
+                } else if (!isEnabled) {
                     Logger.i { "TAK Server disabled by preference, stopping integration" }
                     takMeshIntegration.stop()
                 }
@@ -189,10 +189,7 @@ class MeshServiceOrchestrator(
      */
     fun stop() {
         Logger.i { "Stopping mesh service orchestrator" }
-        // Guard stop() so we don't emit a spurious "stopped" log when TAK was never started
-        if (takServerManager.isRunning.value) {
-            takMeshIntegration.stop()
-        }
+        takMeshIntegration.stop()
         // Best-effort polite goodbye on service teardown (onDestroy / process shutdown). We launch
         // on a fresh detached scope — not the orchestrator's per-start scope — so the subsequent
         // scope.cancel() below doesn't interrupt the short drain delay inside disconnect(). The

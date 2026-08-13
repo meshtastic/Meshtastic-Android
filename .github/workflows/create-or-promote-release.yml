@@ -82,9 +82,11 @@ jobs:
 
             NEW_TAG="v${BASE_VERSION}-internal.${INCREMENT}"
             echo "Calculated new tag: $NEW_TAG"
-            echo "tag_to_process=$NEW_TAG" >> $GITHUB_OUTPUT
-            echo "release_name=$NEW_TAG" >> $GITHUB_OUTPUT
-            echo "final_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+            {
+              echo "tag_to_process=$NEW_TAG"
+              echo "release_name=$NEW_TAG"
+              echo "final_tag=$NEW_TAG"
+            } >> "$GITHUB_OUTPUT"
           else
             # This is a promotion, find the latest tag from the previous channel to promote
             FROM_CHANNEL="internal"
@@ -121,10 +123,12 @@ jobs:
 
             echo "New release name will be: $NEW_TAG"
             echo "Final tag will be: $NEW_TAG"
-            echo "from_channel=${FROM_CHANNEL}" >> $GITHUB_OUTPUT
-            echo "tag_to_process=${LATEST_TAG_TO_PROMOTE}" >> $GITHUB_OUTPUT
-            echo "release_name=${NEW_TAG}" >> $GITHUB_OUTPUT
-            echo "final_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+            {
+              echo "from_channel=${FROM_CHANNEL}"
+              echo "tag_to_process=${LATEST_TAG_TO_PROMOTE}"
+              echo "release_name=${NEW_TAG}"
+              echo "final_tag=${NEW_TAG}"
+            } >> "$GITHUB_OUTPUT"
           fi
         shell: bash
 

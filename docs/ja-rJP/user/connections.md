@@ -29,9 +29,9 @@ Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方
 
 ![Bluetooth デバイスをスキャンし、見つかった無線機がリストに表示されている様子](../../assets/screenshots/connections_bluetooth_scan.png)
 
-Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
+接続カードの下にあるセグメント化されたボタン列（接続方式のセレクター）を使って、Bluetooth・ネットワーク・USB の接続方式を切り替えます（一度に 1 つが有効になります）：
 
-![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+![接続方式のセレクター](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **ヒント：** デバイスが表示されない場合は、Bluetooth と位置情報の権限が許可されているか、また無線機が別のデバイスにすでに接続されていないかを確認してください。
 
@@ -77,7 +77,7 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 ### ネットワーク経由で接続する
 
 1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
-2. On the Connect screen, select **Network** in the transport selector.
+2. 接続画面で、接続方式のセレクターから「**ネットワーク**」を選択します。
 3. 無線機は次の 2 通りの方法で選べます：
    - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
    - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。

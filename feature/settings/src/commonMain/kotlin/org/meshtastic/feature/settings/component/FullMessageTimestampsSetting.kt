@@ -14,30 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.component
+package org.meshtastic.feature.settings.component
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.sats
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Satellites
+import org.meshtastic.core.resources.show_full_message_timestamps
+import org.meshtastic.core.resources.show_full_message_timestamps_summary
+import org.meshtastic.core.ui.component.SwitchPreference
 
 @Composable
-fun SatelliteCountInfo(
-    modifier: Modifier = Modifier,
-    satCount: Int,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
-    IconInfo(
-        modifier = modifier,
-        icon = MeshtasticIcons.Satellites,
-        contentDescription = stringResource(Res.string.sats),
-        label = stringResource(Res.string.sats),
-        text = "$satCount",
-        contentColor = contentColor,
+internal fun FullMessageTimestampsSetting(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    SwitchPreference(
+        title = stringResource(Res.string.show_full_message_timestamps),
+        summary = stringResource(Res.string.show_full_message_timestamps_summary),
+        checked = checked,
+        enabled = true,
+        onCheckedChange = onCheckedChange,
     )
 }

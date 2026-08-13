@@ -45,6 +45,7 @@ class NodeManagementActionsTest {
             nodeRepository = nodeRepository,
             radioController = radioController,
             alertManager = alertManager,
+            analytics = mock(MockMode.autofill),
         )
 
     @Test
@@ -76,6 +77,7 @@ class NodeManagementActionsTest {
                 nodeRepository = nodeRepository,
                 radioController = radioController,
                 alertManager = realAlertManager,
+                analytics = mock(MockMode.autofill),
             )
         val node = Node(num = 123, user = User(long_name = "Test Node"))
         var afterRemoveCalled = false

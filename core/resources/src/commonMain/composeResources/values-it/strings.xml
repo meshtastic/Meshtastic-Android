@@ -555,7 +555,6 @@
     <string name="done">Fatto</string>
     <string name="dont_show_again_for_device">Non mostrare più per questo dispositivo</string>
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
-    <string name="downlink_enabled">Downlink attivato</string>
     <string name="downlink_feature_description">I messaggi provenienti da un gateway Internet pubblico vengono inoltrati alla rete mesh locale. A causa della politica zero-hop, il traffico proveniente dal server MQTT predefinito non si propagherà oltre questo dispositivo.</string>
     <string name="download">Scarica</string>
     <string name="duplicated_public_key_title">Rilevata chiave pubblica duplicata</string>
@@ -565,6 +564,7 @@
     <string name="edit">Modifica</string>
     <string name="edit_custom_tile_source">Modifica sorgente tile di rete</string>
     <string name="eight_hours">8 Ore</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Abilita modalità risparmio energetico</string>
     <string name="enabled">Abilitato</string>
     <!-- ENCRYPTION -->
@@ -595,6 +595,7 @@
     <string name="expand_chart">Espandi grafico</string>
     <string name="expanded">Espanso</string>
     <string name="expires">Scade</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Esporta configurazione</string>
     <string name="export_data_csv">Esporta tutti i pacchetti</string>
     <string name="export_gpx">Esporta GPX</string>
@@ -869,6 +870,7 @@
     <string name="latest_alpha_firmware">Ultima alfa</string>
     <string name="latest_stable_firmware">Ultima stabile</string>
     <string name="latitude">Latitudine</string>
+    <!-- LAYER -->
     <string name="learn_more">Maggiori informazioni</string>
     <string name="led_heartbeat">Battito Cuore Led</string>
     <string name="led_state">LED di stato</string>
@@ -1053,7 +1055,6 @@
     <string name="message_device_managed">Questa radio è gestita e può essere modificata solo da un amministratore remoto.</string>
     <string name="message_input_label">Messaggio</string>
     <string name="message_routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
-    <string name="message_routing_error_no_channel">Nessun canale selezionato</string>
     <string name="message_routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
     <string name="message_routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
     <string name="message_routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>
@@ -1448,24 +1449,15 @@
     <string name="rotary_encoder_1_enabled">Encoder rotativo #1 abilitato</string>
     <string name="router_role_confirmation_text">Ho letto la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;documentazione sui ruoli del dispositivo&lt;/a&gt; e l'articolo del blog su &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;come scegliere il ruolo giusto per il dispositivo&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chiave di sessione non valida</string>
-    <string name="routing_error_admin_public_key_unauthorized">Chiave Pubblica non autorizzata</string>
-    <string name="routing_error_bad_request">Richiesta Non Valida</string>
-    <string name="routing_error_duty_cycle_limit">Raggiunto il limite del ciclo di lavoro regionale</string>
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
-    <string name="routing_error_max_retransmit">Tentativi di Ritrasmissione Esauriti</string>
-    <string name="routing_error_no_channel">Nessun Canale</string>
-    <string name="routing_error_no_interface">Nessuna Interfaccia</string>
-    <string name="routing_error_no_response">Nessuna risposta</string>
+    <string name="routing_error_max_retransmit">Consegna alla mesh non riuscita</string>
     <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_none">Confermato</string>
-    <string name="routing_error_not_authorized">Non Autorizzato</string>
-    <string name="routing_error_pki_failed">Invio Cifrato Non Riuscito</string>
-    <string name="routing_error_pki_send_fail_public_key">Invio PKI non riuscito, nessuna chiave pubblica</string>
-    <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
-    <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi.</string>
+    <string name="routing_error_pki_failed">Impossibile inviare il messaggio cifrato</string>
+    <string name="routing_error_pki_send_fail_public_key">Chiave del destinatario non disponibile</string>
+    <string name="routing_error_pki_unknown_pubkey">Il destinatario ha bisogno della tua chiave</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Pacchetto troppo grande</string>
+    <string name="routing_error_too_large">Il messaggio è troppo grande per essere inviato</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
     <string name="rsyslog_server">server rsyslog</string>
@@ -1635,10 +1627,10 @@
     <string name="tak_role_unspecified">Non specificato</string>
     <string name="tak_server">Server TAK</string>
     <string name="tak_server_enabled">Abilita server TAK locale</string>
-    <string name="tak_server_enabled_desc">Avvia un server TLS locale sulla porta 8089 per le connessioni ATAK/iTAK</string>
-    <string name="tak_server_export_data_package_desc">Genera uno .zip per far connettere ATAK/iTAK a questo server</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Stato</string>
+    <string name="tak_server_status_off">Disattivato</string>
     <string name="tak_server_test_card_title">Test TAK Mesh (Debug)</string>
     <string name="tak_server_test_idle">Invia alla mesh tutte le %1$d fixture di test</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1760,7 +1752,6 @@
     <string name="update_interval">Intervallo Interrogazione GPS</string>
     <string name="update_interval_seconds">Intervallo di aggiornamento (secondi)</string>
     <string name="updated">Aggiornato</string>
-    <string name="uplink_enabled">Uplink attivato</string>
     <string name="uplink_feature_description">I messaggi provenienti dalla rete mesh saranno inviati alla rete Internet pubblica attraverso il gateway configurato di qualsiasi nodo.</string>
     <string name="uptime">Tempo di attività</string>
     <!-- URL -->

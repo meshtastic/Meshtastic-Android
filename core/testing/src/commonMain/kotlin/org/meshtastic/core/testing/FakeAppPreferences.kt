@@ -152,6 +152,12 @@ class FakeUiPrefs : UiPrefs {
         showQuickChat.value = show
     }
 
+    override val showFullMessageTimestamps = MutableStateFlow(false)
+
+    override fun setShowFullMessageTimestamps(show: Boolean) {
+        showFullMessageTimestamps.value = show
+    }
+
     override val eventThemeEnabled = MutableStateFlow(true)
 
     override fun setEventThemeEnabled(enabled: Boolean) {
@@ -354,6 +360,8 @@ class FakeMeshPrefs : MeshPrefs {
         deviceAddress.value = address
     }
 
+    override suspend fun awaitDeviceAddress(): String? = deviceAddress.value
+
     private val lastRequest = mutableMapOf<String?, MutableStateFlow<Int>>()
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> =
@@ -474,5 +482,11 @@ class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
 
     override fun setTakServerEnabled(enabled: Boolean) {
         isTakServerEnabled.value = enabled
+    }
+
+    override val isMeshToCotEnabled = MutableStateFlow(false)
+
+    override fun setMeshToCotEnabled(enabled: Boolean) {
+        isMeshToCotEnabled.value = enabled
     }
 }
