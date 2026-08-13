@@ -575,16 +575,8 @@ fun MapView(
         val intent =
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
+                // Providers may assign generic MIME types to valid map files; validate the extension after selection.
                 type = "*/*"
-                val mimeTypes =
-                    arrayOf(
-                        "application/vnd.google-earth.kml+xml",
-                        "application/vnd.google-earth.kmz",
-                        "application/vnd.geo+json",
-                        "application/geo+json",
-                        "application/json",
-                    )
-                putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             }
         filePickerLauncher.launch(intent)
     }
