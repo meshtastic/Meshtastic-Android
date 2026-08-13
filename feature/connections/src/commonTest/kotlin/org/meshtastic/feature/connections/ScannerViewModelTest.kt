@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -748,11 +749,12 @@ class ScannerViewModelTest {
  * the caller has moved on. Warming keeps the error message observable synchronously, which these tests need because
  * they also assert on exact virtual-time retry cooldowns and so cannot wait in real time.
  *
- * Best-effort: the androidHostTest stubs leave `Resources.getSystem()` unmocked, so resources never resolve there and
- * the ViewModel's untranslated fallback — identical text, produced synchronously — is what the assertions match.
+ * Best-effort via [safeCatchingAll], mirroring the ViewModel: the androidHostTest stubs leave `Resources.getSystem()`
+ * unmocked and skiko's initializer can raise an `Error` here, so resources never resolve and the untranslated fallback
+ * — identical text, produced synchronously — is what the assertions match. Cancellation still propagates.
  */
 private suspend fun warmScanFailureStrings() {
-    runCatching {
+    safeCatchingAll {
         getStringSuspend(Res.string.bluetooth_scan_start_failed)
         getStringSuspend(Res.string.bluetooth_scan_missing_permission)
         getStringSuspend(Res.string.bluetooth_disabled)
