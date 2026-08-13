@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +68,7 @@ fun NodeDetailScreen(
     onNavigateUp: () -> Unit = {},
     compassViewModel: CompassViewModel? = null,
 ) {
-    LaunchedEffect(nodeId) { viewModel.start(nodeId) }
+    SideEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { onNavigate(it) } }
     NodeDetailScaffold(

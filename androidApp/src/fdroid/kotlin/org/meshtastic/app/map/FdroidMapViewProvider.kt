@@ -17,7 +17,7 @@
 package org.meshtastic.app.map
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.Single
@@ -34,8 +34,8 @@ class FdroidMapViewProvider : MapViewProvider {
         sitePlannerNodeNum: Int?,
     ) {
         val mapViewModel: MapViewModel = koinViewModel()
-        LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
-        LaunchedEffect(sitePlannerNodeNum) { mapViewModel.setSitePlannerNodeNum(sitePlannerNodeNum) }
+        SideEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
+        SideEffect(sitePlannerNodeNum) { mapViewModel.setSitePlannerNodeNum(sitePlannerNodeNum) }
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,
