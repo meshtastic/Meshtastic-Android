@@ -21,7 +21,9 @@ permissions:
 jobs:
   cancel-pr-runs:
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-24.04-arm
+    # Actions API only, no checkout (and must stay that way — see the
+    # pull_request_target note above), so ubuntu-slim's container is sufficient.
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
       - name: Cancel in-flight CI runs for the closed PR

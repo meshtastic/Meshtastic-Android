@@ -19,10 +19,12 @@ jobs:
   # new merge group but does NOT cancel the workflow runs of the destroyed one. Those stale
   # runs sit queued/running and starve the runner pool. Cancel any older merge-queue run
   # for the same PR — only the newest merge group per PR is ever valid.
+  # No checkout, no toolchain — just gh api + jq. ubuntu-slim starts sooner than a VM, which
+  # matters most here: every second before this runs is a second the superseded run keeps a slot.
   cancel-superseded:
     name: Cancel Superseded Queue Runs
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions:
       actions: write
