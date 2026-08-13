@@ -37,7 +37,7 @@ plugins {
     id("meshtastic.develocity")
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
     // Applied on demand only — see below.
-    id("org.meshtastic.flatpak.sources.settings") version "0.1.5" apply false
+    id("org.meshtastic.flatpak.sources.settings") version "0.1.7" apply false
 }
 
 // The flatpak-sources plugin reads Gradle.extensions, which Isolated Projects forbids; Gradle 9.7
