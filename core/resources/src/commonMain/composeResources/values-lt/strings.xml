@@ -35,6 +35,7 @@
     <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Skaičiuojama…</string>

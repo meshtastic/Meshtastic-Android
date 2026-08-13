@@ -44,6 +44,7 @@
     <string name="audio">Zvuk</string>
     <string name="audio_config">Konfigurácia zvuku</string>
     <string name="bad">Zlý</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Šírka pásma</string>
     <string name="battery">Batéria</string>
     <string name="blue">Modrá</string>

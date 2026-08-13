@@ -91,6 +91,7 @@
     <string name="backup_keys_confirmation">Запазва публичните и частните ключове в защитено, криптирано хранилище на това устройство.</string>
     <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Широчина на честотната лента</string>
     <string name="baro_pressure">Баро</string>
     <string name="battery">Батерия</string>

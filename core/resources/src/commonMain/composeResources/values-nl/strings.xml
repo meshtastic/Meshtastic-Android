@@ -45,6 +45,7 @@
     <string name="audio_config">Audioconfiguratie</string>
     <string name="available_pins">Beschikbare pinnen</string>
     <string name="bad">Slecht</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbreedte</string>
     <string name="battery">Batterij</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI drempelwaarde (standaard -80)</string>

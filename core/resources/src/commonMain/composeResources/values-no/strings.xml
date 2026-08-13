@@ -35,6 +35,7 @@
     <string name="aqi_good">Godt</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="bad">Dårlig</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Batteri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Beregner…</string>

@@ -82,6 +82,7 @@
     <string name="available_pins">Pin-uri disponibile</string>
     <string name="back">Înapoi</string>
     <string name="bad">Slab</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Lățime bandă</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Baterie</string>

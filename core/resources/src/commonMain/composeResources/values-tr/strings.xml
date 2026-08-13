@@ -61,6 +61,7 @@
     <string name="available_pins">Mevcut pinler</string>
     <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bant genişliği</string>
     <string name="battery">Pil</string>
     <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>

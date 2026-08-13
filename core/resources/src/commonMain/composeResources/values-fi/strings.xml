@@ -132,7 +132,12 @@
     <string name="backup_keys_confirmation">Tallentaa julkiset ja yksityiset avaimet tämän laitteen suojattuun, salattuun tallennustilaan.</string>
     <string name="backup_restore">Varmuuskopioi &amp; palauta</string>
     <string name="bad">Huono</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Kaistanleveys</string>
+    <string name="bandwidth_default">Oletus (%1$s kHz)</string>
+    <string name="bandwidth_option_khz">%1$s kHz</string>
+    <string name="bandwidth_unsupported">Ei tuettu (%1$s)</string>
+    <string name="bandwidth_unsupported_summary">Tätä kaistanleveyttä ei tueta yhdistetyssä radiossa valitulla alueella. Valitse tuettu arvo ennen tallentamista.</string>
     <string name="baro_pressure">Barometri</string>
     <string name="battery">Akku</string>
     <string name="battery_ina_2xx_i2c_address">INA_2XX-akun valvontapiirin I2C-osoite</string>
@@ -606,6 +611,7 @@
     <string name="ethernet_config">Verkon asetukset</string>
     <string name="ethernet_enabled">Ethernet käytössä</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="event_firmware_running">Tapahtuman laiteohjelmisto käynnissä</string>
     <string name="event_use_event_theme">Käytä tapahtuman teemaa</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="expand_chart">Laajenna kaavio</string>
@@ -1220,6 +1226,8 @@
     <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_id">Laiteen ID</string>
+    <string name="node_incomplete">Keskeneräinen</string>
+    <string name="node_incomplete_description">Radion tietoja ei ole vielä vastaanotettu</string>
     <string name="node_layout_channel">Kanava</string>
     <string name="node_layout_compact">Tiivis</string>
     <string name="node_layout_compact_fields_header">Tiiviit kentät</string>

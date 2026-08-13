@@ -34,6 +34,7 @@
     <string name="aqi_good">Maith</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="bad">Go dona</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Cúis leictreachais</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Á ríomh…</string>

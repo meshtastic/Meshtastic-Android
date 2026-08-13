@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">公開鍵と秘密鍵を、このデバイスの安全な暗号化ストレージに保存します。</string>
     <string name="backup_restore">バックアップと復元</string>
     <string name="bad">不良</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">帯域</string>
     <string name="baro_pressure">気圧</string>
     <string name="battery">バッテリー</string>

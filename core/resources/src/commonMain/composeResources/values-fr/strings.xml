@@ -119,6 +119,7 @@
     <string name="backup_keys">Sauvegarder les clés</string>
     <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bande Passante</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Batterie</string>

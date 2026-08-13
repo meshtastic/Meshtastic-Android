@@ -34,6 +34,7 @@
     <string name="aqi_good">Mirë</string>
     <string name="are_you_sure_change_default">A jeni të sigurt se doni të kaloni në kanalin e parazgjedhur?</string>
     <string name="bad">I Keq</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Bateria</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Po llogaritet…</string>

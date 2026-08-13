@@ -97,6 +97,7 @@
     <string name="backup_keys_confirmation">Uloží veřejný a soukromý klíč do zabezpečeného, šifrovaného úložiště tohoto zařízení.</string>
     <string name="backup_restore">Zálohování a obnovení</string>
     <string name="bad">Špatný</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Šířka pásma</string>
     <string name="baro_pressure">Tlak</string>
     <string name="battery">Baterie</string>

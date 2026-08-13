@@ -54,6 +54,7 @@
     <string name="audio">오디오</string>
     <string name="audio_config">오디오 설정</string>
     <string name="bad">나쁨</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">대역폭</string>
     <string name="battery">배터리</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI 임계값 (기본값 -80)</string>

@@ -99,6 +99,7 @@
     <string name="back">Назад</string>
     <string name="backup_keys">Резервні ключі</string>
     <string name="bad">Поганий</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ширина смуги пропускання</string>
     <string name="baro_pressure">Бар</string>
     <string name="battery">Батарея</string>

@@ -33,6 +33,7 @@
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
     <string name="audio">إعدادات الصوت</string>
     <string name="bad">سيئ</string>
+    <!-- BANDWIDTH -->
     <string name="battery">البطارية</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">إعدادات بلوتوث</string>

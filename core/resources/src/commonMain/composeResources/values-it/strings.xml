@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">Salva le chiavi pubbliche e private in una memoria sicura e crittografata su questo dispositivo.</string>
     <string name="backup_restore">Backup &amp; Ripristino</string>
     <string name="bad">Scarso</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Larghezza di banda</string>
     <string name="baro_pressure">Pressione atmosferica</string>
     <string name="battery">Batteria</string>

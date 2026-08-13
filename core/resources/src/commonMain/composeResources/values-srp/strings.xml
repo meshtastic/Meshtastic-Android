@@ -54,6 +54,7 @@
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="back">Назад</string>
     <string name="bad">Лош</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Проток</string>
     <string name="battery">Батерија</string>
     <!-- BLUETOOTH -->
