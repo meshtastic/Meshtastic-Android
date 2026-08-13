@@ -17,11 +17,19 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 /** Runs a test with a structured child scope driven by the test scheduler and always cancels it afterward. */
 fun runWithRenderScope(block: suspend TestScope.(CoroutineScope) -> Unit) = runTest {
@@ -30,5 +38,27 @@ fun runWithRenderScope(block: suspend TestScope.(CoroutineScope) -> Unit) = runT
         block(renderScope)
     } finally {
         renderScope.cancel()
+    }
+}
+
+private val SETTLE_POLL_INTERVAL = 5.milliseconds
+
+/**
+ * Runs the test scheduler until [isSettled] holds, waiting in real time between passes.
+ *
+ * Compose resources are loaded on an internal `Dispatchers.Default` scope, so state derived from a string resource
+ * lands outside the test scheduler and cannot be observed by draining it.
+ *
+ * Not safe in a test that asserts on exact virtual time: waiting in real time suspends the test coroutine, and
+ * `runTest` advances the virtual clock to the next scheduled task whenever that happens, firing pending `delay`s early.
+ * Such a test should instead load the resources it needs before scheduling anything it later advances past.
+ */
+suspend fun TestScope.runUntilSettled(timeout: Duration = 10.seconds, isSettled: () -> Boolean) {
+    val start = TimeSource.Monotonic.markNow()
+    while (true) {
+        runCurrent()
+        if (isSettled()) return
+        check(start.elapsedNow() < timeout) { "condition was still not settled after $timeout" }
+        withContext(Dispatchers.Default) { delay(SETTLE_POLL_INTERVAL) }
     }
 }

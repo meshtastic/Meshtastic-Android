@@ -33,6 +33,7 @@ import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.failBondAfterRecording
 import org.meshtastic.core.testing.failBondWith
 import org.meshtastic.core.testing.failBondWithSecurityException
+import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -135,6 +136,7 @@ class AndroidScannerViewModelBondingTest {
 
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
+        runUntilSettled { harness.serviceRepository.errorMessage.value != null }
         assertEquals(getString(Res.string.bonding_failed_retry), harness.serviceRepository.errorMessage.value)
     }
 
@@ -160,6 +162,7 @@ class AndroidScannerViewModelBondingTest {
 
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
+        runUntilSettled { harness.serviceRepository.errorMessage.value != null }
         assertNotNull(harness.serviceRepository.errorMessage.value)
     }
 

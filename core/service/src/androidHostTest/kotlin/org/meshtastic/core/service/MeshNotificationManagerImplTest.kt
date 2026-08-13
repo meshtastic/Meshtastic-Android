@@ -43,6 +43,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.local_stats_nodes
+import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.core.testing.runWithRenderScope
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
@@ -121,7 +122,7 @@ class MeshNotificationManagerImplTest {
         notifications.updateServiceStateNotification(ConnectionState.Disconnected, populatedTelemetry())
 
         assertNull(activeServiceNotification())
-        advanceUntilIdle()
+        runUntilSettled { activeServiceNotification() != null }
         assertNotNull(activeServiceNotification())
     }
 
@@ -167,7 +168,7 @@ class MeshNotificationManagerImplTest {
         notifications.initChannels()
 
         notifications.updateServiceStateNotification(ConnectionState.Disconnected, telemetry = null)
-        advanceUntilIdle()
+        runUntilSettled { activeServiceNotification() != null }
 
         val text = activeServiceNotification()?.notification?.extras?.getCharSequence(Notification.EXTRA_TEXT)
         assertNotNull(text)

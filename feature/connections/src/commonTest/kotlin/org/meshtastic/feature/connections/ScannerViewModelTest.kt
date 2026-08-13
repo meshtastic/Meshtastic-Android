@@ -31,9 +31,18 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_disabled
+import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
+import org.meshtastic.core.resources.bluetooth_scan_missing_permission
+import org.meshtastic.core.resources.bluetooth_scan_start_failed
+import org.meshtastic.core.resources.bluetooth_scan_too_frequent
+import org.meshtastic.core.resources.getPluralStringSuspend
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
@@ -114,6 +123,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `scan startup failure clears scanning state disables auto-scan and surfaces error`() = runTest {
+        warmScanFailureStrings()
         harness.uiPrefs.setBleAutoScan(true)
         every { bleScanner.scan(any(), any()) } returns failingScanFlow()
 
@@ -154,6 +164,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `bluetooth-disabled failure allows an immediate retry once the user re-enables it`() = runTest {
+        warmScanFailureStrings()
         // No cooldown for preconditions the user clears with a system toggle — a dead scan button right after they
         // switched Bluetooth back on reads as a broken app.
         var scanAttempts = 0
@@ -178,6 +189,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `location-services-disabled failure allows an immediate retry`() = runTest {
+        warmScanFailureStrings()
         var scanAttempts = 0
         every { bleScanner.scan(any(), any()) } returns
             flow {
@@ -201,6 +213,7 @@ class ScannerViewModelTest {
 
     @Test
     fun `scan quota failure honors retry-after cooldown`() = runTest {
+        warmScanFailureStrings()
         var scanAttempts = 0
         every { bleScanner.scan(any(), any()) } returns
             flow {
@@ -726,5 +739,26 @@ class ScannerViewModelTest {
             reason = BleScanStartFailureReason.ApplicationRegistrationFailed,
             cause = IllegalStateException("Failed to start scan as app cannot be registered"),
         )
+    }
+}
+
+/**
+ * Loads the scan-failure strings into the compose-resources cache up front.
+ *
+ * The first read of a resource completes on an internal `Dispatchers.Default` scope, so an un-warmed lookup lands after
+ * the caller has moved on. Warming keeps the error message observable synchronously, which these tests need because
+ * they also assert on exact virtual-time retry cooldowns and so cannot wait in real time.
+ *
+ * Best-effort via [safeCatchingAll], mirroring the ViewModel: the androidHostTest stubs leave `Resources.getSystem()`
+ * unmocked and skiko's initializer can raise an `Error` here, so resources never resolve and the untranslated fallback
+ * — identical text, produced synchronously — is what the assertions match. Cancellation still propagates.
+ */
+private suspend fun warmScanFailureStrings() {
+    safeCatchingAll {
+        getStringSuspend(Res.string.bluetooth_scan_start_failed)
+        getStringSuspend(Res.string.bluetooth_scan_missing_permission)
+        getStringSuspend(Res.string.bluetooth_disabled)
+        getStringSuspend(Res.string.bluetooth_scan_location_services_disabled)
+        getPluralStringSuspend(Res.plurals.bluetooth_scan_too_frequent, 1, 1L)
     }
 }
