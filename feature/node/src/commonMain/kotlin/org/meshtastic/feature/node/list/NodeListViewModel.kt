@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.getSystemMeasurementSystem
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -39,6 +40,7 @@ import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -54,6 +56,7 @@ import org.meshtastic.proto.Config
 class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
+    nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val connectionStateProvider: ConnectionStateProvider,
     private val adminController: AdminController,
@@ -67,7 +70,30 @@ class NodeListViewModel(
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
-    val onlineNodeCount = nodeRepository.onlineNodeCount.stateInWhileSubscribed(initialValue = 0)
+    val currentRadioNodeSnapshot =
+        combine(connectionStateProvider.connectionState, nodeManager.currentRadioNodeSnapshot) { state, snapshot ->
+            snapshot.takeIf { state == ConnectionState.Connected }
+        }
+            .stateInWhileSubscribed(
+                initialValue =
+                nodeManager.currentRadioNodeSnapshot.value.takeIf {
+                    connectionStateProvider.connectionState.value == ConnectionState.Connected
+                },
+            )
+
+    val onlineNodeCount =
+        combine(
+            nodeRepository.onlineNodeCount,
+            nodeRepository.nodeDBbyNum,
+            currentRadioNodeSnapshot,
+            connectionStateProvider.connectionState,
+        ) { cachedCount, nodesByNum, snapshot, connectionState ->
+            snapshot
+                .takeIf { connectionState == ConnectionState.Connected }
+                ?.let { current -> nodesByNum.values.count { it.num in current.nodeNums && it.isOnline } }
+                ?: cachedCount
+        }
+            .stateInWhileSubscribed(initialValue = 0)
 
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
@@ -147,7 +173,20 @@ class NodeListViewModel(
 
     val nodeList: StateFlow<List<Node>> =
         combine(nodeFilter, nodeSortOption, ::Pair)
-            .flatMapLatest { (filter, sort) -> getFilteredNodesUseCase.invoke(filter, sort) }
+            .flatMapLatest { (filter, sort) ->
+                combine(
+                    getFilteredNodesUseCase.invoke(filter, sort),
+                    currentRadioNodeSnapshot,
+                    connectionStateProvider.connectionState,
+                ) { nodes, snapshot, connectionState ->
+                    val currentSnapshot = snapshot.takeIf { connectionState == ConnectionState.Connected }
+                    if (currentSnapshot == null || (!filter.onlyOnline && !filter.onlyDirect)) {
+                        nodes
+                    } else {
+                        nodes.filter { it.num in currentSnapshot.nodeNums }
+                    }
+                }
+            }
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =

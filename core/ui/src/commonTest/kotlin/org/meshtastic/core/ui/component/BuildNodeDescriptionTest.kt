@@ -38,6 +38,7 @@ class BuildNodeDescriptionTest {
             unknown = "unknown",
             now = "now",
             incomplete = "incomplete",
+            savedOnPhone = "saved on phone",
         )
 
     private fun describe(
@@ -53,6 +54,7 @@ class BuildNodeDescriptionTest {
         viaMqtt: Boolean = false,
         lastHeardIsRelative: Boolean = true,
         isUnknownUser: Boolean = false,
+        isSavedOnPhoneOnly: Boolean = false,
     ): String = buildNodeDescription(
         name = name,
         isOnline = isOnline,
@@ -67,6 +69,7 @@ class BuildNodeDescriptionTest {
         strings = testStrings,
         lastHeardIsRelative = lastHeardIsRelative,
         isUnknownUser = isUnknownUser,
+        isSavedOnPhoneOnly = isSavedOnPhoneOnly,
     )
 
     // ---- Basic output ----
@@ -81,6 +84,15 @@ class BuildNodeDescriptionTest {
     fun includes_offline_when_not_online() {
         val result = describe(isOnline = false)
         assertContains(result, "offline")
+    }
+
+    @Test
+    fun saved_only_node_uses_retained_label_instead_of_current_status() {
+        val result = describe(isOnline = true, isSavedOnPhoneOnly = true)
+
+        assertContains(result, "saved on phone")
+        assertFalse(result.contains("online"))
+        assertFalse(result.contains("offline"))
     }
 
     @Test

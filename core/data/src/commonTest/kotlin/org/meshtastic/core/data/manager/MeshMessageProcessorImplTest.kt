@@ -39,6 +39,7 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.di.asServiceScope
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
@@ -334,6 +335,7 @@ class MeshMessageProcessorImplTest {
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
 
+        verify { nodeManager.markNodeObserved(session.generation, packet.from) }
         // Packet should be buffered, not processed
         // (no emitMeshPacket call since DB is not ready)
     }
@@ -626,6 +628,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
+        verify { nodeManager.markNodeObserved(session.generation, senderNode) }
         verifySuspend { nodeManager.updateNodeAndPersist(senderNode, any(), any()) }
     }
 
@@ -640,7 +643,36 @@ class MeshMessageProcessorImplTest {
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
-        // No crash, no emitMeshPacket call (decoded is null so processReceivedMeshPacket returns early)
+
+        verify { nodeManager.markNodeObserved(session.generation, packet.from) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { serviceRepository.emitMeshPacket(any()) }
+    }
+
+    @Test
+    fun `invalid and broadcast senders are not marked observed`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = true
+
+        processor.handleReceivedMeshPacket(MeshPacket(id = 1, from = 0, decoded = null), myNodeNum)
+        processor.handleReceivedMeshPacket(
+            MeshPacket(id = 2, from = NodeAddress.NODENUM_BROADCAST, decoded = null),
+            myNodeNum,
+        )
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.markNodeObserved(any(), any()) }
+    }
+
+    @Test
+    fun `stale packet cannot mark its sender observed`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = true
+        activeSession.value = RadioSessionContext(generation = session.generation + 1, address = session.address)
+
+        processor.handleReceivedMeshPacket(MeshPacket(id = 1, from = 999, decoded = null), myNodeNum, session)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.markNodeObserved(any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: myNodeNum not yet known ----------

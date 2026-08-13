@@ -35,6 +35,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.core.model.util.snrOrNull
@@ -194,6 +195,10 @@ class MeshMessageProcessorImpl(
         if (!radioInterfaceService.isSessionActive(session)) {
             Logger.d { "Dropping mesh packet from stale transport session gen=${session.generation}" }
             return
+        }
+
+        if (packet.from != 0 && packet.from != NodeAddress.NODENUM_BROADCAST) {
+            nodeManager.markNodeObserved(session.generation, packet.from)
         }
 
         if (nodeManager.isNodeDbReady.value && myNodeNum != null) {

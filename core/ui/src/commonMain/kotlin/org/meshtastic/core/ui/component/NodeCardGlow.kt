@@ -51,7 +51,11 @@ fun Modifier.nodeCardGlow(lastHeard: Int, nodeColor: Color): Modifier {
     // Track previous value to distinguish initial composition from actual changes
     val previousLastHeard = remember { mutableIntStateOf(lastHeard) }
     LaunchedEffect(lastHeard) {
-        if (lastHeard > 0 && lastHeard != previousLastHeard.intValue) {
+        if (lastHeard <= 0) {
+            // A completed current-radio snapshot can invalidate a cached last-heard value while a glow is still
+            // animating. Cancellation alone retains Animatable's intermediate alpha, so explicitly clear it.
+            glowAlpha.snapTo(0f)
+        } else if (lastHeard != previousLastHeard.intValue) {
             glowAlpha.animateTo(targetValue = 1f, animationSpec = bloomSpec)
             glowAlpha.animateTo(targetValue = 0f, animationSpec = decaySpec)
         }

@@ -1231,6 +1231,7 @@ node_list_help_title
 node_list_long_click_label
 node_number
 node_restarting
+node_saved_on_phone
 node_sort_alpha
 node_sort_button
 node_sort_channel

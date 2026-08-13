@@ -298,8 +298,10 @@ class MeshConfigFlowManagerImpl(
             nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
 
+        val currentRadioNodeNums = state.nodes.mapTo(mutableSetOf()) { it.num }.apply { add(info.myNodeNum) }
         val published =
             runForSession(session) {
+                nodeManager.publishRadioNodeSnapshot(session.generation, currentRadioNodeNums)
                 nodeManager.setNodeDbReady(true)
                 nodeManager.setAllowNodeDbWrites(true)
                 serviceStateWriter.setConnectionState(ConnectionState.Connected)
@@ -322,6 +324,7 @@ class MeshConfigFlowManagerImpl(
         val admitted =
             radioInterfaceService.runIfSessionActive(session) {
                 Logger.i { "MyNodeInfo received" }
+                nodeManager.beginRadioNodeSession(session.generation)
                 handshakeState.value = HandshakeState.ReceivingConfig(session = session, rawMyNodeInfo = myInfo)
                 nodeManager.setMyDeviceId(deviceId)
                 nodeManager.setMyNodeNum(myInfo.my_node_num)

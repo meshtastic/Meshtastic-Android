@@ -94,11 +94,13 @@ fun NodeItem(
     isActive: Boolean = false,
     showTelemetry: Boolean = true,
     deviceImageUrl: String? = null,
+    isInCurrentRadioNodeSnapshot: Boolean? = null,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
     val isFavorite = thatNode.isFavorite
+    val currentRadio = thatNode.currentRadioPresentation(isInCurrentRadioNodeSnapshot)
 
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system =
@@ -135,32 +137,34 @@ fun NodeItem(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, distance, a11yStrings, modemPreset) {
+        remember(thatNode, currentRadio, distance, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = originalLongName,
-                isOnline = thatNode.isOnline,
+                isOnline = currentRadio.isOnline,
                 isFavorite = isFavorite,
-                lastHeard = thatNode.lastHeard,
+                lastHeard = currentRadio.lastHeard ?: 0,
                 role = thatNode.user.role.name,
-                hopsAway = thatNode.hopsAway,
+                hopsAway = currentRadio.hopsAway ?: -1,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snrOrNull,
+                snr = currentRadio.snr,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 modemPreset = modemPreset,
                 isUnknownUser = thatNode.isUnknownUser,
+                isSavedOnPhoneOnly = currentRadio.isSavedOnPhoneOnly,
             )
         }
 
     Card(
         modifier =
-        modifier.nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor).fillMaxWidth().semantics(
-            mergeDescendants = true,
-        ) {
-            contentDescription = nodeDescription
-            role = Role.Button
-        },
+        modifier
+            .nodeCardGlow(lastHeard = currentRadio.lastHeard ?: 0, nodeColor = nodeColor)
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = nodeDescription
+                role = Role.Button
+            },
         colors = cardColors,
         border = cardBorder,
     ) {
@@ -188,6 +192,7 @@ fun NodeItem(
                 connectionState = connectionState,
                 deviceType = deviceType,
                 contentColor = contentColor,
+                currentRadio = currentRadio,
             )
 
             thatNode.nodeStatus?.let { status ->
@@ -220,7 +225,12 @@ fun NodeItem(
                 contentColor = contentColor,
             )
 
-            NodeSignalRow(thatNode = thatNode, isThisNode = isThisNode, contentColor = contentColor)
+            NodeSignalRow(
+                thatNode = thatNode,
+                currentRadio = currentRadio,
+                isThisNode = isThisNode,
+                contentColor = contentColor,
+            )
 
             if (showTelemetry) {
                 val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
@@ -283,7 +293,12 @@ private fun NodeBatteryPositionRow(
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
+private fun NodeSignalRow(
+    thatNode: Node,
+    currentRadio: CurrentRadioNodePresentation,
+    isThisNode: Boolean,
+    contentColor: Color,
+) {
     // The signal pill bundles SNR + RSSI + quality into one row. It's wider than a 1/3 grid cell, so it renders on
     // its own line at natural width; the short metrics flow in the grid.
     var signalChip: (@Composable () -> Unit)? = null
@@ -309,11 +324,11 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     )
                 }
             } else {
-                if (thatNode.hopsAway > 0) {
-                    add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
-                } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    val snr = thatNode.snrOrNull
-                    val rssi = thatNode.rssiOrNull
+                if ((currentRadio.hopsAway ?: -1) > 0) {
+                    add { HopsInfo(hops = checkNotNull(currentRadio.hopsAway), contentColor = contentColor) }
+                } else if (currentRadio.hopsAway == 0 && !thatNode.viaMqtt) {
+                    val snr = currentRadio.snr
+                    val rssi = currentRadio.rssi
                     if (snr != null || rssi != null) {
                         signalChip = {
                             // Full-width row: SNR left, RSSI center, quality right.
@@ -501,6 +516,7 @@ private fun NodeItemHeader(
     connectionState: ConnectionState,
     deviceType: DeviceType?,
     contentColor: Color,
+    currentRadio: CurrentRadioNodePresentation,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -531,11 +547,15 @@ private fun NodeItemHeader(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                StatusAwareLastHeard(
-                    lastHeard = thatNode.lastHeard,
-                    online = !isThisNode && thatNode.isOnline,
-                    contentColor = contentColor,
-                )
+                if (currentRadio.isSavedOnPhoneOnly) {
+                    SavedOnPhoneInfo()
+                } else {
+                    StatusAwareLastHeard(
+                        lastHeard = currentRadio.lastHeard ?: 0,
+                        online = !isThisNode && currentRadio.isOnline,
+                        contentColor = contentColor,
+                    )
+                }
             }
         }
 

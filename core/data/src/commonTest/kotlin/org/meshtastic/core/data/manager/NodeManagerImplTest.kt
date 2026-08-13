@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.manager
 
+import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -47,6 +48,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioNodeSnapshot
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
@@ -72,17 +74,174 @@ class NodeManagerImplTest {
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val testScope = TestScope()
+    private val activeRadioSession = MutableStateFlow<RadioSessionContext?>(null)
 
     private lateinit var nodeManager: NodeManagerImpl
 
     @BeforeTest
     fun setUp() {
+        activeRadioSession.value = null
+        every { radioInterfaceService.activeSession } returns activeRadioSession
         nodeManager =
             NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope.asServiceScope())
         // Override the compose-resources formatter so notification dispatch is deterministic in the
         // plain-JVM test env (getStringSuspend does not resolve here). Tests that assert "no dispatch"
         // still hold: the override only changes the title, not whether dispatch fires.
         nodeManager.notificationTitleFormatter = { shortName -> "New node seen: $shortName" }
+    }
+
+    private fun activateRadioSession(generation: Long) {
+        activeRadioSession.value = RadioSessionContext(generation, address = "tcp:test")
+    }
+
+    // ---------- Current-radio membership ----------
+
+    @Test
+    fun `incomplete radio session is distinct from a completed empty snapshot`() {
+        val generation = 10L
+        activateRadioSession(generation)
+
+        nodeManager.beginRadioNodeSession(generation)
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        val mutableMembership = mutableSetOf<Int>()
+        nodeManager.publishRadioNodeSnapshot(generation, mutableMembership)
+        mutableMembership += 99
+
+        assertEquals(RadioNodeSnapshot(generation, emptySet()), nodeManager.currentRadioNodeSnapshot.value)
+        assertFalse(nodeManager.currentRadioNodeSnapshot.value?.nodeNums is MutableSet<*>)
+    }
+
+    @Test
+    fun `newer radio session clears membership and rejects every stale generation mutation`() {
+        activateRadioSession(10L)
+        nodeManager.beginRadioNodeSession(10L)
+        nodeManager.publishRadioNodeSnapshot(10L, setOf(1, 2))
+
+        activateRadioSession(11L)
+        nodeManager.beginRadioNodeSession(11L)
+        nodeManager.publishRadioNodeSnapshot(10L, setOf(90))
+        nodeManager.markNodeObserved(10L, 91)
+        nodeManager.beginRadioNodeSession(10L)
+
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        nodeManager.publishRadioNodeSnapshot(11L, setOf(3))
+        nodeManager.markNodeObserved(10L, 92)
+        nodeManager.markNodeObserved(11L, 4)
+
+        assertEquals(RadioNodeSnapshot(11L, setOf(3, 4)), nodeManager.currentRadioNodeSnapshot.value)
+    }
+
+    @Test
+    fun `same radio session begin is idempotent after snapshot completion`() {
+        val generation = 12L
+        activateRadioSession(generation)
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.publishRadioNodeSnapshot(generation, setOf(1, 2))
+
+        nodeManager.beginRadioNodeSession(generation)
+
+        assertEquals(RadioNodeSnapshot(generation, setOf(1, 2)), nodeManager.currentRadioNodeSnapshot.value)
+    }
+
+    @Test
+    fun `live observation is staged while incomplete and joined on snapshot completion`() {
+        val generation = 13L
+        activateRadioSession(generation)
+
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.markNodeObserved(generation, 7)
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        nodeManager.publishRadioNodeSnapshot(generation, setOf(8))
+        nodeManager.markNodeObserved(generation, 7)
+
+        assertEquals(RadioNodeSnapshot(generation, setOf(7, 8)), nodeManager.currentRadioNodeSnapshot.value)
+    }
+
+    @Test
+    fun `packet observed before MyInfo is staged for the active generation`() {
+        val generation = 14L
+        activateRadioSession(generation)
+
+        nodeManager.markNodeObserved(generation, 7)
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.publishRadioNodeSnapshot(generation, setOf(8))
+
+        assertEquals(RadioNodeSnapshot(generation, setOf(7, 8)), nodeManager.currentRadioNodeSnapshot.value)
+    }
+
+    @Test
+    fun `active session replacement and revocation promptly invalidate radio membership`() = testScope.runTest {
+        val generation = 12L
+        activateRadioSession(generation)
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.publishRadioNodeSnapshot(generation, setOf(7))
+        runCurrent()
+
+        activateRadioSession(generation + 1)
+        runCurrent()
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        nodeManager.beginRadioNodeSession(generation + 1)
+        nodeManager.publishRadioNodeSnapshot(generation + 1, setOf(8))
+        assertEquals(RadioNodeSnapshot(generation + 1, setOf(8)), nodeManager.currentRadioNodeSnapshot.value)
+
+        activeRadioSession.value = null
+        runCurrent()
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+    }
+
+    @Test
+    fun `radio snapshot collectors receive null at the active session boundary`() = testScope.runTest {
+        val generation = 14L
+        activateRadioSession(generation)
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.publishRadioNodeSnapshot(generation, setOf(7))
+
+        nodeManager.currentRadioNodeSnapshot.test {
+            assertEquals(RadioNodeSnapshot(generation, setOf(7)), awaitItem())
+
+            activeRadioSession.value = RadioSessionContext(generation + 1, address = "tcp:test")
+
+            assertNull(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `live observations cannot grow current radio membership past the in-memory bound`() {
+        val generation = 15L
+        val boundedMembership = (1..NodeManagerImpl.MAX_IN_MEMORY_NODES).toSet()
+        activateRadioSession(generation)
+
+        nodeManager.beginRadioNodeSession(generation)
+        nodeManager.publishRadioNodeSnapshot(generation, boundedMembership)
+        nodeManager.markNodeObserved(generation, NodeManagerImpl.MAX_IN_MEMORY_NODES + 1)
+
+        assertEquals(boundedMembership, nodeManager.currentRadioNodeSnapshot.value?.nodeNums)
+    }
+
+    @Test
+    fun `staged observations are bounded before snapshot completion`() {
+        val generation = 16L
+        activateRadioSession(generation)
+        nodeManager.beginRadioNodeSession(generation)
+
+        repeat(NodeManagerImpl.MAX_IN_MEMORY_NODES + 100) { index ->
+            nodeManager.markNodeObserved(generation, index + 1)
+        }
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
+
+        nodeManager.publishRadioNodeSnapshot(generation, emptySet())
+
+        val boundedMembership = assertNotNull(nodeManager.currentRadioNodeSnapshot.value).nodeNums
+        assertEquals((1..NodeManagerImpl.MAX_IN_MEMORY_NODES).toSet(), boundedMembership)
+        assertFalse(NodeManagerImpl.MAX_IN_MEMORY_NODES + 1 in boundedMembership)
+        assertFalse(NodeManagerImpl.MAX_IN_MEMORY_NODES + 100 in boundedMembership)
     }
 
     // ---------- In-memory index bounding ----------
@@ -514,11 +673,15 @@ class NodeManagerImplTest {
     @Test
     fun `clear resets internal state`() {
         nodeManager.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
+        activateRadioSession(20L)
+        nodeManager.beginRadioNodeSession(20L)
+        nodeManager.publishRadioNodeSnapshot(20L, setOf(1234))
         nodeManager.clear()
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
         assertNull(nodeManager.getNodeById("!000004d2"))
         assertNull(nodeManager.myNodeNum.value)
+        assertNull(nodeManager.currentRadioNodeSnapshot.value)
     }
 
     @Test

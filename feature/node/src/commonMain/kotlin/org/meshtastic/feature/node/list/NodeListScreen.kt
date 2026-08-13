@@ -116,6 +116,7 @@ fun NodeListScreen(
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
+    val currentRadioNodeSnapshot by viewModel.currentRadioNodeSnapshot.collectAsStateWithLifecycle()
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
@@ -131,6 +132,7 @@ fun NodeListScreen(
     }
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val connectedRadioNodeSnapshot = currentRadioNodeSnapshot.takeIf { connectionState == ConnectionState.Connected }
     val deviceType by viewModel.deviceType.collectAsStateWithLifecycle()
 
     val density by viewModel.nodeListDensity.collectAsStateWithLifecycle()
@@ -155,7 +157,10 @@ fun NodeListScreen(
 
     var showHopHistogram by remember { mutableStateOf(false) }
     if (showHopHistogram) {
-        NodeHopHistogramSheet(nodes = unfilteredNodes, onDismiss = { showHopHistogram = false })
+        val histogramNodes =
+            connectedRadioNodeSnapshot?.let { snapshot -> unfilteredNodes.filter { it.num in snapshot.nodeNums } }
+                ?: unfilteredNodes
+        NodeHopHistogramSheet(nodes = histogramNodes, onDismiss = { showHopHistogram = false })
     }
 
     var showShareContact by remember { mutableStateOf(false) }
@@ -265,6 +270,7 @@ fun NodeListScreen(
                             }
 
                         val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+                        val isInCurrentRadioNodeSnapshot = connectedRadioNodeSnapshot?.nodeNums?.contains(node.num)
 
                         when (density) {
                             NodeListDensity.COMPLETE ->
@@ -281,6 +287,7 @@ fun NodeListScreen(
                                     isActive = isActive,
                                     showTelemetry = showTelemetry,
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                                    isInCurrentRadioNodeSnapshot = isInCurrentRadioNodeSnapshot,
                                 )
 
                             NodeListDensity.COMPACT ->
@@ -303,6 +310,7 @@ fun NodeListScreen(
                                     showTelemetry = showTelemetry,
                                     tempInFahrenheit = state.tempInFahrenheit,
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                                    isInCurrentRadioNodeSnapshot = isInCurrentRadioNodeSnapshot,
                                 )
                         }
                         val isThisNode = remember(node) { ourNode?.num == node.num }

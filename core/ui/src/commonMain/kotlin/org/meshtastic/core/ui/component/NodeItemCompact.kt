@@ -114,10 +114,12 @@ fun NodeItemCompact(
     showTelemetry: Boolean = true,
     tempInFahrenheit: Boolean = false,
     deviceImageUrl: String? = null,
+    isInCurrentRadioNodeSnapshot: Boolean? = null,
 ) {
     val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
+    val currentRadio = thatNode.currentRadioPresentation(isInCurrentRadioNodeSnapshot)
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system =
         remember(distanceUnits) {
@@ -147,33 +149,35 @@ fun NodeItemCompact(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
+        remember(thatNode, currentRadio, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = longName,
-                isOnline = thatNode.isOnline,
+                isOnline = currentRadio.isOnline,
                 isFavorite = isFavorite,
-                lastHeard = thatNode.lastHeard,
+                lastHeard = currentRadio.lastHeard ?: 0,
                 role = thatNode.user.role.name,
-                hopsAway = thatNode.hopsAway,
+                hopsAway = currentRadio.hopsAway ?: -1,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
-                snr = thatNode.snrOrNull,
+                snr = currentRadio.snr,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
                 modemPreset = modemPreset,
                 isUnknownUser = thatNode.isUnknownUser,
+                isSavedOnPhoneOnly = currentRadio.isSavedOnPhoneOnly,
             )
         }
 
     Card(
         modifier =
-        modifier.nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor).fillMaxWidth().semantics(
-            mergeDescendants = true,
-        ) {
-            contentDescription = nodeDescription
-            role = Role.Button
-        },
+        modifier
+            .nodeCardGlow(lastHeard = currentRadio.lastHeard ?: 0, nodeColor = nodeColor)
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = nodeDescription
+                role = Role.Button
+            },
         colors = cardColors,
         border = cardBorder,
     ) {
@@ -229,6 +233,7 @@ fun NodeItemCompact(
                     showLocation = showLocation,
                     showSignal = showSignal,
                     contentColor = contentColor,
+                    currentRadio = currentRadio,
                 )
 
                 // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
@@ -248,6 +253,7 @@ fun NodeItemCompact(
                     showChannel = showChannel,
                     showRole = showRole,
                     deviceImageUrl = deviceImageUrl,
+                    currentRadio = currentRadio,
                 )
             }
         }
@@ -316,15 +322,20 @@ private fun CompactHealthRow(
     showLocation: Boolean,
     showSignal: Boolean,
     contentColor: Color,
+    currentRadio: CurrentRadioNodePresentation,
 ) {
     val segments = buildList {
         // Last heard (tinted by online status)
-        if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
+        if (currentRadio.isSavedOnPhoneOnly) {
+            add(@Composable { SavedOnPhoneInfo() })
+        } else if (
+            showLastHeard && (currentRadio.lastHeard ?: 0) > 0 && !isFutureDate(checkNotNull(currentRadio.lastHeard))
+        ) {
             add(
                 @Composable {
                     StatusAwareLastHeard(
-                        lastHeard = thatNode.lastHeard,
-                        online = thatNode.isOnline,
+                        lastHeard = checkNotNull(currentRadio.lastHeard),
+                        online = currentRadio.isOnline,
                         contentColor = contentColor,
                         relative = lastHeardIsRelative,
                     )
@@ -361,7 +372,7 @@ private fun CompactHealthRow(
         }
 
         // Signal quality, rated from SNR alone — RSSI is not part of the rating (#5446), so it must not gate it.
-        val directSnr = thatNode.snrOrNull?.takeIf { thatNode.hopsAway == 0 && !thatNode.viaMqtt }
+        val directSnr = currentRadio.snr?.takeIf { currentRadio.hopsAway == 0 && !thatNode.viaMqtt }
         if (showSignal && directSnr != null) {
             val quality = determineSignalQuality(directSnr, LocalModemPreset.current)
             add(
@@ -397,6 +408,7 @@ private fun CompactFooterRow(
     showChannel: Boolean,
     showRole: Boolean,
     deviceImageUrl: String?,
+    currentRadio: CurrentRadioNodePresentation,
 ) {
     val tertiaryColor = MaterialTheme.colorScheme.outline
     val segments =
@@ -418,13 +430,13 @@ private fun CompactFooterRow(
                     )
                 }
             }
-            if (showHops && thatNode.hopsAway > 0 && !isThisNode) {
+            if (showHops && (currentRadio.hopsAway ?: -1) > 0 && !isThisNode) {
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.HopCount,
-                        contentDescription = "${thatNode.hopsAway} hops",
+                        contentDescription = "${currentRadio.hopsAway} hops",
                         contentColor = tertiaryColor,
-                        text = thatNode.hopsAway.toString(),
+                        text = currentRadio.hopsAway.toString(),
                     )
                 }
             }

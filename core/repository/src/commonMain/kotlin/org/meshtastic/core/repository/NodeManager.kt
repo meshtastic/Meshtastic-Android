@@ -48,6 +48,20 @@ data class ConnectionIdentity(
         "nodeNum=$nodeNum, deviceIdPresent=${deviceId != null})"
 }
 
+/**
+ * Authoritative node membership observed for one completed radio configuration session.
+ *
+ * This is deliberately separate from the cumulative phone database: [nodeNums] contains only the node numbers in the
+ * successfully installed Stage 2 snapshot (including the local node), plus senders observed live afterward. The
+ * nullable [NodeManager.currentRadioNodeSnapshot] distinguishes an incomplete handshake from a completed snapshot whose
+ * membership is empty.
+ */
+data class RadioNodeSnapshot(val sessionGeneration: Long, val nodeNums: Set<Int>) {
+    /** Privacy-safe diagnostic form: node numbers are identifiers and must not enter logs. */
+    override fun toString(): String =
+        "RadioNodeSnapshot(sessionGeneration=$sessionGeneration, nodeCount=${nodeNums.size})"
+}
+
 /** Interface for managing the in-memory node database and processing received node information. */
 @Suppress("TooManyFunctions")
 interface NodeManager : NodeIdLookup {
@@ -68,6 +82,30 @@ interface NodeManager : NodeIdLookup {
 
     /** Sets whether node database writes are allowed. */
     fun setAllowNodeDbWrites(allowed: Boolean)
+
+    /**
+     * Completed membership for the current radio session, or null while no current Stage 2 snapshot has been
+     * successfully installed. This state is connection-scoped and is never persisted to or reconstructed from Room.
+     */
+    val currentRadioNodeSnapshot: StateFlow<RadioNodeSnapshot?>
+
+    /**
+     * Starts an admitted radio handshake for [sessionGeneration] and invalidates an older completed snapshot. Repeated
+     * admission of the same session is idempotent.
+     */
+    fun beginRadioNodeSession(sessionGeneration: Long)
+
+    /**
+     * Publishes the completed, deduplicated Stage 2 membership for [sessionGeneration]. Calls from a generation that no
+     * longer owns the current handshake are ignored.
+     */
+    fun publishRadioNodeSnapshot(sessionGeneration: Long, nodeNums: Set<Int>)
+
+    /**
+     * Records a sender observed in a live admitted packet. Same-generation observations received before Stage 2
+     * completes are staged and joined to the first published snapshot; stale-session observations are ignored.
+     */
+    fun markNodeObserved(sessionGeneration: Long, nodeNum: Int)
 
     /** The local node number as a thread-safe [StateFlow]. */
     val myNodeNum: StateFlow<Int?>

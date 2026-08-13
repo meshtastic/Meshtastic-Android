@@ -188,6 +188,7 @@ class MeshConfigFlowManagerImplTest {
         handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
+        verify { nodeManager.beginRadioNodeSession(activeSession.generation) }
         verify { nodeManager.setMyNodeNum(myNodeNum) }
         verify {
             nodeManager.publishConnectionIdentity(
@@ -227,6 +228,7 @@ class MeshConfigFlowManagerImplTest {
 
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyDeviceId(any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.beginRadioNodeSession(any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
     }
 
@@ -238,6 +240,7 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.beginRadioNodeSession(any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
     }
 
@@ -251,6 +254,7 @@ class MeshConfigFlowManagerImplTest {
 
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyDeviceId(any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setMyNodeNum(any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.beginRadioNodeSession(any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.publishConnectionIdentity(any(), any(), any(), any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { nodeRepository.insertMetadata(any(), any()) }
     }
@@ -570,6 +574,7 @@ class MeshConfigFlowManagerImplTest {
         verify { nodeManager.installNodeInfo(nodeInfo) }
         verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.installNodeInfoAndPersist(any()) }
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.installConfig(any(), any()) }
+        verify { nodeManager.publishRadioNodeSnapshot(activeSession.generation, setOf(myNodeNum, nodeInfo.num)) }
         verify { nodeManager.setNodeDbReady(true) }
         verify { nodeManager.setAllowNodeDbWrites(true) }
         verifySuspend { connectionManager.onNodeDbReady() }
@@ -597,6 +602,7 @@ class MeshConfigFlowManagerImplTest {
 
         verify(mode = VerifyMode.exactly(1)) { nodeManager.installNodeInfo(any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { nodeRepository.installConfig(any(), any()) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.publishRadioNodeSnapshot(any(), any()) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setNodeDbReady(true) }
         verify(mode = VerifyMode.exactly(0)) { nodeManager.setAllowNodeDbWrites(true) }
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionState(ConnectionState.Connected) }
@@ -628,6 +634,37 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `Stage 2 publishes exact deduplicated membership plus the local node`() = testScope.runTest {
+        val firstNum = 100
+        val secondNum = 200
+        val nodesByNum =
+            mapOf(
+                firstNum to org.meshtastic.core.testing.TestDataFactory.createTestNode(num = firstNum),
+                secondNum to org.meshtastic.core.testing.TestDataFactory.createTestNode(num = secondNum),
+            )
+        every { nodeManager.nodeDBbyNodeNum } returns nodesByNum
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(NodeInfo(num = firstNum))
+        manager.handleNodeInfo(NodeInfo(num = firstNum, snr = 4.5f))
+        manager.handleNodeInfo(NodeInfo(num = secondNum))
+        assertEquals(2, manager.newNodeCount)
+
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        verify {
+            nodeManager.publishRadioNodeSnapshot(activeSession.generation, setOf(myNodeNum, firstNum, secondNum))
+        }
+    }
+
+    @Test
     fun `Stage 2 applies trusted migrations before readiness and replay`() = testScope.runTest {
         val retiredNum = 456
         val callOrder = mutableListOf<String>()
@@ -637,6 +674,7 @@ class MeshConfigFlowManagerImplTest {
                 listOf(retiredNum)
             }
         every { nodeManager.applyTrustedIdentityMigrations(any()) } calls { callOrder.add("applyMigrations") }
+        every { nodeManager.publishRadioNodeSnapshot(any(), any()) } calls { callOrder.add("publishSnapshot") }
         every { nodeManager.setNodeDbReady(true) } calls { callOrder.add("nodeDbReady") }
         every { nodeManager.setAllowNodeDbWrites(true) } calls { callOrder.add("writesReady") }
         everySuspend { connectionManager.onNodeDbReady() } calls { callOrder.add("replayReady") }
@@ -652,7 +690,14 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         assertEquals(
-            listOf("installConfig", "applyMigrations", "nodeDbReady", "writesReady", "replayReady"),
+            listOf(
+                "installConfig",
+                "applyMigrations",
+                "publishSnapshot",
+                "nodeDbReady",
+                "writesReady",
+                "replayReady",
+            ),
             callOrder,
         )
         verify { nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum)) }
@@ -679,6 +724,7 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
+        verify { nodeManager.publishRadioNodeSnapshot(activeSession.generation, setOf(myNodeNum)) }
         verify { nodeManager.setNodeDbReady(true) }
         verifySuspend { connectionManager.onNodeDbReady() }
     }
@@ -727,6 +773,7 @@ class MeshConfigFlowManagerImplTest {
         verify { nodeManager.setNodeDbReady(false) }
         verify { nodeManager.setAllowNodeDbWrites(false) }
         verify { connectionManager.recoverPostHandshakeFailure() }
+        verify(mode = VerifyMode.not) { nodeManager.publishRadioNodeSnapshot(any(), any()) }
         verify(mode = VerifyMode.not) { nodeManager.setNodeDbReady(true) }
         verifySuspend(mode = VerifyMode.not) { connectionManager.onNodeDbReady() }
     }

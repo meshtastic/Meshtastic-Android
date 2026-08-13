@@ -32,6 +32,7 @@ import org.meshtastic.core.repository.ConnectionIdentity
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -58,6 +59,7 @@ class NodeManagerConnectionIdentityTest {
     @BeforeTest
     fun setUp() {
         everySuspend { nodeRepository.getNodeDbSnapshot() } returns emptyMap()
+        every { radioInterfaceService.activeSession } returns MutableStateFlow<RadioSessionContext?>(null)
         nodeManager =
             NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope.asServiceScope())
     }

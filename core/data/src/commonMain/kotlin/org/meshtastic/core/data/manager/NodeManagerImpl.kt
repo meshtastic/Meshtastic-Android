@@ -18,13 +18,19 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString
@@ -43,6 +49,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioNodeSnapshot
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
@@ -78,6 +85,28 @@ private const val KEY_FINGERPRINT_HEX_LENGTH = 8
 internal fun publicKeyLogFingerprint(key: ByteString): String = key.sha256().hex().take(KEY_FINGERPRINT_HEX_LENGTH)
 
 private val DEFAULT_NODE_NAME_REGEX = Regex("^Meshtastic [0-9a-fA-F]{4}$")
+
+/** A synchronous StateFlow view that hides a snapshot as soon as its transport session is no longer active. */
+@OptIn(ExperimentalForInheritanceCoroutinesApi::class)
+private class SessionBoundRadioNodeSnapshotFlow(
+    private val snapshot: StateFlow<RadioNodeSnapshot?>,
+    private val activeSession: StateFlow<RadioSessionContext?>,
+) : StateFlow<RadioNodeSnapshot?> {
+    override val value: RadioNodeSnapshot?
+        get() = snapshot.value?.takeIf { it.sessionGeneration == activeSession.value?.generation }
+
+    override val replayCache: List<RadioNodeSnapshot?>
+        get() = listOf(value)
+
+    override suspend fun collect(collector: FlowCollector<RadioNodeSnapshot?>): Nothing {
+        combine(snapshot, activeSession) { currentSnapshot, session ->
+            currentSnapshot?.takeIf { it.sessionGeneration == session?.generation }
+        }
+            .distinctUntilChanged()
+            .collect(collector)
+        error("StateFlow collection completed unexpectedly")
+    }
+}
 
 /** Implementation of [NodeManager] that maintains an in-memory database of the mesh. */
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod", "LargeClass")
@@ -291,12 +320,79 @@ class NodeManagerImpl(
     override val isNodeDbReady = MutableStateFlow(false)
     override val allowNodeDbWrites = MutableStateFlow(false)
 
+    private val radioNodeSessionLock = SynchronizedObject()
+    private var currentRadioNodeSessionGeneration: Long? = null
+    private var stagedRadioNodeNums: PersistentSet<Int> = persistentSetOf()
+    private val _currentRadioNodeSnapshot = MutableStateFlow<RadioNodeSnapshot?>(null)
+    override val currentRadioNodeSnapshot: StateFlow<RadioNodeSnapshot?> =
+        SessionBoundRadioNodeSnapshotFlow(_currentRadioNodeSnapshot, radioInterfaceService.activeSession)
+
     override fun setNodeDbReady(ready: Boolean) {
         isNodeDbReady.value = ready
     }
 
     override fun setAllowNodeDbWrites(allowed: Boolean) {
         allowNodeDbWrites.value = allowed
+    }
+
+    override fun beginRadioNodeSession(sessionGeneration: Long) {
+        synchronized(radioNodeSessionLock) {
+            if (radioInterfaceService.activeSession.value?.generation != sessionGeneration) return@synchronized
+            val currentGeneration = currentRadioNodeSessionGeneration
+            if (currentGeneration == sessionGeneration) return@synchronized
+            if (currentGeneration != null && sessionGeneration < currentGeneration) return@synchronized
+
+            currentRadioNodeSessionGeneration = sessionGeneration
+            stagedRadioNodeNums = persistentSetOf()
+            _currentRadioNodeSnapshot.value = null
+        }
+    }
+
+    override fun publishRadioNodeSnapshot(sessionGeneration: Long, nodeNums: Set<Int>) {
+        synchronized(radioNodeSessionLock) {
+            if (radioInterfaceService.activeSession.value?.generation != sessionGeneration) return@synchronized
+            if (currentRadioNodeSessionGeneration != sessionGeneration) return@synchronized
+
+            var completedNodeNums = persistentSetOf<Int>().addingAll(nodeNums)
+            val remainingCapacity = (MAX_IN_MEMORY_NODES - completedNodeNums.size).coerceAtLeast(0)
+            stagedRadioNodeNums
+                .asSequence()
+                .filterNot { it in completedNodeNums }
+                .take(remainingCapacity)
+                .forEach { completedNodeNums = completedNodeNums.adding(it) }
+            stagedRadioNodeNums = persistentSetOf()
+            _currentRadioNodeSnapshot.value = RadioNodeSnapshot(sessionGeneration, completedNodeNums)
+        }
+    }
+
+    override fun markNodeObserved(sessionGeneration: Long, nodeNum: Int) {
+        if (nodeNum == 0 || nodeNum == NodeAddress.NODENUM_BROADCAST) return
+        synchronized(radioNodeSessionLock) {
+            if (radioInterfaceService.activeSession.value?.generation != sessionGeneration) return@synchronized
+            if (currentRadioNodeSessionGeneration != sessionGeneration) {
+                // A valid packet can precede MyInfo on a fresh transport. Treat the active transport generation as
+                // authority, invalidate any hidden prior state, and stage this sender for Stage 2 publication.
+                currentRadioNodeSessionGeneration = sessionGeneration
+                stagedRadioNodeNums = persistentSetOf()
+                _currentRadioNodeSnapshot.value = null
+            }
+            val snapshot = _currentRadioNodeSnapshot.value
+            if (snapshot == null) {
+                if (stagedRadioNodeNums.size < MAX_IN_MEMORY_NODES) {
+                    stagedRadioNodeNums = stagedRadioNodeNums.adding(nodeNum)
+                }
+            } else if (nodeNum !in snapshot.nodeNums && snapshot.nodeNums.size < MAX_IN_MEMORY_NODES) {
+                val updatedNodeNums = persistentSetOf<Int>().addingAll(snapshot.nodeNums).adding(nodeNum)
+                _currentRadioNodeSnapshot.value = snapshot.copy(nodeNums = updatedNodeNums)
+            }
+        }
+    }
+
+    private fun reconcileRadioNodeSession(activeSessionGeneration: Long?) = synchronized(radioNodeSessionLock) {
+        if (currentRadioNodeSessionGeneration == activeSessionGeneration) return@synchronized
+        currentRadioNodeSessionGeneration = activeSessionGeneration
+        stagedRadioNodeNums = persistentSetOf()
+        _currentRadioNodeSnapshot.value = null
     }
 
     override val myNodeNum = MutableStateFlow<Int?>(null)
@@ -317,12 +413,14 @@ class NodeManagerImpl(
 
     override fun clearConnectionIdentity() {
         _connectionIdentity.value = null
+        reconcileRadioNodeSession(activeSessionGeneration = null)
     }
 
     override fun clearStaleConnectionIdentity(activeSessionGeneration: Long) {
         _connectionIdentity.updateStateFlow { identity ->
             identity?.takeIf { it.sessionGeneration == activeSessionGeneration }
         }
+        reconcileRadioNodeSession(activeSessionGeneration)
     }
 
     override fun publishConnectionIdentity(sessionGeneration: Long, address: String, nodeNum: Int, deviceId: String?) {
@@ -475,6 +573,7 @@ class NodeManagerImpl(
         myDeviceId.value = null
         firmwareEdition.value = null
         _connectionIdentity.value = null
+        reconcileRadioNodeSession(activeSessionGeneration = null)
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
