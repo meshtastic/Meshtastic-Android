@@ -22,15 +22,18 @@ import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
+import org.meshtastic.core.database.retryOnDbPoolFailure
 
 @Single
 class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) : NodeInfoReadDataSource {
 
+    // These flows back process-lifetime eager StateFlows (NodeRepositoryImpl); retryOnDbPoolFailure keeps them
+    // restartable after a pool-wedge failure exhausts observeCurrentDb's in-place recovery budget (#6608).
     override fun myNodeInfoFlow(): Flow<MyNodeEntity?> =
-        dbManager.observeCurrentDb { db -> db.nodeInfoDao().getMyNodeInfo() }
+        dbManager.observeCurrentDb { db -> db.nodeInfoDao().getMyNodeInfo() }.retryOnDbPoolFailure("myNodeInfo")
 
     override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> =
-        dbManager.observeCurrentDb { db -> db.nodeInfoDao().nodeDBbyNum() }
+        dbManager.observeCurrentDb { db -> db.nodeInfoDao().nodeDBbyNum() }.retryOnDbPoolFailure("nodeDBbyNum")
 
     override fun getNodesFlow(
         sort: String,
@@ -38,16 +41,18 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
         includeUnknown: Boolean,
         hopsAwayMax: Int,
         lastHeardMin: Int,
-    ): Flow<List<NodeWithRelations>> = dbManager.observeCurrentDb { db ->
-        db.nodeInfoDao()
-            .getNodes(
-                sort = sort,
-                filter = filter,
-                includeUnknown = includeUnknown,
-                hopsAwayMax = hopsAwayMax,
-                lastHeardMin = lastHeardMin,
-            )
-    }
+    ): Flow<List<NodeWithRelations>> = dbManager
+        .observeCurrentDb { db ->
+            db.nodeInfoDao()
+                .getNodes(
+                    sort = sort,
+                    filter = filter,
+                    includeUnknown = includeUnknown,
+                    hopsAwayMax = hopsAwayMax,
+                    lastHeardMin = lastHeardMin,
+                )
+        }
+        .retryOnDbPoolFailure("getNodes")
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
         dbManager.withReadDb { it.nodeInfoDao().getNodesOlderThan(lastHeard) }

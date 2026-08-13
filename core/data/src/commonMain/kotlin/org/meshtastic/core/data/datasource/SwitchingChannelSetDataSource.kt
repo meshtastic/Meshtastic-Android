@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.ChannelSetEntity
+import org.meshtastic.core.database.retryOnDbPoolFailure
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -52,6 +53,7 @@ class SwitchingChannelSetDataSource(
     val channelSetFlow: Flow<ChannelSet> =
         dbManager
             .observeCurrentDb { db -> db.channelSetDao().observe() }
+            .retryOnDbPoolFailure("channelSet")
             .map { entity -> entity?.channelSet ?: ChannelSet() }
             .distinctUntilChanged()
 

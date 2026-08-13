@@ -175,19 +175,19 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
     }
 
     /**
-     * Once the lifetime replacement budget is spent, the wedged pool stays published. Admitting further work against it
-     * would park one more block that can never finish, so under steady ingest the parked coroutines and their writer
+     * While the windowed replacement budget is spent, the wedged pool stays published. Admitting further work against
+     * it would park one more block that can never finish, so under steady ingest the parked coroutines and their writer
      * registrations would grow without bound. Admission must fail immediately instead.
      */
     @Test
-    fun writesFailFastOnceWedgeRecoveryIsExhausted() = runTest(testDispatcher) {
+    fun writesFailFastWhileWedgeRecoveryBudgetIsSpent() = runTest(testDispatcher) {
         manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
         manager.switchActiveDatabase("addrA")
         val releaseWedges = CompletableDeferred<Unit>()
         var startedCallbacks = 0
 
         // Spend the whole replacement budget, then wedge one more call against the pool recovery now refuses.
-        repeat(MAX_WEDGE_POOL_RECOVERIES_PER_MANAGER_LIFETIME + 1) {
+        repeat(MAX_WEDGE_POOL_RECOVERIES_PER_WINDOW + 1) {
             val wedgeStarted = CompletableDeferred<Unit>()
             async {
                 runCatching {
@@ -222,6 +222,63 @@ class DatabaseManagerWedgedWriteTest : DatabaseManagerTestFixture() {
         releaseWedges.complete(Unit)
         runCurrent()
         assertEquals(0 to 0, manager.debugWriterCounts())
+    }
+
+    /**
+     * The #6608 property, on the write path: a spent budget must be a pause, not a life sentence.
+     *
+     * The quarantine expires with the recovery window, and the assertions follow the whole cycle rather than stopping
+     * at re-admission — stopping there would pass even if recovery never completed, which is the thing being fixed.
+     * Note that expiry re-admits against the still-wedged pool (recovery was refused, so nothing replaced it), so the
+     * first write back pays one deadline and its abandonment is what publishes the replacement.
+     */
+    @Test
+    fun writesRecoverAfterTheWedgeWindowClears() = runTest(testDispatcher) {
+        manager.withDbTimeoutMillisForTest = DatabaseManager.WITH_DB_TIMEOUT_MS
+        manager.switchActiveDatabase("addrA")
+        val releaseWedges = CompletableDeferred<Unit>()
+
+        repeat(MAX_WEDGE_POOL_RECOVERIES_PER_WINDOW + 1) {
+            val wedgeStarted = CompletableDeferred<Unit>()
+            async {
+                runCatching {
+                    manager.withDb {
+                        wedgeStarted.complete(Unit)
+                        releaseWedges.await()
+                        Unit
+                    }
+                }
+            }
+            wedgeStarted.await()
+            advanceTimeBy(DatabaseManager.WITH_DB_TIMEOUT_MS + 1)
+        }
+        val wedgedPool = manager.currentDb.value
+        assertIs<DatabaseOperationTimeoutException>(
+            runCatching { manager.withDb { Unit } }.exceptionOrNull(),
+            "the budget is spent, so admission must fail fast while the quarantine holds",
+        )
+
+        manager.recoveryClockMillis += POOL_RECOVERY_WINDOW_MS
+
+        // Re-admitted, but against the pool nothing has replaced yet: this write is the sacrificial one.
+        val sacrificial = async { runCatching { manager.withDb { releaseWedges.await() } } }
+        runCurrent()
+        advanceTimeBy(DatabaseManager.WITH_DB_TIMEOUT_MS + 1)
+        assertIs<DatabaseOperationTimeoutException>(
+            sacrificial.await().exceptionOrNull(),
+            "the first write after expiry pays the deadline on the still-wedged pool",
+        )
+        assertTrue(manager.currentDb.value !== wedgedPool, "abandoning it must publish a replacement pool")
+
+        // And the write after that lands on the healthy replacement.
+        assertEquals(
+            LATER_RESULT,
+            manager.withDb { LATER_RESULT },
+            "writes must work again once the pool is replaced",
+        )
+
+        releaseWedges.complete(Unit)
+        runCurrent()
     }
 
     private companion object {
