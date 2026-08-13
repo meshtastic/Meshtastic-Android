@@ -43,6 +43,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -115,7 +116,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
         }
     val filteredLogs = filteredLogsState
 
-    LaunchedEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
+    SideEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
 
     val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
     if (shouldAutoScroll) {

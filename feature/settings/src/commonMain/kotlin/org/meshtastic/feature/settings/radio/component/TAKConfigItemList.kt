@@ -38,7 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -114,8 +113,6 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val takConfig = state.moduleConfig.tak ?: ModuleConfig.TAKConfig()
     val formState = rememberConfigState(initialValue = takConfig)
-
-    LaunchedEffect(takConfig) { formState.value = takConfig }
 
     val effectiveResponseState =
         when (state.responseState) {

@@ -49,6 +49,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -192,7 +193,7 @@ fun MessageScreen(
     }
 
     // Prevent the message TextField from stealing focus when the screen opens
-    LaunchedEffect(contactKey) { focusManager.clearFocus() }
+    SideEffect(contactKey) { focusManager.clearFocus() }
 
     // Derived state, memoized for performance
     val channelInfo =
