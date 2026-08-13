@@ -51,7 +51,7 @@ jobs:
 
       - name: Generate flatpak-sources.json
         run: |
-          ./gradlew --no-build-cache -Dorg.gradle.isolated-projects=false --no-configuration-cache -Pmeshtastic.flatpakSources=true \
+          ./gradlew --no-build-cache \
             -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
             :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
           cp build/flatpak-sources.json flatpak-sources.json
