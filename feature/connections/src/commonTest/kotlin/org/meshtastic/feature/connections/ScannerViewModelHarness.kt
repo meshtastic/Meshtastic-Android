@@ -92,8 +92,15 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
     val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /**
+     * The `(showMock, showReplay)` pairs the ViewModel has asked for, in call order. Without this the fake would return
+     * the same devices for every visibility combination, so a test could pass while the ViewModel requested the wrong
+     * one — assert against this to prove the production path actually forwarded the intended flags.
+     */
+    val discoveryRequests = mutableListOf<Pair<Boolean, Boolean>>()
+
+    /**
      * A fake [GetDiscoveredDevicesUseCase] that mirrors the real behavior: it combines [baseDevicesFlow] with the
-     * provided resolved list so tests can verify NSD gating.
+     * provided resolved list so tests can verify NSD gating, and records each request in [discoveryRequests].
      */
     val getDiscoveredDevicesUseCase =
         object : GetDiscoveredDevicesUseCase {
@@ -101,10 +108,13 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
                 showMock: Boolean,
                 showReplay: Boolean,
                 resolvedList: Flow<List<DiscoveredService>>,
-            ): Flow<DiscoveredDevices> = combine(baseDevicesFlow, resolvedList) { base, resolved ->
-                val tcpDevices =
-                    resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
-                base.copy(discoveredTcpDevices = tcpDevices)
+            ): Flow<DiscoveredDevices> {
+                discoveryRequests += showMock to showReplay
+                return combine(baseDevicesFlow, resolvedList) { base, resolved ->
+                    val tcpDevices =
+                        resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
+                    base.copy(discoveredTcpDevices = tcpDevices)
+                }
             }
         }
 

@@ -262,7 +262,8 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, showReplay = true, resolvedList = flowOf(emptyList())).test {
             val result = awaitItem()
-            result.usbDevices.size shouldBe 2
+            result.usbDevices.map { it::class } shouldBe
+                listOf(DeviceListEntry.Mock::class, DeviceListEntry.Replay::class)
             cancelAndIgnoreRemainingEvents()
         }
     }
