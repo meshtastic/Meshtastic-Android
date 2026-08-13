@@ -34,7 +34,8 @@ import org.junit.runner.RunWith
  *
  * The [androidx.baselineprofile] plugin on `:androidApp` drives this against the auto-created
  * `nonMinifiedRelease` variant and merges the result into
- * `androidApp/src/google/generated/baselineProfiles/`. Commit that output so release builds ship it.
+ * `androidApp/src/googleRelease/generated/baselineProfiles/`. Commit that output so release builds ship
+ * it.
  *
  * The journey is intentionally minimal (cold start → first frame) because CI has no paired radio.
  * Extend it with post-connection screens (node list, map, message thread) once a fake transport or
