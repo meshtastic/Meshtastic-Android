@@ -118,6 +118,17 @@ class NodeListViewModelTest {
     }
 
     @Test
+    fun `isActive is false for the default filter`() {
+        assertEquals(false, NodeFilterState().isActive)
+    }
+
+    @Test
+    fun `isActive is true when unknown nodes are opted out`() {
+        // includeUnknown defaults to true, so a persisted false is a user-applied narrowing filter.
+        assertEquals(true, NodeFilterState(includeUnknown = false).isActive)
+    }
+
+    @Test
     fun `connectionState reflects serviceRepository state`() = runTest {
         val stateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
         every { connectionStateProvider.connectionState } returns stateFlow

@@ -238,9 +238,15 @@ data class NodeFilterState(
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
 ) {
-    /** True if any user-applied filter is narrowing the visible node set. */
+    /** True if any user-applied filter is narrowing the visible node set. Unknown nodes are shown unless opted out. */
     val isActive: Boolean
-        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || excludeMqtt
+        get() =
+            !includeUnknown ||
+                filterText.isNotEmpty() ||
+                excludeInfrastructure ||
+                onlyOnline ||
+                onlyDirect ||
+                excludeMqtt
 }
 
 data class NodeFilterToggles(
