@@ -872,6 +872,7 @@
     <string name="led_state">LEDの状態</string>
     <string name="legacy_admin_channel">レガシー管理チャンネル</string>
     <string name="library_count">%1$d 個のライブラリ</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">アマチュア無線従事者 (ハム/HAM)</string>
     <string name="licensed_amateur_radio_text">このオプションを有効にすると、暗号化が無効になりデフォルトのMeshtasticネットワークと互換性が無くなります。</string>
     <!-- LOAD -->

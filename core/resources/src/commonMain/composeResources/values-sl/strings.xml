@@ -123,6 +123,7 @@
     <!-- KEY -->
     <!-- LABEL -->
     <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>

@@ -243,6 +243,7 @@
     <string name="latitude">Ширина</string>
     <!-- LAYER -->
     <string name="led_heartbeat">LED срчани откуцаји</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Приступ локацији је искључен, не може се обезбедити позиција мрежи.</string>

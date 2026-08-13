@@ -578,6 +578,7 @@
     <string name="learn_more">Научете повече</string>
     <string name="led_state">LED за състояние</string>
     <string name="library_count">%1$d библиотеки</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
     <!-- LOAD -->

@@ -664,6 +664,7 @@
     <string name="led_state">Stav LED</string>
     <string name="legacy_admin_channel">Starý kanál správce</string>
     <string name="library_count">%1$d knihoven</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licencované amatérské rádio (Ham)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
     <!-- LOAD -->

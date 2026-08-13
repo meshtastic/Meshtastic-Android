@@ -641,6 +641,7 @@
     <string name="led_state">LED-läge</string>
     <string name="legacy_admin_channel">Äldre typ av adminkanal</string>
     <string name="library_count">%1$d bibliotek</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <!-- LOAD -->

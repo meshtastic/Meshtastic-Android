@@ -878,6 +878,7 @@
     <string name="led_state">LED olek</string>
     <string name="legacy_admin_channel">Pärandadministraatori kanal</string>
     <string name="library_count">%1$d teek</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Litsentseeritud raadioamatöör (Ham)</string>
     <string name="licensed_amateur_radio_text">Selle valiku lubamine keelab krüpteerimise ja ei ühildu Meshtastic vaikevõrguga.</string>
     <!-- LOAD -->

@@ -796,6 +796,7 @@
     <string name="led_state">LED Zustand</string>
     <string name="legacy_admin_channel">Veralteter administrativer Kanal</string>
     <string name="library_count">%1$d Bibliotheken</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Lizenzierter Amateurfunker</string>
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <!-- LOAD -->

@@ -358,6 +358,7 @@
     <!-- LAYER -->
     <string name="led_state">Estado do LED</string>
     <string name="legacy_admin_channel">Canal de administração antigo</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a criptografia e não é compatível com a rede padrão do Meshtastic.</string>
     <!-- LOAD -->
     <string name="load">Carregar</string>

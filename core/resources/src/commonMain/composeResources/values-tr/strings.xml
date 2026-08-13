@@ -282,6 +282,7 @@
     <!-- LAYER -->
     <string name="led_state">LED durumu</string>
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
     <!-- LOAD -->
     <string name="load">Yükle</string>

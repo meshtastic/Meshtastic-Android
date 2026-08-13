@@ -401,6 +401,7 @@
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="led_heartbeat">LED bicia serca</string>
     <string name="led_state">Stan diody LED</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
     <!-- LOCAL -->

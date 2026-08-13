@@ -679,6 +679,7 @@
     <string name="led_state">État de la LED</string>
     <string name="legacy_admin_channel">Ancien canal Admin</string>
     <string name="library_count">%1$d Bibliothèques</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamateur licencié (RA)</string>
     <string name="licensed_amateur_radio_text">L'activation de cette option désactive le chiffrement et n'est pas compatible avec le réseau Meshtastic par défaut.</string>
     <!-- LOAD -->
