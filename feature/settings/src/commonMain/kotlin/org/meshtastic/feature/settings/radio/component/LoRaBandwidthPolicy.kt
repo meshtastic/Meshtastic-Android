@@ -35,6 +35,8 @@ internal data class LoRaBandwidthSelection(
 
 private const val SX128X_WIDEST_BANDWIDTH_CODE = 1600
 
+private val LORA_24_DEFAULT_OPTION = LoRaBandwidthOption(0, "812.5")
+
 private val CONSERVATIVE_HIGH_BAND_OPTIONS =
     listOf(LoRaBandwidthOption(200, "203.125"), LoRaBandwidthOption(400, "406.25"), LoRaBandwidthOption(800, "812.5"))
 
@@ -67,12 +69,13 @@ internal fun loRaBandwidthSelection(
 
     val sx128xOnly =
         hwModel !in SX128X_EXCLUDED_HARDWARE_MODELS && pioEnv?.lowercase()?.let(SX128X_ONLY_TARGETS::contains) == true
-    val options =
+    val supportedOptions =
         if (sx128xOnly) {
             CONSERVATIVE_HIGH_BAND_OPTIONS + LoRaBandwidthOption(SX128X_WIDEST_BANDWIDTH_CODE, "1625")
         } else {
             CONSERVATIVE_HIGH_BAND_OPTIONS
         }
+    val options = listOf(LORA_24_DEFAULT_OPTION) + supportedOptions
     val invalidPersistedValue = storedValue.takeUnless { value -> options.any { it.wireValue == value } }
     return LoRaBandwidthSelection(options = options, invalidPersistedValue = invalidPersistedValue)
 }

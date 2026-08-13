@@ -25,8 +25,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.bandwidth_required
-import org.meshtastic.core.resources.bandwidth_required_summary
 import org.meshtastic.core.resources.bandwidth_unsupported_summary
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.save_changes
@@ -90,15 +88,9 @@ class LoRaBandwidthUiTest {
         runOnIdle { assertNull(savedConfig) }
 
         runOnIdle { configState.value = configState.value.copy(bandwidth = 0) }
-        onNodeWithText(getString(Res.string.bandwidth_required)).assertIsDisplayed()
-        onNodeWithText(getString(Res.string.bandwidth_required_summary)).assertIsDisplayed()
-        onNodeWithText(getString(Res.string.save_changes)).assertIsNotEnabled().performClick()
-        runOnIdle { assertNull(savedConfig) }
-
-        onNodeWithText(getString(Res.string.bandwidth_required)).performClick()
-        onNodeWithText("406.25 kHz").performClick()
+        onNodeWithText("Default (812.5 kHz)").assertIsDisplayed()
         onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
 
-        runOnIdle { assertEquals(400, savedConfig?.bandwidth) }
+        runOnIdle { assertEquals(0, savedConfig?.bandwidth) }
     }
 }

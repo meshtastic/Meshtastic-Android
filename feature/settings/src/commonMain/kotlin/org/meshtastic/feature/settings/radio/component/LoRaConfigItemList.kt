@@ -39,9 +39,8 @@ import org.meshtastic.core.model.repairPresetFor
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth
+import org.meshtastic.core.resources.bandwidth_default
 import org.meshtastic.core.resources.bandwidth_option_khz
-import org.meshtastic.core.resources.bandwidth_required
-import org.meshtastic.core.resources.bandwidth_required_summary
 import org.meshtastic.core.resources.bandwidth_unsupported
 import org.meshtastic.core.resources.bandwidth_unsupported_summary
 import org.meshtastic.core.resources.coding_rate
@@ -424,18 +423,18 @@ internal fun LoRaBandwidthPreference(
             .map { option ->
                 DropDownItem(
                     value = option.wireValue,
-                    label = stringResource(Res.string.bandwidth_option_khz, option.displayKilohertz),
+                    label =
+                    if (option.wireValue == 0) {
+                        stringResource(Res.string.bandwidth_default, option.displayKilohertz)
+                    } else {
+                        stringResource(Res.string.bandwidth_option_khz, option.displayKilohertz)
+                    },
                 )
             }
             .toMutableList()
     selection.invalidPersistedValue?.let { invalidValue ->
-        val invalidLabel =
-            if (invalidValue == 0) {
-                stringResource(Res.string.bandwidth_required)
-            } else {
-                val value = stringResource(Res.string.bandwidth_option_khz, invalidValue.toString())
-                stringResource(Res.string.bandwidth_unsupported, value)
-            }
+        val value = stringResource(Res.string.bandwidth_option_khz, invalidValue.toString())
+        val invalidLabel = stringResource(Res.string.bandwidth_unsupported, value)
         items += DropDownItem(value = invalidValue, label = invalidLabel, enabled = false)
     }
 
@@ -444,8 +443,6 @@ internal fun LoRaBandwidthPreference(
         summary =
         if (selection.isValid) {
             null
-        } else if (selection.invalidPersistedValue == 0) {
-            stringResource(Res.string.bandwidth_required_summary)
         } else {
             stringResource(Res.string.bandwidth_unsupported_summary)
         },

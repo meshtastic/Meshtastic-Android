@@ -54,7 +54,7 @@ class LoRaBandwidthPolicyTest {
                 pioEnv = "tlora-t3s3-v1",
             )
 
-        assertEquals(listOf(200, 400, 800), selection.options?.map { it.wireValue })
+        assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
         assertTrue(selection.isValid)
     }
 
@@ -68,7 +68,7 @@ class LoRaBandwidthPolicyTest {
                 pioEnv = "tlora-v2-1-1_8",
             )
 
-        assertEquals(listOf(200, 400, 800), selection.options?.map { it.wireValue })
+        assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
         assertEquals(1600, selection.invalidPersistedValue)
         assertFalse(selection.isValid)
     }
@@ -78,7 +78,7 @@ class LoRaBandwidthPolicyTest {
         val selection =
             loRaBandwidthSelection(1600, RegionCode.LORA_24, hwModel = HardwareModel.MUZI_BASE, pioEnv = "muzi-base")
 
-        assertEquals(listOf(200, 400, 800), selection.options?.map { it.wireValue })
+        assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
         assertEquals(1600, selection.invalidPersistedValue)
         assertFalse(selection.isValid)
     }
@@ -93,7 +93,7 @@ class LoRaBandwidthPolicyTest {
                 pioEnv = "tlora-v2-1-1_8",
             )
 
-        assertEquals(listOf(200, 400, 800), selection.options?.map { it.wireValue })
+        assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
         assertEquals(1600, selection.invalidPersistedValue)
         assertFalse(selection.isValid)
     }
@@ -103,7 +103,7 @@ class LoRaBandwidthPolicyTest {
         listOf(null, "future-radio").forEach { target ->
             val selection = loRaBandwidthSelection(800, RegionCode.LORA_24, hwModel = null, pioEnv = target)
 
-            assertEquals(listOf(200, 400, 800), selection.options?.map { it.wireValue })
+            assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
             assertTrue(selection.isValid)
         }
     }
@@ -125,11 +125,12 @@ class LoRaBandwidthPolicyTest {
     }
 
     @Test
-    fun lora24CustomDefault_requiresExplicitBandwidth() {
+    fun lora24ProtobufDefault_usesFirmwareDefaultBandwidth() {
         val selection = loRaBandwidthSelection(0, RegionCode.LORA_24, hwModel = null, pioEnv = null)
 
-        assertEquals(0, selection.invalidPersistedValue)
-        assertFalse(selection.allowsSave(usePreset = false))
+        assertEquals(listOf(0, 200, 400, 800), selection.options?.map { it.wireValue })
+        assertNull(selection.invalidPersistedValue)
+        assertTrue(selection.allowsSave(usePreset = false))
         assertTrue(selection.allowsSave(usePreset = true))
     }
 
@@ -148,7 +149,7 @@ class LoRaBandwidthPolicyTest {
         targets.forEach { target ->
             val selection = loRaBandwidthSelection(1600, RegionCode.LORA_24, hwModel = null, pioEnv = target)
 
-            assertEquals(listOf(200, 400, 800, 1600), selection.options?.map { it.wireValue })
+            assertEquals(listOf(0, 200, 400, 800, 1600), selection.options?.map { it.wireValue })
             assertTrue(selection.isValid)
         }
     }
@@ -157,6 +158,6 @@ class LoRaBandwidthPolicyTest {
     fun canonicalCodes_haveFirmwareDisplayBandwidths() {
         val selection = loRaBandwidthSelection(200, RegionCode.LORA_24, hwModel = null, pioEnv = null)
 
-        assertEquals(listOf("203.125", "406.25", "812.5"), selection.options?.map { it.displayKilohertz })
+        assertEquals(listOf("812.5", "203.125", "406.25", "812.5"), selection.options?.map { it.displayKilohertz })
     }
 }
