@@ -97,6 +97,7 @@
     <string name="available_pins">Pinos disponíveis</string>
     <string name="back">Voltar</string>
     <string name="bad">Ruim</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Largura da banda</string>
     <string name="battery">Bateria</string>
     <string name="battery_ina_2xx_i2c_address">Endereço I2C da bateria INA_2XX</string>

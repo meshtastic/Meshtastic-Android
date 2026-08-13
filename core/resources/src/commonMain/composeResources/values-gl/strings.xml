@@ -30,6 +30,7 @@
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
     <string name="camera_permission">Permiso da cámara</string>

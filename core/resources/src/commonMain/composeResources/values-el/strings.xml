@@ -32,6 +32,7 @@
     <!-- AQI -->
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="audio">Ήχος</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Μπαταρία</string>
     <string name="blue">Μπλε</string>
     <!-- BLUETOOTH -->

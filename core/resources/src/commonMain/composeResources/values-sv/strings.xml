@@ -105,6 +105,7 @@
     <string name="backup_keys">Säkerhetskopiera nycklar</string>
     <string name="backup_restore">Säkerhetskopiera &amp; återställ</string>
     <string name="bad">Dålig</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbredd</string>
     <string name="baro_pressure">Tryck</string>
     <string name="battery">Batteri</string>

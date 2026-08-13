@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">Сохранить публичные и приватные ключи в безопасном зашифрованном хранилище на этом устройстве.</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ширина канала</string>
     <string name="baro_pressure">Давл</string>
     <string name="battery">Батарея</string>

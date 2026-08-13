@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">Salvestab avalikud ja privaatvõtmed selle seadme turvalisse ja krüpteeritud salvestusruumi.</string>
     <string name="backup_restore">Varunda &amp; Taasta</string>
     <string name="bad">Halb</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ribalaius</string>
     <string name="baro_pressure">Õhurõhk</string>
     <string name="battery">Aku</string>

@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">将公钥和私钥保存到该设备的安全加密存储中。</string>
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">带宽</string>
     <string name="baro_pressure">气压计</string>
     <string name="battery">电池</string>

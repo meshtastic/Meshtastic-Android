@@ -129,6 +129,7 @@
     <string name="backup_keys_confirmation">Speichert die öffentlichen und privaten Schlüssel im sicheren, verschlüsseltem Speicher auf diesem Gerät.</string>
     <string name="backup_restore">Sichern &amp; Wiederherstellen</string>
     <string name="bad">Schlecht</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbreite</string>
     <string name="baro_pressure">Luftdruck</string>
     <string name="battery">Akku</string>

@@ -76,6 +76,7 @@
     <string name="audio_config">Hangbeállítások</string>
     <string name="available_pins">Elérhető pinek</string>
     <string name="bad">Rossz</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Sávszélesség</string>
     <string name="battery">Akkumulátor</string>
     <string name="battery_ina_2xx_i2c_address">Akkumulátor INA_2XX I2C-cím</string>

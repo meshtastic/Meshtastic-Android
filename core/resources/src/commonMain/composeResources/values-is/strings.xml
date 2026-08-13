@@ -30,6 +30,7 @@
     <string name="apply">Virkja</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Reiknar…</string>
     <string name="camera_permission">Aðgangur að myndavél</string>

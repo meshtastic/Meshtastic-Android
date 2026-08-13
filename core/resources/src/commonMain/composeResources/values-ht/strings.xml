@@ -34,6 +34,7 @@
     <string name="aqi_good">Bon</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="bad">Move</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Batri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Ap kalkile…</string>

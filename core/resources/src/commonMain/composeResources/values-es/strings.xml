@@ -73,6 +73,7 @@
     <string name="audio_config">Configuración de sonido</string>
     <string name="available_pins">Pines disponibles</string>
     <string name="bad">Mal</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ancho de Banda</string>
     <string name="battery">Batería</string>
     <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>

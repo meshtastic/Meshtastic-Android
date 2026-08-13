@@ -32,6 +32,7 @@
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
     <string name="audio">Zvuk</string>
     <string name="audio_config">Postavke Zvuka</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="bluetooth_config">Postavke Bluetootha</string>
     <string name="calculating">Izračunavanje…</string>

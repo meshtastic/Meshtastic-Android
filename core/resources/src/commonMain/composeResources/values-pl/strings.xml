@@ -61,6 +61,7 @@
     <string name="back">Wstecz</string>
     <string name="backup_keys">Klucze zapasowe</string>
     <string name="bad">słaby</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Pasmo</string>
     <string name="battery">Bateria</string>
     <string name="blue">Niebieski</string>

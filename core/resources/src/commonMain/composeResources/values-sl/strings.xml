@@ -35,6 +35,7 @@
     <string name="aqi_good">Dober</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>
     <string name="bad">Slab</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Preračunavam…</string>
