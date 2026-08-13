@@ -33,7 +33,12 @@ import kotlin.test.assertSame
 class CoilImageLoaderLifecycleTest {
     @After
     @OptIn(DelicateCoilApi::class)
-    fun tearDown() = SingletonImageLoader.reset()
+    fun tearDown() {
+        // Booting the real Application starts background init on Dispatchers.Default; leaving it running
+        // leaks failures into later tests in this JVM (Robolectric never calls onTerminate).
+        ApplicationProvider.getApplicationContext<MeshUtilApplication>().cancelBackgroundInit()
+        SingletonImageLoader.reset()
+    }
 
     @Test
     fun productionApplicationProvidesConfiguredKoinImageLoader() {

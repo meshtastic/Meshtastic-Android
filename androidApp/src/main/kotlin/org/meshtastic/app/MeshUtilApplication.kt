@@ -20,6 +20,7 @@ import android.app.Application
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.work.Configuration
@@ -30,6 +31,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -68,7 +70,14 @@ open class MeshUtilApplication :
     Configuration.Provider,
     SingletonImageLoader.Factory {
 
-    protected val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    // SupervisorJob alone only isolates siblings: a failed child still reaches the global uncaught
+    // handler. These launches are best-effort background init, so report rather than escalate.
+    private val applicationScopeExceptionHandler = CoroutineExceptionHandler { context, throwable ->
+        Logger.e(throwable) { "Background application init failed in $context" }
+    }
+
+    protected val applicationScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.Default + applicationScopeExceptionHandler)
 
     /** Supplies Coil's process-wide loader without retaining an Activity in its singleton factory. */
     override fun newImageLoader(context: Context): ImageLoader = get<ImageLoader>()
@@ -144,10 +153,19 @@ open class MeshUtilApplication :
         }
     }
 
-    override fun onTerminate() {
-        // Robolectric never calls this, so unit tests booting this Application cannot rely on it.
-        // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
+    /**
+     * Stops the background init launched by [onCreate]. Robolectric never calls [onTerminate], so a unit test that
+     * boots this Application must call this itself — otherwise those jobs outlive the test on real
+     * [Dispatchers.Default] threads and their failures surface against whichever test is running next.
+     */
+    @VisibleForTesting
+    fun cancelBackgroundInit() {
         applicationScope.cancel()
+    }
+
+    override fun onTerminate() {
+        // cancel() not cancelAndJoin(): joining under runBlocking on the main thread can deadlock.
+        cancelBackgroundInit()
         try {
             runBlocking { get<DatabaseManager>().close() }
         } finally {
