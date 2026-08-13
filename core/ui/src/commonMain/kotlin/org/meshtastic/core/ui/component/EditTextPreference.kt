@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.ui.icon.Info
@@ -67,7 +68,9 @@ fun SignedIntegerEditTextPreference(
         enabled = enabled,
         summary = summary,
         isError = valueState.toIntOrNull() == null,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        // Signed by contract: RSSI thresholds and tx power are negative, and Number has no minus key.
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.NumberSigned, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
             valueState = it
@@ -136,17 +139,19 @@ fun EditTextPreference(
         value = valueState,
         enabled = enabled,
         summary = summary,
-        isError = value.toString() != valueState,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        // Compare parsed values, not strings: a comma-locale "3,7" is correct input but never string-equals "3.7".
+        isError = NumberFormatter.parseDecimalOrNull(valueState)?.toFloat() != value,
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.isEmpty()) {
+            val parsed = NumberFormatter.parseDecimalOrNull(it)?.toFloat()
+            if (parsed != null) {
                 valueState = it
-            } else {
-                it.toFloatOrNull()?.let { float ->
-                    valueState = it
-                    onValueChanged(float)
-                }
+                onValueChanged(parsed)
+            } else if (NumberFormatter.isPartialDecimal(it)) {
+                // Keep transient input ("", "-", "-.") so the field doesn't snap back mid-entry of "-1.5".
+                valueState = it
             }
         },
         onFocusChanged = onFocusChanged,
@@ -166,24 +171,25 @@ fun EditTextPreference(
     onFocusChanged: (FocusState) -> Unit = {},
 ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
-    val decimalSeparators = setOf('.', ',', '٫', '、', '·') // set of possible decimal separators
 
     EditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
         summary = summary,
-        isError = value.toString() != valueState,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        // Compare parsed values, not strings: a comma-locale "48,21" is correct input but never string-equals "48.21".
+        isError = NumberFormatter.parseDecimalOrNull(valueState) != value,
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.length <= 1 || it.first() in decimalSeparators) {
+            val parsed = NumberFormatter.parseDecimalOrNull(it)
+            if (parsed != null) {
                 valueState = it
-            } else {
-                it.toDoubleOrNull()?.let { double ->
-                    valueState = it
-                    onValueChanged(double)
-                }
+                onValueChanged(parsed)
+            } else if (NumberFormatter.isPartialDecimal(it)) {
+                // Keep transient input ("", "-", "-.") so the field doesn't snap back mid-entry of "-1.5".
+                valueState = it
             }
         },
         onFocusChanged = onFocusChanged,

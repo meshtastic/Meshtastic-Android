@@ -82,7 +82,7 @@ class CurrentlyConnectedInfoRssiLifecycleTest {
             }
         }
 
-        waitUntil { device.readRssiCalls >= 1 }
+        waitUntil("initial RSSI read", SETTLE_TIMEOUT_MS) { device.readRssiCalls >= 1 }
         val firstReadCount = device.readRssiCalls
 
         lifecycleOwner.moveTo(Lifecycle.State.CREATED)
@@ -92,7 +92,7 @@ class CurrentlyConnectedInfoRssiLifecycleTest {
         assertEquals(firstReadCount, device.readRssiCalls, "RSSI reads must stop below STARTED")
 
         lifecycleOwner.moveTo(Lifecycle.State.STARTED)
-        waitUntil { device.readRssiCalls > firstReadCount }
+        waitUntil("polling resumed at STARTED", SETTLE_TIMEOUT_MS) { device.readRssiCalls > firstReadCount }
 
         device.setState(BleConnectionState.Disconnected())
         waitForIdle()
@@ -102,7 +102,7 @@ class CurrentlyConnectedInfoRssiLifecycleTest {
         assertEquals(disconnectedReadCount, device.readRssiCalls, "disconnected devices must not be polled")
 
         device.setState(BleConnectionState.Connected)
-        waitUntil { device.readRssiCalls > disconnectedReadCount }
+        waitUntil("polling resumed on reconnect", SETTLE_TIMEOUT_MS) { device.readRssiCalls > disconnectedReadCount }
         assertTrue(
             device.readRssiCalls > disconnectedReadCount,
             "reconnect must resume RSSI reads without a timer poll",
@@ -141,5 +141,14 @@ class CurrentlyConnectedInfoRssiLifecycleTest {
         fun setState(newState: BleConnectionState) {
             mutableState.value = newState
         }
+    }
+
+    private companion object {
+        /**
+         * `waitUntil` defaults to 1s, which asserts rendering speed rather than liveness: CI runners are several times
+         * slower than local, and `waitForIdle` alone has been observed taking 6s on passing runs. Budget for the
+         * slowest runner — a genuine regression still fails, just later.
+         */
+        const val SETTLE_TIMEOUT_MS = 30_000L
     }
 }

@@ -49,9 +49,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -71,6 +72,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
@@ -130,10 +132,10 @@ private class SiteFormState(initial: SitePlannerParams) {
 
     // Validation — computed from the (observable) string fields, so callers just read the booleans.
     private val latValue
-        get() = lat.toDoubleOrNull()
+        get() = NumberFormatter.parseDecimalOrNull(lat)
 
     private val lonValue
-        get() = lon.toDoubleOrNull()
+        get() = NumberFormatter.parseDecimalOrNull(lon)
 
     val latBad
         get() = latValue.let { it == null || it !in -LAT_LIMIT..LAT_LIMIT }
@@ -142,14 +144,14 @@ private class SiteFormState(initial: SitePlannerParams) {
         get() = lonValue.let { it == null || it !in -LON_LIMIT..LON_LIMIT }
 
     val powerBad
-        get() = (power.toDoubleOrNull() ?: 0.0) <= 0.0
+        get() = (NumberFormatter.parseDecimalOrNull(power) ?: 0.0) <= 0.0
 
     val freqBad
-        get() = (freq.toDoubleOrNull() ?: 0.0) <= 0.0
+        get() = (NumberFormatter.parseDecimalOrNull(freq) ?: 0.0) <= 0.0
 
     val rxSensBad
         get() =
-            rxSensitivity.toDoubleOrNull()?.let {
+            NumberFormatter.parseDecimalOrNull(rxSensitivity)?.let {
                 it !in SitePlannerParams.MIN_RX_SENSITIVITY_DBM..SitePlannerParams.MAX_RX_SENSITIVITY_DBM
             } ?: false
 
@@ -172,7 +174,11 @@ fun SitePlannerSheet(
     onUseNodeLocation: (() -> Unit)? = null,
     onUseMapCenter: (() -> Unit)? = null,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState =
+        rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        )
     val state = remember { SiteFormState(initial) }
     // Re-seed only the coordinates when a shortcut changes them; other fields keep the user's edits.
     LaunchedEffect(initial.latitude, initial.longitude) {
@@ -268,10 +274,12 @@ private fun TransmitterSection(
 @Composable
 private fun ReceiverSection(state: SiteFormState) {
     FormSection(stringResource(Res.string.site_planner_section_receiver), defaultExpanded = false) {
+        // The whole valid range is negative (-150..-30 dBm), so an unsigned keypad reaches no valid value.
         SiteField(
             state.rxSensitivity,
             { state.rxSensitivity = it },
             Res.string.site_planner_rx_sensitivity_dbm,
+            keyboardType = KeyboardType.DecimalSigned,
             error = if (state.rxSensBad) stringResource(Res.string.site_planner_invalid_rx_sensitivity) else null,
         )
         SiteField(state.rxHeight, { state.rxHeight = it }, Res.string.site_planner_rx_height_meters)
@@ -334,12 +342,30 @@ private fun TransmitterFields(
     freqError: String?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SiteField(state.lat, { state.lat = it }, Res.string.latitude, error = latError)
-        SiteField(state.lon, { state.lon = it }, Res.string.longitude, error = lonError)
+        // Southern/western hemispheres and lossy antennas are negative, so these need a sign key.
+        SiteField(
+            state.lat,
+            { state.lat = it },
+            Res.string.latitude,
+            keyboardType = KeyboardType.DecimalSigned,
+            error = latError,
+        )
+        SiteField(
+            state.lon,
+            { state.lon = it },
+            Res.string.longitude,
+            keyboardType = KeyboardType.DecimalSigned,
+            error = lonError,
+        )
         SiteField(state.power, { state.power = it }, Res.string.site_planner_tx_power_watts, error = powerError)
         SiteField(state.freq, { state.freq = it }, Res.string.site_planner_frequency_mhz, error = freqError)
         SiteField(state.height, { state.height = it }, Res.string.site_planner_antenna_height_meters)
-        SiteField(state.gain, { state.gain = it }, Res.string.site_planner_antenna_gain_dbi)
+        SiteField(
+            state.gain,
+            { state.gain = it },
+            Res.string.site_planner_antenna_gain_dbi,
+            keyboardType = KeyboardType.DecimalSigned,
+        )
     }
 }
 
@@ -349,7 +375,8 @@ private fun SiteField(
     onValueChange: (String) -> Unit,
     label: StringResource,
     modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Number,
+    // Every numeric field here is fractional (MHz, watts, dBi, km), so Decimal — not Number — is the floor.
+    keyboardType: KeyboardType = KeyboardType.Decimal,
     error: String? = null,
 ) {
     OutlinedTextField(
@@ -421,16 +448,16 @@ private fun paletteStops(name: String): List<Color> {
 /** Build params from the (string) form fields, falling back to the matching [initial] value when a field is invalid. */
 private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams): SitePlannerParams = SitePlannerParams(
     name = state.name.ifBlank { initial.name },
-    latitude = state.lat.toDoubleOrNull() ?: initial.latitude,
-    longitude = state.lon.toDoubleOrNull() ?: initial.longitude,
-    txPowerWatts = state.power.toDoubleOrNull() ?: initial.txPowerWatts,
-    txFreqMhz = state.freq.toDoubleOrNull() ?: initial.txFreqMhz,
-    txHeightMeters = state.height.toDoubleOrNull() ?: initial.txHeightMeters,
-    txGainDbi = state.gain.toDoubleOrNull() ?: initial.txGainDbi,
+    latitude = NumberFormatter.parseDecimalOrNull(state.lat) ?: initial.latitude,
+    longitude = NumberFormatter.parseDecimalOrNull(state.lon) ?: initial.longitude,
+    txPowerWatts = NumberFormatter.parseDecimalOrNull(state.power) ?: initial.txPowerWatts,
+    txFreqMhz = NumberFormatter.parseDecimalOrNull(state.freq) ?: initial.txFreqMhz,
+    txHeightMeters = NumberFormatter.parseDecimalOrNull(state.height) ?: initial.txHeightMeters,
+    txGainDbi = NumberFormatter.parseDecimalOrNull(state.gain) ?: initial.txGainDbi,
     colorScale = state.colorScale,
-    rxSensitivityDbm = state.rxSensitivity.toDoubleOrNull() ?: initial.rxSensitivityDbm,
-    rxHeightMeters = state.rxHeight.toDoubleOrNull() ?: initial.rxHeightMeters,
-    maxRangeKm = state.maxRange.toDoubleOrNull() ?: initial.maxRangeKm,
+    rxSensitivityDbm = NumberFormatter.parseDecimalOrNull(state.rxSensitivity) ?: initial.rxSensitivityDbm,
+    rxHeightMeters = NumberFormatter.parseDecimalOrNull(state.rxHeight) ?: initial.rxHeightMeters,
+    maxRangeKm = NumberFormatter.parseDecimalOrNull(state.maxRange) ?: initial.maxRangeKm,
     highResolution = state.highResolution,
     minDbm = initial.minDbm,
     maxDbm = initial.maxDbm,

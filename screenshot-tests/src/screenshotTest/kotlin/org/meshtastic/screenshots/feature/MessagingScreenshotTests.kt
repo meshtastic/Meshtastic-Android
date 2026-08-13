@@ -19,12 +19,13 @@ package org.meshtastic.screenshots.feature
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_routing_error_max_retransmit
 import org.meshtastic.core.resources.message_routing_error_max_retransmit_detail
-import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppThemePreviewWrapper
 import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
@@ -88,16 +89,15 @@ fun ScreenshotMessageItemStatusStates() {
 
 @PreviewTest
 @PreviewLightDark
+@PreviewWrapper(AppThemePreviewWrapper::class)
 @Composable
 fun ScreenshotMessageStatusFailureDetails() {
-    AppTheme {
-        DeliveryInfo(
-            title = Res.string.error,
-            text = Res.string.message_routing_error_max_retransmit,
-            detail = Res.string.message_routing_error_max_retransmit_detail,
-            resendOption = true,
-        )
-    }
+    DeliveryInfo(
+        title = Res.string.error,
+        text = Res.string.message_routing_error_max_retransmit,
+        detail = Res.string.message_routing_error_max_retransmit_detail,
+        resendOption = true,
+    )
 }
 
 @PreviewTest
