@@ -25,11 +25,8 @@ import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.demo_mode
-import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic
-import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
@@ -48,7 +45,11 @@ open class CommonGetDiscoveredDevicesUseCase(
     private val usbScanner: UsbScanner? = null,
 ) : GetDiscoveredDevicesUseCase {
 
-    override fun invoke(showMock: Boolean, resolvedList: Flow<List<DiscoveredService>>): Flow<DiscoveredDevices> {
+    override fun invoke(
+        showMock: Boolean,
+        showReplay: Boolean,
+        resolvedList: Flow<List<DiscoveredService>>,
+    ): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
         val usbFlow = usbScanner?.scanUsbDevices() ?: flowOf(emptyList())
 
@@ -65,16 +66,7 @@ open class CommonGetDiscoveredDevicesUseCase(
             val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
 
-            val mockEntries = buildList {
-                if (showMock) {
-                    val label = safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode")
-                    add(DeviceListEntry.Mock(label))
-                    val replayLabel =
-                        safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }
-                            .getOrDefault("Demo Mode (Replay)")
-                    add(DeviceListEntry.Replay(replayLabel))
-                }
-            }
+            val mockEntries = virtualDeviceEntries(showMock, showReplay)
 
             DiscoveredDevices(
                 discoveredTcpDevices = discoveredTcpForUi,

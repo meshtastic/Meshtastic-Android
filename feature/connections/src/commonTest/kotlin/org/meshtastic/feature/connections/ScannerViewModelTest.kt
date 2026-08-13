@@ -354,6 +354,44 @@ class ScannerViewModelTest {
         }
     }
 
+    /**
+     * The replay demo entry only makes sense in a build carrying the capture asset; without it the replay transport
+     * degrades to the plain mock. These two pin the ViewModel as the thing that forwards that capability, so the gate
+     * cannot regress into "always offer replay whenever Demo Mode is on".
+     */
+    @Test
+    fun `replay is requested only when the transport reports the capture asset`() = runTest {
+        assertEquals(listOf(true to true), requestedVisibility(mockTransport = true, replayAvailable = true))
+    }
+
+    @Test
+    fun `replay is not requested when the capture asset is absent`() = runTest {
+        assertEquals(listOf(true to false), requestedVisibility(mockTransport = true, replayAvailable = false))
+    }
+
+    /**
+     * Builds a ViewModel against the given transport capabilities and returns the distinct `(showMock, showReplay)`
+     * pairs it asked the use case for. A fresh ViewModel is required because both flags are latched in `init`.
+     */
+    private suspend fun requestedVisibility(
+        mockTransport: Boolean,
+        replayAvailable: Boolean,
+    ): List<Pair<Boolean, Boolean>> {
+        every { harness.radioInterfaceService.isMockTransport() } returns mockTransport
+        every { harness.radioInterfaceService.isReplayTransportAvailable } returns replayAvailable
+        harness.discoveryRequests.clear()
+        val subject = harness.buildBase()
+        try {
+            subject.usbDevicesForUi.test {
+                awaitItem()
+                cancelAndIgnoreRemainingEvents()
+            }
+            return harness.discoveryRequests.distinct()
+        } finally {
+            harness.clearViewModel(subject)
+        }
+    }
+
     @Test
     fun `bleDevicesForUi shows bonded devices only once they are visible via scan`() = runTest {
         val device1 = FakeBleDevice(address = "01:02:03:04:05:06", name = "Node B", rssi = -50)

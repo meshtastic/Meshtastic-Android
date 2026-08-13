@@ -31,6 +31,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.feature.connections.model.DeviceListEntry
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -61,7 +62,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     @Test
     fun testEmptyRecentAddresses() = runTest {
         setUp()
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             assertTrue(result.recentTcpDevices.isEmpty(), "No recent TCP devices when empty")
             assertTrue(result.usbDevices.isEmpty(), "No USB devices when showMock=false")
@@ -76,7 +77,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         recentAddressesFlow.value =
             listOf(RecentAddress("t192.168.1.100", "Zebra_Node"), RecentAddress("t192.168.1.101", "Alpha_Node"))
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             result.recentTcpDevices.size shouldBe 2
             result.recentTcpDevices[0].name shouldBe "Alpha_Node"
@@ -86,11 +87,33 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     }
 
     @Test
-    fun testShowMockAddsDemo() = runTest {
+    fun testShowMockAddsDemoOnly() = runTest {
         setUp()
-        useCase.invoke(showMock = true, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = true, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            result.usbDevices.size shouldBe 2
+            result.usbDevices.map { it::class } shouldBe listOf(DeviceListEntry.Mock::class)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testShowReplayAddsReplayAlongsideDemo() = runTest {
+        setUp()
+        useCase.invoke(showMock = true, showReplay = true, resolvedList = resolvedServicesFlow).test {
+            val result = awaitItem()
+            result.usbDevices.map { it::class } shouldBe
+                listOf(DeviceListEntry.Mock::class, DeviceListEntry.Replay::class)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** Replay is nested inside the demo gate: it is never offered on its own. */
+    @Test
+    fun testShowReplayIgnoredWhenMockHidden() = runTest {
+        setUp()
+        useCase.invoke(showMock = false, showReplay = true, resolvedList = resolvedServicesFlow).test {
+            val result = awaitItem()
+            assertTrue(result.usbDevices.isEmpty(), "No replay device when showMock=false")
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -98,7 +121,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     @Test
     fun testHideMockNoDemo() = runTest {
         setUp()
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             assertTrue(result.usbDevices.isEmpty(), "No mock device when showMock=false")
             cancelAndIgnoreRemainingEvents()
@@ -121,7 +144,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
 
         recentAddressesFlow.value = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             result.recentTcpDevices.size shouldBe 1
             assertNotNull(result.recentTcpDevices[0].node, "Node should be matched by suffix")
@@ -138,7 +161,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
 
         recentAddressesFlow.value = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             result.recentTcpDevices.size shouldBe 1
             assertNull(result.recentTcpDevices[0].node, "Node should not be matched when no database")
@@ -151,7 +174,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         recentAddressesFlow.value = listOf(RecentAddress("t192.168.1.100", "Node_A"))
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val firstResult = awaitItem()
             firstResult.recentTcpDevices.size shouldBe 1
 
@@ -176,7 +199,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
                 ),
             )
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             result.discoveredTcpDevices.size shouldBe 1
             result.discoveredTcpDevices[0].name shouldBe "Mesh_1234"
@@ -210,7 +233,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
                 ),
             )
 
-        useCase.invoke(showMock = false, resolvedList = resolvedServicesFlow).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
             result.discoveredTcpDevices.size shouldBe 1
             assertNotNull(result.discoveredTcpDevices[0].node)
@@ -225,7 +248,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         recentAddressesFlow.value = listOf(RecentAddress("t192.168.1.100", "Recent_Node"))
 
-        useCase.invoke(showMock = false, resolvedList = flowOf(emptyList())).test {
+        useCase.invoke(showMock = false, showReplay = false, resolvedList = flowOf(emptyList())).test {
             val result = awaitItem()
             assertTrue(result.discoveredTcpDevices.isEmpty(), "No NSD devices when resolvedList is empty")
             result.recentTcpDevices.size shouldBe 1
@@ -237,9 +260,10 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     @Test
     fun testEmptyResolvedListIncludesMock() = runTest {
         setUp()
-        useCase.invoke(showMock = true, resolvedList = flowOf(emptyList())).test {
+        useCase.invoke(showMock = true, showReplay = true, resolvedList = flowOf(emptyList())).test {
             val result = awaitItem()
-            result.usbDevices.size shouldBe 2
+            result.usbDevices.map { it::class } shouldBe
+                listOf(DeviceListEntry.Mock::class, DeviceListEntry.Replay::class)
             cancelAndIgnoreRemainingEvents()
         }
     }

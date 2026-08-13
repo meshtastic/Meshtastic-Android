@@ -31,6 +31,12 @@ interface RadioTransportFactory {
     /** Whether we are currently forced into using a mock transport (e.g., Firebase Test Lab). */
     fun isMockTransport(): Boolean
 
+    /**
+     * Whether this build can actually replay a packet capture rather than silently degrading to the plain mock. The
+     * capture is a locally generated artifact that is not checked in, so most builds ship without it.
+     */
+    val isReplayTransportAvailable: Boolean
+
     /** Creates a transport for the given [address], or a NOP implementation if invalid/unsupported. */
     fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
 

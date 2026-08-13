@@ -55,6 +55,14 @@ class AndroidRadioTransportFactory(
     override fun isMockTransport(): Boolean =
         buildConfigProvider.isDebug || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
+    /**
+     * Probed once: the asset is baked into the APK, so its presence cannot change while the process lives. Empty counts
+     * as absent to match [createReplayTransport]'s own guard.
+     */
+    override val isReplayTransportAvailable: Boolean by lazy {
+        runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.read() != -1 } }.getOrDefault(false)
+    }
+
     override fun isPlatformAddressValid(address: String): Boolean {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) } ?: return false
         val rest = address.substring(1)
