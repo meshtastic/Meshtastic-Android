@@ -18,7 +18,11 @@ concurrency:
 
 jobs:
   update-changelog:
-    runs-on: ubuntu-24.04-arm
+    # ubuntu-slim: git + gh + coreutils + stdlib python3 is the whole toolchain here. Note this job checks out
+    # full history below and slim is single-CPU, so the clone is slower than on a VM — and
+    # slim's 15-minute platform cap is hard, matching the timeout already set here. A run that
+    # outgrows that budget fails; it regenerates CHANGELOG.md from scratch, so a retry is safe.
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     steps:
       - name: Checkout code

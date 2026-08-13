@@ -24,7 +24,11 @@ concurrency:
 
 jobs:
   cleanup_prereleases:
-    runs-on: ubuntu-24.04-arm
+    # ubuntu-slim: gh + git + jq + stdlib python is the whole toolchain, and the gh-pages
+    # worktree needs no privileges. Slim is single-CPU (the full-history clone below is slower
+    # than on a VM) and its 15-minute platform cap is hard, matching the timeout already set
+    # here. Each step is independently re-runnable, so a capped run is retryable.
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     # Dispatch inputs reach the shell as environment variables rather than being
     # interpolated into the script text: base_version is free-form and feeds a

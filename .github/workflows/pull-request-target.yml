@@ -14,7 +14,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    runs-on: ubuntu-24.04-arm
+    # github-script only, no checkout, so ubuntu-slim's container is sufficient.
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
     - name: Auto-label PR
