@@ -72,6 +72,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
@@ -131,10 +132,10 @@ private class SiteFormState(initial: SitePlannerParams) {
 
     // Validation — computed from the (observable) string fields, so callers just read the booleans.
     private val latValue
-        get() = lat.toDoubleOrNull()
+        get() = NumberFormatter.parseDecimalOrNull(lat)
 
     private val lonValue
-        get() = lon.toDoubleOrNull()
+        get() = NumberFormatter.parseDecimalOrNull(lon)
 
     val latBad
         get() = latValue.let { it == null || it !in -LAT_LIMIT..LAT_LIMIT }
@@ -143,14 +144,14 @@ private class SiteFormState(initial: SitePlannerParams) {
         get() = lonValue.let { it == null || it !in -LON_LIMIT..LON_LIMIT }
 
     val powerBad
-        get() = (power.toDoubleOrNull() ?: 0.0) <= 0.0
+        get() = (NumberFormatter.parseDecimalOrNull(power) ?: 0.0) <= 0.0
 
     val freqBad
-        get() = (freq.toDoubleOrNull() ?: 0.0) <= 0.0
+        get() = (NumberFormatter.parseDecimalOrNull(freq) ?: 0.0) <= 0.0
 
     val rxSensBad
         get() =
-            rxSensitivity.toDoubleOrNull()?.let {
+            NumberFormatter.parseDecimalOrNull(rxSensitivity)?.let {
                 it !in SitePlannerParams.MIN_RX_SENSITIVITY_DBM..SitePlannerParams.MAX_RX_SENSITIVITY_DBM
             } ?: false
 
@@ -447,16 +448,16 @@ private fun paletteStops(name: String): List<Color> {
 /** Build params from the (string) form fields, falling back to the matching [initial] value when a field is invalid. */
 private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams): SitePlannerParams = SitePlannerParams(
     name = state.name.ifBlank { initial.name },
-    latitude = state.lat.toDoubleOrNull() ?: initial.latitude,
-    longitude = state.lon.toDoubleOrNull() ?: initial.longitude,
-    txPowerWatts = state.power.toDoubleOrNull() ?: initial.txPowerWatts,
-    txFreqMhz = state.freq.toDoubleOrNull() ?: initial.txFreqMhz,
-    txHeightMeters = state.height.toDoubleOrNull() ?: initial.txHeightMeters,
-    txGainDbi = state.gain.toDoubleOrNull() ?: initial.txGainDbi,
+    latitude = NumberFormatter.parseDecimalOrNull(state.lat) ?: initial.latitude,
+    longitude = NumberFormatter.parseDecimalOrNull(state.lon) ?: initial.longitude,
+    txPowerWatts = NumberFormatter.parseDecimalOrNull(state.power) ?: initial.txPowerWatts,
+    txFreqMhz = NumberFormatter.parseDecimalOrNull(state.freq) ?: initial.txFreqMhz,
+    txHeightMeters = NumberFormatter.parseDecimalOrNull(state.height) ?: initial.txHeightMeters,
+    txGainDbi = NumberFormatter.parseDecimalOrNull(state.gain) ?: initial.txGainDbi,
     colorScale = state.colorScale,
-    rxSensitivityDbm = state.rxSensitivity.toDoubleOrNull() ?: initial.rxSensitivityDbm,
-    rxHeightMeters = state.rxHeight.toDoubleOrNull() ?: initial.rxHeightMeters,
-    maxRangeKm = state.maxRange.toDoubleOrNull() ?: initial.maxRangeKm,
+    rxSensitivityDbm = NumberFormatter.parseDecimalOrNull(state.rxSensitivity) ?: initial.rxSensitivityDbm,
+    rxHeightMeters = NumberFormatter.parseDecimalOrNull(state.rxHeight) ?: initial.rxHeightMeters,
+    maxRangeKm = NumberFormatter.parseDecimalOrNull(state.maxRange) ?: initial.maxRangeKm,
     highResolution = state.highResolution,
     minDbm = initial.minDbm,
     maxDbm = initial.maxDbm,
