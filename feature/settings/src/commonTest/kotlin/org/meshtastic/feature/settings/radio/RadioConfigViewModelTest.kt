@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.radio
 
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
@@ -31,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -123,7 +125,15 @@ class RadioConfigViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
-    private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
+    private val trackerScope = CoroutineScope(SupervisorJob())
+    private val nodeRestartTracker = NodeRestartTracker(trackerScope)
+
+    /**
+     * A `viewModelScope` is not a child of `runTest`, so work still in flight when a test ends would resume on
+     * `Dispatchers.Main` after [Dispatchers.resetMain] and fail an unrelated later test. Every ViewModel is tracked
+     * here so [tearDown] can cancel it.
+     */
+    private val createdViewModels = mutableListOf<RadioConfigViewModel>()
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -157,6 +167,9 @@ class RadioConfigViewModelTest {
 
     @AfterTest
     fun tearDown() {
+        createdViewModels.forEach { it.viewModelScope.cancel() }
+        createdViewModels.clear()
+        trackerScope.cancel()
         Dispatchers.resetMain()
     }
 
@@ -186,6 +199,7 @@ class RadioConfigViewModelTest {
         lockdownCoordinator = FakeLockdownCoordinator(),
         analytics = mock(MockMode.autofill),
     )
+        .also { createdViewModels += it }
 
     @Test
     fun `setConfig calls useCase`() = runTest {
@@ -951,33 +965,7 @@ class RadioConfigViewModelTest {
     fun `destNum from SavedStateHandle resolves destNode`() = runTest {
         val node = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(node))
-        viewModel =
-            RadioConfigViewModel(
-                destNum = 456,
-                radioConfigRepository = radioConfigRepository,
-                packetRepository = packetRepository,
-                serviceRepository = serviceRepository,
-                nodeRepository = nodeRepository,
-                locationRepository = locationRepository,
-                mapConsentPrefs = mapConsentPrefs,
-                analyticsPrefs = analyticsPrefs,
-                homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                importProfileUseCase = importProfileUseCase,
-                exportProfileUseCase = exportProfileUseCase,
-                importSecurityConfigUseCase = importSecurityConfigUseCase,
-                securityKeyBackupStore = securityKeyBackupStore,
-                snackbarManager = snackbarManager,
-                nodeRestartTracker = nodeRestartTracker,
-                installProfileUseCase = installProfileUseCase,
-                radioConfigUseCase = radioConfigUseCase,
-                adminActionsUseCase = adminActionsUseCase,
-                processRadioResponseUseCase = processRadioResponseUseCase,
-                locationService = locationService,
-                fileService = fileService,
-                mqttManager = mqttManager,
-                lockdownCoordinator = FakeLockdownCoordinator(),
-                analytics = mock(MockMode.autofill),
-            )
+        viewModel = createViewModel(destNum = 456)
         assertEquals(456, viewModel.destNode.value?.num)
     }
 
