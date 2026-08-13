@@ -274,6 +274,10 @@ class MeshNotificationManagerImpl(
     /**
      * Creates all necessary notification channels on devices running Android O or newer. This should be called once
      * when the service is created.
+     *
+     * Deliberately blocking (Main-thread, one-time cost): the orchestrator posts the foreground-service notification
+     * synchronously right after this returns, so channels must exist before then — do not lazy-gate this into the
+     * suspend notify paths. Blocking [getString] is safe here only because Main is not a Dispatchers.Default worker.
      */
     override fun initChannels() {
         notificationManager.removeLegacyCategoryChannels()
@@ -547,7 +551,7 @@ class MeshNotificationManagerImpl(
         showGroupSummary()
     }
 
-    private fun showGroupSummary(justCancelledId: Int? = null) {
+    private suspend fun showGroupSummary(justCancelledId: Int? = null) {
         // Exclude the summary itself by its group-summary flag rather than by id, so a conversation whose
         // contactKey.hashCode() happens to equal SUMMARY_ID is still counted as an active conversation.
         // Also exclude a conversation we just cancelled: activeNotifications does not reflect a cancel() issued
@@ -568,7 +572,7 @@ class MeshNotificationManagerImpl(
         }
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
+        val meName = ourNode?.user?.long_name ?: getStringSuspend(Res.string.you)
         val me =
             Person.Builder()
                 .setName(meName)
@@ -583,7 +587,7 @@ class MeshNotificationManagerImpl(
         val messagingStyle =
             NotificationCompat.MessagingStyle(me)
                 .setGroupConversation(true)
-                .setConversationTitle(getString(Res.string.meshtastic_app_name))
+                .setConversationTitle(getStringSuspend(Res.string.meshtastic_app_name))
 
         activeNotifications.forEach { sbn ->
             // Prefer the child's real MessagingStyle: its latest message carries the actual sender (Person, icon) and
@@ -593,7 +597,7 @@ class MeshNotificationManagerImpl(
                     ?.messages
                     ?.lastOrNull()
             if (latest?.text != null) {
-                val senderPerson = latest.person ?: Person.Builder().setName(getString(Res.string.you)).build()
+                val senderPerson = latest.person ?: Person.Builder().setName(getStringSuspend(Res.string.you)).build()
                 messagingStyle.addMessage(latest.text, latest.timestamp, senderPerson)
             } else {
                 // Fallback for children without an extractable style: rebuild a generic line from the extras.
@@ -642,7 +646,7 @@ class MeshNotificationManagerImpl(
         notificationManager.notify(TAG_CLIENT, clientNotification.toString().hashCode(), notification)
     }
 
-    override fun cancelMessageNotification(contactKey: String) {
+    override suspend fun cancelMessageNotification(contactKey: String) {
         val id = contactKey.hashCode()
         notificationManager.cancel(TAG_MESSAGE, id)
         // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
@@ -666,13 +670,13 @@ class MeshNotificationManagerImpl(
             val index = contactKey.substringBefore(NodeAddress.ID_BROADCAST).toIntOrNull()
             channelName = index?.let { channelSet.settings.getOrNull(it) }?.let { Channel(it, lora).name }
             // Never fall back to the raw contactKey for user-facing labels (privacy-first convention).
-            conversationName = channelName ?: getString(Res.string.channel)
+            conversationName = channelName ?: getStringSuspend(Res.string.channel)
         } else {
             // DM contactKey is "<channelIndex><userId>" where userId starts at the '!'.
             val userId = "!" + contactKey.substringAfter("!", missingDelimiterValue = "")
             val peer = nodeRepository.value.nodeDBbyNum.value.values.find { it.user.id == userId }
             conversationName =
-                peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: getString(Res.string.unknown_username)
+                peer?.user?.long_name?.takeIf { it.isNotBlank() } ?: getStringSuspend(Res.string.unknown_username)
         }
         showConversationNotification(contactKey, isBroadcast, channelName, conversationName, isSilent = true)
     }
@@ -715,7 +719,7 @@ class MeshNotificationManagerImpl(
     }
 
     @Suppress("LongMethod")
-    private fun createConversationNotification(
+    private suspend fun createConversationNotification(
         contactKey: String,
         isBroadcast: Boolean,
         channelName: String?,
@@ -730,7 +734,7 @@ class MeshNotificationManagerImpl(
         }
 
         val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
+        val meName = ourNode?.user?.long_name ?: getStringSuspend(Res.string.you)
         val me =
             Person.Builder()
                 .setName(meName)
@@ -964,8 +968,8 @@ class MeshNotificationManagerImpl(
         }
     }
 
-    private fun createReplyAction(contactKey: String): NotificationCompat.Action {
-        val replyLabel = getString(Res.string.reply)
+    private suspend fun createReplyAction(contactKey: String): NotificationCompat.Action {
+        val replyLabel = getStringSuspend(Res.string.reply)
         val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
 
         val replyIntent =
@@ -989,8 +993,8 @@ class MeshNotificationManagerImpl(
             .build()
     }
 
-    private fun createMarkAsReadAction(contactKey: String): NotificationCompat.Action {
-        val label = getString(Res.string.mark_as_read)
+    private suspend fun createMarkAsReadAction(contactKey: String): NotificationCompat.Action {
+        val label = getStringSuspend(Res.string.mark_as_read)
         val intent =
             Intent(context, MarkAsReadReceiver::class.java).apply {
                 action = MARK_AS_READ_ACTION

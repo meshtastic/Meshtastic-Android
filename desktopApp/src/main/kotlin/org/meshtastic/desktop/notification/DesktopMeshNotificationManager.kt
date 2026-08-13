@@ -168,7 +168,7 @@ class DesktopMeshNotificationManager(
         }
     }
 
-    override fun cancelMessageNotification(contactKey: String) {
+    override suspend fun cancelMessageNotification(contactKey: String) {
         notificationManager.cancel(contactKey.hashCode())
     }
 
