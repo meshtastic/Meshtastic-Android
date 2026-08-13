@@ -659,6 +659,38 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `Stage 2 removes cached nodes absent from the completed radio snapshot before readiness`() = testScope.runTest {
+        val currentNode = NodeInfo(num = 100)
+        val staleNum = 200
+        val current = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = currentNode.num)
+        val stale = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = staleNum)
+        val callOrder = mutableListOf<String>()
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(current.num to current, stale.num to stale)
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls
+            {
+                callOrder.add("installConfig")
+                emptyList()
+            }
+        every { nodeManager.removeByNodenum(any()) } calls { callOrder.add("removeStale") }
+        every { nodeManager.setNodeDbReady(true) } calls { callOrder.add("nodeDbReady") }
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(currentNode)
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        assertEquals(listOf("installConfig", "removeStale", "nodeDbReady"), callOrder)
+        verify { nodeManager.removeByNodenum(staleNum) }
+        verify(mode = VerifyMode.exactly(0)) { nodeManager.removeByNodenum(current.num) }
+    }
+
+    @Test
     fun `Stage 2 complete id ignored when not in ReceivingNodeInfo state`() = testScope.runTest {
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()

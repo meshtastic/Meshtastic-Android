@@ -298,6 +298,13 @@ class MeshConfigFlowManagerImpl(
             nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
 
+        val installedNums = entities.mapTo(mutableSetOf()) { it.num }
+        val staleNums = nodeManager.nodeDBbyNodeNum.keys.filterNot { it in installedNums }
+        staleNums.forEach(nodeManager::removeByNodenum)
+        if (staleNums.isNotEmpty()) {
+            Logger.i { "Removed ${staleNums.size} node(s) absent from the completed radio snapshot" }
+        }
+
         val published =
             runForSession(session) {
                 nodeManager.setNodeDbReady(true)

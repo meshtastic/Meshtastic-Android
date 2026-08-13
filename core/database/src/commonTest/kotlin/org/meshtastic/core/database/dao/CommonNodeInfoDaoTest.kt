@@ -24,11 +24,13 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.core.testing.setupTestContext
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 abstract class CommonNodeInfoDaoTest {
@@ -118,5 +120,24 @@ abstract class CommonNodeInfoDaoTest {
         val nodes = dao.nodeDBbyNum().first()
         assertEquals(1, nodes.size)
         assertTrue(nodes.containsKey(1))
+    }
+
+    @Test
+    fun installConfigReplacesThePreviousNodeSnapshot() = runTest {
+        createDb()
+        val retained = NodeEntity(num = 1, user = User(id = "!1"), notes = "app-local note")
+        val stale = NodeEntity(num = 2, user = User(id = "!2"), isFavorite = true)
+        dao.putAll(listOf(retained, stale))
+
+        dao.installConfig(
+            myNodeInfo,
+            listOf(
+                NodeEntity(num = 1, user = User(id = "!1", long_name = "Fresh name", hw_model = HardwareModel.TBEAM)),
+            ),
+        )
+
+        assertEquals("Fresh name", dao.getNodeByNum(1)?.node?.longName)
+        assertEquals("app-local note", dao.getNodeByNum(1)?.node?.notes)
+        assertNull(dao.getNodeByNum(2), "a node absent from the complete radio snapshot must not survive")
     }
 }

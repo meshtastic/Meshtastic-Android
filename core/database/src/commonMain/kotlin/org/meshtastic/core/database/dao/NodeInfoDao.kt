@@ -585,8 +585,11 @@ interface NodeInfoDao {
     }
 
     /**
-     * Installs the config download from the connected device, reconciling any node-number change of the device itself
-     * (firmware 2.8 renumber, erase-and-reflash, manual re-key) before the new `my_node` row lands.
+     * Replaces the stored node snapshot with the complete config download from the connected device, reconciling any
+     * node-number change of the device itself (firmware 2.8 renumber, erase-and-reflash, manual re-key) before the new
+     * `my_node` row lands. Rows absent from the completed download are removed so an old or wiped radio NodeDB cannot
+     * leave app-only ghost nodes behind. Existing app-local fields on nodes that remain are preserved by
+     * [getVerifiedNodesForUpsert].
      *
      * @return node numbers whose rows were removed by identity migration, so callers can evict them from in-memory
      *   caches.
@@ -601,7 +604,12 @@ interface NodeInfoDao {
         }
         clearMyNodeInfo()
         setMyNodeInfo(mi)
-        putAll(getVerifiedNodesForUpsert(nodes, selfNum = mi.myNodeNum, removedNums = removedNums))
+        val verifiedNodes = getVerifiedNodesForUpsert(nodes, selfNum = mi.myNodeNum, removedNums = removedNums)
+        putAll(verifiedNodes)
+
+        val installedNums = verifiedNodes.mapTo(mutableSetOf()) { it.num }
+        val staleNums = getAllNodesSnapshot().mapNotNull { node -> node.num.takeIf { it !in installedNums } }
+        deleteNodesAndMetadata(staleNums)
         return removedNums
     }
 
