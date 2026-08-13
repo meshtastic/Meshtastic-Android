@@ -1196,6 +1196,8 @@ node_filter_placeholder
 node_filter_show_ignored
 node_filter_title
 node_id
+node_incomplete
+node_incomplete_description
 node_layout_channel
 node_layout_compact
 node_layout_compact_fields_header

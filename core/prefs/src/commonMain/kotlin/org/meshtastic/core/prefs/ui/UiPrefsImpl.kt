@@ -73,8 +73,9 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         scope.launch { dataStore.edit { it[KEY_NODE_SORT] = value } }
     }
 
+    // Defaults on so nodes heard before their NodeInfo arrives stay visible and messageable (design#16).
     override val includeUnknown: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
+        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN] ?: true }.stateIn(scope, SharingStarted.Lazily, true)
 
     override fun setIncludeUnknown(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_INCLUDE_UNKNOWN] = value } }

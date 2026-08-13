@@ -1229,6 +1229,8 @@
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="node_filter_title">Filter by</string>
     <string name="node_id">Node ID</string>
+    <string name="node_incomplete">Incomplete</string>
+    <string name="node_incomplete_description">Node info has not been received yet</string>
     <string name="node_layout_channel">Channel</string>
     <string name="node_layout_compact">Compact</string>
     <string name="node_layout_compact_fields_header">Compact Fields</string>

@@ -113,7 +113,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
             hopsAway = 2,
         )
 
-    private val unknown =
+    val unknown =
         donaldDuck.copy(
             user =
             User(id = "myId", long_name = "Meshtastic myId", short_name = "myId", hw_model = HardwareModel.UNSET),
