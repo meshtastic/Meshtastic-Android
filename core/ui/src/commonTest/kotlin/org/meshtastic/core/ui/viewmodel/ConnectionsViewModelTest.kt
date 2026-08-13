@@ -40,6 +40,11 @@ import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.firmware_update_available
+import org.meshtastic.core.resources.firmware_update_notification_android
+import org.meshtastic.core.resources.firmware_update_notification_flasher
+import org.meshtastic.core.resources.getString
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeFirmwareReleaseRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -85,6 +90,7 @@ class ConnectionsViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        warmFirmwareNotificationStrings()
         Dispatchers.setMain(testDispatcher)
         dispatchedNotifications.clear()
         notificationsCanBeScheduled = true
@@ -285,5 +291,16 @@ class ConnectionsViewModelTest {
     @Test
     fun `RECONNECTING_PROGRESS_TEXT pins the cross-track literal value`() {
         assertEquals("Reconnecting\u2026", ServiceRepository.RECONNECTING_PROGRESS_TEXT)
+    }
+
+    /**
+     * From CMP 1.12 compose resources load each string once on a library-owned `Dispatchers.Default` scope, which
+     * `advanceUntilIdle` cannot drain, so the notification dispatch lands after the assertions. Pre-loading keeps the
+     * path inside virtual time on any CMP version; must run before `setMain`.
+     */
+    private fun warmFirmwareNotificationStrings() {
+        getString(Res.string.firmware_update_available)
+        getString(Res.string.firmware_update_notification_android, "", "")
+        getString(Res.string.firmware_update_notification_flasher, "", "")
     }
 }
