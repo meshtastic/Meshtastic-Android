@@ -30,6 +30,7 @@ import org.meshtastic.core.resources.a11y_node_offline
 import org.meshtastic.core.resources.a11y_node_online
 import org.meshtastic.core.resources.a11y_node_role
 import org.meshtastic.core.resources.a11y_node_signal
+import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.util.formatAgo
@@ -52,6 +53,7 @@ internal data class NodeDescriptionStrings(
     val signal: String,
     val unknown: String,
     val now: String,
+    val incomplete: String,
 )
 
 /** Resolves [NodeDescriptionStrings] from Compose string resources. */
@@ -68,6 +70,7 @@ internal fun rememberNodeDescriptionStrings(): NodeDescriptionStrings = NodeDesc
     signal = stringResource(Res.string.a11y_node_signal, "%s"),
     unknown = stringResource(Res.string.unknown),
     now = stringResource(Res.string.now),
+    incomplete = stringResource(Res.string.node_incomplete),
 )
 
 /** Builds a TalkBack-friendly description aggregating node state. Shared between [NodeItem] and [NodeItemCompact]. */
@@ -86,8 +89,13 @@ internal fun buildNodeDescription(
     strings: NodeDescriptionStrings,
     lastHeardIsRelative: Boolean = true,
     modemPreset: ModemPreset? = null,
+    isUnknownUser: Boolean = false,
 ): String = buildString {
     append(name)
+    if (isUnknownUser) {
+        append(", ")
+        append(strings.incomplete)
+    }
     append(", ")
     append(if (isOnline) strings.online else strings.offline)
     if (isFavorite) {

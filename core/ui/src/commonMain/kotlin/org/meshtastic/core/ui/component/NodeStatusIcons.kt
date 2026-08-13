@@ -45,10 +45,13 @@ import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
+import org.meshtastic.core.resources.node_incomplete
+import org.meshtastic.core.resources.node_incomplete_description
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PersonQuestion
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -65,8 +68,17 @@ fun NodeStatusIcons(
     modifier: Modifier = Modifier,
     deviceType: DeviceType? = null,
     contentColor: Color = LocalContentColor.current,
+    isUnknownUser: Boolean = false,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
+        if (isUnknownUser) {
+            StatusBadge(
+                imageVector = MeshtasticIcons.PersonQuestion,
+                contentDescription = Res.string.node_incomplete,
+                tooltipText = Res.string.node_incomplete_description,
+                tint = contentColor,
+            )
+        }
         if (isUnmessageable) {
             StatusBadge(
                 imageVector = MeshtasticIcons.Unmessageable,

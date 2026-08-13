@@ -31,10 +31,12 @@ import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
 import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
+import org.meshtastic.feature.node.component.NodeItemCompactUnknownPreview
 import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.NodeItemSignedPreview
+import org.meshtastic.feature.node.component.NodeItemUnknownPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.PowerMetricsNoCurrentPreview
 import org.meshtastic.feature.node.component.PowerMetricsPartialPreview
@@ -207,6 +209,20 @@ fun ScreenshotNodeItemComplete() {
 @Composable
 fun ScreenshotNodeItemSigned() {
     NodeItemSignedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemUnknown() {
+    NodeItemUnknownPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactUnknown() {
+    NodeItemCompactUnknownPreview()
 }
 
 @PreviewTest

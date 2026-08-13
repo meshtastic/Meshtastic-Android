@@ -60,6 +60,7 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.ic_memory
+import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
@@ -81,6 +82,7 @@ import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
+import org.meshtastic.core.ui.icon.PersonQuestion
 import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
@@ -160,6 +162,7 @@ fun NodeItemCompact(
                 strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
                 modemPreset = modemPreset,
+                isUnknownUser = thatNode.isUnknownUser,
             )
         }
 
@@ -274,6 +277,14 @@ private fun CompactNameRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (thatNode.isUnknownUser) {
+            Icon(
+                imageVector = MeshtasticIcons.PersonQuestion,
+                contentDescription = stringResource(Res.string.node_incomplete),
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
         if (unmessageable) {
             Icon(
                 imageVector = MeshtasticIcons.Unmessageable,

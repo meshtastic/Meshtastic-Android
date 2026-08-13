@@ -37,6 +37,7 @@ class BuildNodeDescriptionTest {
             signal = "signal %s",
             unknown = "unknown",
             now = "now",
+            incomplete = "incomplete",
         )
 
     private fun describe(
@@ -51,6 +52,7 @@ class BuildNodeDescriptionTest {
         snr: Float? = null,
         viaMqtt: Boolean = false,
         lastHeardIsRelative: Boolean = true,
+        isUnknownUser: Boolean = false,
     ): String = buildNodeDescription(
         name = name,
         isOnline = isOnline,
@@ -64,6 +66,7 @@ class BuildNodeDescriptionTest {
         viaMqtt = viaMqtt,
         strings = testStrings,
         lastHeardIsRelative = lastHeardIsRelative,
+        isUnknownUser = isUnknownUser,
     )
 
     // ---- Basic output ----
@@ -90,6 +93,18 @@ class BuildNodeDescriptionTest {
     fun omits_favorite_when_not_flagged() {
         val result = describe(isFavorite = false)
         assertFalse(result.contains("favorite"))
+    }
+
+    @Test
+    fun includes_incomplete_when_unknown_user() {
+        val result = describe(name = "Alpha", isUnknownUser = true)
+        assertTrue(result.startsWith("Alpha, incomplete"))
+    }
+
+    @Test
+    fun omits_incomplete_for_known_user() {
+        val result = describe(isUnknownUser = false)
+        assertFalse(result.contains("incomplete"))
     }
 
     // ---- Last heard ----

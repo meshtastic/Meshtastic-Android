@@ -231,7 +231,7 @@ data class NodesUiState(
 
 data class NodeFilterState(
     val filterText: String = "",
-    val includeUnknown: Boolean = false,
+    val includeUnknown: Boolean = true,
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
@@ -244,7 +244,7 @@ data class NodeFilterState(
 }
 
 data class NodeFilterToggles(
-    val includeUnknown: Boolean = false,
+    val includeUnknown: Boolean = true,
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
