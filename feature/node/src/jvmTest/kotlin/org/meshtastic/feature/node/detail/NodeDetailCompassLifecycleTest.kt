@@ -127,17 +127,17 @@ class NodeDetailCompassLifecycleTest {
             val openCompass = getString(Res.string.open_compass)
             onNodeWithText(openCompass).performScrollTo().performClick()
             onNodeWithText(getString(Res.string.compass_title)).assertExists()
-            waitUntil { headingProvider.starts == 1 }
+            waitUntil("compass started", SETTLE_TIMEOUT_MS) { headingProvider.starts == 1 }
 
             lifecycleOwner.moveTo(Lifecycle.State.CREATED)
-            waitUntil { headingProvider.stops == 1 }
+            waitUntil("compass stopped on STOPPED", SETTLE_TIMEOUT_MS) { headingProvider.stops == 1 }
 
             lifecycleOwner.moveTo(Lifecycle.State.STARTED)
-            waitUntil { headingProvider.starts == 2 }
+            waitUntil("compass restarted on STARTED", SETTLE_TIMEOUT_MS) { headingProvider.starts == 2 }
 
             onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.Dismiss), useUnmergedTree = true)
                 .performSemanticsAction(SemanticsActions.Dismiss)
-            waitUntil { headingProvider.stops == 2 }
+            waitUntil("compass stopped on dismissal", SETTLE_TIMEOUT_MS) { headingProvider.stops == 2 }
             onNodeWithText(getString(Res.string.compass_title)).assertDoesNotExist()
 
             lifecycleOwner.moveTo(Lifecycle.State.CREATED)
@@ -205,5 +205,14 @@ class NodeDetailCompassLifecycleTest {
 
     private data object ZeroMagneticFieldProvider : MagneticFieldProvider {
         override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float = 0f
+    }
+
+    private companion object {
+        /**
+         * `waitUntil` defaults to 1s, which is a rendering-speed assertion rather than a liveness bound: CI runners
+         * take ~12s for this test against ~2.3s locally, and `waitForIdle` alone has been observed taking 6s on runs
+         * that pass. Budget for the slowest runner — a genuine regression still fails, just later.
+         */
+        const val SETTLE_TIMEOUT_MS = 30_000L
     }
 }
