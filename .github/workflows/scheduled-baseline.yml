@@ -50,6 +50,11 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # Lets the detection step below prove the profile was written by *this* run rather than
+      # accepting the one already committed in the checkout.
+      - name: Mark generation start
+        run: touch "$RUNNER_TEMP/baseline-start"
+
       - name: Generate Baseline Profile
         id: generate_baseline
         continue-on-error: true # Emulator flakiness must not block the graphs PR.
@@ -74,17 +79,22 @@ jobs:
         id: baseline
         run: |
           outcome="${{ steps.generate_baseline.outcome }}"
-          # Locate the profile the plugin actually wrote rather than hardcoding the variant dir, so a
-          # flavor/buildType rename surfaces as an error instead of a silent "unchanged".
-          profile="$(find androidApp/src -type f -name baseline-prof.txt -print -quit 2>/dev/null || true)"
+          # Pin the variant the Gradle task above targets: googleRelease (flavor + buildType), NOT the
+          # bare `google` flavor dir. Searching for any baseline-prof.txt would happily validate another
+          # variant's file — or, once this profile is committed, the stale one already in the checkout.
+          profile_dir="androidApp/src/googleRelease/generated/baselineProfiles"
+          profile="$profile_dir/baseline-prof.txt"
           if [ "$outcome" != "success" ]; then
             echo "::error::Baseline profile generation failed (outcome: $outcome)."
             echo "status=error" >> "$GITHUB_OUTPUT"
-          elif [ ! -s "$profile" ]; then
-            echo "::error::Generation reported success but produced no non-empty baseline-prof.txt under androidApp/src/*/generated/baselineProfiles."
+          elif [ ! -s "$profile" ] || [ ! "$profile" -nt "$RUNNER_TEMP/baseline-start" ]; then
+            # Absent, empty, or untouched by this run. The mtime half catches a no-op generation that
+            # leaves the committed profile in place, which would otherwise read as a clean "unchanged".
+            echo "::error::Generation reported success but did not write a non-empty $profile during this run."
+            echo "Profiles present in the tree (empty = none, a listing here points at a variant rename):"
+            find androidApp/src -type f -name '*-prof.txt' -exec ls -l {} +
             echo "status=error" >> "$GITHUB_OUTPUT"
           else
-            profile_dir="$(dirname "$profile")"
             echo "dir=$profile_dir" >> "$GITHUB_OUTPUT"
             echo "Baseline profile at $profile_dir ($(wc -l < "$profile") rules)."
             if [ -n "$(git status --porcelain -- "$profile_dir")" ]; then
