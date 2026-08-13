@@ -61,7 +61,8 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # Writes androidApp/src/google/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
+          # Writes androidApp/src/<variant>/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
+          # The variant is googleRelease (flavor + buildType), NOT the bare `google` flavor dir.
           # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
           # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
           # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
@@ -72,15 +73,25 @@ jobs:
       - name: Detect baseline profile changes
         id: baseline
         run: |
-          profile_dir="androidApp/src/google/generated/baselineProfiles"
           outcome="${{ steps.generate_baseline.outcome }}"
+          # Locate the profile the plugin actually wrote rather than hardcoding the variant dir, so a
+          # flavor/buildType rename surfaces as an error instead of a silent "unchanged".
+          profile="$(find androidApp/src -type f -name baseline-prof.txt -print -quit 2>/dev/null || true)"
           if [ "$outcome" != "success" ]; then
-            echo "::warning::Baseline profile generation failed (outcome: $outcome). Skipping."
+            echo "::error::Baseline profile generation failed (outcome: $outcome)."
             echo "status=error" >> "$GITHUB_OUTPUT"
-          elif [ -n "$(git status --porcelain "$profile_dir" 2>/dev/null)" ]; then
-            echo "status=updated" >> "$GITHUB_OUTPUT"
+          elif [ ! -s "$profile" ]; then
+            echo "::error::Generation reported success but produced no non-empty baseline-prof.txt under androidApp/src/*/generated/baselineProfiles."
+            echo "status=error" >> "$GITHUB_OUTPUT"
           else
-            echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            profile_dir="$(dirname "$profile")"
+            echo "dir=$profile_dir" >> "$GITHUB_OUTPUT"
+            echo "Baseline profile at $profile_dir ($(wc -l < "$profile") rules)."
+            if [ -n "$(git status --porcelain -- "$profile_dir")" ]; then
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Build PR body
@@ -128,7 +139,15 @@ jobs:
           # `git add <glob>` aborts with "pathspec did not match any files", which would hard-fail this step
           # and defeat the continue-on-error on the generation step above.
           add-paths: |
-            ${{ steps.baseline.outputs.status == 'updated' && 'androidApp/src/google/generated/baselineProfiles/**' || '' }}
+            ${{ steps.baseline.outputs.status == 'updated' && format('{0}/**', steps.baseline.outputs.dir) || '' }}
             **/README.md
           labels: |
             automation
+
+      # Runs after the PR so graph updates still land, but turns the run red: a silently-green
+      # baseline job let a path mismatch discard a freshly generated profile every night for weeks.
+      - name: Fail the run if baseline generation broke
+        if: steps.baseline.outputs.status == 'error'
+        run: |
+          echo "::error::Baseline profile was not regenerated — see the 'Generate Baseline Profile' step."
+          exit 1
