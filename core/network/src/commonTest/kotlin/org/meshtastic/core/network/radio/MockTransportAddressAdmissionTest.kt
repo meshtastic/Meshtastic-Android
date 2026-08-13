@@ -59,6 +59,11 @@ class MockTransportAddressAdmissionTest {
 
             override val mockTransportEnabled: StateFlow<Boolean> = gate
 
+            // Deliberately false: admission of the `r` address is governed by the gate alone. Whether the capture
+            // asset ships only decides if the entry is worth offering, and must not make `r` connectable when Demo
+            // Mode is locked.
+            override val isReplayTransportAvailable: Boolean = false
+
             override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
                 NopRadioTransport(address)
         }

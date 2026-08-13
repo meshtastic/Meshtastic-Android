@@ -17,6 +17,8 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -88,17 +90,34 @@ class MockRadioTransport(
     val address: String,
 ) : RadioTransport {
 
-    private var currentPacketId = 50
-
-    // an infinite sequence of ints
-    private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
+    /**
+     * Hands out packet ids.
+     *
+     * Atomic because ids are drawn concurrently from the seed pass, the live-traffic ticker, the delayed reply jobs and
+     * the ack path. Two frames sharing an id is not cosmetic here: the app keys its message and node lists by packet
+     * id, and a duplicate key has crashed those lists before — exactly the screens a store reviewer is looking at while
+     * the demo runs.
+     */
+    private val packetIdCounter = atomic(FIRST_PACKET_ID)
 
     /** Guards against re-seeding traffic if the app repeats stage 2 (e.g. after a handshake retry). */
-    private var trafficStarted = false
+    private val trafficStarted = atomic(false)
 
-    private var trafficJob: Job? = null
+    /**
+     * Every coroutine this transport owns: the live-traffic ticker, the delayed replies and the delayed acks.
+     *
+     * An atomic reference to an immutable list rather than a `mutableListOf`, because [close] drains it from the
+     * caller's context while `handleSendToRadio` is still appending to it — concurrent iteration and mutation of a
+     * plain list throws ConcurrentModificationException.
+     */
+    private val pendingJobs = atomic<List<Job>>(emptyList())
 
-    private val replyJobs = mutableListOf<Job>()
+    private fun nextPacketId(): Int = packetIdCounter.getAndIncrement()
+
+    /** Registers a coroutine for cancellation by [close], dropping the ones that have already finished. */
+    private fun track(job: Job) {
+        pendingJobs.update { jobs -> jobs.filterNot { it.isCompleted } + job }
+    }
 
     override fun start() {
         Logger.i { "Starting the mock transport" }
@@ -185,10 +204,9 @@ class MockRadioTransport(
 
     override suspend fun close() {
         Logger.i { "Closing the mock transport" }
-        trafficJob?.cancel()
-        trafficJob = null
-        replyJobs.forEach { it.cancel() }
-        replyJobs.clear()
+        // Drain and cancel in one atomic swap so a job added concurrently is either cancelled here or belongs to the
+        // list the next close() drains — never silently dropped while still running.
+        pendingJobs.getAndSet(emptyList()).forEach { it.cancel() }
     }
 
     // ── Handshake ─────────────────────────────────────────────────────────────────────────────
@@ -227,9 +245,8 @@ class MockRadioTransport(
         SIM_PEERS.forEach { peer -> callback.handleFromRadio(FromRadio(node_info = peer.toNodeInfo()).encode()) }
         callback.handleFromRadio(FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE).encode())
 
-        if (!trafficStarted) {
-            trafficStarted = true
-            trafficJob = scope.handledLaunch { seedTraffic() }
+        if (trafficStarted.compareAndSet(expect = false, update = true)) {
+            track(scope.handledLaunch { seedTraffic() })
         }
     }
 
@@ -288,24 +305,24 @@ class MockRadioTransport(
      */
     private suspend fun seedTraffic() {
         SIM_PEERS.forEach { peer ->
-            callback.handleFromRadio(peer.positionPacket(packetIdSequence.next()).encode())
+            callback.handleFromRadio(peer.positionPacket(nextPacketId()).encode())
             delay(SEED_SPACING_MS)
         }
 
         SIM_PEERS.take(TELEMETRY_PEER_COUNT).forEach { peer ->
-            callback.handleFromRadio(peer.deviceTelemetryPacket(packetIdSequence.next(), tick = 0).encode())
+            callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick = 0).encode())
             delay(SEED_SPACING_MS)
         }
 
         WEATHER_PEER_INDEXES.forEach { index ->
             val peer = SIM_PEERS[index]
-            callback.handleFromRadio(peer.environmentTelemetryPacket(packetIdSequence.next(), tick = 0).encode())
+            callback.handleFromRadio(peer.environmentTelemetryPacket(nextPacketId(), tick = 0).encode())
             delay(SEED_SPACING_MS)
         }
 
-        callback.handleFromRadio(SIM_PEERS[0].neighborInfoPacket(packetIdSequence.next()).encode())
+        callback.handleFromRadio(SIM_PEERS[0].neighborInfoPacket(nextPacketId()).encode())
         delay(SEED_SPACING_MS)
-        callback.handleFromRadio(SIM_PEERS[1].nodeStatusPacket(packetIdSequence.next()).encode())
+        callback.handleFromRadio(SIM_PEERS[1].nodeStatusPacket(nextPacketId()).encode())
         delay(SEED_SPACING_MS)
 
         // Each message is stamped progressively closer to now, so the thread reads as a conversation that unfolded over
@@ -315,7 +332,7 @@ class MockRadioTransport(
             callback.handleFromRadio(
                 peer
                     .textPacket(
-                        id = packetIdSequence.next(),
+                        id = nextPacketId(),
                         to = BROADCAST_ADDR,
                         text = text,
                         ageSeconds = messageAgeSeconds(CHANNEL_CONVERSATION.size, index),
@@ -328,7 +345,7 @@ class MockRadioTransport(
         DIRECT_CONVERSATION.forEachIndexed { index, text ->
             callback.handleFromRadio(
                 SIM_PEERS[DIRECT_PEER_INDEX].textPacket(
-                    id = packetIdSequence.next(),
+                    id = nextPacketId(),
                     to = MY_NODE,
                     text = text,
                     ageSeconds = messageAgeSeconds(DIRECT_CONVERSATION.size, index),
@@ -353,10 +370,10 @@ class MockRadioTransport(
         while (true) {
             delay(LIVE_TICK_MS)
             val peer = SIM_PEERS[tick % TELEMETRY_PEER_COUNT]
-            callback.handleFromRadio(peer.deviceTelemetryPacket(packetIdSequence.next(), tick).encode())
+            callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick).encode())
             if (tick % WEATHER_TICK_INTERVAL == 0) {
                 val weatherPeer = SIM_PEERS[WEATHER_PEER_INDEXES.first()]
-                callback.handleFromRadio(weatherPeer.environmentTelemetryPacket(packetIdSequence.next(), tick).encode())
+                callback.handleFromRadio(weatherPeer.environmentTelemetryPacket(nextPacketId(), tick).encode())
             }
             tick++
         }
@@ -377,17 +394,16 @@ class MockRadioTransport(
             }
         val replyTo = if (isBroadcast) BROADCAST_ADDR else MY_NODE
 
-        val job =
+        track(
             scope.handledLaunch {
                 delay(REPLY_DELAY_MS)
                 callback.handleFromRadio(
                     responder
-                        .textPacket(id = packetIdSequence.next(), to = replyTo, text = AUTO_REPLY_TEXT, ageSeconds = 0)
+                        .textPacket(id = nextPacketId(), to = replyTo, text = AUTO_REPLY_TEXT, ageSeconds = 0)
                         .encode(),
                 )
-            }
-        replyJobs.removeAll { it.isCompleted }
-        replyJobs.add(job)
+            },
+        )
     }
 
     // ── Packet builders ──────────────────────────────────────────────────────────────────────
@@ -436,33 +452,42 @@ class MockRadioTransport(
         ),
     )
 
-    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int) = FromRadio(
-        packet =
-        packet(
-            id = id,
-            to = BROADCAST_ADDR,
-            ageSeconds = 0,
-            data =
-            Data(
-                portnum = PortNum.TELEMETRY_APP,
-                payload =
-                Telemetry(
-                    device_metrics =
-                    DeviceMetrics(
-                        // Drift the readings per tick so the charts show a trend instead of a
-                        // flat line.
-                        battery_level = (batteryLevel - tick).coerceIn(5, 100),
-                        voltage = voltage - tick * 0.01f,
-                        channel_utilization = 6f + (tick % 5) * 1.5f,
-                        air_util_tx = 1.2f + (tick % 4) * 0.4f,
-                        uptime_seconds = uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt(),
-                    ),
-                )
-                    .encode()
-                    .toByteString(),
+    /**
+     * Device telemetry for [tick], drifted so the charts show a trend rather than a flat line.
+     *
+     * Both the percentage and the voltage are clamped, not just the percentage: a tick is 20s, so an unbounded slope
+     * takes the voltage through 0V inside a couple of hours and the battery and telemetry views then render a cell that
+     * cannot physically exist.
+     */
+    private fun SimPeer.deviceTelemetryPacket(id: Int, tick: Int): FromRadio {
+        val driftedBattery = (batteryLevel - tick).coerceIn(MIN_BATTERY_PERCENT, MAX_BATTERY_PERCENT)
+        val driftedVoltage = (voltage - tick * VOLTAGE_DRIFT_PER_TICK).coerceAtLeast(MIN_CELL_VOLTAGE)
+        return FromRadio(
+            packet =
+            packet(
+                id = id,
+                to = BROADCAST_ADDR,
+                ageSeconds = 0,
+                data =
+                Data(
+                    portnum = PortNum.TELEMETRY_APP,
+                    payload =
+                    Telemetry(
+                        device_metrics =
+                        DeviceMetrics(
+                            battery_level = driftedBattery,
+                            voltage = driftedVoltage,
+                            channel_utilization = 6f + (tick % 5) * 1.5f,
+                            air_util_tx = 1.2f + (tick % 4) * 0.4f,
+                            uptime_seconds = uptimeSeconds + tick * (LIVE_TICK_MS / 1000).toInt(),
+                        ),
+                    )
+                        .encode()
+                        .toByteString(),
+                ),
             ),
-        ),
-    )
+        )
+    }
 
     private fun SimPeer.environmentTelemetryPacket(id: Int, tick: Int) = FromRadio(
         packet =
@@ -537,7 +562,7 @@ class MockRadioTransport(
     private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data) = FromRadio(
         packet =
         MeshPacket(
-            id = packetIdSequence.next(),
+            id = nextPacketId(),
             from = fromIn,
             to = toIn,
             rx_time = nowSeconds.toInt(),
@@ -570,10 +595,14 @@ class MockRadioTransport(
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: ToRadio) = scope.handledLaunch {
-        val packet = pr.packet ?: return@handledLaunch
-        delay(2000)
-        callback.handleFromRadio(makeAck(SIM_PEERS[DIRECT_PEER_INDEX].num, packet.from, packet.id).encode())
+    private fun sendFakeAck(pr: ToRadio) {
+        val packet = pr.packet ?: return
+        track(
+            scope.handledLaunch {
+                delay(ACK_DELAY_MS)
+                callback.handleFromRadio(makeAck(SIM_PEERS[DIRECT_PEER_INDEX].num, packet.from, packet.id).encode())
+            },
+        )
     }
 
     /** One simulated peer in the demo mesh. */
@@ -618,6 +647,18 @@ class MockRadioTransport(
         const val PEER_NODE_STATUS = "Solar powered, up on the ridge."
         const val AUTO_REPLY_TEXT = "Got it, thanks! Message received on the demo mesh."
 
+        /** First packet id handed out; low enough to stay clear of ids the app generates for its own sends. */
+        const val FIRST_PACKET_ID = 50
+
+        /**
+         * Floor of the simulated voltage drift, the counterpart to [MIN_BATTERY_PERCENT]: a nearly-flat Li-ion cell
+         * rests around here, so the charts settle on a plausible value instead of running off the bottom of the scale.
+         */
+        const val MIN_CELL_VOLTAGE = 3.2f
+        const val MIN_BATTERY_PERCENT = 5
+        const val MAX_BATTERY_PERCENT = 100
+        const val VOLTAGE_DRIFT_PER_TICK = 0.01f
+
         /** Hop budget the simulated nodes transmit with; `hop_limit` is derived so the app can infer hop distance. */
         const val DEFAULT_HOP_START = 3
         const val DIRECT_PEER_INDEX = 0
@@ -630,6 +671,7 @@ class MockRadioTransport(
         const val LIVE_TICK_MS = 20_000L
         const val WEATHER_TICK_INTERVAL = 3
         const val REPLY_DELAY_MS = 2_500L
+        const val ACK_DELAY_MS = 2_000L
 
         val FAKE_SESSION_PASSKEY: okio.ByteString = okio.ByteString.of(0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77)
 

@@ -21,9 +21,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
@@ -199,7 +201,10 @@ class MockRadioTransportTest {
             assertTrue(directs.isNotEmpty(), "expected a direct-message thread")
             // A broadcast has to land on the announced primary channel or it opens an unnamed "Channel N" thread.
             assertTrue(broadcasts.all { it.channel == 0 }, "channel messages must use the primary channel")
-            assertEquals(texts.size, texts.distinctBy { it.id }.size, "duplicate packet ids are silently dropped")
+            // Across every frame, not just the texts: all of these ids come from one shared counter, and the app keys
+            // its lists by packet id — a repeat is dropped at best and a duplicate-key crash at worst.
+            val all = callback.packets
+            assertEquals(all.size, all.distinctBy { it.id }.size, "packet ids must be unique across the whole session")
 
             assertTrue(callback.packetsOn(PortNum.POSITION_APP).isNotEmpty(), "expected position packets")
 
@@ -238,10 +243,68 @@ class MockRadioTransportTest {
             )
             assertTrue(positions.all { it.hop_start > 0 }, "hop_start must be set for hop distance to be derivable")
             assertTrue(positions.all { (it.rx_time ?: 0) > 0 }, "rx_time drives lastHeard")
-            assertTrue(positions.any { it.rx_snr != 0f }, "expected varied SNR readings")
-            assertTrue(positions.any { (it.rx_rssi ?: 0) != 0 }, "expected varied RSSI readings")
+
+            // Presence and variation are separate claims, and RSSI has to be checked for presence rather than for
+            // "not zero": 0 dBm is a legal (very strong) reading, so `rx_rssi ?: 0` would silently accept a packet
+            // that carries no RSSI at all — the exact sentinel-zero confusion the signal views suffer from.
+            assertTrue(positions.all { it.rx_rssi != null }, "every simulated reception must carry an RSSI reading")
+            assertTrue(
+                positions.mapTo(mutableSetOf()) { it.rx_rssi }.size > 1,
+                "expected RSSI to vary between nodes so the signal indicators differ",
+            )
+            // rx_snr has no presence bit in the proto (it defaults to 0f), so variation is all that can be asserted.
+            assertTrue(
+                positions.mapTo(mutableSetOf()) { it.rx_snr }.size > 1,
+                "expected SNR to vary between nodes so the signal indicators differ",
+            )
             // At least one node must look like a direct neighbour, or nothing ever gets a signal reading at all.
             assertTrue(positions.any { it.hop_start == it.hop_limit }, "expected at least one direct neighbour")
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    /**
+     * Disconnecting has to actually stop the simulator. Its live-telemetry loop, delayed replies and delayed acks all
+     * run on a scope that outlives the transport, so anything `close()` fails to cancel keeps pushing frames into a
+     * session the app has already torn down.
+     */
+    @Test
+    fun `close stops the simulated mesh`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback, scope, address = "")
+            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            testScheduler.advanceTimeBy(SEED_WINDOW_MS)
+            // A text with want_ack leaves both a delayed ack and a delayed reply pending, so close() has more than the
+            // telemetry ticker to cancel.
+            transport.handleSendToRadio(
+                ToRadio(
+                    packet =
+                    MeshPacket(
+                        id = 1,
+                        to = BROADCAST_ADDR,
+                        want_ack = true,
+                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "ping".encodeUtf8()),
+                    ),
+                )
+                    .encode(),
+            )
+            assertTrue(callback.received.isNotEmpty(), "sanity: the demo mesh must be emitting before close()")
+
+            transport.close()
+            callback.received.clear()
+
+            // Several live ticks' worth of virtual time — a surviving ticker would emit on every one of them, and a
+            // surviving reply or ack job would fire well inside the first.
+            testScheduler.advanceTimeBy(LIVE_TICK_MS * LIVE_TICKS_AFTER_CLOSE)
+
+            assertTrue(
+                callback.received.isEmpty(),
+                "close() must stop the simulator; got ${callback.received.size} frames afterwards",
+            )
         } finally {
             scope.cancel()
         }
@@ -253,5 +316,9 @@ class MockRadioTransportTest {
 
         /** Comfortably longer than the seed pass, but shorter than the first live-telemetry tick. */
         const val SEED_WINDOW_MS = 10_000L
+
+        /** Mirrors `MockRadioTransport.LIVE_TICK_MS`, which is private to the transport. */
+        const val LIVE_TICK_MS = 20_000L
+        const val LIVE_TICKS_AFTER_CLOSE = 5
     }
 }

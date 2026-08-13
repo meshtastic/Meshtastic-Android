@@ -98,6 +98,9 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      * The `(showMock, showReplay)` pairs the ViewModel has asked for, in call order. Without this the fake would return
      * the same devices for every visibility combination, so a test could pass while the ViewModel requested the wrong
      * one — assert against this to prove the production path actually forwarded the intended flags.
+     *
+     * The order matters as much as the contents: the Demo Mode gate is observed rather than sampled, so a mid-session
+     * unlock has to show up here as a fresh request.
      */
     val discoveryRequests = mutableListOf<Pair<Boolean, Boolean>>()
 

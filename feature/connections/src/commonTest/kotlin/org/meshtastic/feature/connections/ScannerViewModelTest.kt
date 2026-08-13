@@ -118,6 +118,29 @@ class ScannerViewModelTest {
         }
     }
 
+    /**
+     * The gate has to reach the device list, not merely be observable on the ViewModel.
+     *
+     * Asserting on `showMockTransport` alone would pass even if the ViewModel stopped feeding the gate into the
+     * device-list query, so this asserts on the requests the use case actually received: one per gate value, in order.
+     * A gate sampled once at construction — which is what this branch fixes — records only its initial value here.
+     */
+    @Test
+    fun `a mid-session unlock re-queries the device list`() = runTest {
+        viewModel.usbDevicesForUi.test {
+            awaitItem()
+            harness.mockTransportEnabled.value = true
+            harness.mockTransportEnabled.value = false
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(
+            listOf(false to false, true to false, false to false),
+            harness.discoveryRequests,
+            "each Demo Mode gate value must produce its own device-list request",
+        )
+    }
+
     @Test
     fun `connectionProgressText reflects connectionProgress`() = runTest {
         viewModel.connectionProgressText.test {
@@ -389,8 +412,8 @@ class ScannerViewModelTest {
 
     /**
      * Builds a ViewModel against the given transport capabilities and returns the distinct `(showMock, showReplay)`
-     * pairs it asked the use case for. A fresh ViewModel is required because the replay flag is latched in `init` —
-     * the Demo Mode gate itself is observed, so it is set on the backing flow rather than stubbed.
+     * pairs it asked the use case for. A fresh ViewModel is required because the replay flag is latched in `init` — the
+     * Demo Mode gate itself is observed, so it is set on the backing flow rather than stubbed.
      */
     private suspend fun requestedVisibility(
         mockTransport: Boolean,
