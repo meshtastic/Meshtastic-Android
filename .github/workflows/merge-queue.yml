@@ -94,9 +94,11 @@ jobs:
       upload_artifacts: false
     secrets: inherit
 
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
+  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions: {}
     needs:
