@@ -317,8 +317,15 @@ interface MapConsentPrefs {
 /** Reactive interface for map tile provider settings. */
 interface MapTileProviderPrefs {
     val customTileProviders: StateFlow<String?>
+    val selectedCustomTileProviderId: StateFlow<String?>
 
-    fun setCustomTileProviders(providers: String?)
+    suspend fun awaitCustomTileProviders(): String?
+
+    suspend fun awaitSelectedCustomTileProviderId(): String?
+
+    suspend fun setCustomTileProviders(providers: String?)
+
+    suspend fun setSelectedCustomTileProviderId(providerId: String?)
 }
 
 /** Reactive interface for radio settings. */

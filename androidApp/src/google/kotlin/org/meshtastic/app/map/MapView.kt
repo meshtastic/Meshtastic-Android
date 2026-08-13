@@ -293,7 +293,7 @@ fun MapView(
     var boxAuthoringSecondCorner by remember { mutableStateOf<LatLng?>(null) }
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
-    val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
+    val currentCustomTileProvider by mapViewModel.selectedCustomTileProvider.collectAsStateWithLifecycle()
 
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
@@ -583,7 +583,7 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) MapType.NONE else selectedGoogleMapType
+    val effectiveGoogleMapType = if (currentCustomTileProvider != null) MapType.NONE else selectedGoogleMapType
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -645,12 +645,8 @@ fun MapView(
             },
         ) {
             // Custom tile overlay (all modes)
-            key(currentCustomTileProviderUrl) {
-                currentCustomTileProviderUrl?.let { url ->
-                    val config =
-                        mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
-                            it.urlTemplate == url || it.localUri == url
-                        }
+            key(currentCustomTileProvider) {
+                currentCustomTileProvider?.let { config ->
                     mapViewModel.getTileProvider(config)?.let { tileProvider ->
                         TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }

@@ -50,7 +50,7 @@ internal fun MapTypeDropdown(
     onManageCustomTileProvidersClicked: () -> Unit,
 ) {
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
-    val selectedCustomUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
+    val selectedCustomProviderId by mapViewModel.selectedCustomTileProviderId.collectAsStateWithLifecycle()
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
 
     val googleMapTypes =
@@ -71,7 +71,7 @@ internal fun MapTypeDropdown(
                         onDismissRequest()
                     },
                     trailingIcon =
-                    if (selectedCustomUrl == null && selectedGoogleMapType == type) {
+                    if (selectedCustomProviderId == null && selectedGoogleMapType == type) {
                         {
                             Icon(
                                 MeshtasticIcons.Check,
@@ -95,7 +95,7 @@ internal fun MapTypeDropdown(
                             onDismissRequest()
                         },
                         trailingIcon =
-                        if (selectedCustomUrl == config.urlTemplate) {
+                        if (selectedCustomProviderId == config.id) {
                             {
                                 Icon(
                                     MeshtasticIcons.Check,

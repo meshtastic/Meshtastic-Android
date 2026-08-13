@@ -20,9 +20,11 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import com.google.maps.android.compose.MapType
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
@@ -40,12 +42,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
+import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
+import org.meshtastic.app.map.repository.CustomTileProviderLoadResult
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeMapPrefs
+import org.meshtastic.core.testing.FakeMapTileProviderPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -88,8 +93,13 @@ class MapViewModelSitePlannerRequestTest {
         every { googleMapsPrefs.cameraPosition } returns flowOf<GoogleCameraPosition?>(null)
         every { googleMapsPrefs.selectedCustomTileUrl } returns MutableStateFlow(null)
         every { googleMapsPrefs.selectedGoogleMapType } returns MutableStateFlow(null)
+        everySuspend { googleMapsPrefs.awaitMapSelection() } returns
+            GoogleMapSelectionPrefs(mapType = MapType.NORMAL.name, customTileUrl = null)
         every { customTileProviderRepository.getCustomTileProviders() } returns
             flowOf<List<CustomTileProviderConfig>>(emptyList())
+        // autofill cannot synthesize the load result, and the ViewModel init dereferences it.
+        everySuspend { customTileProviderRepository.awaitCustomTileProviders() } returns
+            CustomTileProviderLoadResult(providers = emptyList(), isSuccessful = true)
 
         nodeRepository.setNodes(listOf(firstNode, secondNode))
         viewModel =
@@ -104,6 +114,7 @@ class MapViewModelSitePlannerRequestTest {
                 radioConfigRepository = FakeRadioConfigRepository(),
                 radioController = FakeRadioController(),
                 customTileProviderRepository = customTileProviderRepository,
+                mapTileProviderPrefs = FakeMapTileProviderPrefs(),
                 uiPrefs = FakeUiPrefs(),
                 notificationPrefs = FakeNotificationPrefs(),
                 savedStateHandle = SavedStateHandle(),
