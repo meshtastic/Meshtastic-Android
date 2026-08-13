@@ -175,7 +175,6 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
@@ -569,8 +568,8 @@ fun MapView(
 
     // --- Tile & layers state ---
     var showLayersBottomSheet by remember { mutableStateOf(false) }
-    // Non-null while the Site Planner estimate dialog/runner is open, holding the initial (prefilled) params.
-    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
+    // Non-null while the Site Planner estimate dialog/runner is open, retaining its node-location source.
+    var sitePlannerLaunch by remember { mutableStateOf<SitePlannerLaunch?>(null) }
 
     val onAddLayerClicked = {
         val intent =
@@ -910,7 +909,10 @@ fun MapView(
             // Google flavor only: hands params to the hosted Site Planner and imports the returned coverage.
             onSitePlannerClick =
             if (sitePlannerAvailable()) {
-                { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+                {
+                    sitePlannerLaunch =
+                        SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
+                }
             } else {
                 null
             },
@@ -975,14 +977,15 @@ fun MapView(
     val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
-            sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            sitePlannerLaunch =
+                SitePlannerLaunch(initialParams = node.toSitePlannerParams(channelSet), selectedNode = node)
             if (node.validPosition != null) {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(node.latitude, node.longitude)))
             }
-            mapViewModel.consumeSitePlannerRequest()
+            mapViewModel.consumeSitePlannerRequest(node.num)
         }
     }
-    sitePlannerInitial?.let { initial ->
+    sitePlannerLaunch?.let { launch ->
         // Phone GPS: only when permission is already granted; otherwise the field stays manual.
         val onRequestCurrentLocation: (suspend () -> Pair<Double, Double>?)? =
             if (locationPermission.isGranted) {
@@ -990,12 +993,12 @@ fun MapView(
             } else {
                 null
             }
-        // Our connected node's reported position: only when it has a valid fix.
+        // Route launches retain the selected node; manual map launches continue following our connected node.
         val onUseNodeLocation: (() -> Pair<Double, Double>)? =
-            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } }
+            launch.nodeLocation(ourNodeInfo)?.let { location -> { location } }
         SitePlannerHost(
-            initialParams = initial,
-            onDismiss = { sitePlannerInitial = null },
+            initialParams = launch.initialParams,
+            onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
                 // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.

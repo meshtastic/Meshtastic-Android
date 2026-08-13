@@ -333,6 +333,7 @@ dependencies {
 
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.work.testing)
+    testImplementation(projects.core.testing)
     testImplementation(libs.koin.test)
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.kotlinx.coroutines.test)
