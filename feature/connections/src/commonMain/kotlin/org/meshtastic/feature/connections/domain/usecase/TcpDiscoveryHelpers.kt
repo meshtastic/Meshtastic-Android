@@ -17,10 +17,15 @@
 package org.meshtastic.feature.connections.domain.usecase
 
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.demo_mode
+import org.meshtastic.core.resources.demo_mode_replay
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
@@ -115,4 +120,27 @@ internal fun findNodeByNameSuffix(
     } else {
         nodeDb.values.find { it.user.id.lowercase().endsWith(suffix) }
     }
+}
+
+/**
+ * The virtual devices offered behind the Demo Mode gate, shared so the common and Android discovery paths cannot
+ * diverge on visibility policy.
+ *
+ * [showReplay] is nested inside [showMock]: replay is an extra entry *within* Demo Mode, never a device on its own. It
+ * additionally requires the build to carry the capture asset (`RadioTransportFactory.isReplayTransportAvailable`) —
+ * without it the replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
+ */
+internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean): List<DeviceListEntry> {
+    if (!showMock) return emptyList()
+    val mock =
+        DeviceListEntry.Mock(safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode"))
+    val replay =
+        if (showReplay) {
+            val label =
+                safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }.getOrDefault("Demo Mode (Replay)")
+            DeviceListEntry.Replay(label)
+        } else {
+            null
+        }
+    return listOfNotNull(mock, replay)
 }
