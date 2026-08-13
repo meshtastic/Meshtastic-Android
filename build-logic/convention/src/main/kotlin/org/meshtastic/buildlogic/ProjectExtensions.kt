@@ -127,7 +127,9 @@ internal fun Project.configureTestOptions() {
         extensions.findByType(DevelocityTestConfiguration::class.java)?.testRetry {
             maxRetries.set(MAX_TEST_RETRIES)
             maxFailures.set(MAX_TEST_FAILURES)
-            failOnPassedAfterRetry.set(false)
+            // Retry still isolates an ordering flake to one worker, but the build must not report success:
+            // a green tick over a recorded <failure> hid a real cross-test coroutine leak for weeks.
+            failOnPassedAfterRetry.set(true)
         }
     }
 }

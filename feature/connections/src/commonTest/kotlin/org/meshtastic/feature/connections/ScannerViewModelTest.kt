@@ -90,6 +90,8 @@ class ScannerViewModelTest {
 
     @AfterTest
     fun tearDown() {
+        // Order matters: the ViewModel's coroutines must be gone before Main is unset.
+        harness.clearViewModel(viewModel)
         Dispatchers.resetMain()
     }
 

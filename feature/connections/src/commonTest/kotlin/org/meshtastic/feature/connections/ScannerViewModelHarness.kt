@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.connections
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -23,6 +25,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -135,6 +138,18 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         firmwareRecoveryDataSource = firmwareRecoveryDataSource,
         bleScanner = bleScanner,
     )
+
+    /**
+     * Ends [viewModel]'s lifetime. Call from `@AfterTest` **before** `Dispatchers.resetMain()`.
+     *
+     * `viewModelScope` is never cleared for a hand-built ViewModel, so without this its coroutines outlive the test.
+     * One suspended on a real-dispatcher result (compose-resources resolves on an internal `Dispatchers.Default` scope)
+     * then resumes onto a `Dispatchers.Main` that `resetMain()` has already unset, which throws. Nothing handles it, so
+     * it lands as `UncaughtExceptionsBeforeTest` on whichever test starts next.
+     */
+    fun clearViewModel(viewModel: ViewModel) {
+        viewModel.viewModelScope.cancel()
+    }
 
     companion object {
         /** A scanned-but-unbonded BLE entry — the input that routes through `requestBonding`. */
