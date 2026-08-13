@@ -273,10 +273,12 @@ private fun TransmitterSection(
 @Composable
 private fun ReceiverSection(state: SiteFormState) {
     FormSection(stringResource(Res.string.site_planner_section_receiver), defaultExpanded = false) {
+        // The whole valid range is negative (-150..-30 dBm), so an unsigned keypad reaches no valid value.
         SiteField(
             state.rxSensitivity,
             { state.rxSensitivity = it },
             Res.string.site_planner_rx_sensitivity_dbm,
+            keyboardType = KeyboardType.DecimalSigned,
             error = if (state.rxSensBad) stringResource(Res.string.site_planner_invalid_rx_sensitivity) else null,
         )
         SiteField(state.rxHeight, { state.rxHeight = it }, Res.string.site_planner_rx_height_meters)
@@ -339,12 +341,30 @@ private fun TransmitterFields(
     freqError: String?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SiteField(state.lat, { state.lat = it }, Res.string.latitude, error = latError)
-        SiteField(state.lon, { state.lon = it }, Res.string.longitude, error = lonError)
+        // Southern/western hemispheres and lossy antennas are negative, so these need a sign key.
+        SiteField(
+            state.lat,
+            { state.lat = it },
+            Res.string.latitude,
+            keyboardType = KeyboardType.DecimalSigned,
+            error = latError,
+        )
+        SiteField(
+            state.lon,
+            { state.lon = it },
+            Res.string.longitude,
+            keyboardType = KeyboardType.DecimalSigned,
+            error = lonError,
+        )
         SiteField(state.power, { state.power = it }, Res.string.site_planner_tx_power_watts, error = powerError)
         SiteField(state.freq, { state.freq = it }, Res.string.site_planner_frequency_mhz, error = freqError)
         SiteField(state.height, { state.height = it }, Res.string.site_planner_antenna_height_meters)
-        SiteField(state.gain, { state.gain = it }, Res.string.site_planner_antenna_gain_dbi)
+        SiteField(
+            state.gain,
+            { state.gain = it },
+            Res.string.site_planner_antenna_gain_dbi,
+            keyboardType = KeyboardType.DecimalSigned,
+        )
     }
 }
 
@@ -354,7 +374,8 @@ private fun SiteField(
     onValueChange: (String) -> Unit,
     label: StringResource,
     modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Number,
+    // Every numeric field here is fractional (MHz, watts, dBi, km), so Decimal — not Number — is the floor.
+    keyboardType: KeyboardType = KeyboardType.Decimal,
     error: String? = null,
 ) {
     OutlinedTextField(
