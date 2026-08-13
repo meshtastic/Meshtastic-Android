@@ -144,7 +144,7 @@ configuration settings screen. Constraints are sourced from two layers:
 | `region` | Enum | Dropdown: `RegionInfo` entries | Regional frequency plans |
 | `use_preset` | Boolean | Toggle | Controls manual vs preset LoRa settings visibility |
 | `modem_preset` | Enum | Dropdown: `ChannelOption` entries | Visible only when `use_preset = true` |
-| `bandwidth` | Integer | Numeric input | Visible only when `use_preset = false` |
+| `bandwidth` | Integer | Numeric input outside `LORA_24`; region/target-aware dropdown in `LORA_24` | Visible only when `use_preset = false`; protobuf default `0` is shown as the firmware's 812.5 kHz `LORA_24` default, while unsupported nonzero values remain visible and block Save until replaced |
 | `spread_factor` | Integer | Numeric input | Visible only when `use_preset = false` |
 | `coding_rate` | Integer | Numeric input | Visible only when `use_preset = false` |
 | `hop_limit` | Integer | Dropdown: 0–7 | — |

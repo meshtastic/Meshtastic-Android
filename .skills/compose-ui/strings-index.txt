@@ -114,7 +114,12 @@ backup_keys
 backup_keys_confirmation
 backup_restore
 bad
+### BANDWIDTH ###
 bandwidth
+bandwidth_default
+bandwidth_option_khz
+bandwidth_unsupported
+bandwidth_unsupported_summary
 baro_pressure
 battery
 battery_ina_2xx_i2c_address

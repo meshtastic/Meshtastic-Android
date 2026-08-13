@@ -76,6 +76,7 @@ import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -97,6 +98,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
@@ -1269,6 +1271,65 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `local destination exposes its PlatformIO target`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
+
+        val localVm = createViewModel(destNum = 100)
+        runCurrent()
+
+        assertTrue(localVm.radioConfigState.value.isLocal)
+        assertEquals("tlora-v2-1-1_8", localVm.radioConfigState.value.pioEnv)
+    }
+
+    @Test
+    fun `local destination updates its PlatformIO target when identity is unchanged`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-t3s3-v1"))
+        val localVm = createViewModel(destNum = 100)
+        runCurrent()
+
+        val beforeReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertFalse(beforeReflash.options.orEmpty().any { it.wireValue == 1600 })
+
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "my-esp32s3-diy-oled"))
+        runCurrent()
+
+        val afterReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertTrue(localVm.radioConfigState.value.isLocal)
+        assertEquals("my-esp32s3-diy-oled", localVm.radioConfigState.value.pioEnv)
+        assertTrue(afterReflash.options.orEmpty().any { it.wireValue == 1600 })
+    }
+
+    @Test
+    fun `remote destination never inherits gateway PlatformIO target`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
+
+        val remoteVm = createViewModel(destNum = 456)
+        runCurrent()
+
+        assertFalse(remoteVm.radioConfigState.value.isLocal)
+        assertNull(remoteVm.radioConfigState.value.pioEnv)
+    }
+
+    @Test
     fun `loraRegionPresetMapFlow populates state`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
@@ -1388,7 +1449,7 @@ class RadioConfigViewModelTest {
         ChannelSettings(name = "D"),
     )
 
-    private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
+    private fun myNodeInfo(myNodeNum: Int, pioEnv: String? = null) = MyNodeInfo(
         myNodeNum = myNodeNum,
         hasGPS = false,
         model = null,
@@ -1403,6 +1464,7 @@ class RadioConfigViewModelTest {
         channelUtilization = 0f,
         airUtilTx = 0f,
         deviceId = null,
+        pioEnv = pioEnv,
     )
 
     @Test
