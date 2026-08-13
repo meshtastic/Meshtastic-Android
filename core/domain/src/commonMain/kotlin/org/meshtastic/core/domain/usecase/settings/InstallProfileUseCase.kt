@@ -16,10 +16,19 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.ChannelReplacementPlan
+import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
+import org.meshtastic.core.model.util.toChannelReplacementPlan
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.AdminEditScope
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
@@ -29,7 +38,11 @@ import org.meshtastic.proto.User
 
 /** Use case for installing a device profile onto a radio. */
 @Single
-open class InstallProfileUseCase constructor(private val radioController: RadioController) {
+open class InstallProfileUseCase
+constructor(
+    private val radioController: RadioController,
+    private val radioConfigRepository: RadioConfigRepository,
+) {
     /**
      * Installs the provided [DeviceProfile] onto the radio at [destNum].
      *
@@ -37,13 +50,52 @@ open class InstallProfileUseCase constructor(private val radioController: RadioC
      * @param profile The device profile to install.
      * @param currentUser The current user configuration of the destination node (to preserve names if not in profile).
      */
-    open suspend operator fun invoke(destNum: Int, profile: DeviceProfile, currentUser: User?) {
+    open suspend operator fun invoke(
+        destNum: Int,
+        profile: DeviceProfile,
+        currentUser: User?,
+        currentLoraConfig: Config.LoRaConfig?,
+        isLocal: Boolean,
+    ) {
+        // Decode and validate before opening the radio transaction. A malformed channel URL must not leave an edit
+        // session open or allow the rest of the profile to be partially applied.
+        val channelSet = profile.channel_url?.takeIf { it.isNotBlank() }?.let(::parseProfileChannelSet)
+        val desiredLoraConfig = channelSet?.lora_config ?: profile.config?.lora
+        val replacementPlan =
+            channelSet?.let {
+                try {
+                    it.toChannelReplacementPlan(
+                        currentSettings = emptyList(),
+                        fallbackLoraConfig = profile.config?.lora ?: currentLoraConfig,
+                        requirePrimary = true,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    throw MalformedMeshtasticUrlException("Invalid channel set in device profile", e)
+                }
+            }
+        val loraConfigToWrite = desiredLoraConfig?.takeIf { it != currentLoraConfig }
+
         radioController.editSettings(destNum) {
             installOwner(profile, currentUser)
             installConfig(profile.config)
             installFixedPosition(profile.fixed_position)
             installModuleConfig(profile.module_config)
+            installChannelsAndLora(replacementPlan, loraConfigToWrite)
         }
+        if (isLocal && (replacementPlan != null || loraConfigToWrite != null)) {
+            withContext(NonCancellable) {
+                radioConfigRepository.updateChannelSet(
+                    settingsList = replacementPlan?.normalizedSettings,
+                    loraConfig = loraConfigToWrite,
+                )
+            }
+        }
+    }
+
+    private fun parseProfileChannelSet(url: String): ChannelSet = try {
+        CommonUri.parse(url).toChannelSet()
+    } catch (e: IllegalArgumentException) {
+        throw MalformedMeshtasticUrlException("Invalid channel URL in device profile", e)
     }
 
     // is_licensed is deliberately not installed here: enabling ham mode is a dedicated onboarding flow
@@ -70,7 +122,6 @@ open class InstallProfileUseCase constructor(private val radioController: RadioC
             lc.power?.let { setConfig(Config(power = it)) }
             lc.network?.let { setConfig(Config(network = it)) }
             lc.display?.let { setConfig(Config(display = it)) }
-            lc.lora?.let { setConfig(Config(lora = it)) }
             lc.bluetooth?.let { setConfig(Config(bluetooth = it)) }
             lc.security?.let { setConfig(Config(security = it)) }
         }
@@ -108,5 +159,13 @@ open class InstallProfileUseCase constructor(private val radioController: RadioC
         lmc.paxcounter?.let { setModuleConfig(ModuleConfig(paxcounter = it)) }
         lmc.statusmessage?.let { setModuleConfig(ModuleConfig(statusmessage = it)) }
         lmc.tak?.let { setModuleConfig(ModuleConfig(tak = it)) }
+    }
+
+    private suspend fun AdminEditScope.installChannelsAndLora(
+        replacementPlan: ChannelReplacementPlan?,
+        loraConfig: Config.LoRaConfig?,
+    ) {
+        replacementPlan?.channelWrites?.forEach { setChannel(it) }
+        loraConfig?.let { setConfig(Config(lora = it)) }
     }
 }

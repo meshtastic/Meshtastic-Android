@@ -69,6 +69,10 @@ open class RadioConfigRepositoryImpl(
         channelSetDataSource.replaceAllSettings(settingsList)
     }
 
+    override suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
+        channelSetDataSource.updateChannelSet(settingsList, loraConfig)
+    }
+
     /**
      * Updates the [ChannelSettings] list with the provided channel and returns the index of the admin channel after the
      * update (if not found, returns 0).

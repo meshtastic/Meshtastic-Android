@@ -16,5 +16,11 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.common.log.ExpectedCondition
+
 /** Exception thrown when a Meshtastic URL cannot be parsed. */
-class MalformedMeshtasticUrlException(message: String) : Exception(message)
+class MalformedMeshtasticUrlException(message: String, cause: Throwable? = null) :
+    Exception(message, cause),
+    ExpectedCondition {
+    override val expectedConditionLabel: String = "malformed-meshtastic-url"
+}

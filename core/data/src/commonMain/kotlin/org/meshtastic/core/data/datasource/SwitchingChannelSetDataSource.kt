@@ -65,7 +65,14 @@ class SwitchingChannelSetDataSource(
 
     /** Replaces all [ChannelSettings] in a single atomic operation. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        mutate { it.copy(settings = settingsList) }
+        updateChannelSet(settingsList = settingsList, loraConfig = null)
+    }
+
+    /** Atomically updates supplied [ChannelSet] fields while preserving fields omitted by the caller. */
+    suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
+        mutate { current ->
+            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+        }
     }
 
     /** Places [channel]'s settings at its index, resizing with blank channels to fill any gap (parity with legacy). */
@@ -82,7 +89,7 @@ class SwitchingChannelSetDataSource(
     }
 
     suspend fun setLoraConfig(config: Config.LoRaConfig) {
-        mutate { it.copy(lora_config = config) }
+        updateChannelSet(settingsList = null, loraConfig = config)
     }
 
     private suspend fun mutate(transform: (ChannelSet) -> ChannelSet) {

@@ -21,10 +21,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.util.channelIdentity
+import org.meshtastic.core.model.util.isChannelPlaceholder
+import org.meshtastic.core.model.util.toChannelReplacementPlan
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
@@ -36,12 +38,8 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
 import kotlin.time.Duration.Companion.days
-import org.meshtastic.core.model.Channel as ModelChannel
 
 private const val SECONDS_TO_MILLIS = 1000L
-
-// Firmware channel files expose eight slots: one primary plus up to seven secondary channels.
-private const val CHANNEL_REPLACEMENT_SLOT_COUNT = 8
 
 @Composable
 fun Position.formatPositionTime(): String {
@@ -94,124 +92,26 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
 }
 
 /**
- * Builds an authoritative [Channel] list for a full REPLACE import. Every position in [new] is emitted (PRIMARY at
- * index 0, SECONDARY for 1..new.lastIndex) and any trailing positions beyond [new]'s range are emitted as DISABLED so
- * the radio stops using them.
- *
- * Unlike [getChannelList], this does NOT skip positions where `currentSettings[i] == new[i]`: the imported set is
- * authoritative, the local cache must not gate the writes, and silent diff-skips during REPLACE were the source of
- * stale channels.
- *
- * [currentSettings] is consulted only for its size (to determine trailing DISABLED writes); its values are never
- * compared against [new]. Callers should read it from `radioConfigRepository.channelSetFlow.first().settings`, not from
- * a `stateInWhileSubscribed` StateFlow's `.value` — the StateFlow placeholder window can return an empty list and
- * suppress trailing DISABLED writes.
- *
- * Edge case: if [new] is empty, every emitted slot (including index 0) is DISABLED rather than wrongly promoting an
- * empty [ChannelSettings] to PRIMARY.
- *
- * @param new The imported [ChannelSettings] list. Every index becomes a write to the radio.
- * @param currentSettings The current [ChannelSettings] list. Only its size is used; trailing indices past [new] become
- *   DISABLED writes so leftover slots are cleared.
- * @param minimumSlotCount The minimum slot count to emit. Full replacement callers can use this to disable firmware
- *   slots even when the local cache is stale or shorter than the radio's actual channel list.
- * @param maximumSlotCount The maximum slot count to emit. Full replacement callers use this to avoid unsupported
- *   firmware channel indices even if an imported or cached list is longer than expected.
- * @return A [Channel] list covering every slot the radio needs written to materialize [new] and clear leftover slots.
- */
-fun getChannelReplacementList(
-    new: List<ChannelSettings>,
-    currentSettings: List<ChannelSettings>,
-    minimumSlotCount: Int = 0,
-    maximumSlotCount: Int = Int.MAX_VALUE,
-): List<Channel> = buildList {
-    require(minimumSlotCount <= maximumSlotCount) { "minimumSlotCount must be <= maximumSlotCount" }
-    val minimumLastIndex = minimumSlotCount.coerceAtLeast(0) - 1
-    val maximumLastIndex = maximumSlotCount.coerceAtLeast(0) - 1
-    val endIndex = maxOf(currentSettings.lastIndex, new.lastIndex, minimumLastIndex).coerceAtMost(maximumLastIndex)
-    if (endIndex < 0) return@buildList
-    for (i in 0..endIndex) {
-        add(
-            Channel(
-                role =
-                when (i) {
-                    // Empty-new is a degenerate import: every slot (including 0) must be DISABLED.
-                    0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
-
-                    in 1..new.lastIndex -> Channel.Role.SECONDARY
-
-                    else -> Channel.Role.DISABLED
-                },
-                index = i,
-                settings = new.getOrNull(i) ?: ChannelSettings(),
-            ),
-        )
-    }
-}
-
-/**
- * Normalizes an imported REPLACE-mode [ChannelSettings] list so firmware only materializes real, distinct channels.
- *
- * Imported replacement sets can carry blank placeholder secondaries (trailing empty [ChannelSettings] padding) and
- * semantic duplicates (two slots resolving to the same effective channel under the active LoRa preset). Both produce
- * invalid LongFast-looking slots on the radio that cause route failures (`QueueStatus res=6` / `routeErr=6`).
- * - Slot 0 (primary) is always preserved as-is, even if blank (a blank primary is a deliberate disable signal).
- * - A blank placeholder primary does not participate in duplicate tracking.
- * - Blank placeholder secondaries (no name AND no PSK) are dropped.
- * - Semantic duplicates (same effective name + effective PSK as an earlier kept slot) are dropped.
- * - Remaining valid secondaries compact into sequential slots 1..n.
- *
- * @param settings Raw imported settings list.
- * @param loraConfig Active LoRa config used to resolve effective channel identity. Null falls back to defaults.
- * @return Compacted, deduplicated list safe to write to the radio.
- */
-fun normalizeReplacementSettings(
-    settings: List<ChannelSettings>,
-    loraConfig: Config.LoRaConfig?,
-): List<ChannelSettings> {
-    if (settings.size <= 1) return settings
-    val effectiveLora = loraConfig ?: Config.LoRaConfig()
-    val primary = settings.first()
-    val seen = mutableSetOf<ChannelIdentity>()
-    if (!primary.isPlaceholder()) {
-        seen.add(primary.channelIdentity(effectiveLora))
-    }
-    val compact = mutableListOf(primary)
-    for (index in 1..settings.lastIndex) {
-        val candidate = settings[index]
-        val identity = if (candidate.isPlaceholder()) null else candidate.channelIdentity(effectiveLora)
-        if (identity != null && seen.add(identity)) {
-            compact.add(candidate)
-        }
-    }
-    return compact
-}
-
-/** True when a [ChannelSettings] carries no name and no PSK — a placeholder, not an intended channel. */
-private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && psk.size == 0
-
-/**
  * Imports a [ChannelSet] as an authoritative REPLACE: writes every channel and — when present and actually different —
  * the imported LoRa config, all inside one [RadioController.editLocalSettings] transaction, then replaces the local
  * channel cache.
  *
  * Reads the current LoRa config and channel set from [radioConfigRepository]'s flows (avoiding the StateFlow
- * placeholder window) and builds the authoritative replacement list via [getChannelReplacementList]. The edit-settings
- * transaction defers disk persistence, radio reload/reconfiguration, and reboot until the closing commit, so channels +
- * LoRa land in a single reboot with no per-slot reconfigure to pace against. (Firmware still writes each `set_channel`
- * into its in-memory channel table as it arrives — the transaction is not a full staging of channel state — but the
- * expensive persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors
- * `InstallProfileUseCase` and is why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
+ * placeholder window) and builds the shared authoritative replacement plan. The edit-settings transaction defers disk
+ * persistence, radio reload/reconfiguration, and reboot until the closing commit, so channels + LoRa land in a single
+ * reboot with no per-slot reconfigure to pace against. (Firmware still writes each `set_channel` into its in-memory
+ * channel table as it arrives — the transaction is not a full staging of channel state — but the expensive
+ * persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors `InstallProfileUseCase` and is
+ * why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
  *
  * The local channel cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
  * `AdminControllerImpl.EditSettingsSession.setChannel`), and this function replaces the cached channel list once, after
- * the session succeeds — so an import interrupted before that point leaves the local channel cache untouched. (The
- * imported LoRa config is the one exception: it still writes through the cache-mirroring `setConfig`, so its local
- * cache update is not itself deferred to commit — a single trailing write that self-heals on the device's next config
- * re-send. Making `setConfig` transaction-aware is future work.)
+ * the session succeeds — so an import interrupted before that point leaves the local channel cache untouched. The
+ * post-commit [RadioConfigRepository.updateChannelSet] call updates the normalized settings and imported LoRa config
+ * together; an import without LoRa preserves the cached LoRa config.
  *
- * Imported settings are normalized via [normalizeReplacementSettings] before any write or bounds check, so blank
- * placeholder secondaries and semantic duplicates never reach the radio or the local cache.
+ * Imported settings are normalized before any write or bounds check, so blank placeholder secondaries and semantic
+ * duplicates never reach the radio or the local cache.
  *
  * @param channelSet The imported [ChannelSet] to apply as a replacement. Its `lora_config`, if present and different
  *   from the device's current LoRa config, is written inside the same transaction.
@@ -223,32 +123,21 @@ suspend fun importChannelSet(
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
 ) {
-    // Resolve the LoRa preset used for semantic identity: prefer the imported config, fall back to the device's current
-    // local config so duplicate detection stays correct when the import omits lora_config (e.g. a non-default preset).
     val currentLoraConfig = radioConfigRepository.localConfigFlow.first().lora
-    val identityLoraConfig = channelSet.lora_config ?: currentLoraConfig
-    val normalizedSettings = normalizeReplacementSettings(channelSet.settings, identityLoraConfig)
-    require(normalizedSettings.size <= CHANNEL_REPLACEMENT_SLOT_COUNT) {
-        "Imported channel set exceeds supported channel slot count"
-    }
     val currentSettings = radioConfigRepository.channelSetFlow.first().settings
-    val replacements =
-        getChannelReplacementList(
-            new = normalizedSettings,
-            currentSettings = currentSettings,
-            minimumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
-            maximumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
-        )
+    val replacementPlan =
+        channelSet.toChannelReplacementPlan(currentSettings = currentSettings, fallbackLoraConfig = currentLoraConfig)
     // Only write LoRa when the import carries one that actually differs from the device — avoids a redundant
     // reconfigure.
     val importedLoraConfig = channelSet.lora_config?.takeIf { it != currentLoraConfig }
     Logger.i {
-        "Applying imported channel replacement writes=${replacements.size} " +
-            "importedSettings=${channelSet.settings.size} normalizedSettings=${normalizedSettings.size} " +
+        "Applying imported channel replacement writes=${replacementPlan.channelWrites.size} " +
+            "importedSettings=${channelSet.settings.size} " +
+            "normalizedSettings=${replacementPlan.normalizedSettings.size} " +
             "writesLora=${importedLoraConfig != null}"
     }
     radioController.editLocalSettings {
-        for (channel in replacements) {
+        for (channel in replacementPlan.channelWrites) {
             Logger.i {
                 "Writing imported channel index=${channel.index} role=${channel.role} " +
                     "hasName=${channel.settings?.name?.isNotBlank() == true}"
@@ -257,7 +146,12 @@ suspend fun importChannelSet(
         }
         importedLoraConfig?.let { setConfig(Config(lora = it)) }
     }
-    withContext(NonCancellable) { radioConfigRepository.replaceAllSettings(normalizedSettings) }
+    withContext(NonCancellable) {
+        radioConfigRepository.updateChannelSet(
+            settingsList = replacementPlan.normalizedSettings,
+            loraConfig = importedLoraConfig,
+        )
+    }
 }
 
 /**
@@ -287,7 +181,7 @@ fun getChannelPreviewForAdd(
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
     for (channel in incoming) {
-        val shouldShow = !channel.isPlaceholder()
+        val shouldShow = !channel.isChannelPlaceholder()
         val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
         // Omit blank placeholders and semantic duplicates entirely — they are not shown to the user.
         if (identity != null && seen.add(identity)) {
@@ -302,16 +196,3 @@ fun getChannelPreviewForAdd(
 
 /** Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched). */
 data class ChannelAddPreview(val settings: List<ChannelSettings>, val selections: List<Boolean>)
-
-/** Semantic channel identity based on effective name and effective PSK. */
-private data class ChannelIdentity(val name: String, val psk: ByteString) {
-    // Redact the effective PSK from auto-generated diagnostics so a cryptographic key never leaks
-    // via toString() in exception messages, debug logs, or stack traces.
-    override fun toString(): String = "ChannelIdentity(name=$name, psk=<redacted>)"
-}
-
-/** Resolves the [ChannelIdentity] of this [ChannelSettings] under the given [Config.LoRaConfig]. */
-private fun ChannelSettings.channelIdentity(loraConfig: Config.LoRaConfig): ChannelIdentity {
-    val channel = ModelChannel(settings = this, loraConfig = loraConfig)
-    return ChannelIdentity(name = channel.name, psk = channel.psk)
-}

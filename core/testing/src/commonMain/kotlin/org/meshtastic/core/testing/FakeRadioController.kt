@@ -37,6 +37,12 @@ class FakeRadioController :
     BaseFake(),
     RadioController {
 
+    sealed interface SettingsOperation {
+        data class SetConfig(val config: Config) : SettingsOperation
+
+        data class SetChannel(val channel: Channel) : SettingsOperation
+    }
+
     /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
     private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
@@ -55,6 +61,9 @@ class FakeRadioController :
 
     /** Every [setLocalChannel] call, in order. */
     val localChannels = mutableListOf<Channel>()
+
+    /** Every config and channel write, in their shared call order. */
+    val settingsOperations = mutableListOf<SettingsOperation>()
 
     var throwOnSend: Boolean = false
 
@@ -86,6 +95,7 @@ class FakeRadioController :
             sentSharedContacts.clear()
             localConfigs.clear()
             localChannels.clear()
+            settingsOperations.clear()
             throwOnSend = false
             throwOnSetLocalConfig = false
             failChannelWriteAfter = null
@@ -130,10 +140,12 @@ class FakeRadioController :
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
         localConfigs.add(config)
+        settingsOperations.add(SettingsOperation.SetConfig(config))
     }
 
     override suspend fun setLocalChannel(channel: Channel) {
         localChannels.add(channel)
+        settingsOperations.add(SettingsOperation.SetChannel(channel))
     }
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
@@ -144,6 +156,7 @@ class FakeRadioController :
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         localConfigs.add(config)
+        settingsOperations.add(SettingsOperation.SetConfig(config))
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {}
@@ -151,6 +164,7 @@ class FakeRadioController :
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
         failChannelWriteAfter?.let { if (localChannels.size >= it) error("Fake channel write failure") }
         localChannels.add(channel)
+        settingsOperations.add(SettingsOperation.SetChannel(channel))
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {}
