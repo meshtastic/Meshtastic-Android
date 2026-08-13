@@ -145,13 +145,13 @@ fun EditTextPreference(
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.isEmpty()) {
+            val parsed = NumberFormatter.parseDecimalOrNull(it)?.toFloat()
+            if (parsed != null) {
                 valueState = it
-            } else {
-                NumberFormatter.parseDecimalOrNull(it)?.toFloat()?.let { float ->
-                    valueState = it
-                    onValueChanged(float)
-                }
+                onValueChanged(parsed)
+            } else if (NumberFormatter.isPartialDecimal(it)) {
+                // Keep transient input ("", "-", "-.") so the field doesn't snap back mid-entry of "-1.5".
+                valueState = it
             }
         },
         onFocusChanged = onFocusChanged,
@@ -183,13 +183,13 @@ fun EditTextPreference(
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.DecimalSigned, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.length <= 1 || NumberFormatter.isDecimalSeparator(it.first())) {
+            val parsed = NumberFormatter.parseDecimalOrNull(it)
+            if (parsed != null) {
                 valueState = it
-            } else {
-                NumberFormatter.parseDecimalOrNull(it)?.let { double ->
-                    valueState = it
-                    onValueChanged(double)
-                }
+                onValueChanged(parsed)
+            } else if (NumberFormatter.isPartialDecimal(it)) {
+                // Keep transient input ("", "-", "-.") so the field doesn't snap back mid-entry of "-1.5".
+                valueState = it
             }
         },
         onFocusChanged = onFocusChanged,

@@ -18,7 +18,9 @@ package org.meshtastic.core.common.util
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class NumberFormatterTest {
 
@@ -94,6 +96,26 @@ class NumberFormatterTest {
         assertNull(NumberFormatter.parseDecimalOrNull("abc"))
         assertNull(NumberFormatter.parseDecimalOrNull("."))
         assertNull(NumberFormatter.parseDecimalOrNull("1.2.3.4a"))
+    }
+
+    @Test
+    fun testIsPartialDecimalAcceptsTransientInput() {
+        // What a controlled field must keep on the way to "-1.5" or ".5".
+        assertTrue(NumberFormatter.isPartialDecimal(""))
+        assertTrue(NumberFormatter.isPartialDecimal("-"))
+        assertTrue(NumberFormatter.isPartialDecimal("."))
+        assertTrue(NumberFormatter.isPartialDecimal(","))
+        assertTrue(NumberFormatter.isPartialDecimal("-."))
+        assertTrue(NumberFormatter.isPartialDecimal("-1."))
+        assertTrue(NumberFormatter.isPartialDecimal("1 "))
+    }
+
+    @Test
+    fun testIsPartialDecimalRejectsNonNumeric() {
+        assertFalse(NumberFormatter.isPartialDecimal("abc"))
+        assertFalse(NumberFormatter.isPartialDecimal("1a"))
+        assertFalse(NumberFormatter.isPartialDecimal("1-2"))
+        assertFalse(NumberFormatter.isPartialDecimal("--1"))
     }
 
     @Test

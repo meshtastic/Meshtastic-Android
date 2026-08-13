@@ -64,6 +64,14 @@ object NumberFormatter {
     /** True when [char] is a decimal mark reachable from a `Decimal`/`DecimalSigned` keyboard. */
     fun isDecimalSeparator(char: Char): Boolean = char in DECIMAL_SEPARATORS
 
+    /**
+     * True when [text] could still become a number as the user types — an empty field, a lone sign, or a trailing
+     * separator. A controlled field consults this after [parseDecimalOrNull] returns null, so transient input like `-`
+     * or `-.` survives on the way to `-1.5` instead of snapping back to the last committed value.
+     */
+    fun isPartialDecimal(text: String): Boolean =
+        text.removePrefix("-").all { it.isDigit() || isDecimalSeparator(it) || it.isWhitespace() || it == '\'' }
+
     /** Decimal marks reachable from a `Decimal`/`DecimalSigned` keyboard, across keyboard locales. */
     private val DECIMAL_SEPARATORS = setOf('.', ',', '٫', '、', '·')
 }
