@@ -115,6 +115,7 @@ import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
+import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
@@ -339,6 +340,18 @@ fun ConnectionsScreen(
                                 }
                             }
                         }
+
+                        // Event firmware is reported here rather than by swapping the app-bar logo: the Meshtastic
+                        // identity stays put, and the edition reads as one more fact about the connected device.
+                        // LocalEventBranding is only populated while connected to event firmware, so the card comes
+                        // and goes with the device. Hidden once the event is over — the ended-event card below takes
+                        // over from here, and celebrating an event that has passed would undercut its nudge.
+                        LocalEventBranding.current
+                            ?.takeIf { !it.hasEnded() }
+                            ?.let { edition ->
+                                Spacer(modifier = Modifier.height(8.dp))
+                                EventFirmwareCard(edition = edition)
+                            }
 
                         firmwareUpdateNotice?.let { notice ->
                             FirmwareUpdateNoticeCard(

@@ -40,9 +40,10 @@ import kotlin.time.Clock
 
 /**
  * Provides the active [EventFirmwareEdition] (if any) to the composition tree. When a connected device reports an event
- * firmware edition, this local is populated at the app root so that
- * [MainAppBar][org.meshtastic.core.ui.component.MainAppBar] can display event branding automatically — no per-screen
- * wiring needed.
+ * firmware edition, this local is populated at the app root so consumers can pick it up without per-screen wiring: the
+ * Connections screen surfaces the edition itself, and [LocalEventTheme][org.meshtastic.core.ui.theme.LocalEventTheme]
+ * derives the ambient theme from it. The app-bar logo is deliberately *not* one of those consumers — the Meshtastic
+ * identity stays in place regardless of the firmware running on the device.
  */
 @Suppress("CompositionLocalAllowlist")
 val LocalEventBranding = compositionLocalOf<EventFirmwareEdition?> { null }

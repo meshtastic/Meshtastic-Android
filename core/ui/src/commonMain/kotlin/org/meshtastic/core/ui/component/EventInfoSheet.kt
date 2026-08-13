@@ -69,8 +69,9 @@ import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.safeLinks
 
 /**
- * Bottom sheet shown when the user taps the event branding in [MainAppBar]. Surfaces the event metadata the bundled
- * `event_firmware.json` carries — welcome message, location, dates, and links — themed with the edition's accent color.
+ * Bottom sheet shown when the user taps the event card on the Connections screen. Surfaces the event metadata the
+ * bundled `event_firmware.json` carries — welcome message, location, dates, and links — themed with the edition's
+ * accent color.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
