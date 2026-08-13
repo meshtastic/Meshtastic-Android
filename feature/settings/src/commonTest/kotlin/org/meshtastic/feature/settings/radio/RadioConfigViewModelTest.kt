@@ -28,6 +28,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1037,9 +1038,13 @@ class RadioConfigViewModelTest {
             {
                 throw MalformedMeshtasticUrlException("bad profile")
             }
+        // UiText.resolve() loads the string on real Dispatchers.Default, outside the test scheduler,
+        // so await the snackbar call instead of draining with runCurrent().
+        val snackbarShown = CompletableDeferred<Unit>()
+        every { snackbarManager.showSnackbar(any(), any(), any(), any(), any()) } calls { snackbarShown.complete(Unit) }
 
         viewModel.installProfile(profile)
-        runCurrent()
+        snackbarShown.await()
 
         verify { snackbarManager.showSnackbar(message = "This Channel URL is invalid and can not be used") }
     }
