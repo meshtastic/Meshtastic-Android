@@ -115,6 +115,51 @@
               </div>
             </div>
           </div>
+<a data-name="1226679832%2FFunctions%2F-2004510817" anchor-label="isDecimalSeparator" id="1226679832%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-decimal-separator.html"><span>is</span><wbr><span>Decimal</span><wbr><span><span>Separator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1226679832%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-decimal-separator.html"><span class="token function">isDecimalSeparator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">char<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-char/index.html">Char</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when <a href="is-decimal-separator.html">char</a> is a decimal mark reachable from a <code class="lang-kotlin">Decimal</code>/<code class="lang-kotlin">DecimalSigned</code> keyboard.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1009193785%2FFunctions%2F-2004510817" anchor-label="isPartialDecimal" id="1009193785%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-partial-decimal.html"><span>is</span><wbr><span>Partial</span><wbr><span><span>Decimal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1009193785%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-partial-decimal.html"><span class="token function">isPartialDecimal</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when <a href="is-partial-decimal.html">text</a> could still become a number as the user types — an empty field, a lone sign, or a trailing separator. A controlled field consults this after <a href="parse-decimal-or-null.html">parseDecimalOrNull</a> returns null, so transient input like <code class="lang-kotlin">-</code> or <code class="lang-kotlin">-.</code> survives on the way to <code class="lang-kotlin">-1.5</code> instead of snapping back to the last committed value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2132133593%2FFunctions%2F-2004510817" anchor-label="parseDecimalOrNull" id="-2132133593%2FFunctions%2F-2004510817" data-filterable-set=":core:common/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:common/commonMain" data-filterable-set=":core:common/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="parse-decimal-or-null.html"><span>parse</span><wbr><span>Decimal</span><wbr><span>Or</span><wbr><span><span>Null</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2132133593%2FFunctions%2F-2004510817"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:common/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="parse-decimal-or-null.html"><span class="token function">parseDecimalOrNull</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Parses a user-entered decimal whose separator follows the keyboard locale — <code class="lang-kotlin">48,21</code> on a comma locale, which <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.text/index.html">String.toDoubleOrNull</a> rejects. A lone separator is always the decimal mark; grouping is only recognised when more than one appears, in which case the last one is the decimal mark. Returns null for anything unparseable.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

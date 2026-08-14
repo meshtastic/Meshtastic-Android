@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-data</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.data.repository</a><span class="delimiter">/</span><span class="current">PacketRepositoryImpl</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Packet</span><wbr><span>Repository</span><wbr><span><span>Impl</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">PacketRepositoryImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/data/src/commonMain/kotlin/org/meshtastic/core/data/repository/PacketRepositoryImpl.kt#L52">source</a>)</span></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">PacketRepositoryImpl</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dbManager<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database/-database-provider/index.html">DatabaseProvider</a><span class="token punctuation">, </span></span><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a></span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-packet-repository/index.html">PacketRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/data/src/commonMain/kotlin/org/meshtastic/core/data/repository/PacketRepositoryImpl.kt#L55">source</a>)</span></span></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -138,7 +138,37 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1323975066%2FFunctions%2F-367135906" anchor-label="clearAllUnreadCounts" id="1323975066%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+        <div class="table"><a data-name="-210782544%2FFunctions%2F-367135906" anchor-label="claimQueuedPacket" id="-210782544%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="claim-queued-packet.html"><span>claim</span><wbr><span>Queued</span><wbr><span><span>Packet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-210782544%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="claim-queued-packet.html"><span class="token function">claimQueuedPacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet/index.html">PersistedPacket</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-839265288%2FFunctions%2F-367135906" anchor-label="claimQueuedPacketByPacketIdIfUnique" id="-839265288%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="claim-queued-packet-by-packet-id-if-unique.html"><span>claim</span><wbr><span>Queued</span><wbr><span>Packet</span><wbr><span>By</span><wbr><span>Packet</span><wbr><span>Id</span><wbr><span>If</span><wbr><span><span>Unique</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-839265288%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="claim-queued-packet-by-packet-id-if-unique.html"><span class="token function">claimQueuedPacketByPacketIdIfUnique</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet/index.html">PersistedPacket</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1323975066%2FFunctions%2F-367135906" anchor-label="clearAllUnreadCounts" id="1323975066%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -328,7 +358,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-enroute-packets.html"><span class="token function">getEnroutePackets</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-enroute-packets.html"><span class="token function">getEnroutePackets</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet/index.html">PersistedPacket</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -453,6 +483,36 @@
               </div>
             </div>
           </div>
+<a data-name="-1044086511%2FFunctions%2F-367135906" anchor-label="getPacketByPacketIdIfUnique" id="-1044086511%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-packet-by-packet-id-if-unique.html"><span>get</span><wbr><span>Packet</span><wbr><span>By</span><wbr><span>Packet</span><wbr><span>Id</span><wbr><span>If</span><wbr><span><span>Unique</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1044086511%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-packet-by-packet-id-if-unique.html"><span class="token function">getPacketByPacketIdIfUnique</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1522146678%2FFunctions%2F-367135906" anchor-label="getPacketByPersistedId" id="1522146678%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-packet-by-persisted-id.html"><span>get</span><wbr><span>Packet</span><wbr><span>By</span><wbr><span>Persisted</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1522146678%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-packet-by-persisted-id.html"><span class="token function">getPacketByPersistedId</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-891172929%2FFunctions%2F-367135906" anchor-label="getQueuedPackets" id="-891172929%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
             <div class="main-subrow keyValue ">
@@ -463,7 +523,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-queued-packets.html"><span class="token function">getQueuedPackets</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="get-queued-packets.html"><span class="token function">getQueuedPackets</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet/index.html">PersistedPacket</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -598,7 +658,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="insert-room-packet.html"><span class="token function">insertRoomPacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database.entity/-packet/index.html">Packet</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="insert-room-packet.html"><span class="token function">insertRoomPacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/database/org.meshtastic.core.database.entity/-packet/index.html">Packet</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -618,6 +678,21 @@
               </div>
             </div>
           </div>
+<a data-name="88355363%2FFunctions%2F-367135906" anchor-label="rollbackEnroutePacket" id="88355363%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rollback-enroute-packet.html"><span>rollback</span><wbr><span>Enroute</span><wbr><span><span>Packet</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="88355363%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="rollback-enroute-packet.html"><span class="token function">rollbackEnroutePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="542188003%2FFunctions%2F-367135906" anchor-label="savePacket" id="542188003%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
             <div class="main-subrow keyValue ">
@@ -628,7 +703,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="save-packet.html"><span class="token function">savePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">receivedTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">read<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">filtered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="save-packet.html"><span class="token function">savePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">contactKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">packet<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">receivedTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">read<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">filtered<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -708,17 +783,17 @@
               </div>
             </div>
           </div>
-<a data-name="-481671227%2FFunctions%2F-367135906" anchor-label="timeOutEnroutePacket" id="-481671227%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+<a data-name="-1769853931%2FFunctions%2F-367135906" anchor-label="timeOutEnroutePacket" id="-1769853931%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="time-out-enroute-packet.html"><span>time</span><wbr><span>Out</span><wbr><span>Enroute</span><wbr><span><span>Packet</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-481671227%2FFunctions%2F-367135906"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1769853931%2FFunctions%2F-367135906"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="time-out-enroute-packet.html"><span class="token function">timeOutEnroutePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packetId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">routingError<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="time-out-enroute-packet.html"><span class="token function">timeOutEnroutePacket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a><span class="token punctuation">, </span></span><span class="parameter ">routingError<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -783,17 +858,32 @@
               </div>
             </div>
           </div>
-<a data-name="852462241%2FFunctions%2F-367135906" anchor-label="updateMessageStatus" id="852462241%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+<a data-name="1515648977%2FFunctions%2F-367135906" anchor-label="updateMessageStatus" id="1515648977%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="update-message-status.html"><span>update</span><wbr><span>Message</span><wbr><span><span>Status</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="852462241%2FFunctions%2F-367135906"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1515648977%2FFunctions%2F-367135906"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-message-status.html"><span class="token function">updateMessageStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">d<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">m<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-message-status.html"><span class="token function">updateMessageStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">d<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-data-packet/index.html">DataPacket</a><span class="token punctuation">, </span></span><span class="parameter ">m<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-message-status.html"><span class="token function">updateMessageStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a><span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1063656978%2FFunctions%2F-367135906" anchor-label="updateOutgoingMessageStatus" id="1063656978%2FFunctions%2F-367135906" data-filterable-set=":core:data/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:data/commonMain" data-filterable-set=":core:data/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-outgoing-message-status.html"><span>update</span><wbr><span>Outgoing</span><wbr><span>Message</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1063656978%2FFunctions%2F-367135906"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:data/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="update-outgoing-message-status.html"><span class="token function">updateOutgoingMessageStatus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span><span class="token punctuation">, </span></span><span class="parameter ">status<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-message-status/index.html">MessageStatus</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-persisted-packet-id/index.html">PersistedPacketId</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>

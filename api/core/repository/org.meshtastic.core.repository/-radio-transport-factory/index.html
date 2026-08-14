@@ -93,14 +93,44 @@
   <div class="breadcrumbs"><a href="../../index.html">core-repository</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.repository</a><span class="delimiter">/</span><span class="current">RadioTransportFactory</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Radio</span><wbr><span>Transport</span><wbr><span><span>Factory</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RadioTransportFactory</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/RadioTransportFactory.kt#L27">source</a>)</span></span></div><p class="paragraph">Creates <a href="../-radio-transport/index.html">RadioTransport</a> instances for specific device addresses.</p><p class="paragraph">Implemented per-platform to provide the correct hardware transport (BLE, Serial, TCP).</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RadioTransportFactory</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/RadioTransportFactory.kt#L28">source</a>)</span></span></div><p class="paragraph">Creates <a href="../-radio-transport/index.html">RadioTransport</a> instances for specific device addresses.</p><p class="paragraph">Implemented per-platform to provide the correct hardware transport (BLE, Serial, TCP).</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-1830497264%2FProperties%2F-1238997634" anchor-label="supportedDeviceTypes" id="-1830497264%2FProperties%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+        <div class="table"><a data-name="2093754004%2FProperties%2F-1238997634" anchor-label="isReplayTransportAvailable" id="2093754004%2FProperties%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-replay-transport-available.html"><span>is</span><wbr><span>Replay</span><wbr><span>Transport</span><wbr><span><span>Available</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2093754004%2FProperties%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="is-replay-transport-available.html">isReplayTransportAvailable</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this build can actually replay a packet capture rather than silently degrading to the plain mock. The capture is a locally generated artifact that is not checked in, so most builds ship without it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="407443811%2FProperties%2F-1238997634" anchor-label="mockTransportEnabled" id="407443811%2FProperties%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mock-transport-enabled.html"><span>mock</span><wbr><span>Transport</span><wbr><span><span>Enabled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="407443811%2FProperties%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="mock-transport-enabled.html">mockTransportEnabled</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Whether the virtual demo transports (<code class="lang-kotlin">m</code> mock / <code class="lang-kotlin">r</code> replay) may be offered and bound right now.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1830497264%2FProperties%2F-1238997634" anchor-label="supportedDeviceTypes" id="-1830497264%2FProperties%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -145,21 +175,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="is-address-valid.html"><span class="token function">isAddressValid</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Checks if the given <a href="is-address-valid.html">address</a> represents a valid, supported transport type.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="2083931072%2FFunctions%2F-1238997634" anchor-label="isMockTransport" id="2083931072%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="is-mock-transport.html"><span>is</span><wbr><span>Mock</span><wbr><span><span>Transport</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2083931072%2FFunctions%2F-1238997634"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="is-mock-transport.html"><span class="token function">isMockTransport</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether we are currently forced into using a mock transport (e.g., Firebase Test Lab).</p></div></div></div>
                 </div>
               </div>
             </div>
