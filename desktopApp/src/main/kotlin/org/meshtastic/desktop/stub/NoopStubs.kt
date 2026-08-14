@@ -84,7 +84,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
         block: suspend (RadioSessionLease) -> Unit,
     ): Boolean = false
 
-    override fun isMockTransport(): Boolean = false
+    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
     override val isReplayTransportAvailable: Boolean = false
 

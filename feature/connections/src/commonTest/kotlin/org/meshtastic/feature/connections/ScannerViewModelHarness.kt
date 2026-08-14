@@ -89,12 +89,18 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      */
     val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
 
+    /** Demo Mode gate, backing `radioInterfaceService.mockTransportEnabled`. Flip it to assert the reactive path. */
+    val mockTransportEnabled = MutableStateFlow(false)
+
     val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /**
      * The `(showMock, showReplay)` pairs the ViewModel has asked for, in call order. Without this the fake would return
      * the same devices for every visibility combination, so a test could pass while the ViewModel requested the wrong
      * one — assert against this to prove the production path actually forwarded the intended flags.
+     *
+     * The order matters as much as the contents: the Demo Mode gate is observed rather than sampled, so a mid-session
+     * unlock has to show up here as a fresh request.
      */
     val discoveryRequests = mutableListOf<Pair<Boolean, Boolean>>()
 
@@ -119,7 +125,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         }
 
     init {
-        every { radioInterfaceService.isMockTransport() } returns false
+        every { radioInterfaceService.mockTransportEnabled } returns mockTransportEnabled
         every { radioInterfaceService.isReplayTransportAvailable } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())

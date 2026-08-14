@@ -100,6 +100,66 @@ class ScannerViewModelTest {
         assertNotNull(viewModel)
     }
 
+    /**
+     * Demo Mode's gate opens mid-session in a release build, when the user performs the hidden-features gesture in
+     * Settings. Sampling it once in `init` (as this used to) meant the Connections list never noticed.
+     */
+    @Test
+    fun `showMockTransport follows the transport gate after construction`() = runTest {
+        viewModel.showMockTransport.test {
+            assertEquals(false, awaitItem())
+
+            harness.mockTransportEnabled.value = true
+            assertEquals(true, awaitItem())
+
+            harness.mockTransportEnabled.value = false
+            assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The gate has to reach the device list, not merely be observable on the ViewModel.
+     *
+     * Asserting on `showMockTransport` alone would pass even if the ViewModel stopped feeding the gate into the
+     * device-list query, so this asserts on the requests the use case actually received: one per gate value, in order.
+     * A gate sampled once at construction — which is what this branch fixes — records only its initial value here.
+     */
+    @Test
+    fun `a mid-session unlock re-queries the device list`() = runTest {
+        viewModel.usbDevicesForUi.test {
+            awaitItem()
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false),
+                harness.discoveryRequests,
+                "a locked gate must still have queried the device list once",
+            )
+
+            // Each transition is checkpointed before the next one is provoked. Writing `true` and `false` back to
+            // back would let the StateFlow conflate them, and the `true` request — the one this whole feature exists
+            // to produce — could then never be observed, leaving the test green but vacuous. Waiting here fixes the
+            // ordering through the test's own control flow rather than through dispatcher timing, which is not a
+            // contract worth asserting on.
+            harness.mockTransportEnabled.value = true
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false, true to false),
+                harness.discoveryRequests,
+                "unlocking Demo Mode mid-session must re-query the device list",
+            )
+
+            harness.mockTransportEnabled.value = false
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false, true to false, false to false),
+                harness.discoveryRequests,
+                "re-locking must re-query it again",
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `connectionProgressText reflects connectionProgress`() = runTest {
         viewModel.connectionProgressText.test {
@@ -371,13 +431,14 @@ class ScannerViewModelTest {
 
     /**
      * Builds a ViewModel against the given transport capabilities and returns the distinct `(showMock, showReplay)`
-     * pairs it asked the use case for. A fresh ViewModel is required because both flags are latched in `init`.
+     * pairs it asked the use case for. A fresh ViewModel is required because the replay flag is latched in `init` — the
+     * Demo Mode gate itself is observed, so it is set on the backing flow rather than stubbed.
      */
     private suspend fun requestedVisibility(
         mockTransport: Boolean,
         replayAvailable: Boolean,
     ): List<Pair<Boolean, Boolean>> {
-        every { harness.radioInterfaceService.isMockTransport() } returns mockTransport
+        harness.mockTransportEnabled.value = mockTransport
         every { harness.radioInterfaceService.isReplayTransportAvailable } returns replayAvailable
         harness.discoveryRequests.clear()
         val subject = harness.buildBase()

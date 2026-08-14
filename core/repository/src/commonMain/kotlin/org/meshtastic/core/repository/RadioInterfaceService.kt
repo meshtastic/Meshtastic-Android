@@ -122,8 +122,12 @@ interface RadioInterfaceService :
      */
     val sessionGeneration: StateFlow<Long>
 
-    /** Whether we are currently using a mock transport. */
-    fun isMockTransport(): Boolean
+    /**
+     * Whether the virtual demo transports may be offered and bound right now.
+     *
+     * @see RadioTransportFactory.mockTransportEnabled
+     */
+    val mockTransportEnabled: StateFlow<Boolean>
 
     /**
      * Whether this build carries the packet capture the replay transport needs. False means selecting a replay address
