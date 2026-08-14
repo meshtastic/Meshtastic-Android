@@ -24,8 +24,8 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
@@ -58,6 +58,7 @@ import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.core.testing.runUntilSettled
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -896,7 +897,9 @@ class FirmwareUpdateViewModelFileTest {
         viewModel = createViewModel()
         advanceUntilIdle()
         viewModel.startFactoryErase()
-        advanceUntilIdle()
+        // CMP 1.12 loads string resources on an internal Dispatchers.Default scope, outside the
+        // test scheduler — drain in real time until the maintenance flow reaches its terminal state.
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.Error }
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
         assertFalse(firmwareMaintenanceLock.isActive, "a failed preparation must not leak the lock")
@@ -932,13 +935,16 @@ class FirmwareUpdateViewModelFileTest {
         viewModel = createViewModel()
         advanceUntilIdle()
         viewModel.startFactoryErase()
-        advanceUntilIdle()
+        // CMP 1.12 loads string resources outside the test scheduler; settle in real time per pass.
+        runUntilSettled { viewModel.state.value is FirmwareUpdateState.AwaitingFileSave }
 
         // First pass (erase image) — writes through writeMaintenancePass.
         val awaitingErase = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
         assertEquals(UsbFileSaveStep.FactoryErase, awaitingErase.step)
         viewModel.writeMaintenancePass(CommonUri.parse("content://tree/1234-5678%3A"))
-        advanceUntilIdle()
+        runUntilSettled {
+            (viewModel.state.value as? FirmwareUpdateState.AwaitingFileSave)?.step == UsbFileSaveStep.Firmware
+        }
 
         assertTrue(firmwareMaintenanceLock.isActive, "the lock must still be held between passes")
         val awaitingFirmware = assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
@@ -947,7 +953,7 @@ class FirmwareUpdateViewModelFileTest {
 
         // Second, terminal pass (firmware image) — writes through the pre-existing saveDfuFile.
         viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
-        advanceUntilIdle()
+        runUntilSettled { !firmwareMaintenanceLock.isActive }
 
         assertFalse(
             firmwareMaintenanceLock.isActive,
