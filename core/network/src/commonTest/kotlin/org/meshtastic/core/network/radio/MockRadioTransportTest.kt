@@ -157,10 +157,20 @@ class MockRadioTransportTest {
                 // Without last_heard every node reads as offline and vanishes under the "online only" filter.
                 assertTrue(node.last_heard > 0, "node ${node.num} has no last_heard")
                 val position = assertNotNull(node.position, "node ${node.num} has no position")
-                assertTrue((position.latitude_i ?: 0) != 0, "node ${node.num} has no latitude")
-                assertTrue((position.longitude_i ?: 0) != 0, "node ${node.num} has no longitude")
+                // Presence, not "not zero": a scaled-integer 0 is a real coordinate on the equator and the prime
+                // meridian, so the sentinel form would reject a legitimately placed node.
+                assertNotNull(position.latitude_i, "node ${node.num} has no latitude")
+                assertNotNull(position.longitude_i, "node ${node.num} has no longitude")
                 assertNotNull(node.device_metrics?.battery_level, "node ${node.num} has no battery level")
             }
+
+            // Checked across the mesh rather than per node, which is where "the coordinates are real" actually lives:
+            // the demo is meant to be spread out enough that the map has something to fit, and a per-node non-zero
+            // test never showed that anyway.
+            assertTrue(
+                nodes.distinctBy { it.position?.latitude_i to it.position?.longitude_i }.size == nodes.size,
+                "every demo node needs its own position or they stack on one map pin",
+            )
         } finally {
             scope.cancel()
         }
@@ -242,7 +252,10 @@ class MockRadioTransportTest {
                 "packets left at the default transport are treated as internal and carry no signal info",
             )
             assertTrue(positions.all { it.hop_start > 0 }, "hop_start must be set for hop distance to be derivable")
-            assertTrue(positions.all { (it.rx_time ?: 0) > 0 }, "rx_time drives lastHeard")
+            // Two claims rather than `rx_time ?: 0 > 0`. That form was not unsound — an absent rx_time failed it too —
+            // but it reported a missing timestamp and an epoch-zero one identically.
+            assertTrue(positions.all { it.rx_time != null }, "every reception needs an rx_time; it drives lastHeard")
+            assertTrue(positions.all { (it.rx_time ?: 0) > 0 }, "rx_time must be a real timestamp, not epoch zero")
 
             // Presence and variation are separate claims, and RSSI has to be checked for presence rather than for
             // "not zero": 0 dBm is a legal (very strong) reading, so `rx_rssi ?: 0` would silently accept a packet
@@ -277,7 +290,17 @@ class MockRadioTransportTest {
             val transport = MockRadioTransport(callback, scope, address = "")
             transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
             transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            // Drop the handshake frames before timing the seed pass. Asserting on a recorder that still holds them
+            // would pass even if the simulator went silent the moment the handshake ended, which would leave close()
+            // with nothing to stop and this test proving nothing.
+            callback.received.clear()
+
             testScheduler.advanceTimeBy(SEED_WINDOW_MS)
+            assertTrue(
+                callback.received.isNotEmpty(),
+                "sanity: the seed pass must be emitting in its own right before close() is exercised",
+            )
+
             // A text with want_ack leaves both a delayed ack and a delayed reply pending, so close() has more than the
             // telemetry ticker to cancel.
             transport.handleSendToRadio(
@@ -292,7 +315,6 @@ class MockRadioTransportTest {
                 )
                     .encode(),
             )
-            assertTrue(callback.received.isNotEmpty(), "sanity: the demo mesh must be emitting before close()")
 
             transport.close()
             callback.received.clear()

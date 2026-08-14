@@ -129,16 +129,35 @@ class ScannerViewModelTest {
     fun `a mid-session unlock re-queries the device list`() = runTest {
         viewModel.usbDevicesForUi.test {
             awaitItem()
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false),
+                harness.discoveryRequests,
+                "a locked gate must still have queried the device list once",
+            )
+
+            // Each transition is checkpointed before the next one is provoked. Writing `true` and `false` back to
+            // back would let the StateFlow conflate them, and the `true` request — the one this whole feature exists
+            // to produce — could then never be observed, leaving the test green but vacuous. Waiting here fixes the
+            // ordering through the test's own control flow rather than through dispatcher timing, which is not a
+            // contract worth asserting on.
             harness.mockTransportEnabled.value = true
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false, true to false),
+                harness.discoveryRequests,
+                "unlocking Demo Mode mid-session must re-query the device list",
+            )
+
             harness.mockTransportEnabled.value = false
+            testScheduler.runCurrent()
+            assertEquals(
+                listOf(false to false, true to false, false to false),
+                harness.discoveryRequests,
+                "re-locking must re-query it again",
+            )
             cancelAndIgnoreRemainingEvents()
         }
-
-        assertEquals(
-            listOf(false to false, true to false, false to false),
-            harness.discoveryRequests,
-            "each Demo Mode gate value must produce its own device-list request",
-        )
     }
 
     @Test
