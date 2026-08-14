@@ -21,8 +21,6 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.LogRecord
 
 internal const val PROTECTED_POSITION_ADVISORY_MESSAGE = "Location sharing is disabled on this channel"
-internal const val PROTECTED_POSITION_ADVISORY_NOTIFICATION_ID = 1
-internal const val PROTECTED_POSITION_ADVISORY_NOTIFICATION_TAG = "protected_position_advisory"
 
 /**
  * Wire currently generates each ClientNotification oneof member as a nullable property rather than exposing a sealed

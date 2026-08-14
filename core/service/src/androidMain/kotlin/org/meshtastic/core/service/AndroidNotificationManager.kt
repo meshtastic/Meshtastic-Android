@@ -133,20 +133,15 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
     override fun suppressClientNotificationModal(notification: ClientNotification): Boolean =
         notification.isProtectedPositionAdvisory()
 
+    // The advisory's id already comes from ClientNotification.notificationId(), which is stable across repeats (see
+    // its kdoc) — so it lands in the same tray slot without a dedicated tag or fixed id; only onlyAlertOnce is needed
+    // to stop it from re-alerting on every update.
     override suspend fun dispatchClientNotification(
         notification: Notification,
         clientNotification: ClientNotification,
-    ): Boolean = if (clientNotification.isProtectedPositionAdvisory()) {
-        dispatch(
-            notification = notification.copy(id = PROTECTED_POSITION_ADVISORY_NOTIFICATION_ID),
-            onlyAlertOnce = true,
-            tag = PROTECTED_POSITION_ADVISORY_NOTIFICATION_TAG,
-        )
-    } else {
-        dispatch(notification)
-    }
+    ): Boolean = dispatch(notification, onlyAlertOnce = clientNotification.isProtectedPositionAdvisory())
 
-    private suspend fun dispatch(notification: Notification, onlyAlertOnce: Boolean, tag: String? = null): Boolean {
+    private suspend fun dispatch(notification: Notification, onlyAlertOnce: Boolean): Boolean {
         ensureChannelsInitialized()
         val channelId = notification.category.channelConfig().id
         if (!canPostNotifications(channelId)) return false
@@ -169,11 +164,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         notification.deepLinkUri?.let { uri -> builder.setContentIntent(createDeepLinkPendingIntent(uri, id)) }
 
         return try {
-            if (tag == null) {
-                notificationManager.notify(id, builder.build())
-            } else {
-                notificationManager.notify(tag, id, builder.build())
-            }
+            notificationManager.notify(id, builder.build())
             true
         } catch (_: SecurityException) {
             false

@@ -18,5 +18,23 @@ package org.meshtastic.core.repository
 
 import org.meshtastic.proto.ClientNotification
 
-/** Stable platform-notification identity shared by posting and cancellation paths. */
-fun ClientNotification.notificationId(): Int = toString().hashCode()
+/**
+ * Stable platform-notification identity shared by posting and cancellation paths.
+ *
+ * Deliberately excludes `reply_id` and `time`: both change on every firmware reply, so hashing the full notification
+ * (e.g. via `toString()`) mints a fresh id per occurrence and defeats coalescing — a repeated advisory would stack up
+ * as a new tray entry every time instead of updating the same one.
+ *
+ * Hashes only strings and the enum's wire value, never the enum object: enum hashCodes are identity-based, and the tray
+ * outlives the process — a repost after a service restart must land on the same id.
+ */
+fun ClientNotification.notificationId(): Int = listOf(message, level.value, payloadVariantKey()).hashCode()
+
+private fun ClientNotification.payloadVariantKey(): String = when {
+    key_verification_number_inform != null -> "key_verification_number_inform"
+    key_verification_number_request != null -> "key_verification_number_request"
+    key_verification_final != null -> "key_verification_final"
+    duplicated_public_key != null -> "duplicated_public_key"
+    low_entropy_key != null -> "low_entropy_key"
+    else -> "generic"
+}

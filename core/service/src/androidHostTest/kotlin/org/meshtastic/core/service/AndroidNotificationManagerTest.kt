@@ -258,6 +258,7 @@ class AndroidNotificationManagerTest {
                     title = "Client notification",
                     message = advisory.message,
                     category = Notification.Category.Alert,
+                    id = advisory.notificationId(),
                 ),
                 advisory,
             )
@@ -266,8 +267,30 @@ class AndroidNotificationManagerTest {
         val posted = shadowOf(systemNotificationManager).allNotifications.single()
         assertTrue(posted.flags and android.app.Notification.FLAG_ONLY_ALERT_ONCE != 0)
         val active = systemNotificationManager.activeNotifications.single()
-        assertEquals(PROTECTED_POSITION_ADVISORY_NOTIFICATION_TAG, active.tag)
-        assertEquals(PROTECTED_POSITION_ADVISORY_NOTIFICATION_ID, active.id)
+        assertEquals(first.notificationId(), active.id)
+    }
+
+    @Test
+    fun `repeated generic client notifications with the same message coalesce into one tray entry`() = runTest {
+        val manager = AndroidNotificationManager(context)
+        // A near-miss of the protected-position predicate (message differs slightly), so it takes the plain
+        // dispatch path — but reply_id/time still change on every firmware reply, exactly like the real advisory.
+        val first = ClientNotification(message = "Location sharing is disabled", reply_id = 100, time = 1_000)
+        val second = ClientNotification(message = "Location sharing is disabled", reply_id = 200, time = 2_000)
+
+        listOf(first, second).forEach { cn ->
+            manager.dispatchClientNotification(
+                Notification(
+                    title = "Client notification",
+                    message = cn.message,
+                    category = Notification.Category.Alert,
+                    id = cn.notificationId(),
+                ),
+                cn,
+            )
+        }
+
+        assertEquals(1, shadowOf(systemNotificationManager).allNotifications.size)
     }
 
     @Test
