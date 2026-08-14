@@ -46,6 +46,7 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LockdownStatus
+import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.MyNodeInfo
@@ -313,6 +314,28 @@ class FromRadioPacketHandlerImplTest {
     }
 
     @Test
+    fun `platform-suppressed client notification skips modal state but preserves system delivery`() {
+        val notification = protectedPositionAdvisory(replyId = 100, time = 1_000)
+        every { notificationManager.suppressClientNotificationModal(notification) } returns true
+
+        handle(FromRadio(clientNotification = notification))
+
+        verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
+        verifySuspend(mode = VerifyMode.exactly(1)) { radioInterfaceService.runWithSessionLease(session, any()) }
+    }
+
+    @Test
+    fun `default platform policy preserves modal and system delivery for exact advisory`() {
+        val notification = protectedPositionAdvisory(replyId = 200, time = 2_000)
+        every { notificationManager.suppressClientNotificationModal(notification) } returns false
+
+        handle(FromRadio(clientNotification = notification))
+
+        verify { serviceRepository.setClientNotification(notification) }
+        verifySuspend { radioInterfaceService.runWithSessionLease(session, any()) }
+    }
+
+    @Test
     fun `stale client notification is discarded before publication`() {
         val notification = ClientNotification(message = "stale")
         every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
@@ -320,7 +343,7 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio(clientNotification = notification))
 
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
     }
 
     @Test
@@ -331,7 +354,7 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio(clientNotification = notification))
 
         verify { serviceRepository.setClientNotification(notification) }
-        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatch(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
     }
 
     @Test
@@ -351,4 +374,11 @@ class FromRadioPacketHandlerImplTest {
         assertFalse(ClientNotification(message = "ROTATE credentials").isOtaStatusNotification())
         assertFalse(ClientNotification(message = "Quota exceeded").isOtaStatusNotification())
     }
+
+    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification(
+        message = "Location sharing is disabled on this channel",
+        reply_id = replyId,
+        time = time,
+        level = LogRecord.Level.WARNING,
+    )
 }
