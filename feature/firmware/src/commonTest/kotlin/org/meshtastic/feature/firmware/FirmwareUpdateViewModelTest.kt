@@ -41,9 +41,11 @@ import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
@@ -146,6 +148,7 @@ class FirmwareUpdateViewModelTest {
         TestApplicationCoroutineScope(testDispatcher),
         hiddenFeaturesUnlock,
         analytics,
+        NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
     )
 
     @Test
@@ -216,7 +219,12 @@ class FirmwareUpdateViewModelTest {
         verify {
             analytics.trackAction(
                 "firmware_update_start",
-                mapOf("update_method" to "ble", "is_recovery" to false, "release_version" to "1"),
+                mapOf(
+                    "update_method" to "ble",
+                    "is_recovery" to false,
+                    "release_version" to "1",
+                    "wipe_device" to false,
+                ),
             )
         }
     }
@@ -245,6 +253,71 @@ class FirmwareUpdateViewModelTest {
                 state is FirmwareUpdateState.VerificationFailed,
             "Final state was $state",
         )
+    }
+
+    @Test
+    fun `startUpdate with wipe factory-resets only after verification succeeds`() = runTest {
+        advanceUntilIdle()
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+        // Connected before verification starts, so verifyUpdateResult confirms the update deterministically.
+        radioController.setConnectionState(ConnectionState.Connected)
+
+        viewModel.startUpdate(wipeDevice = true)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Success>(state)
+        assertTrue(state.deviceWasWiped, "Success must report the wipe it performed")
+        assertEquals(listOf(123), radioController.factoryResetCalls)
+    }
+
+    @Test
+    fun `startUpdate with wipe never factory-resets when verification fails`() = runTest {
+        advanceUntilIdle()
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+        // Never reconnects → verification times out. A device we cannot confirm updated is never wiped.
+
+        viewModel.startUpdate(wipeDevice = true)
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.VerificationFailed>(viewModel.state.value)
+        assertTrue(radioController.factoryResetCalls.isEmpty(), "no factory reset without a verified update")
+    }
+
+    @Test
+    fun `startUpdate without wipe never factory-resets`() = runTest {
+        advanceUntilIdle()
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+        radioController.setConnectionState(ConnectionState.Connected)
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Success>(state)
+        assertFalse(state.deviceWasWiped)
+        assertTrue(radioController.factoryResetCalls.isEmpty(), "default update path must not wipe")
     }
 
     @Test

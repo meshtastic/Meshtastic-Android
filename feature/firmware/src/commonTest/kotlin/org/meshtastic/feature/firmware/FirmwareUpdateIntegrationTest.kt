@@ -40,6 +40,7 @@ import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -122,6 +123,7 @@ class FirmwareUpdateIntegrationTest {
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
         analytics,
+        NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
     )
 
     @Test

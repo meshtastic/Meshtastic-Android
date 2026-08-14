@@ -88,7 +88,8 @@ sealed interface FirmwareUpdateState {
      * @property wasLowSpeedTransfer True if the upload ran at the MTU-capped low speed (stock bootloader), so the
      *   Success screen can offer a one-time OTAFIX upgrade tip for faster future updates.
      */
-    data class Success(val wasLowSpeedTransfer: Boolean = false) : FirmwareUpdateState
+    data class Success(val wasLowSpeedTransfer: Boolean = false, val deviceWasWiped: Boolean = false) :
+        FirmwareUpdateState
 
     /**
      * Waiting for the user to point the app at the device's UF2 drive (USB flow).

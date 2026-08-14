@@ -55,6 +55,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -63,6 +64,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,10 +96,6 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
-import org.meshtastic.core.resources.firmware_maintenance_erase_action
-import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_button
-import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_text
-import org.meshtastic.core.resources.firmware_maintenance_erase_confirm_title
 import org.meshtastic.core.resources.firmware_maintenance_select_drive
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_bootloader_action
 import org.meshtastic.core.resources.firmware_maintenance_upgrade_confirm_text
@@ -134,6 +132,7 @@ import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_source_local
 import org.meshtastic.core.resources.firmware_update_stable
 import org.meshtastic.core.resources.firmware_update_success
+import org.meshtastic.core.resources.firmware_update_success_wiped
 import org.meshtastic.core.resources.firmware_update_taking_a_while
 import org.meshtastic.core.resources.firmware_update_target
 import org.meshtastic.core.resources.firmware_update_title
@@ -145,6 +144,10 @@ import org.meshtastic.core.resources.firmware_update_usb_instruction_title
 import org.meshtastic.core.resources.firmware_update_verification_failed
 import org.meshtastic.core.resources.firmware_update_verifying
 import org.meshtastic.core.resources.firmware_update_waiting_reconnect
+import org.meshtastic.core.resources.firmware_update_wipe_ble_detail
+import org.meshtastic.core.resources.firmware_update_wipe_confirm_warning
+import org.meshtastic.core.resources.firmware_update_wipe_label
+import org.meshtastic.core.resources.firmware_update_wipe_usb_detail
 import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.learn_more
@@ -215,7 +218,6 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 },
                 onSaveFile = { fileName -> saveFileLauncher(fileName, UF2_MIME_TYPE) },
                 onPickVolume = volumePickerLauncher,
-                onFactoryErase = viewModel::startFactoryErase,
                 onBootloaderUpgrade = viewModel::startBootloaderUpgrade,
                 onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
                 onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
@@ -426,12 +428,16 @@ private fun FirmwareUpdateContent(
             is FirmwareUpdateState.Verifying -> VerifyingState()
 
             is FirmwareUpdateState.VerificationFailed ->
-                VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
+                VerificationFailedState(onRetry = { actions.onStartUpdate(false) }, onIgnore = actions.onDone)
 
             is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
 
             is FirmwareUpdateState.Success ->
-                SuccessState(onDone = actions.onDone, wasLowSpeedTransfer = state.wasLowSpeedTransfer)
+                SuccessState(
+                    onDone = actions.onDone,
+                    wasLowSpeedTransfer = state.wasLowSpeedTransfer,
+                    deviceWasWiped = state.deviceWasWiped,
+                )
 
             is FirmwareUpdateState.AwaitingFileSave ->
                 AwaitingFileSaveState(
@@ -480,19 +486,40 @@ private fun ReadyState(
     }
 
     var showDisclaimer by remember { mutableStateOf(false) }
+    // Deliberately not persisted anywhere: the wipe is an explicit per-update opt-in, never sticky.
+    var wipeDevice by rememberSaveable { mutableStateOf(false) }
     val device = state.deviceHardware
     val haptic = LocalHapticFeedback.current
+
+    // A wipe can only be offered where a mechanism exists for it: the vetted UF2 erase sequence over USB, or a
+    // post-verification factory reset over BLE/WiFi. Local files and recovery flows never wipe.
+    val wipeOffered =
+        selectedReleaseType != FirmwareReleaseType.LOCAL &&
+            state.release != null &&
+            !state.isRecovery &&
+            when (state.updateMethod) {
+                FirmwareUpdateMethod.Usb -> state.maintenance.show
+
+                FirmwareUpdateMethod.Ble,
+                FirmwareUpdateMethod.Wifi,
+                -> true
+
+                FirmwareUpdateMethod.Unknown -> false
+            }
+    val wipeRefusal = (state.maintenance.eraseRefusal).takeIf { state.updateMethod is FirmwareUpdateMethod.Usb }
+    val wipeArmed = wipeOffered && wipeDevice && wipeRefusal == null
 
     if (showDisclaimer) {
         DisclaimerDialog(
             updateMethod = state.updateMethod,
+            wipeDevice = wipeArmed,
             onDismiss = { showDisclaimer = false },
             onConfirm = {
                 showDisclaimer = false
                 if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
                     actions.onPickFile()
                 } else {
-                    actions.onStartUpdate()
+                    actions.onStartUpdate(wipeArmed)
                 }
             },
         )
@@ -503,12 +530,17 @@ private fun ReadyState(
         Spacer(Modifier.height(16.dp))
     }
 
-    if (state.maintenance.show) {
-        UsbMaintenanceCard(
-            gate = state.maintenance,
-            deviceName = device.displayName,
-            onFactoryErase = actions.onFactoryErase,
-            onBootloaderUpgrade = actions.onBootloaderUpgrade,
+    if (state.maintenance.showBootloaderUpgrade) {
+        UsbMaintenanceCard(deviceName = device.displayName, onBootloaderUpgrade = actions.onBootloaderUpgrade)
+        Spacer(Modifier.height(16.dp))
+    }
+
+    if (wipeOffered) {
+        WipeDeviceToggle(
+            updateMethod = state.updateMethod,
+            refusal = wipeRefusal,
+            wipeDevice = wipeDevice,
+            onWipeDeviceChange = { wipeDevice = it },
         )
         Spacer(Modifier.height(16.dp))
     }
@@ -604,7 +636,12 @@ private fun UnsupportedTransportState() {
 }
 
 @Composable
-internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+internal fun DisclaimerDialog(
+    updateMethod: FirmwareUpdateMethod,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    wipeDevice: Boolean = false,
+) {
     MeshtasticDialog(
         onDismiss = onDismiss,
         title = stringResource(Res.string.firmware_update_disclaimer_title),
@@ -629,6 +666,23 @@ internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () 
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
+                if (wipeDevice) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            MeshtasticIcons.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            stringResource(Res.string.firmware_update_wipe_confirm_warning),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
                 if (updateMethod is FirmwareUpdateMethod.Ble) {
                     Spacer(modifier = Modifier.height(12.dp))
                     ChirpyCard()
@@ -636,6 +690,55 @@ internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () 
             }
         },
     )
+}
+
+/**
+ * Per-update opt-in for wiping the device as part of the update — always off by default.
+ *
+ * Over USB this is a true flash erase (the vetted UF2 maintenance sequence, which reinstalls the selected release
+ * afterwards); over BLE/WiFi it is a factory reset issued only after the update is verified. A USB erase the gate
+ * refuses stays **visible but disabled with its reason shown**, because the reason is the useful part — it tells the
+ * user this app can't confirm their device's SoftDevice and points them at the web flasher.
+ */
+@Composable
+internal fun WipeDeviceToggle(
+    updateMethod: FirmwareUpdateMethod,
+    refusal: UsbMaintenanceRefusal?,
+    wipeDevice: Boolean,
+    onWipeDeviceChange: (Boolean) -> Unit,
+) {
+    val enabled = refusal == null
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.firmware_update_wipe_label),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text =
+                        when (updateMethod) {
+                            FirmwareUpdateMethod.Usb -> stringResource(Res.string.firmware_update_wipe_usb_detail)
+                            else -> stringResource(Res.string.firmware_update_wipe_ble_detail)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Switch(checked = wipeDevice && enabled, onCheckedChange = onWipeDeviceChange, enabled = enabled)
+            }
+            refusal?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = usbMaintenanceRefusalText(it),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -757,38 +860,17 @@ private fun DeviceInfoCard(
 }
 
 /**
- * Offers factory erase and, where available, an OTAFIX bootloader upgrade.
+ * Offers the OTAFIX bootloader upgrade where an image exists for the device's Board-ID.
  *
- * Both are destructive, so both sit behind a confirmation and are rendered as low-emphasis error-tinted text buttons
- * rather than anything that competes with the primary update action — the same treatment [BootloaderWarningCard] uses.
- *
- * An erase that cannot run safely stays **visible but disabled with its reason shown**, because the reason is the
- * useful part: it tells the user this app can't confirm their device's SoftDevice and points them at the web flasher. A
- * missing bootloader image is different and is simply absent — that is a coverage gap, not something a user can act on.
+ * Destructive, so it sits behind a confirmation and is rendered as a low-emphasis text button rather than anything that
+ * competes with the primary update action — the same treatment [BootloaderWarningCard] uses. Factory erase is not
+ * offered here: it lives on the update action itself as the [WipeDeviceToggle] opt-in, so an erase always ends with a
+ * release installed. A missing bootloader image hides the card — that is a coverage gap, not something a user can act
+ * on.
  */
 @Composable
-internal fun UsbMaintenanceCard(
-    gate: UsbMaintenanceGate,
-    deviceName: String,
-    onFactoryErase: () -> Unit,
-    onBootloaderUpgrade: () -> Unit,
-) {
-    var showEraseConfirmation by remember { mutableStateOf(false) }
+internal fun UsbMaintenanceCard(deviceName: String, onBootloaderUpgrade: () -> Unit) {
     var showUpgradeConfirmation by remember { mutableStateOf(false) }
-
-    if (showEraseConfirmation) {
-        MeshtasticDialog(
-            onDismiss = { showEraseConfirmation = false },
-            title = stringResource(Res.string.firmware_maintenance_erase_confirm_title),
-            message = stringResource(Res.string.firmware_maintenance_erase_confirm_text, deviceName),
-            confirmText = stringResource(Res.string.firmware_maintenance_erase_confirm_button),
-            onConfirm = {
-                showEraseConfirmation = false
-                onFactoryErase()
-            },
-            dismissText = stringResource(Res.string.cancel),
-        )
-    }
 
     if (showUpgradeConfirmation) {
         MeshtasticDialog(
@@ -806,26 +888,8 @@ internal fun UsbMaintenanceCard(
 
     Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            TextButton(
-                onClick = { showEraseConfirmation = true },
-                enabled = gate.eraseRefusal == null,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-            ) {
-                Text(stringResource(Res.string.firmware_maintenance_erase_action))
-            }
-
-            gate.eraseRefusal?.let { refusal ->
-                Text(
-                    text = usbMaintenanceRefusalText(refusal),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            if (gate.showBootloaderUpgrade) {
-                TextButton(onClick = { showUpgradeConfirmation = true }) {
-                    Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
-                }
+            TextButton(onClick = { showUpgradeConfirmation = true }) {
+                Text(stringResource(Res.string.firmware_maintenance_upgrade_bootloader_action))
             }
         }
     }
@@ -1130,7 +1194,7 @@ internal fun ErrorState(error: UiText, onRetry: () -> Unit) {
 }
 
 @Composable
-internal fun SuccessState(wasLowSpeedTransfer: Boolean = false, onDone: () -> Unit) {
+internal fun SuccessState(wasLowSpeedTransfer: Boolean = false, deviceWasWiped: Boolean = false, onDone: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val openUrl = rememberOpenUrl()
     LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
@@ -1149,6 +1213,15 @@ internal fun SuccessState(wasLowSpeedTransfer: Boolean = false, onDone: () -> Un
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
         )
+        if (deviceWasWiped) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(Res.string.firmware_update_success_wiped),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         // The just-finished transfer was MTU-capped (stock bootloader). Now that the device is back and it's safe to
         // leave the app, offer a one-time OTAFIX upgrade tip for faster future updates.
         if (wasLowSpeedTransfer) {

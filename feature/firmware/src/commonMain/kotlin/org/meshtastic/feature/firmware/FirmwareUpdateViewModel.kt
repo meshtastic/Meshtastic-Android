@@ -56,6 +56,7 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
@@ -122,6 +123,7 @@ class FirmwareUpdateViewModel(
     private val applicationScope: ApplicationCoroutineScope,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     private val analytics: PlatformAnalytics,
+    private val nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -168,6 +170,13 @@ class FirmwareUpdateViewModel(
      */
     private var destructiveWriteDone = false
 
+    /**
+     * Set by [startUpdate] when the user opted into a wipe on a transport that cannot erase flash (BLE/WiFi). Consumed
+     * by [verifyUpdateResult]: the factory reset is only sent once the updated firmware is back up and verified — a
+     * device we cannot confirm updated is never wiped.
+     */
+    private var pendingFactoryResetAfterUpdate = false
+
     init {
         // Cleanup potential leftovers
         viewModelScope.launch {
@@ -184,7 +193,7 @@ class FirmwareUpdateViewModel(
         // A maintenance sequence's lock must not outlive this ViewModel: the user may abandon the flow between
         // passes (e.g. navigating away after the erase leg but before picking the firmware save location), and a
         // leaked lock would permanently suppress the radio transport's auto-reconnect for the rest of the app
-        // session — see startFactoryErase/advancePastPass. A no-op if no sequence was in flight.
+        // session — see startUsbMaintenance/advancePastPass. A no-op if no sequence was in flight.
         firmwareMaintenanceLock.release()
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
@@ -354,7 +363,7 @@ class FirmwareUpdateViewModel(
      * Emitted from every path that begins a flash, so the RUM action counts local-file sideloads alongside release
      * updates. The method label is mapped explicitly because [FirmwareUpdateMethod] is obfuscated in release builds.
      */
-    private fun trackUpdateStart(state: FirmwareUpdateState.Ready, releaseId: String) {
+    private fun trackUpdateStart(state: FirmwareUpdateState.Ready, releaseId: String, wipeDevice: Boolean = false) {
         val updateMethod =
             when (state.updateMethod) {
                 FirmwareUpdateMethod.Usb -> "usb"
@@ -364,18 +373,37 @@ class FirmwareUpdateViewModel(
             }
         analytics.trackAction(
             "firmware_update_start",
-            mapOf("update_method" to updateMethod, "is_recovery" to state.isRecovery, "release_version" to releaseId),
+            mapOf(
+                "update_method" to updateMethod,
+                "is_recovery" to state.isRecovery,
+                "release_version" to releaseId,
+                "wipe_device" to wipeDevice,
+            ),
         )
     }
 
-    fun startUpdate() {
+    fun startUpdate(wipeDevice: Boolean = false) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
-        trackUpdateStart(currentState, release.id)
-        if (currentState.isRecovery) {
-            startRecoveryUpdate(currentState, release)
-        } else {
-            startNormalUpdate(currentState, release)
+        // Every update starts from a clean slate: an opt-in from an earlier, failed attempt must not carry over.
+        pendingFactoryResetAfterUpdate = false
+        trackUpdateStart(currentState, release.id, wipeDevice)
+        when {
+            currentState.isRecovery -> startRecoveryUpdate(currentState, release)
+
+            // Over USB a wipe is a physical flash erase: route into the maintenance sequence, which
+            // erases via the UF2 image and then installs this release as its terminal pass.
+            wipeDevice && currentState.updateMethod is FirmwareUpdateMethod.Usb ->
+                startUsbMaintenance(UsbMaintenanceRequest.FactoryErase)
+
+            // BLE/WiFi cannot touch flash directly; the equivalent is a factory reset issued once the
+            // updated firmware is back up and verified.
+            wipeDevice -> {
+                pendingFactoryResetAfterUpdate = true
+                startNormalUpdate(currentState, release)
+            }
+
+            else -> startNormalUpdate(currentState, release)
         }
     }
 
@@ -512,8 +540,8 @@ class FirmwareUpdateViewModel(
     }
 
     // ── USB maintenance (factory erase / bootloader upgrade) ────────────────────────────────────────
-
-    fun startFactoryErase() = startUsbMaintenance(UsbMaintenanceRequest.FactoryErase)
+    // Factory erase has no standalone entry point: it is reached through startUpdate(wipeDevice = true)
+    // on the USB path, so a wipe always ends with this release installed.
 
     fun startBootloaderUpgrade() = startUsbMaintenance(UsbMaintenanceRequest.BootloaderUpgrade)
 
@@ -922,6 +950,8 @@ class FirmwareUpdateViewModel(
 
     private fun startUpdateFromFile(uri: CommonUri, pendingArtifact: FirmwareArtifact? = null) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
+        // Local-file installs never wipe; drop any opt-in left over from an earlier, failed attempt.
+        pendingFactoryResetAfterUpdate = false
         if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
             cleanupPendingLocalFirmwareArtifact(pendingArtifact)
@@ -1025,6 +1055,10 @@ class FirmwareUpdateViewModel(
     }
 
     private suspend fun verifyUpdateResult(address: String?, wasLowSpeedTransfer: Boolean = false) {
+        // Consume the wipe opt-in up front: whatever this verification concludes, it must never leak into a
+        // later update flow that did not opt in (e.g. a retry via a local file).
+        val factoryResetAfterVerify = pendingFactoryResetAfterUpdate
+        pendingFactoryResetAfterUpdate = false
         _state.value = FirmwareUpdateState.Verifying
 
         // Trigger a fresh connection attempt by MeshService using the original prefixed address.
@@ -1064,12 +1098,41 @@ class FirmwareUpdateViewModel(
 
         if (result == null) {
             Logger.w { "Post-update verification timed out for ${address.anonymize()}" }
+            // The opted-in wipe is deliberately skipped: a device we could not verify is never wiped.
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
             // Device is back and healthy — retire any recovery record (covers both normal and recovery updates).
             pendingRecovery = null
             firmwareRecoveryDataSource.clear()
-            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer)
+            val wiped = factoryResetAfterVerify && sendPostUpdateFactoryReset()
+            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer, deviceWasWiped = wiped)
+        }
+    }
+
+    /**
+     * Sends the factory reset the user opted into alongside a BLE/WiFi update, once the updated firmware is verified.
+     *
+     * @return true when the reset was actually sent — the Success screen only claims a wipe that happened.
+     */
+    private suspend fun sendPostUpdateFactoryReset(): Boolean {
+        val nodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+        if (nodeNum == null) {
+            Logger.w { "Post-update factory reset skipped: local node number unknown after reconnect" }
+            return false
+        }
+        return try {
+            // The reset reboots the device and drops the transport; mark it expected so the UI shows
+            // "restarting" instead of a surprise disconnect (same treatment as the settings reset).
+            nodeRestartTracker.expectRestart()
+            radioController.factoryReset(nodeNum, radioController.generatePacketId())
+            // The phone-side node DB describes a configuration that no longer exists.
+            nodeRepository.clearNodeDB()
+            true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.e(e) { "Post-update factory reset failed" }
+            false
         }
     }
 

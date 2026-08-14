@@ -50,6 +50,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
@@ -149,6 +150,7 @@ class FirmwareUpdateViewModelFileTest {
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
         analytics,
+        NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")
@@ -222,7 +224,12 @@ class FirmwareUpdateViewModelFileTest {
         verify {
             analytics.trackAction(
                 "firmware_update_start",
-                mapOf("update_method" to "usb", "is_recovery" to false, "release_version" to "local"),
+                mapOf(
+                    "update_method" to "usb",
+                    "is_recovery" to false,
+                    "release_version" to "local",
+                    "wipe_device" to false,
+                ),
             )
         }
     }
@@ -816,7 +823,7 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
         assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
 
-        viewModel.startFactoryErase()
+        viewModel.startUpdate(wipeDevice = true)
         advanceUntilIdle()
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
@@ -877,7 +884,7 @@ class FirmwareUpdateViewModelFileTest {
 
         viewModel = createViewModel()
         advanceUntilIdle()
-        viewModel.startFactoryErase()
+        viewModel.startUpdate(wipeDevice = true)
         advanceUntilIdle()
 
         assertFalse(
@@ -896,7 +903,7 @@ class FirmwareUpdateViewModelFileTest {
 
         viewModel = createViewModel()
         advanceUntilIdle()
-        viewModel.startFactoryErase()
+        viewModel.startUpdate(wipeDevice = true)
         // CMP 1.12 loads string resources on an internal Dispatchers.Default scope, outside the
         // test scheduler — drain in real time until the maintenance flow reaches its terminal state.
         runUntilSettled { viewModel.state.value is FirmwareUpdateState.Error }
@@ -934,7 +941,7 @@ class FirmwareUpdateViewModelFileTest {
 
         viewModel = createViewModel()
         advanceUntilIdle()
-        viewModel.startFactoryErase()
+        viewModel.startUpdate(wipeDevice = true)
         // CMP 1.12 loads string resources outside the test scheduler; settle in real time per pass.
         runUntilSettled { viewModel.state.value is FirmwareUpdateState.AwaitingFileSave }
 

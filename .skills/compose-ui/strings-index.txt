@@ -722,6 +722,7 @@ firmware_update_stable
 firmware_update_starting_dfu
 firmware_update_starting_ota
 firmware_update_success
+firmware_update_success_wiped
 firmware_update_taking_a_while
 firmware_update_target
 firmware_update_title
@@ -740,6 +741,10 @@ firmware_update_verification_failed
 firmware_update_verifying
 firmware_update_waiting_reboot
 firmware_update_waiting_reconnect
+firmware_update_wipe_ble_detail
+firmware_update_wipe_confirm_warning
+firmware_update_wipe_label
+firmware_update_wipe_usb_detail
 firmware_version
 fixed_pin
 fixed_position

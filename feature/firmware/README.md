@@ -77,7 +77,7 @@ sequenceDiagram
 ```
 
 #### 4. USB Maintenance: Factory Erase & OTAFIX Bootloader Upgrade
-An nRF52/RP2040 device already in UF2 bootloader mode can also run a **factory erase** (wipes the internal filesystem, useful for a device stuck in a bad state) or, on boards OTAFIX ships a bootloader for, a **bootloader self-update**. Both are two-pass sequences: the maintenance image (erase or OTAFIX) is written first, which reboots the device back into a bare bootloader; the release firmware is then written as the second, ordinary UF2 pass.
+An nRF52/RP2040 device can also run a **factory erase** (wipes the internal filesystem, useful for a device stuck in a bad state or carrying stale event-firmware state) or, on boards OTAFIX ships a bootloader for, a **bootloader self-update**. The erase is reached through the update screen's "Erase device during update" opt-in (default off) rather than a standalone action, so a wipe always ends with the selected release installed; over BLE/WiFi the same opt-in instead sends an admin factory reset once the update is verified. Both USB flows are two-pass sequences: the maintenance image (erase or OTAFIX) is written first, which reboots the device back into a bare bootloader; the release firmware is then written as the second, ordinary UF2 pass.
 
 Two runtime facts make the maintenance image itself safety-critical, not just another UF2 write:
 

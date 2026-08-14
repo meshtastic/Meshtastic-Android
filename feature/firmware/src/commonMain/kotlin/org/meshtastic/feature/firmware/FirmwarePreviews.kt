@@ -90,12 +90,7 @@ internal fun UsbMaintenanceCardPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(24.dp)) {
-                UsbMaintenanceCard(
-                    gate = UsbMaintenanceGate(show = true, showBootloaderUpgrade = true),
-                    deviceName = "RAK4631",
-                    onFactoryErase = {},
-                    onBootloaderUpgrade = {},
-                )
+                UsbMaintenanceCard(deviceName = "RAK4631", onBootloaderUpgrade = {})
             }
         }
     }
@@ -107,16 +102,11 @@ internal fun UsbMaintenanceCardRefusedPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(24.dp)) {
-                UsbMaintenanceCard(
-                    gate =
-                    UsbMaintenanceGate(
-                        show = true,
-                        eraseRefusal = UsbMaintenanceRefusal.UnknownSoftDevice,
-                        showBootloaderUpgrade = false,
-                    ),
-                    deviceName = "ThinkNode M8",
-                    onFactoryErase = {},
-                    onBootloaderUpgrade = {},
+                WipeDeviceToggle(
+                    updateMethod = FirmwareUpdateMethod.Usb,
+                    refusal = UsbMaintenanceRefusal.UnknownSoftDevice,
+                    wipeDevice = false,
+                    onWipeDeviceChange = {},
                 )
             }
         }
