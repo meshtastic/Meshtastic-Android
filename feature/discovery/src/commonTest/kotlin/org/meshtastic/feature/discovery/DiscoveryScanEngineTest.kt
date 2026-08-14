@@ -45,6 +45,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
+import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -593,6 +595,38 @@ class DiscoveryScanEngineTest {
             node.distanceFromUser!! > 10_000 && node.distanceFromUser!! < 25_000,
             "Distance should be between 10km and 25km, was ${node.distanceFromUser}m",
         )
+    }
+
+    @Test
+    fun neighborRequestQueueRejectionKeepsBestEffortScanRunning() = runTest {
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+        radioController.requestNeighborInfoFailure = PacketQueueRejectedException("Neighbor info")
+        val engine = createEngine(this)
+
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 1)
+        advanceUntilIdle()
+
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(1, radioController.neighborInfoRequests.size)
+        assertEquals("complete", discoveryDao.sessions.values.single().completionStatus)
+    }
+
+    @Test
+    fun localIdentityLossDuringNeighborRequestKeepsBestEffortScanRunning() = runTest {
+        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+        radioController.requestNeighborInfoFailure = LocalNodeUnavailableException("Neighbor info")
+        val engine = createEngine(this)
+
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 1)
+        advanceUntilIdle()
+
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals(1, radioController.neighborInfoRequests.size)
+        assertEquals("complete", discoveryDao.sessions.values.single().completionStatus)
     }
 
     // region Home-preset restoration (the one config-mutating, safety-critical behavior of a scan)

@@ -175,7 +175,8 @@ internal constructor(
                         if (!completed) {
                             Logger.w { "[$address] TCP $operation timed out after $OPERATION_TIMEOUT" }
                             // Cancellation may leave a framed write partially emitted. Stopping this one-shot
-                            // transport forces the service reconnect path to create a fresh transport before another send.
+                            // transport forces the service reconnect path to create a fresh transport before another
+                            // send.
                             stopTransport()
                         }
                     }

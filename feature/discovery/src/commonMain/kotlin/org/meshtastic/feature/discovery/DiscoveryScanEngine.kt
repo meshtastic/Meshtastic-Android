@@ -418,8 +418,14 @@ class DiscoveryScanEngine(
     private suspend fun requestNeighborInfoAtDwellBoundary() {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
         val packetId = radioController.generatePacketId()
-        radioController.requestNeighborInfo(packetId, myNodeNum)
-        Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        try {
+            radioController.requestNeighborInfo(packetId, myNodeNum)
+            Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "DiscoveryScanEngine: NeighborInfo request failed; continuing the dwell" }
+        }
     }
 
     private suspend fun runDwell(presetName: String, durationSeconds: Long): Boolean {

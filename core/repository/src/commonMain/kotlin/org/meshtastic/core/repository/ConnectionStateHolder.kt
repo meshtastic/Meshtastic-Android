@@ -94,11 +94,10 @@ class ConnectionStateHolder(
     }
 }
 
-private fun ConnectionEpochs.isSelfConsistent(): Boolean =
-    departures >= 0L &&
-        completedHandshakes >= 0L &&
-        handshakesAtLastDeparture >= 0L &&
-        handshakesAtLastDeparture <= completedHandshakes &&
-        (departures > 0L || handshakesAtLastDeparture == 0L) &&
-        lastDepartureState !is ConnectionState.Connected &&
-        (departures == 0L) == (lastDepartureState == null)
+private fun ConnectionEpochs.isSelfConsistent(): Boolean = departures >= 0L &&
+    completedHandshakes >= 0L &&
+    handshakesAtLastDeparture >= 0L &&
+    handshakesAtLastDeparture <= completedHandshakes &&
+    (departures > 0L || handshakesAtLastDeparture == 0L) &&
+    lastDepartureState !is ConnectionState.Connected &&
+    (departures == 0L) == (lastDepartureState == null)

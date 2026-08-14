@@ -25,6 +25,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
@@ -49,6 +51,7 @@ constructor(
     private val radioController: RadioController,
     private val snackbarManager: SnackbarManager,
     private val analytics: PlatformAnalytics,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) : NodeRequestActions {
 
     private val _lastTracerouteTime = MutableStateFlow<Long?>(null)
@@ -58,17 +61,32 @@ constructor(
     override val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
     private suspend fun showFeedback(text: UiText) {
-        snackbarManager.showSnackbar(message = text.resolve())
+        snackbarManager.showSnackbar(message = resolveUiText(text))
     }
 
-    override suspend fun requestUserInfo(destNum: Int, longName: String) {
+    private suspend fun runRequest(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: PacketQueueRejectedException) {
+            showNodeRequestFailure(e, "Node request rejected by outbound packet queue", snackbarManager, resolveUiText)
+        } catch (e: LocalNodeUnavailableException) {
+            showNodeRequestFailure(
+                e,
+                "Node request deferred until local node identity is available",
+                snackbarManager,
+                resolveUiText,
+            )
+        }
+    }
+
+    override suspend fun requestUserInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting UserInfo for '$destNum'" }
         radioController.requestUserInfo(destNum)
         analytics.trackAction("user_info_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
     }
 
-    override suspend fun requestNeighborInfo(destNum: Int, longName: String) {
+    override suspend fun requestNeighborInfo(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting NeighborInfo for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestNeighborInfo(packetId, destNum)
@@ -76,14 +94,14 @@ constructor(
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
     }
 
-    override suspend fun requestPosition(destNum: Int, longName: String, position: Position) {
+    override suspend fun requestPosition(destNum: Int, longName: String, position: Position) = runRequest {
         Logger.i { "Requesting position for '$destNum'" }
         radioController.requestPosition(destNum, position)
         analytics.trackAction("position_request")
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
     }
 
-    override suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) {
+    override suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) = runRequest {
         Logger.i { "Requesting telemetry for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestTelemetry(packetId, destNum, type.ordinal)
@@ -103,7 +121,7 @@ constructor(
         showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
     }
 
-    override suspend fun requestTraceroute(destNum: Int, longName: String) {
+    override suspend fun requestTraceroute(destNum: Int, longName: String) = runRequest {
         Logger.i { "Requesting traceroute for '$destNum'" }
         val packetId = radioController.generatePacketId()
         radioController.requestTraceroute(packetId, destNum)

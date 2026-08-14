@@ -17,10 +17,10 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Position as ModelPosition
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.core.model.Position as ModelPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Interface for sending commands and packets to the mesh network. */

@@ -16,15 +16,16 @@
  */
 package org.meshtastic.feature.node.detail
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,12 +43,9 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.QueryController
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.UiText
-import org.meshtastic.core.resources.connect_radio_for_remote_admin
-import org.meshtastic.core.resources.remote_admin_unreachable
-import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.proto.User
@@ -77,19 +75,6 @@ class NodeDetailViewModelTest {
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
         every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
         snackbarManager.messages.clear()
-        NodeDetailUiTextResolver.resolve = { text ->
-            when (text) {
-                is UiText.DynamicString -> text.value
-
-                is UiText.Resource ->
-                    when (text.res) {
-                        Res.string.connect_radio_for_remote_admin -> "Connect to a radio to administer remote nodes."
-                        Res.string.remote_admin_unreachable -> "Could not reach node — try again or move closer."
-                        else -> error("Unexpected UiText resource in test: ${text.res}")
-                    }
-            }
-        }
-
         viewModel = createViewModel(1234)
     }
 
@@ -102,25 +87,11 @@ class NodeDetailViewModelTest {
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
         snackbarManager = snackbarManager,
+        resolveUiText = resolveNodeDetailUiTextForTest,
     )
-
-    private class RecordingSnackbarManager : SnackbarManager() {
-        val messages = mutableListOf<String>()
-
-        override fun showSnackbar(
-            message: String,
-            actionLabel: String?,
-            withDismissAction: Boolean,
-            duration: SnackbarDuration,
-            onAction: (() -> Unit)?,
-        ) {
-            messages += message
-        }
-    }
 
     @AfterTest
     fun tearDown() {
-        NodeDetailUiTextResolver.resolve = { it.resolve() }
         Dispatchers.resetMain()
     }
 
@@ -201,5 +172,43 @@ class NodeDetailViewModelTest {
 
         assertEquals(listOf(expectedMessage), snackbarManager.messages)
         verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `refreshMetadata surfaces queue rejection without throwing from view model scope`() = runTest(testDispatcher) {
+        everySuspend { queryController.refreshMetadata(1234) } throws
+            PacketQueueRejectedException("Metadata request")
+
+        viewModel.refreshMetadata(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend { queryController.refreshMetadata(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin surfaces queue rejection and releases the in-flight guard`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } throws PacketQueueRejectedException("Metadata request")
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT, NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend(exactly(2)) { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin surfaces local node loss and releases the in-flight guard`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } throws LocalNodeUnavailableException("Remote admin")
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT, NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend(exactly(2)) { ensureRemoteAdminSession(1234) }
     }
 }

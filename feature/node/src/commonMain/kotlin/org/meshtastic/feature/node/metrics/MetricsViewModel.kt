@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.decodeBase64
@@ -265,13 +263,15 @@ open class MetricsViewModel(
 
     fun requestPosition() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            viewModelScope.launch { nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "") }
+            safeLaunch(tag = "requestPosition") {
+                nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "")
+            }
         }
     }
 
     fun requestTelemetry(type: TelemetryType) {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            viewModelScope.launch {
+            safeLaunch(tag = "requestTelemetry") {
                 nodeRequestActions.requestTelemetry(it, state.value.node?.user?.long_name ?: "", type)
             }
         }
@@ -279,13 +279,15 @@ open class MetricsViewModel(
 
     fun requestTraceroute() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            viewModelScope.launch { nodeRequestActions.requestTraceroute(it, state.value.node?.user?.long_name ?: "") }
+            safeLaunch(tag = "requestTraceroute") {
+                nodeRequestActions.requestTraceroute(it, state.value.node?.user?.long_name ?: "")
+            }
         }
     }
 
     fun requestNeighborInfo() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            viewModelScope.launch {
+            safeLaunch(tag = "requestNeighborInfo") {
                 nodeRequestActions.requestNeighborInfo(it, state.value.node?.user?.long_name ?: "")
             }
         }

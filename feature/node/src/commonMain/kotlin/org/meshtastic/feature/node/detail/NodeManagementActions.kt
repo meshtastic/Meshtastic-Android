@@ -17,15 +17,21 @@
 package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
 import org.meshtastic.core.resources.favorite_remove
@@ -39,7 +45,7 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
-import kotlin.coroutines.cancellation.CancellationException
+import org.meshtastic.core.ui.util.SnackbarManager
 
 @Single
 open class NodeManagementActions
@@ -48,14 +54,15 @@ constructor(
     private val radioController: RadioController,
     private val alertManager: AlertManager,
     private val analytics: PlatformAnalytics,
+    private val snackbarManager: SnackbarManager,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) {
     open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
         alertManager.showAlert(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
             onConfirm = {
-                scope.launch { removeNode(node.num) }
-                onAfterRemove()
+                launchRadioMutation(scope, "removeNode", onSuccess = onAfterRemove) { removeNode(node.num) }
             },
         )
     }
@@ -74,7 +81,7 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
-                onConfirm = { scope.launch { setIgnored(node.num, !node.isIgnored) } },
+                onConfirm = { launchRadioMutation(scope, "setIgnored") { setIgnored(node.num, !node.isIgnored) } },
             )
         }
     }
@@ -90,7 +97,7 @@ constructor(
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
-                onConfirm = { scope.launch { toggleMuted(node.num) } },
+                onConfirm = { launchRadioMutation(scope, "toggleMuted") { toggleMuted(node.num) } },
             )
         }
     }
@@ -109,7 +116,7 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.favorite,
                 message = message,
-                onConfirm = { scope.launch { setFavorite(node.num, !node.isFavorite) } },
+                onConfirm = { launchRadioMutation(scope, "setFavorite") { setFavorite(node.num, !node.isFavorite) } },
             )
         }
     }
@@ -119,13 +126,42 @@ constructor(
         analytics.trackAction("node_favorite", mapOf("favorite" to favorite))
     }
 
-    open suspend fun setNodeNotes(nodeNum: Int, notes: String) {
-        try {
-            nodeRepository.setNodeNotes(nodeNum, notes)
-        } catch (ex: CancellationException) {
-            throw ex
-        } catch (ex: Exception) {
-            Logger.e(ex) { "Set node notes error" }
+    private fun launchRadioMutation(
+        scope: CoroutineScope,
+        operation: String,
+        onSuccess: () -> Unit = {},
+        block: suspend () -> Unit,
+    ) {
+        scope.handledLaunch {
+            val succeeded =
+                try {
+                    block()
+                    true
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: PacketQueueRejectedException) {
+                    showNodeRequestFailure(
+                        e,
+                        "Node management operation '$operation' rejected by outbound packet queue",
+                        snackbarManager,
+                        resolveUiText,
+                    )
+                    false
+                } catch (e: LocalNodeUnavailableException) {
+                    showNodeRequestFailure(
+                        e,
+                        "Node management operation '$operation' deferred until local node identity is available",
+                        snackbarManager,
+                        resolveUiText,
+                    )
+                    false
+                }
+            if (succeeded) onSuccess()
         }
+    }
+
+    open suspend fun setNodeNotes(nodeNum: Int, notes: String) {
+        val failure = safeCatching { nodeRepository.setNodeNotes(nodeNum, notes) }.exceptionOrNull()
+        if (failure != null) Logger.e(failure) { "Set node notes error" }
     }
 }

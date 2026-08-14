@@ -27,8 +27,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.model.ConnectionEpochs
 import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
@@ -132,23 +132,23 @@ class ConnectionStateHolderTest {
         assertFailsWith<IllegalArgumentException> {
             ConnectionStateHolder(
                 initialEpochs =
-                    ConnectionEpochs(
-                        departures = 0,
-                        completedHandshakes = 1,
-                        handshakesAtLastDeparture = 1,
-                        lastDepartureState = null,
-                    ),
+                ConnectionEpochs(
+                    departures = 0,
+                    completedHandshakes = 1,
+                    handshakesAtLastDeparture = 1,
+                    lastDepartureState = null,
+                ),
             )
         }
         assertFailsWith<IllegalArgumentException> {
             ConnectionStateHolder(
                 initialEpochs =
-                    ConnectionEpochs(
-                        departures = 1,
-                        completedHandshakes = 1,
-                        handshakesAtLastDeparture = 1,
-                        lastDepartureState = ConnectionState.Connected,
-                    ),
+                ConnectionEpochs(
+                    departures = 1,
+                    completedHandshakes = 1,
+                    handshakesAtLastDeparture = 1,
+                    lastDepartureState = ConnectionState.Connected,
+                ),
             )
         }
     }
@@ -285,15 +285,13 @@ class ConnectionStateHolderTest {
     @Test
     fun `constructor rejects negative epoch counters`() {
         listOf(
-            ConnectionEpochs(
-                departures = -1,
-                lastDepartureState = ConnectionState.Disconnected,
-            ),
+            ConnectionEpochs(departures = -1, lastDepartureState = ConnectionState.Disconnected),
             ConnectionEpochs(completedHandshakes = -1),
             ConnectionEpochs(handshakesAtLastDeparture = -1),
-        ).forEach { epochs ->
-            assertFailsWith<IllegalArgumentException> { ConnectionStateHolder(initialEpochs = epochs) }
-        }
+        )
+            .forEach { epochs ->
+                assertFailsWith<IllegalArgumentException> { ConnectionStateHolder(initialEpochs = epochs) }
+            }
     }
 
     @Test

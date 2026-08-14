@@ -150,10 +150,10 @@ class FakeRadioController :
 
     /** Failure thrown by [requestNeighborInfo], when set. */
     var requestNeighborInfoFailure: Exception? = null
+    val neighborInfoRequests = mutableListOf<Pair<Int, Int>>()
 
     /**
-     * When set, a channel write throws after this many total local/admin [channelWrites] — simulates mid-write
-     * failure.
+     * When set, a channel write throws after this many total local/admin [channelWrites] — simulates mid-write failure.
      */
     var failChannelWriteAfter: Int? = null
     var lastSetDeviceAddress: String? = null
@@ -194,6 +194,7 @@ class FakeRadioController :
             rejectLocalConfigWritesRemaining = 0
             rejectLocalChannelWritesRemaining = 0
             requestNeighborInfoFailure = null
+            neighborInfoRequests.clear()
             failChannelWriteAfter = null
             lastSetDeviceAddress = null
             lastSetOwnerUser = null
@@ -341,6 +342,7 @@ class FakeRadioController :
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
+        neighborInfoRequests += requestId to destNum
         requestNeighborInfoFailure?.let { throw it }
     }
 
