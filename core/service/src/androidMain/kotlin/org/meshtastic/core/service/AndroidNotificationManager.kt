@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.meshtastic_mesh_beacon_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.resources.meshtastic_service_notifications
+import org.meshtastic.proto.ClientNotification
 import android.app.NotificationManager as SystemNotificationManager
 
 @Single
@@ -127,7 +128,25 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }
 
-    override suspend fun dispatch(notification: Notification): Boolean {
+    override suspend fun dispatch(notification: Notification): Boolean = dispatch(notification, onlyAlertOnce = false)
+
+    override fun suppressClientNotificationModal(notification: ClientNotification): Boolean =
+        notification.isProtectedPositionAdvisory()
+
+    override suspend fun dispatchClientNotification(
+        notification: Notification,
+        clientNotification: ClientNotification,
+    ): Boolean = if (clientNotification.isProtectedPositionAdvisory()) {
+        dispatch(
+            notification = notification.copy(id = PROTECTED_POSITION_ADVISORY_NOTIFICATION_ID),
+            onlyAlertOnce = true,
+            tag = PROTECTED_POSITION_ADVISORY_NOTIFICATION_TAG,
+        )
+    } else {
+        dispatch(notification)
+    }
+
+    private suspend fun dispatch(notification: Notification, onlyAlertOnce: Boolean, tag: String? = null): Boolean {
         ensureChannelsInitialized()
         val channelId = notification.category.channelConfig().id
         if (!canPostNotifications(channelId)) return false
@@ -141,6 +160,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
                 .setSilent(notification.isSilent)
 
         notification.group?.let { builder.setGroup(it) }
+        if (onlyAlertOnce) builder.setOnlyAlertOnce(true)
 
         if (notification.type == Notification.Type.Error) {
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -149,7 +169,11 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         notification.deepLinkUri?.let { uri -> builder.setContentIntent(createDeepLinkPendingIntent(uri, id)) }
 
         return try {
-            notificationManager.notify(id, builder.build())
+            if (tag == null) {
+                notificationManager.notify(id, builder.build())
+            } else {
+                notificationManager.notify(tag, id, builder.build())
+            }
             true
         } catch (_: SecurityException) {
             false
