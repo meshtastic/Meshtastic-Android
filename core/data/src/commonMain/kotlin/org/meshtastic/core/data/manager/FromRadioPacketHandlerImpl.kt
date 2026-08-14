@@ -35,6 +35,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.XModemManager
+import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.duplicated_public_key_title
@@ -154,7 +155,11 @@ class FromRadioPacketHandlerImpl(
 
     private fun handleClientNotification(cn: ClientNotification, session: RadioSessionContext) {
         val admitted =
-            radioInterfaceService.runIfSessionActive(session) { serviceStateWriter.setClientNotification(cn) }
+            radioInterfaceService.runIfSessionActive(session) {
+                if (!notificationManager.suppressClientNotificationModal(cn)) {
+                    serviceStateWriter.setClientNotification(cn)
+                }
+            }
         if (!admitted) {
             Logger.d { "Discarding client notification from stale transport session" }
             return
@@ -207,8 +212,15 @@ class FromRadioPacketHandlerImpl(
                 else -> Pair(getStringSuspend(Res.string.client_notification), Notification.Type.Info)
             }
 
-        notificationManager.dispatch(
-            Notification(title = title, type = type, message = cn.message, category = Notification.Category.Alert),
+        notificationManager.dispatchClientNotification(
+            Notification(
+                title = title,
+                type = type,
+                message = cn.message,
+                category = Notification.Category.Alert,
+                id = cn.notificationId(),
+            ),
+            cn,
         )
     }
 }

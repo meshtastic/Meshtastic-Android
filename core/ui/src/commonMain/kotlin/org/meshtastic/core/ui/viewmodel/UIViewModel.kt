@@ -67,6 +67,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
@@ -176,7 +177,7 @@ class UIViewModel(
 
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
-        notificationManager.cancel(notification.toString().hashCode())
+        notificationManager.cancel(notification.notificationId())
     }
 
     val lockdownState = serviceRepository.lockdownState
