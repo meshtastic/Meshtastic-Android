@@ -16,11 +16,11 @@
  */
 package org.meshtastic.feature.discovery
 
-import kotlinx.atomicfu.locks.SynchronizedObject
-import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -29,7 +29,7 @@ import org.meshtastic.core.database.entity.DiscoverySessionStatus
 
 /** Shared in-memory [DiscoveryDao] for discovery feature tests, including live session flows. */
 internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
-    private val stateLock = SynchronizedObject()
+    private val stateLock = Mutex()
     private var nextSessionId = 1L
     private var nextPresetResultId = 1L
     private var nextNodeId = 1L
@@ -42,39 +42,39 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
 
     /** Read-only views used by feature-test assertions. */
     val sessions: Map<Long, DiscoverySessionEntity>
-        get() = synchronized(stateLock) { mutableSessions.toMap() }
+        get() = sessionsFlow.value.associateBy { it.id }
 
     val presetResults: Map<Long, DiscoveryPresetResultEntity>
-        get() = synchronized(stateLock) { mutablePresetResults.toMap() }
+        get() = presetResultsFlow.value.associateBy { it.id }
 
     val discoveredNodes: Map<Long, DiscoveredNodeEntity>
-        get() = synchronized(stateLock) { mutableDiscoveredNodes.toMap() }
+        get() = discoveredNodesFlow.value.associateBy { it.id }
 
     /** Seeds a persisted session with a stable ID for recovery tests. */
-    fun seedSession(session: DiscoverySessionEntity) {
+    suspend fun seedSession(session: DiscoverySessionEntity) {
         require(session.id > 0) { "seeded discovery sessions require a persisted id" }
-        synchronized(stateLock) {
+        stateLock.withLock {
             mutableSessions[session.id] = session
             nextSessionId = maxOf(nextSessionId, session.id + 1)
         }
         refreshSessionsFlow()
     }
 
-    private fun refreshSessionsFlow() {
-        sessionsFlow.value = synchronized(stateLock) { mutableSessions.values.sortedByDescending { it.timestamp } }
+    private suspend fun refreshSessionsFlow() {
+        stateLock.withLock { sessionsFlow.value = mutableSessions.values.sortedByDescending { it.timestamp } }
     }
 
-    private fun refreshPresetResultsFlow() {
-        presetResultsFlow.value = synchronized(stateLock) { mutablePresetResults.values.toList() }
+    private suspend fun refreshPresetResultsFlow() {
+        stateLock.withLock { presetResultsFlow.value = mutablePresetResults.values.toList() }
     }
 
-    private fun refreshDiscoveredNodesFlow() {
-        discoveredNodesFlow.value = synchronized(stateLock) { mutableDiscoveredNodes.values.toList() }
+    private suspend fun refreshDiscoveredNodesFlow() {
+        stateLock.withLock { discoveredNodesFlow.value = mutableDiscoveredNodes.values.toList() }
     }
 
     override suspend fun insertSession(session: DiscoverySessionEntity): Long {
         val id =
-            synchronized(stateLock) {
+            stateLock.withLock {
                 val id = nextSessionId++
                 mutableSessions[id] = session.copy(id = id)
                 id
@@ -84,9 +84,7 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     }
 
     override suspend fun updateSession(session: DiscoverySessionEntity) {
-        synchronized(stateLock) {
-            if (mutableSessions.containsKey(session.id)) mutableSessions[session.id] = session
-        }
+        stateLock.withLock { if (mutableSessions.containsKey(session.id)) mutableSessions[session.id] = session }
         refreshSessionsFlow()
     }
 
@@ -94,15 +92,15 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
 
     // The Room snapshot query intentionally has no ORDER BY; preserve that contract instead of mirroring the live flow.
     override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> =
-        synchronized(stateLock) { mutableSessions.values.toList() }
+        stateLock.withLock { mutableSessions.values.toList() }
 
     override suspend fun getSession(sessionId: Long): DiscoverySessionEntity? =
-        synchronized(stateLock) { mutableSessions[sessionId] }
+        stateLock.withLock { mutableSessions[sessionId] }
 
     override suspend fun updateSessionCompletionStatus(sessionId: Long, status: String): Int {
         val updated =
-            synchronized(stateLock) {
-                val session = mutableSessions[sessionId] ?: return@synchronized false
+            stateLock.withLock {
+                val session = mutableSessions[sessionId] ?: return@withLock false
                 mutableSessions[sessionId] = session.copy(completionStatus = status)
                 true
             }
@@ -120,8 +118,8 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
         avgChannelUtilization: Double,
     ) {
         val updated =
-            synchronized(stateLock) {
-                val session = mutableSessions[sessionId] ?: return@synchronized false
+            stateLock.withLock {
+                val session = mutableSessions[sessionId] ?: return@withLock false
                 mutableSessions[sessionId] =
                     session.copy(
                         totalUniqueNodes = totalUniqueNodes,
@@ -138,10 +136,10 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
 
     override suspend fun updateRecoverableSessionCompletionStatus(sessionId: Long, status: String): Int {
         val updated =
-            synchronized(stateLock) {
+            stateLock.withLock {
                 val session =
                     mutableSessions[sessionId]?.takeIf { it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
-                        ?: return@synchronized false
+                        ?: return@withLock false
                 mutableSessions[sessionId] = session.copy(completionStatus = status)
                 true
             }
@@ -153,7 +151,7 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
         sessionsFlow.map { sessions -> sessions.firstOrNull { it.id == sessionId } }
 
     override suspend fun deleteSession(sessionId: Long) {
-        synchronized(stateLock) {
+        stateLock.withLock {
             mutableSessions.remove(sessionId)
             val resultIds = mutablePresetResults.values.filter { it.sessionId == sessionId }.map { it.id }
             resultIds.forEach { resultId ->
@@ -168,7 +166,7 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
 
     override suspend fun insertPresetResult(result: DiscoveryPresetResultEntity): Long {
         val id =
-            synchronized(stateLock) {
+            stateLock.withLock {
                 val id = nextPresetResultId++
                 mutablePresetResults[id] = result.copy(id = id)
                 id
@@ -178,21 +176,19 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     }
 
     override suspend fun updatePresetResult(result: DiscoveryPresetResultEntity) {
-        synchronized(stateLock) {
-            if (mutablePresetResults.containsKey(result.id)) mutablePresetResults[result.id] = result
-        }
+        stateLock.withLock { if (mutablePresetResults.containsKey(result.id)) mutablePresetResults[result.id] = result }
         refreshPresetResultsFlow()
     }
 
     override suspend fun getPresetResults(sessionId: Long): List<DiscoveryPresetResultEntity> =
-        synchronized(stateLock) { mutablePresetResults.values.filter { it.sessionId == sessionId } }
+        stateLock.withLock { mutablePresetResults.values.filter { it.sessionId == sessionId } }
 
     override fun getPresetResultsFlow(sessionId: Long): Flow<List<DiscoveryPresetResultEntity>> =
         presetResultsFlow.map { results -> results.filter { it.sessionId == sessionId } }
 
     override suspend fun insertDiscoveredNode(node: DiscoveredNodeEntity): Long {
         val id =
-            synchronized(stateLock) {
+            stateLock.withLock {
                 val id = nextNodeId++
                 mutableDiscoveredNodes[id] = node.copy(id = id)
                 id
@@ -202,7 +198,7 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     }
 
     override suspend fun insertDiscoveredNodes(nodes: List<DiscoveredNodeEntity>) {
-        synchronized(stateLock) {
+        stateLock.withLock {
             nodes.forEach { node ->
                 val id = nextNodeId++
                 mutableDiscoveredNodes[id] = node.copy(id = id)
@@ -212,44 +208,40 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
     }
 
     override suspend fun updateDiscoveredNode(node: DiscoveredNodeEntity) {
-        synchronized(stateLock) {
-            if (mutableDiscoveredNodes.containsKey(node.id)) mutableDiscoveredNodes[node.id] = node
-        }
+        stateLock.withLock { if (mutableDiscoveredNodes.containsKey(node.id)) mutableDiscoveredNodes[node.id] = node }
         refreshDiscoveredNodesFlow()
     }
 
     override suspend fun getDiscoveredNodes(presetResultId: Long): List<DiscoveredNodeEntity> =
-        synchronized(stateLock) { mutableDiscoveredNodes.values.filter { it.presetResultId == presetResultId } }
+        stateLock.withLock { mutableDiscoveredNodes.values.filter { it.presetResultId == presetResultId } }
 
     override fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>> =
         discoveredNodesFlow.map { nodes -> nodes.filter { it.presetResultId == presetResultId } }
 
-    override suspend fun getUniqueNodeNums(sessionId: Long): List<Int> =
-        synchronized(stateLock) {
-            mutablePresetResults.values
-                .filter { it.sessionId == sessionId }
-                .flatMap { result -> mutableDiscoveredNodes.values.filter { it.presetResultId == result.id } }
-                .map { it.nodeNum }
-                .distinct()
-        }
+    override suspend fun getUniqueNodeNums(sessionId: Long): List<Long> = stateLock.withLock {
+        mutablePresetResults.values
+            .filter { it.sessionId == sessionId }
+            .flatMap { result -> mutableDiscoveredNodes.values.filter { it.presetResultId == result.id } }
+            .map { it.nodeNum }
+            .distinct()
+    }
 
     override suspend fun getUniqueNodeCount(sessionId: Long): Int = getUniqueNodeNums(sessionId).size
 
-    override suspend fun getMaxDistance(sessionId: Long): Double? =
-        synchronized(stateLock) {
-            mutablePresetResults.values
-                .filter { it.sessionId == sessionId }
-                .flatMap { result -> mutableDiscoveredNodes.values.filter { it.presetResultId == result.id } }
-                .mapNotNull { it.distanceFromUser }
-                .maxOrNull()
-        }
+    override suspend fun getMaxDistance(sessionId: Long): Double? = stateLock.withLock {
+        mutablePresetResults.values
+            .filter { it.sessionId == sessionId }
+            .flatMap { result -> mutableDiscoveredNodes.values.filter { it.presetResultId == result.id } }
+            .mapNotNull { it.distanceFromUser }
+            .maxOrNull()
+    }
 
     // The DAO method name is historical; the Room query currently returns only the session entity.
     override suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity? =
-        synchronized(stateLock) { mutableSessions[sessionId] }
+        stateLock.withLock { mutableSessions[sessionId] }
 
     override suspend fun markInterruptedSessions() {
-        synchronized(stateLock) {
+        stateLock.withLock {
             mutableSessions.keys.toList().forEach { key ->
                 val session = checkNotNull(mutableSessions[key])
                 if (session.completionStatus == DiscoverySessionStatus.IN_PROGRESS) {
@@ -260,10 +252,11 @@ internal class SharedInMemoryDiscoveryDao : DiscoveryDao {
         refreshSessionsFlow()
     }
 
-    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? =
-        synchronized(stateLock) {
-            mutableSessions.values
-                .filter { it.deviceAddress == deviceAddress && it.completionStatus in DiscoverySessionStatus.RECOVERABLE }
-                .maxByOrNull { it.timestamp }
-        }
+    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = stateLock.withLock {
+        mutableSessions.values
+            .filter {
+                it.deviceAddress == deviceAddress && it.completionStatus in DiscoverySessionStatus.RECOVERABLE
+            }
+            .maxByOrNull { it.timestamp }
+    }
 }

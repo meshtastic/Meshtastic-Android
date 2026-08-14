@@ -167,13 +167,12 @@ internal class DiscoveryHomeRestorer(
     }
 
     /**
-     * Non-suspending scan-engine recheck used while its mutex prevents a new recovery restore from racing admission.
-     * A completed restore remains blocking unless it completed successfully.
+     * Non-suspending scan-engine recheck used while its mutex prevents a new recovery restore from racing admission. A
+     * completed restore remains blocking unless it completed successfully.
      */
     fun hasUnsatisfiedRestoreFor(deviceAddress: String?): Boolean {
         val pending = pendingRestoreSnapshot.value?.takeIf { it.plan.deviceAddress == deviceAddress }
         return pending?.let { !it.result.isCompleted || it.state.completedSuccessfully.value != true } ?: false
-    }
     }
 
     /** Registers a restore in the application scope. Repeated scheduling of the same active plan is idempotent. */

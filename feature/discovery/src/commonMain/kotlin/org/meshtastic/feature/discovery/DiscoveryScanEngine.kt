@@ -24,7 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +43,7 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
@@ -71,7 +74,7 @@ import org.meshtastic.proto.Telemetry
  * persists aggregated results via [DiscoveryDao].
  */
 @Single
-@Suppress("LongParameterList")
+@Suppress("LargeClass", "LongParameterList")
 class DiscoveryScanEngine(
     private val radioController: RadioController,
     private val serviceRepository: ServiceRepository,
@@ -104,6 +107,33 @@ class DiscoveryScanEngine(
     // region Internal scan state
 
     private val mutex = Mutex()
+    private val homeRestorer =
+        DiscoveryHomeRestorer(radioController, serviceRepository, discoveryDao, applicationScope, meshPrefs)
+    private val terminalCoordinator =
+        DiscoveryTerminalCoordinator(
+            discoveryDao = discoveryDao,
+            homeRestorer = homeRestorer,
+            applicationScope = applicationScope,
+            onSessionUpdated = { updated -> _currentSession.value = updated },
+            onTerminalCompleted = { outcome -> _scanState.value = DiscoveryScanState.Complete(outcome) },
+            cancelScan = { mutex.withLock { cancelScanInternal() } },
+        )
+    private val interruptedSessionRecovery =
+        DiscoveryInterruptedSessionRecovery(
+            serviceRepository = serviceRepository,
+            discoveryDao = discoveryDao,
+            meshPrefs = meshPrefs,
+            isScanActive = { mutex.withLock { isActive } },
+            scheduleRestoreIfIdle = { session ->
+                mutex.withLock {
+                    if (isActive || meshPrefs.deviceAddress.value != session.deviceAddress) {
+                        null
+                    } else {
+                        homeRestorer.schedulePersistedSession(session)
+                    }
+                }
+            },
+        )
     private var scanScope: CoroutineScope? = null
     private var dwellJob: Job? = null
     private var originalLoRaConfig: Config.LoRaConfig? = null
@@ -123,6 +153,9 @@ class DiscoveryScanEngine(
 
     private var currentPresetName: String = ""
     private var totalDwellSeconds: Long = 0
+
+    /** Guards exact-once result insertion when terminal cleanup races normal dwell completion. Protected by [mutex]. */
+    private var currentDwellPersisted: Boolean = false
     private var lastLocalStats: org.meshtastic.proto.LocalStats? = null
 
     // endregion
@@ -166,94 +199,192 @@ class DiscoveryScanEngine(
         require(targets.isNotEmpty()) { "At least one scan target is required" }
         require(dwellDurationSeconds > 0) { "Dwell duration must be positive" }
 
+        if (!prepareScanStart(meshPrefs.deviceAddress.value)) return
+
+        // These repository flows may suspend while their initial snapshots load. Keep that wait outside the engine
+        // mutex so stop/reset and packet collection remain responsive, then revalidate device and restore ownership
+        // under the mutex before publishing any scan state. Capture the baseline after admission waits so a transport
+        // restart during those waits is not misreported as a change that happened during snapshot preparation.
+        val deviceAddress = meshPrefs.deviceAddress.value
+        val sessionGeneration = radioController.sessionGeneration.value
+        val snapshot = readInitialConfigSnapshot()
+        if (snapshot == null) {
+            refuseScan("Radio configuration snapshot is not available")
+            return
+        }
+        val (homeLora, initialPrimaryChannel) = snapshot
         mutex.withLock {
             if (isActive) {
                 Logger.w { "DiscoveryScanEngine: scan already active, ignoring startScan" }
-                return
-            }
+            } else if (!isScanPreparationCurrent(deviceAddress, sessionGeneration)) {
+                _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
+            } else if (homeRestorer.hasUnsatisfiedRestoreFor(meshPrefs.deviceAddress.value)) {
+                // Interrupted-session recovery registers its restore under this mutex. Re-check here so a restore that
+                // won the race after the first wait cannot retune the radio underneath this scan.
+                _scanState.value = DiscoveryScanState.Failed("Home configuration restoration is incomplete")
+            } else {
+                _scanState.value = DiscoveryScanState.Preparing
+                val requiresPrimaryRestore = targets.any { it.channel != null }
+                when {
+                    homeLora == null -> refuseUnrestorableScanLocked("Home LoRa configuration is not available")
 
-            _scanState.value = DiscoveryScanState.Preparing
+                    initialPrimaryChannel == null && requiresPrimaryRestore ->
+                        refuseUnrestorableScanLocked("Primary channel is not available for a custom-channel scan")
 
-            // Capture the entire original LoRa config and primary channel to restore them accurately later.
-            val initialLoraConfig = radioConfigRepository.localConfigFlow.first().lora
-            originalLoRaConfig = initialLoraConfig
-            originalPrimaryChannel = radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
-            tunedPrimaryChannel = false
-
-            // A custom-channel target overwrites the primary channel; without a captured original we could not restore
-            // it and would strand the radio on the beacon's channel. Abort rather than proceed silently.
-            if (originalPrimaryChannel == null && targets.any { it.channel != null }) {
-                Logger.w { "DiscoveryScanEngine: primary channel not captured; aborting custom-channel scan" }
-                _scanState.value = DiscoveryScanState.Idle
-                return
-            }
-
-            val homePresetStr =
-                if (initialLoraConfig?.use_preset == true) {
-                    ChannelOption.from(initialLoraConfig.modem_preset)?.name ?: ChannelOption.DEFAULT.name
-                } else {
-                    "CUSTOM"
+                    else ->
+                        prepareScanLocked(
+                            targets = targets,
+                            dwellDurationSeconds = dwellDurationSeconds,
+                            initialLoraConfig = homeLora,
+                            initialPrimaryChannel = initialPrimaryChannel,
+                            requiresPrimaryRestore = requiresPrimaryRestore,
+                            deviceAddress = deviceAddress,
+                            sessionGeneration = sessionGeneration,
+                        )
                 }
+            }
+        }
+    }
 
-            val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
-            val myPosition = myNodeNum?.let { nodeRepository.nodeDBbyNum.value[it]?.position }
-            val latDouble = (myPosition?.latitude_i ?: 0).toDouble() / POSITION_DIVISOR
-            val lonDouble = (myPosition?.longitude_i ?: 0).toDouble() / POSITION_DIVISOR
+    private suspend fun prepareScanStart(deviceAddress: String?): Boolean = when {
+        deviceAddress == null -> {
+            refuseScan("Selected radio is not available")
+            false
+        }
 
-            // Create the DB session. homeLoraConfig/homePrimaryChannel/deviceAddress let a later reconnect detect and
-            // restore this exact config if the process dies mid-scan before restoreHomePreset() ever runs.
-            val session =
-                DiscoverySessionEntity(
-                    timestamp = nowMillis,
-                    presetsScanned = targets.joinToString(",") { it.label },
-                    homePreset = homePresetStr,
-                    completionStatus = "in_progress",
-                    userLatitude = latDouble,
-                    userLongitude = lonDouble,
-                    deviceAddress = meshPrefs.deviceAddress.value,
-                    homeLoraConfig = initialLoraConfig,
-                    // Only custom-channel targets ever overwrite the primary channel, so only they need it restored —
-                    // mirrors the tunedPrimaryChannel gating in restoreHomePreset().
-                    homePrimaryChannel = originalPrimaryChannel.takeIf { targets.any { t -> t.channel != null } },
-                )
-            sessionId = discoveryDao.insertSession(session)
-            _currentSession.value = session.copy(id = sessionId)
+        !terminalCoordinator.resetForScan() -> {
+            refuseScan("Previous discovery scan cleanup is still running")
+            false
+        }
 
-            // Register as packet collector
-            collectorRegistry.collector = this
+        !homeRestorer.awaitBeforeScan(deviceAddress) -> {
+            refuseScan("Home configuration restoration is incomplete")
+            false
+        }
 
-            // Set initial state so the scan loop's isActive guard succeeds
-            _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
-            currentPresetName = targets.first().label
-            totalDwellSeconds = dwellDurationSeconds
+        else -> true
+    }
 
-            // Launch scan coroutine
-            val scope = CoroutineScope(dispatchers.io + SupervisorJob())
+    private suspend fun readInitialConfigSnapshot(): Pair<Config.LoRaConfig?, ChannelSettings?>? =
+        withTimeoutOrNull(CONFIG_SNAPSHOT_TIMEOUT_MS) {
+            radioConfigRepository.localConfigFlow.first().lora to
+                radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
+        }
+
+    private suspend fun refuseScan(reason: String) {
+        mutex.withLock { if (!isActive) _scanState.value = DiscoveryScanState.Failed(reason) }
+    }
+
+    private fun refuseUnrestorableScanLocked(reason: String) {
+        Logger.w { "DiscoveryScanEngine: refusing unrestorable scan: $reason" }
+        _scanState.value = DiscoveryScanState.Failed(reason)
+    }
+
+    private suspend fun prepareScanLocked(
+        targets: List<ScanTarget>,
+        dwellDurationSeconds: Long,
+        initialLoraConfig: Config.LoRaConfig,
+        initialPrimaryChannel: ChannelSettings?,
+        requiresPrimaryRestore: Boolean,
+        deviceAddress: String?,
+        sessionGeneration: Long,
+    ) {
+        originalLoRaConfig = initialLoraConfig
+        originalPrimaryChannel = initialPrimaryChannel
+        tunedPrimaryChannel = false
+        val homePresetStr =
+            if (initialLoraConfig.use_preset) {
+                ChannelOption.from(initialLoraConfig.modem_preset)?.name ?: ChannelOption.DEFAULT.name
+            } else {
+                "CUSTOM"
+            }
+        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+        val myPosition = myNodeNum?.let { nodeRepository.nodeDBbyNum.value[it]?.position }
+        val session =
+            DiscoverySessionEntity(
+                timestamp = nowMillis,
+                presetsScanned = targets.joinToString(",") { it.label },
+                homePreset = homePresetStr,
+                completionStatus = DiscoverySessionStatus.IN_PROGRESS,
+                userLatitude = (myPosition?.latitude_i ?: 0).toDouble() / POSITION_DIVISOR,
+                userLongitude = (myPosition?.longitude_i ?: 0).toDouble() / POSITION_DIVISOR,
+                deviceAddress = deviceAddress,
+                homeLoraConfig = initialLoraConfig,
+                homePrimaryChannel = initialPrimaryChannel.takeIf { requiresPrimaryRestore },
+            )
+        val insertedSessionId = discoveryDao.insertSession(session)
+        if (!isScanPreparationCurrent(deviceAddress, sessionGeneration)) {
+            discoveryDao.deleteSession(insertedSessionId)
+            sessionId = 0L
+            originalLoRaConfig = null
+            originalPrimaryChannel = null
+            _scanState.value = DiscoveryScanState.Failed("Selected radio changed while preparing the scan")
+            return
+        }
+        sessionId = insertedSessionId
+        _currentSession.value = session.copy(id = sessionId)
+        collectorRegistry.collector = this
+        _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
+        currentPresetName = targets.first().label
+        totalDwellSeconds = dwellDurationSeconds
+        currentDwellPersisted = false
+        CoroutineScope(dispatchers.io + SupervisorJob()).also { scope ->
             scanScope = scope
             scope.launch { runScanLoop(targets, dwellDurationSeconds) }
         }
     }
 
+    private fun isScanPreparationCurrent(deviceAddress: String?, sessionGeneration: Long): Boolean =
+        meshPrefs.deviceAddress.value == deviceAddress &&
+            radioController.sessionGeneration.value == sessionGeneration &&
+            serviceRepository.connectionState.value is ConnectionState.Connected
+
     /** Stops the active scan and restores the home preset. */
     suspend fun stopScan() {
-        mutex.withLock {
-            if (!isActive) return
-            Logger.i { "DiscoveryScanEngine: stopping scan" }
-            _scanState.value = DiscoveryScanState.Cancelling
-            cancelScanInternal()
+        val request =
+            mutex.withLock {
+                if (!isActive) {
+                    null
+                } else if (_scanState.value is DiscoveryScanState.Analysis) {
+                    Logger.i { "DiscoveryScanEngine: ignoring stop after terminal analysis has started" }
+                    null
+                } else {
+                    if (_scanState.value !is DiscoveryScanState.Cancelling) {
+                        Logger.i { "DiscoveryScanEngine: stopping scan" }
+                        _scanState.value = DiscoveryScanState.Cancelling
+                    }
+                    // Freeze the scan generation before snapshotting its restore plan.
+                    // No later target shift may race this terminal request.
+                    cancelScanInternal()
+                    terminalRequestLocked(
+                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_STOPPED,
+                        outcome = DiscoveryScanState.CompletionOutcome.Cancelled,
+                        awaitRestore = false,
+                        generateAi = false,
+                    )
+                }
+            }
+        if (request != null) {
+            terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
         }
-        persistCurrentDwellResults()
-        finalizeSession("stopped")
-        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Cancelled)
-
-        // Restore home preset in the background so we don't block the UI with the connection wait
-        applicationScope.launch { restoreHomePreset() }
     }
 
     /** Resets engine state after the UI has acknowledged completion. */
     fun reset() {
-        _scanState.value = DiscoveryScanState.Idle
-        _currentSession.value = null
+        if (!mutex.tryLock()) {
+            Logger.w { "DiscoveryScanEngine: ignoring reset while scan state is changing" }
+            return
+        }
+        try {
+            if (isActive) {
+                Logger.w { "DiscoveryScanEngine: ignoring reset while scan cleanup is still active" }
+                return
+            }
+            _currentSession.value = null
+            _scanState.value = DiscoveryScanState.Idle
+        } finally {
+            mutex.unlock()
+        }
     }
 
     // endregion
@@ -311,22 +442,38 @@ class DiscoveryScanEngine(
         for (target in targets) {
             if (!isActive) return
 
-            currentPresetName = target.label
-            mutex.withLock {
-                collectedNodes.clear()
-                deviceMetricsLog.clear()
-                lastLocalStats = null
-            }
-            totalDwellSeconds = dwellDurationSeconds
+            val shouldShift =
+                mutex.withLock {
+                    if (!canAdvanceScanLocked()) {
+                        false
+                    } else {
+                        currentPresetName = target.label
+                        totalDwellSeconds = dwellDurationSeconds
+                        currentDwellPersisted = false
+                        collectedNodes.clear()
+                        deviceMetricsLog.clear()
+                        lastLocalStats = null
+                        _scanState.value = DiscoveryScanState.Shifting(target.label)
+                        true
+                    }
+                }
+            if (!shouldShift) return
 
             // Shift to the new target (preset, plus a custom primary channel for beacon-channel targets)
-            _scanState.value = DiscoveryScanState.Shifting(target.label)
-            shiftTarget(target)
+            try {
+                shiftTarget(target)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "DiscoveryScanEngine: target shift failed; aborting scan and restoring home config" }
+                pauseAndAbort()
+                return
+            }
 
             // Wait for reconnection
-            _scanState.value = DiscoveryScanState.Reconnecting(target.label)
+            if (!transitionScanState(DiscoveryScanState.Reconnecting(target.label))) return
             if (!waitForConnection()) {
-                pauseAndAbort()
+                pauseAndAbort(persistPartialDwell = true)
                 return
             }
 
@@ -335,7 +482,7 @@ class DiscoveryScanEngine(
 
             // Dwell
             if (!runDwell(target.label, dwellDurationSeconds)) {
-                pauseAndAbort()
+                pauseAndAbort(persistPartialDwell = true)
                 return
             }
             if (!isActive) return
@@ -344,28 +491,45 @@ class DiscoveryScanEngine(
             persistCurrentDwellResults()
         }
 
-        // All presets scanned — unregister packet collector before analysis
-        collectorRegistry.collector = null
-        _scanState.value = DiscoveryScanState.Analysis
-        restoreHomePreset()
-        generateAiSummaries()
-        finalizeSession("complete")
-        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Success)
+        // Elect normal completion under the same mutex used by stopScan so a late stop cannot replace its outcome.
+        val request =
+            mutex.withLock {
+                collectorRegistry.collector = null
+                _scanState.value = DiscoveryScanState.Analysis
+                terminalRequestLocked(
+                    pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_COMPLETE,
+                    outcome = DiscoveryScanState.CompletionOutcome.Success,
+                    awaitRestore = true,
+                    generateAi = true,
+                )
+            }
+        // complete() cancels scanScope before terminal cleanup finishes. This scan coroutine ends inside the call;
+        // follow-up work belongs in terminal-coordinator callbacks, not after this invocation.
+        terminalCoordinator.complete(request = request, generateAi = ::generateAiSummaries)
     }
 
     /** Common cleanup path when a scan step fails mid-loop. */
-    private suspend fun pauseAndAbort() {
-        _scanState.value = DiscoveryScanState.Failed("Connection lost during scan")
-        // pauseAndAbort runs inside the runScanLoop coroutine, which is a child of scanScope.
-        // cancelScanInternal() cancels scanScope (and therefore this coroutine), so it must run LAST:
-        // any suspend after it — finalizeSession or restoreHomePreset — would throw CancellationException
-        // and silently skip cleanup, stranding the radio on the scan modem preset. So finalize and reach
-        // the terminal state first, then restore the home preset on applicationScope (which outlives
-        // scanScope), mirroring stopScan().
-        finalizeSession("failed")
-        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Failed)
-        applicationScope.launch { restoreHomePreset() }
-        cancelScanInternal()
+    private suspend fun pauseAndAbort(persistPartialDwell: Boolean = false) {
+        val request =
+            mutex.withLock {
+                if (_scanState.value is DiscoveryScanState.Cancelling) {
+                    null
+                } else {
+                    _scanState.value = DiscoveryScanState.Analysis
+                    terminalRequestLocked(
+                        pendingStatus = DiscoverySessionStatus.RESTORE_PENDING_FAILED,
+                        outcome = DiscoveryScanState.CompletionOutcome.Failed,
+                        awaitRestore = false,
+                        generateAi = false,
+                    )
+                }
+            }
+        if (request == null) return
+        if (persistPartialDwell) {
+            terminalCoordinator.complete(request = request, beforeFinalize = ::persistCurrentDwellResults)
+        } else {
+            terminalCoordinator.complete(request = request)
+        }
     }
 
     private suspend fun shiftTarget(target: ScanTarget) {
@@ -394,8 +558,9 @@ class DiscoveryScanEngine(
                     ),
                 ),
             )
+            currentCoroutineContext().ensureActive()
+            mutex.withLock { tunedPrimaryChannel = true }
             radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = target.channel))
-            tunedPrimaryChannel = true
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
         }
         // The firmware often restarts the radio or reboots after a LoRa config change.
@@ -418,31 +583,49 @@ class DiscoveryScanEngine(
     private suspend fun requestNeighborInfoAtDwellBoundary() {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
         val packetId = radioController.generatePacketId()
-        radioController.requestNeighborInfo(packetId, myNodeNum)
-        Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        try {
+            radioController.requestNeighborInfo(packetId, myNodeNum)
+            Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "DiscoveryScanEngine: NeighborInfo request failed; continuing the dwell" }
+        }
     }
 
     private suspend fun runDwell(presetName: String, durationSeconds: Long): Boolean {
         var remaining = durationSeconds
-        while (remaining > 0 && isActive) {
+        var canContinue = true
+        while (remaining > 0 && canContinue) {
             val isConnected = serviceRepository.connectionState.value is ConnectionState.Connected
             if (!isConnected) {
-                _scanState.value = DiscoveryScanState.Reconnecting(presetName)
-                val reconnected = waitForConnection()
-                if (!reconnected) return false
-                continue
+                canContinue = transitionScanState(DiscoveryScanState.Reconnecting(presetName)) && waitForConnection()
+            } else {
+                val dwellState =
+                    DiscoveryScanState.Dwell(
+                        presetName = presetName,
+                        remainingSeconds = remaining,
+                        totalSeconds = durationSeconds,
+                    )
+                canContinue = transitionScanState(dwellState)
+                if (canContinue) {
+                    delay(TICK_INTERVAL_MS)
+                    remaining--
+                }
             }
-
-            _scanState.value =
-                DiscoveryScanState.Dwell(
-                    presetName = presetName,
-                    remainingSeconds = remaining,
-                    totalSeconds = durationSeconds,
-                )
-            delay(TICK_INTERVAL_MS)
-            remaining--
         }
-        return true
+        return canContinue
+    }
+
+    /** Caller must hold [mutex]. Terminal states are intentionally excluded even though Cancelling is active. */
+    private fun canAdvanceScanLocked(): Boolean = isActive &&
+        _scanState.value !is DiscoveryScanState.Cancelling &&
+        _scanState.value !is DiscoveryScanState.Analysis
+
+    private suspend fun transitionScanState(state: DiscoveryScanState): Boolean = mutex.withLock {
+        if (!canAdvanceScanLocked()) return@withLock false
+        _scanState.value = state
+        true
     }
 
     // endregion
@@ -526,13 +709,15 @@ class DiscoveryScanEngine(
     private suspend fun persistCurrentDwellResults() {
         if (sessionId == 0L) return
         mutex.withLock {
+            if (currentDwellPersisted) return@withLock
             if (collectedNodes.isEmpty()) {
                 persistEmptyPresetResult()
-                return
+                currentDwellPersisted = true
+            } else {
+                val presetResultId = persistPresetResult()
+                persistDiscoveredNodes(presetResultId)
+                currentDwellPersisted = true
             }
-
-            val presetResultId = persistPresetResult()
-            persistDiscoveredNodes(presetResultId)
         }
     }
 
@@ -667,116 +852,59 @@ class DiscoveryScanEngine(
         return avgChannel to avgAirRate
     }
 
-    // Guarded by [mutex] so the session-row read-modify-write can't interleave with restoreInterruptedSessionIfAny().
-    // pauseAndAbort() flips isActive to false before finalizing, so without this a reconnect-triggered restore could
-    // race this write on the same row. No caller (runScanLoop, pauseAndAbort, stopScan) holds the mutex here.
-    private suspend fun finalizeSession(status: String) = mutex.withLock {
-        if (sessionId == 0L) return@withLock
-        val uniqueCount = discoveryDao.getUniqueNodeCount(sessionId)
-        val presetResults = discoveryDao.getPresetResults(sessionId)
-        val session = discoveryDao.getSession(sessionId) ?: return@withLock
-        val totalDwell = presetResults.sumOf { it.dwellDurationSeconds }
-        val totalMsgs = presetResults.sumOf { it.messageCount }
-        val totalSensor = presetResults.sumOf { it.sensorPacketCount }
-        val maxDistance = discoveryDao.getMaxDistance(sessionId) ?: 0.0
-        val avgChanUtil =
-            presetResults
-                .filter { it.uniqueNodes > 0 }
-                .map { it.avgChannelUtilization }
-                .average()
-                .takeIf { !it.isNaN() } ?: 0.0
-        discoveryDao.updateSession(
-            session.copy(
-                totalUniqueNodes = uniqueCount,
-                totalDwellSeconds = totalDwell,
-                totalMessages = totalMsgs,
-                totalSensorPackets = totalSensor,
-                furthestNodeDistance = maxDistance,
-                avgChannelUtilization = avgChanUtil,
-                completionStatus = status,
-            ),
-        )
-        _currentSession.value = discoveryDao.getSession(sessionId)
-    }
-
-    // endregion
-
-    // region Home preset restoration
-
-    private suspend fun restoreHomePreset() {
-        val config = originalLoRaConfig ?: return
-        // Restore the primary channel first (only when a custom-channel target overwrote it), then the LoRa config —
-        // both are no-ops on a public-only scan, so that path stays unchanged (FR-005 no-regression).
-        if (tunedPrimaryChannel) {
-            originalPrimaryChannel?.let {
-                radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = it))
+    /** Builds one immutable terminal snapshot. Caller must hold [mutex]. */
+    private fun terminalRequestLocked(
+        pendingStatus: String,
+        outcome: DiscoveryScanState.CompletionOutcome,
+        awaitRestore: Boolean,
+        generateAi: Boolean,
+    ): DiscoveryTerminalRequest {
+        val session = _currentSession.value
+        val finalStatus = finalStatusForPendingStatus(pendingStatus)
+        val config = session?.homeLoraConfig ?: originalLoRaConfig
+        val primaryChannel = session?.homePrimaryChannel ?: originalPrimaryChannel
+        if (tunedPrimaryChannel && primaryChannel == null) {
+            Logger.e {
+                "DiscoveryScanEngine: primary channel was retuned without a captured home channel; " +
+                    "restoring LoRa config only for session ${session?.id ?: sessionId}"
             }
         }
-        radioController.setLocalConfig(Config(lora = config))
-        Logger.i { "DiscoveryScanEngine: restored original LoRa config" }
-        // The firmware often restarts the radio or reboots after a LoRa config change.
-        delay(3000)
-        // Wait briefly for reconnection after restoring
-        waitForConnection()
+        val restorePlan =
+            if (session == null || config == null) {
+                null
+            } else {
+                DiscoveryHomeRestorePlan(
+                    sessionId = session.id,
+                    deviceAddress = session.deviceAddress,
+                    loraConfig = config,
+                    primaryChannel = primaryChannel,
+                    restorePrimaryChannel = tunedPrimaryChannel && primaryChannel != null,
+                    finalStatus = finalStatus,
+                )
+            }
+        return DiscoveryTerminalRequest(
+            sessionId = session?.id ?: sessionId,
+            restorePlan = restorePlan,
+            pendingStatus = pendingStatus,
+            outcome = outcome,
+            awaitRestore = awaitRestore,
+            shouldGenerateAi = generateAi,
+        )
     }
+
+    private fun finalStatusForPendingStatus(pendingStatus: String): String =
+        finalStatusForPendingRestore(pendingStatus, default = DiscoverySessionStatus.FAILED)
 
     // endregion
 
     // region Interrupted-session restoration
 
     /**
-     * Watches for the radio reconnecting and restores any home LoRa config a *previous process's* scan left mid-flight
-     * — process death, a crash, or BLE loss mid-scan skips [restoreHomePreset] entirely, leaving the session row
-     * "in_progress" forever and the radio detuned off the user's home mesh until this catches it.
-     *
-     * Meant to be `launch`ed once for the app's process lifetime (from app startup) — it never returns normally. Safe
-     * to call even while this engine is running a legitimate scan of its own: the [isActive] check (taken under
-     * [mutex], the same lock [startScanTargets] uses) skips every reconnect that belongs to this process's own
-     * in-progress scan.
-     *
-     * @param onRestored invoked with the restored session's home-preset label after a successful restore. The engine
-     *   stays UI-free: localizing that into a user notification is the caller's job (see MeshUtilApplication), which
-     *   also keeps this function unit-testable off a live Compose-resources runtime.
+     * Watches reconnects for persisted discovery sessions left without a confirmed home-radio restore. Recovery is
+     * device-bound and skipped while this engine owns an active scan.
      */
-    suspend fun restoreInterruptedSessionsOnReconnect(onRestored: suspend (homePreset: String) -> Unit = {}) {
-        serviceRepository.connectionState.collect { state ->
-            if (state !is ConnectionState.Connected) return@collect
-            try {
-                restoreInterruptedSessionIfAny()?.let { onRestored(it) }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                // A radio write can fail if the link drops right after Connected — the session stays
-                // "interrupted" (it's only marked "restored" after the writes succeed), so the next
-                // reconnect retries. Swallowing keeps this process-lifetime watcher alive.
-                Logger.e(e) { "DiscoveryScanEngine: interrupted-session restore failed; will retry on reconnect" }
-            }
-        }
-    }
-
-    /** Restores an interrupted session's home config if one matches the current device; returns its home preset. */
-    private suspend fun restoreInterruptedSessionIfAny(): String? {
-        val address = meshPrefs.deviceAddress.value ?: return null
-        return mutex.withLock {
-            if (isActive) return@withLock null
-            val session = discoveryDao.getInterruptedSession(address) ?: return@withLock null
-            // A session with no captured config can never be restored (the radio config was null at scan start).
-            // Terminalize it so it stops re-matching getInterruptedSession on every future reconnect.
-            val loraConfig =
-                session.homeLoraConfig
-                    ?: run {
-                        discoveryDao.updateSession(session.copy(completionStatus = "unrestorable"))
-                        return@withLock null
-                    }
-            Logger.w { "DiscoveryScanEngine: restoring home config after interrupted session ${session.id}" }
-            session.homePrimaryChannel?.let {
-                radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = it))
-            }
-            radioController.setLocalConfig(Config(lora = loraConfig))
-            discoveryDao.updateSession(session.copy(completionStatus = "restored"))
-            session.homePreset
-        }
-    }
+    suspend fun restoreInterruptedSessionsOnReconnect(onRestored: suspend (homePreset: String) -> Unit = {}): Unit =
+        interruptedSessionRecovery.watch(onRestored)
 
     // endregion
 
@@ -793,6 +921,7 @@ class DiscoveryScanEngine(
     // endregion
 
     companion object {
+        private const val CONFIG_SNAPSHOT_TIMEOUT_MS = 5_000L
         private const val RECONNECT_TIMEOUT_MS = 60_000L
         private const val TICK_INTERVAL_MS = 1_000L
         private const val POSITION_DIVISOR = 1e7

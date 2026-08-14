@@ -686,8 +686,10 @@ class DiscoveryHomeRestorerTest {
         var retryDelayMs = DiscoveryHomeRestorer.RETRY_DELAY_MS
         repeat(DiscoveryHomeRestorer.MAX_RESTORE_ATTEMPTS - 1) {
             retryWindowMs += retryDelayMs
-            retryDelayMs = (retryDelayMs * DiscoveryHomeRestorer.RETRY_BACKOFF_MULTIPLIER)
-                .coerceAtMost(DiscoveryHomeRestorer.MAX_RETRY_DELAY_MS)
+            retryDelayMs =
+                (retryDelayMs * DiscoveryHomeRestorer.RETRY_BACKOFF_MULTIPLIER).coerceAtMost(
+                    DiscoveryHomeRestorer.MAX_RETRY_DELAY_MS,
+                )
         }
         advanceTimeBy(retryWindowMs)
         runCurrent()
