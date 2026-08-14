@@ -82,6 +82,7 @@ import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
 import org.meshtastic.core.ui.component.SignedNodeDialog
+import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
@@ -98,6 +99,7 @@ import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.MeshPacket.TransportMechanism
@@ -292,9 +294,12 @@ private fun SignalRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         val snr = node.snrOrNull
         if (snr != null) {
+            val quality = determineSignalQuality(snr, LocalModemPreset.current)
+            // Value-before-quality with " · " matches the node-list signal pill in SignalInfo.kt.
             InfoItem(
                 label = stringResource(Res.string.snr),
-                value = MetricFormatter.snr(snr),
+                value = "${MetricFormatter.snr(snr)} · ${stringResource(quality.nameRes)}",
+                valueColor = quality.color(),
                 icon = MeshtasticIcons.Snr,
                 modifier = Modifier.weight(1f),
             )
@@ -303,6 +308,7 @@ private fun SignalRow(node: Node) {
         }
         val rssi = node.rssiOrNull
         if (rssi != null) {
+            // No quality word here: RSSI alone can't be rated without the noise floor - see determineSignalQuality.
             InfoItem(
                 label = stringResource(Res.string.rssi),
                 value = MetricFormatter.rssi(rssi),
@@ -330,7 +336,7 @@ private fun TransportRow(node: Node) {
     }
 }
 
-/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
+/** Trust signals: automatic XEdDSA signing (left, tap-able) and user-asserted key verification (right). */
 @Composable
 private fun VerificationRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
