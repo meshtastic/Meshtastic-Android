@@ -15,6 +15,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat(settings): warn before enabling licensed (ham) mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6632
 * perf(startup): move WorkManager and AppFunctions init off the main thread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6648
 * feat(analytics): report key user interactions as named RUM actions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6654
+* feat(node): surface incomplete nodes with a badge and show them by default by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6673
+* refactor(maps): share custom tile providers by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6641
+* feat(demo): make Demo Mode reachable and populated in release builds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6691
+#### 🖥️ Desktop
+* fix(service): stop blocking getString on Dispatchers.Default-reachable notification paths by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6668
+* fix(messaging): disambiguate sender-scoped packet IDs by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6624
+* fix(connections): hide the replay demo entry when its capture asset is absent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6692
 #### 🛠️ Fixes
 * fix(build): sign debug builds with a shared checked-in keystore by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6615
 * fix(ci): unbreak the merge queue on Gradle 9.6.1 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6636
@@ -42,6 +49,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(telemetry): repoint 1-Wire temperature at per-channel fields, adopt ADC voltage by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6653
 * fix(analytics): cover local firmware sideloads and report message_send in the foreground by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6660
 * fix(database): bound withDb execution so one wedged callback can't stall every write by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6661
+* fix(konsist): anchor path rules to the scanned checkout root so the commonMain guard isn't vacuously green in agent worktrees by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6665
+* fix(database): recover from Room's silent connection-pool wedge (#6608) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6658
+* fix(settings): restore channels from device profiles by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6618
+* fix(map): open Site Planner for the selected node by @simulationstation in https://github.com/meshtastic/Meshtastic-Android/pull/6640
+* fix(map): allow layers with generic MIME types by @ayysasha in https://github.com/meshtastic/Meshtastic-Android/pull/6663
+* fix(ui): move event firmware branding off the app bar by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6676
+* fix(lora): validate 2.4 GHz bandwidth options by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6529
+* fix(build): track compose-multiplatform's actual version in the flatpak arm64 force-resolve by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6694
+* fix(build): declare navigationevent-compose explicitly, fixing Dokka's metadata compile by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6698
+#### 📝 Other Changes
+* refactor(compose): adopt keyed SideEffect and drop redundant config write-back effects by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6684
 
 ### Internal (v2.8.1-internal.1)
 Changes since [`v2.8.0`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0):
@@ -77,6 +95,7 @@ Changes since [`v2.8.0`](https://github.com/meshtastic/Meshtastic-Android/releas
 ## New Contributors
 * @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
 * @simulationstation made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6602
+* @ayysasha made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6663
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
