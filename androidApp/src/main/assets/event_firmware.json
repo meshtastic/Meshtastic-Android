@@ -248,9 +248,9 @@
       },
       "firmware": {
         "slug": "burningmesh2026",
-        "version": "2.8.0.26673d3",
-        "id": "v2.8.0.26673d3",
-        "title": "Meshtastic Firmware 2.8.0.26673d3",
+        "version": "2.8.0.2651f28",
+        "id": "v2.8.0.2651f28",
+        "title": "Meshtastic Firmware 2.8.0.2651f28",
         "zipUrl": null,
         "releaseNotes": "## Welcome to Burning Man 2026!\n\n### ⚠️ Flash the Latest 2026 Firmware\n\nFlash your node with the latest Burning Man 2026 firmware before joining the mesh. Burning Mesh firmware from previous years is not compatible with the 2026 mesh. Use the [Burning Man Firmware Flasher](https://burn.meshtastic.org) to install the current release.\n\nThis Burning Mesh firmware includes event defaults tuned for Black Rock City, including the SHORT_TURBO modem preset, frequency slot 33, an Everyone channel, event routing limits, and location-sharing protections on the event channel.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf you care about what is currently stored on your node, back up your keys and configuration before proceeding. A full erase is not required for a normal update, but installation and reset choices can replace saved configuration.\n\nIf you updated from a previous version or installed a UF2 on an nRF52 device, perform a factory reset to activate Burning Man mode.\n\n### Learn More\n\n- [Burning Man Firmware Flasher](https://burn.meshtastic.org)\n- [Quick Start Guide](https://docs.burningmesh.org/en/guides/quick_start)\n- [Android Offline Maps](https://docs.burningmesh.org/en/offline_maps/android_offline_maps)\n- [iOS Offline Maps](https://docs.burningmesh.org/en/offline_maps/ios_offline_maps)\n- [Burning Mesh Discord](https://discord.gg/eXUBcCEJuH)"
       }
