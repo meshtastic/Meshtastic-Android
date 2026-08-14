@@ -98,7 +98,7 @@ kable = "0.44.3"
 mqttastic = "0.8.1"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "0.8.1"
+takpacket-sdk = "0.9.0"
 meshtastic-protobufs = "2.7.26.142-gf3c374d-SNAPSHOT"
 
 # Gradle Plugins
