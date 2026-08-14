@@ -15,7 +15,6 @@
     <ID>ComposableParamOrder:NodeItem.kt:@Composable @Suppress("LongMethod") fun NodeItem</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt:@Suppress("LongMethod") @Composable private fun PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt:@Suppress("LongMethod") @Composable private fun PowerMetricsChart</ID>
-    <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun SignalMetricsChart</ID>
     <ID>ComposableParamOrder:TracerouteChart.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable internal fun TracerouteMetricsChart</ID>
     <ID>ComposableParamOrder:TracerouteLog.kt:@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod", "CyclomaticComplexMethod", "UnusedParameter") @Composable fun TracerouteLogScreen</ID>

@@ -53,14 +53,15 @@ class BleAddressLoggingTest {
      */
     private fun scannedFiles() = Konsist.scopeFromProject()
         .files
-        .filter { file -> scannedPathFragments.any { it in file.path } }
-        .filterNot { file -> identityUseAllowlist.any { file.path.endsWith(it) } }
+        .filterNot { it.isNestedAgentWorktree() }
+        .filter { file -> scannedPathFragments.any { it in file.scanPath } }
+        .filterNot { file -> identityUseAllowlist.any { file.scanPath.endsWith(it) } }
 
     @Test
     fun `the scan actually reaches the BLE sources`() {
-        val paths = scannedFiles().map { it.path }
+        val paths = scannedFiles().map { it.scanPath }
 
-        assertTrue(paths.isNotEmpty(), "scoped scan matched no files at all — the path filter is wrong")
+        assertTrue(paths.isNotEmpty(), emptyScanMessage("BLE-scoped scan"))
         assertTrue(
             paths.any { it.endsWith("KableBleConnection.kt") },
             "expected core/ble sources in scope; got ${paths.size} files, e.g. ${paths.take(3)}",
@@ -76,7 +77,7 @@ class BleAddressLoggingTest {
                     val interpolates = interpolatedAddress.containsMatchIn(line)
                     val anonymised = "anonymize" in line
                     if (isDiagnostic && interpolates && !anonymised) {
-                        "${file.path.substringAfterLast("/kotlin/")}:${index + 1}: ${line.trim()}"
+                        "${file.scanPath.substringAfterLast("/kotlin/")}:${index + 1}: " + line.trim()
                     } else {
                         null
                     }
@@ -98,11 +99,12 @@ class BleAddressLoggingTest {
         val offenders =
             Konsist.scopeFromProject()
                 .files
-                .filter { "/core/ble/" in it.path }
+                .filterNot { it.isNestedAgentWorktree() }
+                .filter { "/core/ble/" in it.scanPath }
                 .flatMap { file ->
                     file.text.lines().withIndex().mapNotNull { (index, line) ->
                         if ("identifier =" in line && "address" in line && "anonymize" !in line) {
-                            "${file.path.substringAfterLast("/kotlin/")}:${index + 1}: ${line.trim()}"
+                            "${file.scanPath.substringAfterLast("/kotlin/")}:${index + 1}: " + line.trim()
                         } else {
                             null
                         }

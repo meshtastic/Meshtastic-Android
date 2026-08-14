@@ -52,6 +52,8 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PersistedPacket
+import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -314,8 +316,8 @@ class MeshConnectionManagerImplTest {
     @Test
     fun `onRadioConfigLoaded enqueues queued packets and sets time`() = runTest(testDispatcher) {
         manager = createManager(backgroundScope)
-        val packetId = 456
-        everySuspend { packetRepository.getQueuedPackets() } returns listOf(dataPacket)
+        val packetId = PersistedPacketId(myNodeNum = 123, uuid = 456L)
+        everySuspend { packetRepository.getQueuedPackets() } returns listOf(PersistedPacket(packetId, dataPacket))
         every { workerManager.enqueueSendMessage(any()) } returns Unit
 
         manager.onRadioConfigLoaded()

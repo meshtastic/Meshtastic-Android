@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 
@@ -28,8 +29,21 @@ interface RadioTransportFactory {
     /** The device types supported by this factory. */
     val supportedDeviceTypes: List<DeviceType>
 
-    /** Whether we are currently forced into using a mock transport (e.g., Firebase Test Lab). */
-    fun isMockTransport(): Boolean
+    /**
+     * Whether the virtual demo transports (`m` mock / `r` replay) may be offered and bound right now.
+     *
+     * Reactive rather than a one-shot check because it can flip at runtime: on Android the Demo Mode gesture (five taps
+     * on the Settings app-version row) unlocks it mid-session, and the Connections device list has to notice. Every
+     * consumer must read this one flow — the device-list visibility path and the [isAddressValid] admission path have
+     * to agree, or the demo entry appears and then refuses to connect.
+     */
+    val mockTransportEnabled: StateFlow<Boolean>
+
+    /**
+     * Whether this build can actually replay a packet capture rather than silently degrading to the plain mock. The
+     * capture is a locally generated artifact that is not checked in, so most builds ship without it.
+     */
+    val isReplayTransportAvailable: Boolean
 
     /** Creates a transport for the given [address], or a NOP implementation if invalid/unsupported. */
     fun createTransport(address: String, service: RadioInterfaceService): RadioTransport

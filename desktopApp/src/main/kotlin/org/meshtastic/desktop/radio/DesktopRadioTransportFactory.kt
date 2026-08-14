@@ -16,6 +16,8 @@
  */
 package org.meshtastic.desktop.radio
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
@@ -45,7 +47,11 @@ class DesktopRadioTransportFactory(
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
-    override fun isMockTransport(): Boolean = false
+    // Desktop has no unlock gesture and no demo entry in its picker; the virtual transports stay inadmissible.
+    override val mockTransportEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Desktop bundles no capture asset, and [createPlatformTransport] does not wire a replay address. */
+    override val isReplayTransportAvailable: Boolean = false
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
         address.startsWith(InterfaceId.TCP.id) -> {

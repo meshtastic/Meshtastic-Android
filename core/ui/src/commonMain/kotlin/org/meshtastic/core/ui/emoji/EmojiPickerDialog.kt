@@ -30,10 +30,13 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -50,12 +53,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,10 +74,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.delay
@@ -81,6 +89,18 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.emoji_category_activities
+import org.meshtastic.core.resources.emoji_category_animals_nature
+import org.meshtastic.core.resources.emoji_category_flags
+import org.meshtastic.core.resources.emoji_category_food_drink
+import org.meshtastic.core.resources.emoji_category_objects
+import org.meshtastic.core.resources.emoji_category_people_body
+import org.meshtastic.core.resources.emoji_category_smileys_emotion
+import org.meshtastic.core.resources.emoji_category_symbols
+import org.meshtastic.core.resources.emoji_category_travel_places
+import org.meshtastic.core.resources.emoji_load_error
+import org.meshtastic.core.resources.emoji_no_results
+import org.meshtastic.core.resources.emoji_recently_used
 import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -91,6 +111,12 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 private val GRID_MIN_CELL_SIZE = 44.dp
 private const val EMOJI_FONT_SIZE = 24
+private val CELL_CONTENT_PADDING = 12.dp
+private val SKIN_TONE_CELL_MIN_SIZE = 44.dp
+private const val SKIN_TONE_FONT_SIZE = 22
+
+/** Wide enough for all six [SkinTone] variants at [SKIN_TONE_CELL_MIN_SIZE]; wider scales wrap instead. */
+private val SKIN_TONE_POPUP_MAX_WIDTH = 300.dp
 private const val CATEGORY_HEADER_KEY_PREFIX = "header_"
 private const val RECENTS_HEADER_KEY = "header_recents"
 private const val RECENTS_KEY_PREFIX = "recent_"
@@ -146,12 +172,16 @@ fun EmojiPickerDialog(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState =
+        rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
     ) {
         if (loadError) {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Unable to load emoji",
+                    text = stringResource(Res.string.emoji_load_error),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -261,7 +291,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier.fillMaxWidth().height(52.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         placeholder = {
             Text(
                 text = stringResource(Res.string.search_emoji),
@@ -409,9 +439,10 @@ private fun EmojiGrid(
             }
     }
 
+    val cellSize = emojiCellSize()
     LazyVerticalGrid(
         state = gridState,
-        columns = GridCells.Adaptive(minSize = GRID_MIN_CELL_SIZE),
+        columns = GridCells.Adaptive(minSize = cellSize),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -419,12 +450,15 @@ private fun EmojiGrid(
         gridItems.forEach { item ->
             when (item) {
                 is GridItem.Header ->
-                    item(span = { GridItemSpan(maxLineSpan) }, key = item.key) { SectionHeader(title = item.title) }
+                    item(span = { GridItemSpan(maxLineSpan) }, key = item.key) {
+                        SectionHeader(title = localizedHeaderTitle(item))
+                    }
 
                 is GridItem.EmojiCell ->
                     item(key = item.key) {
                         EmojiCellWithSkinTone(
                             emoji = item.emoji,
+                            cellSize = cellSize,
                             isSelected = selectedEmojis.contains(item.emoji.base),
                             preferredSkinToneIndex = preferredSkinToneIndex,
                             onSkinToneSelect = onSkinToneSelect,
@@ -437,7 +471,7 @@ private fun EmojiGrid(
         if (gridItems.none { it is GridItem.EmojiCell }) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "No emoji found",
+                    text = stringResource(Res.string.emoji_no_results),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -469,7 +503,8 @@ private fun buildGridItems(
         results.forEachIndexed { i, emoji -> add(GridItem.EmojiCell(emoji, "search_$i")) }
     } else {
         if (recentEmojis.isNotEmpty()) {
-            add(GridItem.Header("Recently Used", RECENTS_HEADER_KEY))
+            // Title resolved at render time via localizedHeaderTitle (recents key → string resource)
+            add(GridItem.Header("", RECENTS_HEADER_KEY))
             recentEmojis.forEachIndexed { i, emojiStr ->
                 add(GridItem.EmojiCell(Emoji(emojiStr), "$RECENTS_KEY_PREFIX$i"))
             }
@@ -526,6 +561,38 @@ private fun scoreEmoji(emoji: Emoji, query: String, recentSet: Set<String>): Flo
 
 // ── Cell Components ────────────────────────────────────────────────────────────
 
+/**
+ * Resolves a grid header to localized text. Category names arrive as raw English strings from `emoji-data.json`, so
+ * they are mapped to string resources here; unknown names fall back to the raw value.
+ */
+@Composable
+private fun localizedHeaderTitle(header: GridItem.Header): String = if (header.key == RECENTS_HEADER_KEY) {
+    stringResource(Res.string.emoji_recently_used)
+} else {
+    when (header.title) {
+        "Smileys & Emotion" -> stringResource(Res.string.emoji_category_smileys_emotion)
+        "People & Body" -> stringResource(Res.string.emoji_category_people_body)
+        "Animals & Nature" -> stringResource(Res.string.emoji_category_animals_nature)
+        "Food & Drink" -> stringResource(Res.string.emoji_category_food_drink)
+        "Travel & Places" -> stringResource(Res.string.emoji_category_travel_places)
+        "Activities" -> stringResource(Res.string.emoji_category_activities)
+        "Objects" -> stringResource(Res.string.emoji_category_objects)
+        "Symbols" -> stringResource(Res.string.emoji_category_symbols)
+        "Flags" -> stringResource(Res.string.emoji_category_flags)
+        else -> header.title
+    }
+}
+
+/** Grid cell size that grows with the system font scale so emoji glyphs are never clipped. */
+@Composable
+private fun emojiCellSize(): Dp = emojiCellSizeFor(glyphSize = with(LocalDensity.current) { EMOJI_FONT_SIZE.sp.toDp() })
+
+/**
+ * Cell size for a glyph that measures [glyphSize] at the current font scale: never smaller than the glyph plus its
+ * padding, and never below [GRID_MIN_CELL_SIZE] so the cell stays a valid touch target.
+ */
+internal fun emojiCellSizeFor(glyphSize: Dp): Dp = max(GRID_MIN_CELL_SIZE, glyphSize + CELL_CONTENT_PADDING)
+
 @Composable
 private fun SectionHeader(title: String) {
     Text(
@@ -547,6 +614,7 @@ private fun SectionHeader(title: String) {
 @Suppress("LongParameterList")
 private fun EmojiCellWithSkinTone(
     emoji: Emoji,
+    cellSize: Dp,
     isSelected: Boolean,
     preferredSkinToneIndex: Int,
     onSkinToneSelect: (Int) -> Unit,
@@ -559,7 +627,7 @@ private fun EmojiCellWithSkinTone(
     Box {
         Box(
             modifier =
-            Modifier.size(GRID_MIN_CELL_SIZE)
+            Modifier.size(cellSize)
                 .clip(RoundedCornerShape(8.dp))
                 .then(
                     if (isSelected) {
@@ -611,23 +679,37 @@ private fun EmojiCellWithSkinTone(
 @Composable
 private fun SkinTonePopup(emoji: Emoji, onSelect: (String, Int) -> Unit, onDismiss: () -> Unit) {
     Popup(alignment = Alignment.TopCenter, onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shadowElevation = 8.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-            modifier = Modifier.widthIn(max = 280.dp),
+        SkinToneSurface(emoji = emoji, onSelect = onSelect)
+    }
+}
+
+/** Split out of [SkinTonePopup] so the scale-sensitive layout is reachable from a preview; [Popup] is not. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SkinToneSurface(emoji: Emoji, onSelect: (String, Int) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 8.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+        modifier = Modifier.widthIn(max = SKIN_TONE_POPUP_MAX_WIDTH),
+    ) {
+        // FlowRow so scale-grown cells wrap to a second line instead of clipping
+        FlowRow(
+            modifier = Modifier.padding(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            Row(modifier = Modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                SkinTone.entries.forEachIndexed { index, tone ->
-                    val variant = emoji.withSkinTone(tone)
-                    Box(
-                        modifier =
-                        Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable { onSelect(variant, index) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = variant, fontSize = 22.sp)
-                    }
+            SkinTone.entries.forEachIndexed { index, tone ->
+                val variant = emoji.withSkinTone(tone)
+                Box(
+                    modifier =
+                    Modifier.defaultMinSize(minWidth = SKIN_TONE_CELL_MIN_SIZE, minHeight = SKIN_TONE_CELL_MIN_SIZE)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onSelect(variant, index) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = variant, fontSize = SKIN_TONE_FONT_SIZE.sp)
                 }
             }
         }
@@ -734,6 +816,47 @@ fun EmojiPickerContentPreview() {
             )
         }
     }
+}
+
+/** A skin-tone-capable emoji, so the preview renders all six variants. */
+private val SKIN_TONE_PREVIEW_EMOJI = Emoji("👋", listOf("wave", "hand", "hello"), supportsSkinTone = true)
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@Preview(fontScale = 2.0f)
+@Composable
+fun EmojiPickerContentLargeFontPreview() {
+    AppTheme {
+        Surface {
+            EmojiPickerContent(
+                searchQuery = "",
+                debouncedQuery = "",
+                onSearchQueryChange = {},
+                selectedCategoryIndex = 0,
+                onCategorySelected = {},
+                selectedEmojis = setOf("😀", "👍"),
+                recentEmojis = listOf("😀", "❤️", "👍", "🔥", "😂", "🙏"),
+                categories = PREVIEW_CATEGORIES,
+                allEmojis = PREVIEW_CATEGORIES.flatMap { it.emojis },
+                preferredSkinToneIndex = 0,
+                onSkinToneSelect = {},
+                onEmojiSelected = {},
+            )
+        }
+    }
+}
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SkinTonePopupPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
+}
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@Preview(fontScale = 2.0f)
+@Composable
+fun SkinTonePopupLargeFontPreview() {
+    AppTheme { Surface { SkinToneSurface(emoji = SKIN_TONE_PREVIEW_EMOJI, onSelect = { _, _ -> }) } }
 }
 
 @Suppress("UnusedPrivateMember", "PreviewPublic")

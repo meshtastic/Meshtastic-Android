@@ -41,6 +41,8 @@ class FakeRadioConfigRepository :
     BaseFake(),
     RadioConfigRepository {
 
+    data class ChannelSetUpdate(val settingsList: List<ChannelSettings>?, val loraConfig: Config.LoRaConfig?)
+
     private val channelSetBacking = mutableStateFlow(ChannelSet())
     override val channelSetFlow: Flow<ChannelSet> = channelSetBacking
 
@@ -93,10 +95,14 @@ class FakeRadioConfigRepository :
     var lastSetModuleConfig: ModuleConfig? = null
         private set
 
+    /** Arguments supplied to [updateChannelSet], in call order. */
+    val channelSetUpdates = mutableListOf<ChannelSetUpdate>()
+
     init {
         registerResetAction {
             lastSetLocalConfig = null
             lastSetModuleConfig = null
+            channelSetUpdates.clear()
         }
     }
 
@@ -105,7 +111,14 @@ class FakeRadioConfigRepository :
     }
 
     override suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetBacking.value = channelSetBacking.value.copy(settings = settingsList)
+        updateChannelSet(settingsList = settingsList, loraConfig = null)
+    }
+
+    override suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
+        channelSetUpdates += ChannelSetUpdate(settingsList, loraConfig)
+        val current = channelSetBacking.value
+        channelSetBacking.value =
+            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
     }
 
     override suspend fun updateChannelSettings(channel: Channel) {

@@ -58,7 +58,11 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.layout)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation.suite)
-            implementation(libs.jetbrains.navigation3.ui)
+            api(libs.jetbrains.navigation3.ui)
+            // navigation3-ui's own POM marks this runtime-scope, so it never reaches any
+            // compile classpath transitively — declare it directly. Consumers (e.g.
+            // feature:docs) import androidx.navigationevent.compose.* directly.
+            api(libs.jetbrains.navigationevent.compose)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
             implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)

@@ -17,13 +17,20 @@
 package org.meshtastic.core.repository.usecase
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PersistedPacketId
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.testing.FakeAppPreferences
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -40,6 +47,7 @@ class SendMessageUseCaseTest {
     private lateinit var radioController: FakeRadioController
     private lateinit var appPreferences: FakeAppPreferences
     private lateinit var messageQueue: MessageQueue
+    private lateinit var analytics: PlatformAnalytics
     private lateinit var useCase: SendMessageUseCase
 
     @BeforeTest
@@ -49,6 +57,10 @@ class SendMessageUseCaseTest {
         radioController = FakeRadioController()
         appPreferences = FakeAppPreferences()
         messageQueue = mock(MockMode.autofill)
+        analytics = mock(MockMode.autofill)
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } returns
+            PersistedPacketId(myNodeNum = 1, uuid = 10L)
+        everySuspend { messageQueue.enqueue(any()) } returns Unit
 
         useCase =
             SendMessageUseCaseImpl(
@@ -57,6 +69,7 @@ class SendMessageUseCaseTest {
                 radioController = radioController,
                 homoglyphEncodingPrefs = appPreferences.homoglyph,
                 messageQueue = messageQueue,
+                analytics = analytics,
             )
     }
 
@@ -73,6 +86,30 @@ class SendMessageUseCaseTest {
         // Assert
         radioController.favoritedNodes.size shouldBe 0
         radioController.sentSharedContacts.size shouldBe 0
+    }
+
+    @Test
+    fun `invoke reports a message_send analytics action`() = runTest {
+        // Arrange
+        val ourNode = Node(num = 1, user = User(id = "!1234"))
+        nodeRepository.setOurNode(ourNode)
+        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+
+        // Act
+        useCase("Hello", "0${NodeAddress.ID_BROADCAST}", null)
+
+        // Assert
+        verify { analytics.trackAction("message_send", mapOf("num_bytes" to 5, "is_reply" to false)) }
+    }
+
+    @Test
+    fun `invoke queues the stable id returned by persistence`() = runTest {
+        val persistedId = PersistedPacketId(myNodeNum = 42, uuid = 9001L)
+        everySuspend { packetRepository.savePacket(any(), any(), any(), any(), any(), any()) } returns persistedId
+
+        useCase("persisted identity", "0${NodeAddress.ID_BROADCAST}", null)
+
+        verifySuspend { messageQueue.enqueue(persistedId) }
     }
 
     @Test

@@ -71,6 +71,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -100,6 +101,7 @@ import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import java.awt.Desktop
 import java.util.Locale
+import kotlin.system.exitProcess
 import coil3.util.Logger as CoilLogger
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
@@ -126,20 +128,36 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 }
 
 @OptIn(ExperimentalCoilApi::class)
-fun main(args: Array<String>) = application {
-    val koinApp = remember {
-        // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
-        Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
-        Logger.i { "Meshtastic Desktop — Starting" }
-        startKoin { modules(desktopPlatformModule(), desktopModule()) }
-    }
-    val systemLocale = remember { Locale.getDefault() }
-    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-    val httpClient = remember { koinApp.koin.get<HttpClient>() }
+fun main(args: Array<String>) {
+    // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
+    // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
+    // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
+    application(exitProcessOnExit = false) {
+        val koinApp = remember {
+            // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
+            Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
+            Logger.i { "Meshtastic Desktop — Starting" }
+            startKoin { modules(desktopPlatformModule(), desktopModule()) }
+        }
+        val systemLocale = remember { Locale.getDefault() }
+        val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+        val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
-    DeepLinkHandler(args, uiViewModel)
-    MeshServiceLifecycle()
-    ThemeAndLocaleProvider(uiViewModel)
+        DeepLinkHandler(args, uiViewModel)
+        MeshServiceLifecycle()
+        ThemeAndLocaleProvider(uiViewModel)
+    }
+
+    // Runs on the main thread with the UI already gone. Closing the container fires the `onClose` callbacks that
+    // release native handles — currently libnotify's process-wide state in LinuxNotificationSender. Guarded because
+    // a teardown failure must not turn a clean quit into a non-zero exit.
+    runCatching { stopKoin() }.onFailure { Logger.w(it) { "stopKoin() failed during shutdown" } }
+    Logger.i { "Meshtastic Desktop — Stopped" }
+
+    // Restores the exit application() no longer performs. Not optional: lingering non-daemon threads (coroutine
+    // dispatchers, ktor pools, AWT stragglers) would otherwise keep the JVM alive after the last window closes,
+    // turning "quit" into a hung background process.
+    exitProcess(0)
 }
 
 // ----- Deep link handling -----

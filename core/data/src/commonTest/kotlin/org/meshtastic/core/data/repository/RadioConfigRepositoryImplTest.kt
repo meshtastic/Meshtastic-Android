@@ -27,14 +27,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.SwitchingChannelSetDataSource
-import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.core.datastore.di.CoreModuleConfigDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.proto.FileInfo
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,12 +44,18 @@ class RadioConfigRepositoryImplTest {
 
     private val nodeDB = mock<NodeRepository>(MockMode.autofill)
 
-    // These data sources are concrete wrappers -- construct them with mocked dependencies. Channels are now stored
-    // per-device via SwitchingChannelSetDataSource (DatabaseProvider), the others still wrap a DataStore<T>. None are
-    // touched by the addFileInfo/fileManifestFlow/clearFileManifest behavior under test here.
+    // These data sources are concrete wrappers -- construct them with test doubles. Channels are now stored per-device
+    // via SwitchingChannelSetDataSource (DatabaseProvider), the others still wrap a DataStore<T>. None are touched by
+    // the addFileInfo/fileManifestFlow/clearFileManifest behavior under test here. The channel source needs a real
+    // provider rather than an autofill mock: it composes its DAO flow at construction, and a mock returns null for the
+    // non-null Flow.
+    private val dbProvider = FakeDatabaseProvider()
+
+    @AfterTest fun tearDown() = dbProvider.close()
+
     private val channelSetDataSource =
         SwitchingChannelSetDataSource(
-            mock<DatabaseProvider>(MockMode.autofill),
+            dbProvider,
             CoroutineDispatchers(
                 main = Dispatchers.Unconfined,
                 io = Dispatchers.Unconfined,

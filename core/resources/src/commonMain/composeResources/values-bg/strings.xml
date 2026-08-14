@@ -80,6 +80,7 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Добър</string>
+    <string name="aqi_hazardous">Опасно</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
@@ -90,6 +91,7 @@
     <string name="backup_keys_confirmation">Запазва публичните и частните ключове в защитено, криптирано хранилище на това устройство.</string>
     <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Широчина на честотната лента</string>
     <string name="baro_pressure">Баро</string>
     <string name="battery">Батерия</string>
@@ -129,8 +131,8 @@
     <string name="channel_3">Канал 3</string>
     <string name="channel_4">Канал 4</string>
     <string name="channel_5">Канал 5</string>
-    <string name="channel_6">Channel 6</string>
-    <string name="channel_7">/*Канал 7</string>
+    <string name="channel_6">Канал 6</string>
+    <string name="channel_7">Канал 7</string>
     <string name="channel_8">Канал 8</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="channel_label">Канал</string>
@@ -360,7 +362,6 @@
     <string name="doc_title_translate">Превод на приложението</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
-    <string name="downlink_enabled">Downlink активиран</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="download">Изтегляне</string>
     <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
@@ -369,6 +370,7 @@
     <string name="echo_enabled">Echo е активирано</string>
     <string name="edit">Редактирай</string>
     <string name="eight_hours">8 часа</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="enabled">Активиран</string>
     <!-- ENCRYPTION -->
@@ -396,6 +398,7 @@
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
     <string name="expires">Изтича</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="export_data_csv">Експортиране на всички пакети</string>
     <string name="export_gpx">Експортиране на GPX</string>
@@ -572,9 +575,11 @@
     <string name="latest_alpha_firmware">Най-новия алфа</string>
     <string name="latest_stable_firmware">Най-новия стабилен</string>
     <string name="latitude">Географска ширина</string>
+    <!-- LAYER -->
     <string name="learn_more">Научете повече</string>
     <string name="led_state">LED за състояние</string>
     <string name="library_count">%1$d библиотеки</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
     <!-- LOAD -->
@@ -688,7 +693,6 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
-    <string name="message_routing_error_no_channel">Няма избран канал</string>
     <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
@@ -993,21 +997,13 @@
     <string name="role_tracker_desc">Излъчва приоритетно пакети за GPS позиция</string>
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Невалиден ключ за сесия</string>
-    <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
-    <string name="routing_error_bad_request">Невалидна заявка</string>
-    <string name="routing_error_duty_cycle_limit">Достигнат е регионален лимит на работния цикъл</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
-    <string name="routing_error_max_retransmit">Достигнат максимален брой препращания</string>
-    <string name="routing_error_no_channel">Няма канал</string>
-    <string name="routing_error_no_interface">Няма интерфейс</string>
-    <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_none">Признато</string>
-    <string name="routing_error_not_authorized">Не е оторизиран</string>
-    <string name="routing_error_pki_failed">Провалено шифрирано изпращане</string>
-    <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
-    <string name="routing_error_too_large">Пакетът е твърде голям</string>
+    <string name="routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
+    <string name="routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
+    <string name="routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
+    <string name="routing_error_too_large">Съобщението е твърде голямо за изпращане</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="rsyslog_server">rsyslog сървър</string>
@@ -1123,6 +1119,7 @@
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Сървър</string>
+    <string name="tak_server_status">Статус</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team">Цвят на екипа</string>
@@ -1204,7 +1201,6 @@
     <string name="unset">Не е зададен - 0</string>
     <string name="update_interval_seconds">Интервал на актуализиране (секунди)</string>
     <string name="updated">Актуализирано</string>
-    <string name="uplink_enabled">Uplink активиран</string>
     <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
     <string name="uptime">Време на работа</string>
     <!-- URL -->

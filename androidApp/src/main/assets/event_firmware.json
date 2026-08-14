@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-07-18T00:00:00Z",
+  "generatedAt": "2026-08-13T00:00:00Z",
   "source": "bundled",
   "editions": [
     {
@@ -183,26 +183,46 @@
       },
       "firmware": {
         "slug": "defcon34",
-        "version": "2.8.0.8adc7c3",
-        "id": "v2.8.0.8adc7c3",
-        "title": "Meshtastic Firmware 2.8.0.8adc7c3",
-        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/defcon34/firmware-2.8.0.8adc7c3.zip",
+        "version": "2.8.0.c800fc8",
+        "id": "v2.8.0.c800fc8",
+        "title": "Meshtastic Firmware 2.8.0.c800fc8",
+        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/defcon34/firmware-2.8.0.c800fc8.zip",
         "releaseNotes": "## Welcome to DEF CON 34! 💀\n\nThis firmware has been customized for DEF CON 34 with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the DEF CON mode.\n\n**Happy meshing from Las Vegas!**"
       }
     },
     {
       "edition": "BURNING_MAN",
       "displayName": "Burning Man 2026",
-      "welcomeMessage": "Welcome to Burning Man! 🔥",
+      "welcomeMessage": "Welcome to Burning Man 2026!",
       "tag": "Burning Man",
-      "eventStart": "2026-08-30",
+      "eventStart": "2026-08-28",
       "eventEnd": "2026-09-07",
       "timeZone": "America/Los_Angeles",
       "location": "Black Rock City, Nevada, USA",
-      "iconUrl": null,
+      "iconUrl": "https://api.meshtastic.org/resource/eventFirmware/burningman2026.png",
       "accentColor": "#EC8819",
-      "domain": "burningman.meshtastic.org",
+      "domain": "burn.meshtastic.org",
       "links": [
+        {
+          "label": "Burning Man Firmware Flasher",
+          "url": "https://burn.meshtastic.org"
+        },
+        {
+          "label": "Quick Start Guide",
+          "url": "https://docs.burningmesh.org/en/guides/quick_start"
+        },
+        {
+          "label": "Android Offline Maps",
+          "url": "https://docs.burningmesh.org/en/offline_maps/android_offline_maps"
+        },
+        {
+          "label": "iOS Offline Maps",
+          "url": "https://docs.burningmesh.org/en/offline_maps/ios_offline_maps"
+        },
+        {
+          "label": "Burning Mesh Discord",
+          "url": "https://discord.gg/eXUBcCEJuH"
+        },
         {
           "label": "Event Website",
           "url": "https://burningman.org"
@@ -210,24 +230,29 @@
       ],
       "theme": {
         "name": "Axis Mundi",
-        "tagline": "The axis of the world — a celestial column connecting earth, sky, and the realms between.",
+        "tagline": "Rooted in our shared past, branching into possibility.",
         "colors": {
-          "primary": "#EC8819",
-          "secondary": null,
-          "accent": null
+          "primary": "#111111",
+          "secondary": "#F2F2F2",
+          "accent": "#EC8819"
         },
         "palette": [
+          "#111111",
+          "#F2F2F2",
           "#EC8819"
         ],
-        "fonts": null
+        "fonts": {
+          "heading": "Lato",
+          "body": "Atkinson Hyperlegible"
+        }
       },
       "firmware": {
-        "slug": "burningman2026",
-        "version": null,
-        "id": null,
-        "title": null,
+        "slug": "burningmesh2026",
+        "version": "2.8.0.26673d3",
+        "id": "v2.8.0.26673d3",
+        "title": "Meshtastic Firmware 2.8.0.26673d3",
         "zipUrl": null,
-        "releaseNotes": null
+        "releaseNotes": "## Welcome to Burning Man 2026!\n\n### ⚠️ Flash the Latest 2026 Firmware\n\nFlash your node with the latest Burning Man 2026 firmware before joining the mesh. Burning Mesh firmware from previous years is not compatible with the 2026 mesh. Use the [Burning Man Firmware Flasher](https://burn.meshtastic.org) to install the current release.\n\nThis Burning Mesh firmware includes event defaults tuned for Black Rock City, including the SHORT_TURBO modem preset, frequency slot 33, an Everyone channel, event routing limits, and location-sharing protections on the event channel.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf you care about what is currently stored on your node, back up your keys and configuration before proceeding. A full erase is not required for a normal update, but installation and reset choices can replace saved configuration.\n\nIf you updated from a previous version or installed a UF2 on an nRF52 device, perform a factory reset to activate Burning Man mode.\n\n### Learn More\n\n- [Burning Man Firmware Flasher](https://burn.meshtastic.org)\n- [Quick Start Guide](https://docs.burningmesh.org/en/guides/quick_start)\n- [Android Offline Maps](https://docs.burningmesh.org/en/offline_maps/android_offline_maps)\n- [iOS Offline Maps](https://docs.burningmesh.org/en/offline_maps/ios_offline_maps)\n- [Burning Mesh Discord](https://discord.gg/eXUBcCEJuH)"
       }
     }
   ]

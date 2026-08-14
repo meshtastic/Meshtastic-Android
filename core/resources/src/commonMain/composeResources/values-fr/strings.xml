@@ -119,6 +119,7 @@
     <string name="backup_keys">Sauvegarder les clés</string>
     <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bande Passante</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Batterie</string>
@@ -436,7 +437,6 @@
     <string name="done">Terminé</string>
     <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
-    <string name="downlink_enabled">Liaison descendante activée (MQTT vers LoRa)</string>
     <string name="downlink_feature_description">Les messages provenant d'une passerelle Internet publique sont transmis au maillage local. En raison de la politique zéro saut, le trafic du serveur MQTT par défaut ne se propagera pas plus loin que cet appareil.</string>
     <string name="download">Télécharger</string>
     <string name="duplicated_public_key_title">Clé publique dupliquée détectée</string>
@@ -446,6 +446,7 @@
     <string name="edit">Modifier</string>
     <string name="edit_custom_tile_source">Modifier le réseau de tuile personnalisée</string>
     <string name="eight_hours">8 Heures</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activer le mode économie d'énergie</string>
     <string name="enabled">Activé</string>
     <!-- ENCRYPTION -->
@@ -473,6 +474,7 @@
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
     <string name="expires">Expire</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exporter la configuration</string>
     <string name="export_data_csv">Exporter tous les paquets</string>
     <string name="export_tak_data_package">Exporter le paquet de données TAK</string>
@@ -672,11 +674,13 @@
     <string name="latest_alpha_firmware">Dernière version alpha</string>
     <string name="latest_stable_firmware">Dernière version stable</string>
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
     <string name="learn_more">En savoir plus</string>
     <string name="led_heartbeat">LED de vérification de fonctionnement (heartbeat)</string>
     <string name="led_state">État de la LED</string>
     <string name="legacy_admin_channel">Ancien canal Admin</string>
     <string name="library_count">%1$d Bibliothèques</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamateur licencié (RA)</string>
     <string name="licensed_amateur_radio_text">L'activation de cette option désactive le chiffrement et n'est pas compatible avec le réseau Meshtastic par défaut.</string>
     <!-- LOAD -->
@@ -1125,24 +1129,10 @@
     <string name="rotary_encoder_1_enabled">Encodeur rotatif #1 activé</string>
     <string name="router_role_confirmation_text">J'ai lu la &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Mauvaise clé de session</string>
-    <string name="routing_error_admin_public_key_unauthorized">Clé publique non autorisée</string>
-    <string name="routing_error_bad_request">Mauvaise requête</string>
-    <string name="routing_error_duty_cycle_limit">Limite du temps d'émission autorisé par heure (duty cycle) atteinte</string>
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
-    <string name="routing_error_max_retransmit">Nombre de retransmissions atteint</string>
-    <string name="routing_error_no_channel">Pas de canal ou d'autorisation</string>
-    <string name="routing_error_no_interface">Pas d'interface</string>
-    <string name="routing_error_no_response">Aucune réponse</string>
     <string name="routing_error_no_route">Pas de routage</string>
     <string name="routing_error_none">Entendu par un autre nœud (mais dans le cas d'un message direct, nous n'avons pas reçu la confirmation de réception par le destinataire : soit il n'a pas reçu le message, soit sa confirmation ne nous est pas parvenue)</string>
-    <string name="routing_error_not_authorized">Non Autorisé</string>
-    <string name="routing_error_pki_failed">Échec de l'envoi chiffré</string>
-    <string name="routing_error_pki_send_fail_public_key">Échec de l'envoi de clé privée, pas de clé publique</string>
-    <string name="routing_error_pki_unknown_pubkey">Clé publique inconnue</string>
-    <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="routing_error_timeout">Délai dépassé</string>
-    <string name="routing_error_too_large">Paquet trop grand</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicateur de force du signal reçu, une mesure utilisée pour déterminer le niveau de puissance reçu par l'antenne. Une valeur RSSI plus élevée indique généralement une connexion plus forte et plus stable.</string>
     <string name="rsyslog_server">Serveur Rsyslog</string>
@@ -1272,6 +1262,7 @@
     <string name="tak_role_unspecified">Non spécifié</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
     <string name="tak_server_section">Serveur</string>
+    <string name="tak_server_status_off">Éteint</string>
     <string name="tak_team">Couleur de l'équipe</string>
     <string name="tak_team_blue">Bleu</string>
     <string name="tak_team_brown">Marron</string>
@@ -1374,7 +1365,6 @@
     <string name="update_interval">Fréquence de récupération GPS</string>
     <string name="update_interval_seconds">Intervalle de mise à jour (secondes)</string>
     <string name="updated">Mis à jour</string>
-    <string name="uplink_enabled">Liaison montante activée (LoRa vers MQTT)</string>
     <string name="uplink_feature_description">Les messages provenant du maillage seront envoyés à Internet public via la passerelle configurée sur n'importe quel nœud.</string>
     <string name="uptime">Durée de fonctionnement</string>
     <!-- URL -->

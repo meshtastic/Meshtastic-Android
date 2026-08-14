@@ -98,7 +98,13 @@ class NodeRepositoryImpl(
         processLifecycle.coroutineScope.launch { localStatsDataSource.setLocalStats(stats) }
     }
 
-    /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
+    /**
+     * A reactive map from nodeNum to [Node] objects, representing the entire mesh.
+     *
+     * `SharingStarted.Eagerly` over the process lifecycle means a terminal upstream failure is unrecoverable for the
+     * process — re-navigation cannot restart the sharing coroutine. [NodeInfoReadDataSource] therefore restarts its DB
+     * flows after a recoverable Room pool failure, so this upstream never terminates on a pool wedge (#6608).
+     */
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
@@ -211,16 +217,12 @@ class NodeRepositoryImpl(
     override suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
 
     /** Deletes a node and its metadata by [num]. */
-    override suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNode(num)
-        nodeInfoWriteDataSource.deleteMetadata(num)
-    }
+    override suspend fun deleteNode(num: Int) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodeAndMetadata(num) }
 
     /** Deletes multiple nodes and their metadata. */
-    override suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNodes(nodeNums)
-        nodeNums.forEach { nodeInfoWriteDataSource.deleteMetadata(it) }
-    }
+    override suspend fun deleteNodes(nodeNums: List<Int>) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodesAndMetadata(nodeNums) }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() } }

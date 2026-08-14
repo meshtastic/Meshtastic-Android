@@ -40,6 +40,14 @@ interface RadioConfigRepository {
     /** Replaces the [ChannelSettings] list with a new [settingsList]. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>)
 
+    /**
+     * Atomically updates the cached channel set. A null argument preserves that field's current value.
+     *
+     * This is used after a committed radio transaction when channel settings and LoRa configuration must become visible
+     * together.
+     */
+    suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?)
+
     /** Updates the [ChannelSettings] list with the provided channel. */
     suspend fun updateChannelSettings(channel: Channel)
 

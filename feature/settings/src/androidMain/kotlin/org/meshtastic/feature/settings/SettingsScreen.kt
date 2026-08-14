@@ -103,6 +103,7 @@ fun SettingsScreen(
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by settingsViewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
@@ -258,6 +259,8 @@ fun SettingsScreen(
                         stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
                     )
                     AppearanceSettingsContent(
+                        showFullMessageTimestamps = showFullMessageTimestamps,
+                        onShowFullMessageTimestampsChange = settingsViewModel::setShowFullMessageTimestamps,
                         onShowLanguagePicker = { showLanguagePickerDialog = true },
                         onShowThemePicker = { showThemePickerDialog = true },
                     )
@@ -266,6 +269,7 @@ fun SettingsScreen(
                         onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                         nodeShortName = ourNode?.user?.short_name ?: "",
                         onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                        onExportNodeDb = { settingsViewModel.saveNodeDbJson(it) },
                     )
                     ListItem(
                         text = stringResource(Res.string.node_layout_section_title),

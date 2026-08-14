@@ -21,6 +21,7 @@ package org.meshtastic.core.konsist
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.verify.assertFalse
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Enforces the KMP framework-bleed rule from AGENTS.md: shared code in any `commonMain` source set must never depend on
@@ -31,7 +32,22 @@ import kotlin.test.Test
  * (Konsist is JVM-only) under the existing `allTests` baseline gate.
  */
 class CommonMainFrameworkBoundaryTest {
-    private val commonMainFiles = Konsist.scopeFromProject().files.filter { "/src/commonMain/" in it.path }
+    private val commonMainFiles =
+        Konsist.scopeFromProject()
+            .files
+            .filterNot { it.isNestedAgentWorktree() }
+            .filter { "/src/commonMain/" in it.scanPath }
+
+    @Test
+    fun `the scan actually reaches commonMain sources`() {
+        val paths = commonMainFiles.map { it.scanPath }
+
+        assertTrue(paths.isNotEmpty(), emptyScanMessage("commonMain scan"))
+        assertTrue(
+            paths.any { it.endsWith("/core/model/src/commonMain/kotlin/org/meshtastic/core/model/Message.kt") },
+            "expected core/model commonMain sources in scope; got ${paths.size} files, e.g. ${paths.take(3)}",
+        )
+    }
 
     @Test
     fun `commonMain declares no android imports`() {

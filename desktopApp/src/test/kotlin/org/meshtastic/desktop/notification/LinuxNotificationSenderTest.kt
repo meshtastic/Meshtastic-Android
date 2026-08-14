@@ -18,6 +18,7 @@ package org.meshtastic.desktop.notification
 
 import org.meshtastic.core.repository.Notification
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -73,5 +74,23 @@ class LinuxNotificationSenderTest {
         if (!sender.isAvailable) return
         val result = sender.send(Notification(title = "Silent", message = "Shhh", isSilent = true))
         assertTrue(result, "Expected silent send() to succeed")
+    }
+
+    @Test
+    fun `close is idempotent`() {
+        // Uses its own sender: close() calls notify_uninit(), which tears down libnotify for the whole process.
+        // Every other test builds its own sender and so re-runs notify_init().
+        val closeable = LinuxNotificationSender(appName = "MeshtasticTestClose")
+        closeable.close()
+        closeable.close() // second call must be a no-op, not a double notify_uninit()
+        assertFalse(closeable.isAvailable, "Expected isAvailable to be false after close()")
+    }
+
+    @Test
+    fun `send after close returns false instead of calling into a torn-down library`() {
+        val closeable = LinuxNotificationSender(appName = "MeshtasticTestClosedSend")
+        closeable.close()
+        val result = closeable.send(Notification(title = "After close", message = "Should not be delivered"))
+        assertFalse(result, "Expected send() to return false after close()")
     }
 }

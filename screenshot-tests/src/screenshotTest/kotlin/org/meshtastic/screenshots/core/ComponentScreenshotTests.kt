@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.ChannelInfoPreview
@@ -31,12 +32,11 @@ import org.meshtastic.core.ui.component.ListItemDisabledPreview
 import org.meshtastic.core.ui.component.ListItemPreview
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
-import org.meshtastic.core.ui.component.SatelliteCountInfoPreview
 import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.SwitchListItemPreview
 import org.meshtastic.core.ui.component.TitledCardPreview
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
-import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppThemePreviewWrapper
 
 @PreviewTest
 @PreviewLightDark
@@ -75,16 +75,18 @@ fun ScreenshotHopsInfo() {
 
 @PreviewTest
 @PreviewLightDark
+@PreviewWrapper(AppThemePreviewWrapper::class)
 @Composable
 fun ScreenshotSignalInfoSimple() {
-    AppTheme { SignalInfo(node = Node(num = 1, lastHeard = 0, channel = 0, snr = 12.5F, rssi = -42, hopsAway = 0)) }
+    SignalInfo(node = Node(num = 1, lastHeard = 0, channel = 0, snr = 12.5F, rssi = -42, hopsAway = 0))
 }
 
 @PreviewTest
 @PreviewLightDark
+@PreviewWrapper(AppThemePreviewWrapper::class)
 @Composable
 fun ScreenshotSignalInfo(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
-    AppTheme { SignalInfo(node = node) }
+    SignalInfo(node = node)
 }
 
 @PreviewTest
@@ -103,9 +105,10 @@ fun ScreenshotLastHeardInfo() {
 
 @PreviewTest
 @PreviewLightDark
+@PreviewWrapper(AppThemePreviewWrapper::class)
 @Composable
 fun ScreenshotMaterialBatteryInfo() {
-    AppTheme { MaterialBatteryInfo(level = 85, voltage = 3.7F) }
+    MaterialBatteryInfo(level = 85, voltage = 3.7F)
 }
 
 @PreviewTest
@@ -124,14 +127,8 @@ fun ScreenshotChannelInfo() {
 
 @PreviewTest
 @PreviewLightDark
-@Composable
-fun ScreenshotSatelliteCountInfo() {
-    SatelliteCountInfoPreview()
-}
-
-@PreviewTest
-@PreviewLightDark
+@PreviewWrapper(AppThemePreviewWrapper::class)
 @Composable
 fun ScreenshotMaterialBluetoothSignalInfo() {
-    AppTheme { Surface { MaterialBluetoothSignalInfo(rssi = -65) } }
+    Surface { MaterialBluetoothSignalInfo(rssi = -65) }
 }

@@ -31,6 +31,7 @@
     <string name="apply">Прымяніць</string>
     <!-- AQI -->
     <string name="audio">Аўдыё</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Батарэя</string>
     <string name="blue">Сіні</string>
     <!-- BLUETOOTH -->
@@ -99,12 +100,14 @@
     <string name="download">Сцягнуць</string>
     <string name="edit">Змяніць</string>
     <string name="eight_hours">8 Гадзін</string>
+    <!-- EMOJI -->
     <string name="enabled">Уключана</string>
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="environment">Асяроддзе</string>
     <string name="error">Памылка</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <!-- EXPORT -->
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->
     <string name="filter_icon">Фільтраваць</string>
@@ -134,6 +137,8 @@
     <string name="ip_port">Порт:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <!-- LOCKDOWN -->
@@ -238,22 +243,10 @@
     <string name="role_tak_desc">Аптымізавана для сувязі з сістэмай ATAK, змяншае руцінныя трансляцыі.</string>
     <string name="role_tracker_desc">Транслюе пакеты з GPS-каардынатамі з высокім прыярытэтам.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Няправільны ключ сесіі</string>
-    <string name="routing_error_admin_public_key_unauthorized">Адкрыты ключ не аўтарызаваны</string>
-    <string name="routing_error_bad_request">Няправільны запыт</string>
-    <string name="routing_error_duty_cycle_limit">Дасягнута рэгіянальнае абмежаванне каэфіцыента працы</string>
     <string name="routing_error_got_nak">Атрымана адмоўнае пацвярджэнне</string>
-    <string name="routing_error_max_retransmit">Дасягнута максімальная колькасць паўторных перадач</string>
-    <string name="routing_error_no_channel">Няма канала</string>
-    <string name="routing_error_no_interface">Няма інтэрфейсу</string>
-    <string name="routing_error_no_response">Няма адказу</string>
     <string name="routing_error_no_route">Няма маршруту</string>
     <string name="routing_error_none">Пацверджана</string>
-    <string name="routing_error_not_authorized">Не аўтарызавана</string>
-    <string name="routing_error_pki_failed">Зашыфраваная адпраўка не атрымалася</string>
-    <string name="routing_error_pki_unknown_pubkey">Невядомы адкрыты ключ</string>
     <string name="routing_error_timeout">Скончыўся час чакання</string>
-    <string name="routing_error_too_large">Пакет занадта вялікі</string>
     <string name="rssi">адносная магутнасць</string>
     <!-- SAVE -->
     <string name="save">Запісаць</string>

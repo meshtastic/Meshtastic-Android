@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.proto.ChannelSet
 import java.util.concurrent.ConcurrentHashMap
@@ -246,7 +247,7 @@ class ConversationShortcutPublisher(
      * `setShortcutId`/`setLocusId` resolve immediately (the observer replaces it with a richer version on its next
      * emission).
      */
-    fun ensureConversationShortcut(contactKey: String, displayName: String) {
+    suspend fun ensureConversationShortcut(contactKey: String, displayName: String) {
         // Protect this conversation from the observer's pruning until a contacts snapshot includes it.
         pendingOnDemandIds += contactKey
         val alreadyPublished = ShortcutManagerCompat.getDynamicShortcuts(context).any { it.id == contactKey }
@@ -254,7 +255,7 @@ class ConversationShortcutPublisher(
         // ShortcutInfoCompat.Builder.build() rejects a blank short label. On-demand callers derive the name from packet
         // metadata that can be empty (an unnamed node, or a reaction that arrives before the NodeDB knows the sender),
         // so fall back to the same localized placeholder the observer uses rather than letting build() throw.
-        val label = displayName.takeIf { it.isNotBlank() } ?: getString(Res.string.unknown_username)
+        val label = displayName.takeIf { it.isNotBlank() } ?: getStringSuspend(Res.string.unknown_username)
         // Match the styling the observer will republish so there is no generic-head flash: rounded channel badge with
         // its number, or a circular initial for a DM. Color is derived from the key (the node object may not be known
         // yet at on-demand time).

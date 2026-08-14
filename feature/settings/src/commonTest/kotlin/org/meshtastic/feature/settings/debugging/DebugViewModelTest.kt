@@ -21,6 +21,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -28,7 +29,10 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -36,6 +40,9 @@ import org.meshtastic.core.ui.util.AlertManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
@@ -81,6 +88,39 @@ class DebugViewModelTest {
         meshLogPrefs.retentionDays.value shouldBe 14
         meshLogRepository.lastDeletedOlderThan shouldBe 14
         viewModel.retentionDays.value shouldBe 14
+    }
+
+    @Test
+    fun `setRetentionDays one hour keeps the last hour instead of clearing the log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("recent", "TEXT", now - 30.minutes.inWholeMilliseconds, ""),
+                MeshLog("stale", "TEXT", now - 2.hours.inWholeMilliseconds, ""),
+            ),
+        )
+
+        viewModel.setRetentionDays(MeshLogRetention.ONE_HOUR)
+
+        meshLogPrefs.retentionDays.value shouldBe MeshLogRetention.ONE_HOUR
+        viewModel.retentionDays.value shouldBe MeshLogRetention.ONE_HOUR
+        meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("recent")
+    }
+
+    @Test
+    fun `setRetentionDays never keeps every log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("ancient", "TEXT", now - 400.days.inWholeMilliseconds, ""),
+                MeshLog("recent", "TEXT", now, ""),
+            ),
+        )
+
+        viewModel.setRetentionDays(MeshLogRetention.KEEP_FOREVER)
+
+        meshLogPrefs.retentionDays.value shouldBe MeshLogRetention.KEEP_FOREVER
+        meshLogRepository.currentLogs.map { it.uuid } shouldBe listOf("ancient", "recent")
     }
 
     @Test
@@ -196,5 +236,94 @@ class DebugViewModelTest {
     fun `requestDeleteAllLogs shows alert`() {
         viewModel.requestDeleteAllLogs()
         verify { alertManager.showAlert(titleRes = any(), messageRes = any(), onConfirm = any()) }
+    }
+
+    // Regression tests for #6520: Wire's toString prints int fields SIGNED and `=`-delimited
+    // (`from=-559038737,`), which the annotation regexes — written for protobuf-java's
+    // unsigned, whitespace-bounded text format — silently stopped matching. These go through
+    // the real generated toString, so they hold whichever wire format is in use.
+
+    @Test
+    fun `packet log annotates signed Wire-format from and to with hex`() = runTest {
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 0xDEADBEEF.toInt(), to = -1)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs.size shouldBe 1
+        logs[0].logMessage shouldContain "(!deadbeef)"
+        logs[0].logMessage shouldContain "(!ffffffff)"
+    }
+
+    @Test
+    fun `packet log annotates relay_node with the known node's name`() = runTest {
+        nodeRepository.setNodes(
+            listOf(
+                org.meshtastic.core.testing.TestDataFactory.createTestNode(
+                    num = 0x000001AA,
+                    userId = "!000001aa",
+                    longName = "Relay Node",
+                    lastHeard = 100,
+                ),
+            ),
+        )
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 5, to = -1, relayNode = 0xAA)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "relay_node=Relay Node (!000001aa)"
+    }
+
+    @Test
+    fun `packet log annotates unknown relay_node with hex`() = runTest {
+        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(from = 5, to = -1, relayNode = 0xF5)
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "(!000000f5)"
+    }
+
+    @Test
+    fun `node info log still annotates legacy protobuf-java text format`() = runTest {
+        meshLogRepository.insert(
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "NodeInfo",
+                received_date = 1L,
+                raw_message = "node_info {\n  num: 3735928559\n}",
+                fromRadio =
+                org.meshtastic.proto.FromRadio(node_info = org.meshtastic.proto.NodeInfo(num = 0xDEADBEEF.toInt())),
+            ),
+        )
+
+        val logs = viewModel.loadLogsForExport()
+
+        logs[0].logMessage shouldContain "num: 3735928559 (!deadbeef)"
     }
 }

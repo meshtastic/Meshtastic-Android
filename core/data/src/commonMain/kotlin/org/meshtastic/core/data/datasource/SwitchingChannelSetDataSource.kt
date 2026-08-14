@@ -18,7 +18,6 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.ChannelSetEntity
+import org.meshtastic.core.database.retryOnDbPoolFailure
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -51,8 +51,9 @@ class SwitchingChannelSetDataSource(
     private val writeMutex = Mutex()
 
     val channelSetFlow: Flow<ChannelSet> =
-        dbManager.currentDb
-            .flatMapLatest { db -> db.channelSetDao().observe() }
+        dbManager
+            .observeCurrentDb { db -> db.channelSetDao().observe() }
+            .retryOnDbPoolFailure("channelSet")
             .map { entity -> entity?.channelSet ?: ChannelSet() }
             .distinctUntilChanged()
 
@@ -64,7 +65,14 @@ class SwitchingChannelSetDataSource(
 
     /** Replaces all [ChannelSettings] in a single atomic operation. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        mutate { it.copy(settings = settingsList) }
+        updateChannelSet(settingsList = settingsList, loraConfig = null)
+    }
+
+    /** Atomically updates supplied [ChannelSet] fields while preserving fields omitted by the caller. */
+    suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
+        mutate { current ->
+            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+        }
     }
 
     /** Places [channel]'s settings at its index, resizing with blank channels to fill any gap (parity with legacy). */
@@ -81,7 +89,7 @@ class SwitchingChannelSetDataSource(
     }
 
     suspend fun setLoraConfig(config: Config.LoRaConfig) {
-        mutate { it.copy(lora_config = config) }
+        updateChannelSet(settingsList = null, loraConfig = config)
     }
 
     private suspend fun mutate(transform: (ChannelSet) -> ChannelSet) {

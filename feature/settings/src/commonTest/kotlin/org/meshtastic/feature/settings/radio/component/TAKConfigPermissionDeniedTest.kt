@@ -17,10 +17,8 @@
 package org.meshtastic.feature.settings.radio.component
 
 import app.cash.turbine.test
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.testing.FakeTakPrefs
 import kotlin.test.Test
 import kotlin.test.assertFalse
 
@@ -30,32 +28,22 @@ import kotlin.test.assertFalse
  * Verifies that when ACCESS_LOCAL_NETWORK permission is denied on Android 17+, the TAK server is disabled (not crashed)
  * and the UI reflects the disabled state.
  *
- * The actual UI composition test requires a Compose test rule, but the behavioral contract can be validated at the
- * state level: when the permission handler reports denial while the server is enabled, setTakServerEnabled(false) is
- * called.
+ * The actual UI composition test requires a Compose test rule, but these drive the exact function
+ * [handleTakPermissionResult] that [TakServerScreen]'s [TakPermissionHandler] callback calls, rather than duplicating
+ * its conditional — so a change to that production logic fails these tests instead of passing silently.
  */
 class TAKConfigPermissionDeniedTest {
-
-    /** Minimal TakPrefs that tracks calls to setTakServerEnabled. */
-    private class FakeTakPrefs : TakPrefs {
-        private val _isTakServerEnabled = MutableStateFlow(true)
-        override val isTakServerEnabled: StateFlow<Boolean> = _isTakServerEnabled
-
-        override fun setTakServerEnabled(enabled: Boolean) {
-            _isTakServerEnabled.value = enabled
-        }
-    }
 
     @Test
     fun `permission denied disables TAK server`() = runTest {
         val prefs = FakeTakPrefs()
+        prefs.isTakServerEnabled.value = true // Scenario starts with the server already enabled.
 
-        // Simulate the exact logic from TAKConfigItemList.kt:
-        // onPermissionResult = { granted -> if (!granted && isTakServerEnabled) takPrefs.setTakServerEnabled(false) }
-        val granted = false
-        if (!granted && prefs.isTakServerEnabled.value) {
-            prefs.setTakServerEnabled(false)
-        }
+        handleTakPermissionResult(
+            granted = false,
+            isTakServerEnabled = prefs.isTakServerEnabled.value,
+            takPrefs = prefs,
+        )
 
         prefs.isTakServerEnabled.test { assertFalse(awaitItem()) }
     }
@@ -65,11 +53,12 @@ class TAKConfigPermissionDeniedTest {
         val prefs = FakeTakPrefs()
         prefs.setTakServerEnabled(false) // Already disabled
 
-        // Simulate permission denied — should not crash or throw
-        val granted = false
-        if (!granted && prefs.isTakServerEnabled.value) {
-            prefs.setTakServerEnabled(false)
-        }
+        // Should not crash or throw
+        handleTakPermissionResult(
+            granted = false,
+            isTakServerEnabled = prefs.isTakServerEnabled.value,
+            takPrefs = prefs,
+        )
 
         prefs.isTakServerEnabled.test {
             assertFalse(awaitItem()) // Still false, no crash
@@ -79,12 +68,9 @@ class TAKConfigPermissionDeniedTest {
     @Test
     fun `permission granted does not disable TAK server`() = runTest {
         val prefs = FakeTakPrefs()
+        prefs.isTakServerEnabled.value = true // Scenario starts with the server already enabled.
 
-        // Simulate permission granted
-        val granted = true
-        if (!granted && prefs.isTakServerEnabled.value) {
-            prefs.setTakServerEnabled(false)
-        }
+        handleTakPermissionResult(granted = true, isTakServerEnabled = prefs.isTakServerEnabled.value, takPrefs = prefs)
 
         prefs.isTakServerEnabled.test {
             // Server should still be enabled

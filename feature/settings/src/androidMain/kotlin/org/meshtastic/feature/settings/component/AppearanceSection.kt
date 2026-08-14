@@ -40,7 +40,12 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 /** Section for app appearance settings like language and theme. */
 @Composable
-internal fun ColumnScope.AppearanceSettingsContent(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
+internal fun ColumnScope.AppearanceSettingsContent(
+    showFullMessageTimestamps: Boolean,
+    onShowFullMessageTimestampsChange: (Boolean) -> Unit,
+    onShowLanguagePicker: () -> Unit,
+    onShowThemePicker: () -> Unit,
+) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -70,6 +75,11 @@ internal fun ColumnScope.AppearanceSettingsContent(onShowLanguagePicker: () -> U
     ListItem(text = stringResource(Res.string.theme), leadingIcon = MeshtasticIcons.FormatPaint, trailingIcon = null) {
         onShowThemePicker()
     }
+
+    FullMessageTimestampsSetting(
+        checked = showFullMessageTimestamps,
+        onCheckedChange = onShowFullMessageTimestampsChange,
+    )
 }
 
 @Preview(showBackground = true)
@@ -77,7 +87,12 @@ internal fun ColumnScope.AppearanceSettingsContent(onShowLanguagePicker: () -> U
 fun AppearanceSectionPreview() {
     AppTheme {
         ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-            AppearanceSettingsContent(onShowLanguagePicker = {}, onShowThemePicker = {})
+            AppearanceSettingsContent(
+                showFullMessageTimestamps = false,
+                onShowFullMessageTimestampsChange = {},
+                onShowLanguagePicker = {},
+                onShowThemePicker = {},
+            )
         }
     }
 }

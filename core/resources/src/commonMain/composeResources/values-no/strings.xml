@@ -35,6 +35,7 @@
     <string name="aqi_good">Godt</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="bad">Dårlig</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Batteri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Beregner…</string>
@@ -85,6 +86,7 @@
     <!-- DOC -->
     <string name="edit">Rediger</string>
     <string name="eight_hours">8 Timer</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>
@@ -92,6 +94,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Feil</string>
     <string name="error_duty_cycle">Grensen for sykluser er nådd. Kan ikke sende meldinger akkurat nå, prøv igjen senere.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Tilbakestill til fabrikkstandard</string>
     <string name="fair">Middelmådig</string>
     <!-- FILTER -->
@@ -118,6 +121,8 @@
     <string name="ip_address">IP-adresse:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>
@@ -242,22 +247,10 @@
     <string name="role_tak_tracker_desc">Aktiverer automatiske TAK PLI-sendinger og reduserer rutinesendinger.</string>
     <string name="role_tracker_desc">Sender GPS-posisjonspakker som prioritert.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Ikke-gyldig sesjonsnøkkel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Ikke-autorisert offentlig nøkkel</string>
-    <string name="routing_error_bad_request">Ugyldig Forespørsel</string>
-    <string name="routing_error_duty_cycle_limit">Regional Arbeidssyklusgrense Nådd</string>
     <string name="routing_error_got_nak">Mottok negativ bekreftelse</string>
-    <string name="routing_error_max_retransmit">Maks Retransmisjoner Nådd</string>
-    <string name="routing_error_no_channel">Ingen Kanal</string>
-    <string name="routing_error_no_interface">Ingen grensesnitt</string>
-    <string name="routing_error_no_response">Ingen respons</string>
     <string name="routing_error_no_route">Ingen rute</string>
     <string name="routing_error_none">Bekreftet</string>
-    <string name="routing_error_not_authorized">Ikke Autorisert</string>
-    <string name="routing_error_pki_failed">Kryptert sending mislyktes</string>
-    <string name="routing_error_pki_unknown_pubkey">Ukjent Offentlig Nøkkel</string>
     <string name="routing_error_timeout">Tidsavbrudd</string>
-    <string name="routing_error_too_large">Pakken er for stor</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">"Received Signal Strength Indicator", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
     <!-- SAVE -->

@@ -49,6 +49,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -174,6 +175,7 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message.ifEmpty { viewModel.draftMessage.value })
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by viewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
@@ -191,7 +193,7 @@ fun MessageScreen(
     }
 
     // Prevent the message TextField from stealing focus when the screen opens
-    LaunchedEffect(contactKey) { focusManager.clearFocus() }
+    SideEffect(contactKey) { focusManager.clearFocus() }
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -473,6 +475,7 @@ fun MessageScreen(
                     filteringDisabled = filteringDisabled,
                     searchQuery = if (isSearchActive) searchQuery else "",
                     translationAvailable = translationAvailable,
+                    showFullMessageTimestamps = showFullMessageTimestamps,
                 ),
                 handlers =
                 MessageListHandlers(

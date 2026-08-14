@@ -43,6 +43,7 @@ import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshBeaconPrefs
@@ -194,6 +195,8 @@ class MeshDataHandlerTest {
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
         // GeofenceMonitor collects this on init; stub it so the launched collector doesn't NPE on the test scope.
         every { packetRepository.getWaypoints() } returns emptyFlow()
+        everySuspend { packetRepository.findPacketsWithId(any()) } returns emptyList()
+        everySuspend { packetRepository.findReactionsWithId(any()) } returns emptyList()
     }
 
     @Test
@@ -532,6 +535,35 @@ class MeshDataHandlerTest {
     }
 
     @Test
+    fun `routing packet with nak fails pending response`() = testScope.runTest {
+        val routing = Routing(error_reason = Routing.Error.NO_ROUTE)
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded =
+                Data(
+                    portnum = PortNum.ROUTING_APP,
+                    payload = routing.encode().toByteString(),
+                    request_id = 100,
+                ),
+            )
+        val dataPacket =
+            DataPacket(
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = routing.encode().toByteString(),
+                dataType = PortNum.ROUTING_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.toNodeID(456) } returns "!remote"
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetHandler.removeResponse(100, complete = false) }
+    }
+
+    @Test
     fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
         val routing = Routing(error_reason = Routing.Error.NONE)
         val packet =
@@ -554,7 +586,8 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
 
-        verifySuspend(exactly(0)) { packetRepository.getPacketByPacketId(any()) }
+        verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
+        verifySuspend(exactly(0)) { packetRepository.findReactionsWithId(any()) }
         verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
         verifySuspend(exactly(0)) { packetHandler.removeResponse(any(), any()) }
     }
@@ -727,6 +760,45 @@ class MeshDataHandlerTest {
         }
     }
 
+    @Test
+    fun `same packet id from a different sender is persisted`() = testScope.runTest {
+        val packet =
+            MeshPacket(
+                id = 42,
+                from = 789,
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "second".encodeToByteArray().toByteString()),
+            )
+        val existing =
+            DataPacket(
+                id = 42,
+                from = "!000001c8",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = "first".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        val incoming =
+            DataPacket(
+                id = 42,
+                from = "!00000315",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = "second".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns incoming
+        everySuspend { packetRepository.findPacketsWithId(42) } returns listOf(existing)
+        everySuspend { packetRepository.getContactSettings(any()) } returns
+            ContactSettings(contactKey = "test", isMuted = true)
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            packetRepository.insert(incoming, 123, "0${NodeAddress.ID_BROADCAST}", any(), false, false)
+        }
+    }
+
     // --- Reaction handling ---
 
     @Test
@@ -759,9 +831,140 @@ class MeshDataHandlerTest {
                 456 to Node(num = 456, user = User(id = "!remote")),
                 123 to Node(num = 123, user = User(id = "!local")),
             )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.toNodeID(123) } returns "!local"
         everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
-        everySuspend { packetRepository.getPacketByPacketId(42) } returns null
+        everySuspend { packetRepository.findPacketsWithId(42) } returns emptyList()
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend { packetRepository.insertReaction(any(), 123) }
+    }
+
+    @Test
+    fun `PKI reaction persists normalized channel and finds its notification parent`() = testScope.runTest {
+        val emoji = "+1"
+        val packet =
+            MeshPacket(
+                id = 99,
+                from = 456,
+                to = 123,
+                channel = 0,
+                pki_encrypted = true,
+                decoded =
+                Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = emoji.encodeToByteArray().toByteString(),
+                    reply_id = 42,
+                    emoji = 1,
+                ),
+            )
+        val dataPacket =
+            DataPacket(
+                id = 99,
+                from = "!remote",
+                to = NodeAddress.ID_LOCAL,
+                bytes = emoji.encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+        val parent =
+            DataPacket(
+                id = 42,
+                from = NodeAddress.ID_LOCAL,
+                to = "!remote",
+                bytes = "parent".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                channel = NodeAddress.PKC_CHANNEL_INDEX,
+            )
+        val otherConversationParent =
+            parent.copy(to = "!other", bytes = "wrong parent".encodeToByteArray().toByteString())
+        var persistedReaction: Reaction? = null
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(
+                456 to Node(num = 456, user = User(id = "!remote", long_name = "Remote User")),
+                123 to Node(num = 123, user = User(id = NodeAddress.ID_LOCAL)),
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.toNodeID(123) } returns NodeAddress.ID_LOCAL
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+        everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
+        everySuspend { packetRepository.findPacketsWithId(42) } returns listOf(otherConversationParent, parent)
+        everySuspend { packetRepository.getContactSettings("8!remote") } returns
+            ContactSettings(contactKey = "8!remote")
+        everySuspend { packetRepository.insertReaction(any(), 123) } calls
+            {
+                persistedReaction = it.args[0] as Reaction
+            }
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        assertEquals(NodeAddress.PKC_CHANNEL_INDEX, assertNotNull(persistedReaction).channel)
+        verifySuspend {
+            serviceNotifications.updateReactionNotification(
+                contactKey = "8!remote",
+                name = "Remote User",
+                emoji = emoji,
+                isBroadcast = false,
+                channelName = null,
+                isSilent = false,
+            )
+        }
+    }
+
+    @Test
+    fun `same reaction packet id from a different sender is persisted`() = testScope.runTest {
+        val emojiBytes = "ðŸ‘".encodeToByteArray()
+        val packet =
+            MeshPacket(
+                id = 99,
+                from = 456,
+                to = 123,
+                decoded =
+                Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = emojiBytes.toByteString(),
+                    reply_id = 42,
+                    emoji = 1,
+                ),
+            )
+        val dataPacket =
+            DataPacket(
+                id = 99,
+                from = "!remote",
+                to = "!local",
+                bytes = emojiBytes.toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        val existing =
+            Reaction(
+                replyId = 42,
+                user = User(id = "!other"),
+                emoji = "ðŸ‘",
+                timestamp = 1L,
+                snr = null,
+                rssi = null,
+                hopsAway = 1,
+                packetId = 99,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.nodeDBbyNodeNum } returns
+            mapOf(
+                456 to Node(num = 456, user = User(id = "!remote")),
+                123 to Node(num = 123, user = User(id = "!local")),
+            )
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        every { nodeManager.toNodeID(123) } returns "!local"
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { packetRepository.findReactionsWithId(99) } returns listOf(existing)
+        everySuspend { packetRepository.getReactionByPacketId(99) } returns existing
+        everySuspend { packetRepository.findPacketsWithId(42) } returns emptyList()
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()

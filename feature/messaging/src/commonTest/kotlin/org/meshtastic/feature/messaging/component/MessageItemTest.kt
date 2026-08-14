@@ -16,18 +16,25 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Routing
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -263,6 +270,65 @@ class MessageItemTest {
     }
 
     @Test
+    fun channelKeyMismatch_displaysTerminalStatusText() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(node = testNode, status = MessageStatus.ERROR, routingError = Routing.Error.NO_CHANNEL.value)
+
+        setContent {
+            MessageItem(message = message, node = testNode, selected = false, onStatusClick = {}, ourNode = testNode)
+        }
+
+        onNodeWithText("Channel/key mismatch", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun retryableRoutingError_usesWarningStatusColor() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(
+                node = testNode,
+                status = MessageStatus.ERROR,
+                routingError = Routing.Error.MAX_RETRANSMIT.value,
+            )
+        var warningColor = Color.Unspecified
+
+        setContent {
+            AppTheme {
+                warningColor = MaterialTheme.colorScheme.StatusYellow
+                MessageItem(
+                    message = message,
+                    node = testNode,
+                    selected = false,
+                    onStatusClick = {},
+                    ourNode = testNode,
+                )
+            }
+        }
+
+        onNodeWithTag(MESSAGE_STATUS_LABEL_TEST_TAG, useUnmergedTree = true)
+            .assert(SemanticsMatcher.expectValue(MessageStatusColorKey, warningColor))
+    }
+
+    @Test
+    fun messageStatusDialog_displaysRoutingFailureExplanation() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val message =
+            localMessage(
+                node = testNode,
+                status = MessageStatus.ERROR,
+                routingError = Routing.Error.MAX_RETRANSMIT.value,
+            )
+
+        setContent { MessageStatusDialog(message = message, resendOption = true, onResend = {}, onDismiss = {}) }
+
+        onNodeWithText("Failed to deliver to mesh").assertIsDisplayed()
+        onNodeWithText("No node confirmed this message. Try again when you have better signal or more mesh coverage.")
+            .assertIsDisplayed()
+        onNodeWithText("Resend").assertIsDisplayed()
+    }
+
+    @Test
     fun localMessageStatus_invokesStatusClick() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().mickeyMouse
         val message = localMessage(node = testNode, status = MessageStatus.QUEUED)
@@ -295,6 +361,29 @@ class MessageItemTest {
 
         onNodeWithText("Sending...", useUnmergedTree = true).assertIsDisplayed()
         onNodeWithContentDescription("Message delivery status", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun fullMessageTimestampIsDisplayedInMessageHeader() = runComposeUiTest {
+        val testNode = NodePreviewParameterProvider().mickeyMouse
+        val meshTime = 1_700_000_000_000L
+        val message =
+            localMessage(node = testNode, status = MessageStatus.RECEIVED).copy(time = "compact", meshTime = meshTime)
+        val expectedTimestamp = DateFormatter.formatDateTime(meshTime)
+
+        setContent {
+            MessageItem(
+                message = message,
+                node = testNode,
+                selected = false,
+                onStatusClick = {},
+                ourNode = testNode,
+                showFullMessageTimestamp = true,
+            )
+        }
+
+        onNodeWithText(expectedTimestamp, useUnmergedTree = true).assertIsDisplayed()
+        onNodeWithText("compact", useUnmergedTree = true).assertDoesNotExist()
     }
 
     private fun localMessage(node: Node, status: MessageStatus, routingError: Int = 0) = Message(

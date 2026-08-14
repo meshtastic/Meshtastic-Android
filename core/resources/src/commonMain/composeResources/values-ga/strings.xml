@@ -34,6 +34,7 @@
     <string name="aqi_good">Maith</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="bad">Go dona</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Cúis leictreachais</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Á ríomh…</string>
@@ -83,6 +84,7 @@
     <!-- DOC -->
     <string name="edit">Cuir in eagar</string>
     <string name="eight_hours">8 Uair an chloig</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
@@ -90,6 +92,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Earráid</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Athshocraigh an fhactaraí</string>
     <string name="fair">Ceart go leor</string>
     <!-- FILTER -->
@@ -116,6 +119,8 @@
     <string name="ip_address">Seoladh IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Cead iontrála áit dúnta, ní féidir an suíomh a chur ar fáil chuig an mesh.</string>
@@ -233,22 +238,10 @@
     <string name="role_tak_tracker_desc">Ceadaíonn fadhb beathú do bhoganna PLI i sórtú  PLI i feidhm reatha.</string>
     <string name="role_tracker_desc">Bíonn sé ag seoladh pacáistí suíomh GPS mar thosaíocht.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Earráid i eochair sesún an riarthóra</string>
-    <string name="routing_error_admin_public_key_unauthorized">Eochair phoiblí riarthóra neamhúdaraithe</string>
-    <string name="routing_error_bad_request">Iarratas Mícheart</string>
-    <string name="routing_error_duty_cycle_limit">Ceangail cileáil tráth</string>
     <string name="routing_error_got_nak">Fáilte atá faighte le haghaidh niúúáil</string>
-    <string name="routing_error_max_retransmit">Ceannaire Máx Dúnadh</string>
-    <string name="routing_error_no_channel">Gan cainéal</string>
-    <string name="routing_error_no_interface">Gan anicéir</string>
-    <string name="routing_error_no_response">Gan freagra</string>
     <string name="routing_error_no_route">Gan route</string>
     <string name="routing_error_none">Faighte</string>
-    <string name="routing_error_not_authorized">Gan aithne</string>
-    <string name="routing_error_pki_failed">Ní raibh níos saora phósach fadhach</string>
-    <string name="routing_error_pki_unknown_pubkey">Pre-set den x-teirí code</string>
     <string name="routing_error_timeout">Am tráth</string>
-    <string name="routing_error_too_large">Pacáiste ró-mhór</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
     <!-- SAVE -->
     <string name="save">Sábháil</string>

@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.proto.ClientNotification
+
 /**
  * Platform-agnostic notification dispatch primitive. Posts opaque [Notification] records, cancels by id, or wipes all
  * active notifications. Intended as the lowest layer of the notification stack.
@@ -30,6 +32,15 @@ interface NotificationManager {
      * out to OS tools and complete asynchronously).
      */
     suspend fun dispatch(notification: Notification): Boolean
+
+    /** Platform hook for ClientNotifications that should use a native presentation instead of the global modal. */
+    fun suppressClientNotificationModal(notification: ClientNotification): Boolean = false
+
+    /** Platform-specific ClientNotification delivery; defaults to the ordinary notification path. */
+    suspend fun dispatchClientNotification(
+        notification: Notification,
+        clientNotification: ClientNotification,
+    ): Boolean = dispatch(notification)
 
     fun cancel(id: Int)
 

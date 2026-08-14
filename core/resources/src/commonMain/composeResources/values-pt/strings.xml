@@ -57,6 +57,7 @@
     <string name="audio_config">Configurações de áudio</string>
     <string name="available_pins">Pins disponíveis</string>
     <string name="bad">Mau</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Largura de banda</string>
     <string name="battery">Bateria</string>
     <string name="battery_ina_2xx_i2c_address">Endereço I2C da bateria INA_2XX</string>
@@ -165,11 +166,11 @@
     <string name="doc_title_connections">Ligações</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodes</string>
-    <string name="downlink_enabled">Downlink ativado</string>
     <string name="dynamic">Dinâmico</string>
     <string name="echo_enabled">Eco ativado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Ativar modo de poupança de energia</string>
     <!-- ENCRYPTION -->
     <string name="encryption_enabled">Encriptação ativada</string>
@@ -185,6 +186,7 @@
     <string name="error_duty_cycle">Limite do ciclo de trabalho atingido. Não é possível enviar mensagens no momento. Tente novamente mais tarde.</string>
     <string name="ethernet_enabled">Ethernet ativada</string>
     <string name="exchange_position">Intercâmbio de posições</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuração</string>
     <string name="external_notification">Notificação externa</string>
     <string name="external_notification_config">Configuração de Notificação Externa</string>
@@ -258,8 +260,10 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
     <string name="led_state">Estado do LED</string>
     <string name="legacy_admin_channel">Canal de administração antigo</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a encriptação e não é compatível com a rede Meshtastic normal.</string>
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -468,22 +472,10 @@
     <string name="root_topic">Tópico principal</string>
     <string name="rotary_encoder_1_enabled">Ativar Codificador rotativo #1</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chave de sessão inválida</string>
-    <string name="routing_error_admin_public_key_unauthorized">Public Key não autorizada</string>
-    <string name="routing_error_bad_request">Pedido Inválido</string>
-    <string name="routing_error_duty_cycle_limit">Limite do Duty Cycle Regional Atingido</string>
     <string name="routing_error_got_nak">Recebida uma confirmação negativa</string>
-    <string name="routing_error_max_retransmit">Máximo de Retransmissão Atingido</string>
-    <string name="routing_error_no_channel">Sem canal</string>
-    <string name="routing_error_no_interface">Sem interface</string>
-    <string name="routing_error_no_response">Sem resposta</string>
     <string name="routing_error_no_route">Sem rota</string>
     <string name="routing_error_none">Confirmar</string>
-    <string name="routing_error_not_authorized">Não Autorizado</string>
-    <string name="routing_error_pki_failed">Envio cifrado falhou</string>
-    <string name="routing_error_pki_unknown_pubkey">Chave pública desconhecida</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Pacote demasiado grande</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de energia que está a ser recebido pela antena. Um valor mais elevado de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">servidor rsyslog</string>
@@ -575,7 +567,6 @@
     <string name="unrecognized">Desconhecido</string>
     <string name="up_down_select_input_enabled">Entrada Cima/Baixo/Selecionar ativa</string>
     <string name="update_interval_seconds">Intervalo de atualização (segundos)</string>
-    <string name="uplink_enabled">Uplink ativado</string>
     <string name="uptime">Tempo ativo</string>
     <!-- URL -->
     <string name="url">URL</string>

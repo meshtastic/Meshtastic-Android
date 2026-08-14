@@ -30,6 +30,7 @@
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculant…</string>
     <string name="camera_permission">Permisos de la càmera</string>
@@ -73,10 +74,12 @@
     <!-- DOC -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Hores</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Restauració dels paràmetres de fàbrica</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->
@@ -98,6 +101,8 @@
     <string name="ip_address">Adreça IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Accés al posicionament deshabilitat, no es pot proveir la posició a la xarxa.</string>
@@ -217,22 +222,10 @@
     <string name="role_tak_tracker_desc">Activa les difusions automàtiques TAK PLI i redueix les difusions rutinàries.</string>
     <string name="role_tracker_desc">Difon paquets de posició GPS com a prioritat</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Clau de sessió incorrecta</string>
-    <string name="routing_error_admin_public_key_unauthorized">Clau Pública no autoritzada</string>
-    <string name="routing_error_bad_request">Sol·licitud errònia.</string>
-    <string name="routing_error_duty_cycle_limit">Límit regional de cicle de servei assolit</string>
     <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
-    <string name="routing_error_max_retransmit">Màx. retransmissions assolides</string>
-    <string name="routing_error_no_channel">Sense canal</string>
-    <string name="routing_error_no_interface">Sense Interfície</string>
-    <string name="routing_error_no_response">Sense resposta</string>
     <string name="routing_error_no_route">Sense ruta</string>
     <string name="routing_error_none">Confirmat</string>
-    <string name="routing_error_not_authorized">No Autoritzat</string>
-    <string name="routing_error_pki_failed">Falla d'encriptació</string>
-    <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
     <string name="routing_error_timeout">Temps esgotat</string>
-    <string name="routing_error_too_large">Packet massa llarg</string>
     <!-- SAVE -->
     <string name="save">Desar</string>
     <string name="save_changes">Desar</string>

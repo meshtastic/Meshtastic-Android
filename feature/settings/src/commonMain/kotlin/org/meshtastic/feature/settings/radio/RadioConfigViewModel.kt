@@ -58,6 +58,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -70,12 +71,14 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
+import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.key_backup_deleted
 import org.meshtastic.core.resources.key_backup_not_found
 import org.meshtastic.core.resources.key_backup_restore_failed
@@ -113,6 +116,8 @@ internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
     val isLocal: Boolean = false,
+    /** PlatformIO target for the configured destination; available only when that destination is directly connected. */
+    val pioEnv: String? = null,
     val connected: Boolean = false,
     val route: String = "",
     val metadata: DeviceMetadata? = null,
@@ -161,6 +166,7 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
+    private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
@@ -298,10 +304,10 @@ open class RadioConfigViewModel(
         nodeRepository.myNodeInfo
             .map { ni ->
                 val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
-                isLocal
+                isLocal to if (isLocal) ni?.pioEnv else null
             }
             .distinctUntilChanged()
-            .flatMapLatest { isLocal ->
+            .flatMapLatest { (isLocal, pioEnv) ->
                 if (isLocal) {
                     combine(
                         radioConfigRepository.channelSetFlow,
@@ -309,7 +315,13 @@ open class RadioConfigViewModel(
                         radioConfigRepository.moduleConfigFlow,
                     ) { cs, lc, mc ->
                         _radioConfigState.update {
-                            it.copy(isLocal = true, channelList = cs.settings, radioConfig = lc, moduleConfig = mc)
+                            it.copy(
+                                isLocal = true,
+                                pioEnv = pioEnv,
+                                channelList = cs.settings,
+                                radioConfig = lc,
+                                moduleConfig = mc,
+                            )
                         }
                     }
                 } else {
@@ -319,6 +331,7 @@ open class RadioConfigViewModel(
                         _radioConfigState.update {
                             it.copy(
                                 isLocal = false,
+                                pioEnv = null,
                                 channelList = emptyList(),
                                 radioConfig = LocalConfig(),
                                 moduleConfig = LocalModuleConfig(),
@@ -590,7 +603,10 @@ open class RadioConfigViewModel(
 
     private fun sendAdminRequest(destNum: Int) {
         val route = radioConfigState.value.route
+        val isLocal = radioConfigState.value.isLocal
         _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
+
+        analytics.trackAction("admin_action", mapOf("route" to route.lowercase(), "is_remote" to !isLocal))
 
         val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
 
@@ -722,7 +738,22 @@ open class RadioConfigViewModel(
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
+        val state = radioConfigState.value
+        val isLocal = this.destNum == null || destNum == myNodeNum
+        safeLaunch(tag = "installProfile") {
+            try {
+                installProfileUseCase(
+                    destNum = destNum,
+                    profile = protobuf,
+                    currentUser = destNode.value?.user,
+                    currentLoraConfig = state.radioConfig.lora,
+                    isLocal = isLocal,
+                )
+            } catch (_: MalformedMeshtasticUrlException) {
+                Logger.w { "[installProfile] Rejected invalid profile channel URL" }
+                snackbarManager.showSnackbar(message = UiText.Resource(Res.string.channel_invalid).resolve())
+            }
+        }
     }
 
     fun clearPacketResponse() {

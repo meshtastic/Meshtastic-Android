@@ -83,6 +83,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -103,7 +104,7 @@ jobs:
       # Dokka API reference (/api/) — production releases only.
       - name: Build Dokka HTML documentation
         if: steps.version.outputs.is_production == 'true'
-        run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+        run: ./gradlew dokkaGeneratePublicationHtml -Dorg.gradle.isolated-projects=false --no-configuration-cache
 
       - name: Compile Jekyll Sites
         env:

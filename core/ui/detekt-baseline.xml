@@ -13,14 +13,13 @@
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt:@Suppress("MagicNumber", "LongMethod") @Composable fun MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:NodeChip.kt:@Composable fun NodeChip</ID>
     <ID>ComposableParamOrder:NodeKeyStatusIcon.kt:@Composable fun NodeKeyStatusIcon</ID>
-    <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:SignalInfo.kt:@Composable fun SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt:@Composable fun SwitchPreference</ID>
     <ID>CompositionLocalAllowlist:LocalAnalyticsIntroProvider.kt:val LocalAnalyticsIntroProvider = compositionLocalOf&lt;@Composable () -> Unit> { {} }</ID>
     <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerProvider = compositionLocalOf&lt;@Composable (onResult: (String?) -> Unit) -> BarcodeScanner> { { object : BarcodeScanner { override fun startScan() { // Default NO-OP } } } }</ID>
     <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerSupported = compositionLocalOf { false }</ID>
     <ID>CompositionLocalAllowlist:LocalInlineMapProvider.kt:val LocalInlineMapProvider = compositionLocalOf&lt;@Composable (node: Node, modifier: Modifier) -> Unit> { { _, _ -> } }</ID>
-    <ID>CompositionLocalAllowlist:LocalMapMainScreenProvider.kt:/** * Provides the platform-specific Map Main Screen. On Desktop or JVM targets where native maps aren't available yet, it * falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalMapMainScreenProvider = compositionLocalOf&lt; @Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit, > { { _, _, _ -> PlaceholderScreen("Map") } }</ID>
+    <ID>CompositionLocalAllowlist:LocalMapMainScreenProvider.kt:/** * Provides the platform-specific Map Main Screen. On Desktop or JVM targets where native maps aren't available yet, it * falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalMapMainScreenProvider = compositionLocalOf&lt; @Composable ( onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?, sitePlannerNodeNum: Int?, ) -> Unit, > { { _, _, _, _ -> PlaceholderScreen("Map") } }</ID>
     <ID>CompositionLocalAllowlist:LocalNfcScannerProvider.kt:val LocalNfcScannerProvider = compositionLocalOf&lt;@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }</ID>
     <ID>CompositionLocalAllowlist:LocalNfcScannerProvider.kt:val LocalNfcScannerSupported = compositionLocalOf { false }</ID>
     <ID>CompositionLocalAllowlist:LocalNfcScannerProvider.kt:val LocalNfcWriterProvider = compositionLocalOf&lt;@Composable (url: String, onResult: (Boolean) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _, _ -> } }</ID>
@@ -30,7 +29,6 @@
     <ID>CompositionLocalAllowlist:LocalTracerouteMapProvider.kt:/** * Provides an embeddable traceroute map composable that renders node markers and forward/return offset polylines for a * traceroute result. Unlike [LocalMapViewProvider], this does **not** include a Scaffold, AppBar, waypoints, location * tracking, custom tiles, or any main-map features — it is designed to be embedded inside `TracerouteMapScreen`'s * scaffold. * * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen]. * * Parameters: * - `tracerouteOverlay`: The overlay with forward/return route node nums. * - `tracerouteNodePositions`: Map of node num to position snapshots for the route nodes. * - `onMappableCountChanged`: Callback with (shown, total) node counts. * - `modifier`: Compose modifier for the map. */ @Suppress("Wrapping") val LocalTracerouteMapProvider = compositionLocalOf&lt; @Composable ( tracerouteOverlay: TracerouteOverlay?, tracerouteNodePositions: Map&lt;Int, Position>, onMappableCountChanged: (Int, Int) -> Unit, modifier: Modifier, ) -> Unit, > { { _, _, _, _ -> PlaceholderScreen("Traceroute Map") } }</ID>
     <ID>CompositionLocalAllowlist:LocalTracerouteMapScreenProvider.kt:/** * Provides the platform-specific Traceroute Map Screen. On Desktop or JVM targets where native maps aren't available * yet, it falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalTracerouteMapScreenProvider = compositionLocalOf&lt;@Composable (destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) -> Unit> { { _, _, _, _ -> PlaceholderScreen("Traceroute Map") } }</ID>
     <ID>CompositionLocalAllowlist:MapViewProvider.kt:val LocalMapViewProvider = compositionLocalOf&lt;MapViewProvider?> { null }</ID>
-    <ID>ContentSlotReused:AdaptiveTwoPane.kt:second: @Composable ColumnScope.() -> Unit</ID>
     <ID>FunctionTypeModifierSpacing:Theme.kt:@Composable()</ID>
     <ID>LambdaParameterInRestartableEffect:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
     <ID>LambdaParameterInRestartableEffect:PlatformUtils.kt:check: () -> Boolean</ID>
@@ -43,18 +41,12 @@
     <ID>MagicNumber:EditListPreference.kt:67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt:50</ID>
     <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt:TracerouteMapOverlayInsets</ID>
-    <ID>ModifierMissing:AdaptiveTwoPane.kt:@Composable fun AdaptiveTwoPane</ID>
     <ID>ModifierMissing:ChannelItem.kt:@Composable fun ChannelItem</ID>
     <ID>ModifierMissing:ChannelSelection.kt:@Composable fun ChannelSelection</ID>
-    <ID>ModifierMissing:EmojiPickerDialog.kt:@Composable fun EmojiPickerDialog</ID>
     <ID>ModifierMissing:IndoorAirQuality.kt:@Suppress("LongMethod", "UnusedPrivateProperty") @Composable fun IndoorAirQuality</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt:@Composable fun LoraSignalIndicator</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt:@Composable fun SnrAndRssi</ID>
     <ID>ModifierMissing:PlaceholderScreen.kt:@Composable fun PlaceholderScreen</ID>
     <ID>ModifierMissing:PreferenceDivider.kt:@Composable fun PreferenceDivider</ID>
     <ID>ModifierMissing:SecurityIcon.kt:@Composable fun SecurityIcon</ID>
-    <ID>ModifierMissing:SharedContactDialog.kt:@Composable fun SharedContactDialog</ID>
-    <ID>ModifierMissing:SlidingSelector.kt:@Composable fun OptionLabel</ID>
     <ID>ModifierMissing:TracerouteAlertHandler.kt:@Composable fun TracerouteAlertHandler</ID>
     <ID>ModifierNaming:MeshtasticAppShell.kt:hostModifier: Modifier = Modifier</ID>
     <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt:modifier = modifier.fillMaxWidth().padding(all = 16.dp)</ID>
@@ -79,16 +71,12 @@
     <ID>ParameterNaming:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
     <ID>ParameterNaming:EmojiPickerDialog.kt:onCategorySelected: (Int) -> Unit</ID>
     <ID>ParameterNaming:EmojiPickerDialog.kt:onEmojiSelected: (String) -> Unit</ID>
-    <ID>ParameterNaming:PlatformUtils.kt:onDenied: () -> Unit</ID>
-    <ID>ParameterNaming:PlatformUtils.kt:onDenied: () -> Unit = {}</ID>
-    <ID>ParameterNaming:PlatformUtils.kt:onGranted: () -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri) -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri?) -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit</ID>
     <ID>ParameterNaming:PositionPrecisionPreference.kt:onValueChanged: (Int) -> Unit</ID>
     <ID>ParameterNaming:PreferenceFooter.kt:onNegativeClicked: () -> Unit = {}</ID>
     <ID>ParameterNaming:PreferenceFooter.kt:onPositiveClicked: () -> Unit = {}</ID>
-    <ID>ParameterNaming:SlidingSelector.kt:onOptionSelected: (T) -> Unit</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Composable Content Alert") @Composable fun PreviewComposableAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "HTML Alert") @Composable fun PreviewHtmlAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Icon and Text Alert") @Composable fun PreviewIconAlert</ID>
@@ -119,7 +107,6 @@
     <ID>PreviewPublic:PositionPrecisionPreference.kt:@Preview(showBackground = true) @Composable fun PositionPrecisionPreferencePreview</ID>
     <ID>PreviewPublic:PreferenceCategory.kt:@Preview(showBackground = true) @Composable fun PreferenceCategoryPreview</ID>
     <ID>PreviewPublic:RegularPreference.kt:@Preview(showBackground = true) @Composable fun RegularPreferencePreview</ID>
-    <ID>PreviewPublic:SatelliteCountInfo.kt:@PreviewLightDark @Composable fun SatelliteCountInfoPreview</ID>
     <ID>PreviewPublic:SecurityIcon.kt:@Preview(name = "All Security Icons with Dialog") @Composable fun PreviewAllSecurityIconsWithDialog</ID>
     <ID>PreviewPublic:SignalInfo.kt:@Composable @Preview(showBackground = true) fun SignalInfoSimplePreview</ID>
     <ID>PreviewPublic:SignalInfo.kt:@PreviewLightDark @Composable fun SignalInfoPreview</ID>
@@ -132,6 +119,5 @@
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)</ID>
-    <ID>ViewModelForwarding:MeshtasticNavigationSuite.kt:NavigationIconContent( destination = destination, isSelected = isSelected, connectionState = connectionState, unreadMessageCount = unreadMessageCount, selectedDevice = selectedDevice, uiViewModel = uiViewModel, )</ID>
   </CurrentIssues>
 </SmellBaseline>

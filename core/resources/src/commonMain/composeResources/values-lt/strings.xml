@@ -35,6 +35,7 @@
     <string name="aqi_good">Geras</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="bad">Silpnas</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Skaičiuojama…</string>
@@ -84,6 +85,7 @@
     <!-- DOC -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
@@ -91,6 +93,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Gamyklinis atstatymas</string>
     <string name="fair">Pakankamas</string>
     <!-- FILTER -->
@@ -115,6 +118,8 @@
     <string name="ip_address">IP adresas:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
@@ -238,22 +243,10 @@
     <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
     <string name="role_tracker_desc">Pirmenybinis GPS pozicijos paketų siuntimas</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Blogas sesijos raktas</string>
-    <string name="routing_error_admin_public_key_unauthorized">Viešasis raktas nepatvirtintas</string>
-    <string name="routing_error_bad_request">Bloga užklausa</string>
-    <string name="routing_error_duty_cycle_limit">Pasiektas regioninis ciklų limitas</string>
     <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
-    <string name="routing_error_max_retransmit">Pasiektas persiuntimų limitas</string>
-    <string name="routing_error_no_channel">Nėra kanalo</string>
-    <string name="routing_error_no_interface">Nėra sąsajos</string>
-    <string name="routing_error_no_response">Nėra atsakymo</string>
     <string name="routing_error_no_route">Nėra maršruto</string>
     <string name="routing_error_none">Pristatymas patvirtintas</string>
-    <string name="routing_error_not_authorized">Neautorizuotas</string>
-    <string name="routing_error_pki_failed">Šifruotas siuntimas nepavyko</string>
-    <string name="routing_error_pki_unknown_pubkey">Nežinomas viešasis raktas</string>
     <string name="routing_error_timeout">Baigėsi laikas</string>
-    <string name="routing_error_too_large">Paketas perdidelis</string>
     <string name="rssi">RSSI</string>
     <!-- SAVE -->
     <string name="save">Išsaugoti</string>

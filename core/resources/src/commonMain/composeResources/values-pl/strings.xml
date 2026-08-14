@@ -61,6 +61,7 @@
     <string name="back">Wstecz</string>
     <string name="backup_keys">Klucze zapasowe</string>
     <string name="bad">słaby</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Pasmo</string>
     <string name="battery">Bateria</string>
     <string name="blue">Niebieski</string>
@@ -248,11 +249,11 @@
     <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
     <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
-    <string name="downlink_enabled">Odbiór włączony</string>
     <string name="download">Pobierz</string>
     <string name="echo_enabled">Włącz echo</string>
     <string name="edit">Edytuj</string>
     <string name="eight_hours">8 Godzin</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Włącz tryb oszczędzania energii</string>
     <string name="enabled">Włączony</string>
     <!-- ENCRYPTION -->
@@ -273,6 +274,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Poproś o pozycję</string>
     <string name="expires">Wygasa</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Eksport konfiguracji</string>
     <string name="export_data_csv">Eksportuj wszystkie pakiety</string>
     <string name="external_notification">Zewnętrzne Powiadomienie</string>
@@ -396,9 +398,11 @@
     <string name="latest_alpha_firmware">Ostatnia wersja alpha</string>
     <string name="latest_stable_firmware">Ostatnia stabilna wersja</string>
     <string name="latitude">Szerokość geograficzna</string>
+    <!-- LAYER -->
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="led_heartbeat">LED bicia serca</string>
     <string name="led_state">Stan diody LED</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
     <!-- LOCAL -->
@@ -679,23 +683,10 @@
     <string name="role_tracker_desc">Tracker - Do użytku z urządzeniami przeznaczonymi jako śledzenie GPS. Pakiety pozycyjne wysyłane z tego urządzenia będą miały wyższy priorytet, z nadawaniem pozycji co dwie minuty. Inteligentna transmisja pozycji będzie domyślnie wyłączona.</string>
     <string name="root_topic">Główny temat</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Nieprawidłowy klucz sesji</string>
-    <string name="routing_error_admin_public_key_unauthorized">Nieautoryzowany klucz publiczny</string>
-    <string name="routing_error_bad_request">Błędne żądanie</string>
-    <string name="routing_error_duty_cycle_limit">Osiągnięto okresowy limit nadawania dla tego regionu</string>
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
-    <string name="routing_error_max_retransmit">Przekroczono czas lub liczbę retransmisji</string>
-    <string name="routing_error_no_channel">Brak kanału</string>
-    <string name="routing_error_no_interface">Brak interfejsu</string>
-    <string name="routing_error_no_response">Brak odpowiedzi</string>
     <string name="routing_error_no_route">Brak trasy</string>
     <string name="routing_error_none">Potwierdzone</string>
-    <string name="routing_error_not_authorized">Brak autoryzacji</string>
-    <string name="routing_error_pki_failed">Zaszyfrowane wysyłanie nie powiodło się</string>
-    <string name="routing_error_pki_send_fail_public_key">Nie wysłano PKI, brak klucza publicznego</string>
-    <string name="routing_error_pki_unknown_pubkey">Nieznany klucz publiczny</string>
     <string name="routing_error_timeout">Upłynął limit czasu</string>
-    <string name="routing_error_too_large">Pakiet jest zbyt duży</string>
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="rsyslog_server">Serwer rsyslog</string>
@@ -762,6 +753,7 @@
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
     <string name="tak_server_section">Serwer</string>
+    <string name="tak_server_status_off">Wyłączony</string>
     <string name="tak_team_blue">Niebieski</string>
     <string name="tak_team_green">Zielony</string>
     <string name="tak_team_red">Czerwony</string>
@@ -821,7 +813,6 @@
     <string name="unmonitored_or_infrastructure">Niemonitorowany lub infrastruktura</string>
     <string name="unrecognized">Nierozpoznany</string>
     <string name="update_interval_seconds">Częstotliwość aktualizacji (w sekundach)</string>
-    <string name="uplink_enabled">Wysył włączony</string>
     <string name="uptime">Czas pracy</string>
     <!-- URL -->
     <string name="url">URL</string>

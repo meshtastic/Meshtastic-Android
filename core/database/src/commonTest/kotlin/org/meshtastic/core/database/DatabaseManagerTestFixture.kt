@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -149,6 +150,24 @@ abstract class DatabaseManagerTestFixture {
         var defaultBuildStarted: CompletableDeferred<Unit>? = null
         var releaseDefaultBuild: CompletableDeferred<Unit>? = null
 
+        /**
+         * Unbounded by default: most fixtures park a writer across an idle period, and `runTest` auto-advances virtual
+         * time to the next scheduled task, which would otherwise abandon every parked block. Wedge tests set this to
+         * the production bound and drive it with [kotlinx.coroutines.test.advanceTimeBy].
+         */
+        var withDbTimeoutMillisForTest: Long = 0
+
+        override val withDbTimeoutMillis: Long
+            get() = withDbTimeoutMillisForTest
+
+        /** `limitedParallelism` on a test dispatcher would swap virtual-time scheduling for a real worker view. */
+        override fun createPoolLane(): CoroutineDispatcher = testDispatchers.io
+
+        /** Drives the pool-recovery rate window without relying on wall-clock or virtual-time advancement. */
+        var recoveryClockMillis: Long = 0L
+
+        override fun recoveryNowMillis(): Long = recoveryClockMillis
+
         override fun buildDatabase(dbName: String): MeshtasticDatabase {
             failNextBuildWith?.let { failure ->
                 failNextBuildWith = null
@@ -170,9 +189,6 @@ abstract class DatabaseManagerTestFixture {
         }
 
         suspend fun closeCachedForTest(dbName: String) = closeCachedDatabase(dbName)
-
-        override val limitedIo: kotlinx.coroutines.CoroutineDispatcher
-            get() = testDispatchers.default
 
         /**
          * No-op: in-memory test databases have no filesystem directory, so LRU eviction, legacy-DB cleanup, and FTS

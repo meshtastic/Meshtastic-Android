@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emitAll
@@ -61,6 +63,7 @@ import org.meshtastic.core.resources.translation_failed
 import org.meshtastic.core.resources.translation_model_download_failed
 import org.meshtastic.core.resources.translation_not_required
 import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.core.ui.viewmodel.errorEventFlow
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.messaging.translation.DownloadResult
@@ -111,6 +114,8 @@ class MessageViewModel(
     private val _draftMessage = MutableStateFlow(savedStateHandle.get<String>("draftMessage") ?: "")
     val draftMessage: StateFlow<String> = _draftMessage.asStateFlow()
 
+    private val sendErrorEvents = errorEventFlow()
+
     private var pendingDraftPersistence: Job? = null
 
     /**
@@ -145,6 +150,8 @@ class MessageViewModel(
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
     val showQuickChat = uiPrefs.showQuickChat
+
+    val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
 
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
@@ -273,6 +280,9 @@ class MessageViewModel(
     // endregion
 
     init {
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            sendErrorEvents.collect { snackbarManager.showSnackbar(MessagingUiTextResolver.resolve(it)) }
+        }
         val contactKey = savedStateHandle.get<String>("contactKey")
         if (contactKey != null) {
             contactKeyForPagedMessages.value = contactKey
@@ -342,7 +352,9 @@ class MessageViewModel(
      * @param replyId The ID of the message this is a reply to, if any.
      */
     fun sendMessage(str: String, contactKey: String = "0${NodeAddress.ID_BROADCAST}", replyId: Int? = null) {
-        safeLaunch(tag = "sendMessage") { sendMessageUseCase.invoke(str, contactKey, replyId) }
+        safeLaunch(errorEvents = sendErrorEvents, tag = "sendMessage") {
+            sendMessageUseCase.invoke(str, contactKey, replyId)
+        }
     }
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) =

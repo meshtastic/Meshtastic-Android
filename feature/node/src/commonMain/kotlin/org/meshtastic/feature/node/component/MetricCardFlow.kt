@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.MetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
@@ -99,7 +101,9 @@ internal fun MetricCardFlow(
 @Composable
 private fun MetricCard(metric: MetricInfo, valueColor: Color?) {
     val cardModifier = Modifier.fillMaxWidth()
-    val label = stringResource(metric.label)
+    val label =
+        metric.channelNumber?.let { stringResource(Res.string.metric_channel_label, stringResource(metric.label), it) }
+            ?: stringResource(metric.label)
     val resolvedValueColor = valueColor ?: MaterialTheme.colorScheme.onSurface
     when (metric) {
         is VectorMetricInfo ->

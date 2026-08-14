@@ -73,18 +73,18 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 メッセージの配信に失敗すると、エラーインジケーターが何が問題だったかを示します：
 
-| エラー            | 意味                          | 対処方法                                                                     |
-| -------------- | --------------------------- | ------------------------------------------------------------------------ |
-| ルートなし          | 宛先ノードへの経路が存在しません            | 受信者がオフラインか、メッシュの範囲外の可能性があります。 時間をおくか、距離を縮めてください。                         |
-| NAK を受信        | 次のホップのノードが中継を拒否しました         | 中継ノードが混雑している可能性があります。 しばらく待ってから再試行してください。                                |
-| タイムアウト         | 再試行の時間内に受信確認がありませんでした       | 受信者がちょうど範囲外にいる可能性があります。 ホップ数上限を増やすか、より良い場所に移動してみてください。                   |
-| インターフェースがありません | 送信に使える無線インターフェースがありません      | 無線機が接続され、チャンネルが設定されているか確認してください。                                         |
-| 最大再送回数         | すべての再試行を使い切りました             | メッシュ経路が不安定です。 別のチャンネルを試すか、状況が改善するのを待ってください。                              |
-| チャンネルがありません    | 宛先のチャンネルが存在しません             | 両方のノードが同じチャンネル設定を共有しているか確認してください。                                        |
-| サイズ超過          | メッセージが最大ペイロードサイズを超えています     | メッセージを短くしてください（最大約 200 文字）。                                              |
-| 応答なし           | ノードはメッセージを受信しましたが、応答しませんでした | 受信者の無線機が処理中か、低電力のスリープモードの可能性があります。                                       |
-| デューティサイクル制限    | 地域ごとの電波利用時間の上限に達しました        | 無線機が許可された送信時間を使い切りました。 デューティサイクルの期間がリセットされるまで待ってください（EU リージョンでは通常 1 時間）。 |
-| 不正な要求          | 不正な形式または無効なメッセージです          | 通常はソフトウェアの不具合を示します。 アプリを再起動してみてください。                                     |
+| エラー                  | 意味                                           | 対処方法                                                                                 |
+| -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| ルートなし                | 宛先ノードへの経路が存在しません                             | 受信者がオフラインか、メッシュの範囲外の可能性があります。 時間をおくか、距離を縮めてください。                                     |
+| NAK を受信              | 次のホップのノードが中継を拒否しました                          | 中継ノードが混雑している可能性があります。 しばらく待ってから再試行してください。                                            |
+| タイムアウト               | 再試行の時間内に受信確認がありませんでした                        | 受信者がちょうど範囲外にいる可能性があります。 ホップ数上限を増やすか、より良い場所に移動してみてください。                               |
+| No radio interface   | 送信に使える無線インターフェースがありません                       | Check that your radio is connected and available.                    |
+| メッシュへの配信に失敗しました      | すべての再試行を使い切りました                              | Move closer, improve signal, or wait for mesh conditions to improve. |
+| Channel/key mismatch | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                    |
+| メッセージが大きすぎて送信できません   | メッセージが最大ペイロードサイズを超えています                      | Shorten the message and try again.                                   |
+| No app response      | App or plugin did not respond to the request | Retry or check the destination app or module state.                  |
+| Duty cycle limit     | 地域ごとの電波利用時間の上限に達しました                         | Wait for the duty cycle window to reset.                             |
+| Invalid request      | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.         |
 
 > 💡 **ヒント：** ほとんどの配信エラーは自然に解消します。 ノードに断続的に到達できる場合、メッシュは再試行します。 「ルートなし」エラーが続く場合は、中間のルーターノードがオンラインになっているか確認してください。
 
@@ -124,21 +124,21 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 メッセージはチャットの吹き出しとして表示され、送信メッセージは右側、受信メッセージは左側に並びます。 各吹き出しには、送信者・タイムスタンプ・配信状況が表示されます。 返信付きのメッセージでは、応答の上に元メッセージの引用プレビューが表示されます。
 
-### Text Formatting
+### テキストの書式
 
-Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
+メッセージは、軽量なインライン **Markdown** に対応しています。 受信したメッセージは、記法の文字が取り除かれた状態でスタイルが適用されて表示されます：
 
-| 種別            | Syntax                         | Renders as           |
-| ------------- | ------------------------------ | -------------------- |
-| Bold          | `**bold**`                     | **bold**             |
-| Italic        | `*italic*`                     | _italic_             |
-| Strikethrough | `~~strike~~`                   | ~~strike~~           |
-| Inline code   | `` `code` ``                   | monospace `code`     |
-| Link          | `[label](https://example.com)` | a tappable **label** |
+| 種別       | 記法                             | 表示結果          |
+| -------- | ------------------------------ | ------------- |
+| 太字       | `**bold**`                     | **太字**        |
+| 斜体       | `*italic*`                     | _斜体_          |
+| 取り消し線    | `~~strike~~`                   | ~~取り消し線~~     |
+| インラインコード | `` `code` ``                   | 等幅の `code`    |
+| リンク      | `[label](https://example.com)` | タップできる**ラベル** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+メッセージを作成するときは、入力欄にフォーカスして 3 文字以上入力すると、入力欄の下に**書式ツールバー**が表示されます。 テキストを選択してスタイルをタップすると、そのテキストが囲まれます（もう一度タップすると解除されます）。選択していない場合は、空のペアが挿入され、カーソルがマーカーの間に置かれます。 リンクボタンをタップすると、URL を入力するダイアログが開きます。 入力中は下書きに書式が適用されて表示されますが、内部のテキストは Markdown の文字を保持しています。
 
-> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
+> 💡 **ヒント：** 書式はメッシュ上ではそのままの文字として送られます。iOS が送信するのと同じバイト列です。 Markdown に対応していないクライアント（古いアプリや、素のファームウェアのクライアント）では、`**` や `~~` の文字がそのまま表示されます。 URL、メールアドレス、電話番号は、Markdown を使うかどうかにかかわらず、引き続き自動的にリンクになります。
 
 ### メンション
 
@@ -179,7 +179,7 @@ When composing, focus the message field and type at least three characters to re
 ### メッセージの制限
 
 - **最大長：** 200 バイト（ASCII テキストで約 200 文字）
-- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
+- 200 バイトの上限はアプリ内の入力欄に適用されます。メッシュのペイロード上限自体は約 233 バイトのため、他の送信元（アプリ機能や Android Auto など）からのメッセージは、これより少し長い場合があります
 - **レート制限：** メッシュは電波利用時間の公平性を確保するため、大量のメッセージは制限されることがあります
 - **配信：** 受信確認がない場合、メッセージは自動的に再送されます
 

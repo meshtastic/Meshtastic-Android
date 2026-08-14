@@ -73,6 +73,7 @@ data class CoTMessage(
             role: String = DEFAULT_TAK_ROLE_NAME,
             battery: Int = DEFAULT_TAK_BATTERY,
             staleMinutes: Int = DEFAULT_TAK_STALE_MINUTES,
+            remarks: String? = null,
         ): CoTMessage {
             val now = Clock.System.now()
             return CoTMessage(
@@ -91,6 +92,7 @@ data class CoTMessage(
                 group = CoTGroup(name = team, role = role),
                 status = CoTStatus(battery = battery),
                 track = CoTTrack(speed = speed, course = course),
+                remarks = remarks,
             )
         }
 

@@ -17,18 +17,46 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">Mensagem de %1$s %2$s</string>
+    <string name="a11y_node_battery">%1$d%% de bateria</string>
+    <string name="a11y_node_distance_away">%1$s de distância</string>
+    <string name="a11y_node_favorite">favorito</string>
+    <string name="a11y_node_hops_away">A %1$d salto de distância</string>
+    <string name="a11y_node_last_heard">Visto pela última vez há %1$s</string>
+    <string name="a11y_node_offline">desconectado</string>
+    <string name="a11y_node_online">conectado</string>
+    <string name="a11y_node_role">função %1$s</string>
+    <string name="a11y_node_signal">sinal %1$s</string>
+    <string name="a11y_nodes_at_hop">Saltar %1$d a %2$d nós</string>
     <string name="accept">Aceitar</string>
+    <string name="acknowledgements">Agradecimentos</string>
     <!-- ACTION -->
+    <string name="action_copy_message">Copiar mensagem</string>
     <string name="action_delete_message">Excluir %1$s mensagem</string>
+    <string name="action_react_with_emoji">Reagir com emoji</string>
+    <string name="action_select_device">Selecionar dispositivo</string>
+    <string name="action_select_message">Selecionar mensagem</string>
+    <string name="action_select_network">Selecionar rede</string>
+    <string name="action_send_reply">Responder</string>
+    <string name="action_show_message_status">Mostrar status da mensagem</string>
+    <string name="action_toggle_translation">Alternar entre texto original e traduzido</string>
+    <string name="action_translate_message">Traduzir mensagem</string>
     <string name="actions">Ações</string>
     <string name="adc_multiplier_override_ratio">Alterar proporção do multiplicador ADC</string>
     <!-- ADD -->
     <string name="add">Adicionar</string>
+    <string name="add_a_note">Adicionar uma nota privada…</string>
+    <string name="add_favorite">Adicionar a Favoritos</string>
     <string name="add_layer">Adicionar Camada</string>
     <string name="add_network_device">Adicionar</string>
+    <string name="add_network_device_manually">Adicionar dispositivo manualmente…</string>
     <string name="address">Endereço</string>
     <string name="admin_key">Chave do Administrador</string>
+    <string name="admin_keys">Chaves do Administrador</string>
     <string name="administration">Administração</string>
+    <string name="advanced">Avançado</string>
+    <string name="advanced_title">Avançado</string>
     <!-- AIR -->
     <string name="air_quality_icon">Ícone da qualidade do ar</string>
     <string name="air_quality_metrics_module_enabled">Módulo de métricas de qualidade do ar habilitado</string>
@@ -41,12 +69,22 @@
     <string name="alert_message_buzzer">Campainha de mensagem de alerta</string>
     <string name="alert_message_led">LED de mensagem de alerta</string>
     <string name="alert_message_vibra">Vibração de mensagem de alerta</string>
+    <string name="all_time">Todos</string>
     <string name="allow_input_source">Permitir fonte de entrada</string>
     <string name="allow_undefined_pin_access">Permitir acesso indefinido ao pino</string>
     <string name="alt">Alt</string>
+    <string name="altitude">Altitude</string>
     <string name="ambient_lighting">Luz Ambiente</string>
     <string name="ambient_lighting_config">Configuração de Iluminação Ambiente</string>
+    <string name="analytics_okay">Permitir métricas e relatórios de erros.</string>
+    <string name="analytics_platforms">Plataforma de Métricas:</string>
+    <string name="any">Qualquer um</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Obter dados do canal</string>
+    <string name="app_functions_get_device_status">Obter status do dispositivo</string>
+    <string name="app_functions_get_mesh_metrics">Obter métricas da malha</string>
+    <string name="app_functions_get_mesh_status">Obter status da malha</string>
+    <string name="app_functions_get_node_details">Obter detalhes do nó</string>
     <string name="app_notifications">Notificações do Aplicativo</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
     <string name="apply">Aplicar</string>
@@ -59,6 +97,7 @@
     <string name="available_pins">Pinos disponíveis</string>
     <string name="back">Voltar</string>
     <string name="bad">Ruim</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Largura da banda</string>
     <string name="battery">Bateria</string>
     <string name="battery_ina_2xx_i2c_address">Endereço I2C da bateria INA_2XX</string>
@@ -203,13 +242,13 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nós</string>
     <string name="done">Concluído</string>
-    <string name="downlink_enabled">Downlink ativado</string>
     <string name="download">Baixar</string>
     <string name="dynamic">Dinâmico</string>
     <string name="easily_set_up_private_mesh_networks">Configure facilmente redes de malha privada para uma comunicação segura e confiável em áreas remotas.</string>
     <string name="echo_enabled">Eco habilitado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Ativar modo de economia de energia</string>
     <!-- ENCRYPTION -->
     <string name="encryption_enabled">Criptografia ativada</string>
@@ -226,6 +265,7 @@
     <string name="ethernet_enabled">Ethernet ativado</string>
     <string name="exchange_position">Trocar posições</string>
     <string name="expires">Expira em</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configurações</string>
     <string name="external_notification">Notificação Externa</string>
     <string name="external_notification_config">Configuração de Notificações Externas</string>
@@ -316,8 +356,10 @@
     <string name="latest_alpha_firmware">Último alfa</string>
     <string name="latest_stable_firmware">Último estável</string>
     <string name="latitude">Latitude</string>
+    <!-- LAYER -->
     <string name="led_state">Estado do LED</string>
     <string name="legacy_admin_channel">Canal de administração antigo</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a criptografia e não é compatível com a rede padrão do Meshtastic.</string>
     <!-- LOAD -->
     <string name="load">Carregar</string>
@@ -577,23 +619,10 @@
     <string name="root_topic">Tópico principal</string>
     <string name="rotary_encoder_1_enabled">Codificador rotativo #1 ativado</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Chave de sessão incorreta</string>
-    <string name="routing_error_admin_public_key_unauthorized">Chave Publica não autorizada</string>
-    <string name="routing_error_bad_request">Requisição Inválida</string>
-    <string name="routing_error_duty_cycle_limit">Limite Regional de Ciclo de Trabalho Alcançado</string>
     <string name="routing_error_got_nak">Recebi uma negativa de reconhecimento</string>
-    <string name="routing_error_max_retransmit">Limite de Retransmissões Atingido</string>
-    <string name="routing_error_no_channel">Nenhum canal</string>
-    <string name="routing_error_no_interface">Sem interface</string>
-    <string name="routing_error_no_response">Nenhuma resposta</string>
     <string name="routing_error_no_route">Sem rota</string>
     <string name="routing_error_none">Reconhecido</string>
-    <string name="routing_error_not_authorized">Não Autorizado</string>
-    <string name="routing_error_pki_failed">Falha de Envio Criptografado</string>
-    <string name="routing_error_pki_unknown_pubkey">Chave Pública Desconhecida</string>
-    <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="routing_error_timeout">Tempo esgotado</string>
-    <string name="routing_error_too_large">Pacote grande demais</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de potência que está sendo recebida pela antena. Um valor maior de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
@@ -718,7 +747,6 @@
     <string name="unrecognized">Desconhecido</string>
     <string name="up_down_select_input_enabled">Entrada Cima/Baixo/Selecionar ativada</string>
     <string name="update_interval_seconds">Intervalo de atualização (segundos)</string>
-    <string name="uplink_enabled">Uplink ativado</string>
     <string name="uptime">Uptime</string>
     <!-- URL -->
     <string name="url">URL</string>

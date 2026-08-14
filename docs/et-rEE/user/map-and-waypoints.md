@@ -1,37 +1,37 @@
 ---
-title: Map & Waypoints
+title: Kaart ja teekonnapunktid
 parent: User Guide
 nav_order: 6
 last_updated: 2026-07-08
-description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
+description: Vaata sõlmede asukohti kaardil, loo ja jaga teekonnapunkte ning halda asukoha jagamist ja privaatsust.
 aliases:
   - kaart
   - teekonnapunkt
   - gps
   - asukoht
   - site-planner
-  - map-layers
+  - kaardi-kihid
   - geojson
   - kml
 ---
 
-# Map & Waypoints
+# Kaart ja teekonnapunktid
 
-The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.
+Kaardiekraan näitab kärgvõrgu sõlmede geograafilisi asukohti koos jagatud teekonnapunktidega.
 
-## Map View
+## Kaardi vaade
 
-The map displays:
+Kaardil kuvatakse:
 
-- **Node positions** — colored markers for each node reporting location
+- **Sõlmede asukohad** — värvilised markerid iga sõlme asukoha kohta
 - **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **Teie asukoht** — teie praegune GPS asukoht
 
 ### Node Markers
 
-Iga positsiooni teatav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
+Iga asukohta teavitav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõlme lühinime. Kiip on värvitud sõlme enda identiteedivärviga (stabiilne värv, mis on tuletatud sõlme numbrist) – sama kiip, mida kasutatakse sõlmede loendis, seega näeb sõlm kõikjal ühesugune välja. Markeri värv **ei kodeeri** võrguühenduseta/võrguühenduseta olekut. Kui sõlme asukoht reaalajas uueneb, pulseerib selle marker lühidalt. Nearby markers are clustered as you zoom out.
 
-### Map Controls
+### Kaardi juhtnupud
 
 - **Suumi** – näpista või +/- nuppude kasutamine
 - **Pan** — drag to explore
@@ -40,7 +40,7 @@ Iga positsiooni teatav sõlm kuvatakse **sõlme kiibi** markerina, mis kuvab sõ
 
 Ujuv tööriistariba pakub kiiret juurdepääsu kompassile, kihtide vahetamisele, sõlmefiltritele, värskendamisele ja asukoha jälgimisele. Põhjasuuna muutmiseks puuduta kompassi või praeguse asukoha keskpunkti seadmiseks asukohanuppu.
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![Kaardi juhtelementide pealiskiht](/assets/screenshots/map_controls_overlay.png)
 
 ## Teekonnapunkt
 
@@ -48,7 +48,7 @@ Waypoints are shared geographic points of interest that all mesh members can see
 
 ### Loo teekonnapunkt
 
-1. Long-press on the map at the desired location.
+1. Vajuta pikalt kaardil soovitud asukohas.
 2. Sisestage nimi ja valikuline kirjeldus.
 3. Choose an icon/emoji for the waypoint.
 4. Puuduta **Saada** jagamiseks kärgvõrku.
@@ -61,7 +61,7 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 | ---------- | ----------------------------------------------------------- |
 | Nimi       | Lühike identifikaator (max 29 tähemärki) |
 | Kirjeldus  | Optional longer description                                 |
-| Icon       | Visual marker emoji on the map                              |
+| Icon       | Visuaalse markeri emotikon kaardil                          |
 | Lukustatud | If locked, only the creator can edit or delete              |
 | Expiration | Optional auto-remove date and time                          |
 | Geopiire   | Valikuline sisenemis-/väljumishoiatusala – vt allpool       |
@@ -71,9 +71,9 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 Waypoints can be set to expire automatically:
 
 - **Never** (default) — waypoint remains until manually deleted
-- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. Useful for temporary markers like rally points, hazards, or meeting locations.
+- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. Kasulik ajutiste märkide, näiteks kogunemispunktide, ohtude või kohtumispaikade jaoks.
 
-Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.
+Aegunud teekonnapunktid peidetakse kaardilt automaatselt, et need ekraani ei risustaks. The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.
 
 ### Teekonnapunktide geopiirded
 
@@ -94,31 +94,31 @@ Kuna teekonnapunktid (ja nende geopiirded) edastatakse kogu kärgvõrgule, teavi
 
 ## Kaardikihid
 
-Puuduta kaardil kihtide ikooni, et avada **Kaardikihtide haldamine**, kus saad importida oma kihte `.kml`, `.kmz` või GeoJSON-vormingus – avades faili Meshtasticuga või jagades seda rakendusse teisest rakendusest. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds.
+Puuduta kaardil kihtide ikooni, et avada **Kaardikihtide haldamine**, kus saad importida oma kihte `.kml`, `.kmz` või GeoJSON-vormingus – avades faili Meshtasticuga või jagades seda rakendusse teisest rakendusest. Imporditud kihid on loetletud koos lülitiga iga kihi kuvamiseks/peitmiseks ja valikuga selle eemaldamiseks. This is available on both the Google Play and F-Droid builds.
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Konfi saatja (asukoht, sagedus, saatja võimsus, antenni võimendus ja kõrgus), vastuvõtja (tundlikkus, kõrgus) ja simulatsioonivalikud (maksimaalne ulatus, kõrge eraldusvõimega maastik, värvipalett) ning seejärel käivita hinnang. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
+**Asukoha planeerija** hindab saatja raadiosageduslikku leviala ja joonistab selle kaardile värvikoodiga kihina. Ava see kaardihalduselemendist või sõlme detaillehelt valiku **Hinnatud katvus** kaudu (kuvatakse ainult teadaoleva asukohaga sõlmede puhul). Konfi saatja (asukoht, sagedus, saatja võimsus, antenni võimendus ja kõrgus), vastuvõtja (tundlikkus, kõrgus) ja simulatsioonivalikud (maksimaalne ulatus, kõrge eraldusvõimega maastik, värvipalett) ning seejärel käivita hinnang. Nagu kaardikihid, töötab ka Site Planner nii Google Play kui ka F-Droid versioonides.
 
 ## Position Sharing
 
 ### Enabling Position Sharing
 
-Your node shares its GPS position based on:
+Sõlm jagab oma GPS asukohta järgmise alusel:
 
 - **Fikseeritud intervall** – levitamine regulaarsete intervallidega
 - **Nutikas asukoht** – levitatakse, kui liikumine ületab lävendi
 - **Manual** — only share when explicitly requested
 
-Configure position behavior in **Settings → Position**.
+Asukoha käitumist saab seadistada menüüs **Seaded → Asukoht**.
 
 ### Privacy Considerations
 
-> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. Kui sa ei soovi, et sinu asukohta jagataks, keela GPS asukohta seadetes või kasuta fikseeritud/võltsasukohta.
 
-## Map Sources
+## Kaardi allikad
 
-The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
+Baaskaart sõltub rakenduse stiilist: **Google Play** versioonid kasutavad Google Mapsi, **F-Droid** ja töölaua versioonid aga OpenStreetMapi. Põhikaardi peal on saadaval täiendavad paaniallikad pealiskihtide või alternatiividena:
 
 - Satellite imagery (where available)
 - Võrguühenduseta paanid (lae kaardialad alla võrguühenduseta kasutamiseks)

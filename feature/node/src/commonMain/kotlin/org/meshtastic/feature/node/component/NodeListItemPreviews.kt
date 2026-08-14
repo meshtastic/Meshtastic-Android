@@ -100,9 +100,40 @@ fun NodeItemSignedPreview() {
     }
 }
 
+@PreviewLightDark
+@Composable
+fun NodeItemUnknownPreview() {
+    // A node heard before its NodeInfo arrived — placeholder identity, italic name, incomplete badge (design#16).
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = previewNodes.unknown,
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // NodeItemCompact previews
 // ---------------------------------------------------------------------------
+
+@PreviewLightDark
+@Composable
+fun NodeItemCompactUnknownPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(thisNode = previewNodes.mickeyMouse, thatNode = previewNodes.unknown, distanceUnits = 0)
+            }
+        }
+    }
+}
 
 @PreviewLightDark
 @Composable

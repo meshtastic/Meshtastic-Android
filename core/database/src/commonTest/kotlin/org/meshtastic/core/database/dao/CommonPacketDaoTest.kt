@@ -29,6 +29,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Routing
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -150,6 +151,65 @@ abstract class CommonPacketDaoTest {
         packetDao.updateMessageStatus(packetWithId, MessageStatus.DELIVERED)
         val updatedMessages = packetDao.getMessagesFrom(contactKey).first()
         assertEquals(MessageStatus.DELIVERED, updatedMessages.first { it.packet.data.id == 999 }.packet.data.status)
+    }
+
+    private suspend fun insertSentPacket(packetId: Int, status: MessageStatus): Long = packetDao.insertAndGetId(
+        Packet(
+            uuid = 0L,
+            myNodeNum = myNodeNum,
+            port_num = PortNum.TEXT_MESSAGE_APP.value,
+            contact_key = "sent",
+            received_time = nowMillis,
+            read = true,
+            packetId = packetId,
+            data =
+            DataPacket(
+                to = NodeAddress.ID_BROADCAST,
+                bytes = "Sent".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                id = packetId,
+                status = status,
+            ),
+        ),
+    )
+
+    @Test
+    fun timeOutEnroutePacketFailsOnlyStillEnroutePackets() = runTest {
+        createDb()
+        val uuid = insertSentPacket(packetId = 8001, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnroutePacket(myNodeNum, uuid, TIMEOUT_ROUTING_ERROR))
+
+        val timedOut = packetDao.getPacketByPacketId(8001)
+        assertNotNull(timedOut)
+        assertEquals(MessageStatus.ERROR, timedOut.packet.data.status)
+        assertEquals(TIMEOUT_ROUTING_ERROR, timedOut.packet.routingError)
+    }
+
+    @Test
+    fun timeOutEnroutePacketLeavesAnAlreadyResolvedPacketAlone() = runTest {
+        createDb()
+        // The ACK that resolved this packet landed while a send-ack timeout was pending; the timeout must not
+        // overwrite the delivered status it sampled before the ACK arrived.
+        val uuid = insertSentPacket(packetId = 8002, status = MessageStatus.DELIVERED)
+
+        assertFalse(packetDao.timeOutEnroutePacket(myNodeNum, uuid, TIMEOUT_ROUTING_ERROR))
+
+        val untouched = packetDao.getPacketByPacketId(8002)
+        assertNotNull(untouched)
+        assertEquals(MessageStatus.DELIVERED, untouched.packet.data.status)
+    }
+
+    @Test
+    fun timeOutEnroutePacketTargetsOnlyOnePersistedRowWhenMeshIdsCollide() = runTest {
+        createDb()
+        val firstUuid = insertSentPacket(packetId = 8003, status = MessageStatus.ENROUTE)
+        val secondUuid = insertSentPacket(packetId = 8003, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnroutePacket(myNodeNum, firstUuid, TIMEOUT_ROUTING_ERROR))
+
+        assertEquals(MessageStatus.ERROR, packetDao.getPacketByPersistedId(myNodeNum, firstUuid)?.data?.status)
+        assertEquals(MessageStatus.ENROUTE, packetDao.getPacketByPersistedId(myNodeNum, secondUuid)?.data?.status)
     }
 
     @Test
@@ -323,5 +383,7 @@ abstract class CommonPacketDaoTest {
 
     companion object {
         private const val SAMPLE_SIZE = 10
+
+        private val TIMEOUT_ROUTING_ERROR = Routing.Error.TIMEOUT.value
     }
 }

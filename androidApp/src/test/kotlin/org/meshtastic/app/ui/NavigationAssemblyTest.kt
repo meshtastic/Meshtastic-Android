@@ -16,15 +16,23 @@
  */
 package org.meshtastic.app.ui
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.ui.component.MeshtasticNavDisplay
+import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.discovery.navigation.discoveryGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
@@ -35,10 +43,13 @@ import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.test.assertEquals
 
+// Graph assembly only builds entry providers, so a bare Application is enough. Booting
+// MeshUtilApplication here leaks its applicationScope launches into the rest of the fork.
 @OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], application = android.app.Application::class)
 class NavigationAssemblyTest {
 
     @Test
@@ -57,6 +68,86 @@ class NavigationAssemblyTest {
                 settingsGraph(backStack) { _ -> error("Settings ViewModel is not composed in this assembly test") }
                 firmwareGraph(backStack)
             }
+        }
+    }
+
+    @Test
+    fun mapRouteForwardsWaypointAndSitePlannerNode() = runComposeUiTest {
+        val route = MapRoute.Map(waypointId = 42, sitePlannerNodeNum = 8675309)
+        var receivedWaypointId: Int? = null
+        var receivedSitePlannerNodeNum: Int? = null
+
+        setContent {
+            val backStack = rememberNavBackStack(route)
+            CompositionLocalProvider(
+                LocalMapMainScreenProvider provides
+                    { _, _, waypointId, sitePlannerNodeNum ->
+                        SideEffect {
+                            receivedWaypointId = waypointId
+                            receivedSitePlannerNodeNum = sitePlannerNodeNum
+                        }
+                    },
+            ) {
+                MeshtasticNavDisplay(
+                    backStack = backStack,
+                    entryProvider = entryProvider<NavKey> { mapGraph(backStack) },
+                )
+            }
+        }
+
+        waitForIdle()
+        runOnIdle {
+            assertEquals(route.waypointId, receivedWaypointId)
+            assertEquals(route.sitePlannerNodeNum, receivedSitePlannerNodeNum)
+        }
+    }
+
+    @Test
+    fun mapRouteEffectRestartsWhenEntryReturnsFromBackStack() = runComposeUiTest {
+        val route = MapRoute.Map(sitePlannerNodeNum = 8675309)
+        lateinit var backStack: NavBackStack<NavKey>
+        var effectStarts = 0
+        var disposals = 0
+
+        setContent {
+            backStack = rememberNavBackStack(route)
+            CompositionLocalProvider(
+                LocalMapMainScreenProvider provides
+                    { _, _, _, sitePlannerNodeNum ->
+                        LaunchedEffect(sitePlannerNodeNum) { effectStarts += 1 }
+                        DisposableEffect(Unit) { onDispose { disposals += 1 } }
+                    },
+            ) {
+                MeshtasticNavDisplay(
+                    backStack = backStack,
+                    entryProvider =
+                    entryProvider<NavKey> {
+                        mapGraph(backStack)
+                        // MapRoute has no list-pane metadata, so the adaptive strategy cannot pair it with the
+                        // detail.
+                        entry<NodesRoute.NodeDetail> {}
+                    },
+                )
+            }
+        }
+
+        waitForIdle()
+        runOnIdle {
+            assertEquals(1, effectStarts)
+            assertEquals(0, disposals)
+            backStack.add(NodesRoute.NodeDetail(destNum = 11))
+        }
+
+        waitForIdle()
+        runOnIdle {
+            assertEquals(1, disposals)
+            backStack.removeLastOrNull()
+        }
+
+        waitForIdle()
+        runOnIdle {
+            assertEquals(2, effectStarts)
+            assertEquals(1, disposals)
         }
     }
 }

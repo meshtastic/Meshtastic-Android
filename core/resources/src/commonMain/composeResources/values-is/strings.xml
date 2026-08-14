@@ -30,6 +30,7 @@
     <string name="apply">Virkja</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Reiknar…</string>
     <string name="camera_permission">Aðgangur að myndavél</string>
@@ -66,9 +67,11 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <!-- DOC -->
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Grunnstilla</string>
     <!-- FILTER -->
     <!-- FIRMWARE -->
@@ -88,6 +91,8 @@
     <string name="ip_address">IP Tala:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aðgangur að staðsetningu ekki leyfður, staðsetning ekki send út á mesh.</string>

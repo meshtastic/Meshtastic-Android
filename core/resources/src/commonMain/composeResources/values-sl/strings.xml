@@ -35,6 +35,7 @@
     <string name="aqi_good">Dober</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>
     <string name="bad">Slab</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Preračunavam…</string>
@@ -87,6 +88,7 @@
     <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Ur</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="encryption_pkc">Šifriranje javnega ključa</string>
@@ -94,6 +96,7 @@
     <!-- ENVIRONMENT -->
     <string name="error">Napaka</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Povrnitev tovarniških nastavitev</string>
     <string name="fair">Precejšen</string>
     <!-- FILTER -->
@@ -120,6 +123,8 @@
     <string name="ip_address">IP naslov:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>
@@ -244,22 +249,10 @@
     <string name="role_tak_tracker_desc">Omogoča samodejno oddajanje TAK PLI in zmanjšuje rutinsko oddajanje.</string>
     <string name="role_tracker_desc">Prednostno oddaja paketke GPS položaja.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Napačen sejni ključ</string>
-    <string name="routing_error_admin_public_key_unauthorized">Javni ključ ni pooblaščen</string>
-    <string name="routing_error_bad_request">Slaba zahteva</string>
-    <string name="routing_error_duty_cycle_limit">Dosežena regionalna omejitev delovnega cikla</string>
     <string name="routing_error_got_nak">Prejeta negativna potrditev</string>
-    <string name="routing_error_max_retransmit">Dosežena meja ponovnega pošiljanja</string>
-    <string name="routing_error_no_channel">Brez kanala</string>
-    <string name="routing_error_no_interface">Brez vmesnika</string>
-    <string name="routing_error_no_response">Brez odgovora</string>
     <string name="routing_error_no_route">Brez poti</string>
     <string name="routing_error_none">Potrjeno</string>
-    <string name="routing_error_not_authorized">Niste pooblaščeni</string>
-    <string name="routing_error_pki_failed">Šifrirano pošiljanje ni uspelo</string>
-    <string name="routing_error_pki_unknown_pubkey">Neznan javni ključ</string>
     <string name="routing_error_timeout">Časovna omejitev</string>
-    <string name="routing_error_too_large">Paketek je prevelik</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator moči sprejetega signala je meritev, ki se uporablja za določanje ravni moči, ki jo sprejema antena. Višja vrednost RSSI na splošno pomeni močnejšo in stabilnejšo povezavo.</string>
     <!-- SAVE -->

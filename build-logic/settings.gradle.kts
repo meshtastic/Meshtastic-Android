@@ -16,6 +16,7 @@
  */
 
 pluginManagement {
+    includeBuild("settings-plugin")
     repositories {
         mavenCentral()
         gradlePluginPortal()
@@ -28,6 +29,10 @@ pluginManagement {
         }
         maven { url = uri("../offline-repository") }
     }
+}
+
+plugins {
+    id("meshtastic.develocity")
 }
 
 dependencyResolutionManagement {
@@ -49,9 +54,6 @@ dependencyResolutionManagement {
         }
     }
 }
-
-// Build Cache configuration (HTTP remote cache + local)
-apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")

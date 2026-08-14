@@ -84,8 +84,10 @@ class ChannelViewModel(
     }
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) =
-        safeLaunch(tag = "setChannels") { importChannelSet(channelSet, radioController, radioConfigRepository) }
+    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
+        importChannelSet(channelSet, radioController, radioConfigRepository)
+        analytics.trackAction("channel_update", mapOf("num_channels" to channelSet.settings.size))
+    }
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
@@ -94,6 +96,7 @@ class ChannelViewModel(
 
     fun trackShare() {
         analytics.track("share", DataPair("content_type", "channel"))
+        analytics.trackAction("channel_share")
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {

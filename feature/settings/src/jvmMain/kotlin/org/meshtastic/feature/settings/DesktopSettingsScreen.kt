@@ -77,6 +77,7 @@ import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -107,6 +108,7 @@ fun DesktopSettingsScreen(
     val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val cacheLimit by settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle()
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by settingsViewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
 
     var showThemePickerDialog by remember { mutableStateOf(false) }
     var showLanguagePickerDialog by remember { mutableStateOf(false) }
@@ -188,6 +190,11 @@ fun DesktopSettingsScreen(
                     ) {
                         showLanguagePickerDialog = true
                     }
+
+                    FullMessageTimestampsSetting(
+                        checked = showFullMessageTimestamps,
+                        onCheckedChange = settingsViewModel::setShowFullMessageTimestamps,
+                    )
 
                     HomoglyphSetting(
                         homoglyphEncodingEnabled = homoglyphEnabled,

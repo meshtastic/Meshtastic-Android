@@ -46,6 +46,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.model.ConnectionState
@@ -106,6 +107,7 @@ class SettingsViewModelTest {
         val uiPrefs = appPreferences.ui
         val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, appPreferences.meshLog)
         val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
+        val exportNodeDatabaseUseCase = ExportNodeDatabaseUseCase(nodeRepository)
 
         viewModel =
             SettingsViewModel(
@@ -119,6 +121,7 @@ class SettingsViewModelTest {
                 notificationPrefs = notificationPrefs,
                 setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
                 exportDataUseCase = exportDataUseCase,
+                exportNodeDatabaseUseCase = exportNodeDatabaseUseCase,
                 isOtaCapableUseCase = isOtaCapableUseCase,
                 fileService = fileService,
                 hiddenFeaturesUnlock = HiddenFeaturesUnlock(),
@@ -228,6 +231,13 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `setShowFullMessageTimestamps updates prefs`() = runTest {
+        viewModel.setShowFullMessageTimestamps(true)
+
+        appPreferences.ui.showFullMessageTimestamps.value shouldBe true
+    }
+
+    @Test
     fun `setLocale updates prefs`() = runTest {
         viewModel.setLocale("fr")
         appPreferences.ui.locale.value shouldBe "fr"
@@ -324,6 +334,34 @@ class SettingsViewModelTest {
         assertTrue(csvOutput.contains("\"123\",\"Sender Node\""))
         assertTrue(csvOutput.contains("Hello settings"))
         assertFalse(csvOutput.contains("Ignore me"))
+    }
+
+    @Test
+    fun `saveNodeDbJson writes node database export via file service`() = runTest {
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 456))
+        nodeRepository.setNodes(
+            listOf(TestDataFactory.createTestNode(num = 123, longName = "Sender Node", shortName = "SN")),
+        )
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val uri = CommonUri.parse("content://test/nodedb.json")
+        viewModel.saveNodeDbJson(uri)
+        runCurrent()
+
+        verifySuspend { fileService.write(uri, any()) }
+
+        val jsonOutput = buffer.readUtf8()
+        assertTrue(jsonOutput.contains("\"schemaVersion\": 1"))
+        assertTrue(jsonOutput.contains("\"myNodeNum\": 456"))
+        assertTrue(jsonOutput.contains("\"num\": 123"))
+        assertTrue(jsonOutput.contains("\"longName\": \"Sender Node\""))
     }
 
     @Test

@@ -24,6 +24,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CancellationException
@@ -31,18 +32,28 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,6 +68,34 @@ import org.meshtastic.core.database.di.DatabaseDataStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
+
+internal const val MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES = 3
+
+/**
+ * Sliding rate window shared by every automatic pool replacement, whichever failure triggered it.
+ *
+ * Rate-limiting rather than capping per manager lifetime is the point: the Room 3.0.1 permit leak behind #6608 recurs
+ * "multiple times within minutes" in the field, so any lifetime budget is spent early and every later wedge becomes
+ * permanent. A window still bounds how fast detached pools accumulate, because each recovery retains one Room instance
+ * until orderly shutdown, but it always reopens.
+ */
+internal const val POOL_RECOVERY_WINDOW_MS = 10 * 60 * 1_000L
+
+/** Bounds Flow-triggered replacements per [POOL_RECOVERY_WINDOW_MS]. */
+internal const val MAX_FLOW_POOL_RECOVERIES_PER_WINDOW = MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES * 2
+
+/**
+ * Deadline for the first emission of a re-latched DAO Flow. Comfortably above any legitimate cold-open, migration, or
+ * backfill-contended first query (Room's own acquire timeout is 30s) so a healthy database never trips it.
+ */
+internal const val FLOW_FIRST_EMISSION_TIMEOUT_MS = 45_000L
+
+/**
+ * Bounds wedge-triggered replacements (a `withDb` block that never returned) per [POOL_RECOVERY_WINDOW_MS]. Lower than
+ * the Flow budget because each wedge recovery also strands the abandoned block's pool, and a wedge costs a caller a
+ * full [DatabaseManager.withDbTimeoutMillis] to detect.
+ */
+internal const val MAX_WEDGE_POOL_RECOVERIES_PER_WINDOW = 3
 
 /** Returns database names that form either side of an unfinished, crash-recoverable association route. */
 internal fun pendingRouteDbNames(preferences: Preferences): Set<String> = preferences
@@ -90,6 +129,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         CLOSED,
     }
 
+    private enum class ReopenOrigin {
+        BOUNDED_OPERATION,
+        WEDGED_OPERATION,
+        FLOW_OBSERVER,
+    }
+
     @Volatile private var lifecycleState = LifecycleState.OPEN
 
     // Per-database bounded-access tracking and per-source write barrier for merges. `withDb` deliberately does NOT
@@ -107,6 +152,48 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     private val activeWriters = mutableMapOf<MeshtasticDatabase, Int>()
     private val activeReaders = mutableMapOf<MeshtasticDatabase, Int>()
     private val drainWaiters = mutableMapOf<MeshtasticDatabase, MutableList<CompletableDeferred<Unit>>>()
+
+    /**
+     * Per-pool containment lanes for one-shot [withDb] blocks, keyed by Room instance and guarded by
+     * [writerTrackerMutex]. [beginWrite] hands the lane out in the same critical section that admits the writer, so a
+     * block always runs on the lane of the pool it was admitted against.
+     *
+     * Each lane is a single-parallelism view, which narrows the Room/SQLite churn window without serializing blocks
+     * across suspension — a suspended callback releases the lane, exactly as the previous process-wide lane behaved.
+     * Keying by pool is what keeps a callback that blocks its lane thread from stalling every later write: a
+     * replacement pool published by recovery has its own lane. Entries are dropped once a pool can no longer be
+     * admitted (reopen detaches it, cached close removes it, [close] clears the map).
+     */
+    private val poolLanes = mutableMapOf<MeshtasticDatabase, CoroutineDispatcher>()
+
+    /**
+     * Pools proven wedged that recovery has refused to replace, mapped to when they were quarantined. Guarded by
+     * [writerTrackerMutex].
+     *
+     * While the replacement budget is spent, a wedged pool stays published, so without this every later write would be
+     * admitted against it, wait the full deadline, and abandon another block that can never finish — an unbounded pile
+     * of parked coroutines and writer registrations under steady ingest. Admission fails fast instead.
+     *
+     * The quarantine is not terminal: it expires after [POOL_RECOVERY_WINDOW_MS], which is exactly when the wedge
+     * budget has room again. That expiry is what makes windowing the budget observable at all — recovery is refused
+     * until a write is admitted, and writes are refused until recovery happens, so without expiry the two block each
+     * other and the pool stays write-dead for the process.
+     *
+     * Expiry re-admits against the *still-wedged* pool: recovery was refused, so nothing replaced it. The next write
+     * therefore pays one [withDbTimeoutMillis] deadline, and its abandonment is what drives the replacement. That
+     * sacrificial write is the guaranteed floor; when DAO Flows are collecting, a stall recovery usually replaces the
+     * pool sooner and clears the quarantine through the reopen path.
+     *
+     * Entries are also pruned wherever [poolLanes] entries are: a pool that is replaced or closed is not admissible.
+     */
+    private val unrecoverablePools = mutableMapOf<MeshtasticDatabase, Long>()
+
+    /**
+     * Builds the containment lane for one pool. Tests override this because `limitedParallelism` on a test dispatcher
+     * would replace virtual-time scheduling with a real worker view.
+     */
+    protected open fun createPoolLane(): CoroutineDispatcher = dispatchers.io.limitedParallelism(1)
+
     private val deferredEvictions = mutableSetOf<MeshtasticDatabase>()
     private var shutdownWriterDrain: CompletableDeferred<Unit>? = null
 
@@ -194,6 +281,14 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     /** Replaced pools that remain live for consumers of an earlier [currentDb] emission until orderly shutdown. */
     private val detachedDatabases = mutableListOf<NamedDatabase>()
 
+    /**
+     * Guarded by [mutex]; timestamps of successful replacements inside the sliding window, one deque per trigger.
+     *
+     * Per-origin rather than shared so the two failure modes cannot starve each other: a Flow-recovery storm must not
+     * consume the budget that lets a wedged write path reopen, and vice versa.
+     */
+    private val recoveryTimestamps = ReopenOrigin.entries.associateWith { ArrayDeque<Long>() }
+
     /** Databases merged and logically retired but kept open — app-wide consumers may still hold references. */
     private val logicallyRetired = mutableSetOf<String>()
 
@@ -272,6 +367,109 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
 
     override val currentDb: StateFlow<MeshtasticDatabase>
         get() = _currentDb
+
+    /**
+     * Re-latches long-lived DAO flows on database switches and recovers the active Room pool after a reader/writer
+     * acquisition timeout. A failed query is never replayed on the same pool; publishing the replacement causes
+     * [flatMapLatest] to start a fresh DAO flow. Concurrent failing collectors converge on the same replacement.
+     *
+     * Each collector stops after [MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES] replacements without a successful emission,
+     * while the manager permits at most [MAX_FLOW_POOL_RECOVERIES_PER_WINDOW] successful Flow-triggered replacements
+     * per sliding [POOL_RECOVERY_WINDOW_MS]. The rate limit bounds how fast wedge/recover/emission cycles can create
+     * detached Room instances without ever becoming a permanent refusal; a collector that fails while the window is
+     * full can retry after backoff (see `retryOnDbPoolFailure`) and recover once the window clears.
+     *
+     * A leaked pool permit does not surface as an exception at all: Room's pool logs the acquire timeout and retries
+     * forever (see [requireFirstEmissionWithin]), so the DAO flow simply never emits. Every latch is therefore also
+     * bounded by [FLOW_FIRST_EMISSION_TIMEOUT_MS], which converts that silent stall into the same recovery path.
+     */
+    override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> = flow {
+        val consecutivePoolRecoveries = atomic(0)
+        emitAll(
+            currentDb.flatMapLatest { database ->
+                flow {
+                    emitAll(
+                        query(database).requireFirstEmissionWithin(FLOW_FIRST_EMISSION_TIMEOUT_MS) {
+                            consecutivePoolRecoveries.value = 0
+                        },
+                    )
+                }
+                    .catch { failure ->
+                        if (failure is CancellationException) throw failure
+                        val exception = failure as? Exception ?: throw failure
+                        if (!isDbPoolAcquireTimeoutException(exception) && exception !is DbFlowStalledException) {
+                            throw failure
+                        }
+                        if (
+                            consecutivePoolRecoveries.value >= MAX_CONSECUTIVE_FLOW_POOL_RECOVERIES &&
+                            shouldRethrowFlowFailure(database)
+                        ) {
+                            throw exception
+                        }
+                        consecutivePoolRecoveries.incrementAndGet()
+
+                        val reopened =
+                            try {
+                                // Once a timeout is classified, finish or reject the manager-level ownership transfer
+                                // atomically even if this collector is cancelled. A cancellable reopen could otherwise
+                                // build a replacement and abandon the cache/publication handoff halfway through.
+                                withContext(NonCancellable) { reopenFlowDatabaseIfStillCurrent(database) }
+                            } catch (@Suppress("TooGenericExceptionCaught") recoveryFailure: Exception) {
+                                exception.addSuppressed(recoveryFailure)
+                                Logger.w(recoveryFailure) { "Failed to recover active DB after a Flow pool timeout" }
+                                throw exception
+                            }
+                        if (reopened != null) {
+                            Logger.w { "Reopened active DB after a Room Flow connection-pool timeout" }
+                        } else if (shouldRethrowFlowFailure(database)) {
+                            throw exception
+                        }
+                    }
+            },
+        )
+    }
+
+    /**
+     * Fails the flow with [DbFlowStalledException] if the first value does not arrive within [timeoutMs].
+     *
+     * A Room DAO Flow always queries once on collection, so a first emission that never arrives means the query never
+     * ran. Room 3.0.1 leaks a pool permit under cancellation churn and its pool is configured to *log* acquire timeouts
+     * and retry forever, so a wedged pool produces neither a value nor an exception — every DB read hangs silently
+     * (#6608). Only the first emission per latch is bounded; later emissions are event-driven and legitimately sparse.
+     *
+     * [onEmission] runs in the producing coroutine as each value leaves the upstream, before it crosses the channel. A
+     * downstream `onEach` could not be used for recovery bookkeeping: the upstream's own failure travels by cancelling
+     * this producer and can overtake the value it emitted a moment earlier.
+     */
+    private fun <T> Flow<T>.requireFirstEmissionWithin(timeoutMs: Long, onEmission: () -> Unit): Flow<T> = channelFlow {
+        val firstEmission = CompletableDeferred<Unit>()
+        // A failing child fails this channelFlow with its own exception, so the stall reaches the recovery
+        // `catch`
+        // above as DbFlowStalledException rather than as a cancellation.
+        val watchdog = launch {
+            if (withTimeoutOrNull(timeoutMs) { firstEmission.await() } == null) {
+                throw DbFlowStalledException(
+                    "Database Flow produced no first emission within ${timeoutMs}ms; the Room connection pool " +
+                        "is not serving queries",
+                )
+            }
+        }
+        collect { value ->
+            onEmission()
+            firstEmission.complete(Unit)
+            send(value)
+        }
+        watchdog.cancel()
+    }
+        // channelFlow buffers 64 by default; DAO snapshots are large, so keep the upstream's rendezvous
+        // backpressure.
+        .buffer(Channel.RENDEZVOUS)
+
+    /** Checks flow ownership without lazily rebuilding [currentDb] while shutdown is clearing its publication. */
+    private fun shouldRethrowFlowFailure(database: MeshtasticDatabase): Boolean {
+        val isStillCurrent = synchronized(initializationLock) { currentDbState?.value === database }
+        return isStillCurrent || lifecycleState != LifecycleState.OPEN
+    }
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
@@ -783,11 +981,19 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             throw failure
         }
         dbCache.remove(dbName)
+        // A closed pool can never be admitted again, so its lane and wedge verdict are dead weight.
+        writerTrackerMutex.withLock {
+            poolLanes.remove(database)
+            unrecoverablePools.remove(database)
+        }
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
     /** Room-close seam used by deterministic shutdown tests. */
     protected open fun closeDatabase(database: MeshtasticDatabase) = database.close()
+
+    /** Clock for the Flow-recovery rate window; tests override it to drive window expiry deterministically. */
+    protected open fun recoveryNowMillis(): Long = nowMillis
 
     /**
      * Reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted it.
@@ -798,14 +1004,70 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      *
      * Returns the reopened DB, or null if another coroutine switched databases or shutdown has started.
      */
+    private suspend fun reopenFlowDatabaseIfStillCurrent(expectedDb: MeshtasticDatabase): MeshtasticDatabase? {
+        val expectedDbName =
+            mutex.withLock {
+                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== expectedDb) return null
+                currentDbName
+            }
+        return reopenActiveDatabaseIfStillCurrent(expectedDb, expectedDbName, ReopenOrigin.FLOW_OBSERVER)
+    }
+
+    /** Per-window budget for [origin], or null when [origin] needs no budget of its own. */
+    private fun recoveryLimitFor(origin: ReopenOrigin): Int? = when (origin) {
+        ReopenOrigin.FLOW_OBSERVER -> MAX_FLOW_POOL_RECOVERIES_PER_WINDOW
+
+        ReopenOrigin.WEDGED_OPERATION -> MAX_WEDGE_POOL_RECOVERIES_PER_WINDOW
+
+        // Failure-triggered recovery is already bounded by the failing call itself.
+        ReopenOrigin.BOUNDED_OPERATION -> null
+    }
+
+    /** Drops [origin]'s recoveries that have aged out of the window and returns what remains. Caller holds [mutex]. */
+    private fun recoveriesInWindow(origin: ReopenOrigin): ArrayDeque<Long> {
+        val timestamps = recoveryTimestamps.getValue(origin)
+        val now = recoveryNowMillis()
+        while (timestamps.isNotEmpty() && now - timestamps.first() >= POOL_RECOVERY_WINDOW_MS) {
+            timestamps.removeFirst()
+        }
+        return timestamps
+    }
+
+    /**
+     * Reports whether automatic replacement is still allowed for [origin] right now. Each recovery retains one detached
+     * Room instance until orderly shutdown, so an intermittent wedge/recover cycle must not run unbounded — but the
+     * bound is a rate, not a lifetime total, so a wedge that recurs for hours stays recoverable (#6608). Caller must
+     * hold [mutex].
+     */
+    private fun hasReachedRecoveryLimit(origin: ReopenOrigin): Boolean {
+        val limit = recoveryLimitFor(origin) ?: return false
+        val count = recoveriesInWindow(origin).size
+        return (count >= limit).also { reached ->
+            if (reached) {
+                Logger.w {
+                    "DB recovery rate limit reached for $origin ($count in ${POOL_RECOVERY_WINDOW_MS}ms); deferring " +
+                        "another automatic replacement until the window clears"
+                }
+            }
+        }
+    }
+
+    /** Counts one successful automatic replacement against [origin]'s window budget. Caller must hold [mutex]. */
+    private fun recordRecovery(origin: ReopenOrigin) {
+        if (recoveryLimitFor(origin) == null) return
+        recoveriesInWindow(origin).addLast(recoveryNowMillis())
+    }
+
     @Suppress("ReturnCount")
     private suspend fun reopenActiveDatabaseIfStillCurrent(
         expectedDb: MeshtasticDatabase,
         expectedDbName: String,
+        origin: ReopenOrigin,
     ): MeshtasticDatabase? = withManagerOperation {
         mutex.withLock {
             if (lifecycleState != LifecycleState.OPEN) return@withManagerOperation null
             if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return@withManagerOperation null
+            if (hasReachedRecoveryLimit(origin)) return@withManagerOperation null
 
             val registered =
                 dbCache[expectedDbName]
@@ -815,7 +1077,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                         null
                     }
             if (registered !== expectedDb) {
-                Logger.w { "withDb: active DB registration changed before reopen; skipping active DB reopen" }
+                Logger.w { "DB recovery: active registration changed before reopen; skipping active DB reopen" }
                 return@withManagerOperation null
             }
 
@@ -835,59 +1097,185 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 synchronized(initializationLock) { initializedDefaultDb = reopened }
             }
             _currentDb.value = reopened
+            recordRecovery(origin)
             if (detachedDatabases.none { it.database === expectedDb }) {
                 detachedDatabases.add(NamedDatabase(expectedDbName, expectedDb))
+            }
+            // The replaced instance can no longer be admitted (beginWrite only ever hands out the published pool), so
+            // drop its lane and any wedge verdict. An abandoned block keeps running on the lane it already captured.
+            writerTrackerMutex.withLock {
+                poolLanes.remove(expectedDb)
+                unrecoverablePools.remove(expectedDb)
             }
 
             // Intentionally do not close expectedDb here. The public currentDb Flow exposes _currentDb directly,
             // so downstream flatMapLatest collectors may still be using the replaced Room instance after this
             // function emits the reopened DB. Closing the old pool here can surface "Connection pool is closed"
             // to app-wide DB observers that do not have closed-pool recovery. This mirrors switchActiveDatabase's
-            // no-sync-close discipline. [close] owns the detached-pool set and reclaims every replaced instance after
-            // all
-            // application consumers and admitted writers have stopped.
+            // no-sync-close discipline. [close] reclaims every retained detached pool during orderly shutdown.
+            //
+            // Retention is deliberately unbounded before then: a detached pool has no provable last user. Bounded
+            // reads/writes are tracked, but DAO Flow collectors are not, and Paging factories latch a raw
+            // `currentDb.value` (see PacketRepositoryImpl), so no counter here can show a pool is unreachable.
+            // [POOL_RECOVERY_WINDOW_MS] bounds how fast replacements can be created instead.
 
             reopened
         }
     }
 
-    // Short-term runtime containment: route withDb entry through a single-lane dispatcher to narrow the Room/SQLite
-    // connection-pool churn window seen during device/firmware update flows. Room suspend DAOs may continue on Room's
-    // own executor after suspension, so this is not a strict global DB-I/O serialization guarantee. Preserve bounded
-    // one-shot DB-critical blocks through cancellation, then re-check cancellation so stale callers do not continue
-    // after the DB releases. Long-lived Flow/Paging reads must stay out of withDb; revisit after direct currentDb.value
-    // callers are audited and safe DB concurrency can be restored.
-    protected open val limitedIo: CoroutineDispatcher by lazy { dispatchers.io.limitedParallelism(1) }
+    /** Test-only visibility for detached-pool retention. */
+    internal suspend fun debugDetachedPoolCount(): Int = mutex.withLock { detachedDatabases.size }
 
     /**
-     * Executes [block] once against the admitted current DB instance.
+     * Deadline for one [withDb] call. Tests override this: a non-positive value waits without a bound, which is the
+     * only way a fixture can park a writer across a virtual-time idle period without the scheduler auto-advancing into
+     * this deadline.
+     */
+    protected open val withDbTimeoutMillis: Long
+        get() = WITH_DB_TIMEOUT_MS
+
+    /**
+     * Executes [block] once against the admitted current DB instance, bounding the caller's wait at
+     * [withDbTimeoutMillis].
      *
      * A callback is never replayed after it starts: an arbitrary block can perform one side effect and then fail, so
      * transparently invoking it again against another pool could duplicate or split a logical write. Pool-timeout
      * recovery may reopen the active database for future calls, but the original failure is still propagated.
+     *
+     * Containment is per pool, not process-wide: the callback runs on the pool's containment lane ([poolLanes]) in a
+     * manager-scoped child coroutine that owns the writer registration and releases it in its own `finally`. Only the
+     * *wait* is bounded — a started block still runs to completion under [NonCancellable], so a bounded DB-critical
+     * section is never torn apart mid-write. A block that never returns (Room 3.x logs and retries connection-pool
+     * acquisition instead of throwing, so a leaked permit hangs forever) is abandoned rather than cancelled: the caller
+     * fails with [DatabaseOperationTimeoutException] and the active pool is reopened, so later calls are admitted
+     * against the replacement pool and its fresh lane instead of queueing behind the wedge.
+     *
+     * Long-lived Flow/Paging reads must stay out of `withDb`; see [observeCurrentDb] and [withReadDb].
      */
-    @Suppress("TooGenericExceptionCaught", "ReturnCount")
+    @Suppress("ReturnCount")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
         val queuedAt = nowMillis
-        return withContext(limitedIo) {
-            val queuedMillis = nowMillis - queuedAt
-            if (queuedMillis >= WITH_DB_SLOW_OPERATION_MS) {
-                Logger.w { "withDb waited ${queuedMillis}ms for the temporary DB containment lane" }
-            }
+        currentCoroutineContext().ensureActive()
+        val admission = beginWrite()
+        val blockStarted = CompletableDeferred<Unit>()
+        val execution = launchDbBlock(admission, blockStarted, block)
+        val timeoutMillis = withDbTimeoutMillis
+        val completed =
+            if (timeoutMillis <= 0) execution.join() else withTimeoutOrNull(timeoutMillis) { execution.join() }
+        if (completed == null) abandonWedgedDbBlock(admission, blockStarted, execution, timeoutMillis)
 
-            val startedAt = nowMillis
-            try {
-                withCurrentDb(block)
-            } finally {
-                val elapsedMillis = nowMillis - startedAt
-                if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
-                    Logger.w {
-                        "withDb callback took ${elapsedMillis}ms on the temporary DB containment lane; persistent " +
-                            "slow logs indicate DB access path should be revisited"
-                    }
-                }
+        // Re-check cancellation so a stale caller does not continue after the DB releases.
+        currentCoroutineContext().ensureActive()
+        val elapsedMillis = nowMillis - queuedAt
+        if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
+            Logger.w {
+                "withDb took ${elapsedMillis}ms including lane wait; persistent slow logs indicate the DB access " +
+                    "path should be revisited"
             }
         }
+        val failure = execution.getCompletionExceptionOrNull() ?: return execution.getCompleted()
+        handleDbBlockFailure(admission, failure)
+    }
+
+    /**
+     * Starts [block] on the admitted pool's lane.
+     *
+     * The coroutine owns the writer registration and releases it in its own `finally`, so an abandoned block can never
+     * double-release it and always deregisters if it eventually returns. It starts [CoroutineStart.ATOMIC] so that
+     * `finally` also runs when the coroutine is cancelled before its first dispatch, and it completes [blockStarted]
+     * only once it is about to invoke the callback — a call still waiting for its lane has performed no side effect and
+     * is aborted at the cancellation check instead of running late.
+     */
+    private fun <T> launchDbBlock(
+        admission: AdmittedDatabase,
+        blockStarted: CompletableDeferred<Unit>,
+        block: suspend (MeshtasticDatabase) -> T,
+    ): Deferred<T> = managerScope.async(admission.lane, start = CoroutineStart.ATOMIC) {
+        val db = admission.database
+        try {
+            currentCoroutineContext().ensureActive()
+            blockStarted.complete(Unit)
+            withContext(NonCancellable) { block(db) }
+        } finally {
+            withContext(NonCancellable) { endWrite(db) }
+        }
+    }
+
+    /**
+     * Stops admitting work against a pool that stayed published after recovery declined to replace it.
+     *
+     * Recovery declines while the windowed replacement budget is spent, and it can also fail outright. Either way the
+     * wedged instance remains [_currentDb], so every later admission would park another block on it forever. Marking it
+     * turns those calls into an immediate failure until the quarantine expires (see [unrecoverablePools]). Recovery
+     * during shutdown is not a wedge verdict, and neither is a pool that has already been replaced, so both are left
+     * unmarked.
+     */
+    private suspend fun quarantineWedgedPoolIfStillPublished(database: MeshtasticDatabase) {
+        if (lifecycleState != LifecycleState.OPEN) return
+        val quarantined =
+            writerTrackerMutex.withLock {
+                if (lifecycleState != LifecycleState.OPEN || _currentDb.value !== database) {
+                    false
+                } else {
+                    unrecoverablePools.put(database, recoveryNowMillis()) == null
+                }
+            }
+        if (quarantined) {
+            Logger.w {
+                "Marked the active DB pool unrecoverable after wedge recovery was refused; database operations fail " +
+                    "fast for the next ${POOL_RECOVERY_WINDOW_MS}ms, then one is admitted to drive a replacement"
+            }
+        }
+    }
+
+    /**
+     * Resolves a [withDb] call whose bounded wait expired: cancels a block that never started, or abandons a started
+     * one and recovers the pool.
+     *
+     * A started block is not cancellable by design, so it keeps its lane and writer registration until it returns — a
+     * merge drain or shutdown drain that waits on it still resolves on its own bound and logs. Reopening the active
+     * pool is what unwedges the app: the wedged instance moves to the detached set (protected from eviction, reclaimed
+     * by [close]) and later callers admit against the replacement pool and its fresh lane.
+     */
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
+    private suspend fun abandonWedgedDbBlock(
+        admission: AdmittedDatabase,
+        blockStarted: CompletableDeferred<Unit>,
+        execution: Deferred<*>,
+        timeoutMillis: Long,
+    ): Nothing {
+        if (!blockStarted.isCompleted) {
+            execution.cancel()
+            // Re-check: the block may have acquired the lane between the timeout and the cancellation, in which case it
+            // is inside NonCancellable and must be abandoned instead of reported as never started.
+            if (!blockStarted.isCompleted) {
+                Logger.w { "withDb waited ${timeoutMillis}ms for the DB lane; its callback never started" }
+                throw DatabaseOperationTimeoutException(
+                    "withDb did not start within ${timeoutMillis}ms; an earlier block is wedged on this database",
+                )
+            }
+        }
+        val reopened =
+            try {
+                reopenActiveDatabaseIfStillCurrent(admission.database, admission.name, ReopenOrigin.WEDGED_OPERATION)
+            } catch (recoveryCancel: CancellationException) {
+                throw recoveryCancel
+            } catch (recoveryFailure: Exception) {
+                Logger.w(recoveryFailure) { "withDb: failed to reopen active DB after abandoning a wedged callback" }
+                null
+            }
+        if (reopened == null) quarantineWedgedPoolIfStillPublished(admission.database)
+        Logger.w {
+            if (reopened != null) {
+                "withDb callback exceeded ${timeoutMillis}ms; abandoned it and reopened the active DB so later " +
+                    "calls run on a fresh connection pool"
+            } else {
+                "withDb callback exceeded ${timeoutMillis}ms; abandoned it but the active DB was not reopened"
+            }
+        }
+        throw DatabaseOperationTimeoutException(
+            "withDb callback did not finish within ${timeoutMillis}ms and was abandoned without being replayed",
+        )
     }
 
     /**
@@ -947,7 +1335,35 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
      * between those operations. This guarantees a new `withDb` never writes to a DB that is being retired, nor lands on
      * `dest` before its data exists.
      */
-    private data class AdmittedDatabase(val database: MeshtasticDatabase, val name: String)
+    private data class AdmittedDatabase(
+        val database: MeshtasticDatabase,
+        val name: String,
+        /** Containment lane of [database]; see [poolLanes]. */
+        val lane: CoroutineDispatcher,
+    )
+
+    /**
+     * Reports whether [database] is still inside its quarantine, lifting the entry once the window has passed.
+     *
+     * The expiry is evaluated here rather than against the recovery budget itself because this runs under
+     * [writerTrackerMutex] while the budget deques are guarded by [mutex], and the established lock order is [mutex]
+     * then [writerTrackerMutex]. Reading the budget from here would invert it. Both are keyed to
+     * [POOL_RECOVERY_WINDOW_MS], so the quarantine lifts exactly when a replacement becomes permissible again.
+     *
+     * Caller must hold [writerTrackerMutex].
+     */
+    private fun isQuarantinedLocked(database: MeshtasticDatabase): Boolean {
+        val quarantinedAt = unrecoverablePools[database] ?: return false
+        val expired = recoveryNowMillis() - quarantinedAt >= POOL_RECOVERY_WINDOW_MS
+        if (expired) {
+            unrecoverablePools.remove(database)
+            Logger.i {
+                "Lifted the wedged-pool quarantine after ${POOL_RECOVERY_WINDOW_MS}ms; admitting one operation to " +
+                    "drive a replacement"
+            }
+        }
+        return !expired
+    }
 
     private suspend fun beginWrite(): AdmittedDatabase {
         while (true) {
@@ -958,8 +1374,19 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     val pendingGate = writerGate
                     if (pendingGate == null) {
                         val db = _currentDb.value
+                        if (isQuarantinedLocked(db)) {
+                            throw DatabaseOperationTimeoutException(
+                                "database pool is wedged and its replacement budget is spent; refusing to start " +
+                                    "another operation that cannot finish",
+                            )
+                        }
                         activeWriters[db] = (activeWriters[db] ?: 0) + 1
-                        admitted = AdmittedDatabase(database = db, name = currentDbName)
+                        admitted =
+                            AdmittedDatabase(
+                                database = db,
+                                name = currentDbName,
+                                lane = poolLanes.getOrPut(db) { createPoolLane() },
+                            )
                     }
                     pendingGate
                 }
@@ -1080,81 +1507,83 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         }
     }
 
+    /**
+     * Maps a failed [withDb] execution onto the existing recovery policy and rethrows.
+     *
+     * The failed callback is never replayed; recovery only reopens the pool so *future* calls succeed.
+     */
     @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
-    private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        val admission = beginWrite()
+    private suspend fun handleDbBlockFailure(admission: AdmittedDatabase, failure: Throwable): Nothing {
         val db = admission.database
         val active = admission.name
-        try {
-            return runCancellableDbBlock(db, block)
-        } catch (e: CancellationException) {
-            throw e // Preserve structured concurrency cancellation propagation.
-        } catch (e: Exception) {
-            // Shutdown in progress: do not touch _currentDb (its getter calls checkOpen()) nor attempt a reopen that
-            // would build a pool. Propagate the original failure with its message intact.
-            if (lifecycleState != LifecycleState.OPEN) throw e
-            val currentDb = _currentDb.value
-            if (currentDb !== db && isDbClosedException(e)) {
-                Logger.w {
-                    "withDb: database closed during switch (${e.message}); callback will not be replayed automatically"
-                }
-                throw e
-            }
-
-            // Same active DB but Room's connection pool is wedged. Reopen for future calls, but do not replay this
-            // callback: it may already have completed an earlier side effect before the timeout surfaced.
-            if (currentDb === db && isDbPoolAcquireTimeoutException(e)) {
-                val reopened =
-                    try {
-                        reopenActiveDatabaseIfStillCurrent(db, active)
-                    } catch (recoveryCancel: CancellationException) {
-                        throw recoveryCancel
-                    } catch (recoveryFailure: Exception) {
-                        e.addSuppressed(recoveryFailure)
-                        Logger.w(recoveryFailure) {
-                            "withDb: failed to reopen active DB after a connection-pool timeout"
-                        }
-                        null
-                    }
-                Logger.w {
-                    if (reopened != null) {
-                        "withDb: reopened active DB after transient Room connection-pool timeout; " +
-                            "failed callback was not replayed"
-                    } else {
-                        "withDb: active DB was not reopened during timeout recovery; failed callback was " +
-                            "not replayed"
-                    }
-                }
-                throw e
-            }
-
-            throw e
-        } finally {
-            // NonCancellable so a cancelled withDb still deregisters — a leaked +1 would make every future
-            // drain on this DB instance time out.
-            withContext(NonCancellable) { endWrite(db) }
+        if (failure is CancellationException) {
+            // The execution coroutine was cancelled from outside this call — only manager shutdown does that. The
+            // caller itself is still active (its own cancellation surfaces from join), so do not impersonate it.
+            throw IllegalStateException("withDb work was cancelled before completing", failure)
         }
+        val e = failure as? Exception ?: throw failure
+        // Shutdown in progress: do not touch _currentDb (its getter calls checkOpen()) nor attempt a reopen that
+        // would build a pool. Propagate the original failure with its message intact.
+        if (lifecycleState != LifecycleState.OPEN) throw e
+        val currentDb = _currentDb.value
+        if (currentDb !== db && isDbClosedException(e)) {
+            Logger.w {
+                "withDb: database closed during switch (${e.message}); callback will not be replayed automatically"
+            }
+            throw e
+        }
+
+        // Same active DB but Room's connection pool is wedged. Reopen for future calls, but do not replay this
+        // callback: it may already have completed an earlier side effect before the timeout surfaced.
+        if (currentDb === db && isDbPoolAcquireTimeoutException(e)) {
+            val reopened =
+                try {
+                    reopenActiveDatabaseIfStillCurrent(db, active, ReopenOrigin.BOUNDED_OPERATION)
+                } catch (recoveryCancel: CancellationException) {
+                    throw recoveryCancel
+                } catch (recoveryFailure: Exception) {
+                    e.addSuppressed(recoveryFailure)
+                    Logger.w(recoveryFailure) { "withDb: failed to reopen active DB after a connection-pool timeout" }
+                    null
+                }
+            Logger.w {
+                if (reopened != null) {
+                    "withDb: reopened active DB after transient Room connection-pool timeout; " +
+                        "failed callback was not replayed"
+                } else {
+                    "withDb: active DB was not reopened during timeout recovery; failed callback was not replayed"
+                }
+            }
+            throw e
+        }
+
+        throw e
     }
 
+    /**
+     * Runs one bounded DB-critical block under the caller's own writer admission, preserved through cancellation.
+     *
+     * Unlike [withDb] this has no lane and no wait bound: the only caller is manager-owned search-index backfill, which
+     * runs in a cancellable manager job and can legitimately take much longer than [WITH_DB_TIMEOUT_MS].
+     */
     private suspend fun <T> runCancellableDbBlock(db: MeshtasticDatabase, block: suspend (MeshtasticDatabase) -> T): T {
-        // Keep withDb callbacks bounded and one-shot: NonCancellable can hold the containment lane until this returns.
         currentCoroutineContext().ensureActive()
         val result = withContext(NonCancellable) { block(db) }
         currentCoroutineContext().ensureActive()
         return result
     }
 
-    private fun isDbClosedException(e: Exception): Boolean = isDbPoolAcquireTimeoutException(e) ||
-        generateSequence<Throwable>(e) { it.cause }
-            .any { throwable ->
-                val msg = throwable.message?.lowercase() ?: return@any false
-                val hasDbContext = DB_TERMS.any { it in msg }
-                ("closed" in msg && hasDbContext) || "database is locked" in msg || "sqlite_busy" in msg
-            }
-
     internal companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
+
+        /**
+         * Upper bound on the lane wait plus the callback itself. Writer admission is bounded separately by
+         * [WRITER_GATE_TIMEOUT_MS] and runs before this deadline starts, so a call blocked behind an association can
+         * take the sum of the two. Generous enough that no legitimate one-shot write reaches it, and short enough that
+         * a pool wedge surfaces as a failure with recovery instead of a hang.
+         */
+        internal const val WITH_DB_TIMEOUT_MS = 30_000L
 
         /**
          * Upper bound on how long a merge waits for in-flight writers on the source DB to drain (see [drainWriters]).
@@ -1180,6 +1609,14 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                 val msg = throwable.message?.lowercase() ?: return@any false
                 isRoomPoolAcquireTimeoutMessage(msg)
             }
+
+        fun isDbClosedException(e: Exception): Boolean = isDbPoolAcquireTimeoutException(e) ||
+            generateSequence<Throwable>(e) { it.cause }
+                .any { throwable ->
+                    val msg = throwable.message?.lowercase() ?: return@any false
+                    val hasDbContext = DB_TERMS.any { it in msg }
+                    ("closed" in msg && hasDbContext) || "database is locked" in msg || "sqlite_busy" in msg
+                }
     }
 
     /**
@@ -1547,6 +1984,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
                     drainWaiters.clear()
                     activeWriters.clear()
                     activeReaders.clear()
+                    poolLanes.clear()
+                    unrecoverablePools.clear()
                     activeManagerOperations.clear()
                     writerGate?.completeExceptionally(IllegalStateException("DatabaseManager is closing or closed"))
                     writerGate = null
@@ -1565,3 +2004,12 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         }
     }
 }
+
+/**
+ * A bounded one-shot database operation did not finish within its deadline and was abandoned, never replayed.
+ *
+ * Room's connection pool retries a failed acquisition indefinitely instead of throwing, so a leaked permit surfaces as
+ * a callback that never returns. This is the deadline that turns that silent hang into a failure the caller can react
+ * to; the active pool is reopened so subsequent operations proceed.
+ */
+class DatabaseOperationTimeoutException(message: String) : IllegalStateException(message)

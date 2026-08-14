@@ -73,6 +73,7 @@
     <string name="audio_config">Configuración de sonido</string>
     <string name="available_pins">Pines disponibles</string>
     <string name="bad">Mal</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ancho de Banda</string>
     <string name="battery">Batería</string>
     <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>
@@ -271,12 +272,12 @@
     <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
     <string name="double_tap_as_button_press">Doble pulsación como botón</string>
-    <string name="downlink_enabled">Baja de Paquetes Permitida</string>
     <string name="download">Descarga</string>
     <string name="dynamic">Dinámico</string>
     <string name="echo_enabled">Eco activado</string>
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activar el modo ahorro de energía</string>
     <string name="enabled">Habilitado</string>
     <!-- ENCRYPTION -->
@@ -299,6 +300,7 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="expires">Caduca</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuración</string>
     <string name="export_data_csv">Exportar todos los paquetes</string>
     <string name="external_notification">Notificaciones Externas</string>
@@ -417,10 +419,12 @@ Rango de Valores 0 - 500.</string>
     <string name="latest_alpha_firmware">Última alfa</string>
     <string name="latest_stable_firmware">Última estable</string>
     <string name="latitude">Latitud</string>
+    <!-- LAYER -->
     <string name="learn_more">Saber más</string>
     <string name="led_heartbeat">Latido LED</string>
     <string name="led_state">Estado de led</string>
     <string name="legacy_admin_channel">Canal de administración antiguo</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
     <!-- LOAD -->
     <string name="load">Carga</string>
@@ -735,23 +739,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="root_topic">Tema raíz</string>
     <string name="rotary_encoder_1_enabled">Encoder Número 1 Activado</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Mala clave de sesión</string>
-    <string name="routing_error_admin_public_key_unauthorized">Clave pública no autorizada</string>
-    <string name="routing_error_bad_request">Solicitud errónea</string>
-    <string name="routing_error_duty_cycle_limit">Se alcanzó el límite regional de ciclos de trabajo</string>
     <string name="routing_error_got_nak">Recibido un reconocimiento negativo</string>
-    <string name="routing_error_max_retransmit">Máximo número de retransmisiones alcanzado</string>
-    <string name="routing_error_no_channel">No hay canal</string>
-    <string name="routing_error_no_interface">Sin interfaz</string>
-    <string name="routing_error_no_response">Sin respuesta</string>
     <string name="routing_error_no_route">Sin ruta</string>
     <string name="routing_error_none">Reconocido</string>
-    <string name="routing_error_not_authorized">No autorizado</string>
-    <string name="routing_error_pki_failed">Envío cifrado fallido</string>
-    <string name="routing_error_pki_unknown_pubkey">Clave pública desconocida</string>
-    <string name="routing_error_rate_limit_exceeded">Límite de tasa excedido. Por favor intente de nuevo más tarde.</string>
     <string name="routing_error_timeout">Tiempo agotado</string>
-    <string name="routing_error_too_large">Paquete demasiado largo</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
@@ -894,7 +885,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="unset">Sin establecer - 0</string>
     <string name="up_down_select_input_enabled">Arriba/Abajo/Seleccionar Activado</string>
     <string name="update_interval_seconds">Intervalo de refresco (segundos)</string>
-    <string name="uplink_enabled">Subida de Paquetes Permitida</string>
     <string name="uplink_feature_description">Los mensajes de la malla se enviarán a la internet pública a través de la puerta de enlace configurada de cualquier nodo.</string>
     <string name="uptime">Tiempo encendido</string>
     <!-- URL -->

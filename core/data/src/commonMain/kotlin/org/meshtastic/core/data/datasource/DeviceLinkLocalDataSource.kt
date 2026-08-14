@@ -18,16 +18,16 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.DeviceLinkEntity
+import org.meshtastic.core.database.retryOnDbPoolFailure
 
 @Single
 class DeviceLinkLocalDataSource(private val dbManager: DatabaseProvider) {
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observeAll(): Flow<List<DeviceLinkEntity>> =
-        dbManager.currentDb.flatMapLatest { db -> db.deviceLinkDao().observeAll() }
+        dbManager.observeCurrentDb { db -> db.deviceLinkDao().observeAll() }.retryOnDbPoolFailure("deviceLinks")
 
     suspend fun getAll(): List<DeviceLinkEntity> = dbManager.withReadDb { it.deviceLinkDao().getAll() }
 

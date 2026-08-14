@@ -150,7 +150,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     var restartTransportCalled: Boolean = false
         private set
 
-    override fun isMockTransport(): Boolean = true
+    override val mockTransportEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
+
+    /** No capture asset in tests; flip per-test when exercising replay-gated behaviour. */
+    override var isReplayTransportAvailable: Boolean = false
 
     override fun sendToRadio(bytes: ByteArray) {
         sentToRadio.add(bytes)

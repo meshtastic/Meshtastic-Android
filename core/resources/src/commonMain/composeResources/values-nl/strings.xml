@@ -45,6 +45,7 @@
     <string name="audio_config">Audioconfiguratie</string>
     <string name="available_pins">Beschikbare pinnen</string>
     <string name="bad">Slecht</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbreedte</string>
     <string name="battery">Batterij</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI drempelwaarde (standaard -80)</string>
@@ -132,11 +133,11 @@
     <string name="distance">Afstand</string>
     <!-- DOC -->
     <string name="doc_title_mqtt">MQTT</string>
-    <string name="downlink_enabled">Downlink ingeschakeld</string>
     <string name="dynamic">Dynamisch</string>
     <string name="echo_enabled">Echo ingeschakeld</string>
     <string name="edit">Wijzig</string>
     <string name="eight_hours">8 Uur</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Energiebesparingsmodus inschakelen</string>
     <!-- ENCRYPTION -->
     <string name="encryption_enabled">Encryptie ingeschakeld</string>
@@ -149,6 +150,7 @@
     <string name="error_duty_cycle">Limiet van Duty Cycle bereikt. Kan nu geen berichten verzenden, probeer het later opnieuw.</string>
     <string name="ethernet_enabled">Ethernet ingeschakeld</string>
     <string name="exchange_position">Positie uitwisselen</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Configuratie exporteren</string>
     <string name="external_notification">Externe Melding</string>
     <string name="factory_reset">Reset naar fabrieksinstellingen</string>
@@ -207,8 +209,10 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Breedtegraad</string>
+    <!-- LAYER -->
     <string name="led_state">LED status</string>
     <string name="legacy_admin_channel">Legacy Admin kanaal</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>
@@ -383,22 +387,10 @@
     <string name="role_tak_tracker_desc">Activeer automatisch zenden TAK PLI en beperk routine zendingen.</string>
     <string name="role_tracker_desc">Zendt GPS-positiepakketten met prioriteit uit.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Ongeldige sessiesleutel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Publieke sleutel onbevoegd</string>
-    <string name="routing_error_bad_request">Ongeldige aanvraag</string>
-    <string name="routing_error_duty_cycle_limit">Regionale limiet inschakeltijd bereikt</string>
     <string name="routing_error_got_nak">Negatieve bevestiging ontvangen</string>
-    <string name="routing_error_max_retransmit">Maximum Pogingen Bereikt</string>
-    <string name="routing_error_no_channel">Geen Kanaal</string>
-    <string name="routing_error_no_interface">Geen Interface</string>
-    <string name="routing_error_no_response">Geen antwoord</string>
     <string name="routing_error_no_route">Geen route</string>
     <string name="routing_error_none">Bevestigd</string>
-    <string name="routing_error_not_authorized">Niet Bevoegd</string>
-    <string name="routing_error_pki_failed">Versleuteld verzenden mislukt</string>
-    <string name="routing_error_pki_unknown_pubkey">Onbekende publieke sleutel</string>
     <string name="routing_error_timeout">Time-Out</string>
-    <string name="routing_error_too_large">Pakket te groot</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="rsyslog_server">rsyslog server</string>
@@ -479,7 +471,6 @@
     <string name="unmute">Dempen opheffen</string>
     <string name="unrecognized">Niet herkend</string>
     <string name="update_interval_seconds">Update-interval (seconden)</string>
-    <string name="uplink_enabled">Uplink ingeschakeld</string>
     <string name="uptime">Tijd online</string>
     <!-- URL -->
     <string name="url">URL</string>

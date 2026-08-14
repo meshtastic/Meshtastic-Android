@@ -32,6 +32,7 @@
     <!-- AQI -->
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="audio">Ήχος</string>
+    <!-- BANDWIDTH -->
     <string name="battery">Μπαταρία</string>
     <string name="blue">Μπλε</string>
     <!-- BLUETOOTH -->
@@ -93,12 +94,14 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
     <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
     <!-- ENVIRONMENT -->
     <string name="error">Σφάλμα</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
     <string name="favorite">Αγαπημένο</string>
     <!-- FILTER -->
@@ -124,6 +127,8 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Γεωγραφικό Πλάτος</string>
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Η πρόσβαση στην τοποθεσία είναι απενεργοποιημένη, δεν μπορεί να παρέχει θέση στο πλέγμα.</string>
@@ -223,10 +228,6 @@
     <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <string name="routing_error_bad_request">Εσφαλμένο Αίτημα</string>
-    <string name="routing_error_max_retransmit">Max. Anzahl Wiederholungen erreicht</string>
-    <string name="routing_error_no_channel">Kein Kanal</string>
-    <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
     <!-- SAVE -->
     <string name="save">Αποθήκευση</string>

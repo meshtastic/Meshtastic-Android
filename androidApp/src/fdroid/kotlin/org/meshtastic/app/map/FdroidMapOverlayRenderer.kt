@@ -114,7 +114,10 @@ class FdroidMapOverlayRenderer {
                 val ok =
                     stream.use { input ->
                         when (layer.layerType) {
-                            LayerType.GEOJSON -> doc.parseGeoJSON(input.bufferedReader().readText())
+                            LayerType.GEOJSON,
+                            LayerType.COVERAGE,
+                            -> doc.parseGeoJSON(input.bufferedReader().readText())
+
                             LayerType.KML -> doc.parseKMLStream(input, null)
                         }
                     }

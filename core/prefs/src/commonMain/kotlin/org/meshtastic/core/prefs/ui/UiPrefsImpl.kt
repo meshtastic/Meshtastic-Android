@@ -73,8 +73,9 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         scope.launch { dataStore.edit { it[KEY_NODE_SORT] = value } }
     }
 
+    // Defaults on so nodes heard before their NodeInfo arrives stay visible and messageable (design#16).
     override val includeUnknown: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
+        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN] ?: true }.stateIn(scope, SharingStarted.Lazily, true)
 
     override fun setIncludeUnknown(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_INCLUDE_UNKNOWN] = value } }
@@ -129,6 +130,15 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
 
     override fun setShowQuickChat(show: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
+    }
+
+    override val showFullMessageTimestamps: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setShowFullMessageTimestamps(show: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] = show } }
     }
 
     override val eventThemeEnabled: StateFlow<Boolean> =
@@ -295,6 +305,7 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
+        val KEY_SHOW_FULL_MESSAGE_TIMESTAMPS = booleanPreferencesKey("show-full-message-timestamps")
         val KEY_EVENT_THEME_ENABLED = booleanPreferencesKey("event-theme-enabled")
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")

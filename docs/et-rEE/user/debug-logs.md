@@ -23,17 +23,17 @@ Ava **Arendajapaneel**, valides **Seaded → Täpsemad → Arendajapaneel**.
 
 Arendajapaneelil on kaks vahekaarti:
 
-- **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
+- **Paketid** – dekodeeritud võrguliiklus, mida raadio on saatnud ja vastu võtnud (protokollitasemel sõnumid). Useful for diagnosing mesh and routing behavior.
 - **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
 
 Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
 
 ## Viewing app logs
 
-The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
+Rakenduse logide vahekaart kuvab ainult selle rakenduse uusimaid logisid – mitte kunagi teiste seadmes olevate rakenduste logisid.
 
 - **Search** — type in the search box to filter to matching lines.
-- **Tasemefilter** — **V / D / I / W / E** kiibid lülitavad sisse üksikasjaliku, arendaja-, teabe-, hoiatus- ja vearea. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
+- **Tasemefilter** — **V / D / I / W / E** kiibid lülitavad sisse üksikasjaliku, arendaja-, teabe-, hoiatus- ja vearea. Tap a level to hide it; tap again to bring it back. Fataalseid jooni näidatakse alati.
 - **Refresh** — the refresh icon re-reads the latest logs.
 
 Error and warning lines are tinted so problems stand out.
@@ -48,7 +48,7 @@ Attach that file to your GitHub issue.
 
 ## Töölaud
 
-The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
+Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Rakenduse logid** rakenduse enda jäädvustatud logide väljundit. Search, filtering, and export work the same way.
 
 ## Related Topics
 

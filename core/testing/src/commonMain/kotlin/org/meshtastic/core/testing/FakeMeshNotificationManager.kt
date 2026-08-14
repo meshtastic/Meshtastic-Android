@@ -65,7 +65,7 @@ class FakeMeshNotificationManager : MeshNotificationManager {
 
     override fun showClientNotification(clientNotification: ClientNotification) {}
 
-    override fun cancelMessageNotification(contactKey: String) {}
+    override suspend fun cancelMessageNotification(contactKey: String) {}
 
     override fun cancelLowBatteryNotification(node: Node) {}
 

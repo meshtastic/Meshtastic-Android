@@ -46,6 +46,9 @@ interface FilterPrefs {
     fun setFilterWords(words: Set<String>)
 }
 
+/** Persisted policy used by background mesh-log cleanup. */
+data class MeshLogCleanupPolicy(val loggingEnabled: Boolean, val retentionDays: Int)
+
 /** Reactive interface for mesh log preferences. */
 interface MeshLogPrefs {
     val retentionDays: StateFlow<Int>
@@ -56,9 +59,14 @@ interface MeshLogPrefs {
 
     fun setLoggingEnabled(enabled: Boolean)
 
+    /** Both cleanup settings from one persisted snapshot; suspends until the store's initial load completes. */
+    suspend fun awaitCleanupPolicy(): MeshLogCleanupPolicy
+
     companion object {
         const val DEFAULT_RETENTION_DAYS = 30
-        const val MIN_RETENTION_DAYS = -1
+
+        /** The lowest selectable setting is the one-hour sentinel, not a day count. */
+        const val MIN_RETENTION_DAYS = MeshLogRetention.ONE_HOUR
         const val MAX_RETENTION_DAYS = 365
     }
 }
@@ -123,6 +131,11 @@ interface UiPrefs {
     val showQuickChat: StateFlow<Boolean>
 
     fun setShowQuickChat(show: Boolean)
+
+    /** Whether conversation message headers and actions always show both the date and time. */
+    val showFullMessageTimestamps: StateFlow<Boolean>
+
+    fun setShowFullMessageTimestamps(show: Boolean)
 
     /**
      * Whether to apply an event edition's ambient theme (accent wash + custom typeface) app-wide (opt-out; default on).
@@ -304,8 +317,15 @@ interface MapConsentPrefs {
 /** Reactive interface for map tile provider settings. */
 interface MapTileProviderPrefs {
     val customTileProviders: StateFlow<String?>
+    val selectedCustomTileProviderId: StateFlow<String?>
 
-    fun setCustomTileProviders(providers: String?)
+    suspend fun awaitCustomTileProviders(): String?
+
+    suspend fun awaitSelectedCustomTileProviderId(): String?
+
+    suspend fun setCustomTileProviders(providers: String?)
+
+    suspend fun setSelectedCustomTileProviderId(providerId: String?)
 }
 
 /** Reactive interface for radio settings. */
@@ -336,6 +356,9 @@ interface MeshPrefs {
 
     fun setDeviceAddress(address: String?)
 
+    /** Persisted selected-device address; suspends for the first disk load instead of returning the flow's default. */
+    suspend fun awaitDeviceAddress(): String?
+
     fun getStoreForwardLastRequest(address: String?): StateFlow<Int>
 
     fun setStoreForwardLastRequest(address: String?, timestamp: Int)
@@ -346,6 +369,14 @@ interface TakPrefs {
     val isTakServerEnabled: StateFlow<Boolean>
 
     fun setTakServerEnabled(enabled: Boolean)
+
+    /**
+     * Whether mesh nodes are synthesized into CoT contacts for connected TAK clients. Opt-in and default off; only
+     * takes effect while [isTakServerEnabled] is also true.
+     */
+    val isMeshToCotEnabled: StateFlow<Boolean>
+
+    fun setMeshToCotEnabled(enabled: Boolean)
 }
 
 /** Reactive interface for App Functions (system AI integration) preferences. */

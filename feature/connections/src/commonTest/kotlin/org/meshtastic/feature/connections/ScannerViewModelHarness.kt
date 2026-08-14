@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.connections
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -23,6 +25,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -86,26 +89,44 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
      */
     val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
 
+    /** Demo Mode gate, backing `radioInterfaceService.mockTransportEnabled`. Flip it to assert the reactive path. */
+    val mockTransportEnabled = MutableStateFlow(false)
+
     val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /**
+     * The `(showMock, showReplay)` pairs the ViewModel has asked for, in call order. Without this the fake would return
+     * the same devices for every visibility combination, so a test could pass while the ViewModel requested the wrong
+     * one — assert against this to prove the production path actually forwarded the intended flags.
+     *
+     * The order matters as much as the contents: the Demo Mode gate is observed rather than sampled, so a mid-session
+     * unlock has to show up here as a fresh request.
+     */
+    val discoveryRequests = mutableListOf<Pair<Boolean, Boolean>>()
+
+    /**
      * A fake [GetDiscoveredDevicesUseCase] that mirrors the real behavior: it combines [baseDevicesFlow] with the
-     * provided resolved list so tests can verify NSD gating.
+     * provided resolved list so tests can verify NSD gating, and records each request in [discoveryRequests].
      */
     val getDiscoveredDevicesUseCase =
         object : GetDiscoveredDevicesUseCase {
             override fun invoke(
                 showMock: Boolean,
+                showReplay: Boolean,
                 resolvedList: Flow<List<DiscoveredService>>,
-            ): Flow<DiscoveredDevices> = combine(baseDevicesFlow, resolvedList) { base, resolved ->
-                val tcpDevices =
-                    resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
-                base.copy(discoveredTcpDevices = tcpDevices)
+            ): Flow<DiscoveredDevices> {
+                discoveryRequests += showMock to showReplay
+                return combine(baseDevicesFlow, resolvedList) { base, resolved ->
+                    val tcpDevices =
+                        resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
+                    base.copy(discoveredTcpDevices = tcpDevices)
+                }
             }
         }
 
     init {
-        every { radioInterfaceService.isMockTransport() } returns false
+        every { radioInterfaceService.mockTransportEnabled } returns mockTransportEnabled
+        every { radioInterfaceService.isReplayTransportAvailable } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
         every { firmwareRecoveryDataSource.pending } returns flowOf(null)
@@ -135,6 +156,18 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         firmwareRecoveryDataSource = firmwareRecoveryDataSource,
         bleScanner = bleScanner,
     )
+
+    /**
+     * Ends [viewModel]'s lifetime. Call from `@AfterTest` **before** `Dispatchers.resetMain()`.
+     *
+     * `viewModelScope` is never cleared for a hand-built ViewModel, so without this its coroutines outlive the test.
+     * One suspended on a real-dispatcher result (compose-resources resolves on an internal `Dispatchers.Default` scope)
+     * then resumes onto a `Dispatchers.Main` that `resetMain()` has already unset, which throws. Nothing handles it, so
+     * it lands as `UncaughtExceptionsBeforeTest` on whichever test starts next.
+     */
+    fun clearViewModel(viewModel: ViewModel) {
+        viewModel.viewModelScope.cancel()
+    }
 
     companion object {
         /** A scanned-but-unbonded BLE entry — the input that routes through `requestBonding`. */

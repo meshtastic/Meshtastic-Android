@@ -105,6 +105,7 @@
     <string name="backup_keys">Säkerhetskopiera nycklar</string>
     <string name="backup_restore">Säkerhetskopiera &amp; återställ</string>
     <string name="bad">Dålig</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbredd</string>
     <string name="baro_pressure">Tryck</string>
     <string name="battery">Batteri</string>
@@ -408,7 +409,6 @@
     <string name="done">Klart</string>
     <string name="dont_show_again_for_device">Visa inte igen för denna enhet</string>
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
-    <string name="downlink_enabled">Nedlänk aktiverad</string>
     <string name="downlink_feature_description">Meddelanden från en offentlig internetgateway vidarebefordras till det lokala nätverket. På grund av noll-hopp-policyn kommer trafiken från standardservern MQTT inte att sprida sig längre än den här enheten.</string>
     <string name="download">Ladda ner</string>
     <string name="duplicated_public_key_title">Dubblett publik nyckel upptäckt</string>
@@ -417,6 +417,7 @@
     <string name="echo_enabled">Eko aktiverad</string>
     <string name="edit">Ändra</string>
     <string name="eight_hours">8 timmar</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Aktivera strömsparläge</string>
     <string name="enabled">Aktiverad</string>
     <!-- ENCRYPTION -->
@@ -444,6 +445,7 @@
     <string name="expand_chart">Expandera diagrammet</string>
     <string name="expanded">Expanderad</string>
     <string name="expires">Upphör att gälla</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportera konfiguration</string>
     <string name="export_data_csv">Exportera alla paket</string>
     <string name="export_gpx">Exportera GPX</string>
@@ -634,11 +636,13 @@
     <string name="latest_alpha_firmware">Senaste alfa</string>
     <string name="latest_stable_firmware">Senaste stabila</string>
     <string name="latitude">Latitud</string>
+    <!-- LAYER -->
     <string name="learn_more">Läs mer</string>
     <string name="led_heartbeat">LED pulsering</string>
     <string name="led_state">LED-läge</string>
     <string name="legacy_admin_channel">Äldre typ av adminkanal</string>
     <string name="library_count">%1$d bibliotek</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <!-- LOAD -->
@@ -1084,24 +1088,10 @@
     <string name="role_tracker_desc">Nod som prioriterar GPS meddelanden.</string>
     <string name="root_topic">Rotämne (root topic)</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Felaktig sessionsnyckel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Obehörig publik nyckel</string>
-    <string name="routing_error_bad_request">Misslyckad</string>
-    <string name="routing_error_duty_cycle_limit">Gränsen för intermittensfaktor uppnådd</string>
     <string name="routing_error_got_nak">Misslyckad kvittens</string>
-    <string name="routing_error_max_retransmit">Maximalt antal sändningar nådd</string>
-    <string name="routing_error_no_channel">Ingen kanal</string>
-    <string name="routing_error_no_interface">Inget gränssnitt</string>
-    <string name="routing_error_no_response">Inget svar</string>
     <string name="routing_error_no_route">Ingen rutt</string>
     <string name="routing_error_none">Kvitterad</string>
-    <string name="routing_error_not_authorized">Ej behörig</string>
-    <string name="routing_error_pki_failed">Krypterad sändning misslyckades</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI-sändningen misslyckades, ingen offentlig nyckel</string>
-    <string name="routing_error_pki_unknown_pubkey">Okänd publik nyckel</string>
-    <string name="routing_error_rate_limit_exceeded">Sändningsgräns uppnådd. Försök igen senare.</string>
     <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_too_large">Paket för stort</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
     <string name="rsyslog_server">rsyslog-server</string>
@@ -1258,9 +1248,10 @@
     <string name="tak_role_unspecified">Ospecificerad</string>
     <string name="tak_server">TAK-server</string>
     <string name="tak_server_enabled">Aktivera lokal TAK-server</string>
-    <string name="tak_server_enabled_desc">Startar en lokal TLS-server på port 8089 för ATAK/iTAK-anslutningar</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Status</string>
+    <string name="tak_server_status_off">Av</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_results">%1$d passerade, %2$d misslyckades %3$d/%4$d</string>
@@ -1354,7 +1345,6 @@
     <string name="update_interval">Intervall för hämtning av GPS-position</string>
     <string name="update_interval_seconds">Uppdateringsintervall (sekunder)</string>
     <string name="updated">Uppdaterad</string>
-    <string name="uplink_enabled">Upplänk aktiverad</string>
     <string name="uplink_feature_description">Meddelanden från mesh-nätet kommer att skickas till internet via vilken nod som helst som är konfigurerad som gateway.</string>
     <string name="uptime">Upptid</string>
     <!-- URL -->

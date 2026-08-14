@@ -82,6 +82,7 @@
     <string name="available_pins">Pin-uri disponibile</string>
     <string name="back">Înapoi</string>
     <string name="bad">Slab</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Lățime bandă</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Baterie</string>
@@ -320,7 +321,6 @@
     <string name="doc_title_nodes">Noduri</string>
     <string name="done">Gata</string>
     <string name="double_tap_as_button_press">Apăsare dublă ca buton</string>
-    <string name="downlink_enabled">Downlink activat</string>
     <string name="downlink_feature_description">Mesajele provenite de la o un gateway public de internet sunt redirecționate către rețeaua locală. Datorită politicii de zero salturi, traficul provenit de la serverul MQTT implicit nu se va propaga mai departe de acest dispozitiv.</string>
     <string name="download">Descărcare</string>
     <string name="duplicated_public_key_title">Duplicat Cheie Publică detectată</string>
@@ -330,6 +330,7 @@
     <string name="edit">Editare</string>
     <string name="edit_custom_tile_source">Modifică sursa rețelei</string>
     <string name="eight_hours">8 Ore</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Activează modul de economisire a energiei</string>
     <string name="enabled">Activat</string>
     <!-- ENCRYPTION -->
@@ -355,6 +356,7 @@
     <string name="exchange_position">Schimb de poziție</string>
     <string name="expand_chart">Extindeți graficul</string>
     <string name="expires">Expiră la</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportă configurația</string>
     <string name="export_data_csv">Exportă toate pachetele</string>
     <string name="external_notification">Notificare externă</string>
@@ -545,10 +547,12 @@
     <string name="latest_alpha_firmware">Ultimul alfa</string>
     <string name="latest_stable_firmware">Ultimul stabil</string>
     <string name="latitude">Latitudine</string>
+    <!-- LAYER -->
     <string name="led_heartbeat">Puls LED</string>
     <string name="led_state">Stare LED</string>
     <string name="legacy_admin_channel">Canal implicit de administrator</string>
     <string name="library_count">Librării %1$d</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamator autorizat</string>
     <string name="licensed_amateur_radio_text">Activarea acestei opțiuni dezactivează criptarea și nu este compatibilă cu rețeaua implicită de Meshtastic.</string>
     <!-- LOAD -->
@@ -945,24 +949,10 @@
     <string name="root_topic">Temă rădăcină</string>
     <string name="rotary_encoder_1_enabled">Encoder rotativ #1 activat</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Cheie de sesiune incorectă</string>
-    <string name="routing_error_admin_public_key_unauthorized">Cheie publică neautorizată</string>
-    <string name="routing_error_bad_request">Solicitare invalidă</string>
-    <string name="routing_error_duty_cycle_limit">Limita regională a ciclului de funcționare atinsă</string>
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>
-    <string name="routing_error_max_retransmit">Retransmisie maximă atinsă</string>
-    <string name="routing_error_no_channel">Niciun canal</string>
-    <string name="routing_error_no_interface">Fără interfață</string>
-    <string name="routing_error_no_response">Nici un răspuns</string>
     <string name="routing_error_no_route">Nici o rută</string>
     <string name="routing_error_none">Confirmat</string>
-    <string name="routing_error_not_authorized">Neautorizat</string>
-    <string name="routing_error_pki_failed">Trimitere criptată nereușită</string>
-    <string name="routing_error_pki_send_fail_public_key">Trimiterea PKI nu a reușit, nici o cheie publică</string>
-    <string name="routing_error_pki_unknown_pubkey">Cheie publică necunoscută</string>
-    <string name="routing_error_rate_limit_exceeded">Rata limită depășită. Te rugăm să încerci din nou mai târziu.</string>
     <string name="routing_error_timeout">Expirat</string>
-    <string name="routing_error_too_large">Pachet prea mare</string>
     <string name="rssi"> RSSI</string>
     <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="rsyslog_server">server rsyslog</string>
@@ -1181,7 +1171,6 @@
     <string name="update_interval">Interval de actualizare GPS</string>
     <string name="update_interval_seconds">Interval de actualizare (secunde)</string>
     <string name="updated">Actualizat</string>
-    <string name="uplink_enabled">Uplink activat</string>
     <string name="uplink_feature_description">Mesajele de la mesageria va fi trimise pe internet public prin intermediul oricărui portal configurat de nod.</string>
     <string name="uptime">Timp de functionare</string>
     <!-- URL -->

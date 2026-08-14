@@ -115,7 +115,12 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Hea</string>
+    <string name="aqi_hazardous">Ohtlik</string>
+    <string name="aqi_moderate">Mõõdukas</string>
+    <string name="aqi_unhealthy">Ebatervislik</string>
+    <string name="aqi_unhealthy_sensitive">Tundlikele gruppidele ebatervislik</string>
     <string name="aqi_value_with_severity">%1$d (%2$s)</string>
+    <string name="aqi_very_unhealthy">Väga ebatervislik</string>
     <string name="are_you_sure">Oled kindel?</string>
     <string name="are_you_sure_change_default">Kas oled kindel, et soovid vaikekanalit muuta?</string>
     <string name="audio">Heli</string>
@@ -126,6 +131,7 @@
     <string name="backup_keys_confirmation">Salvestab avalikud ja privaatvõtmed selle seadme turvalisse ja krüpteeritud salvestusruumi.</string>
     <string name="backup_restore">Varunda &amp; Taasta</string>
     <string name="bad">Halb</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ribalaius</string>
     <string name="baro_pressure">Õhurõhk</string>
     <string name="battery">Aku</string>
@@ -144,6 +150,7 @@
     <string name="bluetooth_feature_discovery">Avastamine</string>
     <string name="bluetooth_feature_discovery_description">Leia ja tuvasta lähedal asuvad Meshtastic seadmed.</string>
     <string name="bluetooth_permission">Sinihammas</string>
+    <string name="bluetooth_scan_location_services_disabled">Asukohateenused on välja lülitatud. Lähedalasuvate seadmete otsimiseks lülita need sisse.</string>
     <string name="bluetooth_scan_missing_permission">Sinihamba ​​skannimiseks on vaja luba. Andke seadmete leidmiseks lähedalasuvatele seadmetele (või asukohale) luba.</string>
     <string name="bluetooth_scan_start_failed">Sinihamba otsingut ei õnnestunud alustada. Proovi uuesti või lülita sinihammas sisse/välja, kui probleem püsib.</string>
     <plurals name="bluetooth_scan_too_frequent">
@@ -332,6 +339,7 @@
     <string name="debug_logcat_empty">Rakenduste logisid pole kuvada</string>
     <string name="debug_logcat_refresh">Värskenda</string>
     <string name="debug_logs_export">Salvesta logi</string>
+    <string name="debug_logs_export_warning">See fail võib sisaldada sõnumi teksti, täpseid asukohti ja sõlmede üksikasju. Enne avalikku jagamist vaata see üle.</string>
     <string name="debug_logs_exported">Eksporditud logid</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_search_clear">Puhasta otsing</string>
@@ -549,7 +557,6 @@
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Ära selle seadme puhul enam kuva</string>
     <string name="double_tap_as_button_press">Topeltpuudutus nupuna</string>
-    <string name="downlink_enabled">Vastuvõtt lubatud</string>
     <string name="downlink_feature_description">Avaliku interneti ligipääsu sõnumid edastatakse kohalikku kärgvõrgu. Nullhüppe poliitika tõttu ei levi MQTT vaikeserverist tulev liiklus sellest seadmest kaugemale.</string>
     <string name="download">Lae alla</string>
     <string name="duplicated_public_key_title">Tuvastati korduv avalik võti</string>
@@ -559,6 +566,7 @@
     <string name="edit">Muuda</string>
     <string name="edit_custom_tile_source">Muuda võrgupaani allikat</string>
     <string name="eight_hours">8 tundi</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Luba energiasäästurežiim</string>
     <string name="enabled">Lubatud</string>
     <!-- ENCRYPTION -->
@@ -584,10 +592,12 @@
     <string name="ethernet_config">Etherneti valikud</string>
     <string name="ethernet_enabled">Ethernet lubatud</string>
     <string name="ethernet_ip">Etherneti IP-aadress:</string>
+    <string name="event_use_event_theme">Kasuta sündmuse teemat</string>
     <string name="exchange_position">Jaga asukohta</string>
     <string name="expand_chart">Laienda diagrammi</string>
     <string name="expanded">Laiendatud</string>
     <string name="expires">Aegub</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Salvesta sätted</string>
     <string name="export_data_csv">Ekspordi kõik paketid</string>
     <string name="export_gpx">Salvesta GPX</string>
@@ -806,6 +816,7 @@
     <string name="ignore_remove">Eemaldada '%1$s' eiramis loendist?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Lae sätted</string>
+    <string name="import_export_label">Import/Eksport</string>
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="import_label">Lae</string>
     <string name="import_shared_contact">Impordi jagatud kontakt?</string>
@@ -861,11 +872,14 @@
     <string name="latest_alpha_firmware">Viimane alfa</string>
     <string name="latest_stable_firmware">Viimane stabiilne</string>
     <string name="latitude">Laiuskraad</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="learn_more">Lisateave</string>
     <string name="led_heartbeat">Südamelöögi LED</string>
     <string name="led_state">LED olek</string>
     <string name="legacy_admin_channel">Pärandadministraatori kanal</string>
     <string name="library_count">%1$d teek</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Litsentseeritud raadioamatöör (Ham)</string>
     <string name="licensed_amateur_radio_text">Selle valiku lubamine keelab krüpteerimise ja ei ühildu Meshtastic vaikevõrguga.</string>
     <!-- LOAD -->
@@ -1044,12 +1058,13 @@
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
     <string name="message_device_managed">Seda raadio on hallatud ja muudab ainult kaughaldur.</string>
     <string name="message_input_label">Sõnum</string>
-    <string name="message_routing_error_no_channel">Kanalit pole valitud</string>
     <string name="message_routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
     <string name="message_routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
     <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
     <string name="message_status_enroute">Saadan...</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
+    <string name="message_status_recipient_delivered">Saajale kätte toimetatud</string>
+    <string name="message_status_relayed_not_confirmed">Vahendatud, saaja pole kinnitanud</string>
     <string name="message_status_sfpp_confirmed">Kinnitatud SF++ ahel</string>
     <string name="message_status_sfpp_routing">Marsruutimine SF++ ahela kaudu…</string>
     <string name="message_status_unknown">Tundmatu</string>
@@ -1070,6 +1085,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT sätted</string>
     <string name="mqtt_enabled">MQTT lubatud</string>
+    <string name="mqtt_error_connection_lost">MQTT: ühendus katkes</string>
+    <string name="mqtt_error_credentials_rejected">MQTT: ühendus lükati tagasi (kontrolli volitusi)</string>
+    <string name="mqtt_error_proxy_failed">MQTT puhverserveri töö ebaõnnestus: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: ühendus lükati tagasi: %1$s</string>
     <string name="mqtt_probe_dns_failure">Hosti ei leitud</string>
     <string name="mqtt_probe_other_failure">Ühendus ebaõnnestus</string>
     <string name="mqtt_probe_rejected">Vahendaja lükkas tagasi: %1$s</string>
@@ -1080,7 +1099,7 @@
     <string name="mqtt_probe_timeout">Ajaline katkestus peale %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS kätlemine ebaõnnestus: %1$s</string>
     <string name="mqtt_proxy_local">Selle telefoni MQTT puhverserver</string>
-    <string name="mqtt_proxy_local_summary">Telefon edastab ühendatud seadme MQTT-liiklust. Lülita välja, et edastamine katkestada - ilma seadme MQTT-sätet muutmata. See on kasulik, kui MQTT-liiklus ühenduse üle koormab. Edastamise jätkamiseks lülita see uuesti sisse.</string>
+    <string name="mqtt_proxy_local_summary">Telefon vahendab ühendatud seadme MQTT-liiklust. Lülita välja, et vahendaminee katkestada - ilma seadme MQTT-sätet muutmata. See on kasulik, kui MQTT-liiklus ühenduse üle koormab. Vahendamise jätkamiseks lülita see uuesti sisse.</string>
     <string name="mqtt_status_connected">Ühendatud</string>
     <string name="mqtt_status_connecting">Ühendan…</string>
     <string name="mqtt_status_disconnected">Ühendus katkenud</string>
@@ -1247,7 +1266,18 @@
     <string name="override_frequency_mhz">Tühista sagedus</string>
     <string name="pa_fan_disabled">PA ventilaator keelatud</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">Paketi autentsus</string>
+    <string name="packet_authenticity_balanced">Tasakaalustatud — eelista autentitud</string>
+    <string name="packet_authenticity_balanced_summary">Soovitatav. Keeldu allkirjastamata madalamale versioonile ülemineku katsetest sõlmedelt, mis teadaolevalt allkirjastavad.</string>
+    <string name="packet_authenticity_compatible">Ühildub – aktsepteeri allkirjastamata</string>
+    <string name="packet_authenticity_compatible_summary">Autentige pakette võimaluse korral, kuid maksimaalse ühilduvuse tagamiseks aktsepteerige allkirjastamata liiklust.</string>
+    <string name="packet_authenticity_level">Kaitsetase</string>
+    <string name="packet_authenticity_strict">Range – nõuab autentimist</string>
+    <string name="packet_authenticity_strict_confirm">Luba range</string>
     <string name="packet_authenticity_strict_confirmation">Strict ignoreerib kõiki krüptograafiliselt autentimata kaugvõrgu pakette. Vanem püsivara, litsentsitud või PKI-võtmeteta amatööride sõlmed ja ülisuured paketid võivad kaduda. PKI-autentitud otsesõnumid jäävad kättesaadavaks.</string>
+    <string name="packet_authenticity_strict_summary">Kuva ja töötle ainult krüptograafiliselt autentitud kärgvõrgu pakette. Vanemad sõlmed ja ülisuured paketid võivad kaduda.</string>
+    <string name="packet_authenticity_strict_title">Kas lubada range autentimine?</string>
+    <string name="packet_authenticity_unsupported">See ühendatud seade ei toeta pakettallkirja kontrollimist.</string>
     <string name="pairing_mode">Sidumine</string>
     <string name="password">Parool</string>
     <!-- PAX -->
@@ -1424,24 +1454,12 @@
     <string name="rotary_encoder_1_enabled">Pöördvalik #1 lubatud</string>
     <string name="router_role_confirmation_text">Olen lugenud &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Seadme rolli dokumenti&lt;/a&gt; ja blogi postitust &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; Kuidas valida seadmele õige roll&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Vigane sessiooni võti</string>
-    <string name="routing_error_admin_public_key_unauthorized">Avalik võti autoriseerimata</string>
-    <string name="routing_error_bad_request">Vigane päring</string>
-    <string name="routing_error_duty_cycle_limit">Piirkondlik töötsükli piirang saavutatud</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
-    <string name="routing_error_max_retransmit">Maksimaalne kordusedastus on saavutatud</string>
-    <string name="routing_error_no_channel">Kanalit pole</string>
-    <string name="routing_error_no_interface">Liidest pole</string>
-    <string name="routing_error_no_response">Vastust pole</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
     <string name="routing_error_none">Kinnitatud</string>
-    <string name="routing_error_not_authorized">Autoriseerimata</string>
-    <string name="routing_error_pki_failed">Krüpteeritud saatmine nurjus</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI saatmine ebaõnnestus, avalikku võtit pole</string>
-    <string name="routing_error_pki_unknown_pubkey">Tundmatu avalik võti</string>
-    <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
+    <string name="routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
+    <string name="routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
     <string name="routing_error_timeout">Aegunud</string>
-    <string name="routing_error_too_large">Liiga suur pakett</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="rsyslog_server">rsyslog server</string>
@@ -1522,6 +1540,7 @@
     <string name="share_channels_qr">Jaga kanalite QR koodi</string>
     <string name="share_contact">Jaga kontakti</string>
     <string name="share_location">Jaga asukohta</string>
+    <string name="share_location_description">Kasuta oma telefoni GPS asukoha saatmiseks oma sõlmele, selle asemel, et kasutada sõlme riistvaralist GPS.</string>
     <string name="share_to">Jaga…</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="short_name">Lühi nimi</string>
@@ -1531,8 +1550,10 @@
     <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
     <string name="show_iaq_legend">Näita õhukvaliteedi ajalugu</string>
     <string name="show_layer">Näita kiht</string>
+    <string name="show_original">Näita originaali</string>
     <string name="show_password">Kuva parool</string>
     <string name="show_precision_circle">Näita täpsusringid</string>
+    <string name="show_translation">Näita tõlget</string>
     <string name="show_waypoints">Kuva teekonnapunktid</string>
     <string name="shutdown">Lülita välja</string>
     <string name="shutdown_node_name">Sõlm: %1$s</string>
@@ -1541,15 +1562,29 @@
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
     <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Antenni võimendus (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Antenni kõrgus (m)</string>
+    <string name="site_planner_color_scale">Värvipalett</string>
+    <string name="site_planner_estimate">Hinnanguline katvus</string>
+    <string name="site_planner_estimating">Katvuse hindamine…</string>
+    <string name="site_planner_failed">Katvuse hindamine ebaõnnestus</string>
+    <string name="site_planner_frequency_mhz">Sagedus (MHz)</string>
+    <string name="site_planner_high_resolution">Kõrg-haljastusega maastik</string>
     <string name="site_planner_invalid_latitude">Sisesta −90 kuni 90</string>
     <string name="site_planner_invalid_longitude">Sisesta −180 to 180</string>
+    <string name="site_planner_invalid_positive">Peab olema suurem kui 0</string>
     <string name="site_planner_invalid_rx_sensitivity">Sisesta −150 to −30 dBm</string>
     <string name="site_planner_max_range_km">Maks leviulatus (km)</string>
     <string name="site_planner_rx_height_meters">Vastuvõtja kõrgus (m)</string>
     <string name="site_planner_rx_sensitivity_dbm">Vastuvõtja tundlikkus (dBm)</string>
     <string name="site_planner_section_display">Ekraan</string>
+    <string name="site_planner_section_receiver">Vastuvõtja</string>
+    <string name="site_planner_section_transmitter">Asupaik / saatja</string>
+    <string name="site_planner_subtitle">Saatja raadiosagedusliku leviala hindamine</string>
     <string name="site_planner_tx_power_watts">TX võimsus (W)</string>
+    <string name="site_planner_use_current_location">Kasuta praegust asukohta</string>
     <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
+    <string name="site_planner_use_node_location">Kasuta praegust sõlme asukohta</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>
@@ -1566,6 +1601,7 @@
     <string name="status_message">Oleku teavitus</string>
     <string name="status_message_config">Olekuteate sätted</string>
     <string name="stay_connected_anywhere">Igal pool ühenduses</string>
+    <string name="stop_connecting">Peata ühendamine</string>
     <string name="store_forward">Salvesa &amp; edasta</string>
     <string name="store_forward_config">Salvesta &amp; edasta sätted</string>
     <string name="store_forward_enabled">Salvesta &amp; edastamine lubatud</string>
@@ -1591,10 +1627,11 @@
     <string name="tak_role_unspecified">Määramata</string>
     <string name="tak_server">TAK server</string>
     <string name="tak_server_enabled">Kohaliku TAK-serveri lubamine</string>
-    <string name="tak_server_enabled_desc">Käivitab ATAK/iTAK-ühenduste jaoks kohaliku TLS serveri, pordil 8089</string>
-    <string name="tak_server_export_data_package_desc">Genereeri selle serveriga ühendumiseks ATAK/iTAK-il .zip fail</string>
     <string name="tak_server_loading">…</string>
+    <string name="tak_server_mesh_to_cot">Kärgvõrgust CoTi konverter</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Staatus</string>
+    <string name="tak_server_status_off">Väljas</string>
     <string name="tak_server_test_card_title">TAK kärgvõrgu test (arendaja)</string>
     <string name="tak_server_test_idle">Saada kõik %1$d testkinnitust kärgvõrku</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1715,7 +1752,6 @@
     <string name="update_interval">GPS-i küsimise intervall</string>
     <string name="update_interval_seconds">Uuenduste sagedus (sekundit)</string>
     <string name="updated">Uuendatud</string>
-    <string name="uplink_enabled">Saatmine lubatud</string>
     <string name="uplink_feature_description">Võrgusõlme sõnumid saadetakse avalikku internetti mis tahes sõlme konfigureeritud ligipääsu kaudu.</string>
     <string name="uptime">Töötamise aeg</string>
     <!-- URL -->

@@ -41,7 +41,7 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 ### Rakendusesisene USB värskendus
 
-Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
+Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. Rakendus taaskäivitab seadme DFU-režiimis ja seejärel palub süsteemifailide valija abil salvestada `.uf2`-fail seadme DFU-draivi. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
 
 > ℹ️ **nRF alglaaduri märkus:** Mõned seadmed (nt RAK WisBlock RAK4631) vajavad alglaaduri vilkumist tootja jadaühenduse DFU tööriistaga (näiteks `adafruit-nrfutil`) – ainuüksi `.uf2` kopeerimine ei värskenda alglaadurit. The app surfaces a hint when this applies.
 
@@ -66,7 +66,7 @@ Enne uuendamist:
 
 - [ ] Aku > 50%
 - [ ] Stabiilne sinihamba ühendus
-- [ ] Note your current settings (they may reset on major version changes)
+- [ ] Pane tähele oma praeguseid seadeid (need võivad oluliste versioonimuudatuste korral lähtestuda)
 - [ ] Check the release notes for breaking changes
 
 ## Eelvärskendus
@@ -77,9 +77,9 @@ Pärast püsivara kirjutamist kontrollib rakendus värskendust ja ootab, kuni se
 
 Kui värskendus õnnestub:
 
-- The radio will reboot automatically
+- Raadio taaskäivitub automaatselt
 - Sinihamba ühendus taastatakse
-- Verify your settings are intact
+- Veendu, et seaded on puutumatud
 - Kontrolli uut versiooni püsivara värskenduse ekraanil jaotises **Praegu paigaldatud** – see kuvatakse ka sõlme üksikasjade lehel ja ühenduste ekraanil
 
 ![Püsivara värskendus õnnestus](/assets/screenshots/firmware_success.png)
@@ -107,7 +107,7 @@ If your device fails to boot:
 
 ### Compatibility Warnings
 
-The app may show warnings when:
+Rakendus võib kuvada hoiatusi järgmistel juhtudel:
 
 - Ühendatud raadio püsivara versioon on madalam kui minimaalselt toetatud versioon
 - Rakenduse ja püsivara versioonide mittevastavus

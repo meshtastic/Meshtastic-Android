@@ -1513,11 +1513,14 @@
     "hwModelSlug": "MESH_TRACKER_X1",
     "platformioTarget": "seeed_mesh_tracker_X1",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Seeed MeshTracker X1",
     "tags": [
       "Seeed"
+    ],
+    "images": [
+      "seeed_mesh_tracker_x1.svg"
     ]
   },
   {
@@ -1533,6 +1536,21 @@
     ],
     "images": [
       "thinknode-m8.svg"
+    ]
+  },
+  {
+    "hwModel": 124,
+    "hwModelSlug": "TBEAM_BPF",
+    "platformioTarget": "t-beam-bpf",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 3,
+    "displayName": "LilyGo T-Beam BPF",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "tbeam-bpf.svg"
     ]
   }
 ]

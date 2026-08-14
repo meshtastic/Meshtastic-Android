@@ -31,6 +31,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
  * `TAKServer` interface entirely.
  */
 private class NoopTAKServer : TAKServer {
+    override val isSupported = false
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
     override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null

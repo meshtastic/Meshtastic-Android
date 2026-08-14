@@ -167,4 +167,19 @@ class MetricFormatterTest {
     fun rainfallImperial() {
         assertEquals("0.10 in", MetricFormatter.rainfall(2.54f, isImperial = true, decimalPlaces = 2))
     }
+
+    @Test
+    fun weight() {
+        assertEquals("1.50 kg", MetricFormatter.weight(1.5f, isImperial = false))
+    }
+
+    @Test
+    fun weightImperial() {
+        assertEquals("2.20 lb", MetricFormatter.weight(1.0f, isImperial = true))
+    }
+
+    @Test
+    fun weightZero() {
+        assertEquals("0.00 kg", MetricFormatter.weight(0.0f, isImperial = false))
+    }
 }

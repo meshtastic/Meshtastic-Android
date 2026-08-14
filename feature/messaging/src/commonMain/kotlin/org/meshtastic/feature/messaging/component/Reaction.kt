@@ -38,9 +38,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,11 +55,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.getMessageStatusDetailRes
 import org.meshtastic.core.model.getMessageStatusStringRes
 import org.meshtastic.core.model.isMessageStatusRetryable
 import org.meshtastic.core.model.util.getShortDateTime
@@ -87,7 +89,10 @@ internal fun ReactionItem(
     Surface(
         modifier =
         modifier
+            // Clickable wraps the M3 touch-target expansion, so the hit area meets the 44dp
+            // minimum while the drawn pill stays compact.
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .minimumInteractiveComponentSize()
             .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier),
         color =
         when {
@@ -111,7 +116,7 @@ internal fun ReactionItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(text = emoji, fontSize = 14.sp)
+            Text(text = emoji, style = MaterialTheme.typography.labelMedium)
             if (emojiCount > 1) {
                 Text(
                     text = emojiCount.toString(),
@@ -192,7 +197,11 @@ internal fun ReactionDialog(
     onResend: (Reaction) -> Unit = {},
 ) = ModalBottomSheet(
     onDismissRequest = onDismiss,
-    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState =
+    rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+    ),
 ) {
     val groupedEmojis = reactions.groupBy { it.emoji }
     var selectedEmoji by remember { mutableStateOf<String?>(null) }
@@ -206,6 +215,7 @@ internal fun ReactionDialog(
         DeliveryInfo(
             title = title,
             text = text,
+            detail = getMessageStatusDetailRes(reaction.status, reaction.routingError),
             resendOption = isMessageStatusRetryable(reaction.status, reaction.routingError, isDirectMessage),
             onConfirm = {
                 onResend(reaction)

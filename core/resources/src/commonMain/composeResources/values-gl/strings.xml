@@ -30,6 +30,7 @@
     <string name="apply">Aplicar</string>
     <!-- AQI -->
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
     <string name="camera_permission">Permiso da cámara</string>
@@ -75,10 +76,12 @@
     <!-- DOC -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Horas</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error">Erro</string>
     <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Restablecemento de fábrica</string>
     <!-- FILTER -->
     <string name="filter_icon">Filtro</string>
@@ -100,6 +103,8 @@
     <string name="ip_port">Porto:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Acceso á úbicación está apagado, non se pode prover posición na rede.</string>
@@ -194,10 +199,6 @@
     <!-- ROLE -->
     <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- ROUTING -->
-    <string name="routing_error_no_response">Sen resposta</string>
-    <string name="routing_error_not_authorized">Non autorizado</string>
-    <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
-    <string name="routing_error_pki_unknown_pubkey">Chave pública descoñecida</string>
     <!-- SAVE -->
     <string name="save">Gardar</string>
     <string name="save_changes">Gardar</string>

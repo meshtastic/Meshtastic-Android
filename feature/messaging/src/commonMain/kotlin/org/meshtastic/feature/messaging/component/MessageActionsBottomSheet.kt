@@ -18,13 +18,16 @@ package org.meshtastic.feature.messaging.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -111,7 +114,7 @@ fun MessageActionsContent(
             )
         }
 
-        // Bubbles only show a short header time per run, so the sheet is where the full date-time lives.
+        // The caller supplies the same compact or full timestamp shown in the conversation header.
         if (timestamp != null) {
             ListItem(
                 headlineContent = {
@@ -228,14 +231,18 @@ private const val MAX_EMOJI_ROW_SIZE = 6
 @Composable
 private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        // Scrollable so seven 44dp touch targets never clip on narrow (320dp) sheets.
+        modifier =
+        Modifier.fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         quickEmojis.take(MAX_EMOJI_ROW_SIZE).forEach { emoji ->
             Box(
                 modifier =
-                Modifier.size(40.dp)
+                Modifier.defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable(
@@ -252,7 +259,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
 
         IconButton(
             onClick = onMoreReactions,
-            modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+            modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
                 MeshtasticIcons.AddReaction,

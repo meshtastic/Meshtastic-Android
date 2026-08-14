@@ -17,13 +17,18 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.UnitConversions.toTempString
+import org.meshtastic.core.model.util.adcVoltage
+import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toSpeedString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.dew_point
 import org.meshtastic.core.resources.distance
@@ -31,6 +36,7 @@ import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.ic_dew_point
+import org.meshtastic.core.resources.ic_electric_bolt
 import org.meshtastic.core.resources.ic_radioactive
 import org.meshtastic.core.resources.ic_soil_moisture
 import org.meshtastic.core.resources.ic_soil_temperature
@@ -201,7 +207,8 @@ internal fun EnvironmentMetrics(
                 add(
                     VectorMetricInfo(
                         label = Res.string.weight,
-                        value = "${NumberFormatter.format(w, 2)} kg",
+                        value =
+                        MetricFormatter.weight(w, displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
                         icon = MeshtasticIcons.Weight,
                     )
                         .asGroup(),
@@ -238,19 +245,38 @@ internal fun EnvironmentMetrics(
                         .asGroup(),
                 )
             }
-            // 1-Wire temperature sensors (up to 8 channels) — independent probes, so one card each.
-            one_wire_temperature
-                .filterNot { it.isNaN() }
-                .forEachIndexed { idx, temp ->
-                    add(
-                        DrawableMetricInfo(
-                            label = Res.string.one_wire_temperature,
-                            value = "${idx + 1}: ${temp.toTempString(isFahrenheit)}",
-                            icon = Res.drawable.ic_soil_temperature,
+            // 1-Wire probes and ADC inputs are independent channels, so one card each. Absent channels are null; a
+            // reported 0°C or 0 V is a real reading and stays visible.
+            for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
+                oneWireTemperature(channel)
+                    ?.takeIf { !it.isNaN() }
+                    ?.let { temp ->
+                        add(
+                            DrawableMetricInfo(
+                                label = Res.string.one_wire_temperature,
+                                value = temp.toTempString(isFahrenheit),
+                                icon = Res.drawable.ic_soil_temperature,
+                                channelNumber = channel + 1,
+                            )
+                                .asGroup(),
                         )
-                            .asGroup(),
-                    )
-                }
+                    }
+            }
+            for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
+                adcVoltage(channel)
+                    ?.takeIf { !it.isNaN() }
+                    ?.let { volts ->
+                        add(
+                            DrawableMetricInfo(
+                                label = Res.string.adc_voltage,
+                                value = MetricFormatter.voltage(volts),
+                                icon = Res.drawable.ic_electric_bolt,
+                                channelNumber = channel + 1,
+                            )
+                                .asGroup(),
+                        )
+                    }
+            }
         }
     }
     MetricCardFlow(groups = groups)

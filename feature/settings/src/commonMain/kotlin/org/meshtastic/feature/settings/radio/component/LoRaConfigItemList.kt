@@ -39,6 +39,10 @@ import org.meshtastic.core.model.repairPresetFor
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth
+import org.meshtastic.core.resources.bandwidth_default
+import org.meshtastic.core.resources.bandwidth_option_khz
+import org.meshtastic.core.resources.bandwidth_unsupported
+import org.meshtastic.core.resources.bandwidth_unsupported_summary
 import org.meshtastic.core.resources.coding_rate
 import org.meshtastic.core.resources.config_lora_frequency_slot_summary
 import org.meshtastic.core.resources.config_lora_hop_limit_summary
@@ -77,9 +81,9 @@ private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
 
 /**
- * Builds the modem-preset dropdown items: hide the 2.8-only TINY presets on firmware without
- * [Capabilities.supportsLoraRegionPresetMap], restrict to the region's legal presets (R7), then always keep the current
- * selection present (disabled) so the field is never blank when the device's preset is illegal for the region.
+ * Builds the modem-preset dropdown items: hide presets the target firmware's preset table doesn't have yet
+ * ([Capabilities.supportsPreset]), restrict to the region's legal presets (R7), then always keep the current selection
+ * present (disabled) so the field is never blank when the device's preset is illegal for the region.
  */
 private fun buildPresetItems(
     presetConstraint: RegionPresetConstraint?,
@@ -89,10 +93,7 @@ private fun buildPresetItems(
 ): List<DropDownItem<ModemPreset>> {
     val items =
         ChannelOption.entries
-            .filter { option ->
-                capabilities.supportsLoraRegionPresetMap ||
-                    (option != ChannelOption.TINY_FAST && option != ChannelOption.TINY_SLOW)
-            }
+            .filter { option -> capabilities.supportsPreset(option) }
             .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
             .map { option ->
                 DropDownItem(value = option.modemPreset, label = option.modemPreset.name, enabled = !presetsGated)
@@ -103,6 +104,15 @@ private fun buildPresetItems(
         items + DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
     }
 }
+
+/**
+ * Builds the region dropdown items: hide regions the target firmware's region table doesn't have yet
+ * ([Capabilities.supportsRegion]), but never hide the device's current selection.
+ */
+private fun buildRegionItems(capabilities: Capabilities, selectedRegion: RegionCode): List<Pair<RegionCode, String>> =
+    RegionInfo.entries
+        .filter { capabilities.supportsRegion(it) || it.regionCode == selectedRegion }
+        .map { it.regionCode to it.description }
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -127,12 +137,21 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
     val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
     val focusManager = LocalFocusManager.current
+    val bandwidthSelection =
+        loRaBandwidthSelection(
+            storedValue = formState.value.bandwidth,
+            region = formState.value.region,
+            hwModel = state.metadata?.hw_model,
+            pioEnv = state.pioEnv,
+        )
+    val customBandwidthIsValid = bandwidthSelection.allowsSave(formState.value.use_preset)
 
     RadioConfigScreenList(
         title = stringResource(Res.string.lora),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
+        saveEnabled = customBandwidthIsValid,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
@@ -158,7 +177,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.region_frequency_plan),
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
-                    items = RegionInfo.entries.map { it.regionCode to it.description },
+                    items =
+                    remember(capabilities, formState.value.region) {
+                        buildRegionItems(capabilities, formState.value.region)
+                    },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
                         val freshSetup = formState.value.region == RegionCode.UNSET
@@ -213,6 +235,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 } else {
                     ManualModemSettings(
                         config = formState.value,
+                        bandwidthSelection = bandwidthSelection,
                         enabled = state.connected,
                         focusManager = focusManager,
                         onConfigChange = { formState.value = it },
@@ -333,17 +356,18 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 @Composable
 private fun ManualModemSettings(
     config: Config.LoRaConfig,
+    bandwidthSelection: LoRaBandwidthSelection,
     enabled: Boolean,
     focusManager: androidx.compose.ui.focus.FocusManager,
     onConfigChange: (Config.LoRaConfig) -> Unit,
 ) {
     androidx.compose.foundation.layout.Column {
-        EditTextPreference(
-            title = stringResource(Res.string.bandwidth),
-            value = config.bandwidth,
+        LoRaBandwidthPreference(
+            config = config,
+            selection = bandwidthSelection,
             enabled = enabled,
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            onValueChanged = { onConfigChange(config.copy(bandwidth = it)) },
+            focusManager = focusManager,
+            onConfigChange = onConfigChange,
         )
         HorizontalDivider()
         EditTextPreference(
@@ -372,4 +396,59 @@ private fun ManualModemSettings(
             },
         )
     }
+}
+
+@Composable
+internal fun LoRaBandwidthPreference(
+    config: Config.LoRaConfig,
+    selection: LoRaBandwidthSelection,
+    enabled: Boolean,
+    focusManager: androidx.compose.ui.focus.FocusManager,
+    onConfigChange: (Config.LoRaConfig) -> Unit,
+) {
+    val options = selection.options
+    if (options == null) {
+        EditTextPreference(
+            title = stringResource(Res.string.bandwidth),
+            value = config.bandwidth,
+            enabled = enabled,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = { onConfigChange(config.copy(bandwidth = it)) },
+        )
+        return
+    }
+
+    val items =
+        options
+            .map { option ->
+                DropDownItem(
+                    value = option.wireValue,
+                    label =
+                    if (option.wireValue == 0) {
+                        stringResource(Res.string.bandwidth_default, option.displayKilohertz)
+                    } else {
+                        stringResource(Res.string.bandwidth_option_khz, option.displayKilohertz)
+                    },
+                )
+            }
+            .toMutableList()
+    selection.invalidPersistedValue?.let { invalidValue ->
+        val value = stringResource(Res.string.bandwidth_option_khz, invalidValue.toString())
+        val invalidLabel = stringResource(Res.string.bandwidth_unsupported, value)
+        items += DropDownItem(value = invalidValue, label = invalidLabel, enabled = false)
+    }
+
+    DropDownPreference(
+        title = stringResource(Res.string.bandwidth),
+        summary =
+        if (selection.isValid) {
+            null
+        } else {
+            stringResource(Res.string.bandwidth_unsupported_summary)
+        },
+        enabled = enabled,
+        items = items,
+        selectedItem = config.bandwidth,
+        onItemSelected = { onConfigChange(config.copy(bandwidth = it)) },
+    )
 }

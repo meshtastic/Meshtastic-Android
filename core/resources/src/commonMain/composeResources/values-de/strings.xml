@@ -28,6 +28,7 @@
     <string name="a11y_node_online">Online</string>
     <string name="a11y_node_role">Rolle %1$s</string>
     <string name="a11y_node_signal">Signal %1$s</string>
+    <string name="a11y_nodes_at_hop">Hop %1$d: %2$d Knoten</string>
     <string name="accept">Akzeptieren</string>
     <string name="acknowledgements">Danksagungen</string>
     <!-- ACTION -->
@@ -39,6 +40,8 @@
     <string name="action_select_network">Wählen Sie ein Netzwerk</string>
     <string name="action_send_reply">Antwort senden</string>
     <string name="action_show_message_status">Nachrichtenstatus anzeigen</string>
+    <string name="action_toggle_translation">Wechsel zwischen Original und übersetztem Text</string>
+    <string name="action_translate_message">Nachricht übersetzen</string>
     <string name="actions">Aktionen</string>
     <string name="adc_multiplier_override">ADC Multiplikationsfaktor</string>
     <string name="adc_multiplier_override_ratio">ADC Multiplikator Überschreibungsverhältnis</string>
@@ -111,6 +114,11 @@
     <string name="apply">Anwenden</string>
     <!-- AQI -->
     <string name="aqi_good">Gut</string>
+    <string name="aqi_hazardous">Gefährlich</string>
+    <string name="aqi_moderate">Moderat</string>
+    <string name="aqi_unhealthy">Ungesund</string>
+    <string name="aqi_unhealthy_sensitive">Ungesund für empfindliche Gruppen</string>
+    <string name="aqi_very_unhealthy">Sehr ungesund</string>
     <string name="are_you_sure">Sind Sie sicher?</string>
     <string name="are_you_sure_change_default">Sind Sie sicher, dass Sie in den Standardkanal wechseln möchten?</string>
     <string name="audio">Audio</string>
@@ -118,8 +126,10 @@
     <string name="available_pins">Verfügbare Pins</string>
     <string name="back">Zurück</string>
     <string name="backup_keys">Schlüssel sichern</string>
+    <string name="backup_keys_confirmation">Speichert die öffentlichen und privaten Schlüssel im sicheren, verschlüsseltem Speicher auf diesem Gerät.</string>
     <string name="backup_restore">Sichern &amp; Wiederherstellen</string>
     <string name="bad">Schlecht</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bandbreite</string>
     <string name="baro_pressure">Luftdruck</string>
     <string name="battery">Akku</string>
@@ -138,6 +148,12 @@
     <string name="bluetooth_feature_discovery">Entdecken</string>
     <string name="bluetooth_feature_discovery_description">Suchen und identifizieren Sie Meshtastic Geräte in Ihrer Nähe.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Standortdienste sind ausgeschaltet. Schalte sie ein, um nach Geräten in der Nähe zu suchen.</string>
+    <string name="bluetooth_scan_start_failed">Bluetooth Scan konnte nicht gestartet werden. Versuche es erneut, oder schalte Bluetooth ein/aus, wenn das Problem weiterhin besteht.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Bluetooth Scan Limit erreicht. Versuche es in %1$d Sekunde erneut.</item>
+        <item quantity="other">Bluetooth Scan Limit erreicht. Versuche es in %1$d Sekunden erneut.</item>
+    </plurals>
     <string name="bold_heading">Fette Überschrift</string>
     <string name="bonding_failed_permissions">Kopplung fehlgeschlagen. Erteilen Sie Geräten in der Nähe die Berechtigungen und versuchen Sie es erneut.</string>
     <string name="bonding_failed_retry">Kopplung nicht abgeschlossen. Versuchen Sie es erneut.</string>
@@ -148,8 +164,10 @@
     <string name="buzzer_gpio">GPIO Summer</string>
     <string name="calculating">Wird berechnet...</string>
     <string name="call_sign">Rufzeichen</string>
+    <string name="call_sign_summary">Dein Amateurfunk Rufzeichen, bis zu 8 Zeichen</string>
     <string name="camera_permission">Kamera-Berechtigungen</string>
     <string name="camera_permission_rationale">Kamera-Zugriff zum Scannen von QR-Codes erlauben.</string>
+    <string name="camera_unavailable">Kamera konnte nicht gestartet werden. Versuche es erneut, oder schließe den Scanner und öffne ihn erneut.</string>
     <string name="cancel">Abbrechen</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="canned_message">Vordefinierte Nachricht</string>
@@ -259,6 +277,7 @@
     <string name="config_position_flags_summary">Optionale Felder, die bei der Zusammenstellung von Standortnachrichten enthalten sein sollen. Je mehr Optionen ausgewählt werden, desto größer wird die Nachricht und die längere Übertragungszeit erhöht das Risiko für einen Nachrichtenverlust.</string>
     <string name="config_position_gps_update_interval_summary">Intervall zur Erfassung der Position (&lt;10sek. = dauerhaft).</string>
     <string name="config_power_is_power_saving_summary">Versetzt alles so weit wie möglich in den Ruhezustand. Für die Tracker- und Sensorfunktion umfasst dies auch das Lora Funkgerät. Verwenden Sie diese Einstellung nicht, wenn Sie Ihr Gerät mit den Telefon Apps verwenden möchten oder wenn Sie ein Gerät ohne Benutzertaste verwenden.</string>
+    <string name="config_saved_restarting">Der Knoten wird neugestartet und wird kurz nicht erreichbar sein.</string>
     <string name="config_security_admin_key">Der öffentliche Schlüssel, der zum Senden von administrativen Nachrichten an diesen Knoten berechtigt ist.</string>
     <string name="config_security_debug_log_api_enabled">Ausgabe von Echtzeit-Fehlersuchprotokollen über die serielle Schnittstelle, Anzeige und Export von positionskorrigierten Geräteprotokollen über Bluetooth.</string>
     <string name="config_security_is_managed">Das Gerät wird von einem Netzwerkadministrator verwaltet, der Benutzer kann auf keine der Geräteeinstellungen zugreifen.</string>
@@ -311,20 +330,28 @@
     <string name="debug_filter_preset_title">Voreingestellte Filter</string>
     <string name="debug_filters">Filter</string>
     <string name="debug_log_api_enabled">Debug-Protokoll-API aktiviert</string>
+    <string name="debug_logcat_empty">Keine App logs zum Anzeigen</string>
     <string name="debug_logcat_refresh">Aktualisieren</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
+    <string name="debug_logs_export_warning">Diese Datei enthält den Textinhalt deiner Nachricht, die genaue Position und die Knotendetails. Überprüfe es, bevor du es öffentlich teilst.</string>
+    <string name="debug_logs_exported">Logs exportiert</string>
     <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_search_clear">Neue Suche</string>
     <string name="debug_search_next">Nächste Übereinstimmung</string>
     <string name="debug_search_prev">Vorherige Übereinstimmung</string>
     <string name="debug_store_logs_summary">Deaktivieren, um das Schreiben von Netzprotokollen auf die Festplatte zu überspringen</string>
     <string name="debug_store_logs_title">Netzprotokolle speichern</string>
+    <string name="debug_tab_packets">Pakete</string>
+    <string name="deep_link_connect_title">Mit diesem Gerät verbinden?</string>
+    <string name="deep_link_disconnect_title">Von deinem Gerät trennen?</string>
     <string name="default_">Standard</string>
     <!-- DELETE -->
     <string name="delete">Löschen</string>
     <string name="delete_custom_tile_source">Netzwerk Kachelquelle löschen</string>
     <string name="delete_for_everyone">Für jeden löschen</string>
     <string name="delete_for_me">Für mich löschen</string>
+    <string name="delete_key_backup">Schlüssel Backup löschen</string>
+    <string name="delete_key_backup_confirmation">Löscht das verschlüsselte Schlüssel-Backup auf diesem Gerät. Dies kann nicht rückgängig gemacht werden.</string>
     <plurals name="delete_messages">
         <item quantity="one">Nachricht löschen?</item>
         <item quantity="other">%1$s Nachrichten löschen?</item>
@@ -341,6 +368,9 @@
     <string name="desktop_tray_quit">Beenden</string>
     <string name="desktop_tray_show">Meshtastic anzeigen</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
+    <string name="desktop_update_available_message">Meshtastic Desktop %1$s ist bereit zum Download.</string>
+    <string name="desktop_update_available_title">App Update verfügbar</string>
+    <string name="desktop_update_download">Update %1$s downloaden</string>
     <string name="details">Details</string>
     <string name="detection_sensor">Erkennungssensor</string>
     <string name="detection_sensor_config">Sensoreinstellungen für Erkennung</string>
@@ -352,6 +382,8 @@
     <string name="device_db_cache_limit">Limit der Gerätedatenbanken</string>
     <string name="device_db_cache_limit_summary">Maximale Anzahl der Gerätedatenbanken auf diesem Telefon</string>
     <string name="device_gps">Geräte-GPS</string>
+    <string name="device_links_i_want_one">Ich will eins</string>
+    <string name="device_links_open_in_browser">Im Browser öffnen</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Gerätedaten</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -372,8 +404,26 @@
     <string name="disconnected">Verbindung getrennt</string>
     <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
     <!-- DISCOVERY -->
+    <string name="discovery_analysing_results">Analysiere Ergebnisse</string>
+    <string name="discovery_cancelling_scan">Breche Scan ab</string>
+    <string name="discovery_connection_warning">Nicht verbunden. Verbinde dich mit einem Meshtastic Gerät, um das Scannen zu starten.</string>
+    <string name="discovery_delete_session">Sitzung löschen</string>
+    <string name="discovery_export_report">Bericht exportieren</string>
+    <string name="discovery_lora_presets">LoRa Voreinstellungen</string>
+    <string name="discovery_lora_presets_description">Wähle eine oder mehrere Voreinstellungen zum Scannen</string>
+    <string name="discovery_not_connected">Nicht verbunden</string>
+    <string name="discovery_not_connected_description">Verbinde dich mit einem Meshtastic Gerät, um das Scannen zu starten.</string>
+    <string name="discovery_paused">Pausiert: %1$s</string>
+    <string name="discovery_preparing">Scan wird vorbereitet</string>
+    <string name="discovery_scan_complete">Sitzung vollständig</string>
+    <string name="discovery_scan_failed">Scan fehlgeschlagen: %1$s</string>
+    <string name="discovery_scan_history">Scan-Verlauf</string>
+    <string name="discovery_scan_incomplete">Sitzung unvollständig</string>
+    <string name="discovery_scan_progress">Scan-Fortschritt</string>
+    <string name="discovery_scan_summary">Scan-Zusammenfassung</string>
     <string name="discovery_session_detail">Sitzungsdetails</string>
     <string name="discovery_shifting_to">Verschieben auf %1$s</string>
+    <string name="discovery_start_scan">Scan starten</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">Funkgerät unterstützt keine 2,4 GHz</string>
     <string name="discovery_start_scan_reason_no_presets">Keine Voreinstellungen ausgewählt</string>
     <string name="discovery_start_scan_reason_not_connected">Gerät nicht verbunden</string>
@@ -396,7 +446,18 @@
     <string name="discovery_stat_presets_scanned">Voreinstellungen gescannt</string>
     <string name="discovery_stat_rf_health">HF Gesundheit</string>
     <string name="discovery_stat_selected">Ausgewählt</string>
+    <string name="discovery_stat_session_overview">Sitzungsübersicht</string>
     <string name="discovery_stat_status">Status</string>
+    <string name="discovery_stat_success_rate">Erfolgsrate</string>
+    <string name="discovery_stat_total_messages">Nachrichten gesamt</string>
+    <string name="discovery_stat_total_unique_nodes">Einzigartige Knoten gesamt</string>
+    <string name="discovery_stat_unique_nodes">Einzigartige Knoten</string>
+    <string name="discovery_stat_unselected">Nicht ausgewählt</string>
+    <string name="discovery_stop_scan">Scan stoppen</string>
+    <string name="discovery_summary_not_available">KI Analyse nicht verfügbar</string>
+    <string name="discovery_time_remaining">%1$s übrig</string>
+    <string name="discovery_unique_nodes">%1$d einzigartige Knoten</string>
+    <string name="discovery_view_map">Karte anschauen</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>
@@ -434,6 +495,7 @@
     <string name="doc_search_placeholder">Dokumentation durchsuchen…</string>
     <string name="doc_section_developer">Entwicklerhandbuch</string>
     <string name="doc_section_user">Benutzerhandbuch</string>
+    <string name="doc_title_app_functions">App-Funktionen</string>
     <string name="doc_title_connections">Verbindungen</string>
     <string name="doc_title_debug_logs">Fehlersuchprotokolle</string>
     <string name="doc_title_desktop">Desktop App</string>
@@ -456,7 +518,6 @@
     <string name="done">Fertig</string>
     <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="double_tap_as_button_press">Doppelklick als Taste</string>
-    <string name="downlink_enabled">Downlink aktiviert</string>
     <string name="downlink_feature_description">Nachrichten von einem öffentlichen Internet Gateway werden an das lokale Mesh weitergeleitet. Aufgrund der Nullsprungrichtlinie wird der Datenverkehr vom MQTT Standardserver nicht über dieses Gerät hinaus weitergeleitet.</string>
     <string name="download">Herunterladen</string>
     <string name="duplicated_public_key_title">Doppelter öffentlicher Schlüssel erkannt</string>
@@ -466,6 +527,7 @@
     <string name="edit">Bearbeiten</string>
     <string name="edit_custom_tile_source">Netzwerk Kachelquelle bearbeiten</string>
     <string name="eight_hours">8 Stunden</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Energiesparmodus aktivieren</string>
     <string name="enabled">Aktiviert</string>
     <!-- ENCRYPTION -->
@@ -485,6 +547,7 @@
     <string name="environment_metrics_use_fahrenheit">Umweltdaten in Fahrenheit</string>
     <string name="error">Fehler</string>
     <string name="error_duty_cycle">Limit für den aktuellen Betriebszyklus erreicht. Nachrichten können momentan nicht gesendet werden, bitte versuchen Sie es später erneut.</string>
+    <string name="error_recovery_exhausted">Konnte nach mehreren Versuchen keine stabile Verbindung herstellen. Bitte wähle den Knoten erneut aus oder versuche es erneut.</string>
     <string name="establish_session">Verbinden &amp; Verwalten</string>
     <string name="establishing_session">Fernverwaltung wird aufgebaut</string>
     <string name="ethernet_config">Ethernet Einstellungen</string>
@@ -492,9 +555,12 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Standort austauschen</string>
     <string name="expand_chart">Diagramm einblenden</string>
+    <string name="expanded">Erweitert</string>
     <string name="expires">Gültig bis</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Einstellungen exportieren</string>
     <string name="export_data_csv">Alle Pakete exportieren</string>
+    <string name="export_gpx">GPX exportieren</string>
     <string name="export_tak_data_package">TAK Datenpaket exportieren</string>
     <string name="external_notification">Externe Benachrichtigung</string>
     <string name="external_notification_config">Einstellungen für externe Benachrichtigungen</string>
@@ -526,14 +592,21 @@
     <!-- FIRMWARE -->
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware-Version</string>
+    <string name="firmware_event_ended_banner">%1$s ist vorbei. Kehre zur standard Meshtastic Firmware zurück, um die normalen Funktionen wiederherzustellen.</string>
+    <string name="firmware_event_ended_button">Firmware updaten</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
     <string name="firmware_recovery_ble_failed">Das Update konnte nicht über Bluetooth abgeschlossen werden. Der Standard-Bootloader dieses Geräts kann ein unterbrochenes Over-the-Air-Update nicht zuverlässig zu Ende führen. Schließen Sie das Gerät per USB an einen Computer an und flashen Sie es neu mit dem seriellen DFU-Tool des Herstellers (z. B. adafruit-nrfutil), um es wiederherzustellen.</string>
+    <string name="firmware_recovery_button">Firmware-Update fortführen</string>
     <string name="firmware_too_old">Firmware Aktualisierung erforderlich.</string>
     <string name="firmware_update_almost_there">Fast fertig...</string>
     <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_archive_missing_target">Keine Firmware für %2$s (%3$s) wurde in "%1$s" gefunden.</string>
+    <string name="firmware_update_available">Firmware Update verfügbar</string>
     <string name="firmware_update_battery_low">Akku zu niedrig (%1$d%). Bitte laden Sie Ihr Gerät vor der Aktualisierung.</string>
     <string name="firmware_update_checking">Auf Aktualisierungen überprüfen...</string>
+    <string name="firmware_update_confirm_file_title">Bestätige Firmware-Datei</string>
     <string name="firmware_update_connecting_attempt">Verbinde mit Gerät (Versuch %1$d/%2$d)</string>
+    <string name="firmware_update_context_changed">Verbindung zum Gerät hat sich während der Bestätigung verändert. Bitte wähle die Firmware-Datei erneut aus.</string>
     <string name="firmware_update_copying">Bitte warten, Firmware wird kopiert.</string>
     <string name="firmware_update_currently_installed">Momentan installiert: %1$s</string>
     <string name="firmware_update_device">Gerät: %1$s</string>
@@ -549,9 +622,11 @@
     <string name="firmware_update_error">Fehler: %1$s</string>
     <string name="firmware_update_extracting">Extrahiere Firmware...</string>
     <string name="firmware_update_failed">Aktualisierung fehlgeschlagen</string>
+    <string name="firmware_update_filename_unavailable">Der Name der ausgewählten Datei konnte nicht gelesen werden. Wähle eine lokale Datei mit einem sichtbaren Namen aus.</string>
     <string name="firmware_update_flashing">Gerät wird programmiert, bitte warten...</string>
     <string name="firmware_update_hang_tight">Bitte warten, wir arbeiten daran...</string>
     <string name="firmware_update_hash_rejected">Firmware-Hash abgelehnt. Das Gerät benötigt ggf. eine Hash Bereitstellung oder Bootloader Aktualisierung.</string>
+    <string name="firmware_update_invalid_local_file_detail">Die ausgewählte Datei "%1$s" stimmt nicht mit %2$s (%3$s) überein. Wähle die Firmware-Datei für dieses Ziel.</string>
     <string name="firmware_update_keep_device_close">Halten Sie Ihr Gerät in die Nähe Ihres Telefons.</string>
     <string name="firmware_update_latest">Auf %1$s aktualisieren</string>
     <string name="firmware_update_local_file">Lokale Datei</string>
@@ -559,9 +634,15 @@
     <string name="firmware_update_method_detail">Update über %1$s</string>
     <string name="firmware_update_method_usb">USB Dateiübertragung</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">Firmware Ziel Information ist nicht verfügbar für dieses Gerät.</string>
+    <string name="firmware_update_nightly">Nächtlich</string>
     <string name="firmware_update_no_device">Kein Gerät verbunden</string>
     <string name="firmware_update_node_info_missing">Benutzerinformationen des Knotens fehlen.</string>
     <string name="firmware_update_not_found_in_release">Firmware für %1$s in der Release Version nicht gefunden.</string>
+    <string name="firmware_update_notification_android">%1$s ist installiert. Stabil %2$s ist verfügbar. Öffne Firmware Updates, wenn du bereit bist.</string>
+    <string name="firmware_update_notification_flasher">%1$s ist installiert. Stabil %2$s ist verfügbar. Öffne Firmware Updates, um diese Hardware zu updaten.</string>
+    <string name="firmware_update_open">Öffne Firmware Updates</string>
+    <string name="firmware_update_open_flasher">Öffne Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA Aktualisierung fehlgeschlagen: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
     <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
@@ -581,6 +662,8 @@
     <string name="firmware_update_unknown_error">Unbekannter Fehler</string>
     <string name="firmware_update_unknown_hardware">Unbekanntes Hardware Modell: %1$d</string>
     <string name="firmware_update_unknown_release">Unbekannte Version</string>
+    <string name="firmware_update_unsupported_transport">Firmware Updates sind auf diesem Gerät über diese Verbindung nicht unterstützt. Verbinde dich auf eine andere Art (z.B. Bluetooth) zum Updaten.</string>
+    <string name="firmware_update_unsupported_update_method">Lokale Firmware-Dateien sind für diese Update-Methode nicht unterstützt.</string>
     <string name="firmware_update_uploading">Firmware aktualisieren...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="firmware_update_usb_failed">USB Aktualisierung fehlgeschlagen</string>
@@ -609,6 +692,11 @@
     <string name="generate_input_event_on_press">Eingabeereignis beim Drücken generieren</string>
     <string name="generate_qr_code">QR Code Erzeugen</string>
     <!-- GEOFENCE -->
+    <string name="geofence_entered_body">%1$s hat %2$s betreten</string>
+    <string name="geofence_entered_title">%1$s betreten</string>
+    <string name="geofence_favorites_only">Nur Favoriten</string>
+    <string name="geofence_left_body">%1$s hat %2$s verlassen</string>
+    <string name="geofence_left_title">%1$s verlassen</string>
     <string name="geofence_off">Aus</string>
     <string name="get_started">Erste Schritte</string>
     <string name="good">Gut</string>
@@ -656,6 +744,7 @@
     <string name="ignore_remove">'%1$s' von der Ignorieren-Liste entfernen?</string>
     <!-- IMPORT -->
     <string name="import_configuration">Einstellungen importieren</string>
+    <string name="import_export_label">Import/Export</string>
     <string name="import_known_shared_contact_text">Warnung: Dieser Kontakt ist bekannt, beim Importieren werden die vorherigen Kontaktinformationen überschreiben.</string>
     <string name="import_label">Importieren</string>
     <string name="import_shared_contact">Geteilte Kontakte importieren?</string>
@@ -663,6 +752,7 @@
     <string name="indoor_air_quality_iaq">Luftqualität im Innenbereich (IAQ)</string>
     <string name="info">Information</string>
     <string name="input_shared_contact_url">Geteilte Kontakt URL eingeben</string>
+    <string name="insert">Einfügen</string>
     <string name="installed_firmware_version">Aktuell installiert</string>
     <string name="internal">Intern</string>
     <string name="interval_always_on">Immer an</string>
@@ -675,6 +765,8 @@
     <string name="ipv4_mode">IPv4 Modus</string>
     <string name="json_output_enabled">JSON-Ausgabe aktiviert</string>
     <!-- KEY -->
+    <string name="key_backup_deleted">Schlüssel Backup gelöscht</string>
+    <string name="key_backup_not_found">Kein Schlüssel Backup für diesen Knoten gefunden</string>
     <string name="key_verification_final_title">Schlüsselprüfung abgeschlossen</string>
     <string name="key_verification_request_title">Anfrage zur Schlüsselprüfung</string>
     <string name="key_verification_title">Schlüsselprüfung</string>
@@ -698,11 +790,14 @@
     <string name="latest_alpha_firmware">Neueste Alpha Version</string>
     <string name="latest_stable_firmware">Neueste stabile Version</string>
     <string name="latitude">Breitengrad</string>
+    <!-- LAYER -->
+    <string name="layer_type_network">Netzwerkschicht</string>
     <string name="learn_more">Mehr erfahren</string>
     <string name="led_heartbeat">Puls LED</string>
     <string name="led_state">LED Zustand</string>
     <string name="legacy_admin_channel">Veralteter administrativer Kanal</string>
     <string name="library_count">%1$d Bibliotheken</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Lizenzierter Amateurfunker</string>
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <!-- LOAD -->
@@ -733,8 +828,22 @@
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann kein Standort zum Mesh bereitgestellt werden.</string>
     <string name="location_sharing">Standortfreigabe</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Versuche es erneut in %1$d Sekunden.</string>
+    <string name="lockdown_confirm_passphrase">Passwort bestätigen</string>
+    <string name="lockdown_enable_ack">Ich verstehe</string>
     <string name="lockdown_enable_warning">Hinweis: Die Aktivierung des Lockdown-Modus sperrt den Debug-Port (SWD) auf unterstützter Hardware. Sie können den Lockdown jederzeit mithilfe Ihrer Passphrase aufheben; zudem stellt ein vollständiges Zurücksetzen des Geräts bei Bedarf den ursprünglichen Zustand wieder her.</string>
+    <string name="lockdown_enter_passphrase">Passwort eingeben</string>
     <string name="lockdown_hide_passphrase">Ausblenden</string>
+    <string name="lockdown_hours_until_expiry">Stunden bis zum Ablauf</string>
+    <string name="lockdown_incorrect_passphrase">Falsches Passwort.</string>
+    <string name="lockdown_lock_reason">Grund: %1$s</string>
+    <string name="lockdown_mode_summary_off">Verschlüssel Gerätespeicher und frage nach Passwort für jede Verbindung.</string>
+    <string name="lockdown_passphrase">Passwort</string>
+    <string name="lockdown_passphrases_do_not_match">Passwörter stimmen nicht überein</string>
+    <string name="lockdown_session_boots_remaining">Sitzung: %1$d Neustarts übrig</string>
+    <string name="lockdown_session_expires">Läuft ab %1$s</string>
+    <string name="lockdown_session_no_time_limit">Kein Zeitlimit</string>
+    <string name="lockdown_set_passphrase">Passwort setzen</string>
     <string name="lockdown_show_passphrase">Anzeigen</string>
     <string name="lockdown_submit">Absenden</string>
     <string name="locked">Gesperrt</string>
@@ -800,9 +909,31 @@
     <string name="match_any">Irgendwas finden | Alle</string>
     <string name="max">Maximal</string>
     <!-- MESH -->
+    <string name="mesh_beacon_interval_error">Minimum %1$d Sekunden</string>
+    <string name="mesh_beacon_invitations_title">Mesh Einladungen</string>
+    <string name="mesh_beacon_message_error">Maximum %1$d Bytes</string>
+    <string name="mesh_beacon_notification_body">Ein Mesh in der Nähe hat dich eingeladen</string>
+    <string name="mesh_beacon_notification_title">Mesh-Einladung</string>
+    <string name="mesh_beacon_offer_add">Kanal hinzufügen</string>
+    <string name="mesh_beacon_offer_channel">Kanal: %1$s</string>
+    <string name="mesh_beacon_offer_channel_key">Angebotener Kanalschlüssel (base64)</string>
+    <string name="mesh_beacon_offer_channel_name">Angebotener Kanalname</string>
     <string name="mesh_beacon_offer_dismiss">Verwerfen</string>
+    <string name="mesh_beacon_offer_from_unknown">Von einem unbekannten Knoten</string>
     <string name="mesh_beacon_offer_join">Beitreten</string>
+    <string name="mesh_beacon_offer_preset">Voreinstellung: %1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">Angebotene Voreinstellung</string>
+    <string name="mesh_beacon_offer_region">Region: %1$s</string>
+    <string name="mesh_beacon_offer_region_setting">Angebotene Region</string>
+    <string name="mesh_beacon_offer_signal">Signal: %1$s / %2$s</string>
+    <string name="mesh_beacon_offer_title">Mesh Einladung</string>
+    <string name="mesh_beacon_on_preset">Sendevoreinstellung</string>
+    <string name="mesh_beacon_on_region">Senderegion</string>
     <string name="mesh_beacon_preset_none">Keins</string>
+    <string name="mesh_beacon_target">Ziel %1$d</string>
+    <string name="mesh_beacon_target_add">Ziel hinzufügen</string>
+    <string name="mesh_beacon_target_channel_index">Kanal-Index</string>
+    <string name="mesh_beacon_target_remove">Ziel entfernen</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->
@@ -821,11 +952,19 @@
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
     <string name="message_device_managed">Dieses Radio wird verwaltet und kann nur durch Fernverwaltung geändert werden.</string>
     <string name="message_input_label">Nachricht</string>
+    <string name="message_routing_error_pki_failed">Konnte verschlüsselte Nachricht nicht senden</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Empfängerschlüssel nicht verfügbar</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Empfänger benötigt deinen Schlüssel</string>
+    <string name="message_routing_error_too_large">Nachricht ist zu groß zum Senden</string>
     <string name="message_status_delivered">Versand ins Netz</string>
+    <string name="message_status_enroute">Sende...</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
+    <string name="message_status_recipient_delivered">An den Empfänger zugestellt</string>
+    <string name="message_status_relayed_not_confirmed">Weitergeleitet, nicht vom Empfänger bestätigt</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
     <string name="message_status_unknown">Unbekannt</string>
+    <string name="message_translated_label">Übersetzt</string>
     <string name="messages">Nachrichten</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimum</string>
@@ -842,6 +981,9 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT Einstellungen</string>
     <string name="mqtt_enabled">MQTT aktiviert</string>
+    <string name="mqtt_error_connection_lost">MQTT: Verbindung verloren</string>
+    <string name="mqtt_error_proxy_failed">MQTT Proxy fehlgeschlagen: %1$s</string>
+    <string name="mqtt_error_rejected">MQTT: Verbindung abgelehnt: %1$s</string>
     <string name="mqtt_probe_dns_failure">Host nicht gefunden</string>
     <string name="mqtt_probe_other_failure">Verbindung fehlgeschlagen</string>
     <string name="mqtt_probe_rejected">Broker abgelehnt: %1$s</string>
@@ -851,6 +993,7 @@
     <string name="mqtt_probe_tcp_failure">Broker (TCP) nicht erreichbar</string>
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS Aushandlung fehlgeschlagen: %1$s</string>
+    <string name="mqtt_proxy_local">MQTT Proxy auf diesem Handy</string>
     <string name="mqtt_proxy_local_summary">Dieses Telefon leitet den MQTT-Datenverkehr für das verbundene Gerät weiter. Deaktivieren Sie diese Funktion, um die Weiterleitung sofort zu unterbrechen, ohne die MQTT-Einstellungen des Geräts zu ändern – dies ist nützlich, wenn der MQTT-Datenverkehr die Verbindung überlastet. Aktivieren Sie sie wieder, um die Weiterleitung fortzusetzen.</string>
     <string name="mqtt_status_connected">Verbunden</string>
     <string name="mqtt_status_connecting">Wird verbunden…</string>
@@ -903,8 +1046,13 @@
     <string name="no_network_devices_seen">Kein Netzwerkgerät gefunden</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="no_usb_devices_found">Kein USB-Gerät gefunden.</string>
+    <string name="no_usb_devices_hint">Verbinde ein Gerät mit einem USB-Datenkabel, um die serielle Schnittstelle zu verwenden.</string>
+    <string name="no_usb_devices_seen">Keine USB-Geräte erkannt</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d online</string>
+    <string name="node_count_shown">%1$d angezeigt</string>
     <string name="node_count_template">(%1$d online / %2$d angezeigt / %3$d gesamt)</string>
+    <string name="node_count_total">%1$d insgesamt</string>
     <string name="node_filter_exclude_infrastructure">Infrastruktur ausschließen</string>
     <string name="node_filter_exclude_mqtt">MQTT ausschließen</string>
     <string name="node_filter_ignored">Sie sehen ignorierte Knoten,\ndrücken um zur Knotenliste zurückzukehren.</string>
@@ -962,7 +1110,9 @@
     <string name="nodes_empty_searching_hint">Knoten in der Nähe erscheinen hier, sobald sie erreicht wurden.</string>
     <string name="nodes_empty_searching_title">Suche nach Knoten</string>
     <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
+    <string name="noise_floor">Lärmboden</string>
     <string name="noise_floor_definition">Das vom Funkempfänger gemessene HF-Hintergrundrauschen. Niedrigere Werte deuten in der Regel auf eine störungsärmere Empfangsumgebung hin; -85 dBm ist ein Referenzwert für eine hohe Auslastung, kein fester Schwellenwert für einen Ausfall.</string>
+    <string name="noise_floor_no_reading">Lärmboden: kein Wert</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="none_quality">Keine</string>
     <string name="not_connected">Nicht verbunden</string>
@@ -990,10 +1140,12 @@
     <string name="one_wire_temperature">1-Draht Temperatur</string>
     <string name="only_favorites">Nur Favoriten</string>
     <!-- OPEN -->
+    <string name="open_bluetooth_settings">Öffne Bluetootheinstellungen</string>
     <string name="open_compass">Kompass öffnen</string>
     <string name="open_settings">Einstellungen öffnen</string>
     <string name="open_source_description">Meshtastic wurde mit den folgenden Quellen offenen Bibliotheken gebaut. Tippen Sie auf eine beliebige Bibliothek, um ihre Lizenz anzuzeigen.</string>
     <string name="open_source_libraries">Quellen offene Bibliotheken</string>
+    <string name="open_wifi_settings">Öffne Wlan-Einstellungen</string>
     <string name="options">Optionen</string>
     <string name="orient_north">Ausrichtung Nord</string>
     <!-- OUTPUT -->
@@ -1008,6 +1160,12 @@
     <string name="override_frequency_mhz">Frequenz überschreiben</string>
     <string name="pa_fan_disabled">PA Fan deaktiviert</string>
     <!-- PACKET -->
+    <string name="packet_authenticity">Paket Authentizität</string>
+    <string name="packet_authenticity_balanced_summary">Empfohlen. Lehne unsignierte downgrade-Versuche von Knoten ab, von denen bekannt ist, dass sie signieren.</string>
+    <string name="packet_authenticity_compatible_summary">Authentifiziere Pakete, wenn möglich, aber akzeptiere unsignierten Verkehr für maximale Kompatibilität.</string>
+    <string name="packet_authenticity_level">Schutzstufe</string>
+    <string name="packet_authenticity_strict_summary">Zeige und verarbeite nur kryptografisch authentisierte Mesh-Pakete. Ältere Knoten und übergroße Pakete könnten verschwinden.</string>
+    <string name="packet_authenticity_unsupported">Dieses verbundene Gerät unterstützt keine Überprüfung der Paketsignatur.</string>
     <string name="pairing_mode">Kopplungsmodus</string>
     <string name="password">Passwort</string>
     <!-- PAX -->
@@ -1158,6 +1316,7 @@
     <string name="resend">Erneut senden</string>
     <string name="reset">Zurücksetzen</string>
     <string name="reset_to_defaults">Auf Standardeinstellungen zurücksetzen</string>
+    <string name="restore_keys">Schlüssel wiederherstellen</string>
     <string name="retry">Erneut versuchen</string>
     <string name="ringtone">Klingelton</string>
     <string name="ringtone_file_empty">Datei ist leer</string>
@@ -1182,24 +1341,14 @@
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>
     <string name="router_role_confirmation_text">Ich habe die &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
-    <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
-    <string name="routing_error_bad_request">Ungültige Anfrage</string>
-    <string name="routing_error_duty_cycle_limit">Regionale Grenze des Betriebszyklus erreicht</string>
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
-    <string name="routing_error_max_retransmit">Maximale Weiterleitungen erreicht</string>
-    <string name="routing_error_no_channel">Kein Kanal</string>
-    <string name="routing_error_no_interface">Keine Schnittstelle</string>
-    <string name="routing_error_no_response">Keine Reaktion</string>
     <string name="routing_error_no_route">Keine Route</string>
     <string name="routing_error_none">Bestätigt</string>
-    <string name="routing_error_not_authorized">Nicht autorisiert</string>
-    <string name="routing_error_pki_failed">Verschlüsseltes Senden fehlgeschlagen</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI senden fehlgeschlagen, kein öffentlicher Schlüssel</string>
-    <string name="routing_error_pki_unknown_pubkey">Unbekannter öffentlicher Schlüssel</string>
-    <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
+    <string name="routing_error_pki_failed">Konnte verschlüsselte Nachricht nicht senden</string>
+    <string name="routing_error_pki_send_fail_public_key">Empfängerschlüssel nicht verfügbar</string>
+    <string name="routing_error_pki_unknown_pubkey">Empfänger benötigt deinen Schlüssel</string>
     <string name="routing_error_timeout">Zeitüberschreitung</string>
-    <string name="routing_error_too_large">Nachricht zu groß</string>
+    <string name="routing_error_too_large">Nachricht ist zu groß zum Senden</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="rsyslog_server">rsyslog Server</string>
@@ -1242,6 +1391,8 @@
     <string name="security_icon_insecure_precise_only">Unsicherer Kanal, genauer Standort</string>
     <string name="security_icon_secure">Sicher</string>
     <string name="security_icon_warning_precise_mqtt">Warnung: Unsicherer, genauer Standort &amp; MQTT Uplink</string>
+    <string name="security_signed_message_info">Verifiziert mit dem Schlüssel des Absenders.</string>
+    <string name="security_signed_node_desc">Automatisch verifiziert</string>
     <string name="select">Auswählen</string>
     <string name="select_all">Alle auswählen</string>
     <string name="selected">Ausgewählt</string>
@@ -1270,6 +1421,7 @@
     <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="share_contact">Kontakt teilen</string>
     <string name="share_location">Standort teilen</string>
+    <string name="share_location_description">Nutze das GPS deines Handys, um Positionen an deinen Knoten zu senden, anstatt eines GPS-Empfängers an deinem Knoten.</string>
     <string name="share_to">Teile mit…</string>
     <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="short_name">Kurzname</string>
@@ -1279,8 +1431,10 @@
     <string name="show_all_key_title">Bedeutung der Verschlüsselung</string>
     <string name="show_iaq_legend">Legende für Luftqualität anzeigen</string>
     <string name="show_layer">Ebene anzeigen</string>
+    <string name="show_original">Original anzeigen</string>
     <string name="show_password">Passwort anzeigen</string>
     <string name="show_precision_circle">Präzise Bereiche anzeigen</string>
+    <string name="show_translation">Übersetzung anzeigen</string>
     <string name="show_waypoints">Zeige Wegpunkte</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="shutdown_node_name">Knoten: %1$s</string>
@@ -1289,7 +1443,25 @@
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalqualität</string>
     <!-- SITE -->
+    <string name="site_planner_antenna_gain_dbi">Antennengewinn (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Antennenhöhe (m)</string>
+    <string name="site_planner_color_scale">Farbpalette</string>
+    <string name="site_planner_estimate">Geschätzte Abdeckung</string>
+    <string name="site_planner_failed">Schätzung der Abdeckung fehlgeschlagen</string>
+    <string name="site_planner_frequency_mhz">Frequenz (MHz)</string>
+    <string name="site_planner_invalid_latitude">Eingabe -90 bis 90</string>
+    <string name="site_planner_invalid_longitude">Eingabe -180 bis 180</string>
+    <string name="site_planner_invalid_positive">Muss größer als 0 sein</string>
+    <string name="site_planner_invalid_rx_sensitivity">Eingabe -150 bis -30 dBm</string>
+    <string name="site_planner_max_range_km">Max. Reichweite (km)</string>
+    <string name="site_planner_rx_height_meters">Höhe des Empfängers (m)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Empfindlichkeit des Empfängers (dBm)</string>
     <string name="site_planner_section_display">Anzeige</string>
+    <string name="site_planner_section_receiver">Empfänger</string>
+    <string name="site_planner_section_simulation">Simulationsoptionen</string>
+    <string name="site_planner_use_current_location">Nutze derzeitige Position</string>
+    <string name="site_planner_use_map_center">Nutze Kartenzentrum</string>
+    <string name="site_planner_use_node_location">Nutze derzeitige Knoten-Position</string>
     <string name="skip">Überspringen</string>
     <string name="slot">Position</string>
     <string name="smart_position">Intelligente Position</string>
@@ -1299,12 +1471,14 @@
     <string name="soil_temperature">Bodentemperatur</string>
     <string name="speed">Geschwindigkeit</string>
     <string name="speed_kmh">%1$d km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="spread_factor">Spreizfaktor</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Statusübertragung (Sekunden)</string>
     <string name="status_message">Statusmeldung</string>
     <string name="status_message_config">Konfiguration der Statusmeldung</string>
     <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
+    <string name="stop_connecting">Verbindung trennen</string>
     <string name="store_forward">Speichern &amp; Weiterleiten</string>
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
@@ -1330,10 +1504,10 @@
     <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
-    <string name="tak_server_enabled_desc">Startet einen lokalen TLS-Server auf Port 8089 für ATAK/iTAK Verbindungen</string>
-    <string name="tak_server_export_data_package_desc">Erstelle .zip für ATAK/iTAK um sich mit diesem Server zu verbinden</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Server</string>
+    <string name="tak_server_status">Status</string>
+    <string name="tak_server_status_off">Aus</string>
     <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
     <string name="tak_server_test_idle">Alle %1$d Tests an das Netz senden</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
@@ -1413,8 +1587,12 @@
     <string name="traffic_management_unknown_packet_threshold">Unbekannter Paketgrenzwert</string>
     <string name="translate">Translate</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_title">Übersetzungsmodell herunterladen?</string>
+    <string name="translation_failed">Nachricht konnte nicht übersetzt werden</string>
+    <string name="translation_not_required">Nachricht ist schon in deiner Sprache</string>
     <string name="transmit_over_lora">Übertragen über LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport">Transport</string>
     <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
@@ -1448,7 +1626,6 @@
     <string name="update_interval">GPS Abfrageintervall</string>
     <string name="update_interval_seconds">Aktualisierungsintervall (Sekunden)</string>
     <string name="updated">Aktualisiert</string>
-    <string name="uplink_enabled">Uplink aktiviert</string>
     <string name="uplink_feature_description">Wenn aktiviert, werden Nachrichten aus dem Mesh über das konfigurierte Gateway eines beliebigen Knotens an das **öffentliche** Internet gesendet.</string>
     <string name="uptime">Laufzeit</string>
     <!-- URL -->
@@ -1457,6 +1634,7 @@
     <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
     <string name="url_template">URL Vorlage</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">USB-Berechtigung verweigert. Verbinde das Gerät erneut, um es nochmal zu versuchen.</string>
     <!-- USE -->
     <string name="use_12h_format">12h Uhrformat verwenden</string>
     <string name="use_homoglyph_characters_encoding">Kompakte Kodierung für Kyrillisch</string>
@@ -1527,6 +1705,7 @@
     <string name="wifi_qr_code_error">Ungültiges QR-Code-Format für WiFi-Berechtigung</string>
     <string name="wifi_qr_code_scan">WiFi QR-Code scannen</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI Schwellenwert (Standard -80)</string>
+    <string name="wifi_unavailable">Nicht mit Wlan verbunden. Netzwerkscans finden vielleicht keine Geräte in der Nähe.</string>
     <!-- WIND -->
     <string name="wind">Wind</string>
     <string name="wind_direction">Windrichtung</string>
@@ -1534,5 +1713,9 @@
     <string name="wind_lull">Windstille</string>
     <string name="wind_speed">Windgeschwindigkeit</string>
     <!-- WRITE -->
+    <string name="write_nfc">Schreiben auf NFC-Tag</string>
+    <string name="write_nfc_failed">Konnte nicht auf Tag schreiben. Verwende einen schreibbaren, leeren NFC-Tag und halte ihn still.</string>
+    <string name="write_nfc_success">Auf Tag geschrieben</string>
+    <string name="write_nfc_text">Halte einen schreibbaren NFC-Tag gegen die Hinterseite deines Handys.</string>
     <string name="you">Du</string>
 </resources>

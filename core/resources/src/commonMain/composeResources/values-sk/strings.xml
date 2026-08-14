@@ -44,6 +44,7 @@
     <string name="audio">Zvuk</string>
     <string name="audio_config">Konfigurácia zvuku</string>
     <string name="bad">Zlý</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Šírka pásma</string>
     <string name="battery">Batéria</string>
     <string name="blue">Modrá</string>
@@ -145,6 +146,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>
@@ -156,6 +158,7 @@
     <string name="ethernet_enabled">Ethernet zapnutý</string>
     <string name="ethernet_ip">Eternet IP:</string>
     <string name="exchange_position">Vymeniť si pozície</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Exportovať konfiguráciu</string>
     <string name="external_notification">Externá notifikácia</string>
     <string name="factory_reset">Obnova do výrobných nastavení</string>
@@ -216,7 +219,9 @@
     <string name="label_short_slow">Krátky Dosah - Pomali</string>
     <string name="label_short_turbo">Krátky Dosah - Turbo</string>
     <string name="label_very_long_slow">Veľmi Ďaleký Dosah - Pomali</string>
+    <!-- LAYER -->
     <string name="led_state">Stav LED</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <string name="load_indexed">Zaťaženie %1$d</string>
     <!-- LOCAL -->
@@ -406,22 +411,10 @@
     <string name="role_tracker_desc">Prioritne vysiela pakety polohy GPS.</string>
     <string name="rotary_encoder_1_enabled">Enkóder #1 aktivovaný</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Zlý kľúč relácie</string>
-    <string name="routing_error_admin_public_key_unauthorized">Verejný kľúč neautorizovaný</string>
-    <string name="routing_error_bad_request">Nesprávna požiadavka</string>
-    <string name="routing_error_duty_cycle_limit">Dosiahnutý regionálny limit pracovného cyklu</string>
     <string name="routing_error_got_nak">Prijaté negatívne potvrdenie</string>
-    <string name="routing_error_max_retransmit">Dosiahnutý maximum opakovaných prenosov</string>
-    <string name="routing_error_no_channel">Žiaden kanál</string>
-    <string name="routing_error_no_interface">Žiadne rozhranie</string>
-    <string name="routing_error_no_response">Bez odozvy</string>
     <string name="routing_error_no_route">Žiadna trasa</string>
     <string name="routing_error_none">Potvrdené</string>
-    <string name="routing_error_not_authorized">Neautorizované</string>
-    <string name="routing_error_pki_failed">Zlyhalo šifrované odosielanie</string>
-    <string name="routing_error_pki_unknown_pubkey">Neznámy verejný kľúč</string>
     <string name="routing_error_timeout">Časový limit</string>
-    <string name="routing_error_too_large">Príliš veľký paket</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
     <!-- SAVE -->

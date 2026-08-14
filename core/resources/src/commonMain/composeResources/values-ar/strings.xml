@@ -33,6 +33,7 @@
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
     <string name="audio">إعدادات الصوت</string>
     <string name="bad">سيئ</string>
+    <!-- BANDWIDTH -->
     <string name="battery">البطارية</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">إعدادات بلوتوث</string>
@@ -83,12 +84,14 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <string name="encryption_error">المفتاح العام غير متطابق</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>
     <string name="encryption_psk">مفتاح مشترك</string>
     <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
+    <!-- EXPORT -->
     <string name="fair">مناسب</string>
     <string name="favorite">المفضلة</string>
     <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>
@@ -113,6 +116,8 @@
     <string name="ip_address">عنوان الـ IP:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>
@@ -196,22 +201,10 @@
     <string name="reset_to_defaults">العودة إلى الإعدادات الأصلية</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">المفتاح المؤقت غير جيد</string>
-    <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
-    <string name="routing_error_bad_request">طلب غير جيد</string>
-    <string name="routing_error_duty_cycle_limit">عدد الرسائل تعدى الحد المخصص في منطقتك</string>
     <string name="routing_error_got_nak">لم يستلم</string>
-    <string name="routing_error_max_retransmit">وصول حد الإرسال الأعلى</string>
-    <string name="routing_error_no_channel">لا يوجد قناه</string>
-    <string name="routing_error_no_interface">لم يجد وسيط</string>
-    <string name="routing_error_no_response">لا يوجد رد</string>
     <string name="routing_error_no_route">لاطريق</string>
     <string name="routing_error_none">استلم</string>
-    <string name="routing_error_not_authorized">غير مسموح</string>
-    <string name="routing_error_pki_failed">فشل إرسال التشفير</string>
-    <string name="routing_error_pki_unknown_pubkey">المفتاح العام غير معروف</string>
     <string name="routing_error_timeout">استغرق وقت طويل</string>
-    <string name="routing_error_too_large">رسالة كبيره</string>
     <string name="rssi">مؤشر القوة النسبية</string>
     <!-- SAVE -->
     <string name="save">حفظ</string>

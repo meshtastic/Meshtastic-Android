@@ -54,6 +54,7 @@
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="back">Назад</string>
     <string name="bad">Лош</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Проток</string>
     <string name="battery">Батерија</string>
     <!-- BLUETOOTH -->
@@ -166,6 +167,7 @@
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>
+    <!-- EMOJI -->
     <string name="enabled">Омогућено</string>
     <!-- ENCRYPTION -->
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
@@ -178,6 +180,7 @@
     <string name="error_duty_cycle">Достигнут је лимит циклуса рада. Не могу слати поруке тренутно, молимо вас покушајте касније.</string>
     <string name="ethernet_config">Етернет опције</string>
     <string name="expires">Истиче</string>
+    <!-- EXPORT -->
     <string name="external_notification">Спољна обавештења</string>
     <string name="external_notification_config">Подешавање спољних обавештења</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>
@@ -239,7 +242,9 @@
     <string name="label_short_slow">Кратки домет - Споро</string>
     <string name="label_short_turbo">Кратки домет - Турбо</string>
     <string name="latitude">Ширина</string>
+    <!-- LAYER -->
     <string name="led_heartbeat">LED срчани откуцаји</string>
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Приступ локацији је искључен, не може се обезбедити позиција мрежи.</string>
@@ -415,22 +420,10 @@
     <string name="role_tak_tracker_desc">Омогућава аутоматске TAK PLI емисије и смањује рутинске емисије.</string>
     <string name="role_tracker_desc">Емитује пакете са GPS позицијом као приоритет.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Лош кључ сесије</string>
-    <string name="routing_error_admin_public_key_unauthorized">Јавни кључ није ауторизован</string>
-    <string name="routing_error_bad_request">Лош захтев</string>
-    <string name="routing_error_duty_cycle_limit">Достигнут регионални лимит циклуса рада</string>
     <string name="routing_error_got_nak">Примљена негативна потврда</string>
-    <string name="routing_error_max_retransmit">Достигнут максимални број поновних слања</string>
-    <string name="routing_error_no_channel">Нема канала</string>
-    <string name="routing_error_no_interface">Нема интерфејса</string>
-    <string name="routing_error_no_response">Нема одговора</string>
     <string name="routing_error_no_route">Нема руте</string>
     <string name="routing_error_none">Потврђено</string>
-    <string name="routing_error_not_authorized">Без овлашћења</string>
-    <string name="routing_error_pki_failed">Шифровани пренос није успео</string>
-    <string name="routing_error_pki_unknown_pubkey">Непознат јавни кључ</string>
     <string name="routing_error_timeout">Истекло време</string>
-    <string name="routing_error_too_large">Пакет превелик</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор јачине примљеног сигнала RSSI је мера која се користи за одређивање нивоа снаге која се прима преко антене. Виша вредност RSSI генерално указује на јачу и стабилнију везу.</string>
     <string name="sats">Сателита</string>
@@ -471,6 +464,7 @@
     <string name="sx126x_rx_boosted_gain">Појачање пријемника</string>
     <!-- TAK -->
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_status_off">Искључен</string>
     <string name="telemetry">Телеметрија (сензори)</string>
     <string name="telemetry_config">Конфигурација телеметрије</string>
     <string name="temperature">Темп.</string>

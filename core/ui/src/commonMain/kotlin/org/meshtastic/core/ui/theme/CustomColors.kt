@@ -152,6 +152,17 @@ object GraphColors {
     val SkyBlue = Color(0xFF03A9F4)
     val Chartreuse = Color(0xFF76FF03)
     val Coral = Color(0xFFFF6E40)
+
+    // Muted second tier. The vivid hues above are exhausted, so multi-channel series that need their own identity draw
+    // from here: a chart marker resolves its label by series color, so no two plotted series may share one.
+    val Brown = Color(0xFF8D6E63)
+    val BlueGrey = Color(0xFF78909C)
+    val Olive = Color(0xFF9E9D24)
+    val DeepPurple = Color(0xFF7E57C2)
+    val SeaGreen = Color(0xFF2E9E5B)
+    val Maroon = Color(0xFFA13D63)
+    val Mustard = Color(0xFFC9A227)
+    val Slate = Color(0xFF4A6572)
 }
 
 object StatusColors {

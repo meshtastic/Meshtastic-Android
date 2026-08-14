@@ -147,6 +147,7 @@ import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
@@ -157,7 +158,6 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -344,7 +344,7 @@ fun MapView(
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
     val layerRenderer = remember { FdroidMapOverlayRenderer() }
     var showLayersBottomSheet by remember { mutableStateOf(false) }
-    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
+    var sitePlannerLaunch by remember { mutableStateOf<SitePlannerLaunch?>(null) }
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
 
@@ -358,17 +358,8 @@ fun MapView(
         val intent =
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
+                // Providers may assign generic MIME types to valid map files; validate the extension after selection.
                 type = "*/*"
-                putExtra(
-                    Intent.EXTRA_MIME_TYPES,
-                    arrayOf(
-                        "application/vnd.google-earth.kml+xml",
-                        "application/vnd.google-earth.kmz",
-                        "application/vnd.geo+json",
-                        "application/geo+json",
-                        "application/json",
-                    ),
-                )
             }
         filePickerLauncher.launch(intent)
     }
@@ -419,15 +410,7 @@ fun MapView(
         }
     }
 
-    // Keep screen on while location tracking is active
-    LaunchedEffect(myLocationOverlay) {
-        val activity = context as? android.app.Activity ?: return@LaunchedEffect
-        if (myLocationOverlay != null) {
-            activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            activity.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
+    KeepScreenOn(myLocationOverlay != null && locationPermission.isGranted)
 
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
@@ -845,7 +828,10 @@ fun MapView(
                     // Hands node/channel-derived params to the hosted Site Planner and imports the returned coverage.
                     onSitePlannerClick =
                     if (sitePlannerAvailable()) {
-                        { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+                        {
+                            sitePlannerLaunch =
+                                SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
+                        }
                     } else {
                         null
                     },
@@ -897,14 +883,18 @@ fun MapView(
     val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
-            sitePlannerInitial = node.toSitePlannerParams(channelSet)
-            mapViewModel.consumeSitePlannerRequest()
+            sitePlannerLaunch =
+                SitePlannerLaunch(initialParams = node.toSitePlannerParams(channelSet), selectedNode = node)
+            if (node.validPosition != null) {
+                map.controller.animateTo(GeoPoint(node.latitude, node.longitude))
+            }
+            mapViewModel.consumeSitePlannerRequest(node.num)
         }
     }
-    sitePlannerInitial?.let { initial ->
+    sitePlannerLaunch?.let { launch ->
         SitePlannerHost(
-            initialParams = initial,
-            onDismiss = { sitePlannerInitial = null },
+            initialParams = launch.initialParams,
+            onDismiss = { sitePlannerLaunch = null },
             onImport = { name, geoJson, latitude, longitude ->
                 mapViewModel.addGeoJsonLayer(name, geoJson)
                 // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
@@ -918,8 +908,7 @@ fun MapView(
             } else {
                 null
             },
-            onUseNodeLocation =
-            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } },
+            onUseNodeLocation = launch.nodeLocation(ourNodeInfo)?.let { location -> { location } },
             onUseMapCenter = { map.mapCenter.let { it.latitude to it.longitude } },
         )
     }

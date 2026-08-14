@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.radio
 
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
@@ -27,10 +28,12 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +57,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.MalformedMeshtasticUrlException
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -72,6 +76,7 @@ import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.radio.component.loRaBandwidthSelection
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -93,6 +98,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
@@ -123,7 +129,15 @@ class RadioConfigViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
-    private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
+    private val trackerScope = CoroutineScope(SupervisorJob())
+    private val nodeRestartTracker = NodeRestartTracker(trackerScope)
+
+    /**
+     * A `viewModelScope` is not a child of `runTest`, so work still in flight when a test ends would resume on
+     * `Dispatchers.Main` after [Dispatchers.resetMain] and fail an unrelated later test. Every ViewModel is tracked
+     * here so [tearDown] can cancel it.
+     */
+    private val createdViewModels = mutableListOf<RadioConfigViewModel>()
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -157,6 +171,9 @@ class RadioConfigViewModelTest {
 
     @AfterTest
     fun tearDown() {
+        createdViewModels.forEach { it.viewModelScope.cancel() }
+        createdViewModels.clear()
+        trackerScope.cancel()
         Dispatchers.resetMain()
     }
 
@@ -184,7 +201,9 @@ class RadioConfigViewModelTest {
         fileService = fileService,
         mqttManager = mqttManager,
         lockdownCoordinator = FakeLockdownCoordinator(),
+        analytics = mock(MockMode.autofill),
     )
+        .also { createdViewModels += it }
 
     @Test
     fun `setConfig calls useCase`() = runTest {
@@ -950,32 +969,7 @@ class RadioConfigViewModelTest {
     fun `destNum from SavedStateHandle resolves destNode`() = runTest {
         val node = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(node))
-        viewModel =
-            RadioConfigViewModel(
-                destNum = 456,
-                radioConfigRepository = radioConfigRepository,
-                packetRepository = packetRepository,
-                serviceRepository = serviceRepository,
-                nodeRepository = nodeRepository,
-                locationRepository = locationRepository,
-                mapConsentPrefs = mapConsentPrefs,
-                analyticsPrefs = analyticsPrefs,
-                homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                importProfileUseCase = importProfileUseCase,
-                exportProfileUseCase = exportProfileUseCase,
-                importSecurityConfigUseCase = importSecurityConfigUseCase,
-                securityKeyBackupStore = securityKeyBackupStore,
-                snackbarManager = snackbarManager,
-                nodeRestartTracker = nodeRestartTracker,
-                installProfileUseCase = installProfileUseCase,
-                radioConfigUseCase = radioConfigUseCase,
-                adminActionsUseCase = adminActionsUseCase,
-                processRadioResponseUseCase = processRadioResponseUseCase,
-                locationService = locationService,
-                fileService = fileService,
-                mqttManager = mqttManager,
-                lockdownCoordinator = FakeLockdownCoordinator(),
-            )
+        viewModel = createViewModel(destNum = 456)
         assertEquals(456, viewModel.destNode.value?.num)
     }
 
@@ -1029,11 +1023,32 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel()
 
         val profile = DeviceProfile()
-        everySuspend { installProfileUseCase(any(), any(), any()) } returns Unit
+        everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } returns Unit
 
         viewModel.installProfile(profile)
 
-        verifySuspend { installProfileUseCase(123, profile, any()) }
+        verifySuspend { installProfileUseCase(123, profile, any(), null, true) }
+    }
+
+    @Test
+    fun `installProfile surfaces malformed channel URL in snackbar`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        val profile = DeviceProfile(channel_url = "not-a-channel-url")
+        everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } calls
+            {
+                throw MalformedMeshtasticUrlException("bad profile")
+            }
+        // UiText.resolve() loads the string on real Dispatchers.Default, outside the test scheduler,
+        // so await the snackbar call instead of draining with runCurrent().
+        val snackbarShown = CompletableDeferred<Unit>()
+        every { snackbarManager.showSnackbar(any(), any(), any(), any(), any()) } calls { snackbarShown.complete(Unit) }
+
+        viewModel.installProfile(profile)
+        snackbarShown.await()
+
+        verify { snackbarManager.showSnackbar(message = "This Channel URL is invalid and can not be used") }
     }
 
     @Test
@@ -1256,6 +1271,65 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `local destination exposes its PlatformIO target`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
+
+        val localVm = createViewModel(destNum = 100)
+        runCurrent()
+
+        assertTrue(localVm.radioConfigState.value.isLocal)
+        assertEquals("tlora-v2-1-1_8", localVm.radioConfigState.value.pioEnv)
+    }
+
+    @Test
+    fun `local destination updates its PlatformIO target when identity is unchanged`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-t3s3-v1"))
+        val localVm = createViewModel(destNum = 100)
+        runCurrent()
+
+        val beforeReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertFalse(beforeReflash.options.orEmpty().any { it.wireValue == 1600 })
+
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "my-esp32s3-diy-oled"))
+        runCurrent()
+
+        val afterReflash =
+            loRaBandwidthSelection(
+                storedValue = 800,
+                region = Config.LoRaConfig.RegionCode.LORA_24,
+                hwModel = null,
+                pioEnv = localVm.radioConfigState.value.pioEnv,
+            )
+        assertTrue(localVm.radioConfigState.value.isLocal)
+        assertEquals("my-esp32s3-diy-oled", localVm.radioConfigState.value.pioEnv)
+        assertTrue(afterReflash.options.orEmpty().any { it.wireValue == 1600 })
+    }
+
+    @Test
+    fun `remote destination never inherits gateway PlatformIO target`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
+
+        val remoteVm = createViewModel(destNum = 456)
+        runCurrent()
+
+        assertFalse(remoteVm.radioConfigState.value.isLocal)
+        assertNull(remoteVm.radioConfigState.value.pioEnv)
+    }
+
+    @Test
     fun `loraRegionPresetMapFlow populates state`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
@@ -1375,7 +1449,7 @@ class RadioConfigViewModelTest {
         ChannelSettings(name = "D"),
     )
 
-    private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
+    private fun myNodeInfo(myNodeNum: Int, pioEnv: String? = null) = MyNodeInfo(
         myNodeNum = myNodeNum,
         hasGPS = false,
         model = null,
@@ -1390,6 +1464,7 @@ class RadioConfigViewModelTest {
         channelUtilization = 0f,
         airUtilTx = 0f,
         deviceId = null,
+        pioEnv = pioEnv,
     )
 
     @Test

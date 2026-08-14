@@ -16,9 +16,7 @@
  */
 package org.meshtastic.core.database.dao
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -28,8 +26,8 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
  * A switch-aware [DiscoveryDao] that resolves the active database on every call instead of pinning the one that was
  * current at injection time. This is what Koin hands to `feature:discovery` consumers (ViewModels and the scan engine),
  * which hold their DAO for their whole lifetime:
- * - Flow methods re-latch via `currentDb.flatMapLatest`, so an open discovery screen follows a device/DB switch instead
- *   of watching the old database forever.
+ * - Flow methods re-latch through [DatabaseProvider.observeCurrentDb], so an open discovery screen follows a device/DB
+ *   switch and recovers from a wedged active Room pool.
  * - Suspend methods go through [DatabaseProvider.withDb], so writes register with the cross-transport merge drain
  *   barrier (a mid-scan merge can't snapshot-then-retire the DB underneath an in-flight session write). A callback is
  *   never replayed after it starts, so higher layers must make any retry policy explicit where idempotency is known.
@@ -37,7 +35,6 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
  * `withDb` only returns null when no database is open, which [DatabaseProvider] guarantees can't happen (the default DB
  * is the floor), so the non-null coercions below are structural, not behavioral.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("TooManyFunctions")
 class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : DiscoveryDao {
 
@@ -51,7 +48,7 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
     }
 
     override fun getAllSessions(): Flow<List<DiscoverySessionEntity>> =
-        dbManager.currentDb.flatMapLatest { it.discoveryDao().getAllSessions() }
+        dbManager.observeCurrentDb { it.discoveryDao().getAllSessions() }
 
     override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> =
         dbManager.withDb { it.discoveryDao().getAllSessionsSnapshot() }.orEmpty()
@@ -60,7 +57,7 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().getSession(sessionId) }
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> =
-        dbManager.currentDb.flatMapLatest { it.discoveryDao().getSessionFlow(sessionId) }
+        dbManager.observeCurrentDb { it.discoveryDao().getSessionFlow(sessionId) }
 
     override suspend fun deleteSession(sessionId: Long) {
         dbManager.withDb { it.discoveryDao().deleteSession(sessionId) }
@@ -88,7 +85,7 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().getPresetResults(sessionId) }.orEmpty()
 
     override fun getPresetResultsFlow(sessionId: Long): Flow<List<DiscoveryPresetResultEntity>> =
-        dbManager.currentDb.flatMapLatest { it.discoveryDao().getPresetResultsFlow(sessionId) }
+        dbManager.observeCurrentDb { it.discoveryDao().getPresetResultsFlow(sessionId) }
 
     // endregion
 
@@ -109,7 +106,7 @@ class SwitchingDiscoveryDao(private val dbManager: DatabaseProvider) : Discovery
         dbManager.withDb { it.discoveryDao().getDiscoveredNodes(presetResultId) }.orEmpty()
 
     override fun getDiscoveredNodesFlow(presetResultId: Long): Flow<List<DiscoveredNodeEntity>> =
-        dbManager.currentDb.flatMapLatest { it.discoveryDao().getDiscoveredNodesFlow(presetResultId) }
+        dbManager.observeCurrentDb { it.discoveryDao().getDiscoveredNodesFlow(presetResultId) }
 
     override suspend fun getUniqueNodeNums(sessionId: Long): List<Long> =
         dbManager.withDb { it.discoveryDao().getUniqueNodeNums(sessionId) }.orEmpty()

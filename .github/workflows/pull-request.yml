@@ -112,7 +112,7 @@ jobs:
 
           print('check-changes filter is aligned with settings.gradle module roots.')
           PY
-      # Second drift guard: the shard task lists in reusable-check.yml are
+      # Drift guard: the shard task lists in reusable-check.yml are
       # hand-maintained and have silently dropped modules before (discovery,
       # docs, wifi-provision, car, datastore, konsist had tests that never ran
       # in CI). Every module in settings.gradle.kts must appear in the shard
@@ -192,6 +192,14 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7.0.1
+      # Workflow linting (actionlint + its shellcheck integration over every run: block).
+      # Version-pinned; the runner image ships shellcheck. ~1s over the whole tree.
+      - name: Lint GitHub workflows (actionlint)
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /tmp
+          /tmp/actionlint -color
+      - name: Lint repo shell scripts (shellcheck)
+        run: shellcheck scripts/*.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
@@ -228,6 +236,9 @@ jobs:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write # Gradle job summary as a PR comment on failure
     with:
       run_lint: true
       run_screenshot_tests: ${{ needs.check-changes.outputs.screenshots == 'true' }}
@@ -237,9 +248,11 @@ jobs:
     secrets: inherit
 
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
+  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions: {}
     needs: [check-changes, check-metadata, validate-and-build]

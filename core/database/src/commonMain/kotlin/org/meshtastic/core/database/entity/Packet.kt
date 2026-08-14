@@ -24,6 +24,7 @@ import androidx.room3.PrimaryKey
 import androidx.room3.Relation
 import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
@@ -58,6 +59,7 @@ data class PacketEntity(
             emojis =
             reactions
                 .filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }
+                .filter { it.belongsTo(packet) }
                 // myNodeNum is part of the reactions primary key, so the legacy 0 bucket can hold the same
                 // (user, emoji) as this node's. The UI keys reaction rows on that pair, so keep one — the
                 // current node's, which carries the live delivery status.
@@ -75,6 +77,33 @@ data class PacketEntity(
             showTranslated = showTranslated,
         )
     }
+}
+
+/**
+ * A reaction references its parent by mesh packet ID, which is only unique per sender. The wire format does not carry
+ * the parent's sender, but it does carry enough addressing information to keep reactions scoped to the conversation in
+ * which they were sent. Legacy rows without addressing metadata retain the historical ID-only behavior.
+ */
+@Suppress("ReturnCount")
+private fun ReactionEntity.belongsTo(packet: Packet): Boolean {
+    if (to == null || userId.isEmpty()) return true
+
+    val sender = NodeAddress.fromString(userId)
+    val recipient = NodeAddress.fromString(to)
+    val packetContact = ContactKey(packet.contact_key)
+    val isLegacyInboundPkiChannel =
+        packetContact.channel == NodeAddress.PKC_CHANNEL_INDEX &&
+            channel == 0 &&
+            status == MessageStatus.RECEIVED &&
+            recipient !is NodeAddress.Broadcast
+    if (packetContact.channel != channel && !isLegacyInboundPkiChannel) return false
+
+    val senderIsLocal =
+        status != MessageStatus.RECEIVED ||
+            sender is NodeAddress.Local ||
+            (myNodeNum != 0 && sender is NodeAddress.ByNum && sender.num == myNodeNum)
+    val reactionContact = if (recipient is NodeAddress.Broadcast || senderIsLocal) recipient else sender
+    return reactionContact == packetContact.address
 }
 
 @Suppress("ConstructorParameterNaming")

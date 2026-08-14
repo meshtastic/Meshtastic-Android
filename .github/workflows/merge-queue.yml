@@ -19,10 +19,12 @@ jobs:
   # new merge group but does NOT cancel the workflow runs of the destroyed one. Those stale
   # runs sit queued/running and starve the runner pool. Cancel any older merge-queue run
   # for the same PR — only the newest merge group per PR is ever valid.
+  # No checkout, no toolchain — just gh api + jq. ubuntu-slim starts sooner than a VM, which
+  # matters most here: every second before this runs is a second the superseded run keeps a slot.
   cancel-superseded:
     name: Cancel Superseded Queue Runs
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions:
       actions: write
@@ -76,6 +78,9 @@ jobs:
     needs: check-changes
     if: github.repository == 'meshtastic/Meshtastic-Android' && needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       run_lint: true
       run_unit_tests: true
@@ -91,9 +96,11 @@ jobs:
       upload_artifacts: false
     secrets: inherit
 
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
+  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions: {}
     needs:

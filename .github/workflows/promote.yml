@@ -90,23 +90,28 @@ jobs:
         env:
           INPUT_TAG_NAME: ${{ inputs.tag_name }}
         run: |
-          VERSION_NAME=$(echo $INPUT_TAG_NAME | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
+          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "Parsed Version: $VERSION_NAME"
 
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
           OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
 
       - name: Calculate Version Code from Git Commit Count
         id: calculate_version_code
+        env:
+          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
+          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
         shell: bash
 
   promote-release:

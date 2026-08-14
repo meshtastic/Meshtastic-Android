@@ -23,13 +23,13 @@ Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, ener
 
 Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
-| Meetriline       | Kirjeldus                      | Tüüpiline ulatus                   |
-| ---------------- | ------------------------------ | ---------------------------------- |
-| Aku tase         | Charge percentage              | 0–100%                             |
-| Vool             | Aku pinge                      | 3,0–4,2V (LiPo) |
-| Kanali kasutus   | % of airtime used locally      | 0–100%                             |
-| Eetri kasutus TX | % of airtime used by this node | 0–100%                             |
-| Töötamise aeg    | Seconds since last boot        | Varies                             |
+| Meetriline       | Kirjeldus                              | Tüüpiline ulatus                   |
+| ---------------- | -------------------------------------- | ---------------------------------- |
+| Aku tase         | Charge percentage                      | 0–100%                             |
+| Vool             | Aku pinge                              | 3,0–4,2V (LiPo) |
+| Kanali kasutus   | Kohalikult kasutatud eetriaja %        | 0–100%                             |
+| Eetri kasutus TX | Selle sõlme poolt kasutatud eetriaja % | 0–100%                             |
+| Töötamise aeg    | Seconds since last boot                | Varies                             |
 
 ## Environment Sensors
 
@@ -105,21 +105,21 @@ Nodes with particulate matter or CO₂ sensors report air quality data:
 
 CO₂ sensors such as the SCD4x also report their own temperature and humidity, which appear alongside the readings above. From PM2.5 history the app additionally derives an **EPA NowCast AQI** value.
 
-The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands, colors, and AQI detail.
+CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne → Halb → Ohtlik → Evakueeruda). Täpsete ppm-vahemike, värvide ja õhukvaliteedi indeksite üksikasjade saamiseks vaata [Sõlme mõõdikud — õhukvaliteet](node-metrics#air-quality-metrics).
 
 Õhukvaliteedi andmeid saab vaadata infokaartidena sõlme detailvaates, aja jooksul graafikule lisada ja CSV-vormingusse salvestada.
 
 ## Viewing Telemetry
 
 1. Mine **Seadmed** ja vali seade.
-2. Telemetry sections show on the detail screen:
+2. Telemeetria jaotised kuvatakse detailvaates:
    - Device Metrics (always available)
    - Environment Metrics (if sensors present)
    - Power Metrics (if INA sensor present)
    - Air Quality Metrics (if PM/CO₂ sensor present)
-3. Historical graphs show trends over time.
+3. Ajaloolised graafikud näitavad aja jooksul trende.
 
-![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemeetria toimingud](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Troubleshooting
 

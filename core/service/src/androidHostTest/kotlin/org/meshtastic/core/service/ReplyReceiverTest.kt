@@ -25,7 +25,6 @@ import dev.mokkery.answering.throws
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
@@ -98,7 +97,7 @@ class ReplyReceiverTest {
         verifySuspend { packetRepository.clearUnreadCount(contactKey, any()) }
         // The conversation is re-posted with the sent reply (MessagingStyle confirmation flow), not dismissed.
         verifySuspend { notificationManager.refreshConversationAfterReply(contactKey) }
-        verify(mode = VerifyMode.exactly(0)) { notificationManager.cancelMessageNotification(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.cancelMessageNotification(any()) }
     }
 
     @Test
@@ -109,7 +108,7 @@ class ReplyReceiverTest {
         ReplyReceiver().onReceive(ApplicationProvider.getApplicationContext(), replyIntent(contactKey, "hi"))
 
         verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.clearUnreadCount(any(), any()) }
-        verify { notificationManager.cancelMessageNotification(contactKey) }
+        verifySuspend { notificationManager.cancelMessageNotification(contactKey) }
     }
 
     @Test

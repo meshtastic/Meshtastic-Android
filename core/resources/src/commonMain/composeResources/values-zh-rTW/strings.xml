@@ -103,6 +103,7 @@
     <string name="backup_keys">備份金鑰</string>
     <string name="backup_restore">備份 &amp; 還原</string>
     <string name="bad">不良</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">帶寬</string>
     <string name="baro_pressure">氣壓</string>
     <string name="battery">電池</string>
@@ -410,7 +411,6 @@
     <string name="done">完成</string>
     <string name="dont_show_again_for_device">不再為此裝置顯示</string>
     <string name="double_tap_as_button_press">雙擊觸發按鈕功能</string>
-    <string name="downlink_enabled">已啓用下行</string>
     <string name="downlink_feature_description">網際網路閘道的訊息會轉發到本地網狀網路，但因為採用零跳躍政策，來自預設 MQTT 伺服器的流量只會到達本裝置，不會再轉發給其他節點。</string>
     <string name="download">下載</string>
     <string name="duplicated_public_key_title">偵測到重複的公鑰</string>
@@ -420,6 +420,7 @@
     <string name="edit">編輯</string>
     <string name="edit_custom_tile_source">編輯自定義圖磚來源</string>
     <string name="eight_hours">8 小時</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">啟用省電模式</string>
     <string name="enabled">已啟用</string>
     <!-- ENCRYPTION -->
@@ -447,6 +448,7 @@
     <string name="exchange_position">交換位置</string>
     <string name="expand_chart">展開圖表</string>
     <string name="expires">到期時間</string>
+    <!-- EXPORT -->
     <string name="export_configuration">匯出設定</string>
     <string name="export_data_csv">匯出所有封包</string>
     <string name="export_tak_data_package">匯出 TAK 資料封包</string>
@@ -650,11 +652,13 @@
     <string name="latest_alpha_firmware">最新測試版韌體</string>
     <string name="latest_stable_firmware">最新穩定版韌體</string>
     <string name="latitude">緯度</string>
+    <!-- LAYER -->
     <string name="learn_more">瞭解詳情</string>
     <string name="led_heartbeat">LED 心跳指示</string>
     <string name="led_state">LED狀態</string>
     <string name="legacy_admin_channel">舊版管理頻道</string>
     <string name="library_count">%1$d 函式庫</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">領有執照的業餘無線電台 (HAM)</string>
     <string name="licensed_amateur_radio_text">啟用此選項將停用訊息加密，並與預設的 Meshtastic 網路不相容。</string>
     <!-- LOAD -->
@@ -1118,24 +1122,10 @@
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>
     <string name="router_role_confirmation_text">我已閱讀&lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">無效的會話金鑰</string>
-    <string name="routing_error_admin_public_key_unauthorized">無法識別公鑰</string>
-    <string name="routing_error_bad_request">錯誤請求</string>
-    <string name="routing_error_duty_cycle_limit">已達區域工作週期之上限</string>
     <string name="routing_error_got_nak">接收到拒絕確認</string>
-    <string name="routing_error_max_retransmit">已達最大重新發送次數</string>
-    <string name="routing_error_no_channel">無頻道</string>
-    <string name="routing_error_no_interface">無介面</string>
-    <string name="routing_error_no_response">無回應</string>
     <string name="routing_error_no_route">無路徑</string>
     <string name="routing_error_none">已確認</string>
-    <string name="routing_error_not_authorized">未授權</string>
-    <string name="routing_error_pki_failed">加密發送錯誤</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI 傳送失敗，無公開金鑰</string>
-    <string name="routing_error_pki_unknown_pubkey">未知公鑰</string>
-    <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="routing_error_timeout">逾時</string>
-    <string name="routing_error_too_large">封包過大</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="rsyslog_server">rsyslog伺服器</string>
@@ -1266,8 +1256,6 @@
     <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
-    <string name="tak_server_enabled_desc">在連接埠 8089 啟動本地 TLS 伺服器，供 ATAK/iTAK 連線使用</string>
-    <string name="tak_server_export_data_package_desc">產生 .zip 檔供 ATAK/iTAK 連線至此伺服器</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">伺服器</string>
     <string name="tak_server_test_card_title">TAK Mesh 測試（除錯）</string>
@@ -1381,7 +1369,6 @@
     <string name="update_interval">GPS 輪詢間隔</string>
     <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="updated">已更新</string>
-    <string name="uplink_enabled">已啓用上行</string>
     <string name="uplink_feature_description">來自網狀網路的訊息會經由任何配置閘道的節點傳送到網際網路。</string>
     <string name="uptime">運行時間</string>
     <!-- URL -->

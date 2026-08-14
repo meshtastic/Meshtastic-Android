@@ -45,12 +45,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.app.map.LayerType
 import org.meshtastic.app.map.MapLayerItem
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_layer
 import org.meshtastic.core.resources.add_network_layer
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.hide_layer
+import org.meshtastic.core.resources.layer_subtitle
+import org.meshtastic.core.resources.layer_type_coverage
+import org.meshtastic.core.resources.layer_type_geojson
+import org.meshtastic.core.resources.layer_type_kml
+import org.meshtastic.core.resources.layer_type_network
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_layer_formats
 import org.meshtastic.core.resources.name
@@ -62,7 +69,9 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer
 import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Visibility
@@ -108,54 +117,11 @@ fun CustomMapLayersSheet(
             }
         } else {
             items(mapLayers, key = { it.id }) { layer ->
-                ListItem(
-                    headlineContent = { Text(layer.name) },
-                    trailingContent = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (layer.isNetwork) {
-                                if (layer.isRefreshing) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp).padding(4.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                } else {
-                                    IconButton(onClick = { onRefreshLayer(layer.id) }) {
-                                        Icon(
-                                            imageVector = MeshtasticIcons.Refresh,
-                                            contentDescription = stringResource(Res.string.refresh),
-                                        )
-                                    }
-                                }
-                            }
-                            IconToggleButton(
-                                checked = layer.isVisible,
-                                onCheckedChange = { onToggleVisibility(layer.id) },
-                            ) {
-                                Icon(
-                                    imageVector =
-                                    if (layer.isVisible) {
-                                        MeshtasticIcons.Visibility
-                                    } else {
-                                        MeshtasticIcons.VisibilityOff
-                                    },
-                                    contentDescription =
-                                    stringResource(
-                                        if (layer.isVisible) {
-                                            Res.string.hide_layer
-                                        } else {
-                                            Res.string.show_layer
-                                        },
-                                    ),
-                                )
-                            }
-                            IconButton(onClick = { onRemoveLayer(layer.id) }) {
-                                Icon(
-                                    imageVector = MeshtasticIcons.Delete,
-                                    contentDescription = stringResource(Res.string.remove_layer),
-                                )
-                            }
-                        }
-                    },
+                MapLayerRow(
+                    layer = layer,
+                    onToggleVisibility = onToggleVisibility,
+                    onRemoveLayer = onRemoveLayer,
+                    onRefreshLayer = onRefreshLayer,
                 )
                 HorizontalDivider()
             }
@@ -180,6 +146,94 @@ fun CustomMapLayersSheet(
                 showAddNetworkLayerDialog = false
             },
         )
+    }
+}
+
+/**
+ * One row of the layers sheet. The leading icon and subtitle exist so a stack of saved coverage estimates is
+ * distinguishable from each other and from imported KML/GeoJSON files — they otherwise share a default name.
+ */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun MapLayerRow(
+    layer: MapLayerItem,
+    onToggleVisibility: (String) -> Unit,
+    onRemoveLayer: (String) -> Unit,
+    onRefreshLayer: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val typeLabel =
+        stringResource(
+            when {
+                layer.isNetwork -> Res.string.layer_type_network
+                layer.layerType == LayerType.COVERAGE -> Res.string.layer_type_coverage
+                layer.layerType == LayerType.KML -> Res.string.layer_type_kml
+                else -> Res.string.layer_type_geojson
+            },
+        )
+    ListItem(
+        modifier = modifier,
+        headlineContent = { Text(layer.name) },
+        supportingContent = {
+            Text(
+                text =
+                layer.createdAt?.let {
+                    stringResource(Res.string.layer_subtitle, typeLabel, DateFormatter.formatDateTimeShort(it))
+                } ?: typeLabel,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector =
+                if (layer.layerType == LayerType.COVERAGE) {
+                    MeshtasticIcons.CellTower
+                } else {
+                    MeshtasticIcons.Layers
+                },
+                contentDescription = typeLabel,
+            )
+        },
+        trailingContent = {
+            MapLayerActions(
+                layer = layer,
+                onToggleVisibility = onToggleVisibility,
+                onRemoveLayer = onRemoveLayer,
+                onRefreshLayer = onRefreshLayer,
+            )
+        },
+    )
+}
+
+/** Per-row refresh (network layers only), visibility toggle, and delete controls. */
+@Composable
+private fun MapLayerActions(
+    layer: MapLayerItem,
+    onToggleVisibility: (String) -> Unit,
+    onRemoveLayer: (String) -> Unit,
+    onRefreshLayer: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        if (layer.isNetwork) {
+            if (layer.isRefreshing) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(4.dp), strokeWidth = 2.dp)
+            } else {
+                IconButton(onClick = { onRefreshLayer(layer.id) }) {
+                    Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = stringResource(Res.string.refresh))
+                }
+            }
+        }
+        IconToggleButton(checked = layer.isVisible, onCheckedChange = { onToggleVisibility(layer.id) }) {
+            Icon(
+                imageVector = if (layer.isVisible) MeshtasticIcons.Visibility else MeshtasticIcons.VisibilityOff,
+                contentDescription =
+                stringResource(if (layer.isVisible) Res.string.hide_layer else Res.string.show_layer),
+            )
+        }
+        IconButton(onClick = { onRemoveLayer(layer.id) }) {
+            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.remove_layer))
+        }
     }
 }
 

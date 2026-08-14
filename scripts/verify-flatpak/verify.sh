@@ -79,7 +79,7 @@ if [[ $SKIP_REGEN -eq 0 ]]; then
     rm -rf "$GRADLE_HOME_ISOLATED"
     # The settings plugin (org.meshtastic.flatpak.sources.settings) captures URLs from
     # build start — no init script or -I flag needed.
-    (cd "$REPO_ROOT" && ./gradlew --no-build-cache --no-configuration-cache \
+    (cd "$REPO_ROOT" && ./gradlew --no-build-cache \
         -Dgradle.user.home="$GRADLE_HOME_ISOLATED" \
         :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources)
     cp "$REPO_ROOT/build/flatpak-ops-sources.json" "$SOURCES_JSON"

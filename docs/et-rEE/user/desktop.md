@@ -64,7 +64,7 @@ Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/
 | -------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
 | Messaging                                    | ✓       | ✓       | Full parity                                                                                                 |
 | Node List                                    | ✓       | ✓       | Full parity                                                                                                 |
-| Kaart                                        | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only                                     |
+| Kaart                                        | ✓       | ◐       | Kaardi vahekaart on küll töölaual olemas, aga interaktiivne kaardivaade on saadaval ainult Androidis        |
 | Sätted                                       | ✓       | ✓       | Full parity                                                                                                 |
 | Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                                                                                        |
 | Püsivara uuendus                             | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
@@ -86,15 +86,15 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 Otseteed kasutavad macOS-is **⌘** (Command) ja Windowsis ning Linuxis **Ctrl**. (Super/Windowsi võti pole seotud.)
 
-| Otsetee      | Action                 |
-| ------------ | ---------------------- |
-| **⌘/Ctrl+Q** | Quit the application   |
-| **⌘/Ctrl+,** | Ava sätted             |
-| **⌘/Ctrl+1** | Switch to Messages tab |
-| **⌘/Ctrl+2** | Switch to Nodes tab    |
-| **⌘/Ctrl+3** | Switch to Map tab      |
-| **⌘/Ctrl+4** | Switch to Connect tab  |
-| **⌘/Ctrl+/** | Open About             |
+| Otsetee      | Action                     |
+| ------------ | -------------------------- |
+| **⌘/Ctrl+Q** | Quit the application       |
+| **⌘/Ctrl+,** | Ava sätted                 |
+| **⌘/Ctrl+1** | Switch to Messages tab     |
+| **⌘/Ctrl+2** | Switch to Nodes tab        |
+| **⌘/Ctrl+3** | Lülitu kaardi vahekaardile |
+| **⌘/Ctrl+4** | Switch to Connect tab      |
+| **⌘/Ctrl+/** | Open About                 |
 
 ### Window & System Tray
 
@@ -111,15 +111,15 @@ Töölauarakendus pakub rakendusesiseste kuvatavate märguannete juhtimist – s
 
 Töölauarakendusel on sisseehitatud dokumentatsioonibrauser, mis võimaldab kiiret juurdepääsu abisisule ilma rakendusest lahkumata.
 
-![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Dokumentide brauser sisukorraga](../../assets/screenshots/docs-browser_toc.png)
 
 The browser supports full-text search across all documentation:
 
-![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
+![Dokumentide brauserist otsimine](../../assets/screenshots/docs-browser_search.png)
 
 Individual doc pages render with full formatting:
 
-![A documentation page](../../assets/screenshots/docs-browser_page.png)
+![Dokumentatsioonileht](../../assets/screenshots/docs-browser_page.png)
 
 ## Building from Source
 
@@ -136,7 +136,7 @@ Requirements:
 
 ## Known Limitations
 
-- The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
+- Interaktiivne kaardivaade on saadaval ainult Androidile – kaardi vahekaart on olemas, kuid see ei kuva kaarti töölaual
 - Mõned Androidile omased funktsioonid (vidinad, kindlad teavituskanalid) pole saadaval
 - Performance may vary on low-spec hardware running Compose Desktop
 - Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)

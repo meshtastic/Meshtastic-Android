@@ -31,6 +31,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.model.ConnectionState
@@ -61,6 +62,7 @@ class SettingsViewModel(
     private val notificationPrefs: NotificationPrefs,
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
     private val exportDataUseCase: ExportDataUseCase,
+    private val exportNodeDatabaseUseCase: ExportNodeDatabaseUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
     private val fileService: FileService,
     private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
@@ -151,6 +153,12 @@ class SettingsViewModel(
         uiPrefs.setTheme(theme)
     }
 
+    val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
+    fun setShowFullMessageTimestamps(show: Boolean) {
+        uiPrefs.setShowFullMessageTimestamps(show)
+    }
+
     /** Set the application locale. Empty string means system default. */
     fun setLocale(languageTag: String) {
         uiPrefs.setLocale(languageTag)
@@ -179,6 +187,11 @@ class SettingsViewModel(
     private suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {
         val myNodeNum = myNodeNum ?: return
         exportDataUseCase(writer, myNodeNum, filterPortnum)
+    }
+
+    /** Export the current device's node database as a JSON file at the given URI. */
+    fun saveNodeDbJson(uri: CommonUri) {
+        safeLaunch(tag = "saveNodeDbJson") { fileService.write(uri) { sink -> exportNodeDatabaseUseCase(sink) } }
     }
 
     // Node list layout preferences

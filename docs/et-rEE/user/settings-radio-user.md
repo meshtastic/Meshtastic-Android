@@ -1,5 +1,5 @@
 ---
-title: Settings — Radio & User
+title: Seaded — raadio ja kasutaja
 parent: User Guide
 nav_order: 7
 last_updated: 2026-07-27
@@ -11,11 +11,11 @@ aliases:
   - lora
 ---
 
-# Settings — Radio & User
+# Seaded — raadio ja kasutaja
 
 Configure your radio hardware and user identity parameters.
 
-## User Settings
+## Kasutaja seaded
 
 ### User Profile
 
@@ -27,7 +27,7 @@ Configure your radio hardware and user identity parameters.
 
 ### Applying Changes
 
-Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. The device may reboot to apply changes.
+Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. Muudatuste rakendamiseks võib seade taaskäivituda.
 
 ## Sätted
 
@@ -42,14 +42,14 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 ### LoRa sätted
 
-| Setting          | Kirjeldus                                                               | Vaikimisi                                 |
-| ---------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
-| Regioon          | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Modemi vaikesäte | Speed/range tradeoff                                                    | LongFast                                  |
-| Hüppete limiit   | Maks uuesti saadetud hüpet                                              | 3                                         |
-| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Frequency Offset | Fine-tune frequency (MHz)                            | 0                                         |
-| Kanali ribalaius | Bandwidth setting                                                       | Default for preset                        |
+| Setting          | Kirjeldus                                                               | Vaikimisi                                       |
+| ---------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
+| Regioon          | Sagedusribade reguleerimispiirkond                                      | Määramata (tuleb seadistada) |
+| Modemi vaikesäte | Speed/range tradeoff                                                    | LongFast                                        |
+| Hüppete limiit   | Maks uuesti saadetud hüpet                                              | 3                                               |
+| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (region max)               |
+| Sagedusnihe      | Sageduse peenhäälestamine (MHz)                      | 0                                               |
+| Kanali ribalaius | Bandwidth setting                                                       | Default for preset                              |
 
 > ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
@@ -60,13 +60,13 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | Preset             | Range                   | Kiirus                   | SNR Limit | Best For                                                                                          |
 | ------------------ | ----------------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
 | Short Turbo        | ~1 km   | 21,9 kbps                | −7,5 dB   | Dense urban with line-of-sight; data-heavy applications                                           |
-| Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB   | Urban neighborhoods; buildings within a few blocks                                                |
+| Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB   | Linnaosad; hooned mõne kvartali raadiuses                                                         |
 | Short Slow         | ~5 km   | 5.5 kbps | −10 dB    | Äärelinna lühimaa; mõõdukas hoonestustihedus                                                      |
 | Medium Fast        | ~5 km   | 5.5 kbps | −12,5 dB  | Suburban areas; moderate building density                                                         |
 | Medium Slow        | ~8 km   | 1,1 kbps                 | −15 dB    | Suburban/rural; moderate range with slower speed                                                  |
 | Long Turbo         | ~10 km  | 4,4 kbps                 | −12,5 dB  | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
 | Long Fast          | ~10 km  | 1,1 kbps                 | −17,5 dB  | **General use (default)** — balanced range and speed                           |
-| Long Moderate      | ~20 km  | 0,34 kbps                | −17,5 dB  | Rural with some terrain; occasional use                                                           |
+| Long Moderate      | ~20 km  | 0,34 kbps                | −17,5 dB  | Maapiirkond, mõningase maastikuga; aeg-ajalt kasutatav                                            |
 | Lite Fast          | ~5 km   | 5,5 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
 | Lite Slow          | ~10 km  | 1,1 kbps                 | −15 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
 | Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
@@ -109,8 +109,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 | Setting                                   | Kirjeldus                          |
 | ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| GPS värskendamise intervall               | How often to acquire GPS fix       |
+| GPS lubatud                               | GPS lubamine/keelamine             |
+| GPS värskendamise intervall               | Kui tihti GPS asukohta leida       |
 | Asukoha(de) levitamine | How often to share position        |
 | Nutikas asukoht                           | Liikumispõhise levitamise lubamine |
 | Määratud asukoht                          | Use a manually set position        |
@@ -135,7 +135,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP server    | Time synchronization server                |
 | Syslog Server | Kauglogimise server                        |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![IP aadressi väli](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Sinihamba sätted
 
@@ -147,29 +147,29 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Turva sätted
 
-| Setting                 | Kirjeldus                                                                                                                                                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                                          |
-| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                                                      |
-| Salajane võti           | Sinu sõlme privaatvõti (käsitsege turvaliselt)                                                                                                                                                                     |
-| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                                                 |
-| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                                             |
-| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                                                  |
-| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                                          |
-| Taastevõtmed            | Salvesta sõlme võtmete krüpteeritud varukoopia sellesse seadmesse (ainult Android)                                                                                                                                 |
-| Taasta võtmed           | Kirjuta varundatud võtmed tagasi sõlme (saadaval siis, kui varukoopia on olemas)                                                                                                                                   |
-| Kustuta taastevõtmed    | Eemalda salvestatud võtme varukoopia sellest seadmest                                                                                                                                                                                 |
-| Protection Level        | Pakettide autentsus – kuidas käsitletakse allkirjastamata või edastatud pakette: **range**, **tasakaalustatud** või **ühilduv** (nõuab toetavat püsivara; range režiimi puhul küsitakse kinnitust) |
+| Setting                 | Kirjeldus                                                                                                                                                                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                                           |
+| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                                                       |
+| Salajane võti           | Sinu sõlme privaatvõti (käsitsege turvaliselt)                                                                                                                                                                      |
+| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                                                  |
+| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                                              |
+| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                                                   |
+| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                                           |
+| Taastevõtmed            | Salvesta sõlme võtmete krüpteeritud varukoopia sellesse seadmesse (ainult Android)                                                                                                                                  |
+| Taasta võtmed           | Kirjuta varundatud võtmed tagasi sõlme (saadaval siis, kui varukoopia on olemas)                                                                                                                                    |
+| Kustuta taastevõtmed    | Eemalda salvestatud võtme varukoopia sellest seadmest                                                                                                                                                                                  |
+| Protection Level        | Pakettide autentsus – kuidas käsitletakse allkirjastamata või vahendatud pakette: **range**, **tasakaalustatud** või **ühilduv** (nõuab toetavat püsivara; range režiimi puhul küsitakse kinnitust) |
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 
-Settings use standard preference controls — dropdowns, toggles, and sliders:
+Seaded kasutavad standardseid eelistuste juhtelemente – rippmenüüsid, lülitid ja liugurid:
 
-| Control  | Screenshot                                                  |
-| -------- | ----------------------------------------------------------- |
-| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+| Control  | Screenshot                                                   |
+| -------- | ------------------------------------------------------------ |
+| Dropdown | ![Rippmenüü](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![Lülitus](../../assets/screenshots/settings_switch.png)     |
+| Slider   | ![Liugur](../../assets/screenshots/settings_slider.png)      |
 
 ## Related Topics
 

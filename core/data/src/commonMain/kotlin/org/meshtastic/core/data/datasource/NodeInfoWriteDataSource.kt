@@ -30,11 +30,9 @@ interface NodeInfoWriteDataSource {
 
     suspend fun clearMyNodeInfo()
 
-    suspend fun deleteNode(num: Int)
+    suspend fun deleteNodeAndMetadata(num: Int)
 
-    suspend fun deleteNodes(nodeNums: List<Int>)
-
-    suspend fun deleteMetadata(num: Int)
+    suspend fun deleteNodesAndMetadata(nodeNums: List<Int>)
 
     suspend fun upsert(metadata: MetadataEntity)
 

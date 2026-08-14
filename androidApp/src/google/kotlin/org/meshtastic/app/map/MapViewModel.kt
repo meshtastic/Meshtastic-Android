@@ -41,13 +41,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
+import org.meshtastic.app.map.model.isValidTileUrlTemplate
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
+import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
+import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
@@ -85,6 +89,7 @@ class MapViewModel(
     radioConfigRepository: RadioConfigRepository,
     radioController: RadioController,
     private val customTileProviderRepository: CustomTileProviderRepository,
+    private val mapTileProviderPrefs: MapTileProviderPrefs,
     uiPrefs: UiPrefs,
     notificationPrefs: NotificationPrefs,
     savedStateHandle: SavedStateHandle,
@@ -100,15 +105,17 @@ class MapViewModel(
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
-    // Site Planner deep link from node detail: MapRoute.Map(sitePlannerNodeNum) → resolve to the node so the map can
-    // open the estimate dialog pre-filled with its position. Cleared once consumed so it doesn't re-open.
-    private val pendingSitePlannerNodeNum = MutableStateFlow(savedStateHandle.get<Int>("sitePlannerNodeNum"))
+    // Injected by the map provider because this SavedStateHandle is not the Navigation 3 entry's route state.
+    private val sitePlannerRequestState = SitePlannerRequestState(nodeRepository.nodeDBbyNum)
     val sitePlannerRequest: StateFlow<Node?> =
-        combine(pendingSitePlannerNodeNum, nodeRepository.nodeDBbyNum) { num, db -> num?.let { db[it] } }
-            .stateInWhileSubscribed(initialValue = null)
+        sitePlannerRequestState.request.stateInWhileSubscribed(initialValue = null)
 
-    fun consumeSitePlannerRequest() {
-        pendingSitePlannerNodeNum.value = null
+    fun setSitePlannerNodeNum(nodeNum: Int?) {
+        sitePlannerRequestState.setNodeNum(nodeNum)
+    }
+
+    fun consumeSitePlannerRequest(nodeNum: Int) {
+        sitePlannerRequestState.consume(nodeNum)
     }
 
     fun setWaypointId(id: Int?) {
@@ -140,8 +147,14 @@ class MapViewModel(
     val customTileProviderConfigs: StateFlow<List<CustomTileProviderConfig>> =
         customTileProviderRepository.getCustomTileProviders().stateInWhileSubscribed(initialValue = emptyList())
 
-    private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
-    val selectedCustomTileProviderUrl: StateFlow<String?> = _selectedCustomTileProviderUrl.asStateFlow()
+    private val _selectedCustomTileProviderId = MutableStateFlow<String?>(null)
+    val selectedCustomTileProviderId: StateFlow<String?> = _selectedCustomTileProviderId.asStateFlow()
+
+    val selectedCustomTileProvider: StateFlow<CustomTileProviderConfig?> =
+        combine(_selectedCustomTileProviderId, customTileProviderConfigs) { selectedId, providers ->
+            providers.findSelectedCustomTileProvider(selectedId)
+        }
+            .stateInWhileSubscribed(initialValue = null)
 
     private val _selectedGoogleMapType = MutableStateFlow(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
@@ -156,11 +169,6 @@ class MapViewModel(
                 _errorFlow.emit("Invalid name, URL template, or local URI for custom tile provider.")
                 return@launch
             }
-            if (customTileProviderConfigs.value.any { it.name.equals(name, ignoreCase = true) }) {
-                _errorFlow.emit("Custom tile provider with name '$name' already exists.")
-                return@launch
-            }
-
             var finalLocalUri = localUri
             if (localUri != null) {
                 try {
@@ -184,44 +192,55 @@ class MapViewModel(
             }
 
             val newConfig = CustomTileProviderConfig(name = name, urlTemplate = urlTemplate, localUri = finalLocalUri)
-            customTileProviderRepository.addCustomTileProvider(newConfig)
+            when (customTileProviderRepository.addCustomTileProvider(newConfig)) {
+                CustomTileProviderSaveResult.SAVED -> Unit
+
+                CustomTileProviderSaveResult.DUPLICATE_NAME -> {
+                    finalLocalUri?.let { deleteFileToInternalStorage(Uri.parse(it)) }
+                    _errorFlow.emit("Custom tile provider with name '$name' already exists.")
+                }
+
+                CustomTileProviderSaveResult.NOT_FOUND -> _errorFlow.emit("Failed to save custom tile provider.")
+            }
+        }
+    }
+
+    fun addCustomTileProvider(config: CustomTileProviderConfig) {
+        viewModelScope.launch {
+            val normalized = config.normalized()
+            if (normalized.name.isBlank() || !normalized.hasValidGoogleTileSource()) {
+                _errorFlow.emit("Invalid custom tile provider configuration.")
+                return@launch
+            }
+            when (customTileProviderRepository.addCustomTileProvider(normalized)) {
+                CustomTileProviderSaveResult.SAVED -> Unit
+
+                CustomTileProviderSaveResult.DUPLICATE_NAME ->
+                    _errorFlow.emit("Custom tile provider with that name already exists.")
+
+                CustomTileProviderSaveResult.NOT_FOUND -> _errorFlow.emit("Failed to save custom tile provider.")
+            }
         }
     }
 
     fun updateCustomTileProvider(configToUpdate: CustomTileProviderConfig) {
         viewModelScope.launch {
+            val normalized = configToUpdate.normalized()
             if (
-                configToUpdate.name.isBlank() ||
-                (configToUpdate.urlTemplate.isBlank() && configToUpdate.localUri == null) ||
-                (configToUpdate.localUri == null && !isValidTileUrlTemplate(configToUpdate.urlTemplate))
+                normalized.name.isBlank() ||
+                (normalized.urlTemplate.isBlank() && normalized.localUri == null) ||
+                (normalized.localUri == null && !isValidTileUrlTemplate(normalized.urlTemplate))
             ) {
                 _errorFlow.emit("Invalid name, URL template, or local URI for updating custom tile provider.")
                 return@launch
             }
-            val existingConfigs = customTileProviderConfigs.value
-            if (
-                existingConfigs.any {
-                    it.id != configToUpdate.id && it.name.equals(configToUpdate.name, ignoreCase = true)
-                }
-            ) {
-                _errorFlow.emit("Another custom tile provider with name '${configToUpdate.name}' already exists.")
-                return@launch
-            }
+            when (customTileProviderRepository.updateCustomTileProvider(normalized)) {
+                CustomTileProviderSaveResult.SAVED -> Unit
 
-            customTileProviderRepository.updateCustomTileProvider(configToUpdate)
+                CustomTileProviderSaveResult.DUPLICATE_NAME ->
+                    _errorFlow.emit("Another custom tile provider with name '${normalized.name}' already exists.")
 
-            val originalConfig = customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
-            if (
-                _selectedCustomTileProviderUrl.value != null &&
-                originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value
-            ) {
-                // No change needed if URL didn't change, or handle if it did
-            } else if (originalConfig != null && _selectedCustomTileProviderUrl.value != originalConfig.urlTemplate) {
-                val currentlySelectedConfig =
-                    customTileProviderConfigs.value.find { it.urlTemplate == _selectedCustomTileProviderUrl.value }
-                if (currentlySelectedConfig?.id == configToUpdate.id) {
-                    _selectedCustomTileProviderUrl.value = configToUpdate.urlTemplate
-                }
+                CustomTileProviderSaveResult.NOT_FOUND -> _errorFlow.emit("Custom tile provider no longer exists.")
             }
         }
     }
@@ -229,16 +248,17 @@ class MapViewModel(
     fun removeCustomTileProvider(configId: String) {
         viewModelScope.launch {
             val configToRemove = customTileProviderRepository.getCustomTileProviderById(configId)
+            val wasSelected = _selectedCustomTileProviderId.value == configId
             customTileProviderRepository.deleteCustomTileProvider(configId)
 
             if (configToRemove != null) {
-                if (
-                    _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate ||
-                    _selectedCustomTileProviderUrl.value == configToRemove.localUri
-                ) {
-                    _selectedCustomTileProviderUrl.value = null
-                    // Also clear from prefs
+                if (wasSelected) {
+                    clearCurrentTileProvider()
+                    _selectedCustomTileProviderId.value = null
+                    _selectedGoogleMapType.value = MapType.NORMAL
+                    mapTileProviderPrefs.setSelectedCustomTileProviderId(null)
                     googleMapsPrefs.setSelectedCustomTileUrl(null)
+                    googleMapsPrefs.setSelectedGoogleMapType(MapType.NORMAL.name)
                 }
 
                 if (configToRemove.localUri != null) {
@@ -252,48 +272,53 @@ class MapViewModel(
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
             if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
-                Logger.withTag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
-                _selectedCustomTileProviderUrl.value = null
+                Logger.withTag("MapViewModel").w("Attempted to select an invalid custom tile URL template")
+                clearCurrentTileProvider()
+                _selectedCustomTileProviderId.value = null
+                _selectedGoogleMapType.value = MapType.NORMAL
+                viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
                 googleMapsPrefs.setSelectedCustomTileUrl(null)
+                googleMapsPrefs.setSelectedGoogleMapType(MapType.NORMAL.name)
                 return
             }
-            // Use localUri if present, otherwise urlTemplate
-            val selectedUrl = config.localUri ?: config.urlTemplate
-            _selectedCustomTileProviderUrl.value = selectedUrl
+            _selectedCustomTileProviderId.value = config.id
             _selectedGoogleMapType.value = MapType.NONE
-            googleMapsPrefs.setSelectedCustomTileUrl(selectedUrl)
+            viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(config.id) }
+            googleMapsPrefs.setSelectedCustomTileUrl(null)
             googleMapsPrefs.setSelectedGoogleMapType(null)
         } else {
-            _selectedCustomTileProviderUrl.value = null
+            clearCurrentTileProvider()
+            _selectedCustomTileProviderId.value = null
             _selectedGoogleMapType.value = MapType.NORMAL
+            viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
             googleMapsPrefs.setSelectedCustomTileUrl(null)
             googleMapsPrefs.setSelectedGoogleMapType(MapType.NORMAL.name)
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
+        clearCurrentTileProvider()
         _selectedGoogleMapType.value = mapType
-        _selectedCustomTileProviderUrl.value = null // Clear custom selection
+        _selectedCustomTileProviderId.value = null
+        viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
         googleMapsPrefs.setSelectedGoogleMapType(mapType.name)
         googleMapsPrefs.setSelectedCustomTileUrl(null)
     }
 
     private var currentTileProvider: TileProvider? = null
+    private var currentTileProviderConfig: CustomTileProviderConfig? = null
 
     fun getTileProvider(config: CustomTileProviderConfig?): TileProvider? {
         if (config == null) {
-            (currentTileProvider as? MBTilesProvider)?.close()
-            currentTileProvider = null
+            clearCurrentTileProvider()
             return null
         }
 
-        val selectedUrl = config.localUri ?: config.urlTemplate
-        if (currentTileProvider != null && _selectedCustomTileProviderUrl.value == selectedUrl) {
+        if (currentTileProvider != null && currentTileProviderConfig == config) {
             return currentTileProvider
         }
 
-        // Close previous if it was a local provider
-        (currentTileProvider as? MBTilesProvider)?.close()
+        clearCurrentTileProvider()
 
         val newProvider =
             if (config.isLocal) {
@@ -307,14 +332,13 @@ class MapViewModel(
                 if (file.exists()) {
                     MBTilesProvider(file)
                 } else {
-                    Logger.withTag("MapViewModel").e("Local MBTiles file does not exist: ${config.localUri}")
+                    Logger.withTag("MapViewModel").w("Selected local MBTiles file does not exist")
                     null
                 }
             } else {
                 val urlString = config.urlTemplate
                 if (!isValidTileUrlTemplate(urlString)) {
-                    Logger.withTag("MapViewModel")
-                        .e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+                    Logger.withTag("MapViewModel").w("Selected custom tile URL template is invalid")
                     null
                 } else {
                     object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -329,8 +353,8 @@ class MapViewModel(
                                     .replace("{y}", y.toString(), ignoreCase = true)
                             return try {
                                 URL(formattedUrl)
-                            } catch (e: MalformedURLException) {
-                                Logger.withTag("MapViewModel").e(e) { "Malformed URL: $formattedUrl" }
+                            } catch (_: MalformedURLException) {
+                                Logger.withTag("MapViewModel").w("Custom tile provider produced a malformed URL")
                                 null
                             }
                         }
@@ -339,12 +363,18 @@ class MapViewModel(
             }
 
         currentTileProvider = newProvider
+        currentTileProviderConfig = config.takeIf { newProvider != null }
         return newProvider
     }
 
-    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.contains("{z}", ignoreCase = true) &&
-        urlTemplate.contains("{x}", ignoreCase = true) &&
-        urlTemplate.contains("{y}", ignoreCase = true)
+    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean =
+        urlTemplate.isValidTileUrlTemplate(requireHttps = false)
+
+    private fun clearCurrentTileProvider() {
+        (currentTileProvider as? MBTilesProvider)?.close()
+        currentTileProvider = null
+        currentTileProviderConfig = null
+    }
 
     /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and rendered by [MapLayerOverlay]. */
     val mapLayers: StateFlow<List<MapLayerItem>> = mapLayersManager.mapLayers
@@ -361,8 +391,13 @@ class MapViewModel(
         }
 
         viewModelScope.launch {
-            customTileProviderRepository.getCustomTileProviders().first()
-            loadPersistedMapType()
+            val providerLoad = customTileProviderRepository.awaitCustomTileProviders()
+            loadPersistedMapType(
+                providers = providerLoad.providers,
+                providerLoadSuccessful = providerLoad.isSuccessful,
+                selection = googleMapsPrefs.awaitMapSelection(),
+                selectedProviderId = mapTileProviderPrefs.awaitSelectedCustomTileProviderId(),
+            )
         }
 
         selectedWaypointId.value?.let { wpId ->
@@ -387,30 +422,42 @@ class MapViewModel(
         saveCameraPosition(cameraPositionState.position)
     }
 
-    private fun loadPersistedMapType() {
-        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl.value
-        if (savedCustomUrl != null) {
-            // Check if this custom provider still exists
-            if (
-                customTileProviderConfigs.value.any { it.urlTemplate == savedCustomUrl } &&
-                isValidTileUrlTemplate(savedCustomUrl)
-            ) {
-                _selectedCustomTileProviderUrl.value = savedCustomUrl
-                _selectedGoogleMapType.value =
-                    MapType.NONE // MapType.NONE to hide google basemap when using custom provider
-            } else {
-                // The saved custom URL is no longer valid or doesn't exist, remove preference
-                googleMapsPrefs.setSelectedCustomTileUrl(null)
-                // Fallback to default Google Map type
-                _selectedGoogleMapType.value = MapType.NORMAL
+    private suspend fun loadPersistedMapType(
+        providers: List<CustomTileProviderConfig>,
+        providerLoadSuccessful: Boolean,
+        selection: GoogleMapSelectionPrefs,
+        selectedProviderId: String?,
+    ) {
+        val resolvedSelection =
+            providers.resolvePersistedCustomTileSelection(
+                selectedProviderId = selectedProviderId,
+                legacySource = selection.customTileUrl,
+                providerLoadSuccessful = providerLoadSuccessful,
+            )
+        val selectedProvider = resolvedSelection.provider
+
+        if (selectedProvider != null) {
+            _selectedCustomTileProviderId.value = selectedProvider.id
+            _selectedGoogleMapType.value = MapType.NONE
+            if (selectedProviderId != selectedProvider.id) {
+                mapTileProviderPrefs.setSelectedCustomTileProviderId(selectedProvider.id)
             }
+            if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
         } else {
-            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType.value
+            _selectedCustomTileProviderId.value = null
+            if (resolvedSelection.canDiscardMissingSelection) {
+                if (selectedProviderId != null) mapTileProviderPrefs.setSelectedCustomTileProviderId(null)
+                if (selection.customTileUrl != null) googleMapsPrefs.setSelectedCustomTileUrl(null)
+            }
+            if (!providerLoadSuccessful && (selectedProviderId != null || selection.customTileUrl != null)) {
+                _selectedGoogleMapType.value = MapType.NORMAL
+                return
+            }
             try {
-                _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
-            } catch (e: IllegalArgumentException) {
-                Logger.e(e) { "Invalid saved Google Map type: $savedGoogleMapTypeName" }
-                _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
+                _selectedGoogleMapType.value = MapType.valueOf(selection.mapType)
+            } catch (_: IllegalArgumentException) {
+                Logger.w { "Ignoring an invalid saved Google Map type" }
+                _selectedGoogleMapType.value = MapType.NORMAL
                 googleMapsPrefs.setSelectedGoogleMapType(null)
             }
         }
@@ -475,6 +522,36 @@ class MapViewModel(
 
     override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 }
+
+internal fun List<CustomTileProviderConfig>.findSelectedCustomTileProvider(
+    selectedProviderId: String?,
+): CustomTileProviderConfig? = singleOrNull { it.id == selectedProviderId }
+
+internal fun List<CustomTileProviderConfig>.findLegacyCustomTileProvider(
+    legacySource: String?,
+): CustomTileProviderConfig? = legacySource?.let { source -> firstOrNull { (it.localUri ?: it.urlTemplate) == source } }
+
+internal data class PersistedCustomTileSelection(
+    val provider: CustomTileProviderConfig?,
+    val canDiscardMissingSelection: Boolean,
+)
+
+internal fun List<CustomTileProviderConfig>.resolvePersistedCustomTileSelection(
+    selectedProviderId: String?,
+    legacySource: String?,
+    providerLoadSuccessful: Boolean,
+): PersistedCustomTileSelection {
+    val provider =
+        listOfNotNull(findSelectedCustomTileProvider(selectedProviderId), findLegacyCustomTileProvider(legacySource))
+            .firstOrNull { it.hasValidGoogleTileSource() }
+    return PersistedCustomTileSelection(
+        provider = provider,
+        canDiscardMissingSelection = provider == null && providerLoadSuccessful,
+    )
+}
+
+internal fun CustomTileProviderConfig.hasValidGoogleTileSource(): Boolean =
+    isLocal || urlTemplate.isValidTileUrlTemplate(requireHttps = false)
 
 private fun GoogleCameraPosition.toCameraPosition() = CameraPosition(LatLng(targetLat, targetLng), zoom, tilt, bearing)
 

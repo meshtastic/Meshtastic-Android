@@ -48,11 +48,7 @@ on:
         required: true
       GRADLE_ENCRYPTION_KEY:
         required: true
-      GRADLE_CACHE_URL:
-        required: false
-      GRADLE_CACHE_USERNAME:
-        required: false
-      GRADLE_CACHE_PASSWORD:
+      DEVELOCITY_ACCESS_KEY:
         required: false
       APPLE_SIGNING_IDENTITY:
         required: false
@@ -94,10 +90,6 @@ jobs:
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -110,33 +102,34 @@ jobs:
         env:
           INPUT_TAG_NAME: ${{ inputs.tag_name }}
         run: |
-          VERSION_NAME=$(echo $INPUT_TAG_NAME | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
+          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "Parsed Version: $VERSION_NAME"
 
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
           OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
 
       - name: Calculate Version Code from Git Commit Count
         id: calculate_version_code
+        env:
+          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
+          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
         shell: bash
 
   release-google:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     needs: [prepare-build-info]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -149,6 +142,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Load secrets
@@ -163,12 +157,14 @@ jobs:
           GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
         run: |
           rm -f ./androidApp/google-services.json
-          echo $GSERVICES > ./androidApp/google-services.json
-          echo $KEYSTORE | base64 -di > ./androidApp/$KEYSTORE_FILENAME
+          echo "$GSERVICES" > ./androidApp/google-services.json
+          echo "$KEYSTORE" | base64 -di > "./androidApp/$KEYSTORE_FILENAME"
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
-          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
-          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
+          {
+            echo "datadogApplicationId=$DATADOG_APPLICATION_ID"
+            echo "datadogClientToken=$DATADOG_CLIENT_TOKEN"
+            echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
+          } >> ./secrets.properties
           echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
       - name: Setup Fastlane
@@ -218,10 +214,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     needs: [prepare-build-info]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -234,6 +226,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
 
       - name: Load secrets
@@ -242,7 +235,7 @@ jobs:
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
         run: |
-          echo $KEYSTORE | base64 -di > ./androidApp/$KEYSTORE_FILENAME
+          echo "$KEYSTORE" | base64 -di > "./androidApp/$KEYSTORE_FILENAME"
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       - name: Setup Fastlane
@@ -284,9 +277,6 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
       # Secrets aren't readable in step `if:` expressions, so surface presence here.
       SIGN_WINDOWS: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT != '' && 'true' || 'false' }}
     steps:
@@ -301,6 +291,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'false'
           install_jetbrains_jdk: 'true'
 
@@ -443,10 +434,6 @@ jobs:
         # No .deb host-coupling here (pure-Java uber jar + URL manifest) — free to track
         # the current LTS image.
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-    env:
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -459,6 +446,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           cache_read_only: 'true'
           install_jetbrains_jdk: 'true'
 
@@ -471,7 +459,7 @@ jobs:
       # are runtime-only and would be missed by :assemble).
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew --no-build-cache --no-configuration-cache
+          ./gradlew --no-build-cache
           -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
           :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
 

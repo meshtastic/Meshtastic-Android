@@ -34,9 +34,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,13 +70,18 @@ import org.meshtastic.core.ui.util.brandPalette
 import org.meshtastic.core.ui.util.safeLinks
 
 /**
- * Bottom sheet shown when the user taps the event branding in [MainAppBar]. Surfaces the event metadata the bundled
- * `event_firmware.json` carries — welcome message, location, dates, and links — themed with the edition's accent color.
+ * Bottom sheet shown when the user taps the event card on the Connections screen. Surfaces the event metadata the
+ * bundled `event_firmware.json` carries — welcome message, location, dates, and links — themed with the edition's
+ * accent color.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState =
+        rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        )
     val uriHandler = LocalUriHandler.current
     val accent = edition.accentColorOrNull()
     val palette = edition.brandPalette()

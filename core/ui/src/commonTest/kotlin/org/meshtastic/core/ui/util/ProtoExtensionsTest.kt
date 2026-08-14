@@ -18,6 +18,8 @@ package org.meshtastic.core.ui.util
 
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.util.getChannelReplacementList
+import org.meshtastic.core.model.util.normalizeReplacementSettings
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Channel
@@ -196,6 +198,10 @@ class ProtoExtensionsTest {
             ),
             radioController.localChannels.map { it.role },
         )
+        assertEquals(
+            importedSettings + List(6) { ChannelSettings() },
+            radioController.localChannels.map { it.settings ?: error("Channel write omitted settings") },
+        )
         assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
     }
 
@@ -357,6 +363,7 @@ class ProtoExtensionsTest {
 
         // LoRa write is the last op in the edit session, with no settle delays around it.
         assertEquals(listOf(Config(lora = imported)), radioController.localConfigs)
+        assertEquals(imported, radioConfigRepository.currentChannelSet.lora_config)
     }
 
     @Test

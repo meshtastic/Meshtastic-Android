@@ -15,7 +15,9 @@ concurrency:
 jobs:
   stale_issues:
     name: Close Stale Issues
-    runs-on: ubuntu-24.04-arm
+    # actions/stale is pure API work with no checkout, so ubuntu-slim's container is
+    # sufficient. Its 15-minute platform cap matches the timeout already set here.
+    runs-on: ubuntu-slim
     timeout-minutes: 15
     if: github.repository == 'meshtastic/Meshtastic-Android'
 

@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import kotlin.test.AfterTest
@@ -75,9 +76,23 @@ class SwitchingChannelSetDataSourceTest {
     @Test
     fun `replaceAllSettings replaces the whole list`() = runTest(testDispatcher) {
         dataSource.updateChannelSettings(secondary(0, "old"))
+        val originalLora = Config.LoRaConfig(channel_num = 4)
+        dataSource.setLoraConfig(originalLora)
         dataSource.replaceAllSettings(listOf(ChannelSettings(name = "a"), ChannelSettings(name = "b")))
 
-        assertEquals(listOf("a", "b"), dataSource.channelSetFlow.first().settings.map { it.name })
+        val set = dataSource.channelSetFlow.first()
+        assertEquals(listOf("a", "b"), set.settings.map { it.name })
+        assertEquals(originalLora, set.lora_config)
+    }
+
+    @Test
+    fun `updateChannelSet atomically replaces settings and lora`() = runTest(testDispatcher) {
+        val settings = listOf(ChannelSettings(name = "new"))
+        val lora = Config.LoRaConfig(channel_num = 7)
+
+        dataSource.updateChannelSet(settingsList = settings, loraConfig = lora)
+
+        assertEquals(ChannelSet(settings = settings, lora_config = lora), dataSource.channelSetFlow.first())
     }
 
     @Test

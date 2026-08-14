@@ -675,6 +675,7 @@ fun MessageStatusDialog(
         title = title,
         resendOption = resendOption,
         text = text,
+        detail = message.getStatusDetailRes(),
         relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,

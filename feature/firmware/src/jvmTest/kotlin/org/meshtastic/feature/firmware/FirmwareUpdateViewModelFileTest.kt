@@ -25,6 +25,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
@@ -49,6 +50,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -87,6 +89,7 @@ class FirmwareUpdateViewModelFileTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val firmwareMaintenanceLock = FirmwareMaintenanceLock()
+    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private lateinit var viewModel: FirmwareUpdateViewModel
 
@@ -144,6 +147,7 @@ class FirmwareUpdateViewModelFileTest {
         firmwareMaintenanceLock,
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
+        analytics,
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")
@@ -200,6 +204,41 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+    }
+
+    @Test
+    fun `confirmLocalFirmwareFile reports a firmware_update_start action for the local file`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        verify {
+            analytics.trackAction(
+                "firmware_update_start",
+                mapOf("update_method" to "usb", "is_recovery" to false, "release_version" to "local"),
+            )
+        }
+    }
+
+    @Test
+    fun `confirmLocalFirmwareFile with BLE and invalid address reports no analytics action`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("xnot-a-mac-address")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        verify(exactly(0)) { analytics.trackAction("firmware_update_start", any()) }
     }
 
     @Test

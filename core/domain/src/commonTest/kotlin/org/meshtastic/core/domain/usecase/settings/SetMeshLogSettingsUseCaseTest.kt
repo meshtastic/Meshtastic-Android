@@ -17,11 +17,17 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 class SetMeshLogSettingsUseCaseTest {
 
@@ -41,6 +47,54 @@ class SetMeshLogSettingsUseCaseTest {
         useCase.setRetentionDays(500) // Max is 365
         assertEquals(365, meshLogPrefs.retentionDays.value)
         assertEquals(365, meshLogRepository.lastDeletedOlderThan)
+    }
+
+    @Test
+    fun `setRetentionDays one hour keeps the last hour instead of every log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("recent", "TEXT", now - 30.minutes.inWholeMilliseconds, ""),
+                MeshLog("stale", "TEXT", now - 2.hours.inWholeMilliseconds, ""),
+            ),
+        )
+
+        useCase.setRetentionDays(MeshLogRetention.ONE_HOUR)
+
+        assertEquals(MeshLogRetention.ONE_HOUR, meshLogPrefs.retentionDays.value)
+        assertEquals(listOf("recent"), meshLogRepository.currentLogs.map { it.uuid })
+    }
+
+    @Test
+    fun `setRetentionDays never keeps every log`() = runTest {
+        val now = nowMillis
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("ancient", "TEXT", now - 400.days.inWholeMilliseconds, ""),
+                MeshLog("recent", "TEXT", now, ""),
+            ),
+        )
+
+        useCase.setRetentionDays(MeshLogRetention.KEEP_FOREVER)
+
+        assertEquals(MeshLogRetention.KEEP_FOREVER, meshLogPrefs.retentionDays.value)
+        assertEquals(listOf("ancient", "recent"), meshLogRepository.currentLogs.map { it.uuid })
+    }
+
+    @Test
+    fun `setLoggingEnabled true trims to the one hour sentinel`() = runTest {
+        val now = nowMillis
+        meshLogPrefs.setRetentionDays(MeshLogRetention.ONE_HOUR)
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog("recent", "TEXT", now - 30.minutes.inWholeMilliseconds, ""),
+                MeshLog("stale", "TEXT", now - 2.hours.inWholeMilliseconds, ""),
+            ),
+        )
+
+        useCase.setLoggingEnabled(true)
+
+        assertEquals(listOf("recent"), meshLogRepository.currentLogs.map { it.uuid })
     }
 
     @Test

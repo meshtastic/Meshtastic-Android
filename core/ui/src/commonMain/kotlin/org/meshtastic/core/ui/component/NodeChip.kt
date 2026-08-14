@@ -59,7 +59,7 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = node.user.short_name.ifEmpty { "???" },
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
                 textDecoration = TextDecoration.LineThrough.takeIf { node.isIgnored },
                 textAlign = TextAlign.Center,
                 maxLines = 1,

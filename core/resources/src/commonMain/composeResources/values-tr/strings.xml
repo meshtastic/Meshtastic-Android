@@ -61,6 +61,7 @@
     <string name="available_pins">Mevcut pinler</string>
     <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Bant genişliği</string>
     <string name="battery">Pil</string>
     <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>
@@ -178,12 +179,12 @@
     <string name="doc_title_connections">Bağlantılar</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Nodelar</string>
-    <string name="downlink_enabled">Aşağı bağlantı etkinleştirildi</string>
     <string name="download">İndir</string>
     <string name="dynamic">Dinamik</string>
     <string name="echo_enabled">Eko etkin</string>
     <string name="edit">Düzenle</string>
     <string name="eight_hours">8 Saat</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Güç tasarrufu modunu etkinleştir</string>
     <string name="enabled">Açık</string>
     <!-- ENCRYPTION -->
@@ -200,6 +201,7 @@
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
     <string name="ethernet_enabled">Ethernet etkin</string>
     <string name="exchange_position">Konum takas et</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Ayarları dışa aktar</string>
     <string name="external_notification">Dış Bildirim</string>
     <string name="external_notification_config">Harici Bildirim Ayarı</string>
@@ -278,8 +280,10 @@
     <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Enlem</string>
+    <!-- LAYER -->
     <string name="led_state">LED durumu</string>
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
     <!-- LOAD -->
     <string name="load">Yükle</string>
@@ -495,22 +499,10 @@
     <string name="root_topic">Ana konu</string>
     <string name="rotary_encoder_1_enabled">Dönen kodlayıcı #1 etkinleştirildi</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Hatalı oturum anahtarı</string>
-    <string name="routing_error_admin_public_key_unauthorized">Genel Anahtar yetkisiz</string>
-    <string name="routing_error_bad_request">Geçersiz İstek</string>
-    <string name="routing_error_duty_cycle_limit">Bölgesel Görev Çevrimi Limitine Ulaşıldı</string>
     <string name="routing_error_got_nak">Negatif bir onay alındı</string>
-    <string name="routing_error_max_retransmit">Azami Yeniden Gönderme Limitine Ulaşıldı</string>
-    <string name="routing_error_no_channel">Kanal yok</string>
-    <string name="routing_error_no_interface">Arayüz Yok</string>
-    <string name="routing_error_no_response">Yanıt yok</string>
     <string name="routing_error_no_route">Rota yok</string>
     <string name="routing_error_none">Onaylandı</string>
-    <string name="routing_error_not_authorized">Yetkisiz</string>
-    <string name="routing_error_pki_failed">Şifreli Gönderme Başarısız</string>
-    <string name="routing_error_pki_unknown_pubkey">Bilinmeyen Genel Anahtar</string>
     <string name="routing_error_timeout">Zaman Aşımı</string>
-    <string name="routing_error_too_large">Paket çok büyük</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
     <string name="rsyslog_server">rsyslog sunucusu</string>
@@ -611,7 +603,6 @@
     <string name="unrecognized">Tanınmayan</string>
     <string name="up_down_select_input_enabled">Yukarı/Aşağı/Seçme girişi etkinleştirildi</string>
     <string name="update_interval_seconds">Güncelleme aralığı (saniye)</string>
-    <string name="uplink_enabled">Yukarı bağlantı etkinleştirildi</string>
     <string name="uptime">Çalışma Süresi</string>
     <!-- URL -->
     <string name="url">URL</string>

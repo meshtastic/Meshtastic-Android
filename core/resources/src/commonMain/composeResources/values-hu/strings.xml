@@ -76,6 +76,7 @@
     <string name="audio_config">Hangbeállítások</string>
     <string name="available_pins">Elérhető pinek</string>
     <string name="bad">Rossz</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Sávszélesség</string>
     <string name="battery">Akkumulátor</string>
     <string name="battery_ina_2xx_i2c_address">Akkumulátor INA_2XX I2C-cím</string>
@@ -271,7 +272,6 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Csomópontok</string>
     <string name="double_tap_as_button_press">Dupla koppintás mint gomb</string>
-    <string name="downlink_enabled">Letöltés engedélyezve</string>
     <string name="downlink_feature_description">A nyilvános internetes átjáróból érkező üzenetek továbbításra kerülnek a helyi mesh hálózatra. A zéró-ugrási szabály miatt az alapértelmezett MQTT szerver forgalma nem terjed tovább ennél az eszköznél.</string>
     <string name="download">Letöltés</string>
     <string name="dynamic">Dinamikus</string>
@@ -279,6 +279,7 @@
     <string name="echo_enabled">Echo engedélyezve</string>
     <string name="edit">Szerkesztés</string>
     <string name="eight_hours">8 óra</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Energiatakarékos mód engedélyezése</string>
     <string name="enabled">Engedélyezve</string>
     <!-- ENCRYPTION -->
@@ -302,6 +303,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Pozíciócsere</string>
     <string name="expires">Lejárat</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Beállítás exportálása</string>
     <string name="export_data_csv">Minden csomag exportálása</string>
     <string name="external_notification">Külső értesítés</string>
@@ -412,9 +414,11 @@
     <string name="latest_alpha_firmware">Legújabb alpha</string>
     <string name="latest_stable_firmware">Legújabb stabil</string>
     <string name="latitude">Szélesség</string>
+    <!-- LAYER -->
     <string name="led_heartbeat">LED ütemjelzés</string>
     <string name="led_state">LED állapot</string>
     <string name="legacy_admin_channel">Régi admin csatorna</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
     <!-- LOAD -->
     <string name="load">Terhelés</string>
@@ -735,23 +739,10 @@
     <string name="root_topic">Gyökér téma</string>
     <string name="rotary_encoder_1_enabled">1. forgóenkóder engedélyezve</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Hibás munkamenet kulcs</string>
-    <string name="routing_error_admin_public_key_unauthorized">Nem Engedélyezett Publikus Kulcs</string>
-    <string name="routing_error_bad_request">Hibás kérés</string>
-    <string name="routing_error_duty_cycle_limit">Helyi Üzemciklus Határ Elérve</string>
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
-    <string name="routing_error_max_retransmit">Maximális Újraküldés Elérve</string>
-    <string name="routing_error_no_channel">Nincs Csatorna</string>
-    <string name="routing_error_no_interface">Nincs Interfész</string>
-    <string name="routing_error_no_response">Nincs Válasz</string>
     <string name="routing_error_no_route">Nincs út</string>
     <string name="routing_error_none">Visszaigazolva</string>
-    <string name="routing_error_not_authorized">Nem Engedélyezett</string>
-    <string name="routing_error_pki_failed">Titkosított Küldés Sikertelen</string>
-    <string name="routing_error_pki_unknown_pubkey">Nem Ismert Publikus Kulcs</string>
-    <string name="routing_error_rate_limit_exceeded">Túllépted a sebességkorlátot. Próbáld újra később.</string>
     <string name="routing_error_timeout">Időtúllépés</string>
-    <string name="routing_error_too_large">Túl nagy csomag</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="rsyslog_server">rsyslog szerver</string>
@@ -901,7 +892,6 @@
     <string name="unset">Nincs beállítva – 0</string>
     <string name="up_down_select_input_enabled">Fel/Le/Kiválaszt gomb engedélyezve</string>
     <string name="update_interval_seconds">Frissítési intervallum (másodperc)</string>
-    <string name="uplink_enabled">Feltöltés engedélyezve</string>
     <string name="uplink_feature_description">A mesh üzenetei bármely csomópont beállított átjáróján keresztül kerülnek az internetre.</string>
     <string name="uptime">Működési idő</string>
     <!-- URL -->

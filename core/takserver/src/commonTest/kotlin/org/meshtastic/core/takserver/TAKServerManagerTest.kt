@@ -16,10 +16,12 @@
  */
 package org.meshtastic.core.takserver
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -186,15 +188,61 @@ class TAKServerManagerTest {
         override suspend fun hasConnections(): Boolean = false
     }
 
+    private class DelayedTAKServer : TAKServer {
+        override val connectionCount: StateFlow<Int> = MutableStateFlow(0)
+        override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
+        override var onClientConnected: (() -> Unit)? = null
+
+        val startResults = mutableListOf<CompletableDeferred<Result<Unit>>>()
+        var stopCount = 0
+
+        override suspend fun start(scope: CoroutineScope): Result<Unit> =
+            CompletableDeferred<Result<Unit>>().also(startResults::add).await()
+
+        override fun stop() {
+            stopCount++
+        }
+
+        override suspend fun broadcast(cotMessage: CoTMessage) {}
+
+        override suspend fun broadcastRawXml(xml: String) {}
+
+        override suspend fun hasConnections(): Boolean = false
+    }
+
     @Test
-    fun `start failure due to port conflict leaves isRunning false`() = runTest {
+    fun `start failure due to port conflict reports an error state`() = runTest {
         val failingServer = FailingTAKServer()
         val manager = TAKServerManagerImpl(failingServer)
         manager.start(this)
         advanceUntilIdle()
 
-        // Manager should NOT be running after start failure
         assertEquals(false, manager.isRunning.value)
+        assertTrue(manager.hasStartError.value)
+    }
+
+    @Test
+    fun `next start waits for stale start cleanup`() = runTest {
+        val delayedServer = DelayedTAKServer()
+        val manager = TAKServerManagerImpl(delayedServer)
+        manager.start(this)
+        runCurrent()
+        assertEquals(1, delayedServer.startResults.size)
+
+        manager.stop()
+        manager.start(this)
+        runCurrent()
+        assertEquals(1, delayedServer.startResults.size)
+
+        delayedServer.startResults[0].complete(Result.success(Unit))
+        runCurrent()
+        assertEquals(2, delayedServer.startResults.size)
+
+        delayedServer.startResults[1].complete(Result.success(Unit))
+        advanceUntilIdle()
+
+        assertTrue(manager.isRunning.value)
+        assertEquals(2, delayedServer.stopCount)
     }
 
     @Test

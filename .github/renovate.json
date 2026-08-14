@@ -65,13 +65,14 @@
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(\\.\\d+-g[0-9a-f]+-SNAPSHOT)?$/"
     },
     {
-      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180)",
+      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180). Every artifact pinned to the `androidx-compose-bom-aligned` catalog ref must be listed here: bumping any one of them rewrites that shared ref, which AndroidCompose.kt's resolutionStrategy force-aligns across the whole androidx.compose group, so an ungrouped artifact silently drags the entire Android Compose stack out of step with CMP (see PR #6651, where a solo ui-text-google-fonts bump broke screenshot preview discovery).",
       "groupName": "compose-multiplatform",
       "matchPackageNames": [
         "/^org\\.jetbrains\\.compose/",
         "androidx.compose.runtime:runtime-tracing",
         "androidx.compose.ui:ui-test-manifest",
-        "androidx.compose.material:material"
+        "androidx.compose.material:material",
+        "androidx.compose.ui:ui-text-google-fonts"
       ]
     },
     {
@@ -93,6 +94,13 @@
         "/^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$/"
       ],
       "automerge": false
+    },
+    {
+      "description": "Block Gradle 9.7.0: its ExecOperations.exec spec defaults standardOutput to null, crashing the Compose Multiplatform proguardReleaseJars task (ExternalToolRunner reads the stream back). Lift once a fixed Gradle patch or a CMP release that stops reading spec.standardOutput is out.",
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
+      "allowedVersions": "!/^9\\.7\\.0$/"
     },
     {
       "description": "Disable automerge for major updates (safety net)",

@@ -25,6 +25,13 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.MeshPacket
+
+/** Stable identity of one persisted packet row within its owning node database. */
+data class PersistedPacketId(val myNodeNum: Int, val uuid: Long)
+
+/** A persisted packet paired with the stable row identity needed by durable background work. */
+data class PersistedPacket(val id: PersistedPacketId, val packet: DataPacket)
 
 /**
  * Repository interface for managing mesh packets and message history.
@@ -70,8 +77,19 @@ interface PacketRepository {
     /** Updates the identifier of the last read message in a conversation. */
     suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long)
 
-    /** Returns all packets currently queued for transmission. */
-    suspend fun getQueuedPackets(): List<DataPacket>
+    /** Returns all packets currently queued for transmission, including their stable persisted-row identities. */
+    suspend fun getQueuedPackets(): List<PersistedPacket>
+
+    /** Returns all sent packets still awaiting a routing ACK/NAK, including stable persisted-row identities. */
+    suspend fun getEnroutePackets(): List<PersistedPacket>
+
+    /**
+     * Atomically marks a still-[MessageStatus.ENROUTE] packet as failed with [routingError], leaving it untouched if an
+     * ACK/NAK already resolved it.
+     *
+     * @return true if the packet was timed out.
+     */
+    suspend fun timeOutEnroutePacket(id: PersistedPacketId, routingError: Int): Boolean
 
     /**
      * Persists a packet in the database.
@@ -90,7 +108,7 @@ interface PacketRepository {
         receivedTime: Long,
         read: Boolean = true,
         filtered: Boolean = false,
-    )
+    ): PersistedPacketId
 
     /**
      * Returns a reactive flow of messages for a conversation.
@@ -119,6 +137,28 @@ interface PacketRepository {
 
     /** Updates the transmission status of a packet. */
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus)
+
+    /** Updates exactly one persisted packet row without relying on its mesh packet ID. */
+    suspend fun updateMessageStatus(id: PersistedPacketId, status: MessageStatus)
+
+    /**
+     * Atomically claims a stable row for sending. A returned packet with QUEUED status is owned by this caller and has
+     * already been persisted as ENROUTE; another status means the row was already handled.
+     */
+    suspend fun claimQueuedPacket(id: PersistedPacketId): PersistedPacket?
+
+    /** Legacy equivalent of [claimQueuedPacket], available only when the mesh packet ID identifies exactly one row. */
+    suspend fun claimQueuedPacketByPacketIdIfUnique(packetId: Int): PersistedPacket?
+
+    /** Restores the exact row to QUEUED only if it is still ENROUTE, without overwriting a racing ACK/NAK status. */
+    suspend fun rollbackEnroutePacket(id: PersistedPacketId): Boolean
+
+    /**
+     * Updates the single persisted row matching an outgoing mesh packet and returns its stable identity. Returns null
+     * when the row has not been persisted yet or when the mesh identity is ambiguous, so callers can retry without
+     * updating the wrong packet.
+     */
+    suspend fun updateOutgoingMessageStatus(packet: MeshPacket, status: MessageStatus): PersistedPacketId?
 
     /** Updates the identifier of a persisted packet. */
     suspend fun updateMessageId(d: DataPacket, id: Int)
@@ -167,6 +207,12 @@ interface PacketRepository {
 
     /** Returns a packet by its mesh-layer packet ID. */
     suspend fun getPacketByPacketId(packetId: Int): DataPacket?
+
+    /** Returns a packet by mesh-layer ID only when exactly one row has that ID in the current node database. */
+    suspend fun getPacketByPacketIdIfUnique(packetId: Int): DataPacket?
+
+    /** Returns exactly one persisted packet row by its node-scoped database identity. */
+    suspend fun getPacketByPersistedId(id: PersistedPacketId): DataPacket?
 
     /** Returns a packet by its internal database ID. */
     suspend fun getPacketById(id: Int): DataPacket?

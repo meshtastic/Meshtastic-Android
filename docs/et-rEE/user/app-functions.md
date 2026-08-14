@@ -28,7 +28,7 @@ Rakenduse funktsioone saab juhtida menüüst **Seaded → Süsteemi TI** (rakend
 
 The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
 
-![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
+![Rakenduse funktsioonide ekraan põhi- ja funktsioonipõhiste lülititega](../../assets/screenshots/app-functions_settings.png)
 
 ### Write Functions
 

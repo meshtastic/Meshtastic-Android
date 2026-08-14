@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,8 +70,9 @@ fun MapReportingPreference(
     enabled: Boolean,
 ) {
     Column {
-        var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
-        LaunchedEffect(mapReportingEnabled) { showMapReportingWarning = mapReportingEnabled }
+        // Tracks the switch locally so the consent card can show before the config round-trips; re-keyed on
+        // [mapReportingEnabled] so an externally-changed config wins over a stale local toggle.
+        var showMapReportingWarning by rememberSaveable(mapReportingEnabled) { mutableStateOf(mapReportingEnabled) }
         SwitchPreference(
             title = stringResource(Res.string.map_reporting),
             summary = stringResource(Res.string.map_reporting_summary),

@@ -25,6 +25,9 @@ internal sealed interface MetricInfo {
     val label: StringResource
     val value: String
     val rotateIcon: Float
+
+    /** 1-based channel number appended to the resolved [label], for one-card-per-channel readings. */
+    val channelNumber: Int?
 }
 
 internal data class VectorMetricInfo(
@@ -32,6 +35,7 @@ internal data class VectorMetricInfo(
     override val value: String,
     val icon: ImageVector,
     override val rotateIcon: Float = 0f,
+    override val channelNumber: Int? = null,
 ) : MetricInfo
 
 internal data class DrawableMetricInfo(
@@ -39,4 +43,5 @@ internal data class DrawableMetricInfo(
     override val value: String,
     val icon: DrawableResource,
     override val rotateIcon: Float = 0f,
+    override val channelNumber: Int? = null,
 ) : MetricInfo

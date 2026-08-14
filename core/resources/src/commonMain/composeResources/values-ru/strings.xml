@@ -131,6 +131,7 @@
     <string name="backup_keys_confirmation">Сохранить публичные и приватные ключи в безопасном зашифрованном хранилище на этом устройстве.</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
+    <!-- BANDWIDTH -->
     <string name="bandwidth">Ширина канала</string>
     <string name="baro_pressure">Давл</string>
     <string name="battery">Батарея</string>
@@ -560,7 +561,6 @@
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
-    <string name="downlink_enabled">Downlink включен</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
     <string name="download">Скачать</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
@@ -570,6 +570,7 @@
     <string name="edit">Редактировать</string>
     <string name="edit_custom_tile_source">Редактировать источник сетевых плиток</string>
     <string name="eight_hours">8 часов</string>
+    <!-- EMOJI -->
     <string name="enable_power_saving_mode">Включить режим энергосбережения</string>
     <string name="enabled">Включено</string>
     <!-- ENCRYPTION -->
@@ -600,6 +601,7 @@
     <string name="expand_chart">Развернуть диаграмму</string>
     <string name="expanded">Расширенный</string>
     <string name="expires">Срок действия</string>
+    <!-- EXPORT -->
     <string name="export_configuration">Экспорт настроек</string>
     <string name="export_data_csv">Экспортировать все пакеты</string>
     <string name="export_gpx">Экспорт GPX</string>
@@ -874,11 +876,16 @@
     <string name="latest_alpha_firmware">Последняя альфа</string>
     <string name="latest_stable_firmware">Последняя стабильная</string>
     <string name="latitude">Широта</string>
+    <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Оценка покрытия</string>
+    <string name="layer_type_network">Сетевой уровень</string>
     <string name="learn_more">Подробности</string>
     <string name="led_heartbeat">Сердцебиение светодиодом</string>
     <string name="led_state">Состояние LED</string>
     <string name="legacy_admin_channel">Устаревший канал Администратора</string>
     <string name="library_count">%1$d библиотек</string>
+    <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензия радиолюбителя (HAM)</string>
     <string name="licensed_amateur_radio_text">Включение данной опции отключает шифрование и несовместимо с основной сетью Meshtastic.</string>
     <!-- LOAD -->
@@ -1062,7 +1069,6 @@
     <string name="message_device_managed">Это радио управляется и может быть изменено только удаленным администратором.</string>
     <string name="message_input_label">Сообщение</string>
     <string name="message_routing_error_max_retransmit">Не удалось доставить в сеть</string>
-    <string name="message_routing_error_no_channel">Канал не выбран</string>
     <string name="message_routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
@@ -1469,24 +1475,15 @@
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
     <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
-    <string name="routing_error_admin_bad_session_key">Неверный ключ сессии</string>
-    <string name="routing_error_admin_public_key_unauthorized">Публичный ключ не авторизован</string>
-    <string name="routing_error_bad_request">Неверный запрос</string>
-    <string name="routing_error_duty_cycle_limit">Достигнут региональный предел рабочего цикла</string>
     <string name="routing_error_got_nak">Получено отрицательное подтверждение</string>
-    <string name="routing_error_max_retransmit">Достигнут лимит ретрансляции</string>
-    <string name="routing_error_no_channel">Нет канала</string>
-    <string name="routing_error_no_interface">Нет интерфейса</string>
-    <string name="routing_error_no_response">Нет ответа</string>
+    <string name="routing_error_max_retransmit">Не удалось доставить в сеть</string>
     <string name="routing_error_no_route">Нет маршрута</string>
     <string name="routing_error_none">Принято</string>
-    <string name="routing_error_not_authorized">Не авторизован</string>
-    <string name="routing_error_pki_failed">Ошибка шифрования отправки</string>
-    <string name="routing_error_pki_send_fail_public_key">PKI не отправлен, нет открытого ключа</string>
-    <string name="routing_error_pki_unknown_pubkey">Неизвестный публичный ключ</string>
-    <string name="routing_error_rate_limit_exceeded">Превышен лимит запросов. Пожалуйста, повторите попытку позже.</string>
+    <string name="routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
+    <string name="routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
+    <string name="routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
     <string name="routing_error_timeout">Время ожидания истекло</string>
-    <string name="routing_error_too_large">Пакет слишком велик</string>
+    <string name="routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="rsyslog_server">Сервер rsyslog</string>
@@ -1657,10 +1654,11 @@
     <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_enabled">Включить локальный сервер TAK</string>
-    <string name="tak_server_enabled_desc">Запускает локальный TLS-сервер на порту 8089 для подключений ATAK/iTAK</string>
-    <string name="tak_server_export_data_package_desc">Создайте .zip для ATAK/iTAK, чтобы подключиться к этому серверу</string>
     <string name="tak_server_loading">...</string>
+    <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_status">Статус</string>
+    <string name="tak_server_status_off">Выкл</string>
     <string name="tak_server_test_card_title">Сетевой тест TAK (Отладка)</string>
     <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>
     <string name="tak_server_test_result_bytes">%1$dБ ✓</string>
@@ -1784,7 +1782,6 @@
     <string name="update_interval">Интервал опроса GPS</string>
     <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
     <string name="updated">Обновлено</string>
-    <string name="uplink_enabled">Uplink включен</string>
     <string name="uplink_feature_description">Сообщения из сети будут отправляться в публичный интернет через любую ноду настроенного шлюза.</string>
     <string name="uptime">Аптайм</string>
     <!-- URL -->

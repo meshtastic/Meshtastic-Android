@@ -32,6 +32,7 @@
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
     <string name="audio">Zvuk</string>
     <string name="audio_config">Postavke Zvuka</string>
+    <!-- BANDWIDTH -->
     <!-- BLUETOOTH -->
     <string name="bluetooth_config">Postavke Bluetootha</string>
     <string name="calculating">Izračunavanje…</string>
@@ -79,10 +80,12 @@
     <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Sati</string>
+    <!-- EMOJI -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error">Pogreška</string>
     <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
+    <!-- EXPORT -->
     <string name="factory_reset">Vraćanje na tvorničke postavke</string>
     <!-- FILTER -->
     <string name="filter_icon">Filtriraj</string>
@@ -103,6 +106,8 @@
     <string name="ip_address">IP Adresa:</string>
     <!-- KEY -->
     <!-- LABEL -->
+    <!-- LAYER -->
+    <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>
@@ -199,9 +204,7 @@
     <string name="reset_to_defaults">Vrati na početne postavke</string>
     <!-- ROLE -->
     <!-- ROUTING -->
-    <string name="routing_error_no_response">Nema odgovora</string>
     <string name="routing_error_none">Potvrđeno</string>
-    <string name="routing_error_too_large">Paket je prevelik</string>
     <!-- SAVE -->
     <string name="save">Spremi</string>
     <string name="save_changes">Spremi</string>

@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -80,6 +81,7 @@ class MessageViewModelTest {
 
     private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val showQuickChatFlow = MutableStateFlow(false)
+    private val showFullMessageTimestampsFlow = MutableStateFlow(false)
     private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
     private val contactSettingsFlow = MutableStateFlow<Map<String, ContactSettings>>(emptyMap())
 
@@ -91,6 +93,7 @@ class MessageViewModelTest {
 
         connectionStateFlow.value = ConnectionState.Disconnected
         showQuickChatFlow.value = false
+        showFullMessageTimestampsFlow.value = false
         customEmojiFrequencyFlow.value = null
         contactSettingsFlow.value = emptyMap()
 
@@ -106,6 +109,7 @@ class MessageViewModelTest {
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
         every { uiPrefs.showQuickChat } returns showQuickChatFlow
         every { uiPrefs.setShowQuickChat(any()) } returns Unit
+        every { uiPrefs.showFullMessageTimestamps } returns showFullMessageTimestampsFlow
 
         every { packetRepository.getContactSettings() } returns contactSettingsFlow
         every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)
@@ -215,6 +219,17 @@ class MessageViewModelTest {
     }
 
     @Test
+    fun testShowFullMessageTimestampsReflectsUiPreference() = runTest {
+        viewModel.showFullMessageTimestamps.test {
+            assertEquals(false, awaitItem())
+
+            showFullMessageTimestampsFlow.value = true
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun testFrequentEmojis() = runTest {
         customEmojiFrequencyFlow.value = "👍=10,👎=5,😂=20"
 
@@ -233,6 +248,24 @@ class MessageViewModelTest {
         advanceUntilIdle()
 
         // Verify via mokkery
+        verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
+    }
+
+    @Test
+    fun `send persistence failure is shown through the snackbar manager`() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } calls
+            {
+                throw IllegalStateException("Message could not be saved")
+            }
+
+        snackbarManager.events.test {
+            viewModel.sendMessage("Hello", "0!12345678", null)
+            advanceUntilIdle()
+
+            assertEquals("Message could not be saved", awaitItem().message)
+            cancelAndIgnoreRemainingEvents()
+        }
+
         verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
     }
 

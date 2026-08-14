@@ -15,6 +15,9 @@
 //   docs/software/android/developer/*.md
 //   docs/software/android/index.md
 //   static/img/android/docs/*.webp (or .png/.svg if not converting)
+//
+// Only screenshots a synced page actually references are published; any other
+// file already under those two directories is pruned at the end of the run.
 
 "use strict";
 
@@ -231,17 +234,42 @@ function convertCallouts(content) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
-function processMarkdown(srcPath, destPath, section, isIndex = false) {
+/**
+ * Collect the `/img/android/docs/<name>` basenames a page references, so only
+ * screenshots some page actually shows get published. Runs on the transformed
+ * content, which has already had relative paths rewritten to the site path and
+ * convertible extensions renamed to .webp — so these are destination names.
+ */
+function collectImageReferences(content, into) {
+    const re = /\/img\/android\/docs\/([^)"'\s>]+)/g;
+    let match;
+    while ((match = re.exec(content)) !== null) {
+        into.add(path.basename(match[1]));
+    }
+}
+
+function processMarkdown(srcPath, destPath, section, isIndex = false, referencedImages = null) {
     let content = fs.readFileSync(srcPath, "utf-8");
     content = transformFrontmatter(content, section);
     content = rewriteImagePaths(content);
     content = rewriteSiblingLinks(content, section, isIndex);
     content = convertCallouts(content);
+    if (referencedImages) collectImageReferences(content, referencedImages);
     writeFile(destPath, content);
 }
 
-/** Sync screenshots, returning the set of destination basenames written. */
-function processImages() {
+/**
+ * Sync screenshots, returning the set of destination basenames written.
+ *
+ * Only images `referenced` by a synced page are published. The source
+ * screenshots directory accumulates captures faster than pages cite them (and
+ * the Compose screenshot tests regenerate the whole set), so copying it
+ * wholesale ships assets no page shows. Anything skipped here is absent from
+ * the returned set, which is what pruneStale() deletes against — so a
+ * screenshot that loses its last reference is removed from the site on the
+ * next sync rather than lingering forever.
+ */
+function processImages(referenced) {
     const written = new Set();
     if (!fs.existsSync(SRC_SCREENSHOTS_DIR)) {
         console.log("No screenshots directory found, skipping image sync.");
@@ -251,12 +279,20 @@ function processImages() {
     const images = fs.readdirSync(SRC_SCREENSHOTS_DIR)
         .filter(f => IMAGE_EXTENSIONS.has(path.extname(f).toLowerCase()));
 
+    let skipped = 0;
     for (const img of images) {
         const srcPath = path.join(SRC_SCREENSHOTS_DIR, img);
         const ext = path.extname(img).toLowerCase();
+        const destName = CONVERT_WEBP && WEBP_CONVERTIBLE.has(ext)
+            ? img.slice(0, -ext.length) + ".webp"
+            : img;
+
+        if (!referenced.has(destName)) {
+            skipped++;
+            continue;
+        }
 
         if (CONVERT_WEBP && WEBP_CONVERTIBLE.has(ext)) {
-            const destName = img.slice(0, -ext.length) + ".webp";
             const destPath = path.join(DEST_IMAGES_DIR, destName);
 
             if (DRY_RUN) {
@@ -280,6 +316,18 @@ function processImages() {
             written.add(img);
         }
     }
+
+    if (skipped > 0) {
+        console.log(`Skipped ${skipped} screenshot(s) no synced page references.`);
+    }
+
+    // A page citing an image that isn't in the source directory renders a broken
+    // image on the site. Cheap to surface here, where both sets are in hand.
+    const missing = [...referenced].filter(name => !written.has(name)).sort();
+    for (const name of missing) {
+        console.warn(`Warning: referenced image has no source screenshot: ${name}`);
+    }
+
     return written;
 }
 
@@ -398,6 +446,9 @@ function main() {
         "developer/_category_.yml",
     ]);
 
+    // Destination image names cited by the pages below; only these get published.
+    const referencedImages = new Set();
+
     // Section overview pages: docs/en/user.md → user/index.md and
     // docs/en/developer.md → developer/index.md. Docusaurus uses <dir>/index.md
     // as the category landing page, so the index.md "User Guide" / "Developer
@@ -409,7 +460,7 @@ function main() {
     for (const { src, dest, section, key } of sections) {
         const overview = path.join(SRC_DOCS_DIR, src);
         if (fs.existsSync(overview)) {
-            processMarkdown(overview, path.join(DEST_DOCS_DIR, ...dest), section, true);
+            processMarkdown(overview, path.join(DEST_DOCS_DIR, ...dest), section, true, referencedImages);
             expectedDocPaths.add(key);
         }
     }
@@ -422,6 +473,8 @@ function main() {
                 path.join(userDir, file),
                 path.join(DEST_DOCS_DIR, "user", file),
                 "user",
+                false,
+                referencedImages,
             );
             expectedDocPaths.add(`user/${file}`);
         }
@@ -435,6 +488,8 @@ function main() {
                 path.join(devDir, file),
                 path.join(DEST_DOCS_DIR, "developer", file),
                 "developer",
+                false,
+                referencedImages,
             );
             expectedDocPaths.add(`developer/${file}`);
         }
@@ -444,8 +499,8 @@ function main() {
     createIndexPage();
     createCategoryFiles();
 
-    // Process images
-    const expectedImageNames = processImages();
+    // Process images — only those the pages above reference.
+    const expectedImageNames = processImages(referencedImages);
 
     // Remove anything left over from a previous sync or the old hand-written docs.
     pruneStale(expectedDocPaths, expectedImageNames);

@@ -18,13 +18,13 @@ Konfi valikulisi funktsioonimooduleid ja teosta seadme haldamist. Moodulid laien
 
 Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, tekstiväljade ja liuguritega:
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![Lülituslüliti](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![Rippmenüü valija](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![Teksti väli](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![Kaardi paigutuse seaded](../../assets/screenshots/settings_titled_card.png)
 
 ## Mooduli konf
 
@@ -42,7 +42,7 @@ Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. 
 | ~~JSON Output~~ | ⚠️ **Vananenud** — JSON tugi püsivarast eemaldatud; välja ignoreeritakse |
 | TLS             | Use secure connection                                                    |
 | Root Topic      | Baas MQTT teema teekond                                                  |
-| Map Report      | Publish position for public map                                          |
+| Kaardiaruanne   | Avalda asukoht avalikul kaardil                                          |
 
 Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
@@ -91,7 +91,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Kaugustesti moodul
 
-Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. Vastuvõtusõlm logib need sõnumid, võimaldades kõndida või minema sõita ning hiljem analüüsida, millisel kaugusel sõnumite saabumine lakkas.
 
 | Sätted                                 | Kirjeldus                         |
 | -------------------------------------- | --------------------------------- |
@@ -126,7 +126,7 @@ Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pö�
 
 ### Audio moodul
 
-Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
+Codec2 audio support for low-bandwidth voice communication over the mesh. See on **eksperimentaalne** funktsioon, mis kodeerib hääle Codec2 koodeki abil väga väikesteks andmepakettideks.
 
 | Sätted          | Kirjeldus                        |
 | --------------- | -------------------------------- |
@@ -176,16 +176,16 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be 
 
 Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                     | Kirjeldus                                                                                                                               |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Lubatud                                    | Aktiveeri tuvastusandur                                                                                                                 |
-| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                                                                                       |
-| Detection Trigger Type                     | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
-| Use Input Pullup Mode                      | Enable the pin's internal pull-up resistor                                                                                              |
-| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                                               |
-| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                                                 |
-| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                                                 |
-| Friendly Name                              | Selle anduri kohandatud nimi                                                                                                            |
+| Sätted                                     | Kirjeldus                                                                                                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri tuvastusandur                                                                                           |
+| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                                                                 |
+| Detection Trigger Type                     | Kuidas klemmi olek vastab tuvastussündmusele (nt aktiivne kõrge/madal, serva poolt käivitatav) |
+| Use Input Pullup Mode                      | Enable the pin's internal pull-up resistor                                                                        |
+| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                         |
+| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                           |
+| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                           |
+| Friendly Name                              | Selle anduri kohandatud nimi                                                                                      |
 
 ### Paxloenduri moodul
 
@@ -221,7 +221,7 @@ Removes stale nodes from your local database that haven't been heard in a config
 
 ### Factory Reset
 
-Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
+Taastab kõik seaded tehase vaikeväärtustele. **Seda ei saa tagasi võtta.**
 
 ### Taaskäivita
 
@@ -229,17 +229,17 @@ Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
 
 ### Arendaja paneel
 
-Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
+Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaatamiseks, filtreerimiseks ja eksportimiseks. See [Debug Logs](debug-logs) for the full walkthrough.
 
 ### Kaug-admin tõrkeotsing
 
 - **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Veendu, et administraatori võti sobiks mõlemas sõlmele.
-- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
+- **Muudatused ei rakendu** — mõnede sätete jõustumiseks on vaja taaskäivitada. Pärast salvestamist proovi taaskäivitust.
 - **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 
 ## Related Topics
 
-- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — raadio ja kasutajaprofiili põhiseaded
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
 - [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused
 
