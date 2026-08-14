@@ -554,6 +554,13 @@ class FirmwareUpdateViewModel(
         // but never reboot a device into DFU for a request the gate would not have offered — that costs the user a
         // pointless reboot cycle before the write-time check in chooseMaintenanceImage refuses it anyway.
         val gate = currentState.maintenance
+        // A hidden gate carries no refusal (show=false, eraseRefusal=null), so the per-request checks below
+        // would sail past it — refuse outright before anything can reboot the device.
+        if (!gate.show) {
+            _state.value =
+                FirmwareUpdateState.Error(usbMaintenanceRefusalMessage(UsbMaintenanceRefusal.UnsupportedArchitecture))
+            return
+        }
         when (request) {
             UsbMaintenanceRequest.FactoryErase ->
                 gate.eraseRefusal?.let {

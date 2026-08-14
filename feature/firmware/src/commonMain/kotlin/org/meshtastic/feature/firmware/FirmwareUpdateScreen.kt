@@ -491,23 +491,8 @@ private fun ReadyState(
     val device = state.deviceHardware
     val haptic = LocalHapticFeedback.current
 
-    // A wipe can only be offered where a mechanism exists for it: the vetted UF2 erase sequence over USB, or a
-    // post-verification factory reset over BLE/WiFi. Local files and recovery flows never wipe.
-    val wipeOffered =
-        selectedReleaseType != FirmwareReleaseType.LOCAL &&
-            state.release != null &&
-            !state.isRecovery &&
-            when (state.updateMethod) {
-                FirmwareUpdateMethod.Usb -> state.maintenance.show
-
-                FirmwareUpdateMethod.Ble,
-                FirmwareUpdateMethod.Wifi,
-                -> true
-
-                FirmwareUpdateMethod.Unknown -> false
-            }
-    val wipeRefusal = (state.maintenance.eraseRefusal).takeIf { state.updateMethod is FirmwareUpdateMethod.Usb }
-    val wipeArmed = wipeOffered && wipeDevice && wipeRefusal == null
+    val wipeOffer = wipeOffer(state, selectedReleaseType)
+    val wipeArmed = wipeOffer.offered && wipeDevice && wipeOffer.refusal == null
 
     if (showDisclaimer) {
         DisclaimerDialog(
@@ -535,10 +520,10 @@ private fun ReadyState(
         Spacer(Modifier.height(16.dp))
     }
 
-    if (wipeOffered) {
+    if (wipeOffer.offered) {
         WipeDeviceToggle(
             updateMethod = state.updateMethod,
-            refusal = wipeRefusal,
+            refusal = wipeOffer.refusal,
             wipeDevice = wipeDevice,
             onWipeDeviceChange = { wipeDevice = it },
         )
@@ -557,61 +542,9 @@ private fun ReadyState(
 
     Spacer(Modifier.height(16.dp))
 
-    if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-        val largeHeight = ButtonDefaults.LargeContainerHeight
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-        Button(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                showDisclaimer = true
-            },
-            shapes = ButtonDefaults.shapesFor(largeHeight),
-            modifier = Modifier.fillMaxWidth().height(largeHeight),
-        ) {
-            Icon(MeshtasticIcons.Folder, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                stringResource(Res.string.firmware_update_select_file),
-                style = ButtonDefaults.textStyleFor(largeHeight),
-            )
-        }
-    } else if (state.release != null) {
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-        val largeHeight = ButtonDefaults.LargeContainerHeight
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-        Button(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                showDisclaimer = true
-            },
-            shapes = ButtonDefaults.shapesFor(largeHeight),
-            modifier = Modifier.fillMaxWidth().height(largeHeight),
-        ) {
-            Icon(
-                imageVector =
-                when (state.updateMethod) {
-                    FirmwareUpdateMethod.Ble -> MeshtasticIcons.Bluetooth
-                    FirmwareUpdateMethod.Usb -> MeshtasticIcons.Usb
-                    FirmwareUpdateMethod.Wifi -> MeshtasticIcons.Wifi
-                },
-                contentDescription = null,
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                if (state.isRecovery) {
-                    stringResource(Res.string.firmware_recovery_button)
-                } else {
-                    stringResource(
-                        resource = Res.string.firmware_update_method_detail,
-                        stringResource(state.updateMethod.description),
-                    )
-                },
-                style = ButtonDefaults.textStyleFor(largeHeight),
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        ReleaseNotesCard(state.release.releaseNotes)
+    ReadyActionButton(state, selectedReleaseType) {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        showDisclaimer = true
     }
 }
 
@@ -690,6 +623,85 @@ internal fun DisclaimerDialog(
             }
         },
     )
+}
+
+/** The Ready state's primary action: pick a local file, or start the release update over the active transport. */
+@Composable
+private fun ReadyActionButton(
+    state: FirmwareUpdateState.Ready,
+    selectedReleaseType: FirmwareReleaseType,
+    onClick: () -> Unit,
+) {
+    if (state.updateMethod is FirmwareUpdateMethod.Unknown) return
+    if (selectedReleaseType != FirmwareReleaseType.LOCAL && state.release == null) return
+    val largeHeight = ButtonDefaults.LargeContainerHeight
+    Column {
+        Button(
+            onClick = onClick,
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
+        ) {
+            if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
+                Icon(MeshtasticIcons.Folder, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(Res.string.firmware_update_select_file),
+                    style = ButtonDefaults.textStyleFor(largeHeight),
+                )
+            } else {
+                Icon(
+                    imageVector =
+                    when (state.updateMethod) {
+                        FirmwareUpdateMethod.Ble -> MeshtasticIcons.Bluetooth
+                        FirmwareUpdateMethod.Usb -> MeshtasticIcons.Usb
+                        FirmwareUpdateMethod.Wifi -> MeshtasticIcons.Wifi
+                    },
+                    contentDescription = null,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    if (state.isRecovery) {
+                        stringResource(Res.string.firmware_recovery_button)
+                    } else {
+                        stringResource(
+                            resource = Res.string.firmware_update_method_detail,
+                            stringResource(state.updateMethod.description),
+                        )
+                    },
+                    style = ButtonDefaults.textStyleFor(largeHeight),
+                )
+            }
+        }
+        if (selectedReleaseType != FirmwareReleaseType.LOCAL && state.release != null) {
+            Spacer(Modifier.height(24.dp))
+            ReleaseNotesCard(state.release.releaseNotes)
+        }
+    }
+}
+
+/** Whether the wipe opt-in is shown for this Ready state, and the reason it is disabled when it is. */
+internal data class WipeOffer(val offered: Boolean, val refusal: UsbMaintenanceRefusal? = null)
+
+/**
+ * A wipe can only be offered where a mechanism exists for it: the vetted UF2 erase sequence over USB, or a
+ * post-verification factory reset over BLE/WiFi. Local files and recovery flows never wipe.
+ */
+internal fun wipeOffer(state: FirmwareUpdateState.Ready, selectedReleaseType: FirmwareReleaseType): WipeOffer {
+    val offered =
+        selectedReleaseType != FirmwareReleaseType.LOCAL &&
+            state.release != null &&
+            !state.isRecovery &&
+            when (state.updateMethod) {
+                FirmwareUpdateMethod.Usb -> state.maintenance.show
+
+                FirmwareUpdateMethod.Ble,
+                FirmwareUpdateMethod.Wifi,
+                -> true
+
+                FirmwareUpdateMethod.Unknown -> false
+            }
+    val refusal = state.maintenance.eraseRefusal.takeIf { state.updateMethod is FirmwareUpdateMethod.Usb }
+    return WipeOffer(offered = offered, refusal = refusal)
 }
 
 /**
