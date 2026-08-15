@@ -100,7 +100,22 @@
     <div class="tabs-section-body">
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="2136656134%2FFunctions%2F-1238997634" anchor-label="handleQueueStatus" id="2136656134%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+        <div class="table"><a data-name="484149326%2FFunctions%2F-1238997634" anchor-label="completeDispatchedResponse" id="484149326%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="complete-dispatched-response.html"><span>complete</span><wbr><span>Dispatched</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="484149326%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="complete-dispatched-response.html"><span class="token function">completeDispatchedResponse</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataRequestId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">complete<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Completes the strict routing response for <a href="complete-dispatched-response.html">dataRequestId</a> when an active transport already dispatched that packet. Replies that arrive before dispatch are stale and ignored. The packet ID remains reserved until both the firmware queue stage and this routing stage are terminal.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2136656134%2FFunctions%2F-1238997634" anchor-label="handleQueueStatus" id="2136656134%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -130,21 +145,6 @@
               </div>
             </div>
           </div>
-<a data-name="-1854251872%2FFunctions%2F-1238997634" anchor-label="removeResponse" id="-1854251872%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="remove-response.html"><span>remove</span><wbr><span><span>Response</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1854251872%2FFunctions%2F-1238997634"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="remove-response.html"><span class="token function">removeResponse</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dataRequestId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">complete<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Removes and completes a pending response for a request before the caller's lifecycle lease is released.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="194599095%2FFunctions%2F-1238997634" anchor-label="sendToRadio" id="194599095%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
@@ -155,7 +155,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Adds a mesh packet to the queue for sending.</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ToRadio///PointingToDeclaration/">ToRadio</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sends a command/packet directly to the radio.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Adds a mesh packet to the queue for sending.</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/ToRadio///PointingToDeclaration/">ToRadio</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sends a command/packet directly to the radio.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -170,7 +170,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio-and-await.html"><span class="token function">sendToRadioAndAwait</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio-and-await.html"><span class="token function">sendToRadioAndAwait</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Adds a mesh packet to the queue and suspends until its routing acknowledgement arrives.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="509940797%2FFunctions%2F-1238997634" anchor-label="sendToRadioAndAwaitResult" id="509940797%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-to-radio-and-await-result.html"><span>send</span><wbr><span>To</span><wbr><span>Radio</span><wbr><span>And</span><wbr><span>Await</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="509940797%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio-and-await-result.html"><span class="token function">sendToRadioAndAwaitResult</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-awaited-send-result/index.html">AwaitedSendResult</a></div><div class="brief "><p class="paragraph">Detailed form of <a href="send-to-radio-and-await.html">sendToRadioAndAwait</a>, including whether an active transport admitted the packet.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1718477418%2FFunctions%2F-1238997634" anchor-label="sendToRadioForConnection" id="-1718477418%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-to-radio-for-connection.html"><span>send</span><wbr><span>To</span><wbr><span>Radio</span><wbr><span>For</span><wbr><span><span>Connection</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1718477418%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-to-radio-for-connection.html"><span class="token function">sendToRadioForConnection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span><span class="token punctuation">, </span></span><span class="parameter ">expectedConnectionVersion<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Adds <a href="send-to-radio-for-connection.html">packet</a> only while <a href="send-to-radio-for-connection.html">expectedConnectionVersion</a> still owns the connected lifecycle generation.</p></div></div></div>
                 </div>
               </div>
             </div>

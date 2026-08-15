@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-testing</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.testing</a><span class="delimiter">/</span><span class="current">FakeRadioInterfaceService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Fake</span><wbr><span>Radio</span><wbr><span>Interface</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioInterfaceService.kt#L57">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p><p class="paragraph">The <a href="connection-state.html">connectionState</a> here mirrors the transport-level semantics of the real implementation. In production, only <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a> observes this flow; tests should verify that bridging behavior rather than consuming it directly from UI/feature test code (use <a href="../-fake-service-repository/connection-state.html">FakeServiceRepository.connectionState</a> instead). Address selection remains separate from transport admission: <a href="connect.html">connect</a> and an in-flight <a href="restart-transport.html">restartTransport</a> publish a fresh monotonically increasing session generation.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">FakeRadioInterfaceService</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serviceScope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>MainScope()</span></span><span class="token punctuation">)</span> : <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/FakeRadioInterfaceService.kt#L58">source</a>)</span></span></div><p class="paragraph">A test double for <a href="../../../../core/repository/org.meshtastic.core.repository/-radio-interface-service/index.html">RadioInterfaceService</a> that provides an in-memory implementation.</p><p class="paragraph">The <a href="connection-state.html">connectionState</a> here mirrors the transport-level semantics of the real implementation. In production, only <a href="../../../../core/repository/org.meshtastic.core.repository/-mesh-connection-manager/index.html">MeshConnectionManager</a> observes this flow; tests should verify that bridging behavior rather than consuming it directly from UI/feature test code (use <a href="../-fake-service-repository/connection-state.html">FakeServiceRepository.connectionState</a> instead). Address selection remains separate from transport admission: <a href="connect.html">connect</a> and an in-flight <a href="restart-transport.html">restartTransport</a> publish a fresh monotonically increasing session generation.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -254,6 +254,21 @@
               </div>
             </div>
           </div>
+<a data-name="647715899%2FProperties%2F1783121280" anchor-label="rejectAdmittedSends" id="647715899%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="reject-admitted-sends.html"><span>reject</span><wbr><span>Admitted</span><wbr><span><span>Sends</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="647715899%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="reject-admitted-sends.html">rejectAdmittedSends</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Set to true to simulate an admitted transport rejecting the byte handoff.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="770878170%2FProperties%2F1783121280" anchor-label="restartTransportCalled" id="770878170%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
             <div class="main-subrow keyValue ">
@@ -279,7 +294,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="sent-to-radio.html">sentToRadio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-mutable-list/index.html">MutableList</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="sent-to-radio.html">sentToRadio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Thread-safe lifetime history of writes accepted across all admitted fake transport sessions.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -310,6 +325,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="session-generation.html">sessionGeneration</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="141194367%2FProperties%2F1783121280" anchor-label="sessionLeaseInvariantViolations" id="141194367%2FProperties%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="session-lease-invariant-violations.html"><span>session</span><wbr><span>Lease</span><wbr><span>Invariant</span><wbr><span><span>Violations</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="141194367%2FProperties%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="session-lease-invariant-violations.html">sessionLeaseInvariantViolations</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -558,17 +588,17 @@
               </div>
             </div>
           </div>
-<a data-name="-1450179955%2FFunctions%2F1783121280" anchor-label="sendToRadio" id="-1450179955%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+<a data-name="-1467299126%2FFunctions%2F1783121280" anchor-label="sendToRadio" id="-1467299126%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="send-to-radio.html"><span>send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1450179955%2FFunctions%2F1783121280"></span>
+                  <div><a href="index.html#-1467299126%2FFunctions%2F1783121280"><span>send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1467299126%2FFunctions%2F1783121280"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="send-to-radio.html"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1467299126%2FFunctions%2F1783121280"><span class="token function">sendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -614,6 +644,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-interface-address.html"><span class="token function">toInterfaceAddress</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">interfaceId<span class="token operator">: </span><a href="../../../../core/model/org.meshtastic.core.model/-interface-id/index.html">InterfaceId</a><span class="token punctuation">, </span></span><span class="parameter ">rest<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1173960400%2FFunctions%2F1783121280" anchor-label="trySendToRadio" id="1173960400%2FFunctions%2F1783121280" data-filterable-set=":core:testing/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:testing/commonMain" data-filterable-set=":core:testing/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="try-send-to-radio.html"><span>try</span><wbr><span>Send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1173960400%2FFunctions%2F1783121280"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:testing/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="try-send-to-radio.html"><span class="token function">trySendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Records <a href="try-send-to-radio.html">bytes</a> only while a transport session is admitted. Tests must select a non-null device address and call <a href="connect.html">connect</a> before sending; attempts outside that lifecycle return false and leave <a href="sent-to-radio.html">sentToRadio</a> unchanged.</p></div></div></div>
                 </div>
               </div>
             </div>

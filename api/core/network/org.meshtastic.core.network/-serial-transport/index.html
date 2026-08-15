@@ -95,7 +95,7 @@
     <h1 class="cover"><span>Serial</span><wbr><span><span>Transport</span></span></h1>
     <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
       <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-active="" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SerialTransport</a> : <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/index.html">StreamTransport</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/jvmMain/kotlin/org/meshtastic/core/network/SerialTransport.kt#L40">source</a>)</span></span></div><p class="paragraph">JVM-specific implementation of RadioTransport using jSerialComm. Uses <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/index.html">StreamTransport</a> for START1/START2 packet framing.</p><p class="paragraph">Use the <a href="-companion/open.html">open</a> factory method instead of the constructor directly to ensure the serial port is opened and the read loop is started.</p></div>    </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SerialTransport</a> : <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/index.html">StreamTransport</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/jvmMain/kotlin/org/meshtastic/core/network/SerialTransport.kt#L266">source</a>)</span></span></div><p class="paragraph">JVM-specific implementation of RadioTransport using jSerialComm. Uses <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/index.html">StreamTransport</a> for START1/START2 packet framing.</p><p class="paragraph">Use the <a href="-companion/create.html">create</a> factory method instead of the constructor directly. Construction is side-effect free; <a href="start.html">start</a> opens the serial port and publishes the connection.</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -135,7 +135,7 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-active="" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Closes admission and lets already-admitted frames finish before cancelling the worker as a bounded fallback.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -157,19 +157,19 @@
               </div>
             </div>
           </div>
-<a data-name="-1277430621%2FFunctions%2F-1528473448" anchor-label="handleSendToRadio" id="-1277430621%2FFunctions%2F-1528473448" data-filterable-set=":core:network/jvmMain"></a>
+<a data-name="-904820412%2FFunctions%2F-1528473448" anchor-label="handleSendToRadio" id="-904820412%2FFunctions%2F-1528473448" data-filterable-set=":core:network/jvmMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1277430621%2FFunctions%2F-1528473448"><span>handle</span><wbr><span>Send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1277430621%2FFunctions%2F-1528473448"></span>
+                  <div><a href="handle-send-to-radio.html"><span>handle</span><wbr><span>Send</span><wbr><span>To</span><wbr><span><span>Radio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-904820412%2FFunctions%2F-1528473448"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-active="" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1277430621%2FFunctions%2F-1528473448"><span class="token function">handleSendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="handle-send-to-radio.html"><span class="token function">handleSendToRadio</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div>                  </div>
                 </div>
               </div>
             </div>
@@ -203,24 +203,24 @@
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-active="" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="send-bytes.html"><span class="token function">sendBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes raw bytes to the underlying stream (serial port, TCP socket, etc.).</p></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="send-bytes.html"><span class="token function">sendBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Writes raw bytes to the underlying stream (serial port, TCP socket, etc.). Implementations may block until the driver accepts the bytes, so direct callers must already be running on an I/O dispatcher. Framed packet sends use <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/queue-framed-send.html">queueFramedSend</a>, whose writer controls dispatcher confinement. Subclasses that rely on <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/queue-framed-send.html">queueFramedSend</a>'s default writer must therefore supply an I/O-confined <a href="../../../../core/network/org.meshtastic.core.network.radio/-stream-transport/--root--.html">scope</a>.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="490828439%2FFunctions%2F-1528473448" anchor-label="start" id="490828439%2FFunctions%2F-1528473448" data-filterable-set=":core:network/jvmMain"></a>
+<a data-name="2008202198%2FFunctions%2F-1528473448" anchor-label="start" id="2008202198%2FFunctions%2F-1528473448" data-filterable-set=":core:network/jvmMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#490828439%2FFunctions%2F-1528473448"><span><span>start</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="490828439%2FFunctions%2F-1528473448"></span>
+                  <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2008202198%2FFunctions%2F-1528473448"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
                     <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":core:network/jvmMain" data-filterable-set=":core:network/jvmMain" data-active="" data-toggle=":core:network/jvmMain">jvm</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#490828439%2FFunctions%2F-1528473448"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div>                  </div>
                 </div>
               </div>
             </div>

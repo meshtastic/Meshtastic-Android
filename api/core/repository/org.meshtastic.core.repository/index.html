@@ -220,6 +220,36 @@
               </div>
             </div>
           </div>
+<a data-name="559799548%2FClasslikes%2F-1238997634" anchor-label="AwaitedSendResult" id="559799548%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-awaited-send-result/index.html"><span>Awaited</span><wbr><span>Send</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="559799548%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-awaited-send-result/index.html">AwaitedSendResult</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>status<span class="token operator">: </span><a href="-awaited-send-status/index.html">AwaitedSendStatus</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>departureEpochAtDispatch<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Detailed result for an awaited send. <a href="../../../core/repository/org.meshtastic.core.repository/-awaited-send-result/--root--.html">departureEpochAtDispatch</a> captures the canonical departure counter when an active transport accepts the outbound bytes for asynchronous delivery. Its presence is also the single source of truth for <a href="-awaited-send-result/dispatched.html">dispatched</a>, allowing callers to distinguish a later transport departure from one that happened while the packet was still queued. Correlated responses received before dispatch are ignored, so an accepted result always belongs to an admitted transport send.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1777721031%2FClasslikes%2F-1238997634" anchor-label="AwaitedSendStatus" id="1777721031%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-awaited-send-status/index.html"><span>Awaited</span><wbr><span>Send</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1777721031%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-awaited-send-status/index.html">AwaitedSendStatus</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-awaited-send-status/index.html">AwaitedSendStatus</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Outcome of a packet whose caller waited for transport admission and any required routing result.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="2018026742%2FClasslikes%2F-1238997634" anchor-label="CommandSender" id="2018026742%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
@@ -246,6 +276,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-connection-identity/index.html">ConnectionIdentity</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sessionGeneration<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>address<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>nodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>deviceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Fresh-handshake identity for one connection session. Separate from the general <a href="-node-manager/my-node-num.html">NodeManager.myNodeNum</a>/ <a href="-node-manager/my-device-id.html">NodeManager.myDeviceId</a> StateFlows, which can retain stale cached values across transport switches. <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">address</a>, <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">nodeNum</a>, and <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">deviceId</a> are captured from one selected transport and one MyNodeInfo handshake so consumers never have to combine independently delivered address and identity flows. <a href="../../../core/repository/org.meshtastic.core.repository/-connection-identity/--root--.html">sessionGeneration</a> is the active transport session generation at handshake time, so the association collector can discard an identity retained from a previous transport instance even if every other field is equal.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2005479849%2FClasslikes%2F-1238997634" anchor-label="ConnectionStateHolder" id="-2005479849%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-connection-state-holder/index.html"><span>Connection</span><wbr><span>State</span><wbr><span><span>Holder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2005479849%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-connection-state-holder/index.html">ConnectionStateHolder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initialState<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-connection-state/index.html">ConnectionState</a><span class="token operator"> = </span>ConnectionState.Disconnected<span class="token punctuation">, </span></span><span class="parameter ">initialEpochs<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-connection-epochs/index.html">ConnectionEpochs</a><span class="token operator"> = </span>ConnectionEpochs()</span></span><span class="token punctuation">)</span> : <a href="-connection-state-provider/index.html">ConnectionStateProvider</a></div><div class="brief "><p class="paragraph">Owns canonical connection state, epochs, and compatibility projections under one publication lock.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -366,6 +411,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-discovery-prefs/index.html">DiscoveryPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for Local Mesh Discovery scan preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2094358354%2FClasslikes%2F-1238997634" anchor-label="EditSettingsTransactionException" id="-2094358354%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-edit-settings-transaction-exception/index.html"><span>Edit</span><wbr><span>Settings</span><wbr><span>Transaction</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2094358354%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-edit-settings-transaction-exception/index.html">EditSettingsTransactionException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">cause<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-exception/index.html">Exception</a>, <a href="../../../core/common/org.meshtastic.core.common.log/-expected-condition/index.html">ExpectedCondition</a></div><div class="brief "><p class="paragraph">An expected radio rejection or timeout at an edit-settings transaction boundary.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -516,6 +576,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-homoglyph-prefs/index.html">HomoglyphPrefs</a></div><div class="brief "><p class="paragraph">Reactive interface for homoglyph encoding preferences.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="837784650%2FClasslikes%2F-1238997634" anchor-label="LocalNodeUnavailableException" id="837784650%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-local-node-unavailable-exception/index.html"><span>Local</span><wbr><span>Node</span><wbr><span>Unavailable</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="837784650%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-local-node-unavailable-exception/index.html">LocalNodeUnavailableException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a>, <a href="../../../core/common/org.meshtastic.core.common.log/-expected-condition/index.html">ExpectedCondition</a></div><div class="brief "><p class="paragraph">Thrown when a command requires the local node identity before that identity is available.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -1092,6 +1167,21 @@
               </div>
             </div>
           </div>
+<a data-name="1583588708%2FClasslikes%2F-1238997634" anchor-label="PacketQueueRejectedException" id="1583588708%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-packet-queue-rejected-exception/index.html"><span>Packet</span><wbr><span>Queue</span><wbr><span>Rejected</span><wbr><span><span>Exception</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1583588708%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-packet-queue-rejected-exception/index.html">PacketQueueRejectedException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a>, <a href="../../../core/common/org.meshtastic.core.common.log/-expected-condition/index.html">ExpectedCondition</a></div><div class="brief "><p class="paragraph">Thrown when the outbound packet queue refuses admission for an operation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="929259066%2FClasslikes%2F-1238997634" anchor-label="PacketRepository" id="929259066%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
             <div class="main-subrow keyValue ">
@@ -1133,6 +1223,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-persisted-packet-id/index.html">PersistedPacketId</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>uuid<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stable identity of one persisted packet row within its owning node database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-201159014%2FClasslikes%2F-1238997634" anchor-label="PersistedReaction" id="-201159014%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-persisted-reaction/index.html"><span>Persisted</span><wbr><span><span>Reaction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-201159014%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-persisted-reaction/index.html">PersistedReaction</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>id<span class="token operator">: </span><a href="-persisted-reaction-id/index.html">PersistedReactionId</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>reaction<span class="token operator">: </span><a href="../../../core/model/org.meshtastic.core.model/-reaction/index.html">Reaction</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A persisted reaction paired with the exact row identity needed by durable background work.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-539469953%2FClasslikes%2F-1238997634" anchor-label="PersistedReactionId" id="-539469953%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-persisted-reaction-id/index.html"><span>Persisted</span><wbr><span>Reaction</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-539469953%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-persisted-reaction-id/index.html">PersistedReactionId</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>myNodeNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>replyId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>emoji<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stable identity of one persisted reaction row within its owning node database.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -1222,7 +1342,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-interface-service/index.html">RadioInterfaceService</a> : <a href="-radio-transport-callback/index.html">RadioTransportCallback</a>, <a href="-radio-session-authority/index.html">RadioSessionAuthority</a></div><div class="brief "><p class="paragraph">Interface for the low-level radio interface that handles raw byte communication.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-interface-service/index.html">RadioInterfaceService</a> : <a href="-radio-transport-callback/index.html">RadioTransportCallback</a>, <a href="-radio-session-authority/index.html">RadioSessionAuthority</a>, <a href="-radio-transport-writer/index.html">RadioTransportWriter</a></div><div class="brief "><p class="paragraph">Interface for the low-level radio interface that handles raw byte communication.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -1328,6 +1448,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-transport-factory/index.html">RadioTransportFactory</a></div><div class="brief "><p class="paragraph">Creates <a href="-radio-transport/index.html">RadioTransport</a> instances for specific device addresses.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1565195787%2FClasslikes%2F-1238997634" anchor-label="RadioTransportWriter" id="1565195787%2FClasslikes%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-radio-transport-writer/index.html"><span>Radio</span><wbr><span>Transport</span><wbr><span><span>Writer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1565195787%2FClasslikes%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-radio-transport-writer/index.html">RadioTransportWriter</a></div><div class="brief "><p class="paragraph">Writes raw protocol frames to the currently admitted transport.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -1696,6 +1831,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.meshtastic.proto/ClientNotification///PointingToDeclaration/">ClientNotification</span><span class="token punctuation">.</span><a href="notification-id.html"><span class="token function">notificationId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Stable platform-notification identity shared by posting and cancellation paths.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1554167611%2FFunctions%2F-1238997634" anchor-label="toFixedPositionAdminMessage" id="1554167611%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-fixed-position-admin-message.html"><span>to</span><wbr><span>Fixed</span><wbr><span>Position</span><wbr><span>Admin</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1554167611%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../../core/model/org.meshtastic.core.model/-position/index.html">Position</a><span class="token punctuation">.</span><a href="to-fixed-position-admin-message.html"><span class="token function">toFixedPositionAdminMessage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/AdminMessage///PointingToDeclaration/">AdminMessage</span></div><div class="brief "><p class="paragraph">Builds the device admin command for setting or removing a fixed position.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="651220923%2FFunctions%2F-1238997634" anchor-label="toFixedPositionProto" id="651220923%2FFunctions%2F-1238997634" data-filterable-set=":core:repository/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:repository/commonMain" data-filterable-set=":core:repository/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-fixed-position-proto.html"><span>to</span><wbr><span>Fixed</span><wbr><span>Position</span><wbr><span><span>Proto</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="651220923%2FFunctions%2F-1238997634"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:repository/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../../core/model/org.meshtastic.core.model/-position/index.html">Position</a><span class="token punctuation">.</span><a href="to-fixed-position-proto.html"><span class="token function">toFixedPositionProto</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/Position///PointingToDeclaration/">Position</span></div><div class="brief "><p class="paragraph">Converts the model position to the exact protobuf payload used by fixed-position admin commands.</p></div></div></div>
                 </div>
               </div>
             </div>

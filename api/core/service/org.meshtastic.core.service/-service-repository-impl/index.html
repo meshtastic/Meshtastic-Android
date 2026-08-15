@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-service</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.service</a><span class="delimiter">/</span><span class="current">ServiceRepositoryImpl</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Service</span><wbr><span>Repository</span><wbr><span><span>Impl</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ServiceRepositoryImpl</a> : <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/commonMain/kotlin/org/meshtastic/core/service/ServiceRepositoryImpl.kt#L42">source</a>)</span></span></div><p class="paragraph">Platform-agnostic implementation of <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a>.</p><p class="paragraph">Manages reactive state for connection status, error messages, mesh packets, and service actions using only KMP-compatible primitives (StateFlow, SharedFlow, Channel, Kermit Logger). This implementation can be used directly on any KMP target.</p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../../../core/service/org.meshtastic.core.service/-android-service-repository/index.html">AndroidServiceRepository</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ServiceRepositoryImpl</a> : <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/service/src/commonMain/kotlin/org/meshtastic/core/service/ServiceRepositoryImpl.kt#L43">source</a>)</span></span></div><p class="paragraph">Platform-agnostic implementation of <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/index.html">ServiceRepository</a>.</p><p class="paragraph">Manages reactive state for connection status, error messages, mesh packets, and service actions using only KMP-compatible primitives (StateFlow, SharedFlow, Channel, Kermit Logger). This implementation can be used directly on any KMP target.</p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../../../core/service/org.meshtastic.core.service/-android-service-repository/index.html">AndroidServiceRepository</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -130,6 +130,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="client-notification.html">clientNotification</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><span data-unresolved-link="org.meshtastic.proto/ClientNotification///PointingToDeclaration/">ClientNotification</span><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1011140075%2FProperties%2F1835284133" anchor-label="connectionEpochs" id="1011140075%2FProperties%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-epochs.html"><span>connection</span><wbr><span><span>Epochs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1011140075%2FProperties%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="connection-epochs.html">connectionEpochs</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-connection-epochs/index.html">ConnectionEpochs</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2100456603%2FProperties%2F1835284133" anchor-label="connectionLifecycle" id="2100456603%2FProperties%2F1835284133" data-filterable-set=":core:service/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:service/commonMain" data-filterable-set=":core:service/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-lifecycle.html"><span>connection</span><wbr><span><span>Lifecycle</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2100456603%2FProperties%2F1835284133"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:service/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="connection-lifecycle.html">connectionLifecycle</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../core/model/org.meshtastic.core.model/-connection-lifecycle/index.html">ConnectionLifecycle</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
