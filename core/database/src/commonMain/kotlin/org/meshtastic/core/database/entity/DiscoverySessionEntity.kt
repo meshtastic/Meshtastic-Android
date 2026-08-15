@@ -33,7 +33,8 @@ data class DiscoverySessionEntity(
     @ColumnInfo(name = "total_messages", defaultValue = "0") val totalMessages: Int = 0,
     @ColumnInfo(name = "total_sensor_packets", defaultValue = "0") val totalSensorPackets: Int = 0,
     @ColumnInfo(name = "furthest_node_distance", defaultValue = "0.0") val furthestNodeDistance: Double = 0.0,
-    @ColumnInfo(name = "completion_status", defaultValue = "'complete'") val completionStatus: String = "complete",
+    @ColumnInfo(name = "completion_status", defaultValue = "'" + DiscoverySessionStatus.COMPLETE + "'")
+    val completionStatus: String = DiscoverySessionStatus.COMPLETE,
     @ColumnInfo(name = "ai_summary") val aiSummary: String? = null,
     @ColumnInfo(name = "user_latitude", defaultValue = "0.0") val userLatitude: Double = 0.0,
     @ColumnInfo(name = "user_longitude", defaultValue = "0.0") val userLongitude: Double = 0.0,

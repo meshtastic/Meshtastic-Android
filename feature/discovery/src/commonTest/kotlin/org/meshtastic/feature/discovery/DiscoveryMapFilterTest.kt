@@ -18,14 +18,14 @@
 
 package org.meshtastic.feature.discovery
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -112,20 +112,22 @@ class DiscoveryMapFilterTest {
     // region Preset results loaded
 
     @Test
-    fun presetResults_loadedFromDao() = runTest {
-        val dao = MapTestDao()
+    fun sharedDaoFlowsObserveWritesAfterSubscription() = runTest {
+        val dao = SharedInMemoryDiscoveryDao()
         val sessionId = dao.insertSession(testSession())
-        dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LONG_FAST"))
+        val observedResults =
+            async(start = CoroutineStart.UNDISPATCHED) { dao.getPresetResultsFlow(sessionId).first { it.size == 2 } }
+        val presetResultId =
+            dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "LONG_FAST"))
         dao.insertPresetResult(DiscoveryPresetResultEntity(sessionId = sessionId, presetName = "SHORT_FAST"))
+        val observedNodes =
+            async(start = CoroutineStart.UNDISPATCHED) {
+                dao.getDiscoveredNodesFlow(presetResultId).first { it.isNotEmpty() }
+            }
+        dao.insertDiscoveredNode(DiscoveredNodeEntity(presetResultId = presetResultId, nodeNum = 123L))
 
-        val vm = DiscoveryMapViewModel(sessionId = sessionId, discoveryDao = dao)
-        // safeLaunch runs in UnconfinedTestDispatcher-like context within the VM
-        // Access the loaded state
-        val results = vm.presetResults.value
-        // The VM loads asynchronously, so results may still be loading.
-        // Verify the DAO has the right data at minimum.
-        val daoResults = dao.getPresetResults(sessionId)
-        assertEquals(2, daoResults.size)
+        assertEquals(setOf("LONG_FAST", "SHORT_FAST"), observedResults.await().map { it.presetName }.toSet())
+        assertEquals(listOf(123L), observedNodes.await().map { it.nodeNum })
     }
 
     // endregion
@@ -133,7 +135,7 @@ class DiscoveryMapFilterTest {
     // region Helpers
 
     private fun createViewModel(): DiscoveryMapViewModel {
-        val dao = MapTestDao()
+        val dao = SharedInMemoryDiscoveryDao()
         return DiscoveryMapViewModel(sessionId = 1L, discoveryDao = dao)
     }
 
@@ -141,114 +143,8 @@ class DiscoveryMapFilterTest {
         timestamp = 1_000_000L,
         presetsScanned = "LONG_FAST",
         homePreset = "LONG_FAST",
-        completionStatus = "complete",
+        completionStatus = DiscoverySessionStatus.COMPLETE,
     )
 
     // endregion
 }
-
-// region In-memory DAO for map filter tests
-
-private class MapTestDao : DiscoveryDao {
-    private var nextSessionId = 1L
-    private var nextPresetResultId = 1L
-    private var nextNodeId = 1L
-
-    private val sessions = mutableMapOf<Long, DiscoverySessionEntity>()
-    private val presetResults = mutableMapOf<Long, DiscoveryPresetResultEntity>()
-    private val discoveredNodes = mutableMapOf<Long, DiscoveredNodeEntity>()
-
-    override suspend fun insertSession(session: DiscoverySessionEntity): Long {
-        val id = nextSessionId++
-        sessions[id] = session.copy(id = id)
-        return id
-    }
-
-    override suspend fun updateSession(session: DiscoverySessionEntity) {
-        sessions[session.id] = session
-    }
-
-    override fun getAllSessions(): Flow<List<DiscoverySessionEntity>> =
-        flowOf(sessions.values.sortedByDescending { it.timestamp })
-
-    override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> = sessions.values.toList()
-
-    override suspend fun getSession(sessionId: Long) = sessions[sessionId]
-
-    override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> = MutableStateFlow(sessions[sessionId])
-
-    override suspend fun deleteSession(sessionId: Long) {
-        sessions.remove(sessionId)
-        val resultIds = presetResults.values.filter { it.sessionId == sessionId }.map { it.id }
-        resultIds.forEach { rid ->
-            discoveredNodes.entries.removeAll { it.value.presetResultId == rid }
-            presetResults.remove(rid)
-        }
-    }
-
-    override suspend fun insertPresetResult(result: DiscoveryPresetResultEntity): Long {
-        val id = nextPresetResultId++
-        presetResults[id] = result.copy(id = id)
-        return id
-    }
-
-    override suspend fun updatePresetResult(result: DiscoveryPresetResultEntity) {
-        presetResults[result.id] = result
-    }
-
-    override suspend fun getPresetResults(sessionId: Long) = presetResults.values.filter { it.sessionId == sessionId }
-
-    override fun getPresetResultsFlow(sessionId: Long) =
-        flowOf(presetResults.values.filter { it.sessionId == sessionId })
-
-    override suspend fun insertDiscoveredNode(node: DiscoveredNodeEntity): Long {
-        val id = nextNodeId++
-        discoveredNodes[id] = node.copy(id = id)
-        return id
-    }
-
-    override suspend fun insertDiscoveredNodes(nodes: List<DiscoveredNodeEntity>) {
-        nodes.forEach { insertDiscoveredNode(it) }
-    }
-
-    override suspend fun updateDiscoveredNode(node: DiscoveredNodeEntity) {
-        discoveredNodes[node.id] = node
-    }
-
-    override suspend fun getDiscoveredNodes(presetResultId: Long) =
-        discoveredNodes.values.filter { it.presetResultId == presetResultId }
-
-    override fun getDiscoveredNodesFlow(presetResultId: Long) =
-        flowOf(discoveredNodes.values.filter { it.presetResultId == presetResultId })
-
-    override suspend fun getUniqueNodeNums(sessionId: Long) = presetResults.values
-        .filter { it.sessionId == sessionId }
-        .flatMap { pr -> discoveredNodes.values.filter { it.presetResultId == pr.id } }
-        .map { it.nodeNum }
-        .distinct()
-
-    override suspend fun getUniqueNodeCount(sessionId: Long) = getUniqueNodeNums(sessionId).size
-
-    override suspend fun getMaxDistance(sessionId: Long) = presetResults.values
-        .filter { it.sessionId == sessionId }
-        .flatMap { pr -> discoveredNodes.values.filter { it.presetResultId == pr.id } }
-        .mapNotNull { it.distanceFromUser }
-        .maxOrNull()
-
-    override suspend fun getSessionWithResults(sessionId: Long) = sessions[sessionId]
-
-    override suspend fun markInterruptedSessions() {
-        sessions.keys.toList().forEach { key ->
-            val session = sessions[key]!!
-            if (session.completionStatus == "in_progress") {
-                sessions[key] = session.copy(completionStatus = "interrupted")
-            }
-        }
-    }
-
-    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
-        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
-        .maxByOrNull { it.timestamp }
-}
-
-// endregion

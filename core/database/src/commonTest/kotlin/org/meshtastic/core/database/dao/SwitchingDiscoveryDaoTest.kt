@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.database.entity.DiscoverySessionStatus
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -68,6 +69,34 @@ class SwitchingDiscoveryDaoTest {
     }
 
     @Test
+    fun statusUpdateReportsUnavailableDatabase() = runTest {
+        val sessionId =
+            dao.insertSession(session(timestamp = 1).copy(completionStatus = DiscoverySessionStatus.IN_PROGRESS))
+        provider.setWritesAvailable(false)
+
+        assertEquals(0, dao.updateSessionCompletionStatus(sessionId, DiscoverySessionStatus.FAILED))
+        assertEquals(
+            DiscoverySessionStatus.IN_PROGRESS,
+            dbA.discoveryDao().getSession(sessionId)?.completionStatus,
+            "an unavailable database must not be reported as a successful status write",
+        )
+    }
+
+    @Test
+    fun recoverableStatusUpdateReportsUnavailableDatabase() = runTest {
+        val sessionId =
+            dao.insertSession(session(timestamp = 1).copy(completionStatus = DiscoverySessionStatus.IN_PROGRESS))
+        provider.setWritesAvailable(false)
+
+        assertEquals(0, dao.updateRecoverableSessionCompletionStatus(sessionId, DiscoverySessionStatus.FAILED))
+        assertEquals(
+            DiscoverySessionStatus.IN_PROGRESS,
+            dbA.discoveryDao().getSession(sessionId)?.completionStatus,
+            "an unavailable database must not be reported as a successful recoverable status write",
+        )
+    }
+
+    @Test
     fun flowsRelatchOntoTheCurrentDb() = runTest {
         dao.insertSession(session(timestamp = 1))
 
@@ -93,6 +122,7 @@ class SwitchingDiscoveryDaoTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private class TestProvider(db: MeshtasticDatabase) : DatabaseProvider {
         private val _currentDb = MutableStateFlow(db)
+        private var writesAvailable = true
         override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
 
         override fun <T> observeCurrentDb(query: (MeshtasticDatabase) -> Flow<T>): Flow<T> =
@@ -100,7 +130,12 @@ class SwitchingDiscoveryDaoTest {
 
         override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = block(_currentDb.value)
 
-        override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = block(_currentDb.value)
+        override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? =
+            if (writesAvailable) block(_currentDb.value) else null
+
+        fun setWritesAvailable(available: Boolean) {
+            writesAvailable = available
+        }
 
         fun switchTo(db: MeshtasticDatabase) {
             _currentDb.value = db
