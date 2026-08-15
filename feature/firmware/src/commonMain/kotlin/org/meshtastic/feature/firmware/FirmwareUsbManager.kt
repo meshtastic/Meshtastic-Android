@@ -41,4 +41,17 @@ interface FirmwareUsbManager {
      * @return true when a port was claimed and DTR held.
      */
     suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean
+
+    /**
+     * Waits up to [waitMillis] for a serial device to be present and ensures the app holds USB permission for it,
+     * prompting the user when needed.
+     *
+     * Post-update verification depends on this: every USB re-enumeration is a new device identity to Android, so the
+     * grant earned before an update does not carry across the device's reboot — without a fresh one the transport's
+     * auto-recovery fails with SecurityException and verification times out on a healthy device.
+     *
+     * Advisory: reconnection still rides the transport's own recovery; a denial just means verification times out as it
+     * would have anyway.
+     */
+    suspend fun ensureSerialPermission(waitMillis: Long): Boolean
 }

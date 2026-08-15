@@ -169,7 +169,7 @@ internal sealed interface UsbPassResult {
     data object CdcUnblockFailed : UsbPassResult
 }
 
-private const val DETACH_TIMEOUT_MS = 30_000L
+private const val DETACH_TIMEOUT_MS = 60_000L
 private const val POST_WRITE_SETTLE_MS = 1_500L
 private const val CDC_UNBLOCK_WAIT_MS = 15_000L
 private const val CDC_DTR_HOLD_MS = 2_000L

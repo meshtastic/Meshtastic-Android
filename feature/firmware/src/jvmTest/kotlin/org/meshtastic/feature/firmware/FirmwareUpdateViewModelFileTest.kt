@@ -966,5 +966,10 @@ class FirmwareUpdateViewModelFileTest {
             firmwareMaintenanceLock.isActive,
             "completing the sequence's terminal pass must release the lock, or auto-reconnect stays suppressed forever",
         )
+
+        // The rebooted device is a new USB identity to Android, so verification must preflight the permission
+        // grant — otherwise auto-recovery dies on SecurityException and a healthy update reads as a failure.
+        advanceUntilIdle()
+        verifySuspend { usbManager.ensureSerialPermission(any()) }
     }
 }

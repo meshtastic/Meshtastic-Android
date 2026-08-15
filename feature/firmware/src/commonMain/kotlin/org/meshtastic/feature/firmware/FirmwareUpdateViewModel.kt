@@ -93,7 +93,11 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_unsupported_update_method
 import org.meshtastic.core.resources.unknown
 
-private const val DEVICE_DETACH_TIMEOUT = 30_000L
+// Bench measurement (Wio Tracker L1, 2 MB UF2): consume + reboot can outlast 30 s by a hair.
+private const val DEVICE_DETACH_TIMEOUT = 60_000L
+
+/** How long the post-update permission preflight waits for the updated firmware to enumerate. */
+private const val USB_REATTACH_PERMISSION_WAIT = 30_000L
 private const val VERIFY_TIMEOUT = 60_000L
 private const val VERIFY_DELAY = 2000L
 private const val MIN_BATTERY_LEVEL = 10
@@ -1085,6 +1089,12 @@ class FirmwareUpdateViewModel(
         address?.let { fullAddr ->
             if (radioPrefs.isSerial()) {
                 Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
+                // The reboot gave the device a new USB identity, and Android scopes permission grants to the
+                // identity — without a fresh grant the auto-recovery below fails with SecurityException and a
+                // healthy update lands on VerificationFailed. Ask now, while the user is still watching.
+                if (!usbManager.ensureSerialPermission(USB_REATTACH_PERMISSION_WAIT)) {
+                    Logger.w { "Post-update USB permission preflight did not complete; relying on auto-recovery" }
+                }
             } else {
                 Logger.i { "Post-update: Requesting MeshService to reconnect to ${fullAddr.anonymize}" }
                 // GATT cache invalidation is only needed for BLE reconnects — the device

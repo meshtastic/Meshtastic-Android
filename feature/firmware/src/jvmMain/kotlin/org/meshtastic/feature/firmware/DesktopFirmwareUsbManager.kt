@@ -31,4 +31,7 @@ class DesktopFirmwareUsbManager : FirmwareUsbManager {
     override suspend fun serialPortKeys(): Set<String> = emptySet()
 
     override suspend fun unblockCdcPort(excluding: Set<String>, waitMillis: Long, holdMillis: Long): Boolean = false
+
+    /** Desktop serial access has no permission model; there is nothing to preflight. */
+    override suspend fun ensureSerialPermission(waitMillis: Long): Boolean = true
 }

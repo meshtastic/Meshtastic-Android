@@ -24,6 +24,8 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -323,6 +325,8 @@ class FirmwareUpdateViewModelTest {
         assertIs<FirmwareUpdateState.Success>(state)
         assertFalse(state.deviceWasWiped)
         assertTrue(radioController.factoryResetCalls.isEmpty(), "default update path must not wipe")
+        // The USB permission preflight is serial-only; a BLE verify must not touch the USB stack.
+        verifySuspend(VerifyMode.not) { usbManager.ensureSerialPermission(any()) }
     }
 
     @Test
