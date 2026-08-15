@@ -38,8 +38,6 @@ import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.ic_dew_point
 import org.meshtastic.core.resources.ic_electric_bolt
 import org.meshtastic.core.resources.ic_radioactive
-import org.meshtastic.core.resources.ic_soil_moisture
-import org.meshtastic.core.resources.ic_soil_temperature
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.pressure
@@ -59,6 +57,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Particulate
 import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.core.ui.icon.Pressure
+import org.meshtastic.core.ui.icon.SoilMoisture
+import org.meshtastic.core.ui.icon.SoilTemperature
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.core.ui.icon.Weight
@@ -220,17 +220,17 @@ internal fun EnvironmentMetrics(
                     soil_temperature
                         ?.takeUnless { it.isNaN() }
                         ?.let {
-                            DrawableMetricInfo(
+                            VectorMetricInfo(
                                 label = Res.string.soil_temperature,
                                 value = it.toTempString(isFahrenheit),
-                                icon = Res.drawable.ic_soil_temperature,
+                                icon = MeshtasticIcons.SoilTemperature,
                             )
                         },
                     soil_moisture?.let {
-                        DrawableMetricInfo(
+                        VectorMetricInfo(
                             label = Res.string.soil_moisture,
                             value = "$it%",
-                            icon = Res.drawable.ic_soil_moisture,
+                            icon = MeshtasticIcons.SoilMoisture,
                         )
                     },
                 ),
@@ -252,10 +252,10 @@ internal fun EnvironmentMetrics(
                     ?.takeIf { !it.isNaN() }
                     ?.let { temp ->
                         add(
-                            DrawableMetricInfo(
+                            VectorMetricInfo(
                                 label = Res.string.one_wire_temperature,
                                 value = temp.toTempString(isFahrenheit),
-                                icon = Res.drawable.ic_soil_temperature,
+                                icon = MeshtasticIcons.SoilTemperature,
                                 channelNumber = channel + 1,
                             )
                                 .asGroup(),
