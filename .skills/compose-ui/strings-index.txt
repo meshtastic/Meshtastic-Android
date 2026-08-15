@@ -108,7 +108,6 @@ aqi_value_with_severity
 aqi_very_unhealthy
 are_you_sure
 are_you_sure_change_default
-attributions
 audio
 audio_config
 available_pins

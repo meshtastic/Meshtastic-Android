@@ -172,7 +172,7 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object About : SettingsRoute
 
-    @Serializable data object Attributions : SettingsRoute
+    @Serializable data object Acknowledgements : SettingsRoute
 
     @Serializable data object FilterSettings : SettingsRoute
 

@@ -32,14 +32,14 @@ class AboutScreenTest {
     @Test
     fun `about screen displays all sections and content`() = runComposeUiTest {
         var navigatedUp = false
-        var navigatedToAttributions = false
+        var navigatedToAcknowledgements = false
 
         setContent {
             AppTheme {
                 AboutScreen(
                     appVersionName = "2.5.0",
                     onNavigateUp = { navigatedUp = true },
-                    onNavigateToAttributions = { navigatedToAttributions = true },
+                    onNavigateToAcknowledgements = { navigatedToAcknowledgements = true },
                 )
             }
         }
@@ -65,7 +65,7 @@ class AboutScreenTest {
         onNodeWithText("GitHub Repository").assertIsDisplayed()
         onNodeWithText("Version").assertIsDisplayed()
         onNodeWithText("2.5.0").assertIsDisplayed()
-        onNodeWithText("Attributions").assertIsDisplayed()
+        onNodeWithText("Acknowledgements").assertIsDisplayed()
 
         // Project information section
         onNodeWithText("Project information").assertIsDisplayed()
@@ -75,11 +75,9 @@ class AboutScreenTest {
         // Copyright footer
         onNodeWithText("Meshtastic® Copyright Meshtastic LLC").assertIsDisplayed()
 
-        // Click Attributions
-        onNodeWithText("Attributions").performClick()
-        assertTrue(navigatedToAttributions)
+        onNodeWithText("Acknowledgements").performClick()
+        assertTrue(navigatedToAcknowledgements)
 
-        // Click Navigate Back
         onNodeWithContentDescription("Navigate Back").performClick()
         assertTrue(navigatedUp)
     }

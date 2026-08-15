@@ -40,8 +40,8 @@ import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
+import org.meshtastic.feature.settings.AcknowledgementsScreen
 import org.meshtastic.feature.settings.AdministrationScreen
-import org.meshtastic.feature.settings.AttributionsScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.DeviceLinkDirectoryScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
@@ -408,12 +408,12 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         AboutScreen(
             appVersionName = settingsViewModel.appVersionName,
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
-            onNavigateToAttributions = dropUnlessResumed { backStack.add(SettingsRoute.Attributions) },
+            onNavigateToAcknowledgements = dropUnlessResumed { backStack.add(SettingsRoute.Acknowledgements) },
         )
     }
 
-    entry<SettingsRoute.Attributions> {
-        AttributionsScreen(
+    entry<SettingsRoute.Acknowledgements> {
+        AcknowledgementsScreen(
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
             jsonProvider = { getAboutLibrariesJson() },
         )

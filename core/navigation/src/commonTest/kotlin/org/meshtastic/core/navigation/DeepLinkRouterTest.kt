@@ -299,18 +299,18 @@ class DeepLinkRouterTest {
     }
 
     @Test
-    fun `settings attributions resolves to the Attributions screen`() {
+    fun `settings acknowledgements resolves to the Acknowledgements screen`() {
         assertEquals(
-            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Attributions),
-            route("/settings/attributions"),
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Acknowledgements),
+            route("/settings/acknowledgements"),
         )
     }
 
     @Test
-    fun `settings acknowledgements is a back-compat alias for Attributions`() {
+    fun `settings attributions is an alias for Acknowledgements`() {
         assertEquals(
-            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Attributions),
-            route("/settings/acknowledgements"),
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Acknowledgements),
+            route("/settings/attributions"),
         )
     }
 
@@ -359,8 +359,8 @@ class DeepLinkRouterTest {
                 "clean-node-db" to SettingsRoute.CleanNodeDb,
                 "debug-panel" to SettingsRoute.DebugPanel,
                 "about" to SettingsRoute.About,
-                "attributions" to SettingsRoute.Attributions,
-                "acknowledgements" to SettingsRoute.Attributions,
+                "acknowledgements" to SettingsRoute.Acknowledgements,
+                "attributions" to SettingsRoute.Acknowledgements,
                 "filter-settings" to SettingsRoute.FilterSettings,
             )
 

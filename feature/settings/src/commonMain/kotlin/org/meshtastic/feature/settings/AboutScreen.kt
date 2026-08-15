@@ -54,9 +54,9 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.about
+import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.apps
-import org.meshtastic.core.resources.attributions
 import org.meshtastic.core.resources.copyright_notice
 import org.meshtastic.core.resources.documentation
 import org.meshtastic.core.resources.github_repository
@@ -103,13 +103,13 @@ private val POPULAR_DEVICES =
 
 /**
  * About screen displaying general information about Meshtastic, hardware recommendations, repository and version
- * details, attributions, and project links.
+ * details, acknowledgements, and project links.
  */
 @Composable
 fun AboutScreen(
     appVersionName: String,
     onNavigateUp: () -> Unit,
-    onNavigateToAttributions: () -> Unit,
+    onNavigateToAcknowledgements: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -139,7 +139,7 @@ fun AboutScreen(
             WhatIsMeshtasticSection()
             AppsSection(
                 appVersionName = appVersionName,
-                onNavigateToAttributions = onNavigateToAttributions,
+                onNavigateToAcknowledgements = onNavigateToAcknowledgements,
                 onOpenHardwareLink = { uriHandler.openUri(HARDWARE_URL) },
                 onOpenRepoLink = { uriHandler.openUri(GITHUB_REPO_URL) },
             )
@@ -167,7 +167,7 @@ private fun WhatIsMeshtasticSection(modifier: Modifier = Modifier) {
 @Composable
 private fun AppsSection(
     appVersionName: String,
-    onNavigateToAttributions: () -> Unit,
+    onNavigateToAcknowledgements: () -> Unit,
     onOpenHardwareLink: () -> Unit,
     onOpenRepoLink: () -> Unit,
     modifier: Modifier = Modifier,
@@ -187,10 +187,10 @@ private fun AppsSection(
             trailingIcon = null,
         )
         ListItem(
-            text = stringResource(Res.string.attributions),
+            text = stringResource(Res.string.acknowledgements),
             leadingIcon = MeshtasticIcons.Info,
             trailingIcon = MeshtasticIcons.ChevronRight,
-            onClick = onNavigateToAttributions,
+            onClick = onNavigateToAcknowledgements,
         )
     }
 }
@@ -281,5 +281,5 @@ private fun NeedHardwareRow(onOpenHardwareLink: () -> Unit, modifier: Modifier =
 @Preview
 @Composable
 private fun AboutScreenPreview() {
-    AppTheme { AboutScreen(appVersionName = "2.5.0", onNavigateUp = {}, onNavigateToAttributions = {}) }
+    AppTheme { AboutScreen(appVersionName = "2.5.0", onNavigateUp = {}, onNavigateToAcknowledgements = {}) }
 }

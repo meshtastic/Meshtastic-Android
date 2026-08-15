@@ -14,7 +14,7 @@ Handles the complex logic of reading and writing configuration to the Meshtastic
 ### 3. `AboutScreen`
 Displays what Meshtastic is, a "Need Hardware?" row, version information, and project links.
 
-### 4. `AttributionsScreen`
+### 4. `AcknowledgementsScreen`
 Displays the open-source libraries the app is built on, with their licenses.
 
 ## Validation Reference

@@ -38,14 +38,14 @@ import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryBadges
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.attributions
+import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.library_count
 import org.meshtastic.core.resources.open_source_description
 import org.meshtastic.core.resources.open_source_libraries
 import org.meshtastic.core.ui.component.MainAppBar
 
 /**
- * Shared Attributions screen listing the open-source libraries the app is built on, using the multiplatform
+ * Shared Acknowledgements screen listing the open-source libraries the app is built on, using the multiplatform
  * [LibrariesContainer] composable and [produceLibraries] from the AboutLibraries KMP library.
  *
  * Leverages the full M3 [LibrariesContainer] API:
@@ -61,13 +61,13 @@ import org.meshtastic.core.ui.component.MainAppBar
  * @see <a href="https://github.com/mikepenz/AboutLibraries">AboutLibraries KMP</a>
  */
 @Composable
-fun AttributionsScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> String) {
+fun AcknowledgementsScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> String) {
     val libraries by produceLibraries(jsonProvider)
 
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(Res.string.attributions),
+                title = stringResource(Res.string.acknowledgements),
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 ourNode = null,
@@ -84,7 +84,7 @@ fun AttributionsScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> Str
             badges = LibraryBadges(version = true, author = true, description = true, license = true, funding = true),
             header = {
                 item {
-                    AttributionsHeader()
+                    AcknowledgementsHeader()
                     HorizontalDivider()
                 }
             },
@@ -109,7 +109,7 @@ fun AttributionsScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> Str
 }
 
 @Composable
-private fun AttributionsHeader() {
+private fun AcknowledgementsHeader() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(
             text = stringResource(Res.string.open_source_libraries),

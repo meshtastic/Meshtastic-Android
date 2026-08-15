@@ -126,7 +126,6 @@
     <string name="aqi_very_unhealthy">Very Unhealthy</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
-    <string name="attributions">Attributions</string>
     <string name="audio">Audio</string>
     <string name="audio_config">Audio Config</string>
     <string name="available_pins">Available pins</string>
