@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
@@ -334,9 +335,9 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
      * are exactly where a mis-tap sends the image.
      */
     override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             val androidUri = destinationUri.toAndroidUri()
-            if (androidUri.authority != EXTERNAL_STORAGE_AUTHORITY) return@runCatching false
+            if (androidUri.authority != EXTERNAL_STORAGE_AUTHORITY) return@safeCatching false
             // Accepts either a tree URI (the maintenance flow picks the volume) or a single document URI.
             val documentId =
                 runCatching { DocumentsContract.getTreeDocumentId(androidUri) }.getOrNull()
@@ -344,17 +345,19 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             val volumeId = documentId.substringBefore(':', missingDelimiterValue = "")
             volumeId.isNotBlank() && !volumeId.equals(PRIMARY_VOLUME_ID, ignoreCase = true)
         }
-            .onFailure { Logger.w(it) { "Could not classify destination volume for $destinationUri" } }
+            .onFailure { Logger.w { "Could not classify the selected destination volume" } }
             .getOrDefault(false)
     }
 
     override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean = withContext(ioDispatcher) {
-        runCatching { context.contentResolver.openInputStream(destinationUri.toAndroidUri())?.use { true } == true }
+        safeCatching {
+            context.contentResolver.openInputStream(destinationUri.toAndroidUri())?.use { true } == true
+        }
             .getOrDefault(false)
     }
 
     override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             val tree = treeUri.toAndroidUri()
             val treeDocumentId = DocumentsContract.getTreeDocumentId(tree)
             val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, treeDocumentId)
@@ -379,18 +382,18 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                             }
                         }
                         found
-                    } ?: return@runCatching null
+                    } ?: return@safeCatching null
 
             val documentUri = DocumentsContract.buildDocumentUriUsingTree(tree, documentId)
             context.contentResolver.openInputStream(documentUri)?.use { it.readBytes().decodeToString() }
         }
-            .onFailure { Logger.w(it) { "Could not read $fileName from $treeUri" } }
+            .onFailure { Logger.w { "Could not read $fileName from the selected volume" } }
             .getOrNull()
     }
 
     override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
         withContext(ioDispatcher) {
-            runCatching {
+            safeCatching {
                 val tree = treeUri.toAndroidUri()
                 val parent =
                     DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
@@ -398,7 +401,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                     CommonUri.parse(it.toString())
                 }
             }
-                .onFailure { Logger.w(it) { "Could not create $fileName in $treeUri" } }
+                .onFailure { Logger.w { "Could not create $fileName on the selected volume" } }
                 .getOrNull()
         }
 

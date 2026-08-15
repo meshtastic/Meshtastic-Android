@@ -49,7 +49,10 @@ abstract class NoopFirmwareFileHandler : FirmwareFileHandler {
 
     override suspend fun getDisplayName(uri: CommonUri): String? = null
 
-    override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long = 0L
+    // Fails rather than returning a size: UsbPassWriter treats any Long as a successful copy, so a test that
+    // reaches a copy without overriding this would silently pass the destructive path.
+    override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
+        error("test must override copyToUri to reach a copy")
 
     override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = false
 

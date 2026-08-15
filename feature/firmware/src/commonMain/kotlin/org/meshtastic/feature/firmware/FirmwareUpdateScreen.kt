@@ -882,7 +882,7 @@ private fun DeviceInfoCard(
  */
 @Composable
 internal fun UsbMaintenanceCard(deviceName: String, onBootloaderUpgrade: () -> Unit) {
-    var showUpgradeConfirmation by remember { mutableStateOf(false) }
+    var showUpgradeConfirmation by rememberSaveable { mutableStateOf(false) }
 
     if (showUpgradeConfirmation) {
         MeshtasticDialog(
@@ -1075,7 +1075,7 @@ internal fun AwaitingFileSaveState(
 ) {
     // Keyed on the step so each leg of a multi-pass sequence re-shows its own instructions. An unkeyed remember would
     // leave the second pass with no dialog at all, since the branch stays in composition across the transition.
-    var showDialog by remember(state.step) { mutableStateOf(true) }
+    var showDialog by rememberSaveable(state.step) { mutableStateOf(true) }
 
     // A maintenance pass has no artifact yet: the image is chosen from what the volume reports, so the user points at
     // the drive and the app names the file.

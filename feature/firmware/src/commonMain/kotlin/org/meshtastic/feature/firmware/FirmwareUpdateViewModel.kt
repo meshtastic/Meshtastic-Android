@@ -579,12 +579,14 @@ class FirmwareUpdateViewModel(
         originalDeviceAddress = radioPrefs.devAddr.value
         maintenanceHardware = currentState.deviceHardware
         destructiveWriteDone = false
-        // Held until the sequence finishes or fails. Without it the environmental-recovery listeners restart the radio
-        // transport mid-sequence and bind it to the erase firmware's bare CDC port.
-        firmwareMaintenanceLock.acquire()
 
         viewModelScope.launch {
+            // Battery check comes first: an abort here has touched nothing, and acquiring before it would leak
+            // the lock (nothing on this path releases it), suppressing transport recovery until the screen closes.
             if (!checkBatteryLevel()) return@launch
+            // Held until the sequence finishes or fails. Without it the environmental-recovery listeners restart
+            // the radio transport mid-sequence and bind it to the erase firmware's bare CDC port.
+            firmwareMaintenanceLock.acquire()
             updateJob?.cancel()
             updateJob =
                 viewModelScope.launch {
@@ -721,6 +723,10 @@ class FirmwareUpdateViewModel(
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
                     ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
+                // All writes are done once the device detached. Release before verifying: for serial,
+                // verification relies on SharedRadioInterfaceService's USB auto-recovery to reconnect the
+                // radio — which is exactly what the lock suppresses. (The release in finally is a no-op then.)
+                firmwareMaintenanceLock.release()
                 verifyUpdateResult(originalDeviceAddress)
             } catch (e: CancellationException) {
                 throw e

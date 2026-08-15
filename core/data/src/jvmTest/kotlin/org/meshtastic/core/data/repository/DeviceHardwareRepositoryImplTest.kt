@@ -296,6 +296,48 @@ class DeviceHardwareRepositoryImplTest {
         assertEquals(null, hardware?.softDeviceVariant, "a target mismatch must refuse, not fall back")
     }
 
+    /** Two rows for the same hwModel with different SoftDevices — the shape hwModel 94 actually has. */
+    private fun ambiguousQuirksAsset() =
+        """
+        {
+          "devices": [],
+          "softDeviceVariants": [
+            { "hwModel": 9, "hwModelSlug": "RAK4631", "platformioTargets": ["rak4631"], "softDevice": "6.1.1" },
+            { "hwModel": 9, "hwModelSlug": "RAK4631", "platformioTargets": ["rak4631_v2"], "softDevice": "7.3.0" }
+          ]
+        }
+        """
+            .trimIndent()
+
+    @Test
+    fun softDeviceResolvesWithoutAReportedTargetWhenTheModelIsUnambiguous() = runBlocking {
+        val repo = nrfRepository(quirksAsset())
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = null).getOrNull()
+
+        assertEquals(SoftDeviceVariant.S140_6_1_1, hardware?.softDeviceVariant)
+    }
+
+    @Test
+    fun softDeviceIsNullWithoutAReportedTargetWhenTheModelHasMultipleVariants() = runBlocking {
+        // Without a device-reported build target, platformioTarget may be disambiguate()'s arbitrary pick — it
+        // must not choose between rows whose SoftDevices differ.
+        val repo = nrfRepository(ambiguousQuirksAsset())
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = null).getOrNull()
+
+        assertEquals(null, hardware?.softDeviceVariant, "an ambiguous model must not resolve from a guessed target")
+    }
+
+    @Test
+    fun softDeviceTreatsABlankReportedTargetAsAbsent() = runBlocking {
+        val repo = nrfRepository(ambiguousQuirksAsset())
+
+        val hardware = repo.getDeviceHardwareByModel(hwModel = 9, target = "").getOrNull()
+
+        assertEquals(null, hardware?.softDeviceVariant)
+    }
+
     @Test
     fun softDeviceIsNullWhenTheValueIsUnrecognised() = runBlocking {
         val repo = nrfRepository(quirksAsset(softDevice = "6.1.2"))

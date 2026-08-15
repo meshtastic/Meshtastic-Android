@@ -31,6 +31,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
@@ -224,13 +225,13 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
         dir.listFiles()
             ?.firstOrNull { it.name.equals(fileName, ignoreCase = true) }
-            ?.let { file -> runCatching { file.readText() }.getOrNull() }
+            ?.let { file -> safeCatching { file.readText() }.getOrNull() }
     }
 
     override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
         withContext(ioDispatcher) {
             val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
-            runCatching {
+            safeCatching {
                 dir.mkdirs()
                 val target = File(dir, fileName)
                 target.createNewFile()

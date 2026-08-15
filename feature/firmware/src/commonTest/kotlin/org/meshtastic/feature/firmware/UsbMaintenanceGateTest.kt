@@ -175,10 +175,11 @@ class UsbMaintenanceGateTest {
     // ── Board-ID resolution: the actual safety gate (R5) ─────────────────────
 
     @Test
-    fun `every shipped otafix image has a unique board id and matching filename`() {
+    fun `every shipped otafix image resolves, and no two boards share a digest or filename`() {
         assertEquals(14, otafixBoardIds.size, "OTAFIX 2.2-BP1.3 ships 14 update images")
-        val digests = otafixBoardIds.mapNotNull { otafixUf2ForBoardId(it)?.sha256 }
-        assertEquals(digests.size, digests.toSet().size, "No two boards may share a bootloader digest")
+        val images = otafixBoardIds.map { assertNotNull(otafixUf2ForBoardId(it), "no image for $it") }
+        assertEquals(images.size, images.map { it.sha256 }.toSet().size, "No two boards may share a digest")
+        assertEquals(images.size, images.map { it.fileName }.toSet().size, "No two boards may share a filename")
     }
 
     @Test

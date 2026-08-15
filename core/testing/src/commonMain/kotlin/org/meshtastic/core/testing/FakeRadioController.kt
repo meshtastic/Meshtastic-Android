@@ -96,6 +96,7 @@ class FakeRadioController :
             sentPackets.clear()
             favoritedNodes.clear()
             sentSharedContacts.clear()
+            factoryResetCalls.clear()
             localConfigs.clear()
             localChannels.clear()
             settingsOperations.clear()

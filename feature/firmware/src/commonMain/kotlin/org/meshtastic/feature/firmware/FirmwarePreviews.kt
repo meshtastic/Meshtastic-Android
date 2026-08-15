@@ -24,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_maintenance_wrong_destination
 import org.meshtastic.core.ui.theme.AppTheme
 
 // These previews intentionally wrap-content (no fillMaxSize) so the generated reference images are tight crops of
@@ -125,7 +127,7 @@ internal fun AwaitingEraseFileSavePreview() {
                         uf2Artifact = null,
                         fileName = null,
                         step = UsbFileSaveStep.FactoryErase,
-                        retryMessage = UiText.DynamicString("That location isn't the device's update drive."),
+                        retryMessage = UiText.Resource(Res.string.firmware_maintenance_wrong_destination),
                     ),
                     onSaveFile = {},
                     onPickVolume = {},

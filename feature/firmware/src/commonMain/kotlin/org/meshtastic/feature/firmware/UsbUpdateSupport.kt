@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.NodeRepository
@@ -225,7 +226,7 @@ internal class UsbPassWriter(
         }
 
         val copied =
-            runCatching { fileHandler.copyToUri(artifact, destination) }
+            safeCatching { fileHandler.copyToUri(artifact, destination) }
                 .onFailure { Logger.e(it) { "Copying $fileName to the UF2 volume failed" } }
                 .getOrNull()
         if (copied == null) return UsbPassResult.CopyFailed

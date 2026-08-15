@@ -207,13 +207,21 @@ class DeviceHardwareRepositoryImpl(
         entries: List<SoftDeviceVariantEntry>,
         reportedTarget: String?,
     ): DeviceHardware? = base?.let { hw ->
-        // applyBootloaderQuirk has already overwritten platformioTarget with the reported target when one was
-        // given.
-        val effectiveTarget = reportedTarget?.takeIf { it.isNotBlank() } ?: hw.platformioTarget
+        val effectiveTarget = reportedTarget?.takeIf { it.isNotBlank() }
+        val modelEntries = entries.filter { it.hwModel == hwModel }
         val matched =
-            entries.firstOrNull { entry ->
-                entry.hwModel == hwModel &&
-                    entry.platformioTargets.any { it.equals(effectiveTarget, ignoreCase = true) }
+            when {
+                effectiveTarget != null ->
+                    modelEntries.firstOrNull { entry ->
+                        entry.platformioTargets.any { it.equals(effectiveTarget, ignoreCase = true) }
+                    }
+
+                // No reported target: hw.platformioTarget may be disambiguate()'s arbitrary firstOrNull() pick,
+                // so it must not select between rows. Resolve only when every row for this model agrees anyway;
+                // a multi-variant model without a device-reported target stays unresolved (callers refuse on null).
+                modelEntries.map { it.softDevice }.distinct().size == 1 -> modelEntries.first()
+
+                else -> null
             }
         hw.copy(softDeviceVariant = SoftDeviceVariant.fromWire(matched?.softDevice))
     }

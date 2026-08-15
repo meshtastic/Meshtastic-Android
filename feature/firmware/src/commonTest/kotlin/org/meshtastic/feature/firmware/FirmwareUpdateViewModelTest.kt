@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.state.FirmwareMaintenanceLock
@@ -266,10 +267,14 @@ class FirmwareUpdateViewModelTest {
                 updateState(FirmwareUpdateState.Success())
                 null
             }
-        // Connected before verification starts, so verifyUpdateResult confirms the update deterministically.
-        radioController.setConnectionState(ConnectionState.Connected)
-
+        // Start while disconnected: verification blocks on reconnect, and the reset must not have fired yet.
         viewModel.startUpdate(wipeDevice = true)
+        runCurrent()
+
+        assertIs<FirmwareUpdateState.Verifying>(viewModel.state.value)
+        assertTrue(radioController.factoryResetCalls.isEmpty(), "no reset before the device is back and verified")
+
+        radioController.setConnectionState(ConnectionState.Connected)
         advanceUntilIdle()
 
         val state = viewModel.state.value
