@@ -28,6 +28,7 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -41,8 +42,10 @@ import org.meshtastic.core.common.di.asServiceScope
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -51,6 +54,7 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
@@ -97,7 +101,7 @@ class MeshConnectionManagerImplTest {
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private lateinit var connectionStateHolder: ConnectionStateHolder
     private val localConfigFlow = MutableStateFlow(LocalConfig())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig())
 
@@ -128,20 +132,22 @@ class MeshConnectionManagerImplTest {
 
         testDispatcher = UnconfinedTestDispatcher()
         radioConnectionState.value = ConnectionState.Disconnected
-        connectionStateFlow.value = ConnectionState.Disconnected
+        connectionStateHolder = ConnectionStateHolder()
         localConfigFlow.value = LocalConfig()
         moduleConfigFlow.value = LocalModuleConfig()
 
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
-        every { serviceRepository.connectionState } returns connectionStateFlow
+        every { serviceRepository.connectionState } returns connectionStateHolder.connectionState
+        every { serviceRepository.connectionLifecycle } returns connectionStateHolder.connectionLifecycle
         every { serviceRepository.setConnectionState(any()) } calls
             { call ->
-                connectionStateFlow.value = call.arg<ConnectionState>(0)
+                applyConnectionState(call.arg<ConnectionState>(0))
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
+        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } returns Unit
+        everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } returns Unit
         every { packetHandler.stopPacketQueue() } returns Unit
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
@@ -172,6 +178,10 @@ class MeshConnectionManagerImplTest {
         scope.asServiceScope(),
         NodeRestartTracker(scope),
     )
+
+    private fun applyConnectionState(state: ConnectionState) {
+        connectionStateHolder.setConnectionState(state)
+    }
 
     private fun restartTransportCallCounter(): () -> Int {
         var restartCalls = 0
@@ -337,15 +347,149 @@ class MeshConnectionManagerImplTest {
         everySuspend { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.startProxy(any(), any()) } returns Unit
-        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
+        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null
 
         manager = createManager(backgroundScope)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
         manager.onNodeDbReady()
         advanceUntilIdle()
 
         verify { mqttManager.startProxy(true, true) }
-        verifySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
+        verifySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `onNodeDbReady skips history when its lifecycle departs while config loads`() = runTest(testDispatcher) {
+        val delayedModuleConfig = MutableSharedFlow<LocalModuleConfig>()
+        every { radioConfigRepository.moduleConfigFlow } returns delayedModuleConfig
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } returns Unit
+
+        manager = createManager(backgroundScope)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        manager.onNodeDbReady()
+        runCurrent()
+        assertTrue(
+            delayedModuleConfig.subscriptionCount.value >= 2,
+            "MQTT and history collectors must be active; additional collectors are allowed",
+        )
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        delayedModuleConfig.emit(LocalModuleConfig(store_forward = ModuleConfig.StoreForwardConfig(enabled = true)))
+        runCurrent()
+
+        verifySuspend(exactly(0)) { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `onNodeDbReady retains owned requests until queue admission opens`() = runTest(testDispatcher) {
+        var seedAttempts = 0
+        var historyAttempts = 0
+        val telemetryAttempts = mutableMapOf<Int, Int>()
+        val admissionVersions = mutableListOf<Long>()
+        moduleConfigFlow.value = LocalModuleConfig(store_forward = ModuleConfig.StoreForwardConfig(enabled = true))
+        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
+            { call ->
+                admissionVersions += call.arg<Long>(1)
+                seedAttempts++
+                if (seedAttempts < 3) throw PacketQueueRejectedException("test passkey seed")
+                Unit
+            }
+        everySuspend { commandSender.requestTelemetryForConnection(any(), any(), any(), any()) } calls
+            { call ->
+                admissionVersions += call.arg<Long>(3)
+                val type = call.arg<Int>(2)
+                val attempts = telemetryAttempts.getOrElse(type) { 0 } + 1
+                telemetryAttempts[type] = attempts
+                if (attempts == 1) throw PacketQueueRejectedException("test telemetry request")
+                Unit
+            }
+        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } calls
+            { call ->
+                admissionVersions += call.arg<Long>(4)
+                historyAttempts++
+                if (historyAttempts == 1) throw PacketQueueRejectedException("test history replay")
+                Unit
+            }
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        every { nodeManager.getMyNodeInfo() } returns null
+
+        manager = createManager(backgroundScope)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        manager.onNodeDbReady()
+        runCurrent()
+        advanceTimeBy(
+            (
+                MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(1) +
+                    MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(2)
+                )
+                .inWholeMilliseconds,
+        )
+        runCurrent()
+
+        assertEquals(3, seedAttempts)
+        assertEquals(2, historyAttempts)
+        assertEquals(2, telemetryAttempts[TelemetryType.LOCAL_STATS.ordinal])
+        assertEquals(2, telemetryAttempts[TelemetryType.DEVICE.ordinal])
+        assertEquals(setOf(connectionStateHolder.connectionLifecycle.value.version), admissionVersions.toSet())
+    }
+
+    @Test
+    fun `post-handshake admission retries stop when the connected lifecycle changes`() = runTest(testDispatcher) {
+        var seedAttempts = 0
+        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
+            {
+                seedAttempts++
+                throw PacketQueueRejectedException("queue closed")
+            }
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        every { nodeManager.getMyNodeInfo() } returns null
+
+        manager = createManager(backgroundScope)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        manager.onNodeDbReady()
+        runCurrent()
+        assertEquals(1, seedAttempts)
+
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        advanceTimeBy(
+            (1 until MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS).sumOf { rejectionCount ->
+                MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(rejectionCount).inWholeMilliseconds
+            },
+        )
+        runCurrent()
+
+        assertEquals(1, seedAttempts, "a stale connection generation must not keep retrying admission")
+    }
+
+    @Test
+    fun `post-handshake admission retries stop at the attempt cap`() = runTest(testDispatcher) {
+        var seedAttempts = 0
+        everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
+            {
+                seedAttempts++
+                throw PacketQueueRejectedException("queue closed")
+            }
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        every { nodeManager.getMyNodeInfo() } returns null
+
+        manager = createManager(backgroundScope)
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        manager.onNodeDbReady()
+        runCurrent()
+
+        val retryWindowMillis =
+            (1 until MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS).sumOf { rejectionCount ->
+                MeshConnectionManagerImpl.postHandshakeAdmissionRetryDelay(rejectionCount).inWholeMilliseconds
+            }
+        advanceTimeBy(retryWindowMillis)
+        runCurrent()
+
+        assertEquals(MeshConnectionManagerImpl.MAX_POST_HANDSHAKE_ADMISSION_ATTEMPTS, seedAttempts)
     }
 
     @Test
@@ -398,7 +542,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
 
         manager = createManager(backgroundScope)
@@ -443,7 +587,7 @@ class MeshConnectionManagerImplTest {
                 { call ->
                     val state = call.arg<ConnectionState>(0)
                     observed.add(state)
-                    connectionStateFlow.value = state
+                    applyConnectionState(state)
                 }
 
             manager = createManager(backgroundScope)
@@ -627,7 +771,7 @@ class MeshConnectionManagerImplTest {
         everySuspend { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.startProxy(any(), any()) } returns Unit
-        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
+        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null
 
         manager = createManager(backgroundScope)
@@ -816,7 +960,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
         every { serviceRepository.setConnectionProgress(any()) } calls
             { call ->
@@ -834,13 +978,13 @@ class MeshConnectionManagerImplTest {
                 // split-brain this recovery path exists to break.
                 assertEquals(
                     ConnectionState.Disconnected,
-                    connectionStateFlow.value,
+                    connectionStateHolder.connectionState.value,
                     "restartTransport must run AFTER app-level Disconnected transition",
                 )
                 assertEquals(
                     ServiceRepository.RECONNECTING_PROGRESS_TEXT,
                     progressBeforeRestart,
-                    "setConnectionProgress(ServiceRepository.RECONNECTING_PROGRESS_TEXT) must run before restartTransport",
+                    "Reconnect progress must be published before restartTransport",
                 )
             }
 
@@ -869,7 +1013,7 @@ class MeshConnectionManagerImplTest {
             { call ->
                 val state = call.arg<ConnectionState>(0)
                 observed.add(state)
-                connectionStateFlow.value = state
+                applyConnectionState(state)
             }
         every { serviceRepository.setConnectionProgress(any()) } calls
             { call ->
@@ -880,7 +1024,7 @@ class MeshConnectionManagerImplTest {
                 restartTransportCalls++
                 assertEquals(
                     ConnectionState.Disconnected,
-                    connectionStateFlow.value,
+                    connectionStateHolder.connectionState.value,
                     "post-handshake recovery must disconnect app state before restarting transport",
                 )
                 assertEquals(

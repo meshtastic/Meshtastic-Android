@@ -42,6 +42,8 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.repository.PersistedPacket
 import org.meshtastic.core.repository.PersistedPacketId
+import org.meshtastic.core.repository.PersistedReaction
+import org.meshtastic.core.repository.PersistedReactionId
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -128,10 +130,34 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             .map { PersistedPacket(id = PersistedPacketId(it.myNodeNum, it.uuid), packet = it.data) }
     }
 
+    override suspend fun getEnrouteReactions(): List<PersistedReaction> = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().getReactionsByStatus(MessageStatus.ENROUTE).map { entity ->
+            PersistedReaction(
+                id = PersistedReactionId(entity.myNodeNum, entity.replyId, entity.userId, entity.emoji),
+                reaction = entity.toReaction { null },
+            )
+        }
+    }
+
     // A null from withDb means no database was available, so nothing was timed out.
     override suspend fun timeOutEnroutePacket(id: PersistedPacketId, routingError: Int): Boolean =
         withContext(dispatchers.io + NonCancellable) {
             dbManager.withDb { it.packetDao().timeOutEnroutePacket(id.myNodeNum, id.uuid, routingError) } ?: false
+        }
+
+    // A null from withDb means no database was available, so nothing was timed out.
+    override suspend fun timeOutEnrouteReaction(id: PersistedReactionId, routingError: Int): Boolean =
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager.withDb {
+                it.packetDao()
+                    .timeOutEnrouteReaction(
+                        myNodeNum = id.myNodeNum,
+                        replyId = id.replyId,
+                        userId = id.userId,
+                        emoji = id.emoji,
+                        routingError = routingError,
+                    )
+            } ?: false
         }
 
     suspend fun insertRoomPacket(packet: RoomPacket): Long = withContext(dispatchers.io + NonCancellable) {
@@ -281,6 +307,31 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             dbManager
                 .withDb { it.packetDao().updateOutgoingMessageStatus(packet, status) }
                 ?.let { PersistedPacketId(it.myNodeNum, it.uuid) }
+        }
+
+    override suspend fun resolveOutgoingPacket(packet: MeshPacket): PersistedPacket? = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().resolveOutgoingPacket(packet)?.let { stored ->
+            PersistedPacket(PersistedPacketId(stored.myNodeNum, stored.uuid), stored.data)
+        }
+    }
+
+    override suspend fun applyOutgoingQueueStatus(packet: MeshPacket, status: MessageStatus): PersistedPacket? =
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager
+                .withDb { it.packetDao().applyOutgoingQueueStatus(packet, status) }
+                ?.let { stored -> PersistedPacket(PersistedPacketId(stored.myNodeNum, stored.uuid), stored.data) }
+        }
+
+    override suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): PersistedReaction? =
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager
+                .withDb { it.packetDao().applyOutgoingReactionQueueStatus(packetId, status) }
+                ?.let { entity ->
+                    PersistedReaction(
+                        id = PersistedReactionId(entity.myNodeNum, entity.replyId, entity.userId, entity.emoji),
+                        reaction = entity.toReaction { null },
+                    )
+                }
         }
 
     override suspend fun updateMessageId(d: DataPacket, id: Int) {

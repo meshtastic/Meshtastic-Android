@@ -104,11 +104,15 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
  * persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors `InstallProfileUseCase` and is
  * why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
  *
- * The local channel cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
- * `AdminControllerImpl.EditSettingsSession.setChannel`), and this function replaces the cached channel list once, after
- * the session succeeds — so an import interrupted before that point leaves the local channel cache untouched. The
- * post-commit [RadioConfigRepository.updateChannelSet] call updates the normalized settings and imported LoRa config
- * together; an import without LoRa preserves the cached LoRa config.
+ * The local caches are commit-shaped: transactional channel writes deliberately do not mirror per slot (see
+ * `AdminControllerImpl.EditSettingsSession.setChannel`), while transactional `setConfig` stages its LoRa projection
+ * until commit acceptance. This function replaces the cached channel list only after the edit session succeeds, so an
+ * import that fails at a transaction boundary leaves both channel and LoRa cache state describing the last committed
+ * device configuration. The post-commit [RadioConfigRepository.updateChannelSet] call updates the normalized settings
+ * and imported LoRa config together; an import without LoRa preserves the cached LoRa config. Cancellation during
+ * `editLocalSettings` can leave a committed transaction without running the cache replacement, so the cache lags the
+ * device until the next config read. Cancellation after the edit returns does not skip replacement because that final
+ * cache update runs under `NonCancellable`.
  *
  * Imported settings are normalized before any write or bounds check, so blank placeholder secondaries and semantic
  * duplicates never reach the radio or the local cache.

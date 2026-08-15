@@ -25,6 +25,7 @@ import org.meshtastic.proto.Routing
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class ProcessRadioResponseUseCaseTest {
@@ -54,7 +55,22 @@ class ProcessRadioResponseUseCaseTest {
         val result = useCase(packet, 123, setOf(42))
 
         // Assert
-        assertTrue(result is RadioResponseResult.Error)
+        val error = assertIs<RadioResponseResult.Error>(result)
+        assertEquals(Routing.Error.NO_ROUTE, error.routingError)
+    }
+
+    @Test
+    fun `routing response without error reason is not treated as an error`() {
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded =
+                Data(portnum = PortNum.ROUTING_APP, request_id = 42, payload = Routing().encode().toByteString()),
+            )
+
+        val result = useCase(packet, 123, setOf(42))
+
+        assertEquals(RadioResponseResult.Success, result)
     }
 
     @Test

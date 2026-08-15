@@ -97,7 +97,9 @@ class AndroidRadioTransportFactory(
 
             InterfaceId.SERIAL -> {
                 val deviceMap = usbRepository.serialDevices.value
-                val driver = deviceMap[rest] ?: deviceMap.values.firstOrNull()
+                // Older installs may still hold the former path-based USB address. When exactly one serial device is
+                // present, retain the historical self-healing fallback instead of rejecting an otherwise usable radio.
+                val driver = resolveSerialDevice(deviceMap, rest)
                 driver != null && usbManager.hasPermission(driver.device)
             }
 
@@ -126,7 +128,8 @@ class AndroidRadioTransportFactory(
                 SerialRadioTransport(
                     callback = service,
                     scope = service.serviceScope,
-                    usbRepository = usbRepository,
+                    serialDevices = usbRepository.serialDevices,
+                    createSerialConnection = usbRepository::createSerialConnection,
                     address = rest,
                 )
 

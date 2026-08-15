@@ -64,7 +64,7 @@ class DesktopRadioTransportFactory(
         }
 
         address.startsWith(InterfaceId.SERIAL.id) -> {
-            SerialTransport.open(
+            SerialTransport.create(
                 portName = address.removePrefix(InterfaceId.SERIAL.id.toString()),
                 callback = service,
                 scope = service.serviceScope,

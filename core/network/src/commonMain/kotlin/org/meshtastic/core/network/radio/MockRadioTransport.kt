@@ -18,9 +18,10 @@ package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -103,32 +104,28 @@ class MockRadioTransport(
     /** Guards against re-seeding traffic if the app repeats stage 2 (e.g. after a handshake retry). */
     private val trafficStarted = atomic(false)
 
-    /**
-     * Every coroutine this transport owns: the live-traffic ticker, the delayed replies and the delayed acks.
-     *
-     * An atomic reference to an immutable list rather than a `mutableListOf`, because [close] drains it from the
-     * caller's context while `handleSendToRadio` is still appending to it — concurrent iteration and mutation of a
-     * plain list throws ConcurrentModificationException.
-     */
-    private val pendingJobs = atomic<List<Job>>(emptyList())
+    private val lifecycle = TransportLifecycleGate("Mock")
+    private val transportJob = SupervisorJob(scope.coroutineContext[Job])
+    private val transportScope = CoroutineScope(scope.coroutineContext + transportJob)
 
     private fun nextPacketId(): Int = packetIdCounter.getAndIncrement()
 
-    /** Registers a coroutine for cancellation by [close], dropping the ones that have already finished. */
-    private fun track(job: Job) {
-        pendingJobs.update { jobs -> jobs.filterNot { it.isCompleted } + job }
-    }
-
     override fun start() {
-        Logger.i { "Starting the mock transport" }
-        callback.onConnect() // Tell clients they can use the API
+        lifecycle.runIfOpen {
+            Logger.i { "Starting the mock transport" }
+            callback.onConnect() // Tell clients they can use the API
+        }
     }
 
-    override fun handleSendToRadio(p: ByteArray) {
-        val pr = ToRadio.ADAPTER.decode(p)
+    override fun handleSendToRadio(p: ByteArray): Boolean = lifecycle.runIfOpen {
+        val pr = runCatching { ToRadio.ADAPTER.decode(p) }.getOrNull()
+        if (pr == null) {
+            Logger.w { "Ignoring undecodable ToRadio sent to mock transport (${p.size} bytes)" }
+            return@runIfOpen false
+        }
 
-        // Intercept the want_config handshake. Real firmware answers each stage separately and only when asked, and the
-        // app's state machine depends on that: see the class doc.
+        // Intercept the want_config handshake. Real firmware answers each stage separately and only when asked,
+        // and the app's state machine depends on that: see the class doc.
         when (pr.want_config_id) {
             null,
             0,
@@ -140,7 +137,8 @@ class MockRadioTransport(
 
             else -> Logger.w { "Mock transport ignoring unknown want_config_id ${pr.want_config_id}" }
         }
-    }
+        true
+    } ?: false
 
     private fun handleOutboundTraffic(pr: ToRadio) {
         val packet = pr.packet
@@ -151,8 +149,14 @@ class MockRadioTransport(
         val data = packet?.decoded
 
         when {
-            data != null && data.portnum == PortNum.ADMIN_APP ->
-                handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
+            data != null && data.portnum == PortNum.ADMIN_APP -> {
+                val admin = runCatching { AdminMessage.ADAPTER.decode(data.payload) }.getOrNull()
+                if (admin == null) {
+                    Logger.w { "Ignoring undecodable AdminMessage sent to mock transport" }
+                } else {
+                    handleAdminPacket(pr, admin)
+                }
+            }
 
             data != null && data.portnum == PortNum.TEXT_MESSAGE_APP -> {
                 if (packet?.want_ack == true) sendFakeAck(pr)
@@ -203,10 +207,12 @@ class MockRadioTransport(
     }
 
     override suspend fun close() {
-        Logger.i { "Closing the mock transport" }
-        // Drain and cancel in one atomic swap so a job added concurrently is either cancelled here or belongs to the
-        // list the next close() drains — never silently dropped while still running.
-        pendingJobs.getAndSet(emptyList()).forEach { it.cancel() }
+        val completed =
+            lifecycle.close(
+                beforeDrain = { transportJob.cancelAndJoin() },
+                teardown = { Logger.i { "Closing the mock transport" } },
+            )
+        if (!completed) Logger.w { "Mock transport teardown did not complete within its lifecycle bounds" }
     }
 
     // ── Handshake ─────────────────────────────────────────────────────────────────────────────
@@ -246,7 +252,7 @@ class MockRadioTransport(
         callback.handleFromRadio(FromRadio(config_complete_id = HandshakeConstants.NODE_INFO_NONCE).encode())
 
         if (trafficStarted.compareAndSet(expect = false, update = true)) {
-            track(scope.handledLaunch { seedTraffic() })
+            transportScope.handledLaunch { seedTraffic() }
         }
     }
 
@@ -305,53 +311,61 @@ class MockRadioTransport(
      */
     private suspend fun seedTraffic() {
         SIM_PEERS.forEach { peer ->
-            callback.handleFromRadio(peer.positionPacket(nextPacketId()).encode())
+            lifecycle.runIfOpen { callback.handleFromRadio(peer.positionPacket(nextPacketId()).encode()) }
             delay(SEED_SPACING_MS)
         }
 
         SIM_PEERS.take(TELEMETRY_PEER_COUNT).forEach { peer ->
-            callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick = 0).encode())
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick = 0).encode())
+            }
             delay(SEED_SPACING_MS)
         }
 
         WEATHER_PEER_INDEXES.forEach { index ->
             val peer = SIM_PEERS[index]
-            callback.handleFromRadio(peer.environmentTelemetryPacket(nextPacketId(), tick = 0).encode())
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(peer.environmentTelemetryPacket(nextPacketId(), tick = 0).encode())
+            }
             delay(SEED_SPACING_MS)
         }
 
-        callback.handleFromRadio(SIM_PEERS[0].neighborInfoPacket(nextPacketId()).encode())
+        lifecycle.runIfOpen { callback.handleFromRadio(SIM_PEERS[0].neighborInfoPacket(nextPacketId()).encode()) }
         delay(SEED_SPACING_MS)
-        callback.handleFromRadio(SIM_PEERS[1].nodeStatusPacket(nextPacketId()).encode())
+        lifecycle.runIfOpen { callback.handleFromRadio(SIM_PEERS[1].nodeStatusPacket(nextPacketId()).encode()) }
         delay(SEED_SPACING_MS)
 
         // Each message is stamped progressively closer to now, so the thread reads as a conversation that unfolded over
         // the last while rather than a block of messages that all arrived in the same second.
         CHANNEL_CONVERSATION.forEachIndexed { index, (peerIndex, text) ->
             val peer = SIM_PEERS[peerIndex]
-            callback.handleFromRadio(
-                peer
-                    .textPacket(
-                        id = nextPacketId(),
-                        to = BROADCAST_ADDR,
-                        text = text,
-                        ageSeconds = messageAgeSeconds(CHANNEL_CONVERSATION.size, index),
-                    )
-                    .encode(),
-            )
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(
+                    peer
+                        .textPacket(
+                            id = nextPacketId(),
+                            to = BROADCAST_ADDR,
+                            text = text,
+                            ageSeconds = messageAgeSeconds(CHANNEL_CONVERSATION.size, index),
+                        )
+                        .encode(),
+                )
+            }
             delay(SEED_SPACING_MS)
         }
 
         DIRECT_CONVERSATION.forEachIndexed { index, text ->
-            callback.handleFromRadio(
-                SIM_PEERS[DIRECT_PEER_INDEX].textPacket(
-                    id = nextPacketId(),
-                    to = MY_NODE,
-                    text = text,
-                    ageSeconds = messageAgeSeconds(DIRECT_CONVERSATION.size, index),
+            lifecycle.runIfOpen {
+                callback.handleFromRadio(
+                    SIM_PEERS[DIRECT_PEER_INDEX].textPacket(
+                        id = nextPacketId(),
+                        to = MY_NODE,
+                        text = text,
+                        ageSeconds = messageAgeSeconds(DIRECT_CONVERSATION.size, index),
+                    )
+                        .encode(),
                 )
-                    .encode(),
-            )
+            }
             delay(SEED_SPACING_MS)
         }
 
@@ -370,10 +384,12 @@ class MockRadioTransport(
         while (true) {
             delay(LIVE_TICK_MS)
             val peer = SIM_PEERS[tick % TELEMETRY_PEER_COUNT]
-            callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick).encode())
+            lifecycle.runIfOpen { callback.handleFromRadio(peer.deviceTelemetryPacket(nextPacketId(), tick).encode()) }
             if (tick % WEATHER_TICK_INTERVAL == 0) {
                 val weatherPeer = SIM_PEERS[WEATHER_PEER_INDEXES.first()]
-                callback.handleFromRadio(weatherPeer.environmentTelemetryPacket(nextPacketId(), tick).encode())
+                lifecycle.runIfOpen {
+                    callback.handleFromRadio(weatherPeer.environmentTelemetryPacket(nextPacketId(), tick).encode())
+                }
             }
             tick++
         }
@@ -394,16 +410,16 @@ class MockRadioTransport(
             }
         val replyTo = if (isBroadcast) BROADCAST_ADDR else MY_NODE
 
-        track(
-            scope.handledLaunch {
-                delay(REPLY_DELAY_MS)
+        transportScope.handledLaunch {
+            delay(REPLY_DELAY_MS)
+            lifecycle.runIfOpen {
                 callback.handleFromRadio(
                     responder
                         .textPacket(id = nextPacketId(), to = replyTo, text = AUTO_REPLY_TEXT, ageSeconds = 0)
                         .encode(),
                 )
-            },
-        )
+            }
+        }
     }
 
     // ── Packet builders ──────────────────────────────────────────────────────────────────────
@@ -597,12 +613,12 @@ class MockRadioTransport(
     // / Send a fake ack packet back if the sender asked for want_ack
     private fun sendFakeAck(pr: ToRadio) {
         val packet = pr.packet ?: return
-        track(
-            scope.handledLaunch {
-                delay(ACK_DELAY_MS)
+        transportScope.handledLaunch {
+            delay(ACK_DELAY_MS)
+            lifecycle.runIfOpen {
                 callback.handleFromRadio(makeAck(SIM_PEERS[DIRECT_PEER_INDEX].num, packet.from, packet.id).encode())
-            },
-        )
+            }
+        }
     }
 
     /** One simulated peer in the demo mesh. */

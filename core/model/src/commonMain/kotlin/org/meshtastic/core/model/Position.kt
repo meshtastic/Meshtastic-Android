@@ -65,6 +65,9 @@ data class Position(
     /** @return bearing to the other position in degrees */
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
+    /** Returns whether this position represents the protocol sentinel for removing a fixed position. */
+    fun isFixedPositionRemoval(): Boolean = latitude == 0.0 && longitude == 0.0 && altitude == 0
+
     @Suppress("MagicNumber")
     fun isValid(): Boolean = latitude != 0.0 &&
         longitude != 0.0 &&

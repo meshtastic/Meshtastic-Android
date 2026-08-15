@@ -30,8 +30,9 @@ class RadioTransportTest {
 
         val transport =
             object : RadioTransport {
-                override fun handleSendToRadio(p: ByteArray) {
+                override fun handleSendToRadio(p: ByteArray): Boolean {
                     sentData = p
+                    return true
                 }
 
                 override fun keepAlive() {
@@ -44,10 +45,11 @@ class RadioTransportTest {
             }
 
         val testData = byteArrayOf(1, 2, 3)
-        transport.handleSendToRadio(testData)
+        val accepted = transport.handleSendToRadio(testData)
         transport.keepAlive()
         transport.close()
 
+        assertTrue(accepted)
         assertTrue(sentData!!.contentEquals(testData))
         assertTrue(keepAliveCalled)
         assertTrue(closed)

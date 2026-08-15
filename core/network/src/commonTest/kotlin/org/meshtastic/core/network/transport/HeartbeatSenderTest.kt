@@ -27,8 +27,10 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.proto.ToRadio
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,7 +49,7 @@ class HeartbeatSenderTest {
                 },
             )
 
-        sender.sendHeartbeat()
+        assertTrue(sender.sendHeartbeat())
 
         assertEquals(1, sentPackets.size)
         assertEquals(1, afterHeartbeatCalls)
@@ -56,6 +58,26 @@ class HeartbeatSenderTest {
         val heartbeat = assertNotNull(message.heartbeat)
         assertEquals(0, heartbeat.nonce)
         assertNull(message.packet)
+    }
+
+    @Test
+    fun `rejected heartbeat skips post-send work`() = runTest {
+        val sentPackets = mutableListOf<ByteArray>()
+        var afterHeartbeatCalls = 0
+        var accept = false
+        val sender =
+            HeartbeatSender(
+                sendToRadio = { if (accept) sentPackets.add(it) else false },
+                afterHeartbeat = { afterHeartbeatCalls++ },
+            )
+
+        assertFalse(sender.sendHeartbeat())
+        assertEquals(0, afterHeartbeatCalls)
+
+        accept = true
+        assertTrue(sender.sendHeartbeat())
+        assertEquals(1, afterHeartbeatCalls)
+        assertHeartbeats(sentPackets, 0)
     }
 
     @Test

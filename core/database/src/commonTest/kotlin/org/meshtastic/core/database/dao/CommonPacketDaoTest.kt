@@ -28,6 +28,8 @@ import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import kotlin.test.AfterTest
@@ -35,6 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 abstract class CommonPacketDaoTest {
@@ -93,7 +96,7 @@ abstract class CommonPacketDaoTest {
 
     @AfterTest
     fun closeDb() {
-        database.close()
+        if (::database.isInitialized) database.close()
     }
 
     @Test
@@ -173,6 +176,26 @@ abstract class CommonPacketDaoTest {
         ),
     )
 
+    private suspend fun insertSentReaction(
+        packetId: Int,
+        status: MessageStatus,
+        ownerNodeNum: Int = myNodeNum,
+        replyId: Int = packetId,
+        emoji: String = "👍",
+    ) {
+        packetDao.insert(
+            ReactionEntity(
+                myNodeNum = ownerNodeNum,
+                replyId = replyId,
+                userId = "!local",
+                emoji = emoji,
+                timestamp = nowMillis,
+                packetId = packetId,
+                status = status,
+            ),
+        )
+    }
+
     @Test
     fun timeOutEnroutePacketFailsOnlyStillEnroutePackets() = runTest {
         createDb()
@@ -198,6 +221,105 @@ abstract class CommonPacketDaoTest {
         val untouched = packetDao.getPacketByPacketId(8002)
         assertNotNull(untouched)
         assertEquals(MessageStatus.DELIVERED, untouched.packet.data.status)
+    }
+
+    @Test
+    fun applyOutgoingQueueStatusLeavesAnAlreadyResolvedPacketAlone() = runTest {
+        createDb()
+        insertSentPacket(packetId = 8009, status = MessageStatus.DELIVERED)
+        val outgoing =
+            MeshPacket(
+                from = myNodeNum,
+                to = NodeAddress.NODENUM_BROADCAST,
+                id = 8009,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
+            )
+
+        val prior = assertNotNull(packetDao.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE))
+
+        assertEquals(MessageStatus.DELIVERED, prior.data.status)
+        assertEquals(MessageStatus.DELIVERED, packetDao.getPacketByPacketId(8009)?.packet?.data?.status)
+    }
+
+    @Test
+    fun applyOutgoingReactionQueueStatusIgnoresAmbiguousMeshIds() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8011, replyId = 1, emoji = "👍", status = MessageStatus.QUEUED)
+        insertSentReaction(packetId = 8011, replyId = 2, emoji = "❤️", status = MessageStatus.QUEUED)
+
+        assertNull(packetDao.applyOutgoingReactionQueueStatus(8011, MessageStatus.ENROUTE))
+
+        val reactions = packetDao.findReactionsWithId(8011).associateBy { it.replyId }
+        assertEquals(MessageStatus.QUEUED, reactions.getValue(1).status)
+        assertEquals(MessageStatus.QUEUED, reactions.getValue(2).status)
+    }
+
+    @Test
+    fun queueStatusGuardRejectsStatusesOwnedByOtherTransitions() {
+        assertFalse(shouldApplyOutgoingQueueStatus(MessageStatus.DELIVERED, MessageStatus.QUEUED))
+        assertFalse(shouldApplyOutgoingQueueStatus(MessageStatus.SFPP_CONFIRMED, MessageStatus.SFPP_ROUTING))
+    }
+
+    @Test
+    fun getReactionsByStatusReturnsOnlyOwnedRowsWithThatStatus() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8005, status = MessageStatus.ENROUTE)
+        insertSentReaction(packetId = 8006, status = MessageStatus.DELIVERED)
+        insertSentReaction(packetId = 8007, status = MessageStatus.ENROUTE, ownerNodeNum = myNodeNum + 1)
+
+        val enroute = packetDao.getReactionsByStatus(MessageStatus.ENROUTE)
+
+        assertEquals(listOf(8005), enroute.map { it.packetId })
+    }
+
+    @Test
+    fun timeOutEnrouteReactionFailsOnlyStillEnrouteReactions() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8003, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnrouteReaction(myNodeNum, 8003, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val timedOut = packetDao.getReactionByPacketId(8003)
+        assertNotNull(timedOut)
+        assertEquals(MessageStatus.ERROR, timedOut.status)
+        assertEquals(TIMEOUT_ROUTING_ERROR, timedOut.routingError)
+    }
+
+    @Test
+    fun timeOutEnrouteReactionLeavesAnAlreadyResolvedReactionAlone() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8004, status = MessageStatus.DELIVERED)
+
+        assertFalse(packetDao.timeOutEnrouteReaction(myNodeNum, 8004, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val untouched = packetDao.getReactionByPacketId(8004)
+        assertNotNull(untouched)
+        assertEquals(MessageStatus.DELIVERED, untouched.status)
+        assertEquals(0, untouched.routingError)
+    }
+
+    @Test
+    fun applyOutgoingReactionQueueStatusLeavesAnAlreadyResolvedReactionAlone() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8010, status = MessageStatus.DELIVERED)
+
+        val prior = assertNotNull(packetDao.applyOutgoingReactionQueueStatus(8010, MessageStatus.ENROUTE))
+
+        assertEquals(MessageStatus.DELIVERED, prior.status)
+        assertEquals(MessageStatus.DELIVERED, packetDao.getReactionByPacketId(8010)?.status)
+    }
+
+    @Test
+    fun timeOutEnrouteReactionTargetsOnlyOnePersistedRowWhenMeshIdsCollide() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8008, replyId = 1, emoji = "👍", status = MessageStatus.ENROUTE)
+        insertSentReaction(packetId = 8008, replyId = 2, emoji = "❤️", status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnrouteReaction(myNodeNum, 1, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val reactions = packetDao.findReactionsWithId(8008).associateBy { it.replyId }
+        assertEquals(MessageStatus.ERROR, reactions.getValue(1).status)
+        assertEquals(MessageStatus.ENROUTE, reactions.getValue(2).status)
     }
 
     @Test

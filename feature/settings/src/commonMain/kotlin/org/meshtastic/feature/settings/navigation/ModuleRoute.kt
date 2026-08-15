@@ -65,6 +65,7 @@ enum class ModuleRoute(
     // False when the firmware has no ModuleConfigType to request this module per-request; the editor then relies on the
     // connect-time config sync instead of a get (MeshBeacon: MeshBeaconConfig is in ModuleConfig but not in the enum).
     val refreshable: Boolean = true,
+    val hasReadFanOut: Boolean = false,
 ) {
     MQTT(Res.string.mqtt, SettingsRoute.MQTT, Res.drawable.ic_cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
@@ -78,6 +79,7 @@ enum class ModuleRoute(
         SettingsRoute.ExtNotification,
         Res.drawable.ic_notifications,
         AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
+        hasReadFanOut = true,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
@@ -102,6 +104,7 @@ enum class ModuleRoute(
         SettingsRoute.CannedMessage,
         Res.drawable.ic_message,
         AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
+        hasReadFanOut = true,
     ),
     AUDIO(
         Res.string.audio,

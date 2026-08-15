@@ -20,11 +20,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.core.repository.TransportDisconnectReason
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.HardwareModel
@@ -34,6 +38,7 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -332,6 +337,120 @@ class MockRadioTransportTest {
         }
     }
 
+    @Test
+    fun `an open transport delivers the delayed fake acknowledgement`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val outbound = ToRadio(packet = MeshPacket(id = 77, from = 1234, want_ack = true)).encode()
+
+            transport.start()
+            assertTrue(transport.handleSendToRadio(outbound))
+            advanceTimeBy(ACK_WINDOW_MS)
+            runCurrent()
+
+            assertTrue(
+                callback.received.any { it.packet?.decoded?.request_id == 77 },
+                "an open mock transport must deliver the fake ACK",
+            )
+            transport.close()
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `close is terminal and suppresses delayed acknowledgements`() = runTest {
+        val callback = RecordingCallback()
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val outbound = ToRadio(packet = MeshPacket(id = 77, from = 1234, want_ack = true)).encode()
+
+            transport.start()
+            assertTrue(transport.handleSendToRadio(outbound))
+            transport.close()
+            advanceTimeBy(ACK_WINDOW_MS)
+            runCurrent()
+
+            assertFalse(
+                callback.received.any { it.packet?.decoded?.request_id == 77 },
+                "a delayed fake ACK must not escape after close",
+            )
+            assertFalse(transport.handleSendToRadio(outbound))
+            transport.start()
+            runCurrent()
+            assertEquals(1, callback.connects, "a closed mock transport must not reconnect")
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `malformed payload is rejected without escaping the admission contract`() = runTest {
+        val scope = transportScope()
+        try {
+            val transport = MockRadioTransport(callback = RecordingCallback(), scope = scope, address = "mock")
+
+            transport.start()
+            assertFalse(transport.handleSendToRadio(byteArrayOf(0x80.toByte())))
+
+            transport.close()
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `malformed admin payload is ignored without escaping the admission contract`() = runTest {
+        val scope = transportScope()
+        try {
+            val callback = RecordingCallback()
+            val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
+            val outbound =
+                ToRadio(
+                    packet =
+                    MeshPacket(
+                        id = 77,
+                        decoded =
+                        Data(portnum = PortNum.ADMIN_APP, payload = byteArrayOf(0x80.toByte()).toByteString()),
+                    ),
+                )
+
+            transport.start()
+            assertTrue(transport.handleSendToRadio(outbound.encode()))
+            advanceTimeBy(ACK_WINDOW_MS)
+            runCurrent()
+            assertFalse(
+                callback.received.any { it.packet?.decoded?.request_id == 77 },
+                "a malformed admin payload must not produce a simulated response",
+            )
+
+            val validRequestId = 78
+            val validAdmin = AdminMessage(get_config_request = AdminMessage.ConfigType.LORA_CONFIG)
+            val validOutbound =
+                ToRadio(
+                    packet =
+                    MeshPacket(
+                        id = validRequestId,
+                        decoded = Data(portnum = PortNum.ADMIN_APP, payload = validAdmin.encode().toByteString()),
+                    ),
+                )
+            assertTrue(transport.handleSendToRadio(validOutbound.encode()))
+            advanceTimeBy(ACK_WINDOW_MS)
+            runCurrent()
+            assertTrue(
+                callback.received.any { it.packet?.decoded?.request_id == validRequestId },
+                "a valid admin payload must still produce a simulated response",
+            )
+
+            transport.close()
+        } finally {
+            scope.cancel()
+        }
+    }
+
     private companion object {
         const val BROADCAST_ADDR = -1
         const val MIN_DEMO_NODES = 8
@@ -342,5 +461,6 @@ class MockRadioTransportTest {
         /** Mirrors `MockRadioTransport.LIVE_TICK_MS`, which is private to the transport. */
         const val LIVE_TICK_MS = 20_000L
         const val LIVE_TICKS_AFTER_CLOSE = 5
+        const val ACK_WINDOW_MS = 3_000L
     }
 }

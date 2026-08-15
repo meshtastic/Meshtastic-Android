@@ -17,6 +17,8 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.ConnectionEpochs
+import org.meshtastic.core.model.ConnectionLifecycle
 import org.meshtastic.core.model.ConnectionState
 
 /**
@@ -30,6 +32,14 @@ import org.meshtastic.core.model.ConnectionState
  */
 interface ConnectionStateProvider {
     /**
+     * Atomically correlated canonical state and lifecycle evidence.
+     *
+     * Lifecycle-sensitive code must observe this flow rather than combining independent reads from [connectionState]
+     * and [connectionEpochs].
+     */
+    val connectionLifecycle: StateFlow<ConnectionLifecycle>
+
+    /**
      * Canonical app-level connection state.
      *
      * This is the **single source of truth** for connection status across the entire application.
@@ -37,4 +47,11 @@ interface ConnectionStateProvider {
      * @see ServiceRepository.connectionState
      */
     val connectionState: StateFlow<ConnectionState>
+
+    /**
+     * Convenience view of monotonic departures and completed handshakes. Use [connectionLifecycle] when the counters
+     * must be correlated with a specific state, because independent StateFlow collections can observe different
+     * versions.
+     */
+    val connectionEpochs: StateFlow<ConnectionEpochs>
 }
