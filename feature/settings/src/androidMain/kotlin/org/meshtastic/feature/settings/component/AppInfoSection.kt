@@ -34,7 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.acknowledgements
+import org.meshtastic.core.resources.about
 import org.meshtastic.core.resources.app_notifications
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.info
@@ -99,7 +99,7 @@ fun AppInfoSection(
         }
 
         ListItem(
-            text = stringResource(Res.string.acknowledgements),
+            text = stringResource(Res.string.about),
             leadingIcon = MeshtasticIcons.Info,
             trailingIcon = MeshtasticIcons.ChevronRight,
         ) {

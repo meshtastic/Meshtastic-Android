@@ -29,6 +29,7 @@
     <string name="a11y_node_role">role %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
     <string name="a11y_nodes_at_hop">Hop %1$d: %2$d nodes</string>
+    <string name="about">About</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->
@@ -113,6 +114,7 @@
     <string name="app_too_old">Application update required</string>
     <string name="app_version">Version</string>
     <string name="apply">Apply</string>
+    <string name="apps">Apps</string>
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Good</string>
@@ -124,6 +126,7 @@
     <string name="aqi_very_unhealthy">Very Unhealthy</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
+    <string name="attributions">Attributions</string>
     <string name="audio">Audio</string>
     <string name="audio_config">Audio Config</string>
     <string name="available_pins">Available pins</string>
@@ -315,6 +318,7 @@
     <string name="contrast_standard">Standard</string>
     <string name="conversations">Conversations</string>
     <string name="copy">Copy</string>
+    <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Create Your Own Networks</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="critical_alerts">Critical Alerts</string>
@@ -562,6 +566,7 @@
     <string name="doc_title_translate">Translate the App</string>
     <string name="doc_title_units">Units &amp; Locale</string>
     <string name="doc_title_widget">Home Screen Widget</string>
+    <string name="documentation">Documentation</string>
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
@@ -794,6 +799,7 @@
     <string name="geofence_remove_area">Remove area</string>
     <string name="geofence_set_area">Set area on map</string>
     <string name="get_started">Get started</string>
+    <string name="github_repository">GitHub Repository</string>
     <string name="good">Good</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
@@ -1192,6 +1198,8 @@
     <string name="name_cannot_be_empty">Name cannot be empty.</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="navigate_into_label">Navigate Into</string>
+    <string name="need_hardware">Need Hardware?</string>
+    <string name="need_hardware_description">Meshtastic requires a compatible device. Our backers and partners offer ready-to-use hardware. Here are some of the most popular options.</string>
     <string name="neighbor_info">Neighbor Info</string>
     <string name="neighbor_info_config">Neighbor Info Config</string>
     <string name="neighbor_info_enabled">Neighbor Info enabled</string>
@@ -1417,6 +1425,7 @@
     <string name="primary_channel_feature">Periodic position and telemetry broadcast</string>
     <string name="privacy_url" translatable="false">https://meshtastic.org/docs/legal/privacy/</string>
     <string name="private_key">Private Key</string>
+    <string name="project_information">Project information</string>
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <string name="provider_name_exists">Provider name exists.</string>
     <string name="proxy_to_client_enabled">Proxy to client enabled</string>
@@ -1894,7 +1903,10 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
+    <string name="website">Website</string>
     <string name="weight">Weight</string>
+    <string name="what_is_meshtastic">What is Meshtastic?</string>
+    <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>

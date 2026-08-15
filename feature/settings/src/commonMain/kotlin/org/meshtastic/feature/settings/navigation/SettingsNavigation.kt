@@ -41,6 +41,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AdministrationScreen
+import org.meshtastic.feature.settings.AttributionsScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.DeviceLinkDirectoryScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
@@ -403,7 +404,16 @@ fun EntryProviderScope<NavKey>.settingsGraph(
     }
 
     entry<SettingsRoute.About> {
+        val settingsViewModel: SettingsViewModel = koinViewModel()
         AboutScreen(
+            appVersionName = settingsViewModel.appVersionName,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+            onNavigateToAttributions = dropUnlessResumed { backStack.add(SettingsRoute.Attributions) },
+        )
+    }
+
+    entry<SettingsRoute.Attributions> {
+        AttributionsScreen(
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
             jsonProvider = { getAboutLibrariesJson() },
         )

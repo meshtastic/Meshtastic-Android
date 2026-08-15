@@ -294,6 +294,27 @@ class DeepLinkRouterTest {
     }
 
     @Test
+    fun `settings about resolves to the About screen`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.About), route("/settings/about"))
+    }
+
+    @Test
+    fun `settings attributions resolves to the Attributions screen`() {
+        assertEquals(
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Attributions),
+            route("/settings/attributions"),
+        )
+    }
+
+    @Test
+    fun `settings acknowledgements is a back-compat alias for Attributions`() {
+        assertEquals(
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Attributions),
+            route("/settings/acknowledgements"),
+        )
+    }
+
+    @Test
     fun `settings with sub-route without destNum`() {
         assertEquals(listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.LoRa), route("/settings/lora"))
     }
@@ -338,6 +359,8 @@ class DeepLinkRouterTest {
                 "clean-node-db" to SettingsRoute.CleanNodeDb,
                 "debug-panel" to SettingsRoute.DebugPanel,
                 "about" to SettingsRoute.About,
+                "attributions" to SettingsRoute.Attributions,
+                "acknowledgements" to SettingsRoute.Attributions,
                 "filter-settings" to SettingsRoute.FilterSettings,
             )
 
