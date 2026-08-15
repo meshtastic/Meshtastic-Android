@@ -771,7 +771,7 @@
     <string name="firmware_update_wipe_ble_detail">Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed.</string>
     <string name="firmware_update_wipe_confirm_warning">The device will also be erased — all settings, channels, and keys will be lost.</string>
     <string name="firmware_update_wipe_label">Erase device during update</string>
-    <string name="firmware_update_wipe_usb_detail">Wipes the device\'s flash completely, then installs the selected firmware from scratch.</string>
+    <string name="firmware_update_wipe_usb_detail">Wipes the device's flash completely, then installs the selected firmware from scratch.</string>
     <string name="firmware_version">Firmware version: %1$s</string>
     <string name="fixed_pin">Fixed PIN</string>
     <string name="fixed_position">Fixed Position</string>
