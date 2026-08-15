@@ -129,20 +129,22 @@ class LoRaRegionPresetsTest {
         assertEquals(ModemPreset.LONG_FAST, map.repairPresetFor(RegionCode.US, ModemPreset.SHORT_TURBO))
     }
 
+    // A malformed map whose advertised default is not in its own legal set.
+    private val oddMap =
+        LoRaRegionPresetMap(
+            groups =
+            listOf(
+                LoRaPresetGroup(
+                    presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW),
+                    default_preset = ModemPreset.LONG_FAST, // not in presets
+                    licensed_only = false,
+                ),
+            ),
+            region_groups = listOf(LoRaRegionPresets(region = RegionCode.US, group_index = 0)),
+        )
+
     @Test
     fun `repair falls back to the first legal preset when the default is not in the group`() {
-        val oddMap =
-            LoRaRegionPresetMap(
-                groups =
-                listOf(
-                    LoRaPresetGroup(
-                        presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW),
-                        default_preset = ModemPreset.LONG_FAST, // not in presets
-                        licensed_only = false,
-                    ),
-                ),
-                region_groups = listOf(LoRaRegionPresets(region = RegionCode.US, group_index = 0)),
-            )
         assertEquals(ModemPreset.MEDIUM_FAST, oddMap.repairPresetFor(RegionCode.US, ModemPreset.SHORT_FAST))
     }
 
@@ -201,6 +203,14 @@ class LoRaRegionPresetsTest {
         assertEquals(
             ModemPreset.LONG_FAST,
             map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.SHORT_TURBO),
+        )
+    }
+
+    @Test
+    fun `fresh setup never adopts a malformed map's illegal advertised default`() {
+        assertEquals(
+            ModemPreset.MEDIUM_FAST,
+            oddMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
     }
 }

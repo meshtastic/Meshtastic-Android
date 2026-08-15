@@ -91,7 +91,9 @@ fun LoRaRegionPresetMap?.presetForRegionChange(
     val repaired = repairPresetFor(newRegion, current)
     val freshSetup = previousRegion == RegionCode.UNSET && current == ModemPreset.LONG_FAST
     return if (freshSetup) {
-        constraintFor(newRegion)?.defaultPreset ?: defaultPresetFor(newRegion) ?: repaired
+        // Re-repair the adopted default: a malformed map's advertised default may not be in its own legal set.
+        val preferred = constraintFor(newRegion)?.defaultPreset ?: defaultPresetFor(newRegion) ?: repaired
+        repairPresetFor(newRegion, preferred)
     } else {
         repaired
     }
