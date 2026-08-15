@@ -270,6 +270,8 @@ object DeepLinkRouter {
             "clean-node-db" to SettingsRoute.CleanNodeDb,
             "debug-panel" to SettingsRoute.DebugPanel,
             "about" to SettingsRoute.About,
+            "acknowledgements" to SettingsRoute.Acknowledgements,
+            "attributions" to SettingsRoute.Acknowledgements,
             "filter-settings" to SettingsRoute.FilterSettings,
             "helpdocs" to SettingsRoute.HelpDocs,
             "help-docs" to SettingsRoute.HelpDocs,

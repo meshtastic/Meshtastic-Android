@@ -172,6 +172,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object About : SettingsRoute
 
+    @Serializable data object Acknowledgements : SettingsRoute
+
     @Serializable data object FilterSettings : SettingsRoute
 
     @Serializable data object NodeList : SettingsRoute

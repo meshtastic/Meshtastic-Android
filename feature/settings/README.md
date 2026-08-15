@@ -12,7 +12,10 @@ The main entry point for application-wide settings.
 Handles the complex logic of reading and writing configuration to the Meshtastic device over the radio link (BLE, USB, or TCP).
 
 ### 3. `AboutScreen`
-Displays version information, licenses, and project links.
+Displays what Meshtastic is, a "Need Hardware?" row, version information, and project links.
+
+### 4. `AcknowledgementsScreen`
+Displays the open-source libraries the app is built on, with their licenses.
 
 ## Validation Reference
 - See [settings-validation.md](settings-validation.md) for detailed radio/module settings validation rules used by this module.

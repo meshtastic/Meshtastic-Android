@@ -43,7 +43,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.acknowledgements
+import org.meshtastic.core.resources.about
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
@@ -285,7 +285,7 @@ private fun DesktopAppInfoSection(
 ) {
     ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
-            text = stringResource(Res.string.acknowledgements),
+            text = stringResource(Res.string.about),
             leadingIcon = MeshtasticIcons.Info,
             trailingIcon = MeshtasticIcons.ChevronRight,
         ) {

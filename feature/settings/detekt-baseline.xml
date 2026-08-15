@@ -38,10 +38,10 @@
     <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.FIXED_POSITION$6</ID>
     <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.MODULE_CONFIG$5</ID>
     <ID>ModifierClickableOrder:ChannelScreen.kt:clickable(onClick = onClick)</ID>
-    <ID>ModifierMissing:AboutScreen.kt:@Composable fun AboutScreen</ID>
     <ID>ModifierMissing:AdministrationScreen.kt:@Composable fun AdministrationScreen</ID>
     <ID>ModifierMissing:AmbientLightingConfigItemList.kt:@Composable fun AmbientLightingConfigScreen</ID>
     <ID>ModifierMissing:AppInfoSection.kt:@Composable fun AppInfoSection</ID>
+    <ID>ModifierMissing:AcknowledgementsScreen.kt:@Composable fun AcknowledgementsScreen</ID>
     <ID>ModifierMissing:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
     <ID>ModifierMissing:BluetoothConfigItemList.kt:@Composable fun BluetoothConfigScreen</ID>
     <ID>ModifierMissing:CannedMessageConfigItemList.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun CannedMessageConfigScreen</ID>
