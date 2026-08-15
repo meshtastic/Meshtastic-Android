@@ -169,7 +169,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val regionPresetMap = if (capabilities.supportsLoraRegionPresetMap) state.loraRegionPresetMap else null
                 val presetConstraint =
                     remember(regionPresetMap, formState.value.region) {
-                        regionPresetMap.constraintFor(formState.value.region)
+                        // UNSET's map entry states pin intent (firmware #11507), not a constraint: never let it
+                        // narrow the picker while the region is still unset.
+                        formState.value.region
+                            .takeIf { it != RegionCode.UNSET }
+                            ?.let { regionPresetMap.constraintFor(it) }
                     }
                 val presetsGated = presetConstraint?.isGated(state.localIsLicensed) == true
                 DropDownPreference(
