@@ -26,7 +26,7 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.repository.PersistedPacketId
@@ -56,6 +56,12 @@ class AndroidMeshWorkerManagerTest {
 
         manager.enqueueSendMessage(persistedId)
         val first = workManager.getWorkInfosForUniqueWork(workName(persistedId)).get().single()
+        // Regression guard: GC pressure here used to collect the worker's CallbackToFutureAdapter completer,
+        // marking the running work FAILED so the KEEP enqueue below replaced it (flaky only on loaded CI).
+        repeat(3) {
+            System.gc()
+            System.runFinalization()
+        }
         manager.enqueueSendMessage(persistedId)
         val retained = workManager.getWorkInfosForUniqueWork(workName(persistedId)).get().single()
 
@@ -67,19 +73,29 @@ class AndroidMeshWorkerManagerTest {
     private fun workName(id: PersistedPacketId) = "${SendMessageWorker.WORK_NAME_PREFIX}${id.myNodeNum}_${id.uuid}"
 
     private class BlockingWorkerFactory : WorkerFactory() {
+        // Awaiting this (instead of awaitCancellation) keeps the parked worker coroutine strongly reachable;
+        // startWork()'s future holds its completer only weakly, and a GC'd completer fails the work.
+        val release = CompletableDeferred<Unit>()
+
         override fun createWorker(
             appContext: Context,
             workerClassName: String,
             workerParameters: WorkerParameters,
         ): ListenableWorker? = if (workerClassName == SendMessageWorker::class.java.name) {
-            BlockingWorker(appContext, workerParameters)
+            BlockingWorker(appContext, workerParameters, release)
         } else {
             null
         }
     }
 
-    private class BlockingWorker(appContext: Context, workerParameters: WorkerParameters) :
-        CoroutineWorker(appContext, workerParameters) {
-        override suspend fun doWork(): Result = awaitCancellation()
+    private class BlockingWorker(
+        appContext: Context,
+        workerParameters: WorkerParameters,
+        private val release: CompletableDeferred<Unit>,
+    ) : CoroutineWorker(appContext, workerParameters) {
+        override suspend fun doWork(): Result {
+            release.await()
+            return Result.success()
+        }
     }
 }
