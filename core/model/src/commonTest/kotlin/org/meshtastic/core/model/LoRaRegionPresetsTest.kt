@@ -213,4 +213,35 @@ class LoRaRegionPresetsTest {
             oddMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
         )
     }
+
+    // A pinned build advertises its preset as UNSET's map entry (firmware #11507): the same fixture plus a
+    // single-preset UNSET group, here stating a deliberate LONG_FAST pin.
+    private val pinnedMap =
+        map.copy(
+            groups =
+            map.groups +
+                LoRaPresetGroup(
+                    presets = listOf(ModemPreset.LONG_FAST),
+                    default_preset = ModemPreset.LONG_FAST,
+                    licensed_only = false,
+                ),
+            region_groups = map.region_groups + LoRaRegionPresets(region = RegionCode.UNSET, group_index = 3),
+        )
+
+    @Test
+    fun `an UNSET map entry marks even a LongFast pin as deliberate at fresh setup`() {
+        // Without the entry this placeholder would adopt EU_N_868's MEDIUM_FAST default (asserted above).
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            pinnedMap.presetForRegionChange(RegionCode.UNSET, RegionCode.EU_N_868, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `a pin stated via UNSET entry is still repaired when illegal in the region`() {
+        assertEquals(
+            ModemPreset.TINY_FAST,
+            pinnedMap.presetForRegionChange(RegionCode.UNSET, RegionCode.UA_433, ModemPreset.LONG_FAST),
+        )
+    }
 }
