@@ -1262,6 +1262,7 @@
     <string name="node_list_help_title">Radiolistan ohje</string>
     <string name="node_list_long_click_label">Radion asetukset</string>
     <string name="node_number">Laitteen numero</string>
+    <string name="node_request_send_failed">Pyynnön lähettäminen epäonnistui. Yritä uudelleen.</string>
     <string name="node_restarting">Käynnistetään uudelleen…</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
