@@ -20,13 +20,8 @@ import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
-import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
-import io.ktor.utils.io.jvm.javaio.toInputStream
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
@@ -40,8 +35,6 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-
-private const val DOWNLOAD_BUFFER_SIZE = 8192
 
 @Suppress("TooManyFunctions")
 @Single
@@ -92,33 +85,9 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
                 return@withContext null
             }
 
-            val body = response.bodyAsChannel()
-            val contentLength = response.contentLength() ?: -1L
-
             if (!tempDir.exists()) tempDir.mkdirs()
-
             val targetFile = File(tempDir, fileName)
-            body.toInputStream().use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
-                    var bytesRead: Int
-                    var totalBytesRead = 0L
-
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        if (!isActive) throw CancellationException("Download cancelled")
-
-                        output.write(buffer, 0, bytesRead)
-                        totalBytesRead += bytesRead
-
-                        if (contentLength > 0) {
-                            onProgress(totalBytesRead.toFloat() / contentLength)
-                        }
-                    }
-                    if (contentLength != -1L && totalBytesRead != contentLength) {
-                        throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
-                    }
-                }
-            }
+            downloadResponseToFile(response, targetFile, onProgress)
             targetFile.toFirmwareArtifact()
         }
 
