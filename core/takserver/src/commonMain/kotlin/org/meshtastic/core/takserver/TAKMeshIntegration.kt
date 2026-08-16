@@ -212,7 +212,7 @@ class TAKMeshIntegration(
         val wirePayload: ByteArray =
             try {
                 val result = TakSdkCompressor.compressCoT(xml, MAX_TAK_WIRE_PAYLOAD_BYTES)
-                if (result.remarksStripped) {
+                if (result.remarksStripped && result.wirePayload != null) {
                     Logger.i { "Stripped <remarks> to fit TAK packet under MTU: type=${cotMessage.type}" }
                 }
                 result.wirePayload
