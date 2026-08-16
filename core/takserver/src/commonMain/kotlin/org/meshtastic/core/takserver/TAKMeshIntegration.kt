@@ -211,7 +211,11 @@ class TAKMeshIntegration(
         // remarks the packet exceeds the limit.
         val wirePayload: ByteArray =
             try {
-                TakSdkCompressor.compressCoT(xml, MAX_TAK_WIRE_PAYLOAD_BYTES)
+                val result = TakSdkCompressor.compressCoT(xml, MAX_TAK_WIRE_PAYLOAD_BYTES)
+                if (result.remarksStripped && result.wirePayload != null) {
+                    Logger.i { "Stripped <remarks> to fit TAK packet under MTU: type=${cotMessage.type}" }
+                }
+                result.wirePayload
                     ?: run {
                         Logger.w {
                             buildString {

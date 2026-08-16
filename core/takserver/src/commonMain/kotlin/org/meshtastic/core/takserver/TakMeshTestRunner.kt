@@ -173,7 +173,8 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
         // Parse and compress via SDK
         val wirePayload: ByteArray
         try {
-            val compressed = TakSdkCompressor.compressCoT(strippedXml, MAX_TAK_WIRE_PAYLOAD_BYTES)
+            val result = TakSdkCompressor.compressCoT(strippedXml, MAX_TAK_WIRE_PAYLOAD_BYTES)
+            val compressed = result.wirePayload
             if (compressed == null) {
                 Logger.w { "TAK Test: $name oversized even without remarks (xml=${xml.length}B)" }
                 return TakTestResult(name, xml.length, 0, false, "Oversized (>${MAX_TAK_WIRE_PAYLOAD_BYTES}B)")
