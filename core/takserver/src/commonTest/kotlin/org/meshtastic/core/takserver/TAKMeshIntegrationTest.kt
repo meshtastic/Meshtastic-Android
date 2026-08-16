@@ -48,6 +48,7 @@ import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -330,6 +331,42 @@ class TAKMeshIntegrationTest {
 
         assertTrue(h.commandSender.sentPackets.isEmpty())
     }
+
+    // ── Dropped-outcome discrimination (regression: #6583 self-test blind spot) ────────
+
+    @Test
+    fun `v1 drop of an unsupported CoT type is schema-limited`() = runTest(UnconfinedTestDispatcher()) {
+        // a-h-G is a shape/marker type the legacy v1 TAKPacket schema has no field for at all —
+        // this is the "permanent limitation" case, not a size problem.
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        val marker = CoTMessage(uid = "marker-1", type = "a-h-G", stale = Clock.System.now() + 5.minutes)
+
+        val outcome = h.integration.sendCoTToMeshForTest(marker, forceV2 = false)
+
+        val dropped = assertNotNull(outcome as? TakSendOutcome.Dropped, "expected a Dropped outcome, got $outcome")
+        assertTrue(dropped.schemaLimited, "an unsupported CoT type must be reported as schema-limited")
+    }
+
+    @Test
+    fun `v1 drop of an oversize but schema-representable PLI is NOT schema-limited`() =
+        runTest(UnconfinedTestDispatcher()) {
+            // a-f-G (PLI) IS representable in the v1 schema — this must be dropped for size, not
+            // mislabeled as an expected schema gap. This is the exact blind spot the self-test's
+            // expectedDrop flag has to avoid: an MTU problem hiding behind "expected" v1 behavior.
+            val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+            val oversizePli =
+                CoTMessage(
+                    uid = "pli-1",
+                    type = "a-f-G-U-C",
+                    stale = Clock.System.now() + 5.minutes,
+                    contact = CoTContact(callsign = "X".repeat(500)),
+                )
+
+            val outcome = h.integration.sendCoTToMeshForTest(oversizePli, forceV2 = false)
+
+            val dropped = assertNotNull(outcome as? TakSendOutcome.Dropped, "expected a Dropped outcome, got $outcome")
+            assertTrue(!dropped.schemaLimited, "an oversize drop of a representable type must not be schema-limited")
+        }
 
     // ── GeoChat callsign enrichment ──────────────────────────────────────────
 

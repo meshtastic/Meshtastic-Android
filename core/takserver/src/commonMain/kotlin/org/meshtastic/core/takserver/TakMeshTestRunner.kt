@@ -24,11 +24,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
-import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.proto.PortNum
+
+/** Which outbound TAK protocol a [TakTestResult] was dispatched through. See [TAKMeshIntegration]. */
+enum class TakProtocol {
+    /** Firmware >= 2.8.0: zstd-compressed TAKPacketV2 on port 78, full typed CoT support. */
+    V2,
+
+    /** Firmware <= 2.7.x: bare-protobuf legacy TAKPacket on port 72, PLI + GeoChat only. */
+    V1,
+}
 
 /** Result of sending a single test fixture through the TAK mesh pipeline. */
 data class TakTestResult(
@@ -37,15 +41,26 @@ data class TakTestResult(
     val compressedBytes: Int,
     val passed: Boolean,
     val error: String? = null,
+    val protocol: TakProtocol = TakProtocol.V2,
+    // Mirrors TakSendOutcome.Dropped.schemaLimited: true only when this fixture was dropped because the active
+    // protocol's CoT type coverage doesn't include it (e.g. v1's TAKPacket only representing PLI/GeoChat) — a
+    // known, permanent limitation of that protocol, so this is expected/intentional behavior, not a self-test
+    // regression. False for an oversize drop (a real MTU problem, even if it happened on v1) or any failure —
+    // never set purely because the result's protocol is V1.
+    val expectedDrop: Boolean = false,
 )
 
 /**
- * Debug-only test runner that sends the SDK's CoT XML test fixtures through the real TAK mesh pipeline: strip → parse →
- * compress → send to mesh radio.
+ * Debug-only test runner that sends the SDK's CoT XML test fixtures through the REAL TAK mesh pipeline: strip → parse →
+ * dispatch, via [TAKMeshIntegration.sendCoTToMeshForTest]. Each fixture is run through BOTH the v2 (firmware >= 2.8.0)
+ * and v1 (legacy) dispatch paths so the self-test's pass/fail rate reflects what a real connected radio would actually
+ * do on either firmware generation, rather than always exercising the v2 pipeline regardless of the connected radio's
+ * firmware — see [TAKMeshIntegration.useTakV2].
  *
- * Paces sends by waiting [sendDelayMs] between each fixture to avoid flooding the radio's TX queue.
+ * Paces sends by waiting [sendDelayMs] between each successfully-sent fixture to avoid flooding the radio's TX queue.
+ * Fixtures that are dropped (not sent) incur no delay.
  */
-class TakMeshTestRunner(private val commandSender: CommandSender) {
+class TakMeshTestRunner(private val takMeshIntegration: TAKMeshIntegration) {
     private val _results = MutableStateFlow<List<TakTestResult>>(emptyList())
     val results: StateFlow<List<TakTestResult>> = _results.asStateFlow()
 
@@ -118,8 +133,8 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
     }
 
     /**
-     * Run all test fixtures sequentially, sending each through the mesh pipeline. Updates [results] and
-     * [currentFixture] as each fixture is processed.
+     * Run all test fixtures sequentially through both the v2 and v1 dispatch paths. Updates [results] and
+     * [currentFixture] as each fixture is processed. [results] accumulates v2 runs first, then v1 runs.
      */
     suspend fun runAll() {
         // Use tryLock to prevent concurrent test runs: if another coroutine is already
@@ -133,74 +148,95 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
 
             val allResults = mutableListOf<TakTestResult>()
 
-            for (name in FIXTURE_NAMES) {
-                _currentFixture.value = name
-                val result = runSingleFixture(name)
-                allResults.add(result)
-                _results.value = allResults.toList()
+            for (protocol in listOf(TakProtocol.V2, TakProtocol.V1)) {
+                for (name in FIXTURE_NAMES) {
+                    _currentFixture.value = "$name (${protocol.name.lowercase()})"
+                    val result = runSingleFixture(name, protocol)
+                    allResults.add(result)
+                    _results.value = allResults.toList()
 
-                if (result.passed) {
-                    // Wait for radio airtime + ACK before next send
-                    delay(SEND_DELAY_MS)
+                    if (result.passed) {
+                        // Wait for radio airtime + ACK before next send. Dropped fixtures never
+                        // reached the radio, so there's nothing to pace.
+                        delay(SEND_DELAY_MS)
+                    }
                 }
             }
 
             _currentFixture.value = null
 
-            val passed = allResults.count { it.passed }
-            val failed = allResults.size - passed
-            Logger.i { "TAK Mesh Test complete: $passed/${allResults.size} passed, $failed failed" }
+            val v2 = allResults.filter { it.protocol == TakProtocol.V2 }
+            val v1 = allResults.filter { it.protocol == TakProtocol.V1 }
+            val v2Passed = v2.count { it.passed }
+            val v1Passed = v1.count { it.passed }
+            val v1ExpectedDrops = v1.count { it.expectedDrop }
+            Logger.i {
+                "TAK Mesh Test complete: v2=$v2Passed/${v2.size} passed; " +
+                    "v1=$v1Passed/${v1.size} passed ($v1ExpectedDrops expected drops — " +
+                    "v1's legacy schema only supports PLI/GeoChat)"
+            }
         } finally {
             _isRunning.value = false
             runMutex.unlock()
         }
     }
 
-    private suspend fun runSingleFixture(name: String): TakTestResult {
+    private suspend fun runSingleFixture(name: String, protocol: TakProtocol): TakTestResult {
+        val forceV2 = protocol == TakProtocol.V2
+
         // Load fixture XML from bundled resources via platform-specific loader
         val xml =
             try {
                 loadTakFixtureXml(name)
             } catch (e: Exception) {
                 Logger.w(e) { "Failed to load fixture $name" }
-                return TakTestResult(name, 0, 0, false, "Load failed: ${e.message}")
+                return TakTestResult(name, 0, 0, false, "Load failed: ${e.message}", protocol)
             }
 
-        // Apply the same pipeline as TAKMeshIntegration.sendCoTToMesh()
-        val freshXml = TAKMeshIntegration.ensureMinimumStaleForMesh(xml)
-        val strippedXml = TAKMeshIntegration.stripNonEssentialElements(freshXml)
-
-        // Parse and compress via SDK
-        val wirePayload: ByteArray
-        try {
-            val result = TakSdkCompressor.compressCoT(strippedXml, MAX_TAK_WIRE_PAYLOAD_BYTES)
-            val compressed = result.wirePayload
-            if (compressed == null) {
-                Logger.w { "TAK Test: $name oversized even without remarks (xml=${xml.length}B)" }
-                return TakTestResult(name, xml.length, 0, false, "Oversized (>${MAX_TAK_WIRE_PAYLOAD_BYTES}B)")
+        // Parse into the same CoTMessage shape a real inbound TAK-client message would produce
+        // (sourceEventXml preserved) — see CoTXmlParser.buildCoTMessage.
+        val cotMessage =
+            CoTXmlParser(xml).parse().getOrElse { e ->
+                Logger.w(e) { "TAK Test: $name failed to parse as CoT XML: ${e.message}" }
+                return TakTestResult(name, xml.length, 0, false, "Parse failed: ${e.message}", protocol)
             }
-            wirePayload = compressed
-        } catch (e: Exception) {
-            Logger.w(e) { "TAK Test: $name compression failed: ${e.message}" }
-            return TakTestResult(name, xml.length, 0, false, "Compress failed: ${e.message}")
-        }
 
-        // Send to mesh
-        try {
-            val dataPacket =
-                DataPacket(
-                    to = NodeAddress.ID_BROADCAST,
-                    bytes = wirePayload.toByteString(),
-                    dataType = PortNum.ATAK_PLUGIN_V2.value,
-                )
-            commandSender.sendData(dataPacket)
-            Logger.i { "TAK Test: $name → ${wirePayload.size}B (xml=${xml.length}B)" }
-            return TakTestResult(name, xml.length, wirePayload.size, true)
+        // Dispatch through the REAL production pipeline (TAKMeshIntegration.sendCoTToMeshV1/V2),
+        // with the protocol forced rather than read from the connected radio's firmware.
+        return try {
+            when (val outcome = takMeshIntegration.sendCoTToMeshForTest(cotMessage, forceV2)) {
+                is TakSendOutcome.Sent -> {
+                    Logger.i { "TAK Test: $name → ${outcome.wireBytes}B (xml=${xml.length}B) via $protocol" }
+                    TakTestResult(name, xml.length, outcome.wireBytes, true, protocol = protocol)
+                }
+
+                is TakSendOutcome.Dropped -> {
+                    Logger.w { "TAK Test: $name dropped on $protocol: ${outcome.reason}" }
+                    TakTestResult(
+                        fixtureName = name,
+                        xmlBytes = xml.length,
+                        compressedBytes = 0,
+                        passed = false,
+                        error = outcome.reason,
+                        protocol = protocol,
+                        // Only a schema-coverage drop is an expected/intentional limitation (v1's legacy
+                        // schema legitimately supports only PLI/GeoChat). An oversize drop is a real MTU
+                        // problem regardless of which protocol hit it, and must never be mislabeled as
+                        // expected just because it happened on v1.
+                        expectedDrop = outcome.schemaLimited,
+                    )
+                }
+
+                is TakSendOutcome.Failed -> {
+                    Logger.w { "TAK Test: $name send failed on $protocol: ${outcome.reason}" }
+                    TakTestResult(name, xml.length, 0, false, outcome.reason, protocol)
+                }
+            }
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
             Logger.w(e) { "TAK Test: $name send failed: ${e.message}" }
-            return TakTestResult(name, xml.length, wirePayload.size, false, "Send failed: ${e.message}")
+            TakTestResult(name, xml.length, 0, false, "Send failed: ${e.message}", protocol)
         }
     }
 }

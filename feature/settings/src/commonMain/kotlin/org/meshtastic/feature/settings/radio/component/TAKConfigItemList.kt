@@ -47,13 +47,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.getColorFrom
 import org.meshtastic.core.model.getStringResFrom
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
@@ -79,15 +79,20 @@ import org.meshtastic.core.resources.tak_server_status_unavailable
 import org.meshtastic.core.resources.tak_server_status_waiting
 import org.meshtastic.core.resources.tak_server_test_card_title
 import org.meshtastic.core.resources.tak_server_test_idle
+import org.meshtastic.core.resources.tak_server_test_protocol_v1_label
+import org.meshtastic.core.resources.tak_server_test_protocol_v2_label
 import org.meshtastic.core.resources.tak_server_test_result_bytes
+import org.meshtastic.core.resources.tak_server_test_result_expected_drop
 import org.meshtastic.core.resources.tak_server_test_result_unknown_error
-import org.meshtastic.core.resources.tak_server_test_results
+import org.meshtastic.core.resources.tak_server_test_results_v2
 import org.meshtastic.core.resources.tak_server_test_run
 import org.meshtastic.core.resources.tak_server_test_running
 import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
+import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.core.takserver.TakMeshTestRunner
+import org.meshtastic.core.takserver.TakProtocol
 import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -392,8 +397,8 @@ private fun TakMeshTestCard() {
     val buildConfig: BuildConfigProvider = koinInject()
     if (!buildConfig.isDebug) return
 
-    val commandSender: CommandSender = koinInject()
-    val testRunner = remember { TakMeshTestRunner(commandSender) }
+    val takMeshIntegration: TAKMeshIntegration = koinInject()
+    val testRunner = remember { TakMeshTestRunner(takMeshIntegration) }
     val results by testRunner.results.collectAsStateWithLifecycle()
     val isRunning by testRunner.isRunning.collectAsStateWithLifecycle()
     val currentFixture by testRunner.currentFixture.collectAsStateWithLifecycle()
@@ -418,8 +423,8 @@ internal fun TakMeshTestCardContent(
     onRunTests: () -> Unit,
 ) {
     val loadingLabel = stringResource(Res.string.tak_server_loading)
-    val passed = results.count { it.passed }
-    val failed = results.count { !it.passed }
+    val v2Results = results.filter { it.protocol == TakProtocol.V2 }
+    val v1Results = results.filter { it.protocol == TakProtocol.V1 }
 
     TitledCard(title = stringResource(Res.string.tak_server_test_card_title)) {
         Row(
@@ -437,25 +442,6 @@ internal fun TakMeshTestCardContent(
                     },
                     style = MaterialTheme.typography.bodyLarge,
                 )
-                if (results.isNotEmpty()) {
-                    Text(
-                        text =
-                        stringResource(
-                            Res.string.tak_server_test_results,
-                            passed,
-                            failed,
-                            results.size,
-                            fixtureCount,
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color =
-                        if (failed > 0) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
             }
             if (isRunning) {
                 CircularProgressIndicator()
@@ -467,7 +453,58 @@ internal fun TakMeshTestCardContent(
             }
         }
 
-        // Results list
+        if (v2Results.isNotEmpty()) {
+            TakProtocolResultsSection(
+                titleRes = Res.string.tak_server_test_protocol_v2_label,
+                results = v2Results,
+                fixtureCount = fixtureCount,
+            )
+        }
+        if (v1Results.isNotEmpty()) {
+            TakProtocolResultsSection(
+                titleRes = Res.string.tak_server_test_protocol_v1_label,
+                results = v1Results,
+                fixtureCount = fixtureCount,
+            )
+        }
+    }
+}
+
+/**
+ * One protocol's fixture run within the TAK self-test card: a summary line (passed / expected-limitation drops /
+ * unexpected failures) followed by the per-fixture rows. Expected v1 schema drops are surfaced distinctly from real
+ * failures so a low v1 pass rate reads as intentional legacy-schema behavior, not a self-test regression.
+ */
+@Composable
+private fun TakProtocolResultsSection(titleRes: StringResource, results: List<TakTestResult>, fixtureCount: Int) {
+    val passed = results.count { it.passed }
+    val expectedDrops = results.count { !it.passed && it.expectedDrop }
+    val unexpectedFailed = results.count { !it.passed && !it.expectedDrop }
+
+    Column {
+        HorizontalDivider()
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleSmall)
+            Text(
+                text =
+                stringResource(
+                    Res.string.tak_server_test_results_v2,
+                    passed,
+                    expectedDrops,
+                    unexpectedFailed,
+                    results.size,
+                    fixtureCount,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color =
+                if (unexpectedFailed > 0) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+        }
+
         for (result in results) {
             HorizontalDivider()
             Row(
@@ -482,13 +519,21 @@ internal fun TakMeshTestCardContent(
                 )
                 Text(
                     text =
-                    if (result.passed) {
-                        stringResource(Res.string.tak_server_test_result_bytes, result.compressedBytes)
-                    } else {
-                        result.error ?: stringResource(Res.string.tak_server_test_result_unknown_error)
+                    when {
+                        result.passed ->
+                            stringResource(Res.string.tak_server_test_result_bytes, result.compressedBytes)
+
+                        result.expectedDrop -> stringResource(Res.string.tak_server_test_result_expected_drop)
+
+                        else -> result.error ?: stringResource(Res.string.tak_server_test_result_unknown_error)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (result.passed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    color =
+                    when {
+                        result.passed -> MaterialTheme.colorScheme.primary
+                        result.expectedDrop -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> MaterialTheme.colorScheme.error
+                    },
                 )
             }
         }
