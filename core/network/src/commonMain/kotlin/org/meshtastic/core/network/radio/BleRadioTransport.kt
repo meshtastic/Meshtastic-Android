@@ -234,6 +234,10 @@ class BleRadioTransport(
     // toggles the connection off; until then, retry forever with the policy's exponential-backoff cap (60 s).
     private val reconnectPolicy = BleReconnectPolicy(maxFailures = Int.MAX_VALUE)
 
+    // Because the loop above never gives up, a stale platform GATT cache would otherwise retry forever without
+    // recovering (issue #6685). This gate decides when a long failure streak has earned one cache refresh.
+    private val gattCacheInvalidationGate = GattCacheInvalidationGate()
+
     private val heartbeatSender =
         HeartbeatSender(
             sendToRadio = { handleSendToRadio(it) },
@@ -380,27 +384,21 @@ class BleRadioTransport(
             throw RadioNotConnectedException("Failed to connect to device at address $address")
         }
 
-        // Post-OTA GATT cache invalidation: the device rebooted with potentially different
-        // BLE service table handles. Refresh Android's cache and reconnect to force fresh
-        // service discovery before proceeding with profile setup.
-        val radioServiceForCache = callback as? RadioInterfaceService
-        if (radioServiceForCache?.consumeGattCacheInvalidationRequest() == true) {
-            val invalidated = bleConnection.invalidateServiceCache()
-            Logger.d { "[${address.anonymize()}] Post-OTA GATT cache invalidation requested: $invalidated" }
-            if (invalidated) {
-                Logger.i {
-                    "[${address.anonymize()}] Reconnecting after GATT cache refresh to force service rediscovery"
-                }
-                bleConnection.disconnect()
-                delay(POST_INVALIDATION_RECONNECT_DELAY)
-                val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
-                if (reconnectState !is BleConnectionState.Connected) {
-                    throw RadioNotConnectedException(
-                        "Failed to reconnect after post-OTA GATT cache refresh (state=$reconnectState)",
-                    )
-                }
-                Logger.i { "[${address.anonymize()}] Reconnected after GATT cache refresh" }
-            }
+        // GATT cache invalidation has two triggers, both repaired the same way — refresh the platform's cached
+        // service table, then reconnect so discovery re-reads the device:
+        //  1. Post-OTA: the device rebooted with potentially different BLE service table handles.
+        //  2. Stale cache after a long absence: a bonded radio that went out of range or powered off can come back
+        //     with Android still serving the old cached service table, failing every attempt until the user unpairs
+        //     at the OS level (issue #6685).
+        // consumeGattCacheInvalidationRequest() is read into a val first: `||` short-circuiting must never skip
+        // consuming the one-shot post-OTA flag.
+        val postOtaRequested = (callback as? RadioInterfaceService)?.consumeGattCacheInvalidationRequest() == true
+        val consecutiveFailures = reconnectPolicy.consecutiveFailures
+        val staleCacheSuspected = gattCacheInvalidationGate.shouldInvalidateOnAttempt(consecutiveFailures)
+        if (postOtaRequested || staleCacheSuspected) {
+            val reason =
+                if (postOtaRequested) "post-OTA reboot" else "$consecutiveFailures consecutive reconnect failures"
+            refreshGattCacheAndReconnect(device, reason)
         }
 
         val gattConnectedAt = nowMillis
@@ -484,6 +482,12 @@ class BleRadioTransport(
         val connectionUptime = (nowMillis - gattConnectedAt).milliseconds
         val wasStable = connectionUptime >= reconnectPolicy.minStableConnection
 
+        // Mirror the outcomes that make BleReconnectPolicy reset its own failure counter: both end the streak, so the
+        // cache refresh must be re-armed here. It cannot be inferred from consecutiveFailures on the next attempt —
+        // that reset lands after this function returns, and a radio that is out of range again fails its next attempt
+        // without ever reaching the point where the counter is read.
+        if (wasStable || wasIntentional) gattCacheInvalidationGate.onFailureStreakEnded()
+
         if (!wasStable && !wasIntentional) {
             Logger.w {
                 "[$address] Connection lasted only $connectionUptime " +
@@ -492,6 +496,37 @@ class BleRadioTransport(
         }
 
         return BleReconnectPolicy.Outcome.Disconnected(wasStable = wasStable, wasIntentional = wasIntentional)
+    }
+
+    /**
+     * Refreshes the platform's cached GATT service table for the connected peripheral and reconnects so that service
+     * discovery re-reads the device instead of replaying the cache.
+     *
+     * A no-op when the platform cannot invalidate (non-Android targets, or an Android reflection miss): nothing is
+     * disconnected and the current link is used as-is.
+     *
+     * @param reason short diagnostic describing which trigger asked for the refresh
+     * @throws RadioNotConnectedException when the post-refresh reconnect does not reach Connected, so the caller
+     *   returns a retryable failure to [BleReconnectPolicy]
+     */
+    private suspend fun refreshGattCacheAndReconnect(device: BleDevice, reason: String) {
+        val invalidated = bleConnection.invalidateServiceCache()
+        Logger.d { "[${address.anonymize()}] GATT cache invalidation ($reason): $invalidated" }
+        if (!invalidated) return
+
+        // Consume the streak's single allowance only now that the platform reported a real refresh.
+        gattCacheInvalidationGate.onCacheInvalidated()
+
+        Logger.i { "[${address.anonymize()}] Reconnecting after GATT cache refresh to force service rediscovery" }
+        bleConnection.disconnect()
+        delay(POST_INVALIDATION_RECONNECT_DELAY)
+        val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+        if (reconnectState !is BleConnectionState.Connected) {
+            throw RadioNotConnectedException(
+                "Failed to reconnect after GATT cache refresh ($reason, state=$reconnectState)",
+            )
+        }
+        Logger.i { "[${address.anonymize()}] Reconnected after GATT cache refresh ($reason)" }
     }
 
     private suspend fun bondDeviceBeforeConnect(device: BleDevice) {

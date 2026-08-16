@@ -91,9 +91,16 @@ interface BleConnection {
     fun requestBalancedConnectionPriority(): Boolean = false
 
     /**
-     * Clears the platform's cached GATT service table for the connected peripheral. Necessary when a device reboots
-     * into a different GATT profile (e.g., ESP32 OTA loader) on the same BLE MAC. Returns `true` if the cache was
-     * invalidated. Default implementation returns `false` for platforms without a service cache.
+     * Clears the platform's cached GATT service table for the connected peripheral, so the next discovery re-reads the
+     * device instead of replaying the cache. Necessary when a device reboots into a different GATT profile (e.g., ESP32
+     * OTA loader) on the same BLE MAC, and as recovery when a bonded device that was out of range for a long time
+     * reconnects against a cache the platform never refreshed.
+     *
+     * Requires a live connection: the implementation needs the platform's connection handle, so callers must invoke
+     * this while connected and then reconnect to pick up the fresh service table.
+     *
+     * Returns `true` if the cache was invalidated. Default implementation returns `false` for platforms without a
+     * service cache.
      */
     fun invalidateServiceCache(): Boolean = false
 }
