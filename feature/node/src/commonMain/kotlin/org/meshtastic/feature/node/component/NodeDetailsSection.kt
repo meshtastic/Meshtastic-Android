@@ -336,7 +336,7 @@ private fun TransportRow(node: Node) {
     }
 }
 
-/** Trust signals: automatic XEdDSA signing (left, tap-able) and user-asserted key verification (right). */
+/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
 @Composable
 private fun VerificationRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
