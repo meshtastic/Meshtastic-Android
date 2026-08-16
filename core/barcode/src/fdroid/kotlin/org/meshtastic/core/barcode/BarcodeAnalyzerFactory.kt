@@ -17,7 +17,9 @@
 package org.meshtastic.core.barcode
 
 import androidx.camera.core.ImageAnalysis
+import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
@@ -29,7 +31,14 @@ import java.nio.ByteBuffer
  * This is the F-Droid flavor implementation; the Google flavor uses ML Kit instead.
  */
 internal fun createBarcodeAnalyzer(onResult: (String) -> Unit): ImageAnalysis.Analyzer {
-    val reader = MultiFormatReader()
+    val reader =
+        MultiFormatReader().apply {
+            // Without this, MultiFormatReader tries every supported format (DataMatrix,
+            // PDF417, Aztec, Code128/39, EAN/UPC, ...) on every camera frame even though
+            // this analyzer only ever wants QR codes — narrowing it is a meaningful
+            // per-frame CPU/battery win during an active scan session.
+            setHints(mapOf(DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE)))
+        }
 
     return ImageAnalysis.Analyzer { imageProxy ->
         try {
