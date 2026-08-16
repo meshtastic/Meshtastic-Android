@@ -102,6 +102,35 @@ class NodeTest {
     }
 
     @Test
+    fun getRelayNode_neverPrefersAnUnresolvedHopCountOverAKnownOne() {
+        // Regression for the presence-vs-sentinel-zero class: a plain `minByOrNull { it.hopsAway }` would rank
+        // -1 (unresolved) below every real hop count, wrongly picking `unresolved` as the "closest" relay.
+        val unresolved = Node(num = 0x000001AA, lastHeard = 100, hopsAway = Node.HOPS_AWAY_UNSET)
+        val knownFar = Node(num = 0x000002AA, lastHeard = 100, hopsAway = 4)
+        val otherSuffix = Node(num = 0x000003BB, lastHeard = 100, hopsAway = 1)
+
+        val relayNode =
+            Node.getRelayNode(
+                relayNodeId = 0x0000FFAA.toInt(),
+                nodes = listOf(unresolved, knownFar, otherSuffix),
+                ourNodeNum = null,
+            )
+
+        assertEquals(knownFar, relayNode)
+    }
+
+    @Test
+    fun hopsAwayOrNull_isNullOnlyForTheUnsetSentinel() {
+        val unset = Node(num = 1, hopsAway = Node.HOPS_AWAY_UNSET)
+        val direct = Node(num = 2, hopsAway = 0)
+        val relayed = Node(num = 3, hopsAway = 3)
+
+        assertEquals(null, unset.hopsAwayOrNull)
+        assertEquals(0, direct.hopsAwayOrNull)
+        assertEquals(3, relayed.hopsAwayOrNull)
+    }
+
+    @Test
     fun isUnknownUser_falseWhenHardwareModelIsKnown() {
         val node = Node(num = 1, user = User(hw_model = HardwareModel.TLORA_V2))
 

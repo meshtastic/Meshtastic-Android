@@ -628,6 +628,45 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `Stage 2 complete publishes exact session membership before readiness`() = testScope.runTest {
+        val firstNum = 100
+        val secondNum = 200
+        val firstNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = firstNum)
+        val secondNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = secondNum)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(firstNum to firstNode, secondNum to secondNode)
+        val callOrder = mutableListOf<String>()
+        every { nodeManager.publishCurrentSessionNodeNums(any(), any()) } calls
+            {
+                callOrder.add("publishSessionNodeNums")
+            }
+        every { nodeManager.setNodeDbReady(true) } calls { callOrder.add("nodeDbReady") }
+
+        handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(NodeInfo(num = firstNum))
+        manager.handleNodeInfo(NodeInfo(num = secondNum))
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        // Exactly the downloaded set plus the local node — not the entire (possibly larger, locally-retained)
+        // nodeDBbyNodeNum, which would defeat the badge's purpose of flagging rows the radio did NOT just report.
+        verify {
+            nodeManager.publishCurrentSessionNodeNums(
+                activeSession.generation,
+                setOf(myNodeNum, firstNum, secondNum),
+            )
+        }
+        // Published strictly before setNodeDbReady(true), so no reader can observe "ready" against a stale/absent
+        // session snapshot.
+        assertEquals(listOf("publishSessionNodeNums", "nodeDbReady"), callOrder)
+    }
+
+    @Test
     fun `Stage 2 applies trusted migrations before readiness and replay`() = testScope.runTest {
         val retiredNum = 456
         val callOrder = mutableListOf<String>()

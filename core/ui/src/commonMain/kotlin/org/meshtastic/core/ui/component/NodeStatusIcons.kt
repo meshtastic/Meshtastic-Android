@@ -47,11 +47,14 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.node_incomplete_description
+import org.meshtastic.core.resources.node_saved_on_phone
+import org.meshtastic.core.resources.node_saved_on_phone_description
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonQuestion
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -69,8 +72,17 @@ fun NodeStatusIcons(
     deviceType: DeviceType? = null,
     contentColor: Color = LocalContentColor.current,
     isUnknownUser: Boolean = false,
+    isSavedOnPhone: Boolean = false,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
+        if (isSavedOnPhone) {
+            StatusBadge(
+                imageVector = MeshtasticIcons.PhoneAndroid,
+                contentDescription = Res.string.node_saved_on_phone,
+                tooltipText = Res.string.node_saved_on_phone_description,
+                tint = contentColor,
+            )
+        }
         if (isUnknownUser) {
             StatusBadge(
                 imageVector = MeshtasticIcons.PersonQuestion,
@@ -150,9 +162,10 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
     }
 }
 
+/** Icon + tooltip status indicator. Internal (not private) so [NodeItemCompact] can reuse it for its own badges. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StatusBadge(
+internal fun StatusBadge(
     imageVector: ImageVector,
     contentDescription: StringResource,
     tooltipText: StringResource,

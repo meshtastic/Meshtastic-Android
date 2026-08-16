@@ -26,15 +26,18 @@ import org.meshtastic.feature.node.component.EnvironmentMetricsPreview
 import org.meshtastic.feature.node.component.HopHistogramContentPreview
 import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
+import org.meshtastic.feature.node.component.NodeDetailsSectionSavedOnPhonePreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
 import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
+import org.meshtastic.feature.node.component.NodeItemCompactSavedOnPhonePreview
 import org.meshtastic.feature.node.component.NodeItemCompactUnknownPreview
 import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
+import org.meshtastic.feature.node.component.NodeItemSavedOnPhonePreview
 import org.meshtastic.feature.node.component.NodeItemSignedPreview
 import org.meshtastic.feature.node.component.NodeItemUnknownPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
@@ -142,6 +145,13 @@ fun ScreenshotNodeDetailsSection() {
 @Composable
 fun ScreenshotNodeDetailsSectionSigned() {
     NodeDetailsSectionSignedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeDetailsSectionSavedOnPhone() {
+    NodeDetailsSectionSavedOnPhonePreview()
 }
 
 @PreviewTest
@@ -265,6 +275,20 @@ fun ScreenshotNodeItemCompactOnlineRemote() {
 @Composable
 fun ScreenshotNodeItemCompleteOnlineRemote() {
     NodeItemCompleteOnlineRemotePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemSavedOnPhone() {
+    NodeItemSavedOnPhonePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactSavedOnPhone() {
+    NodeItemCompactSavedOnPhonePreview()
 }
 
 @PreviewTest

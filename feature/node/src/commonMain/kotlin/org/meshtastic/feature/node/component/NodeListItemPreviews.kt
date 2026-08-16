@@ -102,6 +102,30 @@ fun NodeItemSignedPreview() {
 
 @PreviewLightDark
 @Composable
+fun NodeItemSavedOnPhonePreview() {
+    // Locally-retained node absent from the connected radio's current session snapshot (#6263). Backdated lastHeard
+    // shows the "Saved on phone" badge suppresses the "online" affordance even for a reading that would otherwise
+    // read as live.
+    val savedOnPhoneNode =
+        previewNodes.minnieMouse.copy(lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt())
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = savedOnPhoneNode,
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                    isSavedOnPhone = true,
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 fun NodeItemUnknownPreview() {
     // A node heard before its NodeInfo arrived — placeholder identity, italic name, incomplete badge (design#16).
     AppTheme {
@@ -201,6 +225,26 @@ fun NodeItemCompactOnlineRemotePreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItemCompact(thisNode = previewNodes.mickeyMouse, thatNode = onlineNode, distanceUnits = 0)
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun NodeItemCompactSavedOnPhonePreview() {
+    // Compact-density counterpart of [NodeItemSavedOnPhonePreview] (#6263).
+    val savedOnPhoneNode =
+        previewNodes.minnieMouse.copy(lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt())
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = savedOnPhoneNode,
+                    distanceUnits = 0,
+                    isSavedOnPhone = true,
+                )
             }
         }
     }

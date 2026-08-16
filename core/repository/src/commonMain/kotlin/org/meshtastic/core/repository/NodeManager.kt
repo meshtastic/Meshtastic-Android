@@ -116,6 +116,28 @@ interface NodeManager : NodeIdLookup {
      */
     fun publishConnectionIdentity(sessionGeneration: Long, address: String, nodeNum: Int, deviceId: String?)
 
+    /**
+     * Node numbers confirmed present in the connected radio's own NodeDB for the current connection session — exactly
+     * the set the Stage 2 handshake downloaded, plus the local node. Null before that handshake has completed at least
+     * once this session (no snapshot to compare against yet, so nothing should be flagged).
+     *
+     * Distinct from [nodeDBbyNodeNum]: the phone's node database is deliberately cumulative and keeps rows the
+     * connected radio no longer reports (multi-radio use, meshes bigger than the radio's own bounded/evicting NodeDB).
+     * A row present in [nodeDBbyNodeNum] but absent here is real, locally-retained history — not a fabricated or stale
+     * entry — and UI should badge it as such (see #6263) rather than hide or delete it.
+     *
+     * Reconciled alongside [connectionIdentity] at every transport-session boundary — see [clearConnectionIdentity] and
+     * [clearStaleConnectionIdentity] — using the same generation carried by [publishCurrentSessionNodeNums], so a
+     * snapshot already published for the active generation survives a delayed boundary collector from that same
+     * generation, exactly like [connectionIdentity].
+     */
+    val currentSessionNodeNums: StateFlow<Set<Int>?>
+
+    /**
+     * Publishes the exact set of node numbers [sessionGeneration]'s Stage 2 handshake downloaded (+ the local node).
+     */
+    fun publishCurrentSessionNodeNums(sessionGeneration: Long, nodeNums: Set<Int>)
+
     /** Loads the cached node database from the repository. */
     fun loadCachedNodeDB()
 

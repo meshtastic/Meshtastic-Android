@@ -31,6 +31,7 @@ import org.meshtastic.core.resources.a11y_node_online
 import org.meshtastic.core.resources.a11y_node_role
 import org.meshtastic.core.resources.a11y_node_signal
 import org.meshtastic.core.resources.node_incomplete
+import org.meshtastic.core.resources.node_saved_on_phone_description
 import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.util.formatAgo
@@ -54,6 +55,7 @@ internal data class NodeDescriptionStrings(
     val unknown: String,
     val now: String,
     val incomplete: String,
+    val savedOnPhone: String,
 )
 
 /** Resolves [NodeDescriptionStrings] from Compose string resources. */
@@ -71,6 +73,7 @@ internal fun rememberNodeDescriptionStrings(): NodeDescriptionStrings = NodeDesc
     unknown = stringResource(Res.string.unknown),
     now = stringResource(Res.string.now),
     incomplete = stringResource(Res.string.node_incomplete),
+    savedOnPhone = stringResource(Res.string.node_saved_on_phone_description),
 )
 
 /** Builds a TalkBack-friendly description aggregating node state. Shared between [NodeItem] and [NodeItemCompact]. */
@@ -90,6 +93,7 @@ internal fun buildNodeDescription(
     lastHeardIsRelative: Boolean = true,
     modemPreset: ModemPreset? = null,
     isUnknownUser: Boolean = false,
+    isSavedOnPhone: Boolean = false,
 ): String = buildString {
     append(name)
     if (isUnknownUser) {
@@ -97,10 +101,16 @@ internal fun buildNodeDescription(
         append(strings.incomplete)
     }
     append(", ")
-    append(if (isOnline) strings.online else strings.offline)
+    // A saved-on-phone row wasn't observed this session — announcing "online" from a cached reading would repeat
+    // the same false-freshness claim the badge exists to correct (#6263).
+    append(if (isOnline && !isSavedOnPhone) strings.online else strings.offline)
     if (isFavorite) {
         append(", ")
         append(strings.favorite)
+    }
+    if (isSavedOnPhone) {
+        append(", ")
+        append(strings.savedOnPhone)
     }
     if (lastHeard > 0) {
         val timeText =

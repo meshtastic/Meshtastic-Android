@@ -108,6 +108,7 @@ fun NodeDetailList(
                 node = node,
                 deviceHardware = uiState.metricsState.deviceHardware,
                 reportedTarget = uiState.metricsState.reportedTarget,
+                isSavedOnPhone = uiState.isSavedOnPhone,
             )
         }
         if (uiState.metricsState.deviceLinks.isNotEmpty()) {

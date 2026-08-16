@@ -159,7 +159,10 @@ data class Packet(
                 if (candidateRelayNodes.size == 1) {
                     candidateRelayNodes.first()
                 } else {
-                    candidateRelayNodes.minByOrNull { it.hopsAway }
+                    // hopsAwayOrNull sorts last via Int.MAX_VALUE: an unresolved hop count (-1) must never look
+                    // "closer" than a real, known hop count under a plain minByOrNull { it.hopsAway }. Mirrors
+                    // Node.Companion.getRelayNode's fix for the same defect (#6263).
+                    candidateRelayNodes.minByOrNull { it.hopsAwayOrNull ?: Int.MAX_VALUE }
                 }
 
             return closestRelayNode

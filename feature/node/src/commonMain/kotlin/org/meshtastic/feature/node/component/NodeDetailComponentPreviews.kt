@@ -301,6 +301,15 @@ fun NodeDetailsSectionSignedPreview() {
     AppTheme { Surface { NodeDetailsSection(node = node) } }
 }
 
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun NodeDetailsSectionSavedOnPhonePreview() {
+    // Locally-retained node absent from the connected radio's current session snapshot (#6263).
+    val node = previewData.mickeyMouse
+    AppTheme { Surface { NodeDetailsSection(node = node, isSavedOnPhone = true) } }
+}
+
 @PreviewLightDark
 @Composable
 private fun NodeDetailsSectionWithDeviceHeroPreview() {

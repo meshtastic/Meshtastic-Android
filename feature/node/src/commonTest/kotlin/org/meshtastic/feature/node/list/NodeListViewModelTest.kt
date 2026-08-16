@@ -29,6 +29,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -55,6 +56,7 @@ class NodeListViewModelTest {
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase = mock(MockMode.autofill)
+    private val nodeManager: NodeManager = mock(MockMode.autofill)
 
     @BeforeTest
     fun setUp() {
@@ -75,6 +77,7 @@ class NodeListViewModelTest {
         every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
+        every { nodeManager.currentSessionNodeNums } returns MutableStateFlow(null)
 
         viewModel = createViewModel()
     }
@@ -87,6 +90,7 @@ class NodeListViewModelTest {
         adminController = radioController,
         radioInterfaceService = radioInterfaceService,
         deviceHardwareRepository = FakeDeviceHardwareRepository(),
+        nodeManager = nodeManager,
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
@@ -138,6 +142,20 @@ class NodeListViewModelTest {
             assertEquals(ConnectionState.Disconnected, awaitItem())
             stateFlow.value = ConnectionState.Connected
             assertEquals(ConnectionState.Connected, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `currentSessionNodeNums mirrors nodeManager until a session snapshot is published`() = runTest {
+        val stateFlow = MutableStateFlow<Set<Int>?>(null)
+        every { nodeManager.currentSessionNodeNums } returns stateFlow
+
+        val vm = createViewModel()
+        vm.currentSessionNodeNums.test {
+            assertEquals(null, awaitItem())
+            stateFlow.value = setOf(100, 200)
+            assertEquals(setOf(100, 200), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

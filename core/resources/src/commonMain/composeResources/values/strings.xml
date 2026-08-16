@@ -1272,6 +1272,8 @@
     <string name="node_number">Node Number</string>
     <string name="node_request_send_failed">Couldn't send request. Try again.</string>
     <string name="node_restarting">Restarting…</string>
+    <string name="node_saved_on_phone">Saved on phone</string>
+    <string name="node_saved_on_phone_description">Not in the radio's current node list — showing data saved on this phone</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>
     <string name="node_sort_channel">Channel</string>

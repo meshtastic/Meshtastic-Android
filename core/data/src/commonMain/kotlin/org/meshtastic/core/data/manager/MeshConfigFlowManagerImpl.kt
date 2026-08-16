@@ -298,8 +298,13 @@ class MeshConfigFlowManagerImpl(
             nodeManager.applyTrustedIdentityMigrations(removedNums)
         }
 
+        // Exactly what this session's Stage 2 handshake downloaded (+ the local node) — the UI's "is this node part
+        // of the connected radio's own NodeDB right now" signal (#6263). Published before setNodeDbReady(true) so no
+        // reader can observe "ready" without an up-to-date snapshot to compare against.
+        val currentSessionNodeNums = entities.mapTo(mutableSetOf()) { it.num }.apply { add(info.myNodeNum) }
         val published =
             runForSession(session) {
+                nodeManager.publishCurrentSessionNodeNums(session.generation, currentSessionNodeNums)
                 nodeManager.setNodeDbReady(true)
                 nodeManager.setAllowNodeDbWrites(true)
                 serviceStateWriter.setConnectionState(ConnectionState.Connected)

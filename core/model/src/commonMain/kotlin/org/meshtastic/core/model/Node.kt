@@ -106,6 +106,14 @@ data class Node(
     val rssiOrNull: Int?
         get() = rssi.takeIf { it != RSSI_UNSET }
 
+    /**
+     * Hop count to this node, or null when it has never been resolved ([hopsAway] still holds [HOPS_AWAY_UNSET]). 0
+     * hops is a real reading (a direct neighbor) — every read of [hopsAway] should go through this rather than
+     * comparing against the raw sentinel.
+     */
+    val hopsAwayOrNull: Int?
+        get() = hopsAway.takeIf { it != HOPS_AWAY_UNSET }
+
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics()
 
@@ -193,12 +201,15 @@ data class Node(
         const val PUBLIC_KEY_SIZE: Int = 32
 
         /**
-         * Sentinels stored when a node has no radio-metric reading. They exist because [snr]/[rssi] are not nullable
-         * (the Room columns behind them are NOT NULL); resolve them with [snrOrNull]/[rssiOrNull] rather than comparing
-         * against them at call sites.
+         * Sentinels stored when a node has no radio-metric reading. They exist because [snr]/[rssi]/[hopsAway] are not
+         * nullable (the Room columns behind them are NOT NULL); resolve them with [snrOrNull]/[rssiOrNull]/
+         * [hopsAwayOrNull] rather than comparing against them at call sites.
          */
         const val SNR_UNSET: Float = Float.MAX_VALUE
         const val RSSI_UNSET: Int = Int.MAX_VALUE
+
+        /** Mirrors the `-1` default already carried by [hopsAway] (and `NodeEntity.hopsAway`). */
+        const val HOPS_AWAY_UNSET: Int = -1
 
         val ERROR_BYTE_STRING: ByteString = ByteArray(PUBLIC_KEY_SIZE) { 0 }.toByteString()
 
@@ -216,7 +227,9 @@ data class Node(
                 if (candidateRelayNodes.size == 1) {
                     candidateRelayNodes.first()
                 } else {
-                    candidateRelayNodes.minByOrNull { it.hopsAway }
+                    // hopsAwayOrNull sorts last via Int.MAX_VALUE: an unresolved hop count (-1) must never look
+                    // "closer" than a real, known hop count under a plain minByOrNull { it.hopsAway }.
+                    candidateRelayNodes.minByOrNull { it.hopsAwayOrNull ?: Int.MAX_VALUE }
                 }
 
             return closestRelayNode

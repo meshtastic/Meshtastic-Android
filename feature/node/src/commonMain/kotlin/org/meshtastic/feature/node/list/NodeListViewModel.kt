@@ -39,6 +39,7 @@ import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -60,6 +61,7 @@ class NodeListViewModel(
     private val adminController: AdminController,
     private val radioInterfaceService: RadioInterfaceService,
     private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val nodeManager: NodeManager,
     val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
@@ -67,6 +69,14 @@ class NodeListViewModel(
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
+
+    /**
+     * Node numbers the connected radio's own NodeDB reported for the current session, or null before that handshake has
+     * completed at least once. Used to badge locally-retained rows the radio did NOT just report (#6263) — see
+     * [NodeManager.currentSessionNodeNums].
+     */
+    val currentSessionNodeNums: StateFlow<Set<Int>?> =
+        nodeManager.currentSessionNodeNums.stateInWhileSubscribed(initialValue = null)
 
     val onlineNodeCount = nodeRepository.onlineNodeCount.stateInWhileSubscribed(initialValue = 0)
 

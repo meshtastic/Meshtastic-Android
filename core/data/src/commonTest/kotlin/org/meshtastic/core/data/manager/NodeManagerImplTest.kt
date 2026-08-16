@@ -2726,4 +2726,58 @@ class NodeManagerImplTest {
             assertEquals(reuseKey, reused.publicKey)
             assertEquals(1, reuseDispatches.count { it.id == num && it.message == "Replacement" })
         }
+
+    // ---------- currentSessionNodeNums (#6263) ----------
+
+    @Test
+    fun `currentSessionNodeNums is null until the current session publishes a snapshot`() {
+        assertNull(nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `publishCurrentSessionNodeNums exposes exactly the published set`() {
+        nodeManager.publishCurrentSessionNodeNums(sessionGeneration = 0L, nodeNums = setOf(1, 2, 3))
+
+        assertEquals(setOf(1, 2, 3), nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `clearConnectionIdentity clears the session node-number snapshot unconditionally`() {
+        nodeManager.publishCurrentSessionNodeNums(sessionGeneration = 0L, nodeNums = setOf(1, 2, 3))
+
+        nodeManager.clearConnectionIdentity()
+
+        assertNull(nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `clearStaleConnectionIdentity clears a snapshot from a superseded generation`() {
+        nodeManager.publishCurrentSessionNodeNums(sessionGeneration = 0L, nodeNums = setOf(1, 2, 3))
+
+        nodeManager.clearStaleConnectionIdentity(activeSessionGeneration = 1L)
+
+        assertNull(nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `clearStaleConnectionIdentity preserves a snapshot already published for the active generation`() {
+        // Regression: RadioControllerImpl's sessionGeneration collector can be delayed and fire
+        // clearStaleConnectionIdentity(activeGeneration) AFTER installAndPublishNodeDatabase already published the
+        // new session's snapshot for that same generation. A generation-blind clear would silently blank the badge
+        // for the rest of the session — mirrors connectionIdentity's own race-survival contract.
+        nodeManager.publishCurrentSessionNodeNums(sessionGeneration = 5L, nodeNums = setOf(1, 2, 3))
+
+        nodeManager.clearStaleConnectionIdentity(activeSessionGeneration = 5L)
+
+        assertEquals(setOf(1, 2, 3), nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `clear resets the session node-number snapshot`() {
+        nodeManager.publishCurrentSessionNodeNums(sessionGeneration = 0L, nodeNums = setOf(1, 2, 3))
+
+        nodeManager.clear()
+
+        assertNull(nodeManager.currentSessionNodeNums.value)
+    }
 }

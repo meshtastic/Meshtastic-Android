@@ -81,6 +81,7 @@ import org.meshtastic.core.resources.supported
 import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
+import org.meshtastic.core.ui.component.SavedOnPhoneBadge
 import org.meshtastic.core.ui.component.SignedNodeDialog
 import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
@@ -110,9 +111,13 @@ fun NodeDetailsSection(
     modifier: Modifier = Modifier,
     deviceHardware: DeviceHardware? = null,
     reportedTarget: String? = null,
+    isSavedOnPhone: Boolean = false,
 ) {
     SectionCard(title = Res.string.details, modifier = modifier) {
         Column(modifier = Modifier.animateContentSize()) {
+            if (isSavedOnPhone) {
+                SavedOnPhoneBadge(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            }
             if (node.mismatchKey) {
                 MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(16.dp))
@@ -176,7 +181,7 @@ private fun MainNodeDetails(node: Node) {
         HearsAndHopsRow(node)
         SectionDivider()
         UserAndUptimeRow(node)
-        if (node.hopsAway == 0 && !node.viaMqtt) {
+        if (node.hopsAwayOrNull == 0 && !node.viaMqtt) {
             SectionDivider()
             SignalRow(node)
         }
@@ -251,10 +256,11 @@ private fun HearsAndHopsRow(node: Node) {
             icon = MeshtasticIcons.History,
             modifier = Modifier.weight(1f),
         )
-        if (node.hopsAway >= 0) {
+        val hopsAway = node.hopsAwayOrNull
+        if (hopsAway != null) {
             InfoItem(
                 label = stringResource(Res.string.hops_away),
-                value = node.hopsAway.toString(),
+                value = hopsAway.toString(),
                 icon = MeshtasticIcons.HopCount,
                 modifier = Modifier.weight(1f),
             )

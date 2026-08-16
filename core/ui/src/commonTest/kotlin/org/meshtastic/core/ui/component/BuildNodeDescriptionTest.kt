@@ -38,6 +38,7 @@ class BuildNodeDescriptionTest {
             unknown = "unknown",
             now = "now",
             incomplete = "incomplete",
+            savedOnPhone = "saved on phone",
         )
 
     private fun describe(
@@ -53,6 +54,7 @@ class BuildNodeDescriptionTest {
         viaMqtt: Boolean = false,
         lastHeardIsRelative: Boolean = true,
         isUnknownUser: Boolean = false,
+        isSavedOnPhone: Boolean = false,
     ): String = buildNodeDescription(
         name = name,
         isOnline = isOnline,
@@ -67,6 +69,7 @@ class BuildNodeDescriptionTest {
         strings = testStrings,
         lastHeardIsRelative = lastHeardIsRelative,
         isUnknownUser = isUnknownUser,
+        isSavedOnPhone = isSavedOnPhone,
     )
 
     // ---- Basic output ----
@@ -198,5 +201,33 @@ class BuildNodeDescriptionTest {
     fun signal_shown_when_direct_and_valid_values() {
         val result = describe(snr = -5f, hopsAway = 0, viaMqtt = false)
         assertContains(result, "signal")
+    }
+
+    // ---- Saved on phone (#6263) ----
+
+    @Test
+    fun includes_saved_on_phone_when_flagged() {
+        val result = describe(isSavedOnPhone = true)
+        assertContains(result, "saved on phone")
+    }
+
+    @Test
+    fun omits_saved_on_phone_by_default() {
+        val result = describe()
+        assertFalse(result.contains("saved on phone"))
+    }
+
+    @Test
+    fun reports_offline_when_saved_on_phone_even_if_isOnline_is_true() {
+        // A row not observed this session must not announce "online" from a cached reading (#6263) — that's the
+        // same false-freshness claim the badge exists to correct.
+        val result = describe(isOnline = true, isSavedOnPhone = true)
+        assertContains(result, "offline")
+    }
+
+    @Test
+    fun reports_online_normally_when_not_saved_on_phone() {
+        val result = describe(isOnline = true, isSavedOnPhone = false)
+        assertTrue(result.contains("online"))
     }
 }

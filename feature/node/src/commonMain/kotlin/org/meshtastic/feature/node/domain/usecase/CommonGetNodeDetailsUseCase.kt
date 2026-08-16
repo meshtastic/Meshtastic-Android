@@ -38,6 +38,7 @@ import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
@@ -66,13 +67,19 @@ constructor(
     private val deviceLinkRepository: DeviceLinkRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
+    private val nodeManager: NodeManager,
 ) : GetNodeDetailsUseCase {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("LongMethod", "CyclomaticComplexMethod")
-    override operator fun invoke(nodeId: Int): Flow<NodeDetailUiState> =
-        nodeRepository.effectiveLogNodeId(nodeId).flatMapLatest { effectiveNodeId ->
-            buildFlow(nodeId, effectiveNodeId)
+    override operator fun invoke(nodeId: Int): Flow<NodeDetailUiState> = nodeRepository
+        .effectiveLogNodeId(nodeId)
+        .flatMapLatest { effectiveNodeId -> buildFlow(nodeId, effectiveNodeId) }
+        .combine(nodeManager.currentSessionNodeNums) { state, sessionNodeNums ->
+            // Null session snapshot means the current session's Stage 2 handshake hasn't completed yet — there
+            // is nothing trustworthy to compare against, so nothing should be flagged (#6263).
+            val isSavedOnPhone = sessionNodeNums != null && state.node?.num?.let { it !in sessionNodeNums } == true
+            state.copy(isSavedOnPhone = isSavedOnPhone)
         }
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")

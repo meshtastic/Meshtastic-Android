@@ -63,6 +63,8 @@ import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.node_incomplete
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
+import org.meshtastic.core.resources.node_saved_on_phone
+import org.meshtastic.core.resources.node_saved_on_phone_description
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.Channel
 import org.meshtastic.core.ui.icon.Counter0
@@ -83,6 +85,7 @@ import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.PersonQuestion
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
@@ -114,6 +117,7 @@ fun NodeItemCompact(
     showTelemetry: Boolean = true,
     tempInFahrenheit: Boolean = false,
     deviceImageUrl: String? = null,
+    isSavedOnPhone: Boolean = false,
 ) {
     val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
@@ -147,7 +151,7 @@ fun NodeItemCompact(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset) {
+        remember(thatNode, distance, lastHeardIsRelative, a11yStrings, modemPreset, isSavedOnPhone) {
             buildNodeDescription(
                 name = longName,
                 isOnline = thatNode.isOnline,
@@ -163,6 +167,7 @@ fun NodeItemCompact(
                 lastHeardIsRelative = lastHeardIsRelative,
                 modemPreset = modemPreset,
                 isUnknownUser = thatNode.isUnknownUser,
+                isSavedOnPhone = isSavedOnPhone,
             )
         }
 
@@ -216,6 +221,7 @@ fun NodeItemCompact(
                     isIgnored = isIgnored,
                     isFavorite = isFavorite,
                     unmessageable = unmessageable,
+                    isSavedOnPhone = isSavedOnPhone,
                 )
 
                 // Row 2: Glanceable health — online + last heard + distance + signal
@@ -229,6 +235,7 @@ fun NodeItemCompact(
                     showLocation = showLocation,
                     showSignal = showSignal,
                     contentColor = contentColor,
+                    isSavedOnPhone = isSavedOnPhone,
                 )
 
                 // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
@@ -262,6 +269,7 @@ private fun CompactNameRow(
     isIgnored: Boolean,
     isFavorite: Boolean,
     unmessageable: Boolean,
+    isSavedOnPhone: Boolean,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -277,6 +285,14 @@ private fun CompactNameRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (isSavedOnPhone) {
+            StatusBadge(
+                imageVector = MeshtasticIcons.PhoneAndroid,
+                contentDescription = Res.string.node_saved_on_phone,
+                tooltipText = Res.string.node_saved_on_phone_description,
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
         if (thatNode.isUnknownUser) {
             Icon(
                 imageVector = MeshtasticIcons.PersonQuestion,
@@ -316,6 +332,7 @@ private fun CompactHealthRow(
     showLocation: Boolean,
     showSignal: Boolean,
     contentColor: Color,
+    isSavedOnPhone: Boolean,
 ) {
     val segments = buildList {
         // Last heard (tinted by online status)
@@ -324,7 +341,10 @@ private fun CompactHealthRow(
                 @Composable {
                     StatusAwareLastHeard(
                         lastHeard = thatNode.lastHeard,
-                        online = thatNode.isOnline,
+                        // A row not observed this session must not carry the "online" affordance forward from a
+                        // cached reading — that's the same false-freshness claim the "Saved on phone" badge exists
+                        // to correct (#6263).
+                        online = thatNode.isOnline && !isSavedOnPhone,
                         contentColor = contentColor,
                         relative = lastHeardIsRelative,
                     )
@@ -418,13 +438,14 @@ private fun CompactFooterRow(
                     )
                 }
             }
-            if (showHops && thatNode.hopsAway > 0 && !isThisNode) {
+            val hopsAway = thatNode.hopsAwayOrNull
+            if (showHops && hopsAway != null && hopsAway > 0 && !isThisNode) {
                 add {
                     IconInfo(
                         icon = MeshtasticIcons.HopCount,
-                        contentDescription = "${thatNode.hopsAway} hops",
+                        contentDescription = "$hopsAway hops",
                         contentColor = tertiaryColor,
-                        text = thatNode.hopsAway.toString(),
+                        text = hopsAway.toString(),
                     )
                 }
             }

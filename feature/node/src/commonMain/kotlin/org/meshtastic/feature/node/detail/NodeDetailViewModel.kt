@@ -71,6 +71,8 @@ data class NodeDetailUiState(
     val lastRequestNeighborsTime: Long? = null,
     val sessionStatus: SessionStatus = SessionStatus.NoSession,
     val isEnsuringSession: Boolean = false,
+    /** True when [node] is locally cached but wasn't part of the connected radio's current session snapshot. */
+    val isSavedOnPhone: Boolean = false,
 )
 
 /**

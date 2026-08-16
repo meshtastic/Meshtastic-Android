@@ -94,6 +94,7 @@ fun NodeItem(
     isActive: Boolean = false,
     showTelemetry: Boolean = true,
     deviceImageUrl: String? = null,
+    isSavedOnPhone: Boolean = false,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
@@ -135,7 +136,7 @@ fun NodeItem(
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, distance, a11yStrings, modemPreset) {
+        remember(thatNode, distance, a11yStrings, modemPreset, isSavedOnPhone) {
             buildNodeDescription(
                 name = originalLongName,
                 isOnline = thatNode.isOnline,
@@ -150,6 +151,7 @@ fun NodeItem(
                 strings = a11yStrings,
                 modemPreset = modemPreset,
                 isUnknownUser = thatNode.isUnknownUser,
+                isSavedOnPhone = isSavedOnPhone,
             )
         }
 
@@ -188,6 +190,7 @@ fun NodeItem(
                 connectionState = connectionState,
                 deviceType = deviceType,
                 contentColor = contentColor,
+                isSavedOnPhone = isSavedOnPhone,
             )
 
             thatNode.nodeStatus?.let { status ->
@@ -309,9 +312,10 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     )
                 }
             } else {
-                if (thatNode.hopsAway > 0) {
-                    add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
-                } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
+                val hopsAway = thatNode.hopsAwayOrNull
+                if (hopsAway != null && hopsAway > 0) {
+                    add { HopsInfo(hops = hopsAway, contentColor = contentColor) }
+                } else if (hopsAway == 0 && !thatNode.viaMqtt) {
                     val snr = thatNode.snrOrNull
                     val rssi = thatNode.rssiOrNull
                     if (snr != null || rssi != null) {
@@ -501,6 +505,7 @@ private fun NodeItemHeader(
     connectionState: ConnectionState,
     deviceType: DeviceType?,
     contentColor: Color,
+    isSavedOnPhone: Boolean,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -533,7 +538,10 @@ private fun NodeItemHeader(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 StatusAwareLastHeard(
                     lastHeard = thatNode.lastHeard,
-                    online = !isThisNode && thatNode.isOnline,
+                    // A row not observed this session must not carry the "online" affordance forward from a cached
+                    // reading — that's the same false-freshness claim the "Saved on phone" badge exists to correct
+                    // (#6263).
+                    online = !isThisNode && thatNode.isOnline && !isSavedOnPhone,
                     contentColor = contentColor,
                 )
             }
@@ -548,6 +556,7 @@ private fun NodeItemHeader(
             deviceType = deviceType,
             contentColor = contentColor,
             isUnknownUser = thatNode.isUnknownUser,
+            isSavedOnPhone = isSavedOnPhone,
         )
     }
 }

@@ -20,10 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.User
@@ -103,24 +105,120 @@ class NodeItemZeroMetricsTest {
         onNodeWithText("0.0°C").assertDoesNotExist()
     }
 
-    private fun ComposeUiTest.setNodeItem(metrics: EnvironmentMetrics) = setContent {
+    // hopsAway: -1 (Node.HOPS_AWAY_UNSET) is "never resolved", not a real reading — 0 is a real direct-neighbor
+    // reading. Pinned as a pair (per the code-review "presence vs. sentinel zero" checklist) so the two states can't
+    // collapse back into one: a real 0 must not read as "unresolved", and "unresolved" must not paint a fake "0 hops".
+    @Test
+    fun nodeItem_showsHopsChipForARealNonZeroReading() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics(), hopsAway = 3)
+        onNodeWithText("Hops Away").assertIsDisplayed()
+        onNodeWithText("3").assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItem_hidesHopsChipWhenNeverResolved() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics(), hopsAway = Node.HOPS_AWAY_UNSET)
+        onNodeWithText("Hops Away").assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_showsHopsChipForARealNonZeroReading() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics(), hopsAway = 4)
+        onNodeWithText("4").assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItemCompact_hidesHopsChipWhenNeverResolved() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics(), hopsAway = Node.HOPS_AWAY_UNSET)
+        onNodeWithText("4").assertDoesNotExist()
+    }
+
+    // "Saved on phone" badge (#6263): flags a node that is locally cached but wasn't part of the connected radio's
+    // current session snapshot, instead of letting it render as if it were freshly heard.
+    @Test
+    fun nodeItem_showsSavedOnPhoneBadgeWhenFlagged() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics(), isSavedOnPhone = true)
+        onNodeWithContentDescription("Saved on phone").assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItem_hidesSavedOnPhoneBadgeByDefault() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics())
+        onNodeWithContentDescription("Saved on phone").assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItemCompact_showsSavedOnPhoneBadgeWhenFlagged() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics(), isSavedOnPhone = true)
+        onNodeWithContentDescription("Saved on phone").assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItemCompact_hidesSavedOnPhoneBadgeByDefault() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics())
+        onNodeWithContentDescription("Saved on phone").assertDoesNotExist()
+    }
+
+    // A saved-on-phone row's lastHeard is real historical data (not a sentinel), but announcing it as "online" would
+    // carry forward the exact false-freshness claim the badge exists to correct (#6263) — see
+    // BuildNodeDescriptionTest for the string-level coverage of this same branch.
+    @Test
+    fun nodeItem_doesNotClaimOnlineWhenSavedOnPhoneEvenWithRecentLastHeard() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics(), isSavedOnPhone = true, lastHeard = onlineTimeThreshold() + 1)
+        onNodeWithContentDescription("online", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun nodeItem_claimsOnlineForARecentlyHeardNodeNotSavedOnPhone() = runComposeUiTest {
+        setNodeItem(EnvironmentMetrics(), isSavedOnPhone = false, lastHeard = onlineTimeThreshold() + 1)
+        onNodeWithContentDescription("online", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun nodeItemCompact_doesNotClaimOnlineWhenSavedOnPhoneEvenWithRecentLastHeard() = runComposeUiTest {
+        setNodeItemCompact(EnvironmentMetrics(), isSavedOnPhone = true, lastHeard = onlineTimeThreshold() + 1)
+        onNodeWithContentDescription("online", substring = true).assertDoesNotExist()
+    }
+
+    private fun ComposeUiTest.setNodeItem(
+        metrics: EnvironmentMetrics,
+        hopsAway: Int = Node.HOPS_AWAY_UNSET,
+        isSavedOnPhone: Boolean = false,
+        lastHeard: Int = 0,
+    ) = setContent {
         MaterialTheme {
             NodeItem(
                 thisNode = null,
-                thatNode = node(metrics),
+                thatNode = node(metrics, hopsAway, lastHeard),
                 distanceUnits = DisplayUnits.METRIC.value,
                 tempInFahrenheit = false,
                 connectionState = ConnectionState.Connected,
+                isSavedOnPhone = isSavedOnPhone,
             )
         }
     }
 
-    private fun ComposeUiTest.setNodeItemCompact(metrics: EnvironmentMetrics) = setContent {
+    private fun ComposeUiTest.setNodeItemCompact(
+        metrics: EnvironmentMetrics,
+        hopsAway: Int = Node.HOPS_AWAY_UNSET,
+        isSavedOnPhone: Boolean = false,
+        lastHeard: Int = 0,
+    ) = setContent {
         MaterialTheme {
-            NodeItemCompact(thisNode = null, thatNode = node(metrics), distanceUnits = DisplayUnits.METRIC.value)
+            NodeItemCompact(
+                thisNode = null,
+                thatNode = node(metrics, hopsAway, lastHeard),
+                distanceUnits = DisplayUnits.METRIC.value,
+                isSavedOnPhone = isSavedOnPhone,
+            )
         }
     }
 
-    private fun node(metrics: EnvironmentMetrics) =
-        Node(num = 2, user = User(id = "!2", long_name = "Sensor"), environmentMetrics = metrics)
+    private fun node(metrics: EnvironmentMetrics, hopsAway: Int = Node.HOPS_AWAY_UNSET, lastHeard: Int = 0) = Node(
+        num = 2,
+        user = User(id = "!2", long_name = "Sensor"),
+        environmentMetrics = metrics,
+        hopsAway = hopsAway,
+        lastHeard = lastHeard,
+    )
 }

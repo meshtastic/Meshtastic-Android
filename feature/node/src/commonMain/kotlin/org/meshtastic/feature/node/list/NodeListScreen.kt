@@ -117,6 +117,7 @@ fun NodeListScreen(
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
+    val currentSessionNodeNums by viewModel.currentSessionNodeNums.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
@@ -265,6 +266,13 @@ fun NodeListScreen(
                             }
 
                         val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+                        // Null session snapshot (not yet connected, or handshake not yet complete this session)
+                        // means there is nothing trustworthy to compare against — don't badge anything until the
+                        // radio has actually reported its own NodeDB for this connection (#6263).
+                        val isSavedOnPhone =
+                            remember(currentSessionNodeNums, node.num) {
+                                currentSessionNodeNums?.let { node.num !in it } ?: false
+                            }
 
                         when (density) {
                             NodeListDensity.COMPLETE ->
@@ -281,6 +289,7 @@ fun NodeListScreen(
                                     isActive = isActive,
                                     showTelemetry = showTelemetry,
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                                    isSavedOnPhone = isSavedOnPhone,
                                 )
 
                             NodeListDensity.COMPACT ->
@@ -303,6 +312,7 @@ fun NodeListScreen(
                                     showTelemetry = showTelemetry,
                                     tempInFahrenheit = state.tempInFahrenheit,
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
+                                    isSavedOnPhone = isSavedOnPhone,
                                 )
                         }
                         val isThisNode = remember(node) { ourNode?.num == node.num }

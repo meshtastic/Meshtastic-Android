@@ -317,16 +317,33 @@ class NodeManagerImpl(
 
     override fun clearConnectionIdentity() {
         _connectionIdentity.value = null
+        currentSessionNodeNumsGeneration.value = NO_SESSION_NODE_NUMS_GENERATION
+        _currentSessionNodeNums.value = null
     }
 
     override fun clearStaleConnectionIdentity(activeSessionGeneration: Long) {
         _connectionIdentity.updateStateFlow { identity ->
             identity?.takeIf { it.sessionGeneration == activeSessionGeneration }
         }
+        // Same reconciliation as connectionIdentity: a snapshot already published for the active generation must
+        // survive a delayed boundary collector from that same generation (RadioControllerImpl's sessionGeneration
+        // collector can fire after installAndPublishNodeDatabase already published for the new session).
+        if (currentSessionNodeNumsGeneration.value != activeSessionGeneration) {
+            _currentSessionNodeNums.value = null
+        }
     }
 
     override fun publishConnectionIdentity(sessionGeneration: Long, address: String, nodeNum: Int, deviceId: String?) {
         _connectionIdentity.value = ConnectionIdentity(sessionGeneration, address, nodeNum, deviceId)
+    }
+
+    private val currentSessionNodeNumsGeneration = atomic(NO_SESSION_NODE_NUMS_GENERATION)
+    private val _currentSessionNodeNums = MutableStateFlow<Set<Int>?>(null)
+    override val currentSessionNodeNums: StateFlow<Set<Int>?> = _currentSessionNodeNums
+
+    override fun publishCurrentSessionNodeNums(sessionGeneration: Long, nodeNums: Set<Int>) {
+        currentSessionNodeNumsGeneration.value = sessionGeneration
+        _currentSessionNodeNums.value = nodeNums
     }
 
     override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
@@ -401,6 +418,9 @@ class NodeManagerImpl(
          * legitimately busy mesh never reaches it and only sustained novel-`from` traffic does.
          */
         const val MAX_IN_MEMORY_NODES = 2_000
+
+        /** Sentinel for [currentSessionNodeNumsGeneration] meaning "no snapshot published yet this process". */
+        private const val NO_SESSION_NODE_NUMS_GENERATION = -1L
     }
 
     override fun loadCachedNodeDB() {
@@ -475,6 +495,8 @@ class NodeManagerImpl(
         myDeviceId.value = null
         firmwareEdition.value = null
         _connectionIdentity.value = null
+        currentSessionNodeNumsGeneration.value = NO_SESSION_NODE_NUMS_GENERATION
+        _currentSessionNodeNums.value = null
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
