@@ -231,7 +231,10 @@
     <string name="clean_nodes_older_than">Clean up nodes last seen older than %1$d days</string>
     <string name="clean_now">Clean Now</string>
     <string name="clean_unknown_nodes">Clean up only unknown nodes</string>
+    <!-- CLEAR -->
     <string name="clear">Clear</string>
+    <string name="clear_position_track_message">This permanently deletes this node's recorded GPS track. This cannot be undone.</string>
+    <string name="clear_position_track_title">Clear position track?</string>
     <string name="clear_selection">Clear selection</string>
     <string name="clear_time_zone">Clear time zone</string>
     <string name="client_notification">Client Notification</string>

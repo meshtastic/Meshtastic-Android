@@ -210,7 +210,10 @@ clean_node_database_title
 clean_nodes_older_than
 clean_now
 clean_unknown_nodes
+### CLEAR ###
 clear
+clear_position_track_message
+clear_position_track_title
 clear_selection
 clear_time_zone
 client_notification
