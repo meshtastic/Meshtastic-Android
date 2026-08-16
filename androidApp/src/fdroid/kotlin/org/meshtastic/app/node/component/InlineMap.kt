@@ -40,6 +40,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             // Default osmdroid tile source.
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(false)
+            isTilesScaledToDpi = true
 
             controller.setZoom(15.0)
         }
