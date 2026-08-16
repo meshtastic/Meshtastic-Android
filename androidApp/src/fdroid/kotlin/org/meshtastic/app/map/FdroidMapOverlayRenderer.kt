@@ -87,7 +87,9 @@ class FdroidMapOverlayRenderer {
             val overlay =
                 withContext(Dispatchers.Main.immediate) {
                     // Build on the main thread: overlay markers reference the MapView (info windows, defaults).
-                    doc.mKmlRoot.buildOverlay(map, null, SimpleStyleStyler, doc).also { insertBelowMarkers(map, it) }
+                    doc.mKmlRoot.buildOverlay(map, null, SimpleStyleStyler(map, doc), doc).also {
+                        insertBelowMarkers(map, it)
+                    }
                 }
             rendered[layer.id] = Rendered(signatureOf(layer), overlay)
             dirty = true
@@ -138,16 +140,29 @@ class FdroidMapOverlayRenderer {
 
 /**
  * osmbonuspack styler that maps mapbox simplestyle properties (read from a GeoJSON feature's `properties`, which
- * osmbonuspack stores as KML ExtendedData) onto the built osmdroid geometry. Only overrides when a property is present,
- * so KML files keep their own `<Style>`.
+ * osmbonuspack stores as KML ExtendedData) onto the built osmdroid geometry, layered on top of osmbonuspack's own
+ * native KML `<Style>` resolution.
+ *
+ * osmbonuspack's `buildOverlay()` is an either/or branch: passing a non-null [KmlFeature.Styler] (as [reconcile] does,
+ * for both KML and GeoJSON) makes it skip `applyDefaultStyling()` entirely and call this styler instead — it is NOT an
+ * addition on top of the default. So every `on*` override here calls the matching `applyDefaultStyling()` itself first
+ * (resolving the placemark's real KML `<Style>`/`<IconStyle>`, and — for polygons — the tap info-window bubble), then
+ * applies simplestyle overrides only when the corresponding GeoJSON property is actually present.
  */
-private object SimpleStyleStyler : KmlFeature.Styler {
+private class SimpleStyleStyler(private val map: MapView, private val kmlDocument: KmlDocument) : KmlFeature.Styler {
     override fun onFeature(overlay: Overlay?, kmlFeature: KmlFeature?) = Unit
 
-    override fun onPoint(marker: Marker?, kmlPlacemark: KmlPlacemark?, kmlPoint: KmlPoint?) = Unit
+    override fun onPoint(marker: Marker?, kmlPlacemark: KmlPlacemark?, kmlPoint: KmlPoint?) {
+        marker ?: return
+        kmlPoint?.applyDefaultStyling(marker, null, kmlPlacemark, kmlDocument, map)
+        // simplestyle's marker-color/marker-symbol aren't modeled here (they'd need Maki icon
+        // sprites or manual icon tinting) — KML's own <IconStyle>, applied above, is what this
+        // fixes; GeoJSON points still fall back to osmdroid's default marker icon.
+    }
 
     override fun onLineString(polyline: Polyline?, kmlPlacemark: KmlPlacemark?, kmlLineString: KmlLineString?) {
         polyline ?: return
+        kmlLineString?.applyDefaultStyling(polyline, null, kmlPlacemark, kmlDocument, map)
         val stroke = kmlPlacemark?.cssColor("stroke") ?: kmlPlacemark?.cssColor("color")
         stroke?.let { polyline.color = it }
         kmlPlacemark?.getExtendedData("stroke-width")?.toFloatOrNull()?.let { polyline.width = it }
@@ -155,16 +170,25 @@ private object SimpleStyleStyler : KmlFeature.Styler {
 
     override fun onPolygon(polygon: Polygon?, kmlPlacemark: KmlPlacemark?, kmlPolygon: KmlPolygon?) {
         polygon ?: return
+        kmlPolygon?.applyDefaultStyling(polygon, null, kmlPlacemark, kmlDocument, map)
+        val hasNativeKmlStyle = kmlDocument.getStyle(kmlPlacemark?.mStyle) != null
         val fill = kmlPlacemark?.cssColor("fill") ?: kmlPlacemark?.cssColor("color")
         val stroke = kmlPlacemark?.cssColor("stroke") ?: kmlPlacemark?.cssColor("color")
         val fillOpacity = kmlPlacemark?.getExtendedData("fill-opacity")?.toFloatOrNull()
-        val strokeWidth = kmlPlacemark?.getExtendedData("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
+        val strokeWidth = kmlPlacemark?.getExtendedData("stroke-width")?.toFloatOrNull()
         fill?.let { polygon.fillColor = it.resolveFillAlpha(fillOpacity) }
         stroke?.let { polygon.strokeColor = it }
-        polygon.strokeWidth = strokeWidth
+        // Only fall back to the GeoJSON default when neither a real KML <Style> nor an explicit
+        // simplestyle stroke-width applied above — otherwise this would overwrite a native KML
+        // polygon's own stroke width every time (KML files don't carry a stroke-width ExtendedData).
+        polygon.strokeWidth =
+            strokeWidth ?: if (hasNativeKmlStyle) polygon.strokeWidth else DEFAULT_GEOJSON_STROKE_WIDTH
     }
 
-    override fun onTrack(polyline: Polyline?, kmlPlacemark: KmlPlacemark?, kmlTrack: KmlTrack?) = Unit
+    override fun onTrack(polyline: Polyline?, kmlPlacemark: KmlPlacemark?, kmlTrack: KmlTrack?) {
+        polyline ?: return
+        kmlTrack?.applyDefaultStyling(polyline, null, kmlPlacemark, kmlDocument, map)
+    }
 }
 
 private fun KmlPlacemark.cssColor(key: String): Int? = getExtendedData(key)?.let { parseCssColor(it) }
