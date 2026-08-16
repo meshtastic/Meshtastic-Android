@@ -58,7 +58,10 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
             val listener =
                 object : ServiceListener {
                     override fun serviceAdded(event: ServiceEvent) {
-                        jmdns?.requestServiceInfo(event.type, event.name)
+                        // persistent=true: keep calling serviceResolved as fresh records arrive (re-announcements,
+                        // IP changes) instead of only once — otherwise a resolved device's address goes stale until
+                        // it's fully removed and rediscovered from scratch.
+                        jmdns?.requestServiceInfo(event.type, event.name, true)
                     }
 
                     override fun serviceRemoved(event: ServiceEvent) {
@@ -75,7 +78,15 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
                         val discovered =
                             DiscoveredService(
                                 name = info.name,
-                                hostAddress = info.hostAddresses.firstOrNull() ?: "",
+                                // Prefer IPv4: jmdns's IPv6 candidates are often link-local
+                                // (fe80::/10) addresses that need a zone/scope ID to be
+                                // routable, which jmdns doesn't supply. Only fall back to
+                                // whatever hostAddresses offers (which may be IPv6) if no
+                                // IPv4 candidate resolved.
+                                hostAddress =
+                                info.inet4Addresses.firstOrNull()?.hostAddress
+                                    ?: info.hostAddresses.firstOrNull()
+                                    ?: "",
                                 port = info.port,
                                 txt = txtMap,
                             )

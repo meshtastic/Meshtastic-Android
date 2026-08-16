@@ -24,7 +24,13 @@ interface NetworkRepository {
 
     companion object {
         fun DiscoveredService.toAddressString() = buildString {
-            append(hostAddress)
+            // Bracket IPv6 literals (they contain ':') so appending ":$port" below stays
+            // unambiguous — "fe80::1:8080" is not parseable as host+port, "[fe80::1]:8080" is.
+            if (hostAddress.contains(':')) {
+                append('[').append(hostAddress).append(']')
+            } else {
+                append(hostAddress)
+            }
             if (port != NetworkConstants.SERVICE_PORT) {
                 append(":$port")
             }
