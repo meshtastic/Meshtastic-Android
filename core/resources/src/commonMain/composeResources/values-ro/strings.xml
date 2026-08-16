@@ -19,6 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s:%2$s</string>
     <string name="a11y_message_from">Mesaj de la %1$s %2$s</string>
+    <string name="about">Despre</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Mulțumiri</string>
     <!-- ACTION -->

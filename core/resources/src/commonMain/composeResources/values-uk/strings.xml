@@ -26,6 +26,7 @@
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="about">Про</string>
     <string name="accept">Прийняти</string>
     <string name="acknowledgements">Подяки</string>
     <!-- ACTION -->

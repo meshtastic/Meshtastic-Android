@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Acerca de</string>
     <string name="accept">Aceptar</string>
     <!-- ACTION -->
     <string name="action_delete_message">Eliminar mensaxe</string>

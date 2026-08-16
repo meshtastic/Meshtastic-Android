@@ -26,6 +26,7 @@
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роля %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="about">Относно</string>
     <string name="accept">Приеми</string>
     <string name="acknowledgements">Благодарности</string>
     <!-- ACTION -->
@@ -79,6 +80,7 @@
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="app_version">Версия</string>
     <string name="apply">Приложи</string>
+    <string name="apps">Приложения</string>
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Добър</string>
@@ -779,6 +781,7 @@
     <string name="mute_status_unmuted">Не е заглушен</string>
     <string name="name">Име</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
+    <string name="need_hardware">Нуждаете се от хардуер?</string>
     <string name="network">Мрежа</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>

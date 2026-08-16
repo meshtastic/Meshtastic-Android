@@ -29,6 +29,7 @@
     <string name="a11y_node_role">役割 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
     <string name="a11y_nodes_at_hop">ホップ %1$d：%2$d ノード</string>
+    <string name="about">概要</string>
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
     <!-- ACTION -->

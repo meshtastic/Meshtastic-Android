@@ -28,6 +28,7 @@
     <string name="a11y_node_online">線上</string>
     <string name="a11y_node_role">角色 %1$s</string>
     <string name="a11y_node_signal">訊號 %1$s</string>
+    <string name="about">關於</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">致謝</string>
     <!-- ACTION -->

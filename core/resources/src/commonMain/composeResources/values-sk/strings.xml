@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">O aplikácii</string>
     <string name="accept">Prijať</string>
     <!-- ACTION -->
     <string name="action_delete_message">Vymazať správu</string>
