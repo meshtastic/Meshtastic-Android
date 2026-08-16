@@ -80,12 +80,15 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
                                 name = info.name,
                                 // Prefer IPv4: jmdns's IPv6 candidates are often link-local
                                 // (fe80::/10) addresses that need a zone/scope ID to be
-                                // routable, which jmdns doesn't supply. Only fall back to
-                                // whatever hostAddresses offers (which may be IPv6) if no
-                                // IPv4 candidate resolved.
+                                // routable, which jmdns doesn't supply. Fall back to a raw
+                                // (unbracketed) IPv6 literal via inet6Addresses rather than
+                                // jmdns's own hostAddresses array, which already brackets
+                                // IPv6 strings ("[fe80::1]") -- toAddressString() below adds
+                                // its own brackets, so starting from an already-bracketed
+                                // value would double-bracket and break parsing downstream.
                                 hostAddress =
                                 info.inet4Addresses.firstOrNull()?.hostAddress
-                                    ?: info.hostAddresses.firstOrNull()
+                                    ?: info.inet6Addresses.firstOrNull()?.hostAddress
                                     ?: "",
                                 port = info.port,
                                 txt = txtMap,
