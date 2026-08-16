@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import com.google.firebase.Firebase
 import com.google.firebase.ai.DownloadStatus
 import com.google.firebase.ai.InferenceMode
+import com.google.firebase.ai.InferenceSource
 import com.google.firebase.ai.OnDeviceConfig
 import com.google.firebase.ai.OnDeviceModelOption
 import com.google.firebase.ai.OnDeviceModelStatus
@@ -218,7 +219,9 @@ class GeminiNanoDocAssistant(
             try {
                 val accumulatedText = StringBuilder()
                 var lastEmitTime = 0L
+                var lastInferenceSource: InferenceSource? = null
                 onDeviceModel.generateContentStream(prompt).collect { chunk ->
+                    lastInferenceSource = chunk.inferenceSource
                     val text = chunk.text
                     if (!text.isNullOrEmpty()) {
                         accumulatedText.append(text)
@@ -230,24 +233,27 @@ class GeminiNanoDocAssistant(
                                 AIDocAssistantResult.Partial(
                                     answer = cleanResponse(accumulatedText.toString()),
                                     sourcePages = contextPages,
-                                    usedOnDeviceModel = true,
+                                    usedOnDeviceModel = chunk.inferenceSource == InferenceSource.ON_DEVICE,
                                 ),
                             )
                         }
                     }
-                    // Log token usage from last chunk
+                    // Log token usage and model version from the last chunk
                     chunk.usageMetadata?.let { meta ->
                         Logger.d(tag = TAG) {
-                            "Tokens — prompt: ${meta.promptTokenCount}, response: ${meta.candidatesTokenCount}, total: ${meta.totalTokenCount}"
+                            "Tokens — prompt: ${meta.promptTokenCount}, response: ${meta.candidatesTokenCount}, " +
+                                "total: ${meta.totalTokenCount}, source: ${chunk.inferenceSource}, " +
+                                "model: ${chunk.modelVersion}"
                         }
                     }
                 }
+                val usedOnDeviceModel = lastInferenceSource == InferenceSource.ON_DEVICE
                 // Emit final partial to ensure UI has the complete text before Success
                 emit(
                     AIDocAssistantResult.Partial(
                         answer = cleanResponse(accumulatedText.toString()),
                         sourcePages = contextPages,
-                        usedOnDeviceModel = true,
+                        usedOnDeviceModel = usedOnDeviceModel,
                     ),
                 )
                 val onDeviceAnswer = cleanResponse(accumulatedText.toString().trimEnd())
@@ -265,7 +271,7 @@ class GeminiNanoDocAssistant(
                     AIDocAssistantResult.Success(
                         answer = onDeviceAnswer,
                         sourcePages = allSourcePages,
-                        usedOnDeviceModel = true,
+                        usedOnDeviceModel = usedOnDeviceModel,
                     ),
                 )
                 return@flow // Success — exit retry loop
