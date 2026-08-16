@@ -26,7 +26,12 @@ object DatabaseConstants {
     const val DEFAULT_DB_NAME: String = "${DB_PREFIX}_default"
 
     const val CACHE_LIMIT_KEY: String = "node_db_cache_limit"
-    const val DEFAULT_CACHE_LIMIT: Int = 3
+
+    // 3 was too aggressive for users who regularly rotate between more than a couple of radios: the LRU
+    // eviction in DatabaseManager.enforceCacheLimit() silently deletes a device's local chat history once
+    // it falls out of the cache. 5 gives more headroom while still bounding on-disk growth; MAX_CACHE_LIMIT
+    // remains the escape hatch for users who need more (github.com/meshtastic/Meshtastic-Android/issues/6186).
+    const val DEFAULT_CACHE_LIMIT: Int = 5
     const val MIN_CACHE_LIMIT: Int = 1
     const val MAX_CACHE_LIMIT: Int = 10
 
