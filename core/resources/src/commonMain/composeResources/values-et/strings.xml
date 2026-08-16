@@ -29,6 +29,7 @@
     <string name="a11y_node_role">roll %1$s</string>
     <string name="a11y_node_signal">signaal %1$s</string>
     <string name="a11y_nodes_at_hop">Hüpet %1$d: %2$d seadmeni</string>
+    <string name="about">Teave</string>
     <string name="accept">Nõustu</string>
     <string name="acknowledgements">Tänusõnad</string>
     <!-- ACTION -->

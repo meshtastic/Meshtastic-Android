@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">A programról</string>
     <string name="accept">Elfogadni</string>
     <string name="acknowledgements">Visszaigazolások (ACK-ek)</string>
     <!-- ACTION -->

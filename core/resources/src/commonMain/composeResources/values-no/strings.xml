@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Om</string>
     <string name="accept">Godta</string>
     <!-- ACTION -->
     <string name="action_delete_message">Slett meldingen</string>

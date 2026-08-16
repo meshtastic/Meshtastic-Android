@@ -29,6 +29,7 @@
     <string name="a11y_node_role">rooli %1$s</string>
     <string name="a11y_node_signal">signaali %1$s</string>
     <string name="a11y_nodes_at_hop">Hyppy %1$d: %2$d radiota</string>
+    <string name="about">Tietoja</string>
     <string name="accept">Hyväksy</string>
     <string name="acknowledgements">Kiitokset</string>
     <!-- ACTION -->
@@ -113,6 +114,7 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="app_version">Versio</string>
     <string name="apply">Hyväksy</string>
+    <string name="apps">Sovellukset</string>
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Hyvä</string>
@@ -315,6 +317,7 @@
     <string name="contrast_standard">Normaali</string>
     <string name="conversations">Keskustelut</string>
     <string name="copy">Kopioi</string>
+    <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Luo omia verkkoja</string>
     <string name="critical_alert">Kriittinen hälytys!</string>
     <string name="critical_alerts">Kriittiset hälytykset</string>
@@ -560,6 +563,7 @@
     <string name="doc_title_translate">Käännä sovellus</string>
     <string name="doc_title_units">Yksiköt &amp; paikallisasetukset</string>
     <string name="doc_title_widget">Aloitusnäytön Widget</string>
+    <string name="documentation">Käyttöohjeet</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>
@@ -790,6 +794,7 @@
     <string name="geofence_remove_area">Poista alue</string>
     <string name="geofence_set_area">Aseta alue kartalla</string>
     <string name="get_started">Näin pääset alkuun</string>
+    <string name="github_repository">GitHub-repositorio</string>
     <string name="good">Hyvä</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
@@ -1185,6 +1190,8 @@
     <string name="name_cannot_be_empty">Nimi ei voi olla tyhjä.</string>
     <string name="navigate_back">Siirry takaisin</string>
     <string name="navigate_into_label">Siirry kohtaan</string>
+    <string name="need_hardware">Tarvitsetko laitteiston?</string>
+    <string name="need_hardware_description">Meshtastic vaatii yhteensopivan laitteen. Tukijamme ja yhteistyökumppanimme tarjoavat käyttövalmiita laitteita. Tässä on muutamia suosituimmista vaihtoehdoista.</string>
     <string name="neighbor_info">Naapuritieto</string>
     <string name="neighbor_info_config">Naapuritietojen asetukset</string>
     <string name="neighbor_info_enabled">Naapuritiedot käytössä</string>
@@ -1408,6 +1415,7 @@
     <string name="primary">Ensisijainen</string>
     <string name="primary_channel_feature">Säännöllinen sijainti- ja telemetrialähetys</string>
     <string name="private_key">Yksityinen avain</string>
+    <string name="project_information">Projektin tiedot</string>
     <string name="provide_location_to_mesh">Jaa puhelimen sijaintitietoa mesh-verkkoon</string>
     <string name="provider_name_exists">Palveluntarjoajan nimi on olemassa.</string>
     <string name="proxy_to_client_enabled">Välityspalvelin käytössä</string>
@@ -1881,7 +1889,10 @@
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_new">Uusi reittipiste</string>
     <string name="waypoint_received">Vastaanotettu reittipiste: %1$s</string>
+    <string name="website">Verkkosivusto</string>
     <string name="weight">Paino</string>
+    <string name="what_is_meshtastic">Mikä on Meshtastic?</string>
+    <string name="what_is_meshtastic_description">Avoimen lähdekoodin, internetistä riippumaton ja hajautettu mesh-verkko, joka toimii edullisilla ja vähän virtaa kuluttavilla radioilla.</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi:n asetukset</string>
     <string name="wifi_devices">WiFi-määritys mPWRD-OS:lle</string>

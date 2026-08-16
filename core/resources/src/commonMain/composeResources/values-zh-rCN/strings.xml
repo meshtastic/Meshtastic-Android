@@ -29,6 +29,7 @@
     <string name="a11y_node_role">角色 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
     <string name="a11y_nodes_at_hop">跳数 %1$d: %2$d 节点</string>
+    <string name="about">关于</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">开源</string>
     <!-- ACTION -->
@@ -553,6 +554,7 @@
     <string name="doc_title_translate">翻译此应用</string>
     <string name="doc_title_units">Units &amp; 区域设置</string>
     <string name="doc_title_widget">主屏幕小组件</string>
+    <string name="documentation">文档</string>
     <string name="done">完成</string>
     <string name="dont_show_again_for_device">此设备不再显示</string>
     <string name="double_tap_as_button_press">双击作为按钮</string>
@@ -1352,6 +1354,7 @@
     <string name="primary">主要</string>
     <string name="primary_channel_feature">定期广播位置和遥测</string>
     <string name="private_key">私钥</string>
+    <string name="project_information">项目信息</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
     <string name="provider_name_exists">服务提供商名已存在。</string>
     <string name="proxy_to_client_enabled">启用客户端代理</string>
@@ -1799,7 +1802,10 @@
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_new">新建航点</string>
     <string name="waypoint_received">收到航点：%1$s</string>
+    <string name="website">网站</string>
     <string name="weight">重量</string>
+    <string name="what_is_meshtastic">什么是 Meshtastic?</string>
+    <string name="what_is_meshtastic_description">这是一个开源、离网、分布式 Mesh 网络，可在价格低廉的低功率无线电设备上运行。</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi设置</string>
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>

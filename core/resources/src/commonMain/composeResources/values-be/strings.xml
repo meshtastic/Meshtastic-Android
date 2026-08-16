@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">О нас</string>
     <string name="accept">Прыняць</string>
     <!-- ACTION -->
     <!-- ADD -->

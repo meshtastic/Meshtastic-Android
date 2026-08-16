@@ -29,6 +29,7 @@
     <string name="a11y_node_role">função %1$s</string>
     <string name="a11y_node_signal">sinal %1$s</string>
     <string name="a11y_nodes_at_hop">Saltar %1$d a %2$d nós</string>
+    <string name="about">Sobre</string>
     <string name="accept">Aceitar</string>
     <string name="acknowledgements">Agradecimentos</string>
     <!-- ACTION -->

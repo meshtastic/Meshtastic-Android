@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Maidir le</string>
     <string name="accept">Glac</string>
     <!-- ACTION -->
     <string name="action_delete_message">Ar mhaith leat teachtaireacht a scriosadh</string>

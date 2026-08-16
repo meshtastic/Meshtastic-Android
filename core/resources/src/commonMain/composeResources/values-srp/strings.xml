@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">О</string>
     <string name="accept">Прихвати</string>
     <!-- ACTION -->
     <string name="action_delete_message">Обриши поруку</string>
@@ -120,6 +121,7 @@
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
     <string name="contrast_standard">Стандардно</string>
     <string name="copy">Копирај</string>
+    <string name="copyright_notice">Meshtastic® Ауторска права Meshtastic LLC</string>
     <string name="critical_alert">Критично упозорење!</string>
     <string name="current">Струја</string>
     <string name="date">Датум</string>
@@ -164,6 +166,7 @@
     <string name="doc_title_debug_logs">Дебаг логови</string>
     <string name="doc_title_firmware">Ажурирања фирмвера</string>
     <string name="doc_title_nodes">Чворови</string>
+    <string name="documentation">Документација</string>
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>
@@ -365,6 +368,7 @@
     <!-- PREVIEW -->
     <string name="primary">Примарни</string>
     <string name="private_key">Приватни кључ</string>
+    <string name="project_information">Информације о пројекту</string>
     <string name="provide_location_to_mesh">Обезбедите локацију телефона меш мрежи</string>
     <string name="public_key">Јавни кључ</string>
     <string name="qr_code">QR код</string>
@@ -517,6 +521,9 @@
     <string name="waypoint_edit">Измените тачку путање</string>
     <string name="waypoint_new">Нова тачка путање</string>
     <string name="waypoint_received">Примљена тачка путање: %1$s</string>
+    <string name="website">Вебсајт</string>
+    <string name="what_is_meshtastic">Шта је Мештастик?</string>
+    <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
     <!-- WIFI -->
     <string name="wifi_config">Опције вајфаја</string>
     <string name="wifi_provision_success_ip_address">IP адреса</string>

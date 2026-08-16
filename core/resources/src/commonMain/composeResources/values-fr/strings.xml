@@ -27,6 +27,7 @@
     <string name="a11y_node_online">en ligne</string>
     <string name="a11y_node_role">rôle %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
+    <string name="about">A propros</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
     <!-- ACTION -->

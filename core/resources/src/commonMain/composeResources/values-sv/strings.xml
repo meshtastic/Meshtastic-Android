@@ -29,6 +29,7 @@
     <string name="a11y_node_role">roll %1$s</string>
     <string name="a11y_node_signal">mottagning %1$s</string>
     <string name="a11y_nodes_at_hop">Hopp %1$d: %2$d noder</string>
+    <string name="about">Om</string>
     <string name="accept">Acceptera</string>
     <string name="acknowledgements">Bekräftelser</string>
     <!-- ACTION -->

@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">앱에 대하여</string>
     <string name="accept">수락</string>
     <!-- ACTION -->
     <string name="actions">작업</string>

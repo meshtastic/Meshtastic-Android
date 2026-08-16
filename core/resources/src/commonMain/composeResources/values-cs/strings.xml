@@ -24,6 +24,7 @@
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
     <string name="a11y_nodes_at_hop">Skok %1$d: %2$d uzlů</string>
+    <string name="about">O aplikaci</string>
     <string name="accept">Přijmout</string>
     <string name="acknowledgements">Poděkování</string>
     <!-- ACTION -->
