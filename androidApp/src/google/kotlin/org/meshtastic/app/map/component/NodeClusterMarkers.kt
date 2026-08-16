@@ -18,7 +18,11 @@ package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import com.google.maps.android.clustering.Cluster
+import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm
+import com.google.maps.android.clustering.algo.NonHierarchicalViewBasedAlgorithm
+import com.google.maps.android.clustering.algo.ScreenBasedAlgorithmAdapter
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
@@ -28,6 +32,12 @@ import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.feature.map.BaseMapViewModel
 
 private const val MIN_CLUSTER_SIZE = 10
+
+/**
+ * Threshold for switching to [NonHierarchicalViewBasedAlgorithm], matching that class's own KDoc describing itself as
+ * being for "large numbers of items (>1000 markers)".
+ */
+private const val VIEW_BASED_ALGORITHM_NODE_THRESHOLD = 1000
 
 /**
  * Renders node markers with clustering via the library's [Clustering] composable.
@@ -41,6 +51,12 @@ private const val MIN_CLUSTER_SIZE = 10
  * lifecycle/saved-state owners, crashing under the Navigation 3 hierarchy (fixed upstream in
  * googlemaps/android-maps-compose#930, which this file previously worked around with a custom [DefaultClusterRenderer]
  * assigning pre-baked bitmaps).
+ *
+ * Below [VIEW_BASED_ALGORITHM_NODE_THRESHOLD] nodes, clusters with the default `NonHierarchicalDistanceBasedAlgorithm`
+ * (pans smoother, and clustering the whole node set is cheap at this scale). Above it, switches to
+ * [NonHierarchicalViewBasedAlgorithm] to avoid a spread-out mesh returning nearly every node as its own unclustered
+ * result at high zoom (#4544) - at the cost of its zero-margin, camera-idle-only viewport bounds popping markers in
+ * abruptly while panning.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
@@ -50,6 +66,7 @@ fun NodeClusterMarkers(
     navigateToNodeDetails: (Int) -> Unit,
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
+    val configuration = LocalConfiguration.current
     Clustering(
         items = nodeClusterItems,
         onClusterClick = onClusterClick,
@@ -80,6 +97,25 @@ fun NodeClusterMarkers(
             if (renderer != null && renderer.minClusterSize != MIN_CLUSTER_SIZE) {
                 renderer.minClusterSize = MIN_CLUSTER_SIZE
                 clusterManager.cluster()
+            }
+            // Only swap on a threshold crossing; otherwise just resize in place - replacing re-migrates every item.
+            val algorithm = clusterManager.algorithm
+            val needsViewBasedAlgorithm = nodeClusterItems.size > VIEW_BASED_ALGORITHM_NODE_THRESHOLD
+            when {
+                needsViewBasedAlgorithm && algorithm is NonHierarchicalViewBasedAlgorithm<*> ->
+                    algorithm.updateViewSize(configuration.screenWidthDp, configuration.screenHeightDp)
+
+                needsViewBasedAlgorithm ->
+                    clusterManager.setAlgorithm(
+                        NonHierarchicalViewBasedAlgorithm(configuration.screenWidthDp, configuration.screenHeightDp),
+                    )
+
+                algorithm is NonHierarchicalViewBasedAlgorithm<*> ->
+                    // Kotlin won't resolve setAlgorithm's Algorithm<T> overload for a plain
+                    // NonHierarchicalDistanceBasedAlgorithm; wrap it to force the ScreenBasedAlgorithm<T> overload.
+                    clusterManager.setAlgorithm(
+                        ScreenBasedAlgorithmAdapter(NonHierarchicalDistanceBasedAlgorithm<NodeClusterItem>()),
+                    )
             }
         },
     )
