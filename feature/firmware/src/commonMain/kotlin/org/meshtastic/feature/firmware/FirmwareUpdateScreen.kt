@@ -139,6 +139,7 @@ import org.meshtastic.core.resources.firmware_update_verifying
 import org.meshtastic.core.resources.firmware_update_waiting_reconnect
 import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.img_chirpy
+import org.meshtastic.core.resources.img_hw_unknown
 import org.meshtastic.core.resources.learn_more
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.save
@@ -633,11 +634,15 @@ private fun ChirpyCard() {
 private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifier = Modifier) {
     val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
+    val fallbackPainter = painterResource(Res.drawable.img_hw_unknown)
 
     AsyncImage(
         model = ImageRequest.Builder(LocalPlatformContext.current).data(imageUrl).crossfade(true).build(),
         contentScale = ContentScale.Fit,
         contentDescription = deviceHardware.displayName,
+        placeholder = fallbackPainter,
+        error = fallbackPainter,
+        fallback = fallbackPainter,
         modifier = modifier,
     )
 }
