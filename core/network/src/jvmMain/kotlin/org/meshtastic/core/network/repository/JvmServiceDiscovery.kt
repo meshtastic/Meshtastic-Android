@@ -58,7 +58,10 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
             val listener =
                 object : ServiceListener {
                     override fun serviceAdded(event: ServiceEvent) {
-                        jmdns?.requestServiceInfo(event.type, event.name)
+                        // persistent=true: keep calling serviceResolved as fresh records arrive (re-announcements,
+                        // IP changes) instead of only once — otherwise a resolved device's address goes stale until
+                        // it's fully removed and rediscovered from scratch.
+                        jmdns?.requestServiceInfo(event.type, event.name, true)
                     }
 
                     override fun serviceRemoved(event: ServiceEvent) {
@@ -75,7 +78,18 @@ class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : Servi
                         val discovered =
                             DiscoveredService(
                                 name = info.name,
-                                hostAddress = info.hostAddresses.firstOrNull() ?: "",
+                                // Prefer IPv4: jmdns's IPv6 candidates are often link-local
+                                // (fe80::/10) addresses that need a zone/scope ID to be
+                                // routable, which jmdns doesn't supply. Fall back to a raw
+                                // (unbracketed) IPv6 literal via inet6Addresses rather than
+                                // jmdns's own hostAddresses array, which already brackets
+                                // IPv6 strings ("[fe80::1]") -- toAddressString() below adds
+                                // its own brackets, so starting from an already-bracketed
+                                // value would double-bracket and break parsing downstream.
+                                hostAddress =
+                                info.inet4Addresses.firstOrNull()?.hostAddress
+                                    ?: info.inet6Addresses.firstOrNull()?.hostAddress
+                                    ?: "",
                                 port = info.port,
                                 txt = txtMap,
                             )
