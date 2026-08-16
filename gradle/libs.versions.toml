@@ -290,7 +290,6 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
-osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 geopackage-android = { module = "mil.nga.geopackage:geopackage-android", version.ref = "geopackage-android" }
 kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
