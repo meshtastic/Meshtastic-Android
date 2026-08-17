@@ -223,6 +223,7 @@
     <string name="clean_nodes_older_than">Knoten älter als %1$d Tage entfernen</string>
     <string name="clean_now">Jetzt leeren</string>
     <string name="clean_unknown_nodes">Nur unbekannte Knoten entfernen</string>
+    <!-- CLEAR -->
     <string name="clear">Leeren</string>
     <string name="clear_selection">Auswahl löschen</string>
     <string name="clear_time_zone">Zeitzone löschen</string>
@@ -646,7 +647,6 @@
     <string name="firmware_update_open">Öffne Firmware Updates</string>
     <string name="firmware_update_open_flasher">Öffne Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA Aktualisierung fehlgeschlagen: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
     <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
     <string name="firmware_update_release_notes">Versionshinweise</string>
     <string name="firmware_update_retrieval_failed">Konnte Firmware Datei nicht abrufen.</string>
@@ -1515,7 +1515,6 @@
     <string name="tak_server_test_idle">Alle %1$d Tests an das Netz senden</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d bestanden, %2$d fehlgeschlagen von %3$d/%4$d</string>
     <string name="tak_server_test_run">Ausführen</string>
     <string name="tak_server_test_running">Ausführen: %1$s</string>
     <string name="tak_team">Teamfarbe</string>

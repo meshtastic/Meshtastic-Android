@@ -94,6 +94,7 @@
     <!-- CHIRPY -->
     <string name="choose_theme">테마 선택</string>
     <!-- CLEAN -->
+    <!-- CLEAR -->
     <string name="clear">삭제</string>
     <string name="client_notification">클라이언트 알림</string>
     <string name="close">닫기</string>

@@ -231,6 +231,7 @@
     <string name="clean_nodes_older_than">Poista laitteet, joita ei ole nähty yli %1$d päivään</string>
     <string name="clean_now">Poista nyt</string>
     <string name="clean_unknown_nodes">Poista vain tuntemattomat laitteet</string>
+    <!-- CLEAR -->
     <string name="clear">Tyhjennä</string>
     <string name="clear_selection">Tyhjennä valinta</string>
     <string name="clear_time_zone">Tyhjennä aikavyöhyke</string>
@@ -715,7 +716,6 @@
     <string name="firmware_update_open_flasher">Avaa Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -laitteelle valmistajan sarjamuotoista DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial toimitetun bootloader .zip -tiedoston kanssa). Pelkän .uf2-tiedoston kopiointi ei päivitä bootloaderia.</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_release_notes">Julkaisutiedot</string>
     <string name="firmware_update_requires_bin">%1$s edellyttää kohteeseen sopivaa .bin-tiedostoa.</string>
@@ -1734,7 +1734,6 @@
     <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d onnistui, %2$d epäonnistui yhteensä %3$d/%4$d testistä</string>
     <string name="tak_server_test_run">Suorita</string>
     <string name="tak_server_test_running">Käynnissä: %1$s</string>
     <string name="tak_team">Tiimin väri</string>

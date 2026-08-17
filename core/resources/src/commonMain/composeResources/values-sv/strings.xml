@@ -165,6 +165,7 @@
     <string name="clean_nodes_older_than">Rensa bort noder som sågs för minst %1$d dagar sedan</string>
     <string name="clean_now">Rensa nu</string>
     <string name="clean_unknown_nodes">Rensa endast okända noder</string>
+    <!-- CLEAR -->
     <string name="clear">Rensa</string>
     <string name="clear_selection">Avmarkera</string>
     <string name="clear_time_zone">Ta bort tidszon</string>
@@ -1255,7 +1256,6 @@
     <string name="tak_server_status_off">Av</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d passerade, %2$d misslyckades %3$d/%4$d</string>
     <string name="tak_server_test_run">Kör</string>
     <string name="tak_server_test_running">Kör: %1$s</string>
     <string name="tak_team">Lagfärg</string>

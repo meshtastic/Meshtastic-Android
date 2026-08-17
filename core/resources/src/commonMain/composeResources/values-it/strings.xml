@@ -224,6 +224,7 @@
     <string name="clean_nodes_older_than">Elimina i nodi visti per l'ultima volta più di %1$d giorni fa</string>
     <string name="clean_now">Elimina ora</string>
     <string name="clean_unknown_nodes">Elimina solo i nodi sconosciuti</string>
+    <!-- CLEAR -->
     <string name="clear">Svuota</string>
     <string name="clear_selection">Annulla selezione</string>
     <string name="clear_time_zone">Cancella fuso orario</string>
@@ -690,7 +691,6 @@
     <string name="firmware_update_open_flasher">Apri Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">Aggiornamento OTA non riuscito: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Il loader OTA di questo dispositivo ha rifiutato il metodo di aggiornamento richiesto: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Per il RAK WisBlock RAK4631, usa lo strumento DFU seriale del produttore (per esempio adafruit-nrfutil dfu serial con il file .zip del bootloader fornito). Copiare solo il file .uf2 non aggiorna il bootloader.</string>
     <string name="firmware_update_rebooting">Riavvio in DFU...</string>
     <string name="firmware_update_release_notes">Note di rilascio</string>
     <string name="firmware_update_requires_bin">%1$s richiede un file .bin corrispondente al target.</string>
@@ -1638,7 +1638,6 @@
     <string name="tak_server_test_idle">Invia alla mesh tutte le %1$d fixture di test</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d superati, %2$d falliti su %3$d/%4$d</string>
     <string name="tak_server_test_run">Esegui</string>
     <string name="tak_server_test_running">In esecuzione: %1$s</string>
     <string name="tak_team">Colore squadra</string>

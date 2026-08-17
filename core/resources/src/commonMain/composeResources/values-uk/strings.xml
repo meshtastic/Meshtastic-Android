@@ -165,6 +165,7 @@
     <string name="clean_nodes_older_than">Очистити вузли, які не були онлайн більше %1$d дні(в)</string>
     <string name="clean_now">Очистити зараз</string>
     <string name="clean_unknown_nodes">Очистити лише невідомі вузли</string>
+    <!-- CLEAR -->
     <string name="clear">Очистити</string>
     <string name="clear_selection">Очистити вибір</string>
     <string name="client_notification">Клієнтські повідомлення</string>

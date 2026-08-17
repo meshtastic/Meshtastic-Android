@@ -216,6 +216,7 @@
     <string name="clean_nodes_older_than">Nettoyer les nœuds vus pour la dernière fois depuis %1$d jours</string>
     <string name="clean_now">Nettoyer maintenant</string>
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
+    <!-- CLEAR -->
     <string name="clear">Effacer</string>
     <string name="clear_selection">Effacer la sélection</string>
     <string name="clear_time_zone">Effacer le fuseau horaire</string>
@@ -603,7 +604,6 @@
     <string name="firmware_update_open_flasher">Ouvrir le Flasher Meshtastic</string>
     <string name="firmware_update_ota_failed">Échec de la mise à jour de l'OTA : %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Le chargeur OTA de ce périphérique a rejeté la méthode de mise à jour demandée : %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Pour le RAK WisBlock RAK4631, utilisez l'outil DFU série du fournisseur (par exemple, adafruit-nrfutil dfu serial avec le fichier .zip du bootloader fourni). La copie du fichier .uf2 seul ne permettra pas de mettre à jour le bootloader.</string>
     <string name="firmware_update_rebooting">Redémarrage en mode DFU...</string>
     <string name="firmware_update_release_notes">Notes de Version</string>
     <string name="firmware_update_requires_bin">%1$s nécessite un fichier .bin correspondant à la cible.</string>

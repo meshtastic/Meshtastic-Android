@@ -125,6 +125,7 @@
     <string name="clean_nodes_older_than">Limpiar nodos vistos por última vez más de %1$d días</string>
     <string name="clean_now">Limpiar ahora</string>
     <string name="clean_unknown_nodes">Limpiar sólo nodos desconocidos</string>
+    <!-- CLEAR -->
     <string name="clear">Limpiar</string>
     <string name="clear_selection">Limpiar selección</string>
     <string name="close">Cerrar</string>

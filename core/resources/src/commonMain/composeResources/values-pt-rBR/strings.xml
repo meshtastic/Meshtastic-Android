@@ -142,6 +142,7 @@
     <string name="clean_nodes_older_than">Limpar nós vistos há mais de %1$d dias</string>
     <string name="clean_now">Limpar Agora</string>
     <string name="clean_unknown_nodes">Limpar somente nós desconhecidos</string>
+    <!-- CLEAR -->
     <string name="clear">Limpar</string>
     <string name="clear_selection">Limpar seleção</string>
     <string name="client_notification">Notificação de cliente</string>

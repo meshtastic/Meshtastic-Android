@@ -233,6 +233,7 @@
     <string name="clean_nodes_older_than">Очистить ноды, старее чем %1$d дней</string>
     <string name="clean_now">Очистить сейчас</string>
     <string name="clean_unknown_nodes">Очистить только неизвестные ноды</string>
+    <!-- CLEAR -->
     <string name="clear">Очистить</string>
     <string name="clear_selection">Очистить выбор</string>
     <string name="clear_time_zone">Очистить часовой пояс</string>
@@ -719,7 +720,6 @@
     <string name="firmware_update_open_flasher">Открыть флешер Meshtastic</string>
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 используйте фирменный серийный инструмент DFU (например, adafruit-nrfutil dfu serial с предоставленным zip-файлом загрузчика). Простое копирование файла .uf2 не обновит загрузчик.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
     <string name="firmware_update_requires_bin">Для %1$s требуется файл .bin.</string>
@@ -1751,7 +1751,6 @@
     <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>
     <string name="tak_server_test_result_bytes">%1$dБ ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d пройдено, %2$d неудачно из %3$d/%4$d</string>
     <string name="tak_server_test_run">Запустить</string>
     <string name="tak_server_test_running">Запущено: %1$s</string>
     <string name="tak_team">Цвет команды</string>

@@ -167,6 +167,7 @@
     <string name="clean_nodes_older_than">Vyčistit uzly neaktivní déle než %1$d dnů</string>
     <string name="clean_now">Vyčistit</string>
     <string name="clean_unknown_nodes">Vyčistit pouze neznámé uzly</string>
+    <!-- CLEAR -->
     <string name="clear">Vymazat</string>
     <string name="clear_selection">Zrušit výběr</string>
     <string name="clear_time_zone">Vymazat časové pásmo</string>
@@ -525,7 +526,6 @@
     <string name="firmware_update_open_flasher">Otevřít Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">Aktualizace OTA selhala: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA zavaděč tohoto zařízení odmítl požadovaný způsob aktualizace: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Pro RAK WisBlock RAK4631 použijte sériový DFU nástroj výrobce (například adafruit-nrfutil dfu serial s dodaným .zip souborem bootloaderu). Pouhé zkopírování souboru .uf2 bootloader neaktualizuje.</string>
     <string name="firmware_update_rebooting">Restartuji do DFU...</string>
     <string name="firmware_update_release_notes">Poznámky k vydání</string>
     <string name="firmware_update_requires_bin">Pro zařízení %1$s je vyžadován soubor .bin určený pro tento model.</string>
