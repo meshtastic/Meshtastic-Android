@@ -188,6 +188,7 @@ class FakeRadioController :
             sentPackets.clear()
             favoritedNodes.clear()
             sentSharedContacts.clear()
+            factoryResetCalls.clear()
             configWrites.clear()
             channelWrites.clear()
             settingsOperations.clear()
@@ -355,7 +356,12 @@ class FakeRadioController :
 
     override suspend fun shutdown(destNum: Int, packetId: Int) {}
 
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {}
+    /** Destination node numbers of [factoryReset] calls, for tests asserting a reset was (or was not) sent. */
+    val factoryResetCalls = mutableListOf<Int>()
+
+    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+        factoryResetCalls += destNum
+    }
 
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
 

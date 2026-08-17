@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -39,6 +40,7 @@ import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -69,6 +71,7 @@ class FirmwareUpdateIntegrationTest {
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private val stableRelease = FirmwareRelease(id = "1", title = "2.5.0", zipUrl = "url", releaseNotes = "")
@@ -115,9 +118,12 @@ class FirmwareUpdateIntegrationTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        firmwareRetriever,
+        FirmwareMaintenanceLock(),
         TestApplicationCoroutineScope(testDispatcher),
         HiddenFeaturesUnlock(),
         analytics,
+        NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
     )
 
     @Test

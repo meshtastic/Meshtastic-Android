@@ -52,7 +52,13 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
         }
 
-        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
+        androidMain.dependencies {
+            implementation(libs.markdown.renderer.android)
+            // AndroidFirmwareUsbManager needs UsbSerialDriver to poke DTR on the erase image's CDC port.
+            // :core:network exposes usb-serial as `implementation`, so it is not on our classpath transitively —
+            // feature/connections declares it the same way for the same reason.
+            implementation(libs.usb.serial.android)
+        }
 
         // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
         // the skiko-awt runtime to read the system theme.

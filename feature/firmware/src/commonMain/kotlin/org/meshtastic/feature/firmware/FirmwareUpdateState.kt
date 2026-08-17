@@ -57,6 +57,11 @@ sealed interface FirmwareUpdateState {
          * update (see [FirmwareUpdateViewModel.checkForUpdates]). Drives recovery-specific copy and routing.
          */
         val isRecovery: Boolean = false,
+        /**
+         * Which USB maintenance affordances to show, precomputed by the ViewModel so the screen stays dumb and the
+         * decision stays unit-testable — the same shape as [showBootloaderWarning].
+         */
+        val maintenance: UsbMaintenanceGate = UsbMaintenanceGate(),
     ) : FirmwareUpdateState
 
     /** Firmware file is being downloaded from the release server. */
@@ -83,10 +88,28 @@ sealed interface FirmwareUpdateState {
      * @property wasLowSpeedTransfer True if the upload ran at the MTU-capped low speed (stock bootloader), so the
      *   Success screen can offer a one-time OTAFIX upgrade tip for faster future updates.
      */
-    data class Success(val wasLowSpeedTransfer: Boolean = false) : FirmwareUpdateState
+    data class Success(val wasLowSpeedTransfer: Boolean = false, val deviceWasWiped: Boolean = false) :
+        FirmwareUpdateState
 
-    /** UF2 file is ready; waiting for the user to choose a save location (USB flow). */
-    data class AwaitingFileSave(val uf2Artifact: FirmwareArtifact, val fileName: String) : FirmwareUpdateState
+    /**
+     * Waiting for the user to point the app at the device's UF2 drive (USB flow).
+     *
+     * @property uf2Artifact The image to write, when it is already downloaded and verified. `null` on a maintenance
+     *   pass: erase and bootloader images are chosen from what the mounted volume reports about itself, so the image
+     *   cannot be known until the volume has been picked.
+     * @property fileName Display name of [uf2Artifact], or `null` for the same reason.
+     * @property step Which leg of a multi-pass sequence this is. Also the recomposition key for the instruction dialog,
+     *   so each pass re-shows its own instructions.
+     * @property retryMessage Set when a previous attempt at *this* pass failed. Once a destructive image has been
+     *   written the flow never abandons the user on an error screen — it re-publishes the same pass with an
+     *   explanation.
+     */
+    data class AwaitingFileSave(
+        val uf2Artifact: FirmwareArtifact?,
+        val fileName: String?,
+        val step: UsbFileSaveStep = UsbFileSaveStep.Firmware,
+        val retryMessage: UiText? = null,
+    ) : FirmwareUpdateState
 }
 
 private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")

@@ -36,6 +36,8 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.SoftDeviceVariant
+import org.meshtastic.core.model.SoftDeviceVariantEntry
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -185,8 +187,43 @@ class DeviceHardwareRepositoryImpl(
     /** Resolves entities into a [DeviceHardware] domain model with quirk application. */
     private fun resolveHardware(hwModel: Int, entities: List<DeviceHardwareEntity>, target: String?): DeviceHardware? {
         val matched = disambiguate(entities, target)
-        val quirks = loadQuirks()
-        return applyBootloaderQuirk(hwModel, matched?.asExternalModel(), quirks, target)
+        val asset = loadQuirksAsset()
+        val withQuirk = applyBootloaderQuirk(hwModel, matched?.asExternalModel(), asset.devices, target)
+        return applySoftDeviceVariant(hwModel, withQuirk, asset.softDeviceVariants, target)
+    }
+
+    /**
+     * Overlays the SoftDevice variant, requiring the reported target to be one this model is actually mapped for.
+     *
+     * Deliberately stricter than [applyBootloaderQuirk] and deliberately not routed through [disambiguate]: both of
+     * those fall back to "close enough" (`firstOrNull()`), which is right for an advisory warning and wrong here.
+     * `hwModel` is not unique — hwModel 94 (`HELTEC_MESH_POCKET`) has two nRF52840 targets — and a plausible-but-wrong
+     * variant writes an erase image into the SoftDevice. Every unresolvable case (asset absent, asset malformed, model
+     * unmapped, reported target not in the row) therefore lands on `null`, and callers must refuse on `null`.
+     */
+    private fun applySoftDeviceVariant(
+        hwModel: Int,
+        base: DeviceHardware?,
+        entries: List<SoftDeviceVariantEntry>,
+        reportedTarget: String?,
+    ): DeviceHardware? = base?.let { hw ->
+        val effectiveTarget = reportedTarget?.takeIf { it.isNotBlank() }
+        val modelEntries = entries.filter { it.hwModel == hwModel }
+        val matched =
+            when {
+                effectiveTarget != null ->
+                    modelEntries.firstOrNull { entry ->
+                        entry.platformioTargets.any { it.equals(effectiveTarget, ignoreCase = true) }
+                    }
+
+                // No reported target: hw.platformioTarget may be disambiguate()'s arbitrary firstOrNull() pick,
+                // so it must not select between rows. Resolve only when every row for this model agrees anyway;
+                // a multi-variant model without a device-reported target stays unresolved (callers refuse on null).
+                modelEntries.map { it.softDevice }.distinct().size == 1 -> modelEntries.first()
+
+                else -> null
+            }
+        hw.copy(softDeviceVariant = SoftDeviceVariant.fromWire(matched?.softDevice))
     }
 
     private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? =
@@ -205,14 +242,13 @@ class DeviceHardwareRepositoryImpl(
     private fun DeviceHardwareEntity.isStale(): Boolean =
         isIncomplete() || (nowMillis - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
 
-    // Quirks are best-effort: swallow any parse/IO error and fall back to "no quirks" rather than failing hardware
-    // lookup.
-    private fun loadQuirks(): List<BootloaderOtaQuirk> = runCatching {
-        assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json)?.devices
-    }
-        .onFailure { e -> Logger.w(e) { "Failed to load device_bootloader_ota_quirks.json" } }
-        .getOrNull()
-        .orEmpty()
+    // Quirks are best-effort: swallow any parse/IO error and fall back to an empty asset rather than failing hardware
+    // lookup. Safe for the advisory bootloader warning, and safe for the SoftDevice map too because an empty map
+    // resolves to a null variant, which refuses.
+    private fun loadQuirksAsset(): BootloaderOtaQuirksResponse =
+        runCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
+            .onFailure { e -> Logger.w(e) { "Failed to load device_bootloader_ota_quirks.json" } }
+            .getOrNull() ?: BootloaderOtaQuirksResponse()
 
     private fun applyBootloaderQuirk(
         hwModel: Int,

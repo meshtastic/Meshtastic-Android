@@ -70,6 +70,45 @@ interface FirmwareFileHandler {
     /** Copy [source] to the platform URI [destinationUri], returning the number of bytes written. */
     suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long
 
+    /**
+     * Best-effort check that [destinationUri] names a location on removable storage — i.e. plausibly a mounted UF2
+     * bootloader drive rather than internal storage.
+     *
+     * Used to reject the Downloads mistake *before* writing, which matters only once a write is destructive: in a
+     * multi-pass maintenance sequence a mis-saved pass leaves the device with no application, and nothing else in the
+     * flow can tell a landed write from a lost one. The plain single-pass update path deliberately does not consult
+     * this — its worst case is "nothing happened, replug".
+     */
+    suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean
+
+    /**
+     * Reads a file sitting alongside the documents in [treeUri], or `null` when it is absent or unreadable.
+     *
+     * Used to read `INFO_UF2.TXT` off a mounted UF2 bootloader volume before writing to it. That file both identifies
+     * the board (`Board-ID:`) and reports the installed SoftDevice, and its mere presence is positive proof the picked
+     * volume really is an Adafruit-family UF2 bootloader drive rather than, say, Downloads.
+     *
+     * Requires a tree URI (`ACTION_OPEN_DOCUMENT_TREE`); a single-document URI grants no sibling access.
+     */
+    suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String?
+
+    /**
+     * Creates [fileName] inside [treeUri] and returns a URI to write to, or `null` on failure.
+     *
+     * The tree-picker counterpart to the save-file launcher: once the volume itself has been vetted, the app names the
+     * file rather than asking the user to.
+     */
+    suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri?
+
+    /**
+     * True when [destinationUri] can still be opened for reading.
+     *
+     * The success signal for a UF2 write is inverted: a UF2 bootloader consumes the image, reboots, and its volume
+     * disappears, so a destination that is *still* readable afterwards means the bytes landed somewhere persistent —
+     * the wrong place. Used as the tiebreaker when the detach broadcast is missed.
+     */
+    suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean
+
     // ── Zip / extraction ─────────────────────────────────────────────────
 
     /**

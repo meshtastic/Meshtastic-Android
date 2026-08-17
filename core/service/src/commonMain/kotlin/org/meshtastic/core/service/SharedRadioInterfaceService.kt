@@ -60,6 +60,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -171,6 +172,7 @@ class SharedRadioInterfaceService(
     private val radioPrefs: RadioPrefs,
     private val transportFactory: RadioTransportFactory,
     private val analytics: PlatformAnalytics,
+    private val firmwareMaintenanceLock: FirmwareMaintenanceLock,
 ) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType>
@@ -588,7 +590,7 @@ class SharedRadioInterfaceService(
                                 // explicitly disconnected from. stopTransportLocked() below still fires on
                                 // BLE-disabled to tear down a running BLE link, but we deliberately do NOT
                                 // clear connectionRequested here — that is disconnect()'s job.
-                                if (connectionRequested) {
+                                if (connectionRequested && !firmwareMaintenanceLock.isActive) {
                                     startTransportLocked()
                                 }
                             } else if (runningTransportId == InterfaceId.BLUETOOTH) {
@@ -604,7 +606,7 @@ class SharedRadioInterfaceService(
                         transportMutex.withLock {
                             if (state) {
                                 // Environmental recovery only — see the BLE listener above for rationale.
-                                if (connectionRequested) {
+                                if (connectionRequested && !firmwareMaintenanceLock.isActive) {
                                     startTransportLocked()
                                 }
                             } else if (runningTransportId == InterfaceId.TCP) {
@@ -644,6 +646,9 @@ class SharedRadioInterfaceService(
             .onEach {
                 transportMutex.withLock {
                     if (!connectionRequested) return@withLock
+                    // A USB firmware-maintenance sequence owns the port: the device is enumerating as bare erase or
+                    // bootloader firmware, and binding a mesh transport to it would claim the port the flow needs.
+                    if (firmwareMaintenanceLock.isActive) return@withLock
                     if (runningTransportId != InterfaceId.SERIAL) return@withLock
                     // Race-defense: the combine snapshot may be stale by the time we acquire
                     // transportMutex — another path (setDeviceAddress, BLE liveness restart) may
