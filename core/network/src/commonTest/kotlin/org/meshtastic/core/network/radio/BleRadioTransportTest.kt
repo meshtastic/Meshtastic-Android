@@ -516,9 +516,21 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
         try {
-            // 3s settle + connectAndAwait + POST_INVALIDATION_RECONNECT_DELAY (3s) + reconnect connectAndAwait,
-            // then profile setup bounded by CONNECTED_GATE_TIMEOUT / SUBSCRIPTION_READY_TIMEOUT (5s each).
-            advanceTimeBy(20_000)
+            // 3s settle + connectAndAwait, then POST_INVALIDATION_RECONNECT_DELAY must fully elapse before the
+            // forced reconnect fires. Checking at 4.5s — safely past where a regressed 500 ms delay would have
+            // already fired (3s settle + 500ms = 3.5s) but safely short of the real 3s delay firing (3s settle +
+            // 3s = 6s) — pins the delay's actual value: a regression back to the old 500 ms would already show
+            // the second connectAndAwait call by this point, which connectAndAwaitCalls == 1 below would catch.
+            advanceTimeBy(4_500)
+            assertEquals(
+                1,
+                connection.connectAndAwaitCalls,
+                "the forced reconnect must wait for the full post-invalidation settle delay, not fire early",
+            )
+
+            // Clears the remaining settle delay, the reconnect itself, and profile setup (CONNECTED_GATE_TIMEOUT /
+            // SUBSCRIPTION_READY_TIMEOUT, 5s each) — 15.5s more, matching the original 20s total budget.
+            advanceTimeBy(15_500)
 
             // The transport consumed the flag during its first connect cycle: a second consume must return false.
             assertFalse(
@@ -746,7 +758,10 @@ class BleRadioTransportTest {
      * down with the platform refusing to refresh.
      *
      * Timings are not asserted: attempts here fail after connecting, so each one also pays session-cleanup waits. The
-     * assertions are on end state — one refresh, the service table repaired, and a loop that stopped retrying.
+     * assertions are on production-observable behavior only — one refresh call, and a loop that stopped retrying
+     * afterward — not on the fake's own `missingServices` bookkeeping, since that store is mutated by the fake's own
+     * [FakeBleConnection.simulateStaleServiceTable] callback and would just be testing the fake against itself. The
+     * negative-control test below is what actually proves recovery is caused by the invalidation.
      */
     @Test
     fun `a stale service table recovers on the attempt that follows the cache refresh`() = runTest {
@@ -767,10 +782,6 @@ class BleRadioTransportTest {
                 1,
                 connection.invalidateServiceCacheCalls,
                 "the streak must earn exactly one refresh, and that refresh must have been enough",
-            )
-            assertFalse(
-                SERVICE_UUID in connection.missingServices,
-                "the refresh must have replaced the stale service table",
             )
 
             val callsAfterRecovery = connection.connectAndAwaitCalls
