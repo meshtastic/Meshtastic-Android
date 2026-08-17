@@ -1108,10 +1108,27 @@
     <string name="message_routing_error_duty_cycle_limit_detail">Местные ограничения эфирного времени временно блокируют отправку. Подождите перед повторной попыткой.</string>
     <string name="message_routing_error_got_nak_detail">Нода отклонила это сообщение. Повторите попытку, когда маршрут изменится.</string>
     <string name="message_routing_error_max_retransmit">Не удалось доставить в сеть</string>
+    <string name="message_routing_error_max_retransmit_detail">Ни одна нода не подтвердила это сообщение. Повтори попытку, когда улучшится сигнал или покрытие mesh-сети.</string>
+    <string name="message_routing_error_no_channel">Несовпадение канала/ключа</string>
+    <string name="message_routing_error_no_channel_detail">Отправитель или получатель не смогли использовать совпадающий канал/ключ для этого сообщения.</string>
+    <string name="message_routing_error_no_interface">Нет радиоинтерфейса</string>
+    <string name="message_routing_error_no_interface_detail">У отправителя нет подходящего радиоинтерфейса для этого сообщения.</string>
+    <string name="message_routing_error_no_response">Нет ответа приложения</string>
+    <string name="message_routing_error_no_response_detail">Назначение получило запрос, но ни одно приложение или модуль не ответили. Повторите попытку, когда получатель будет доступен.</string>
+    <string name="message_routing_error_no_route_detail">В mesh-сети не найден маршрут к целевой ноде. Повторите попытку, когда больше нод станут доступны.</string>
+    <string name="message_routing_error_not_authorized">Не авторизовано</string>
+    <string name="message_routing_error_not_authorized_detail">Назначение отклонило этот запрос, так как он не авторизован.</string>
     <string name="message_routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
+    <string name="message_routing_error_pki_failed_detail">Не удалось использовать зашифрованный путь отправки. Дождитесь синхронизации информации о нодах или ключей, затем повторите попытку.</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
+    <string name="message_routing_error_pki_send_fail_public_key_detail">Твоя нода ещё не имеет открытого ключа получателя. Дождись синхронизации информации о нодах, затем повтори попытку.</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
+    <string name="message_routing_error_pki_unknown_pubkey_detail">Получатель ещё не знает твой открытый ключ. Твоя нода может автоматически делиться своей информацией; повторите попытку после синхронизации.</string>
+    <string name="message_routing_error_rate_limit_exceeded">Ограничение скорости</string>
+    <string name="message_routing_error_rate_limit_exceeded_detail">Сообщения отправляются слишком быстро. Подождите перед повторной попыткой.</string>
+    <string name="message_routing_error_timeout_detail">Подтверждение не было получено вовремя. Повтори попытку, когда улучшится сигнал или покрытие mesh-сети.</string>
     <string name="message_routing_error_too_large">Слишком большое сообщение для отправки</string>
+    <string name="message_routing_error_too_large_detail">Сократи сообщение и отправь его снова.</string>
     <string name="message_status_delivered">Отправлено в сеть</string>
     <string name="message_status_enroute">Отправка...</string>
     <string name="message_status_queued">В очереди на отправку</string>
@@ -1122,6 +1139,7 @@
     <string name="message_status_unknown">Неизвестно</string>
     <string name="message_translated_label">Переведено</string>
     <string name="messages">Сообщения</string>
+    <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_broadcast_seconds">Минимальная трансляция (в секундах)</string>
@@ -1179,6 +1197,8 @@
     <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="navigate_back">Вернуться</string>
     <string name="navigate_into_label">Перейти в</string>
+    <string name="need_hardware">Нужно оборудование?</string>
+    <string name="need_hardware_description">Meshtastic требует совместимое устройство. Наши спонсоры и партнёры предлагают готовое к использованию оборудование. Вот некоторые из самых популярных вариантов тут.</string>
     <string name="neighbor_info">Информация об окружении</string>
     <string name="neighbor_info_config">Настройки соседей</string>
     <string name="neighbor_info_enabled">Информация о соседях включена</string>
@@ -1220,6 +1240,8 @@
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
     <string name="node_filter_title">Фильтр по</string>
     <string name="node_id">ID ноды</string>
+    <string name="node_incomplete">Неполный</string>
+    <string name="node_incomplete_description">Информация о ноде ещё не получена</string>
     <string name="node_layout_channel">Канал</string>
     <string name="node_layout_compact">Компактность</string>
     <string name="node_layout_compact_fields_header">Компактные поля</string>
@@ -1247,6 +1269,7 @@
     <string name="node_list_help_title">Справка по списку нод</string>
     <string name="node_list_long_click_label">Параметры ноды</string>
     <string name="node_number">Номер ноды</string>
+    <string name="node_request_send_failed">Не удалось отправить запрос. Повторите попытку.</string>
     <string name="node_restarting">Перезапуск…</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Варианты сортировки нод</string>
@@ -1406,6 +1429,7 @@
     <string name="primary">Первичный</string>
     <string name="primary_channel_feature">Периодическая трансляция местоположения и телеметрии</string>
     <string name="private_key">Приватный ключ</string>
+    <string name="project_information">Информация о проекте</string>
     <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
     <string name="provider_name_exists">Имя провайдера уже существует.</string>
     <string name="proxy_to_client_enabled">Прокси клиенту включен</string>
@@ -1514,13 +1538,22 @@
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
     <string name="router_role_confirmation_text">Я прочитал &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
+    <string name="routing_error_admin_bad_session_key">Сеанс администратора истёк</string>
+    <string name="routing_error_admin_public_key_unauthorized">Ключ администратора не авторизован</string>
+    <string name="routing_error_bad_request">Неверный запрос</string>
+    <string name="routing_error_duty_cycle_limit">Ограничение рабочего цикла(Dity cycle)</string>
     <string name="routing_error_got_nak">Получено отрицательное подтверждение</string>
     <string name="routing_error_max_retransmit">Не удалось доставить в сеть</string>
+    <string name="routing_error_no_channel">Несовпадение канала/ключа</string>
+    <string name="routing_error_no_interface">Нет радиоинтерфейса</string>
+    <string name="routing_error_no_response">Нет ответа приложения</string>
     <string name="routing_error_no_route">Нет маршрута</string>
     <string name="routing_error_none">Принято</string>
+    <string name="routing_error_not_authorized">Не авторизовано</string>
     <string name="routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
     <string name="routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
+    <string name="routing_error_rate_limit_exceeded">Ограничение скорости</string>
     <string name="routing_error_timeout">Время ожидания истекло</string>
     <string name="routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="rssi">RSSI</string>
@@ -1612,6 +1645,8 @@
     <string name="should_update_firmware">Рекомендуется обновление прошивки.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Ключ шифрования</string>
+    <string name="show_full_message_timestamps">Показывать полные метки времени сообщений</string>
+    <string name="show_full_message_timestamps_summary">Всегда показывать дату и время в заголовках бесед и действиях с сообщениями</string>
     <string name="show_iaq_legend">Показать легенду качества воздуха</string>
     <string name="show_layer">Показать слой</string>
     <string name="show_original">Показать исходник</string>
@@ -1693,11 +1728,25 @@
     <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_enabled">Включить локальный сервер TAK</string>
+    <string name="tak_server_enabled_desc">Запускает локальный TLS-сервер на порту 8089 для подключений ATAK</string>
+    <string name="tak_server_export_data_package_desc">Создать .zip для подключения ATAK к этому серверу</string>
     <string name="tak_server_loading">...</string>
     <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
+    <string name="tak_server_mesh_to_cot_desc">Показывать ноды Meshtastic на карте ATAK как контакты</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
+    <plurals name="tak_server_status_connected">
+        <item quantity="one">%1$d локальное клиентское подключение</item>
+        <item quantity="few">%1$d локальных клиентских подключения</item>
+        <item quantity="many">%1$d локальных клиентских подключений</item>
+        <item quantity="other">%1$d локальных клиентских подключения</item>
+    </plurals>
+    <string name="tak_server_status_failed">Не удалось запустить TAK-сервер. Выключите и снова включите его, чтобы повторить попытку.</string>
+    <string name="tak_server_status_not_running">TAK-сервер не запущен</string>
     <string name="tak_server_status_off">Выкл</string>
+    <string name="tak_server_status_starting">Запуск TAK-сервера</string>
+    <string name="tak_server_status_unavailable">Локальный TAK-сервер доступен в Meshtastic для Android</string>
+    <string name="tak_server_status_waiting">Прослушивание 127.0.0.1:8089 — ожидание ATAK</string>
     <string name="tak_server_test_card_title">Сетевой тест TAK (Отладка)</string>
     <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>
     <string name="tak_server_test_result_bytes">%1$dБ ✓</string>
@@ -1821,6 +1870,7 @@
     <string name="update_interval">Интервал опроса GPS</string>
     <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
     <string name="updated">Обновлено</string>
+    <string name="uplink_enabled">MQTT Uplink включён</string>
     <string name="uplink_feature_description">Сообщения из сети будут отправляться в публичный интернет через любую ноду настроенного шлюза.</string>
     <string name="uptime">Аптайм</string>
     <!-- URL -->
@@ -1859,7 +1909,10 @@
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
+    <string name="website">Веб-сайт</string>
     <string name="weight">Вес</string>
+    <string name="what_is_meshtastic">Что такое Meshtastic?</string>
+    <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
     <!-- WIFI -->
     <string name="wifi_config">Настройки WiFi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
