@@ -39,7 +39,15 @@ Android ユーザーにとって最も一般的な更新方法です：
 
 無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
 
-&gt; ℹ️ **nRF ブートローダーに関する注意：** 一部のデバイス（例：RAK WisBlock RAK4631）では、ベンダーのシリアル DFU ツール（`adafruit-nrfutil` など）でブートローダーを書き込む必要があります。`.uf2` をコピーするだけではブートローダーは更新されません。 これに該当する場合、アプリがヒントを表示します。
+&gt; ℹ️ **nRF bootloader note:** A vendor bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+
+### Factory Erase and Bootloader Upgrade
+
+On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and reinstall** and, where an upgraded bootloader is published for the board, **Upgrade bootloader**.
+
+Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
+
+The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead — picking wrong there can leave the device needing a hardware programmer to recover.
 
 ### その他の書き込み方法
 
