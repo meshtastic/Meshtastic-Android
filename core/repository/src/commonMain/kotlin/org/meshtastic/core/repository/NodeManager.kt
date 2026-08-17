@@ -117,24 +117,40 @@ interface NodeManager : NodeIdLookup {
     fun publishConnectionIdentity(sessionGeneration: Long, address: String, nodeNum: Int, deviceId: String?)
 
     /**
-     * Node numbers confirmed present in the connected radio's own NodeDB for the current connection session — exactly
-     * the set the Stage 2 handshake downloaded, plus the local node. Null before that handshake has completed at least
-     * once this session (no snapshot to compare against yet, so nothing should be flagged).
+     * Node numbers the connected radio is known to know about during the current connection session: the set its Stage
+     * 2 handshake downloaded, plus the local node, plus **every node the radio has forwarded live traffic for since**
+     * (see below). Null before that handshake has completed at least once this session (no snapshot to compare against
+     * yet, so nothing should be flagged).
      *
      * Distinct from [nodeDBbyNodeNum]: the phone's node database is deliberately cumulative and keeps rows the
      * connected radio no longer reports (multi-radio use, meshes bigger than the radio's own bounded/evicting NodeDB).
      * A row present in [nodeDBbyNodeNum] but absent here is real, locally-retained history — not a fabricated or stale
      * entry — and UI should badge it as such (see #6263) rather than hide or delete it.
      *
+     * **This set grows for the life of the session.** The Stage 2 snapshot alone would be a point-in-time photograph:
+     * on a long-lived connection, any node announcing itself mid-session (NodeInfo, Position, Telemetry, node status,
+     * PaxCounter, admin reply) is genuinely part of the live session, and treating it as locally-retained history would
+     * suppress its real, freshly observed presence. Every mid-session path that carries a [RadioSessionContext] — i.e.
+     * that reached the phone through the radio, as opposed to a local projection or an imported contact — adds its node
+     * number here. Local-only writes (optimistic config projections, shared-contact imports, fixed-position edits)
+     * carry no session and deliberately do not, since those nodes are exactly the "saved on phone" case.
+     *
+     * It never shrinks mid-session. A node evicted from the radio's *own* bounded NodeDB after Stage 2 keeps its
+     * membership until the next handshake republishes: the firmware sends no eviction notification, so the phone has no
+     * signal short of re-downloading the whole NodeDB. Erring toward "the radio knew about this node this session" is
+     * the safe direction — it withholds a badge rather than falsely claiming locally-retained history.
+     *
      * Reconciled alongside [connectionIdentity] at every transport-session boundary — see [clearConnectionIdentity] and
      * [clearStaleConnectionIdentity] — using the same generation carried by [publishCurrentSessionNodeNums], so a
      * snapshot already published for the active generation survives a delayed boundary collector from that same
-     * generation, exactly like [connectionIdentity].
+     * generation, exactly like [connectionIdentity]. Mid-session additions are gated on that same generation, so
+     * late-arriving traffic from a superseded session can never contaminate the new session's set.
      */
     val currentSessionNodeNums: StateFlow<Set<Int>?>
 
     /**
      * Publishes the exact set of node numbers [sessionGeneration]'s Stage 2 handshake downloaded (+ the local node).
+     * This replaces (rather than extends) any previous set, and is the only point at which membership can shrink.
      */
     fun publishCurrentSessionNodeNums(sessionGeneration: Long, nodeNums: Set<Int>)
 

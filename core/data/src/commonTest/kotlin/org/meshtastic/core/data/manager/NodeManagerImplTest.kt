@@ -62,6 +62,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
@@ -2779,5 +2780,146 @@ class NodeManagerImplTest {
         nodeManager.clear()
 
         assertNull(nodeManager.currentSessionNodeNums.value)
+    }
+
+    // ---------- Mid-session membership growth (#6263) ----------
+
+    private val liveSession = RadioSessionContext(generation = SESSION_GEN, address = "ble:live")
+
+    /** Publishes a Stage 2 snapshot that deliberately does NOT contain [MID_SESSION_NUM]. */
+    private fun publishStageTwoSnapshot() {
+        nodeManager.publishCurrentSessionNodeNums(SESSION_GEN, setOf(LOCAL_NUM, STAGE_TWO_NUM))
+    }
+
+    /**
+     * The exact predicate every consumer applies (`NodeListScreen`, `CommonGetNodeDetailsUseCase`): a row is badged
+     * "Saved on phone" — and has its online/fresh affordance suppressed — when a snapshot exists and omits it.
+     */
+    private fun isSavedOnPhone(nodeNum: Int): Boolean =
+        nodeManager.currentSessionNodeNums.value?.let { nodeNum !in it } ?: false
+
+    private fun midSessionUser(num: Int = MID_SESSION_NUM) = User(
+        id = NodeAddress.numToDefaultId(num),
+        long_name = "Mid Session Arrival",
+        short_name = "MSA",
+        hw_model = HardwareModel.TLORA_V2,
+    )
+
+    @Test
+    fun `a node first heard mid-session joins the session set instead of being badged saved-on-phone`() {
+        // The defect this locks down: the Stage 2 snapshot is a point-in-time photograph, so a node that announces
+        // itself later on a long-lived connection was flagged as locally-retained history and had its genuinely fresh
+        // online status suppressed — the same "presence looks wrong" defect #6263 set out to fix, inverted.
+        publishStageTwoSnapshot()
+        assertTrue(isSavedOnPhone(MID_SESSION_NUM), "precondition: absent from the Stage 2 snapshot")
+
+        nodeManager.handleReceivedUser(MID_SESSION_NUM, midSessionUser(), session = liveSession)
+
+        assertTrue(MID_SESSION_NUM in nodeManager.currentSessionNodeNums.value.orEmpty())
+        assertFalse(isSavedOnPhone(MID_SESSION_NUM), "a node just heard over the mesh must not be badged")
+        // Purely additive: Stage 2's own membership is untouched.
+        assertEquals(setOf(LOCAL_NUM, STAGE_TWO_NUM, MID_SESSION_NUM), nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `a session-scoped position joins the session set`() {
+        publishStageTwoSnapshot()
+
+        nodeManager.handleReceivedPosition(
+            MID_SESSION_NUM,
+            myNodeNum = LOCAL_NUM,
+            p = ProtoPosition(latitude_i = 123, longitude_i = 456),
+            defaultTime = 1000L,
+            session = liveSession,
+        )
+
+        assertFalse(isSavedOnPhone(MID_SESSION_NUM))
+    }
+
+    @Test
+    fun `a session-scoped node update joins the session set`() {
+        // updateNodeForSession is the mesh telemetry (TelemetryPacketHandlerImpl) and admin-reply
+        // (AdminPacketHandlerImpl) arrival path — neither reaches handleReceivedUser.
+        publishStageTwoSnapshot()
+
+        nodeManager.updateNodeForSession(MID_SESSION_NUM, liveSession) { it.copy(lastHeard = 42) }
+
+        assertFalse(isSavedOnPhone(MID_SESSION_NUM))
+    }
+
+    @Test
+    fun `a session-scoped node status joins the session set`() {
+        publishStageTwoSnapshot()
+
+        nodeManager.handleReceivedNodeStatus(MID_SESSION_NUM, StatusMessage(status = "live"), liveSession)
+
+        assertFalse(isSavedOnPhone(MID_SESSION_NUM))
+    }
+
+    @Test
+    fun `a sessionless user update cannot claim session membership`() {
+        // MessagingControllerImpl imports a shared contact, AdminControllerImpl projects an optimistic config write,
+        // and CommandSenderImpl applies a local fixed position — all with no session. Those nodes are precisely the
+        // "saved on phone" case, so a session-blind add would badge nothing at all and make the feature inert.
+        publishStageTwoSnapshot()
+
+        nodeManager.handleReceivedUser(MID_SESSION_NUM, midSessionUser(), manuallyVerified = true)
+        nodeManager.updateNode(MID_SESSION_NUM) { it.copy(lastHeard = 42) }
+
+        assertEquals(setOf(LOCAL_NUM, STAGE_TWO_NUM), nodeManager.currentSessionNodeNums.value)
+        assertTrue(isSavedOnPhone(MID_SESSION_NUM))
+    }
+
+    @Test
+    fun `traffic from a superseded generation cannot contaminate the active session set`() {
+        publishStageTwoSnapshot()
+        val supersededSession = RadioSessionContext(generation = SESSION_GEN - 1, address = "ble:old")
+
+        nodeManager.handleReceivedUser(MID_SESSION_NUM, midSessionUser(), session = supersededSession)
+
+        assertEquals(setOf(LOCAL_NUM, STAGE_TWO_NUM), nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `mid-session traffic before any snapshot leaves the set null rather than fabricating one`() {
+        // Nothing may be badged until the radio has actually reported its own NodeDB, so a partial set built only from
+        // live traffic would badge the entire real NodeDB as saved-on-phone.
+        nodeManager.handleReceivedUser(MID_SESSION_NUM, midSessionUser(), session = liveSession)
+
+        assertNull(nodeManager.currentSessionNodeNums.value)
+        assertFalse(isSavedOnPhone(MID_SESSION_NUM))
+    }
+
+    @Test
+    fun `a suppressed replay for a retired number claims no session membership`() {
+        val retiredNum = validPk.noncanonicalNum(4600)
+        nodeManager.updateNode(retiredNum) { makeKnownNode(retiredNum, validPk, "Pre-migration") }
+        nodeManager.applyTrustedIdentityMigrations(listOf(retiredNum))
+        publishStageTwoSnapshot()
+
+        // No valid key against a retired slot: the reducer suppresses the packet outright, so it is no evidence that
+        // the radio still knows this number.
+        nodeManager.handleReceivedUser(retiredNum, midSessionUser(retiredNum), session = liveSession)
+
+        assertEquals(setOf(LOCAL_NUM, STAGE_TWO_NUM), nodeManager.currentSessionNodeNums.value)
+    }
+
+    @Test
+    fun `repeat traffic from an existing member allocates no new set`() {
+        // Guards the hot inbound path: every position and telemetry packet reaches this, and a blind `set + num` would
+        // copy up to MAX_IN_MEMORY_NODES entries per packet for a change StateFlow conflates away regardless.
+        publishStageTwoSnapshot()
+        val before = nodeManager.currentSessionNodeNums.value
+
+        nodeManager.handleReceivedUser(STAGE_TWO_NUM, midSessionUser(STAGE_TWO_NUM), session = liveSession)
+
+        assertSame(before, nodeManager.currentSessionNodeNums.value)
+    }
+
+    private companion object {
+        const val SESSION_GEN = 5L
+        const val LOCAL_NUM = 1111
+        const val STAGE_TWO_NUM = 2222
+        const val MID_SESSION_NUM = 3333
     }
 }

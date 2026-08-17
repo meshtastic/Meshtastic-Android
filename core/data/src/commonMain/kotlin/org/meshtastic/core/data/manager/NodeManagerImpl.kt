@@ -346,6 +346,31 @@ class NodeManagerImpl(
         _currentSessionNodeNums.value = nodeNums
     }
 
+    /**
+     * Extends the current session's membership set with [nodeNum] after the radio forwarded live traffic for it, so a
+     * node that announces itself *after* the Stage 2 snapshot is not mistaken for locally-retained history (#6263).
+     *
+     * A null [session] means the mutation did not come from the radio at all (an optimistic admin projection, a
+     * shared-contact import, a locally applied fixed position) and must not claim session membership. Everything else
+     * is decided inside the [updateStateFlow] lambda so a concurrent session boundary makes this a no-op rather than
+     * resurrecting a number into the wrong session's set:
+     * - no snapshot published yet → nothing to extend (leaving it null keeps every row unbadged, per the contract);
+     * - the published snapshot belongs to a different generation → this packet is from a superseded session;
+     * - already a member → return the same instance, so the hot inbound path neither copies a set of up to
+     *   [MAX_IN_MEMORY_NODES] entries nor emits a conflated no-change update.
+     */
+    private fun noteHeardInSession(nodeNum: Int, session: RadioSessionContext?) {
+        if (session == null) return
+        _currentSessionNodeNums.updateStateFlow { current ->
+            when {
+                current == null -> null
+                currentSessionNodeNumsGeneration.value != session.generation -> current
+                nodeNum in current -> current
+                else -> current + nodeNum
+            }
+        }
+    }
+
     override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
 
     override fun setFirmwareEdition(edition: FirmwareEdition?) {
@@ -612,7 +637,13 @@ class NodeManagerImpl(
         session: RadioSessionContext? = null,
         transform: (Node) -> Node,
     ): NodeStateChange? = updateNodeState(nodeNum, channel, transform).also { change ->
-        if (change != null && shouldPersist(change.next)) {
+        if (change == null) return@also
+        // A committed session-scoped update means the radio just forwarded traffic for this node — position,
+        // telemetry, node status, PaxCounter, admin reply — so it belongs to this session's membership set even if
+        // Stage 2 never listed it (#6263). A null change means the update was refused (retired-absent number) and
+        // proves nothing. Retries are impossible here: updateNodeState commits at most once.
+        noteHeardInSession(nodeNum, session)
+        if (shouldPersist(change.next)) {
             radioInterfaceService.launchSessionWork(scope, session) { persistLatestNode(nodeNum) }
         }
     }
@@ -690,6 +721,9 @@ class NodeManagerImpl(
                         " key=$keyStr canonical=$canonicalNum" +
                         " decision=${transition.decision} notify=${transition.notifyNode != null}"
                 }
+                // Only the winning CAS may claim session membership: a packet that lost the race breaks out of this
+                // loop and is logged as discarded, and an entry-point add would have already polluted the set (#6263).
+                transition.sessionMemberNodeNum?.let { noteHeardInSession(it, session) }
                 applyReceivedUserEffects(transition, session)
                 return
             }
@@ -857,6 +891,14 @@ class NodeManagerImpl(
         val notifyNode: Node?,
         /** Retired number to reactivate after a validated, genuinely new identity claims the vacant slot. */
         val unretireNodeNum: Int? = null,
+        /**
+         * Number under which [after] actually keys the node this packet was attributed to, to be recorded as a member
+         * of the live connection session (#6263). Deliberately not always `fromNum`: a stale noncanonical presentation
+         * yields to the canonical row, so the *canonical* number is the row the traffic evidences. Null when the
+         * reduction suppressed or ignored the packet — a suppressed replay proves nothing about session membership, and
+         * claiming `fromNum` there would badge a slot held by an entirely different identity.
+         */
+        val sessionMemberNodeNum: Int? = null,
         val decision: ReceivedUserDecision,
     )
 
@@ -954,6 +996,7 @@ class NodeManagerImpl(
                 after = afterRemovals.put(fromNum, transformed, preferredNum = fromNum),
                 upsertNode = transformed,
                 notifyNode = null,
+                sessionMemberNodeNum = fromNum,
                 decision = ReceivedUserDecision.LOCAL_UPDATE,
             )
         }
@@ -1007,6 +1050,7 @@ class NodeManagerImpl(
                     after = afterRemovals.put(fromNum, transformed, preferredNum = fromNum),
                     upsertNode = null,
                     notifyNode = null,
+                    sessionMemberNodeNum = fromNum,
                     decision = ReceivedUserDecision.CANONICAL_DUPLICATE_RECONCILED,
                 )
             }
@@ -1020,6 +1064,9 @@ class NodeManagerImpl(
                     after = after,
                     upsertNode = null,
                     notifyNode = null,
+                    // The identity lives at canonicalNum (that is what `canonicalNum in otherSameKeyNums` asserts), so
+                    // that — not the yielding fromNum slot — is the row this traffic proves the radio just relayed.
+                    sessionMemberNodeNum = canonicalNum,
                     decision = ReceivedUserDecision.STALE_PRESENTATION_REMOVED,
                 )
             }
@@ -1048,6 +1095,7 @@ class NodeManagerImpl(
                     after = before.put(fromNum, transformed, preferredNum = fromNum),
                     upsertNode = null,
                     notifyNode = null,
+                    sessionMemberNodeNum = fromNum,
                     decision = ReceivedUserDecision.AMBIGUOUS_DUPLICATE_UPDATED,
                 )
             }
@@ -1090,6 +1138,7 @@ class NodeManagerImpl(
             upsertNode = transformed.takeIf { persist },
             notifyNode = notify,
             unretireNodeNum = unretireNodeNum,
+            sessionMemberNodeNum = fromNum,
             decision = decision,
         )
     }
