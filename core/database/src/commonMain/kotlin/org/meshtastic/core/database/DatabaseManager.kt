@@ -1688,7 +1688,7 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
     }
 
     override suspend fun cachedDeviceDbCount(): Int = withManagerOperation {
-        mutex.withLock { deviceDbNamesLocked().size }
+        withContext(dispatchers.io) { mutex.withLock { deviceDbNamesLocked().size } }
     }
 
     private suspend fun enforceCacheLimit() = withManagerOperation {

@@ -52,6 +52,7 @@ fun CacheLimitPreference(cacheLimit: Int, onCheckEvictionCount: suspend (Int) ->
     val scope = rememberCoroutineScope()
     var pendingLimit by rememberSaveable { mutableStateOf<Int?>(null) }
     var pendingEvictionCount by rememberSaveable { mutableIntStateOf(0) }
+    var selectionRequest by remember { mutableIntStateOf(0) }
 
     DropDownPreference(
         title = stringResource(Res.string.device_db_cache_limit),
@@ -59,12 +60,14 @@ fun CacheLimitPreference(cacheLimit: Int, onCheckEvictionCount: suspend (Int) ->
         items = cacheItems,
         selectedItem = cacheLimit.toLong(),
         onItemSelected = { selected ->
+            val request = ++selectionRequest
             val newLimit = selected.toInt()
             if (newLimit >= cacheLimit) {
                 onSetCacheLimit(newLimit)
             } else {
                 scope.launch {
                     val evicted = onCheckEvictionCount(newLimit)
+                    if (request != selectionRequest) return@launch
                     if (evicted > 0) {
                         pendingEvictionCount = evicted
                         pendingLimit = newLimit
