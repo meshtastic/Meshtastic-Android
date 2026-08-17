@@ -39,7 +39,6 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoute.Connections]. */
 fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
@@ -74,7 +73,6 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
 
         ConnectionsScreen(
             scanModel = scanModel,
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },

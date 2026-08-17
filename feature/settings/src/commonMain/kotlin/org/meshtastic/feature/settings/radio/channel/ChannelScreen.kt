@@ -65,6 +65,7 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.defaultPresetFor
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.apply
@@ -282,10 +283,11 @@ fun ChannelScreen(
             item {
                 ModemPresetInfo(
                     modemPresetName = modemPresetName,
-                    onClick = {
-                        isWaiting = true
-                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                    },
+                    // Navigate straight to the LoRa screen: it re-reads the route on entry and renders from the
+                    // connect-time snapshot meanwhile, so pre-fetching behind a progress dialog here bought nothing
+                    // and could strand the user on an empty dialog when the read completed before the dialog
+                    // observed it.
+                    onClick = { onNavigate(SettingsRoute.LoRa) },
                 )
             }
             item {

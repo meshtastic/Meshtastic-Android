@@ -44,9 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -117,10 +114,6 @@ import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedText
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.EventFirmwareCard
 import org.meshtastic.feature.connections.ui.components.TransportSelector
-import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.getNavRouteFrom
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 
 /**
  * Fixed minimum height for the "connected device" card at the top of the Connections screen. Shared across the three UI
@@ -136,12 +129,10 @@ private val CardMinHeight = 100.dp
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = koinViewModel(),
     scanModel: ScannerViewModel = koinViewModel(),
-    radioConfigViewModel: RadioConfigViewModel = koinViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
-    val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
@@ -222,27 +213,6 @@ fun ConnectionsScreen(
         ) {
             scanModel.startNetworkAutoScan()
         }
-    }
-
-    /* Animate waiting for the configurations */
-    var isWaiting by remember { mutableStateOf(false) }
-    if (isWaiting) {
-        PacketResponseStateDialog(
-            state = radioConfigState.responseState,
-            onDismiss = {
-                isWaiting = false
-                radioConfigViewModel.clearPacketResponse()
-            },
-            onComplete = {
-                getNavRouteFrom(radioConfigState.route)?.let { route ->
-                    isWaiting = false
-                    radioConfigViewModel.clearPacketResponse()
-                    if (route == SettingsRoute.LoRa) {
-                        onConfigNavigate(SettingsRoute.LoRa)
-                    }
-                }
-            },
-        )
     }
 
     // Work around CMP-6615 in Compose Multiplatform 1.11.1: Android stringResource enters a blocking resource state.
@@ -422,10 +392,11 @@ fun ConnectionsScreen(
                                 ListItem(
                                     leadingIcon = MeshtasticIcons.Language,
                                     text = stringResource(Res.string.set_your_region),
-                                    onClick = {
-                                        isWaiting = true
-                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                                    },
+                                    // Navigate straight to the LoRa screen: it re-reads the route on entry and
+                                    // renders from the connect-time snapshot meanwhile, so pre-fetching behind a
+                                    // progress dialog here bought nothing and could strand the user on an empty
+                                    // dialog when the read completed before the dialog observed it.
+                                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
                                 )
                             }
                         }
