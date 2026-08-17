@@ -243,3 +243,21 @@ fun Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in
         Config.DeviceConfig.Role.TRACKER,
         Config.DeviceConfig.Role.TAK_TRACKER,
     )
+
+/** Offset converting a negative [Node.num] into its unsigned 32-bit decimal representation. */
+private const val UNSIGNED_INT_OFFSET = 4294967296L
+
+private val Node.unsignedNum: Long
+    get() = num.toLong().let { if (it < 0) it + UNSIGNED_INT_OFFSET else it }
+
+/**
+ * Matches node search text (long/short name, hex id, decimal id) with Unicode-aware case folding.
+ *
+ * Must run in Kotlin, not SQL: SQLite's LIKE/UPPER/LOWER only case-fold ASCII a-z/A-Z, so a query like "kolså" can
+ * never match a stored name of "KOLSÅS" via a SQL WHERE clause (#6750).
+ */
+fun Node.matchesSearch(filter: String): Boolean = filter.isBlank() ||
+    user.long_name.contains(filter, ignoreCase = true) ||
+    user.short_name.contains(filter, ignoreCase = true) ||
+    user.id.contains(filter, ignoreCase = true) ||
+    unsignedNum.toString().contains(filter, ignoreCase = true)

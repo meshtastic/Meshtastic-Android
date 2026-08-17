@@ -37,7 +37,6 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
 
     override fun getNodesFlow(
         sort: String,
-        filter: String,
         includeUnknown: Boolean,
         hopsAwayMax: Int,
         lastHeardMin: Int,
@@ -46,7 +45,6 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
             db.nodeInfoDao()
                 .getNodes(
                     sort = sort,
-                    filter = filter,
                     includeUnknown = includeUnknown,
                     hopsAwayMax = hopsAwayMax,
                     lastHeardMin = lastHeardMin,
