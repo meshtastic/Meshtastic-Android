@@ -24,7 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -105,7 +105,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 /** Trash-can action that asks for confirmation before invoking [onConfirm] to delete the position track. */
 @Composable
 private fun ClearPositionTrackButton(onConfirm: () -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
     IconButton(onClick = { showDialog = true }) {
         Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
     }
