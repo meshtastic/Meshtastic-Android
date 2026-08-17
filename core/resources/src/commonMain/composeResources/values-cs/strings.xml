@@ -242,6 +242,7 @@
     <string name="contrast_standard">Standardní</string>
     <string name="conversations">Konverzace</string>
     <string name="copy">Kopírovat</string>
+    <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Vytvořte si vlastní sítě</string>
     <string name="critical_alert">Kritické varování!</string>
     <string name="critical_alerts">Kritická upozornění</string>
@@ -402,6 +403,7 @@
     <string name="doc_title_translate">Překlad aplikace</string>
     <string name="doc_title_units">Jednotky a místní nastavení</string>
     <string name="doc_title_widget">Widget na domovské obrazovce</string>
+    <string name="documentation">Dokumentace</string>
     <string name="done">Hotovo</string>
     <string name="dont_show_again_for_device">U tohoto zařízení již nezobrazovat</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
@@ -595,6 +597,7 @@
     <string name="geofence_remove_area">Smazat oblast</string>
     <string name="geofence_set_area">Nastavit oblast na mapě</string>
     <string name="get_started">Začněte hned</string>
+    <string name="github_repository">GitHub repozitář</string>
     <string name="good">Silný</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
@@ -688,6 +691,7 @@
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="location_sharing">Sdílení polohy</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Zkuste to znovu za %1$d sekund.</string>
     <string name="lockdown_enable_ack">Rozumím</string>
     <string name="locked">Uzamknout</string>
     <!-- LOG -->
@@ -786,8 +790,19 @@
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="message_device_managed">Toto rádio je spravováno vzdáleným správcem a změny může provádět jen on.</string>
     <string name="message_input_label">Zpráva</string>
+    <string name="message_routing_error_admin_bad_session_key_detail">Klíč relace správce chybí, vypršela jeho platnost nebo je neplatný. Před dalším pokusem si vyžádejte novou relaci.</string>
+    <string name="message_routing_error_duty_cycle_limit_detail">Místní limity vysílacího času dočasně blokují odesílání. Před dalším pokusem chvíli počkejte.</string>
+    <string name="message_routing_error_got_nak_detail">Uzel tuto zprávu odmítl. Zkuste to znovu, až se změní trasa.</string>
     <string name="message_routing_error_max_retransmit">Nepodařilo se doručit do mesh sítě</string>
+    <string name="message_routing_error_max_retransmit_detail">Žádný uzel tuto zprávu nepotvrdil. Zkuste to znovu, až budete mít lepší signál nebo větší pokrytí mesh sítě.</string>
+    <string name="message_routing_error_no_response_detail">Cílové zařízení požadavek přijalo, ale žádná aplikace ani modul neodpověděly. Zkuste to znovu, až bude příjemce dostupný.</string>
+    <string name="message_routing_error_no_route_detail">V mesh síti nebyla nalezena žádná cesta k cílovému uzlu. Zkuste to znovu, až bude dostupných více uzlů.</string>
     <string name="message_routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
+    <string name="message_routing_error_pki_failed_detail">Šifrovanou cestu pro odeslání se nepodařilo použít. Počkejte, až se synchronizují informace o uzlu nebo klíče, a poté to zkuste znovu.</string>
+    <string name="message_routing_error_pki_send_fail_public_key_detail">Váš uzel zatím nemá veřejný klíč příjemce. Počkejte, až se synchronizují informace o uzlu, a poté to zkuste znovu.</string>
+    <string name="message_routing_error_pki_unknown_pubkey_detail">Příjemce zatím nezná váš veřejný klíč. Váš uzel může své informace sdílet automaticky; zkuste to znovu, až se synchronizují.</string>
+    <string name="message_routing_error_rate_limit_exceeded_detail">Zprávy se odesílají příliš rychle. Před dalším pokusem počkejte.</string>
+    <string name="message_routing_error_timeout_detail">Ve stanoveném čase nebylo přijato žádné potvrzení. Zkuste to znovu, až budete mít lepší signál nebo větší pokrytí mesh sítě.</string>
     <string name="message_routing_error_too_large">Zpráva je příliš dlouhá pro odeslání</string>
     <string name="message_status_delivered">Doručeno do mesh sítě</string>
     <string name="message_status_enroute">Odesílání...</string>
@@ -895,6 +910,7 @@
     <string name="node_list_help_node_details">Detaily uzlu</string>
     <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
     <string name="node_number">Číslo uzlu</string>
+    <string name="node_request_send_failed">Požadavek se nepodařilo odeslat. Zkuste to znovu.</string>
     <string name="node_restarting">Restartování…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
@@ -1340,6 +1356,7 @@
     <string name="url_cannot_be_empty">Adresa URL nesmí být prázdná.</string>
     <string name="url_template">URL šablona</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">Přístup k USB byl zamítnut. Odpojte a znovu připojte zařízení a zkuste to znovu.</string>
     <!-- USE -->
     <string name="use_12h_format">Použít 12h formát hodin</string>
     <string name="use_homoglyph_characters_encoding">Úsporné kódování pro cyriliku</string>
