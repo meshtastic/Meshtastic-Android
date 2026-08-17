@@ -23,12 +23,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.clear_position_track_message
+import org.meshtastic.core.resources.clear_position_track_title
+import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.export_gpx
 import org.meshtastic.core.resources.position_log
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -64,9 +71,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                         contentDescription = stringResource(Res.string.export_gpx),
                     )
                 }
-                IconButton(onClick = { viewModel.clearPosition() }) {
-                    Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
-                }
+                ClearPositionTrackButton(onConfirm = { viewModel.clearPosition() })
             }
             if (!state.isLocal) {
                 IconButton(onClick = { viewModel.requestPosition() }) {
@@ -95,4 +100,25 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             }
         },
     )
+}
+
+/** Trash-can action that asks for confirmation before invoking [onConfirm] to delete the position track. */
+@Composable
+private fun ClearPositionTrackButton(onConfirm: () -> Unit) {
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    IconButton(onClick = { showDialog = true }) {
+        Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
+    }
+    if (showDialog) {
+        MeshtasticResourceDialog(
+            titleRes = Res.string.clear_position_track_title,
+            messageRes = Res.string.clear_position_track_message,
+            confirmTextRes = Res.string.delete,
+            onConfirm = {
+                showDialog = false
+                onConfirm()
+            },
+            onDismiss = { showDialog = false },
+        )
+    }
 }
