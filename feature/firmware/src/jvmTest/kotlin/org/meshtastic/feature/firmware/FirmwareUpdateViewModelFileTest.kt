@@ -986,12 +986,13 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
 
         val artifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
-        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) } calls {
-            @Suppress("UNCHECKED_CAST")
-            val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
-            updateState(FirmwareUpdateState.AwaitingFileSave(uf2Artifact = artifact, fileName = "firmware.uf2"))
-            artifact
-        }
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.AwaitingFileSave(uf2Artifact = artifact, fileName = "firmware.uf2"))
+                artifact
+            }
         viewModel.startUpdate()
         advanceUntilIdle()
         assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)

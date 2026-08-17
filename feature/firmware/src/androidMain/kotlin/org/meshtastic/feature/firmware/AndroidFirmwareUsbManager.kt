@@ -69,20 +69,19 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
         return usbRepository.pokeDtr(driver, holdMillis)
     }
 
-    @Suppress("ReturnCount") // preconditions; each missing one ends the preflight without a dialog
-    override suspend fun ensureSerialPermission(waitMillis: Long): Boolean {
+    override suspend fun ensureSerialPermission(waitMillis: Long): Boolean = withTimeoutOrNull(waitMillis) {
         // The updated firmware enumerates a while after the UF2 is consumed; poll rather than sampling once.
         val driver =
-            withTimeoutOrNull(waitMillis) {
-                usbRepository.serialDevices.map { devices -> devices.values.firstOrNull() }.filterNotNull().first()
-            }
-        if (driver == null) {
-            Logger.w { "No serial device appeared within ${waitMillis}ms; skipping the permission preflight" }
-            return false
-        }
-        if (usbRepository.hasPermission(driver.device)) return true
-        return usbRepository.requestPermission(driver.device).first() == true
+            usbRepository.serialDevices.map { devices -> devices.values.firstOrNull() }.filterNotNull().first()
+        if (usbRepository.hasPermission(driver.device)) return@withTimeoutOrNull true
+        // The permission dialog itself must share this budget — otherwise an unanswered dialog leaves the
+        // caller (the post-update verification flow) parked forever instead of falling back to auto-recovery.
+        usbRepository.requestPermission(driver.device).first() == true
     }
+        ?: run {
+            Logger.w { "USB permission preflight did not complete within ${waitMillis}ms" }
+            false
+        }
 
     /** Observe when a USB device is detached. */
     override fun deviceDetachFlow(): Flow<Unit> = callbackFlow {

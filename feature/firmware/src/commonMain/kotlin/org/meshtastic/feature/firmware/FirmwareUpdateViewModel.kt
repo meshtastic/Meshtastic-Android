@@ -1088,7 +1088,7 @@ class FirmwareUpdateViewModel(
         // (stable-keyed) address. BLE/TCP have no such hot-plug recovery, so they still need the explicit re-address.
         address?.let { fullAddr ->
             if (radioPrefs.isSerial()) {
-                Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
+                Logger.i { "Post-update: preflighting the USB permission grant for ${fullAddr.anonymize}" }
                 // The reboot gave the device a new USB identity, and Android scopes permission grants to the
                 // identity — without a fresh grant the auto-recovery fails with SecurityException and a healthy
                 // update lands on VerificationFailed. Ask now, while the user is still watching. On success,
@@ -1097,6 +1097,9 @@ class FirmwareUpdateViewModel(
                 // enumerated and the grant is held, so the one-shot setDeviceAddress cannot land in the
                 // enumeration gap the bare-USB path avoids.
                 if (usbManager.ensureSerialPermission(USB_REATTACH_PERMISSION_WAIT)) {
+                    Logger.i {
+                        "Post-update: USB permission confirmed, reconnecting explicitly to ${fullAddr.anonymize}"
+                    }
                     radioController.setDeviceAddress(fullAddr)
                 } else {
                     Logger.w { "Post-update USB permission preflight did not complete; relying on auto-recovery" }
