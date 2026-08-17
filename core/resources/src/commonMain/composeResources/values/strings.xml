@@ -1747,9 +1747,12 @@
     <string name="tak_server_status_waiting">Listening on 127.0.0.1:8089 — waiting for ATAK</string>
     <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
     <string name="tak_server_test_idle">Send all %1$d test fixtures to mesh</string>
+    <string name="tak_server_test_protocol_v1_label">V1 (legacy firmware &lt; 2.8.0 — PLI + chat only)</string>
+    <string name="tak_server_test_protocol_v2_label">V2 (firmware ≥ 2.8.0)</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_expected_drop">Not in v1 schema (expected)</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d passed, %2$d failed of %3$d/%4$d</string>
+    <string name="tak_server_test_results_v2">%1$d passed, %2$d expected drop, %3$d failed of %4$d/%5$d</string>
     <string name="tak_server_test_run">Run</string>
     <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_team">Team Color</string>
