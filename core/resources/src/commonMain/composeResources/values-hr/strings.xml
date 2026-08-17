@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">O programu</string>
     <string name="accept">Prihvati</string>
     <!-- ACTION -->
     <string name="action_delete_message">Obriši poruku</string>

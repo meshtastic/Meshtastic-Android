@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">حول</string>
     <string name="accept">قبول</string>
     <!-- ACTION -->
     <!-- ADD -->

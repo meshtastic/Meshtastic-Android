@@ -19,11 +19,15 @@ package org.meshtastic.core.domain.usecase.session
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ServiceScope
@@ -47,6 +51,8 @@ import kotlin.time.Duration.Companion.seconds
  *   blast two metadata requests at the radio.
  * - The refresh-flow subscription is established **before** the metadata request is dispatched to avoid losing the
  *   response on the inherently raceful `MutableSharedFlow`.
+ * - A connection departure completes the shared ensure as [EnsureSessionResult.Disconnected], so a later connection
+ *   never inherits an old request or UX deadline.
  * - The `withTimeoutOrNull` is a UX deadline only — late responses still update the durable `SessionStatus` flow that
  *   the UI observes, so a "Timeout" outcome here can self-heal in the chip without re-tapping.
  */
@@ -57,7 +63,7 @@ open class EnsureRemoteAdminSessionUseCase(
     private val serviceRepository: ServiceRepository,
     private val serviceScope: ServiceScope,
 ) {
-    private val mutex = Mutex()
+    private val inFlightMutex = Mutex()
     private val inFlight = mutableMapOf<Int, Deferred<EnsureSessionResult>>()
 
     @Suppress("ReturnCount")
@@ -70,42 +76,73 @@ open class EnsureRemoteAdminSessionUseCase(
         }
 
         val deferred =
-            mutex.withLock {
-                inFlight[destNum]
-                    ?: serviceScope
-                        .async(start = CoroutineStart.LAZY) { runEnsure(destNum) }
-                        .also { inFlight[destNum] = it }
+            inFlightMutex.withLock {
+                inFlight[destNum]?.takeIf { !it.isCompleted }
+                    ?: run {
+                        lateinit var newDeferred: Deferred<EnsureSessionResult>
+                        newDeferred =
+                            serviceScope.async(start = CoroutineStart.LAZY) {
+                                try {
+                                    runEnsure(destNum)
+                                } finally {
+                                    // Cleanup belongs to the shared Deferred itself. NonCancellable guarantees that a
+                                    // service-scope cancellation cannot strand a completed entry in the dedupe map.
+                                    withContext(NonCancellable) {
+                                        inFlightMutex.withLock {
+                                            if (inFlight[destNum] === newDeferred) inFlight.remove(destNum)
+                                        }
+                                    }
+                                }
+                            }
+                        // Register before the lazy deferred starts. The identity check above prevents an old completion
+                        // from removing a newer ensure for the same node.
+                        inFlight[destNum] = newDeferred
+                        // The service scope, not the first awaiting caller, owns dispatch once the entry is visible.
+                        // A lazy child can already be cancelled when its parent scope is shutting down; in that case
+                        // its body never runs, so remove the entry here instead of relying on the body-level finally.
+                        if (!newDeferred.start() && inFlight[destNum] === newDeferred) inFlight.remove(destNum)
+                        newDeferred
+                    }
             }
-        return try {
-            deferred.await()
-        } finally {
-            mutex.withLock { if (inFlight[destNum] === deferred) inFlight.remove(destNum) }
-        }
+        return deferred.await()
     }
 
     private suspend fun runEnsure(destNum: Int): EnsureSessionResult {
         Logger.d { "EnsureRemoteAdminSession dispatching metadata request to $destNum" }
         return withTimeoutOrNull(UX_TIMEOUT) {
-            // Subscribe BEFORE dispatching so we don't miss the refresh emission.
-            val refreshed =
-                serviceScope.async(start = CoroutineStart.UNDISPATCHED) {
-                    sessionManager.sessionRefreshFlow.filter { it == destNum }.first()
+            coroutineScope {
+                // Subscribe to both terminal events before dispatch so neither a synchronous response nor a
+                // concurrent connection departure can be missed. UNDISPATCHED is deliberate: these children do no
+                // work before suspending in first(), so starting inline only establishes the subscriptions.
+                val refreshed =
+                    async(start = CoroutineStart.UNDISPATCHED) {
+                        sessionManager.sessionRefreshFlow.filter { it == destNum }.first()
+                    }
+                val disconnected =
+                    async(start = CoroutineStart.UNDISPATCHED) {
+                        serviceRepository.connectionState.filter { it != ConnectionState.Connected }.first()
+                    }
+                try {
+                    if (disconnected.isCompleted) return@coroutineScope EnsureSessionResult.Disconnected
+                    radioController.refreshMetadata(destNum)
+                    select<EnsureSessionResult> {
+                        disconnected.onAwait { EnsureSessionResult.Disconnected }
+                        refreshed.onAwait { EnsureSessionResult.Refreshed }
+                    }
+                } finally {
+                    disconnected.cancel()
+                    refreshed.cancel()
                 }
-            try {
-                radioController.refreshMetadata(destNum)
-                refreshed.await()
-                EnsureSessionResult.Refreshed
-            } finally {
-                refreshed.cancel()
             }
         } ?: EnsureSessionResult.Timeout
     }
 
     companion object {
         /**
-         * UX deadline for surfacing a result to the user. The metadata request keeps flying after this — late responses
-         * still update the durable `SessionStatus` flow.
+         * UX deadline for surfacing a result to the user. Multi-hop remote-admin responses can legitimately take well
+         * over ten seconds; the metadata request keeps flying after this, and late responses still update the durable
+         * `SessionStatus` flow.
          */
-        val UX_TIMEOUT = 10.seconds
+        val UX_TIMEOUT = 30.seconds
     }
 }

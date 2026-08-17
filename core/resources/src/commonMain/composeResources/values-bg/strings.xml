@@ -26,6 +26,7 @@
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роля %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="about">Относно</string>
     <string name="accept">Приеми</string>
     <string name="acknowledgements">Благодарности</string>
     <!-- ACTION -->
@@ -40,9 +41,11 @@
     <string name="action_toggle_translation">Превключване между оригинален и преведен текст</string>
     <string name="action_translate_message">Превод на съобщението</string>
     <string name="actions">Действия</string>
+    <string name="adc_voltage">ADC напрежение</string>
     <!-- ADD -->
     <string name="add">Добавяне</string>
     <string name="add_a_note">Добавяне на лична бележка...</string>
+    <string name="add_channels_description">Следните канали бяха открити в QR кода. Изберете тези, които искате да добавите към устройството си. Съществуващите канали ще бъдат запазени.</string>
     <string name="add_favorite">Добавяне към любими</string>
     <string name="add_layer">Добавяне на слой</string>
     <string name="add_local_mbtiles_file">Добавяне на локален MBTiles файл</string>
@@ -77,6 +80,7 @@
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="app_version">Версия</string>
     <string name="apply">Приложи</string>
+    <string name="apps">Приложения</string>
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Добър</string>
@@ -93,6 +97,10 @@
     <string name="bad">Лош</string>
     <!-- BANDWIDTH -->
     <string name="bandwidth">Широчина на честотната лента</string>
+    <string name="bandwidth_default">По подразбиране (%1$s kHz)</string>
+    <string name="bandwidth_option_khz">%1$s kHz</string>
+    <string name="bandwidth_unsupported">Не се поддържа (%1$s)</string>
+    <string name="bandwidth_unsupported_summary">Тази честотна лента не се поддържа от свързаното радио в избрания регион. Изберете поддържана стойност, преди да запазите.</string>
     <string name="baro_pressure">Баро</string>
     <string name="battery">Батерия</string>
     <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
@@ -110,7 +118,15 @@
     <string name="bluetooth_feature_discovery">Откриване</string>
     <string name="bluetooth_feature_discovery_description">Намерете и идентифицирайте устройства Meshtastic близо до вас.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Услугите за местоположение са изключени. Включете ги, за сканиране за устройства наблизо.</string>
+    <string name="bluetooth_scan_missing_permission">Bluetooth сканирането изисква разрешение. Предоставете разрешение на "Устройства наблизо" (или "Местоположение"), за намиране на устройства.</string>
+    <string name="bluetooth_scan_start_failed">Bluetooth сканирането не можа да започне. Опитайте отново или включете/изключете Bluetooth, ако проблемът продължава.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Достигнат е лимитът за Bluetooth сканиране. Опитайте отново след %1$d секунда.</item>
+        <item quantity="other">Достигнат е лимитът за Bluetooth сканиране. Опитайте отново след %1$d секунди.</item>
+    </plurals>
     <string name="bold_heading">Удебелен заглавен шрифт</string>
+    <string name="bonding_failed_permissions">Сдвояването не е успешно. Предоставете разрешения на устройството наблизо и опитайте отново.</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="broadcast_interval">Интервал на излъчване</string>
     <string name="button_gpio">GPIO за бутон</string>
@@ -304,6 +320,8 @@
     <string name="discovery_dwell_minutes">%1$d мин</string>
     <string name="discovery_keep_screen_awake">Поддържане на екрана активен</string>
     <string name="discovery_not_connected_description">Свързване с устройство Meshtastic, за започване на сканирането.</string>
+    <string name="discovery_scan_complete">Сесията е завършена</string>
+    <string name="discovery_scan_failed">Сканирането не е успешно: %1$s</string>
     <string name="discovery_scan_history">История на сканирането</string>
     <string name="discovery_scan_progress">Напредък на сканирането</string>
     <string name="discovery_start_scan_disabled">Бутонът за стартиране на сканиране е деактивиран. %1$s</string>
@@ -326,6 +344,7 @@
     <string name="discovery_stat_unique_nodes">Уникални възли</string>
     <string name="discovery_time_remaining">Остават %1$s</string>
     <string name="discovery_unique_nodes">%1$d уникални възела</string>
+    <string name="discovery_view_map">Вижте картата</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -371,6 +390,15 @@
     <string name="edit">Редактирай</string>
     <string name="eight_hours">8 часа</string>
     <!-- EMOJI -->
+    <string name="emoji_category_activities">Дейности</string>
+    <string name="emoji_category_animals_nature">Животни &amp; природа</string>
+    <string name="emoji_category_flags">Знамена</string>
+    <string name="emoji_category_food_drink">Храна &amp; напитки</string>
+    <string name="emoji_category_objects">Обекти</string>
+    <string name="emoji_category_smileys_emotion">Усмивки &amp; емоции</string>
+    <string name="emoji_category_symbols">Символи</string>
+    <string name="emoji_category_travel_places">Пътуване &amp; места</string>
+    <string name="emoji_recently_used">Наскоро използвани</string>
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="enabled">Активиран</string>
     <!-- ENCRYPTION -->
@@ -425,6 +453,7 @@
     <!-- FIRMWARE -->
     <string name="firmware">Фърмуер</string>
     <string name="firmware_edition">Версия на фърмуера</string>
+    <string name="firmware_event_ended_banner">%1$s приключи. Върнете се към стандартния фърмуер на Meshtastic, за да възстановите нормалните функции.</string>
     <string name="firmware_event_ended_button">Актуализиране на фърмуера</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="firmware_recovery_button">Възобновяване на актуализацията на фърмуера</string>
@@ -459,6 +488,7 @@
     <string name="firmware_update_method_detail">Актуализиране чрез %1$s</string>
     <string name="firmware_update_method_usb">Прехвърляне на файл през USB</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_nightly">Нощен</string>
     <string name="firmware_update_no_device">Няма свързано устройство</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
     <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
@@ -576,12 +606,16 @@
     <string name="latest_stable_firmware">Най-новия стабилен</string>
     <string name="latitude">Географска ширина</string>
     <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_network">Мрежов слой</string>
     <string name="learn_more">Научете повече</string>
     <string name="led_state">LED за състояние</string>
     <string name="library_count">%1$d библиотеки</string>
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
+    <string name="licensed_mode_enable_confirm">Активиране на лицензиран режим</string>
+    <string name="licensed_mode_enable_title">Да се ​​активира лицензиран (Радиолюбителски) режим?</string>
     <!-- LOAD -->
     <string name="load_15_min">Натоварване 15m</string>
     <string name="load_15_min_description">Средно натоварване на системата за петнадесет минути</string>
@@ -608,6 +642,7 @@
     <string name="lockdown_enable_ack">Разбирам</string>
     <string name="lockdown_hide_passphrase">Скриване</string>
     <string name="lockdown_lock_reason">Причина: %1$s</string>
+    <string name="lockdown_mode_setting_up">Настройка…</string>
     <string name="lockdown_submit">Изпращане</string>
     <string name="locked">Заключен</string>
     <!-- LOG -->
@@ -693,6 +728,7 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="message_routing_error_no_interface">Няма радио интерфейс</string>
     <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
     <string name="message_routing_error_pki_unknown_pubkey">Получателят се нуждае от вашия ключ</string>
@@ -705,6 +741,7 @@
     <string name="message_status_unknown">Неизвестно</string>
     <string name="message_translated_label">Преведено</string>
     <string name="messages">Съобщения</string>
+    <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимално време за събуждане</string>
@@ -744,6 +781,7 @@
     <string name="mute_status_unmuted">Не е заглушен</string>
     <string name="name">Име</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
+    <string name="need_hardware">Нуждаете се от хардуер?</string>
     <string name="network">Мрежа</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>
@@ -998,6 +1036,7 @@
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
+    <string name="routing_error_no_interface">Няма радио интерфейс</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
@@ -1086,8 +1125,18 @@
     <!-- SITE -->
     <string name="site_planner_antenna_gain_dbi">Усилване на антената (dBi)</string>
     <string name="site_planner_antenna_height_meters">Височина на антената (м)</string>
+    <string name="site_planner_color_scale">Цветова палитра</string>
     <string name="site_planner_frequency_mhz">Честота (MHz)</string>
+    <string name="site_planner_invalid_positive">Трябва да е по-голямо от 0</string>
+    <string name="site_planner_max_range_km">Максимален обхват (km)</string>
+    <string name="site_planner_rx_height_meters">Височина на приемника (m)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Чувствителност на приемника (dBm)</string>
     <string name="site_planner_section_display">Дисплей</string>
+    <string name="site_planner_section_receiver">Приемник</string>
+    <string name="site_planner_tx_power_watts">Мощност на предавателя (W)</string>
+    <string name="site_planner_use_current_location">Използване на текущото местоположение</string>
+    <string name="site_planner_use_map_center">Използване на центъра на картата</string>
+    <string name="site_planner_use_node_location">Използване на текущото местоположение на възела</string>
     <string name="skip">Пропускане</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Интелигентна позиция</string>
@@ -1173,6 +1222,7 @@
     <!-- TRANSLATION -->
     <string name="transmit_over_lora">Предаване през LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport">Транспорт</string>
     <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>

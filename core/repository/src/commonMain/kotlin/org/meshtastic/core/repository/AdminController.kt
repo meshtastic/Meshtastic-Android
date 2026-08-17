@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.NonCancellable
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -28,7 +29,9 @@ import org.meshtastic.proto.User
  *
  * Mirrors the SDK's `AdminApi` interface — local and remote configuration, channel management, owner identity, device
  * lifecycle commands, and batch edit sessions. When the SDK is adopted, this interface becomes the adapter boundary:
- * implementations delegate to `RadioClient.admin`.
+ * implementations delegate to `RadioClient.admin`. Operations that enqueue outbound admin packets can throw
+ * [PacketQueueRejectedException] when the current transport cannot admit the handoff. “Fire-and-forget” means no device
+ * response is awaited, not that local queue rejection is silently ignored.
  *
  * @see RadioController which extends this interface for backward compatibility
  */
@@ -145,7 +148,22 @@ interface AdminController {
      * SDK's `AdminApi.editSettings { }`.
      *
      * All admin packets for the session — begin, the [block]'s writes, and commit — are issued from the calling
-     * coroutine, which is required for the firmware to associate them with one transaction.
+     * coroutine, which is required for the firmware to associate them with one transaction. The implementation waits
+     * for radio queue acceptance at both boundaries, so callers cannot start a later rebooting stage while this
+     * transaction is still queued or uncommitted.
+     *
+     * For the locally connected node, a commit dispatched immediately before the expected transport departure is
+     * treated as accepted because the reboot can prevent an acknowledgement from returning. Local owner, config,
+     * module-config, and fixed-position projections are staged until that commit is accepted; they are discarded when
+     * the block or commit fails so local state cannot describe settings the device did not commit.
+     *
+     * Firmware exposes no abort boundary, so commit is attempted in [NonCancellable] context even when [block] throws
+     * or the caller is cancelled. The original block failure is rethrown, with a distinct commit failure attached as a
+     * suppressed exception. When [block] succeeds and only the commit fails, the commit failure itself is thrown and
+     * the staged projections are discarded.
+     *
+     * @throws EditSettingsTransactionException when the radio rejects or does not answer the begin or commit boundary.
+     * @throws PacketQueueRejectedException when the outbound queue refuses a transactional write issued by [block].
      */
     suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit)
 
@@ -167,7 +185,10 @@ interface AdminEditScope {
     /** Updates a module configuration on the session's node. */
     suspend fun setModuleConfig(config: ModuleConfig)
 
-    /** Updates a channel configuration on the session's node. */
+    /**
+     * Updates a channel configuration on the session's node. The batch operation that owns the complete target set is
+     * responsible for authoritative local-cache reconciliation after [AdminController.editSettings] returns.
+     */
     suspend fun setChannel(channel: Channel)
 
     /** Sets a fixed position on the session's node. */

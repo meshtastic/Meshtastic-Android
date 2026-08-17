@@ -16,18 +16,13 @@
  */
 package org.meshtastic.core.data.manager
 
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.service.LockdownState
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.StoredPassphrase
+import org.meshtastic.core.testing.FakeCommandSender
 import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.FakeServiceRepository
-import org.meshtastic.proto.AdminMessage
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.Telemetry
 import kotlin.test.Test
@@ -68,75 +63,6 @@ class LockdownCoordinatorImplTest {
             clearThrows?.let { throw it }
             saved.remove(deviceAddress)
         }
-    }
-
-    private class FakeCommandSender : CommandSender {
-        var lastPassphrase: String? = null
-        var lastBoots: Int = 0
-        var lastHours: Int = 0
-        var lastMaxSessionSeconds: Int = 0
-        var lastDisable: Boolean = false
-        var lockNowCalled = false
-
-        override fun sendLockdownPassphrase(
-            passphrase: String,
-            boots: Int,
-            hours: Int,
-            maxSessionSeconds: Int,
-            disable: Boolean,
-        ) {
-            lastPassphrase = passphrase
-            lastBoots = boots
-            lastHours = hours
-            lastMaxSessionSeconds = maxSessionSeconds
-            lastDisable = disable
-        }
-
-        override fun sendLockNow() {
-            lockNowCalled = true
-        }
-
-        // Unused stubs
-        override fun getCurrentPacketId(): Long = 0L
-
-        override fun getCachedLocalConfig(): LocalConfig = LocalConfig()
-
-        override fun getCachedChannelSet(): ChannelSet = ChannelSet()
-
-        override fun generatePacketId(): Int = 0
-
-        override suspend fun sendData(p: DataPacket) = Unit
-
-        override suspend fun sendAdmin(
-            destNum: Int,
-            requestId: Int,
-            wantResponse: Boolean,
-            initFn: () -> AdminMessage,
-        ) = Unit
-
-        override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) = Unit
-
-        override suspend fun sendAdminAwait(
-            destNum: Int,
-            requestId: Int,
-            wantResponse: Boolean,
-            initFn: () -> AdminMessage,
-        ) = true
-
-        override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) =
-            Unit
-
-        override suspend fun requestPosition(destNum: Int, currentPosition: Position) = Unit
-
-        override suspend fun setFixedPosition(destNum: Int, pos: Position) = Unit
-
-        override suspend fun requestUserInfo(destNum: Int) = Unit
-
-        override suspend fun requestTraceroute(requestId: Int, destNum: Int) = Unit
-
-        override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) = Unit
-
-        override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) = Unit
     }
 
     private class FakeConnectionManager : MeshConnectionManager {

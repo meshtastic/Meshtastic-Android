@@ -11,6 +11,7 @@ a11y_node_online
 a11y_node_role
 a11y_node_signal
 a11y_nodes_at_hop
+about
 accept
 acknowledgements
 ### ACTION ###
@@ -95,6 +96,7 @@ app_settings
 app_too_old
 app_version
 apply
+apps
 ### AQI ###
 aqi
 aqi_good
@@ -294,6 +296,7 @@ contrast_medium
 contrast_standard
 conversations
 copy
+copyright_notice
 create_your_own_networks
 critical_alert
 critical_alerts
@@ -535,6 +538,7 @@ doc_title_telemetry
 doc_title_translate
 doc_title_units
 doc_title_widget
+documentation
 done
 dont_show_again_for_device
 double_tap_as_button_press
@@ -789,6 +793,7 @@ geofence_radius
 geofence_remove_area
 geofence_set_area
 get_started
+github_repository
 good
 ### GPIO ###
 gpio
@@ -1181,6 +1186,8 @@ name
 name_cannot_be_empty
 navigate_back
 navigate_into_label
+need_hardware
+need_hardware_description
 neighbor_info
 neighbor_info_config
 neighbor_info_enabled
@@ -1252,6 +1259,7 @@ node_list_help_node_details
 node_list_help_title
 node_list_long_click_label
 node_number
+node_request_send_failed
 node_restarting
 node_sort_alpha
 node_sort_button
@@ -1397,6 +1405,7 @@ primary
 primary_channel_feature
 privacy_url
 private_key
+project_information
 provide_location_to_mesh
 provider_name_exists
 proxy_to_client_enabled
@@ -1865,7 +1874,10 @@ waypoint_delete
 waypoint_edit
 waypoint_new
 waypoint_received
+website
 weight
+what_is_meshtastic
+what_is_meshtastic_description
 ### WIFI ###
 wifi_config
 wifi_devices

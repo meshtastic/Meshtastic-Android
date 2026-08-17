@@ -44,11 +44,18 @@ class LoRaRegionPresetsTest {
                     default_preset = ModemPreset.TINY_FAST,
                     licensed_only = true,
                 ),
+                // group 2: models EU_N_868's superset advertising - LONG_FAST is legal but not the default.
+                LoRaPresetGroup(
+                    presets = listOf(ModemPreset.LONG_FAST, ModemPreset.MEDIUM_FAST),
+                    default_preset = ModemPreset.MEDIUM_FAST,
+                    licensed_only = false,
+                ),
             ),
             region_groups =
             listOf(
                 LoRaRegionPresets(region = RegionCode.US, group_index = 0),
                 LoRaRegionPresets(region = RegionCode.UA_433, group_index = 1),
+                LoRaRegionPresets(region = RegionCode.EU_N_868, group_index = 2),
             ),
         )
 
@@ -122,20 +129,22 @@ class LoRaRegionPresetsTest {
         assertEquals(ModemPreset.LONG_FAST, map.repairPresetFor(RegionCode.US, ModemPreset.SHORT_TURBO))
     }
 
+    // A malformed map whose advertised default is not in its own legal set.
+    private val oddMap =
+        LoRaRegionPresetMap(
+            groups =
+            listOf(
+                LoRaPresetGroup(
+                    presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW),
+                    default_preset = ModemPreset.LONG_FAST, // not in presets
+                    licensed_only = false,
+                ),
+            ),
+            region_groups = listOf(LoRaRegionPresets(region = RegionCode.US, group_index = 0)),
+        )
+
     @Test
     fun `repair falls back to the first legal preset when the default is not in the group`() {
-        val oddMap =
-            LoRaRegionPresetMap(
-                groups =
-                listOf(
-                    LoRaPresetGroup(
-                        presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW),
-                        default_preset = ModemPreset.LONG_FAST, // not in presets
-                        licensed_only = false,
-                    ),
-                ),
-                region_groups = listOf(LoRaRegionPresets(region = RegionCode.US, group_index = 0)),
-            )
         assertEquals(ModemPreset.MEDIUM_FAST, oddMap.repairPresetFor(RegionCode.US, ModemPreset.SHORT_FAST))
     }
 
@@ -143,5 +152,96 @@ class LoRaRegionPresetsTest {
     fun `region default preset is LongTurbo for US and absent for other regions`() {
         assertEquals(ModemPreset.LONG_TURBO, defaultPresetFor(RegionCode.US))
         assertNull(defaultPresetFor(RegionCode.EU_868))
+    }
+
+    @Test
+    fun `region change keeps a legal preset when not fresh setup`() {
+        assertEquals(
+            ModemPreset.SHORT_FAST,
+            map.presetForRegionChange(RegionCode.EU_868, RegionCode.US, ModemPreset.SHORT_FAST),
+        )
+    }
+
+    @Test
+    fun `region change keeps a legal placeholder when not fresh setup`() {
+        // Default adoption is a fresh-setup rule only: an already-configured node moving regions keeps LONG_FAST.
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            map.presetForRegionChange(RegionCode.US, RegionCode.EU_N_868, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `fresh setup keeps a deliberately pinned legal preset`() {
+        // UNSET + a non-placeholder preset is a deliberate pin (e.g. USERPREFS_LORACONFIG_MODEM_PRESET, #6704).
+        assertEquals(
+            ModemPreset.SHORT_FAST,
+            map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.SHORT_FAST),
+        )
+    }
+
+    @Test
+    fun `fresh setup placeholder adopts the region's advertised default`() {
+        // LONG_FAST is legal in the EU_N_868 group, but the placeholder still adopts the advertised default.
+        assertEquals(
+            ModemPreset.MEDIUM_FAST,
+            map.presetForRegionChange(RegionCode.UNSET, RegionCode.EU_N_868, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `fresh setup placeholder adopts the built-in default when unconstrained`() {
+        val nullMap: LoRaRegionPresetMap? = null
+        assertEquals(
+            ModemPreset.LONG_TURBO,
+            nullMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `fresh setup pin that is illegal in the region is still repaired`() {
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            map.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.SHORT_TURBO),
+        )
+    }
+
+    @Test
+    fun `fresh setup never adopts a malformed map's illegal advertised default`() {
+        assertEquals(
+            ModemPreset.MEDIUM_FAST,
+            oddMap.presetForRegionChange(RegionCode.UNSET, RegionCode.US, ModemPreset.LONG_FAST),
+        )
+    }
+
+    // A pinned build advertises its preset as UNSET's map entry (firmware #11507): the same fixture plus a
+    // single-preset UNSET group, here stating a deliberate LONG_FAST pin.
+    private val pinnedMap =
+        map.copy(
+            groups =
+            map.groups +
+                LoRaPresetGroup(
+                    presets = listOf(ModemPreset.LONG_FAST),
+                    default_preset = ModemPreset.LONG_FAST,
+                    licensed_only = false,
+                ),
+            region_groups = map.region_groups + LoRaRegionPresets(region = RegionCode.UNSET, group_index = 3),
+        )
+
+    @Test
+    fun `an UNSET map entry marks even a LongFast pin as deliberate at fresh setup`() {
+        // Without the entry this placeholder would adopt EU_N_868's MEDIUM_FAST default (asserted above).
+        assertEquals(
+            ModemPreset.LONG_FAST,
+            pinnedMap.presetForRegionChange(RegionCode.UNSET, RegionCode.EU_N_868, ModemPreset.LONG_FAST),
+        )
+    }
+
+    @Test
+    fun `a pin stated via UNSET entry is still repaired when illegal in the region`() {
+        assertEquals(
+            ModemPreset.TINY_FAST,
+            pinnedMap.presetForRegionChange(RegionCode.UNSET, RegionCode.UA_433, ModemPreset.LONG_FAST),
+        )
     }
 }

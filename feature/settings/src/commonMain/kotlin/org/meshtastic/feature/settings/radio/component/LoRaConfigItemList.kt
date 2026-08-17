@@ -33,9 +33,8 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
-import org.meshtastic.core.model.defaultPresetFor
 import org.meshtastic.core.model.numChannels
-import org.meshtastic.core.model.repairPresetFor
+import org.meshtastic.core.model.presetForRegionChange
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth
@@ -170,7 +169,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val regionPresetMap = if (capabilities.supportsLoraRegionPresetMap) state.loraRegionPresetMap else null
                 val presetConstraint =
                     remember(regionPresetMap, formState.value.region) {
-                        regionPresetMap.constraintFor(formState.value.region)
+                        // UNSET's map entry states pin intent (firmware #11507), not a constraint: never let it
+                        // narrow the picker while the region is still unset.
+                        formState.value.region
+                            .takeIf { it != RegionCode.UNSET }
+                            ?.let { regionPresetMap.constraintFor(it) }
                     }
                 val presetsGated = presetConstraint?.isGated(state.localIsLicensed) == true
                 DropDownPreference(
@@ -183,21 +186,14 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
-                        val freshSetup = formState.value.region == RegionCode.UNSET
-                        // When the region changes, snap the preset to the region's default if the current one is
-                        // no longer legal there (R7); a no-op when the region is unconstrained.
-                        val repaired = regionPresetMap.repairPresetFor(region, formState.value.modem_preset)
-                        // At fresh setup (region was UNSET) adopt the region's advertised default rather than keeping
-                        // a merely-legal preset: the firmware map's default when present, else the app's built-in
-                        // default (e.g. US -> LongTurbo on pre-2.8 firmware that sends no map).
+                        // Keeps the current preset (legality-repaired, R7); at fresh setup a placeholder LongFast
+                        // adopts the region's advertised/built-in default instead (#6704).
                         val preset =
-                            if (freshSetup) {
-                                regionPresetMap.constraintFor(region)?.defaultPreset
-                                    ?: defaultPresetFor(region)
-                                    ?: repaired
-                            } else {
-                                repaired
-                            }
+                            regionPresetMap.presetForRegionChange(
+                                previousRegion = formState.value.region,
+                                newRegion = region,
+                                current = formState.value.modem_preset,
+                            )
                         formState.value = formState.value.copy(region = region, modem_preset = preset)
                     },
                 )

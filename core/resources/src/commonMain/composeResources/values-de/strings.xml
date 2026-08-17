@@ -29,6 +29,7 @@
     <string name="a11y_node_role">Rolle %1$s</string>
     <string name="a11y_node_signal">Signal %1$s</string>
     <string name="a11y_nodes_at_hop">Hop %1$d: %2$d Knoten</string>
+    <string name="about">Über</string>
     <string name="accept">Akzeptieren</string>
     <string name="acknowledgements">Danksagungen</string>
     <!-- ACTION -->
@@ -112,6 +113,7 @@
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
     <string name="app_version">Version</string>
     <string name="apply">Anwenden</string>
+    <string name="apps">Anwendungen</string>
     <!-- AQI -->
     <string name="aqi_good">Gut</string>
     <string name="aqi_hazardous">Gefährlich</string>
@@ -1022,6 +1024,7 @@
     <string name="name_cannot_be_empty">Name darf nicht leer sein.</string>
     <string name="navigate_back">Zurück navigieren</string>
     <string name="navigate_into_label">Navigieren zu</string>
+    <string name="need_hardware">Benötigen Sie Hardware?</string>
     <string name="neighbor_info">Nachbarinformation</string>
     <string name="neighbor_info_config">Einstellungen Nachbarinformation</string>
     <string name="neighbor_info_enabled">Nachbarinformationen aktiviert</string>
@@ -1665,6 +1668,8 @@
     <string name="waypoint_new">Wegpunkt hinzufügen</string>
     <string name="waypoint_received">Wegpunkt %1$s empfangen</string>
     <string name="weight">Gewicht</string>
+    <string name="what_is_meshtastic">Was ist Meshtastic?</string>
+    <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi Optionen</string>
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>

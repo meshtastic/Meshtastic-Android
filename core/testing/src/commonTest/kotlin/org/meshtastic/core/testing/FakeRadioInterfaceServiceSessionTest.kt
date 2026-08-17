@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -60,6 +61,53 @@ class FakeRadioInterfaceServiceSessionTest {
         assertEquals(3L, service.sessionGeneration.value)
         assertEquals(3L, service.activeSession.value?.generation)
         assertEquals("ble:same", service.activeSession.value?.address)
+    }
+
+    @Test
+    fun `trySendToRadio records bytes only while a session is admitted`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        val bytes = byteArrayOf(1, 2, 3)
+
+        assertFalse(service.trySendToRadio(bytes))
+        assertTrue(service.sentToRadio.isEmpty())
+
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        assertTrue(service.trySendToRadio(bytes))
+        assertEquals(1, service.sentToRadio.size)
+        assertTrue(bytes.contentEquals(service.sentToRadio.single()))
+
+        service.disconnect()
+        assertFalse(service.trySendToRadio(bytes))
+        assertEquals(1, service.sentToRadio.size)
+    }
+
+    @Test
+    fun `trySendToRadio can reject an admitted transport handoff without recording bytes`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+        service.rejectAdmittedSends = true
+
+        assertFalse(service.trySendToRadio(byteArrayOf(1, 2, 3)))
+        assertTrue(service.sentToRadio.isEmpty())
+        assertEquals(0, service.sessionLeaseInvariantViolations)
+    }
+
+    @Test
+    fun `recorded radio writes are isolated from caller mutation`() = runTest {
+        val service = FakeRadioInterfaceService(serviceScope = backgroundScope)
+        val bytes = byteArrayOf(1, 2, 3)
+        service.setDeviceAddress("ble:test")
+        service.connect()
+
+        assertTrue(service.trySendToRadio(bytes))
+        bytes[0] = 9
+        val recorded = service.sentToRadio.single()
+        assertContentEquals(byteArrayOf(1, 2, 3), recorded)
+
+        recorded[1] = 8
+        assertContentEquals(byteArrayOf(1, 2, 3), service.sentToRadio.single())
     }
 
     @Test

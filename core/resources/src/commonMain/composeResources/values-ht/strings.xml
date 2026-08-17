@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Sou</string>
     <string name="accept">Aksepte</string>
     <!-- ACTION -->
     <string name="action_delete_message">Efase mesaj la</string>

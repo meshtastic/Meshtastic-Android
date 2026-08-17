@@ -26,6 +26,7 @@
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="about">Про</string>
     <string name="accept">Прийняти</string>
     <string name="acknowledgements">Подяки</string>
     <!-- ACTION -->
@@ -530,7 +531,7 @@
     <string name="gpio_pin">GPIO контакт</string>
     <string name="gpio_pin_for_rotary_encoder_a_port">GPIO для енкодеру порт А</string>
     <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пін для енкодеру порт B</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пін для енкодеру Кнопка</string>
+    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пін для кнопки енкодеру</string>
     <string name="gpio_pin_to_monitor">GPIO контакт для моніторингу</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gps_mode">Режим GPS (Фізичний пристрій)</string>

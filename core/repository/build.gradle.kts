@@ -31,6 +31,7 @@ kotlin {
             implementation(projects.core.database)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kermit)
             implementation(libs.androidx.paging.common)
         }

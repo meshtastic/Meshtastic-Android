@@ -19,10 +19,13 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
@@ -30,7 +33,11 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
 
 @Single
-class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHandler: PacketHandler) : HistoryManager {
+class HistoryManagerImpl(
+    private val meshPrefs: MeshPrefs,
+    private val packetHandler: PacketHandler,
+    private val commandSender: CommandSender,
+) : HistoryManager {
 
     companion object {
         private const val HISTORY_TAG = "HistoryReplay"
@@ -61,9 +68,7 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
 
     private val logger = Logger.withTag(HISTORY_TAG)
 
-    private fun historyLog(message: String, throwable: Throwable? = null) {
-        logger.i(throwable) { message }
-    }
+    private fun historyLog(message: String) = logger.i { message }
 
     private fun activeDeviceAddress(): String? =
         meshPrefs.deviceAddress.value?.takeIf { !it.equals(NO_DEVICE_SELECTED, ignoreCase = true) && it.isNotBlank() }
@@ -73,13 +78,11 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,
         transport: String,
+        expectedConnectionVersion: Long,
     ) {
         val address = activeDeviceAddress()
-        if (address == null || myNodeNum == null) {
-            val reason = if (address == null) "no_addr" else "no_my_node"
-            historyLog("requestHistory skipped trigger=$trigger reason=$reason")
-            return
-        }
+        val nodeNum = myNodeNum
+        if (address == null || nodeNum == null) throw LocalNodeUnavailableException("History replay")
 
         val lastRequest = meshPrefs.getStoreForwardLastRequest(address).value
         val (window, max) =
@@ -91,22 +94,22 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
         val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
 
         historyLog(
-            "requestHistory trigger=$trigger transport=$transport addr=$address " +
+            "requestHistory trigger=$trigger transport=$transport addr=${address.anonymize} " +
                 "lastRequest=$lastRequest window=$window max=$max",
         )
 
-        safeCatching {
-            packetHandler.sendToRadio(
+        val accepted =
+            packetHandler.sendToRadioForConnection(
                 MeshPacket(
-                    from = myNodeNum,
-                    to = myNodeNum,
-                    id = kotlin.random.Random.nextInt(1, Int.MAX_VALUE),
+                    from = nodeNum,
+                    to = nodeNum,
+                    id = commandSender.generatePacketId(),
                     decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
                     priority = MeshPacket.Priority.BACKGROUND,
                 ),
+                expectedConnectionVersion,
             )
-        }
-            .onFailure { ex -> logger.w(ex) { "requestHistory failed" } }
+        if (!accepted) throw PacketQueueRejectedException("History replay")
     }
 
     override fun updateStoreForwardLastRequest(source: String, lastRequest: Int, transport: String) {
@@ -117,7 +120,7 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
             meshPrefs.setStoreForwardLastRequest(address, lastRequest)
             historyLog(
                 "historyMarker updated source=$source transport=$transport " +
-                    "addr=$address from=$current to=$lastRequest",
+                    "addr=${address.anonymize} from=$current to=$lastRequest",
             )
         }
     }

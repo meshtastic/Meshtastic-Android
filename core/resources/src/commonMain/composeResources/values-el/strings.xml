@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Σχετικά</string>
     <string name="accept">Αποδοχή</string>
     <!-- ACTION -->
     <!-- ADD -->

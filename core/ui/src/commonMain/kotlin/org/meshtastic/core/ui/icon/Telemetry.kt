@@ -28,7 +28,6 @@ import org.meshtastic.core.resources.ic_compress
 import org.meshtastic.core.resources.ic_data_array
 import org.meshtastic.core.resources.ic_electric_bolt
 import org.meshtastic.core.resources.ic_explore
-import org.meshtastic.core.resources.ic_grass
 import org.meshtastic.core.resources.ic_height
 import org.meshtastic.core.resources.ic_light_mode
 import org.meshtastic.core.resources.ic_line_axis
@@ -37,6 +36,8 @@ import org.meshtastic.core.resources.ic_power
 import org.meshtastic.core.resources.ic_satellite_alt
 import org.meshtastic.core.resources.ic_scale
 import org.meshtastic.core.resources.ic_social_distance
+import org.meshtastic.core.resources.ic_soil_moisture
+import org.meshtastic.core.resources.ic_soil_temperature
 import org.meshtastic.core.resources.ic_speed
 import org.meshtastic.core.resources.ic_stacked_line_chart
 import org.meshtastic.core.resources.ic_thermostat
@@ -48,7 +49,9 @@ val MeshtasticIcons.Humidity: ImageVector
 val MeshtasticIcons.Pressure: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_compress)
 val MeshtasticIcons.SoilMoisture: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_grass)
+    @Composable get() = vectorResource(Res.drawable.ic_soil_moisture)
+val MeshtasticIcons.SoilTemperature: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_soil_temperature)
 val MeshtasticIcons.ElectricPower: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_electric_bolt)
 val MeshtasticIcons.Distance: ImageVector

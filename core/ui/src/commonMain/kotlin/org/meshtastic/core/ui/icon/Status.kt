@@ -121,6 +121,8 @@ val MeshtasticIcons.DeviceSleep: ImageVector
 // Node connection state (non-MQTT)
 val MeshtasticIcons.Disconnected: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_link_off)
+val MeshtasticIcons.LinkOff: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_link_off)
 
 // Message delivery status
 val MeshtasticIcons.MessageEnroute: ImageVector

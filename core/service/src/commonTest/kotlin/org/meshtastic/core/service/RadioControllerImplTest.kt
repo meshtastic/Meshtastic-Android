@@ -23,6 +23,7 @@ import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.capture
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
@@ -31,18 +32,28 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.repository.AwaitedSendResult
+import org.meshtastic.core.repository.AwaitedSendStatus
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.EditSettingsTransactionException
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -50,6 +61,7 @@ import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.PacketQueueRejectedException
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -65,11 +77,13 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -162,6 +176,37 @@ class RadioControllerImplTest {
             scope = scope,
             onDeviceAddressChanged = onDeviceAddressChanged,
         )
+    }
+
+    private data class CommitBoundaryFixture(
+        val controller: RadioControllerImpl,
+        val serviceRepository: ServiceRepositoryImpl,
+    )
+
+    private fun createCommitBoundaryFixture(
+        scope: CoroutineScope,
+        myNodeNum: Int? = 1234,
+        beforeCommitDispatch: (ServiceRepositoryImpl) -> Unit = {},
+        commitResult: (ServiceRepositoryImpl) -> AwaitedSendResult,
+    ): CommitBoundaryFixture {
+        val serviceRepository = ServiceRepositoryImpl()
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        val controller = createController(scope = scope, myNodeNum = myNodeNum, serviceRepository = serviceRepository)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } calls
+            {
+                beforeCommitDispatch(serviceRepository)
+                // Capture after the pre-dispatch hook; commitResult then models events that happen after admission.
+                val departureEpochAtDispatch = serviceRepository.connectionLifecycle.value.epochs.departures
+                commitResult(serviceRepository).let { result ->
+                    if (result.dispatched) {
+                        result.copy(departureEpochAtDispatch = departureEpochAtDispatch)
+                    } else {
+                        result
+                    }
+                }
+            }
+        return CommitBoundaryFixture(controller, serviceRepository)
     }
 
     @Test
@@ -351,6 +396,45 @@ class RadioControllerImplTest {
 
         verifySuspend { commandSender.sendData(packet) }
         verifySuspend { dataHandler.rememberDataPacket(packet, 456, false) }
+    }
+
+    @Test
+    fun sendMessageDoesNotPersistWhenQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 456)
+        val packet = DataPacket(to = NodeAddress.ID_BROADCAST, channel = 1, text = "ping")
+        val rejection = PacketQueueRejectedException("Data packet")
+        everySuspend { commandSender.sendData(packet) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.sendMessage(packet) }
+
+        assertSame(rejection, failure)
+        verifySuspend(exactly(0)) { dataHandler.rememberDataPacket(any(), any(), any()) }
+    }
+
+    @Test
+    fun localChannelDoesNotPersistWhenQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 456)
+        val channel = Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary"))
+        val rejection = PacketQueueRejectedException("Admin command")
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setLocalChannel(channel) }
+
+        assertSame(rejection, failure)
+        verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
+    }
+
+    @Test
+    fun fixedPositionPropagatesQueueRejection() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val position = Position(latitude = 1.0, longitude = 2.0, altitude = 3)
+        val rejection = PacketQueueRejectedException("Fixed position")
+        everySuspend { commandSender.setFixedPosition(123, position) } throws rejection
+
+        val failure = assertFailsWith<PacketQueueRejectedException> { controller.setFixedPosition(123, position) }
+
+        assertSame(rejection, failure)
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -585,12 +669,60 @@ class RadioControllerImplTest {
         val node = Node(num = 1234, user = user)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to node)
         every { nodeManager.getMyId() } returns "!abcd1234"
+        // Production CommandSenderImpl.sendData stamps QUEUED on successful queue admission. DataPacket.status is
+        // nullable but defaults to UNKNOWN, so the default value does not exercise the controller's null fallback.
+        // Mirror the production stamp here so this assertion exercises the realistic happy-path contract; the explicit
+        // ERROR-stamping path is covered by sendReactionPersistsStatusStampedByCommandSender.
+        everySuspend { commandSender.sendData(any()) } calls
+            {
+                (it.args[0] as DataPacket).status = MessageStatus.QUEUED
+            }
+
+        val reactions = mutableListOf<Reaction>()
+        everySuspend { packetRepository.insertReaction(capture(reactions), any()) } returns Unit
 
         controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
 
-        // Reaction must be persisted (not fire-and-forget)
+        // Reaction must be persisted (not fire-and-forget) with the queue-admission QUEUED status.
         verifySuspend { commandSender.sendData(any()) }
-        verifySuspend { packetRepository.insertReaction(any(), any()) }
+        assertEquals(MessageStatus.QUEUED, reactions.single().status)
+    }
+
+    @Test
+    fun sendReactionDoesNotPersistWhenQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
+        every { nodeManager.getMyId() } returns "!abcd1234"
+        val rejection = PacketQueueRejectedException("Reaction")
+        everySuspend { commandSender.sendData(any()) } calls
+            {
+                (it.args[0] as DataPacket).status = MessageStatus.ERROR
+                throw rejection
+            }
+
+        val failure =
+            assertFailsWith<PacketQueueRejectedException> {
+                controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
+            }
+
+        assertSame(rejection, failure)
+        verifySuspend(exactly(0)) { packetRepository.insertReaction(any(), any()) }
+    }
+
+    @Test
+    fun sendReactionFallsBackToQueuedWhenSenderLeavesStatusNull() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
+        every { nodeManager.getMyId() } returns "!abcd1234"
+        everySuspend { commandSender.sendData(any()) } calls { (it.args[0] as DataPacket).status = null }
+        val reactions = mutableListOf<Reaction>()
+        everySuspend { packetRepository.insertReaction(capture(reactions), any()) } returns Unit
+
+        controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
+
+        assertEquals(MessageStatus.QUEUED, reactions.single().status)
     }
 
     @Test
@@ -657,6 +789,18 @@ class RadioControllerImplTest {
     @Test
     fun removeByNodenumAlwaysRemovesLocallyAndSendsAdminWhenConnected() = runTest {
         val controller = createController(scope = backgroundScope)
+
+        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+
+        verifySuspend { nodeManager.removeByNodenum(55) }
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun removeByNodenumRetainsLocalRemovalWhenAdminQueueRejects() = runTest {
+        val controller = createController(scope = backgroundScope)
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws
+            PacketQueueRejectedException("Remove node")
 
         controller.removeByNodenum(packetId = 1, nodeNum = 55)
 
@@ -739,9 +883,16 @@ class RadioControllerImplTest {
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 
+    private fun dispatchedSendResult(status: AwaitedSendStatus, departureEpochAtDispatch: Long = 0L) =
+        AwaitedSendResult(status, departureEpochAtDispatch = departureEpochAtDispatch)
+
+    private fun acceptedSendResult() = dispatchedSendResult(AwaitedSendStatus.ACCEPTED)
+
     @Test
     fun editLocalSettingsChannelWritesDoNotMirrorToLocalCache() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
 
         controller.editLocalSettings {
             setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "A")))
@@ -749,14 +900,605 @@ class RadioControllerImplTest {
         }
         advanceUntilIdle()
 
-        // Exactly 4 admin packets: begin + 2 channel writes + commit. The tight count also catches a duplicated
-        // begin/commit or an accidental double-write per channel.
-        verifySuspend(exactly(4)) { commandSender.sendAdmin(any(), any(), any(), any()) }
-        // A transactional channel write must NOT eagerly mirror to the local cache the way one-shot
-        // setRemoteChannel does for the local node. importChannelSet owns the cache and writes it once after commit
-        // (replaceAllSettings), so an interrupted import can't leave partial channels cached. A regression to
-        // per-slot mirroring inside the session would make this call count non-zero.
+        // Exactly four packets: awaited begin + 2 channel writes + awaited commit. The tight count also catches a
+        // duplicated boundary or an accidental double-write per channel.
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        verifySuspend(exactly(2)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        // A transactional channel write must not eagerly mirror to the local cache like a one-shot setRemoteChannel.
+        // The batch operation knows the complete target set and must reconcile it after the transaction; per-slot
+        // mirroring here could expose a partial cache when a later write or commit fails.
         verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
+    }
+
+    @Test
+    fun editSettingsAwaitsBoundariesAroundOrderedWrites() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val sentMessages = mutableListOf<AdminMessage>()
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessages += (it.args[3] as () -> AdminMessage)()
+                true
+            }
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessages += (it.args[3] as () -> AdminMessage)()
+                acceptedSendResult()
+            }
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessages += (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.editLocalSettings {
+            setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary")))
+            setChannel(
+                Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "Secondary")),
+            )
+        }
+
+        assertEquals(4, sentMessages.size)
+        assertEquals(true, sentMessages[0].begin_edit_settings)
+        assertEquals(0, sentMessages[1].set_channel?.index)
+        assertEquals(1, sentMessages[2].set_channel?.index)
+        assertEquals(true, sentMessages[3].commit_edit_settings)
+    }
+
+    @Test
+    fun editSettingsAppliesStagedLocalProjectionsOnlyAfterCommitAcceptance() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val commitStarted = CompletableDeferred<Unit>()
+        val releaseCommit = CompletableDeferred<Unit>()
+        val user = User(id = "!000004d2", long_name = "Committed owner")
+        val config = Config(device = Config.DeviceConfig())
+        val moduleConfig = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Ready"))
+        val fixedPosition = Position(latitude = 47.6, longitude = -122.3, altitude = 42)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } calls
+            {
+                commitStarted.complete(Unit)
+                releaseCommit.await()
+                acceptedSendResult()
+            }
+
+        val editJob = launch {
+            controller.editLocalSettings {
+                setOwner(user)
+                setConfig(config)
+                setModuleConfig(moduleConfig)
+                setFixedPosition(fixedPosition)
+            }
+        }
+        commitStarted.await()
+
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
+
+        releaseCommit.complete(Unit)
+        editJob.join()
+        advanceUntilIdle()
+
+        verify(exactly(1)) { nodeManager.handleReceivedUser(1234, user, any(), any(), any()) }
+        verify(exactly(1)) { nodeManager.updateNodeStatus(1234, "Ready") }
+        verify(exactly(1)) { nodeManager.handleReceivedPosition(1234, 1234, any(), any(), any()) }
+        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(config) }
+        verifySuspend(exactly(1)) { radioConfigRepository.setLocalModuleConfig(moduleConfig) }
+    }
+
+    @Test
+    fun editSettingsRetainsInterleavedStagedLocalProjections() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val user = User(id = "!000004d2", long_name = "Concurrent owner")
+        val config = Config(device = Config.DeviceConfig())
+        val moduleConfig = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Ready"))
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
+
+        controller.editLocalSettings {
+            coroutineScope {
+                launch { setOwner(user) }
+                launch { setConfig(config) }
+                launch { setModuleConfig(moduleConfig) }
+            }
+        }
+        advanceUntilIdle()
+
+        verify(exactly(1)) { nodeManager.handleReceivedUser(1234, user, any(), any(), any()) }
+        verify(exactly(1)) { nodeManager.updateNodeStatus(1234, "Ready") }
+        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(config) }
+        verifySuspend(exactly(1)) { radioConfigRepository.setLocalModuleConfig(moduleConfig) }
+    }
+
+    @Test
+    fun editSettingsDoesNotProjectZeroPositionWhenRemovingFixedPosition() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val writes = mutableListOf<AdminMessage>()
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                writes += (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.editLocalSettings {
+            setFixedPosition(Position(latitude = 0.0, longitude = 0.0, altitude = 0, time = 1, satellitesInView = 9))
+        }
+        advanceUntilIdle()
+
+        assertEquals(true, writes.single().remove_fixed_position)
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsRejectsFixedPositionWriteBeforeDeviceMutationWhenLocalNodeIsUnavailable() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = null)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+
+        assertFailsWith<LocalNodeUnavailableException> {
+            controller.editSettings(destNum = 99) {
+                setFixedPosition(Position(latitude = 47.6, longitude = -122.3, altitude = 42))
+            }
+        }
+
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsContinuesLocalProjectionReconciliationAfterProjectionFailure() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val user = User(id = "!000004d2", long_name = "Committed owner")
+        val config = Config(device = Config.DeviceConfig())
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+        every { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) } throws
+            IllegalStateException("projection failed")
+
+        controller.editLocalSettings {
+            setOwner(user)
+            setConfig(config)
+        }
+        advanceUntilIdle()
+
+        verifySuspend(exactly(1)) { radioConfigRepository.setLocalConfig(config) }
+    }
+
+    @Test
+    fun editSettingsDiscardsStagedLocalProjectionsWhenCommitFails() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns
+            dispatchedSendResult(AwaitedSendStatus.RADIO_REJECTED)
+
+        assertFailsWith<EditSettingsTransactionException> {
+            controller.editLocalSettings {
+                setOwner(User(id = "!000004d2", long_name = "Uncommitted owner"))
+                setConfig(Config(device = Config.DeviceConfig()))
+                setModuleConfig(ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Stale")))
+                setFixedPosition(Position(latitude = 1.0, longitude = 2.0, altitude = 3))
+            }
+        }
+        advanceUntilIdle()
+
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
+    }
+
+    @Test
+    fun editSettingsDiscardsStagedLocalProjectionsWhenBlockFails() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val blockFailure = IllegalArgumentException("transaction failed after writes")
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+
+        val failure =
+            assertFailsWith<IllegalArgumentException> {
+                controller.editLocalSettings {
+                    setOwner(User(id = "!000004d2", long_name = "Rolled back owner"))
+                    setConfig(Config(device = Config.DeviceConfig()))
+                    setModuleConfig(
+                        ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Rolled back")),
+                    )
+                    setFixedPosition(Position(latitude = 4.0, longitude = 5.0, altitude = 6))
+                    throw blockFailure
+                }
+            }
+        advanceUntilIdle()
+
+        assertSame(blockFailure, failure)
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.updateNodeStatus(any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedPosition(any(), any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalConfig(any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.setLocalModuleConfig(any()) }
+    }
+
+    @Test
+    fun editSettingsRejectsFailedBeginBeforeRunningWrites() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns false
+        var blockRan = false
+
+        val failure =
+            assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings { blockRan = true } }
+
+        assertEquals(editSettingsBoundaryFailureMessage("begin"), failure.message)
+        assertFalse(blockRan)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsReportsFailedCommitAfterOrderedWrites() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns
+            dispatchedSendResult(AwaitedSendStatus.RADIO_REJECTED)
+
+        val failure =
+            assertFailsWith<EditSettingsTransactionException> {
+                controller.editLocalSettings {
+                    setChannel(
+                        Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary")),
+                    )
+                }
+            }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.RADIO_REJECTED, dispatched = true),
+            failure.message,
+        )
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsCommitsAfterWriteFailureAndRethrowsOriginal() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val writeFailure = IllegalArgumentException("settings write failed")
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws writeFailure
+
+        val failure =
+            assertFailsWith<IllegalArgumentException> {
+                controller.editLocalSettings {
+                    setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "A")))
+                }
+            }
+
+        assertSame(writeFailure, failure)
+        assertTrue(failure.suppressedExceptions.isEmpty())
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsSuppressesCommitFailureOnBlockFailure() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns
+            dispatchedSendResult(AwaitedSendStatus.RADIO_REJECTED)
+        val blockFailure = IllegalArgumentException("settings write failed")
+
+        val failure = assertFailsWith<IllegalArgumentException> { controller.editLocalSettings { throw blockFailure } }
+
+        assertSame(blockFailure, failure)
+        assertEquals(
+            listOf(editSettingsCommitFailureMessage(AwaitedSendStatus.RADIO_REJECTED, dispatched = true)),
+            failure.suppressedExceptions.map(Throwable::message),
+        )
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsSuppressesDistinctCommitFailureWithSameSignature() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } throws
+            IllegalStateException("same failure")
+        val blockFailure = IllegalStateException("same failure")
+
+        val failure = assertFailsWith<IllegalStateException> { controller.editLocalSettings { throw blockFailure } }
+
+        assertSame(blockFailure, failure)
+        assertEquals(listOf("same failure"), failure.suppressedExceptions.map(Throwable::message))
+    }
+
+    @Test
+    fun editSettingsDoesNotSuppressCommitFailureCausedByBlockFailure() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        val blockFailure = IllegalStateException("settings write failed")
+        val recoveredBlockFailure =
+            IllegalStateException(
+                "outer coroutine recovery wrapper",
+                IllegalStateException("recovered settings write failure", blockFailure),
+            )
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } throws recoveredBlockFailure
+
+        val failure = assertFailsWith<IllegalStateException> { controller.editLocalSettings { throw blockFailure } }
+
+        assertSame(blockFailure, failure)
+        assertTrue(failure.suppressedExceptions.isEmpty())
+    }
+
+    @Test
+    fun editSettingsAcceptsDispatchedCommitWhenLocalTransportDeparts() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsWaitsForCanonicalDepartureAfterTransportStops() = runTest {
+        var stateAtCommitReturn: ConnectionState? = null
+        val (controller, serviceRepository) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                backgroundScope.launch { serviceRepository.setConnectionState(ConnectionState.Disconnected) }
+                stateAtCommitReturn = serviceRepository.connectionState.value
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        assertEquals(ConnectionState.Connected, stateAtCommitReturn)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun editSettingsAcceptsCapturedDisconnectAfterFastReconnect() = runTest {
+        val (controller, serviceRepository) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                serviceRepository.setConnectionState(ConnectionState.Connecting)
+                serviceRepository.setConnectionState(ConnectionState.Connected)
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        assertEquals(ConnectionState.Connected, serviceRepository.connectionState.value)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsRejectsTransportStopBeforeCommitTransmission() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                AwaitedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = false),
+            failure.message,
+        )
+    }
+
+    @Test
+    fun editSettingsRejectsTransportStopWithoutObservedDeparture() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED) }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true),
+            failure.message,
+        )
+    }
+
+    @Test
+    fun editSettingsDoesNotAcceptDepartureFromQueuedPredecessorAsCommitEvidence() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(
+                scope = backgroundScope,
+                beforeCommitDispatch = { repository ->
+                    repository.setConnectionState(ConnectionState.Disconnected)
+                    repository.setConnectionState(ConnectionState.Connected)
+                },
+            ) {
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true),
+            failure.message,
+        )
+    }
+
+    @Test
+    fun editSettingsAcceptsTimedOutCommitWhenLocalTransportDeparts() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                dispatchedSendResult(AwaitedSendStatus.TIMED_OUT)
+            }
+
+        controller.editLocalSettings {}
+
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsRejectsTimedOutCommitWithoutObservedDeparture() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { dispatchedSendResult(AwaitedSendStatus.TIMED_OUT) }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }
+
+        assertEquals(editSettingsCommitFailureMessage(AwaitedSendStatus.TIMED_OUT, dispatched = true), failure.message)
+    }
+
+    @Test
+    fun editSettingsAcceptsDeviceSleepAsPostDispatchDeparture() = runTest {
+        var departuresAtCommit = 0L
+        var departuresAfterSleep = 0L
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                departuresAtCommit = serviceRepository.connectionLifecycle.value.epochs.departures
+                serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+                departuresAfterSleep = serviceRepository.connectionLifecycle.value.epochs.departures
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        assertTrue(
+            departuresAfterSleep > departuresAtCommit,
+            "DeviceSleep must publish a departure before the commit result is evaluated",
+        )
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsAcceptsConnectingAsPostDispatchDeparture() = runTest {
+        val (controller, serviceRepository) =
+            createCommitBoundaryFixture(backgroundScope) { repository ->
+                repository.setConnectionState(ConnectionState.Connecting)
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        assertEquals(ConnectionState.Connecting, serviceRepository.connectionState.value)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsAcceptsDepartureThatArrivesWithinCommitDepartureTimeout() = runTest {
+        val (controller, serviceRepository) =
+            createCommitBoundaryFixture(backgroundScope) { repository ->
+                backgroundScope.launch {
+                    delay(COMMIT_DEPARTURE_TIMEOUT.inWholeMilliseconds / 2)
+                    repository.setConnectionState(ConnectionState.Disconnected)
+                }
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        controller.editLocalSettings {}
+
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsRejectsDepartureThatArrivesAfterCommitDepartureTimeout() = runTest {
+        val (controller, serviceRepository) =
+            createCommitBoundaryFixture(backgroundScope) { repository ->
+                backgroundScope.launch {
+                    delay(COMMIT_DEPARTURE_TIMEOUT.inWholeMilliseconds + 1)
+                    repository.setConnectionState(ConnectionState.Disconnected)
+                }
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editLocalSettings {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true),
+            failure.message,
+        )
+        advanceTimeBy(COMMIT_DEPARTURE_TIMEOUT.inWholeMilliseconds + 1)
+        runCurrent()
+        assertEquals(ConnectionState.Disconnected, serviceRepository.connectionState.value)
+    }
+
+    @Test
+    fun editSettingsDoesNotTreatLocalDepartureAsRemoteCommitAcceptance() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editSettings(destNum = 5678) {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true),
+            failure.message,
+        )
+    }
+
+    @Test
+    fun editSettingsDoesNotTreatDestinationZeroAsLocalWhenNodeIdentityIsUnknown() = runTest {
+        val (controller, _) =
+            createCommitBoundaryFixture(backgroundScope, myNodeNum = null) { serviceRepository ->
+                serviceRepository.setConnectionState(ConnectionState.Disconnected)
+                dispatchedSendResult(AwaitedSendStatus.TRANSPORT_STOPPED)
+            }
+
+        val failure = assertFailsWith<EditSettingsTransactionException> { controller.editSettings(destNum = 0) {} }
+
+        assertEquals(
+            editSettingsCommitFailureMessage(AwaitedSendStatus.TRANSPORT_STOPPED, dispatched = true),
+            failure.message,
+        )
+    }
+
+    @Test
+    fun editLocalSettingsFailsBeforeBeginWhenNodeIdentityIsUnknown() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = null)
+
+        assertFailsWith<LocalNodeUnavailableException> { controller.editLocalSettings {} }
+
+        verifySuspend(exactly(0)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editSettingsCommitsWhenCallerIsCancelled() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 1234)
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
+        everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
+        val blockStarted = CompletableDeferred<Unit>()
+        val keepBlockOpen = CompletableDeferred<Unit>()
+
+        val job = launch {
+            controller.editLocalSettings {
+                setOwner(User(id = "!000004d2", long_name = "Cancelled owner"))
+                blockStarted.complete(Unit)
+                keepBlockOpen.await()
+            }
+        }
+        blockStarted.await()
+        job.cancel(CancellationException("cancel settings transaction"))
+        job.join()
+
+        assertTrue(job.isCancelled)
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+        verifySuspend(exactly(1)) { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) }
     }
 
     @Test

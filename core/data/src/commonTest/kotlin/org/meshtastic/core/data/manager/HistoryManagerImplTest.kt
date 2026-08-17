@@ -16,11 +16,35 @@
  */
 package org.meshtastic.core.data.manager
 
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.capture
+import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.testing.FakeMeshPrefs
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class HistoryManagerImplTest {
+    private val commandSender = mock<CommandSender>(MockMode.autofill)
+
+    private fun manager(meshPrefs: FakeMeshPrefs, packetHandler: PacketHandler) =
+        HistoryManagerImpl(meshPrefs, packetHandler, commandSender)
 
     @Test
     fun `buildStoreForwardHistoryRequest copies positive parameters`() {
@@ -66,5 +90,91 @@ class HistoryManagerImplTest {
 
         assertEquals(1440, window)
         assertEquals(100, max)
+    }
+
+    @Test
+    fun `requestHistoryReplay rejects a missing local node before queue admission`() = runTest {
+        val packetHandler = mock<PacketHandler>(MockMode.autofill)
+        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
+
+        assertFailsWith<LocalNodeUnavailableException> {
+            manager(meshPrefs, packetHandler)
+                .requestHistoryReplay(
+                    trigger = "test",
+                    myNodeNum = null,
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    transport = "BLE",
+                    expectedConnectionVersion = 17L,
+                )
+        }
+
+        verifySuspend(exactly(0)) { packetHandler.sendToRadioForConnection(any(), any()) }
+    }
+
+    @Test
+    fun `requestHistoryReplay rejects a missing device before queue admission`() = runTest {
+        val packetHandler = mock<PacketHandler>(MockMode.autofill)
+        val meshPrefs = FakeMeshPrefs()
+
+        assertFailsWith<LocalNodeUnavailableException> {
+            manager(meshPrefs, packetHandler)
+                .requestHistoryReplay(
+                    trigger = "test",
+                    myNodeNum = 123,
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    transport = "BLE",
+                    expectedConnectionVersion = 17L,
+                )
+        }
+
+        verifySuspend(exactly(0)) { packetHandler.sendToRadioForConnection(any(), any()) }
+    }
+
+    @Test
+    fun `requestHistoryReplay binds queue admission to the expected connection`() = runTest {
+        val packetHandler = mock<PacketHandler>(MockMode.autofill)
+        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
+        val packets = mutableListOf<MeshPacket>()
+        everySuspend { packetHandler.sendToRadioForConnection(capture(packets), 17L) } returns true
+        every { commandSender.generatePacketId() } returns 42
+
+        manager(meshPrefs, packetHandler)
+            .requestHistoryReplay(
+                trigger = "test",
+                myNodeNum = 123,
+                storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                transport = "BLE",
+                expectedConnectionVersion = 17L,
+            )
+
+        verifySuspend { packetHandler.sendToRadioForConnection(any(), 17L) }
+        verify { commandSender.generatePacketId() }
+        val queued = packets.single()
+        assertEquals(42, queued.id)
+        assertEquals(123, queued.from)
+        assertEquals(123, queued.to)
+        assertEquals(PortNum.STORE_FORWARD_APP, queued.decoded?.portnum)
+        assertEquals(MeshPacket.Priority.BACKGROUND, queued.priority)
+        val request = StoreAndForward.ADAPTER.decode(checkNotNull(queued.decoded).payload)
+        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+    }
+
+    @Test
+    fun `requestHistoryReplay surfaces owned queue rejection`() = runTest {
+        val packetHandler = mock<PacketHandler>(MockMode.autofill)
+        val meshPrefs = FakeMeshPrefs().apply { setDeviceAddress("bAA:BB:CC:DD:EE:FF") }
+        everySuspend { packetHandler.sendToRadioForConnection(any(), 23L) } returns false
+        every { commandSender.generatePacketId() } returns 43
+
+        assertFailsWith<PacketQueueRejectedException> {
+            manager(meshPrefs, packetHandler)
+                .requestHistoryReplay(
+                    trigger = "test",
+                    myNodeNum = 123,
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    transport = "BLE",
+                    expectedConnectionVersion = 23L,
+                )
+        }
     }
 }

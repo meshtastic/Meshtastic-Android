@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">O aplikacji</string>
     <string name="accept">Akceptuj</string>
     <string name="acknowledgements">Potwierdzenia</string>
     <!-- ACTION -->

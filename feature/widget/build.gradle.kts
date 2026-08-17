@@ -52,6 +52,7 @@ dependencies {
     testImplementation(libs.androidx.glance.appwidget.testing)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     // Robolectric's runner is JUnit 4; configureTestOptions() turns on useJUnitPlatform() for this
     // task, so the vintage engine is what actually discovers and runs these tests.

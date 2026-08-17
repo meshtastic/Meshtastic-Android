@@ -138,6 +138,15 @@ class FakeBleConnection :
 
     val service = FakeBleService()
 
+    /**
+     * Selects the service exposed to each [profile] call. The argument is the 1-based [profile] call ordinal (the first
+     * call receives `1`). Defaults to the shared [service].
+     *
+     * A [profile] call that fails because [missingServices] is true still consumes an ordinal. The ordinal counts
+     * profile invocations, not provider invocations.
+     */
+    var profileServiceProvider: (profileCall: Int) -> BleService = { service }
+
     override suspend fun connect(device: BleDevice) {
         _device.value = device
         _connectionState.value = BleConnectionState.Connecting
@@ -184,7 +193,7 @@ class FakeBleConnection :
         // Use Dispatchers.Unconfined so notification emissions are delivered synchronously to
         // collectors (write → immediate notification). This matches the original FakeBleConnection
         // contract and the auto-responding pattern used by DFU/OTA transport tests.
-        return CoroutineScope(Dispatchers.Unconfined).setup(service)
+        return CoroutineScope(Dispatchers.Unconfined).setup(profileServiceProvider(profileCalls))
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
@@ -218,6 +227,12 @@ class FakeBleService : BleService {
 
     /** When non-null, [write] throws this exception on every call until explicitly cleared. */
     var writeException: Exception? = null
+
+    /**
+     * Optional suspend hook invoked after the attempt is counted and before [writeException] is evaluated, so it also
+     * runs for writes that then fail.
+     */
+    var beforeWrite: (suspend (BleCharacteristic, ByteArray) -> Unit)? = null
 
     /**
      * When non-null, [read] throws this exception instead of returning data. Reset to null before throwing (in the same
@@ -299,6 +314,7 @@ class FakeBleService : BleService {
 
     override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
         writeAttempts++
+        beforeWrite?.invoke(characteristic, data)
         writeException?.let { ex -> throw ex }
         availableCharacteristics += characteristic.uuid
         writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)

@@ -43,6 +43,84 @@ reviews:
     - "!.specify/**"
 
   path_instructions:
+    # Global review contract. Everything below this entry is area-specific detail;
+    # this is what "a finding" means in this repo at all.
+    - path: "**"
+      instructions: >-
+        Report problems only. Every comment must name a concrete defect with evidence in the diff.
+        No praise, no style preferences, no speculative design feedback, no "consider extracting this"
+        on code that works.
+
+
+        FLAG these categories:
+
+        1. Bugs — logic errors, off-by-one, null dereference, a missing `await`/`join`, dropped
+        cancellation, incorrect disposal order.
+
+        2. Security — credential or key exposure, injection, insecure defaults, PII/location/crypto-key
+        material reaching a log sink or analytics payload.
+
+        3. Correctness — behaviour that contradicts the PR description, the linked issue, or an existing
+        contract; a breaking public-API change with no justification.
+
+        4. Behavioural contract changes — when a type is replaced, removed, or refactored, diff the OLD
+        implementation against the NEW one. Look for a removed `override`, a property that used to throw
+        on invalid access and now returns a default, an exception type that changed, and call sites that
+        depended on the removed type's specific behaviour.
+
+        5. Weakened invariants — validation quietly relaxed during a refactor. Kotlin shapes:
+        `single()`/`first()` (throws) swapped for `firstOrNull()` (silently picks nothing);
+        a deleted `require`/`check`/`error`; `!!` replaced by `?: <default>` so a broken state becomes a
+        plausible value; an exhaustive `when` gaining an `else ->` branch that swallows new cases.
+
+        6. Missing error handling at system boundaries — unvalidated input from the radio, a peer, an
+        MQTT broker, a deep link, or an intent extra. Do NOT flag missing null checks the Kotlin type
+        system already guarantees.
+
+        7. Performance regressions — allocation in a hot path or a recomposition scope, N+1 database
+        queries, `runBlocking`/`Thread.sleep`/`.get()` on a coroutine or UI path, blocking
+        `getString()` on `Dispatchers.Default`, an unstable Compose parameter type that defeats skipping.
+
+        8. Concurrency — unguarded shared mutable state, a read-decide-write sequence spanning a suspend
+        boundary, a mutex held across a suspending call, deadlock and lock-ordering risk.
+
+        9. Temporal coupling and initialisation safety — `lateinit var` paired with a separate
+        `initialize()`/`start()` that a caller must remember, DI registrations that only work in one
+        resolution order, any pattern where a forgotten call is a runtime crash with no compile-time
+        signal.
+
+        10. Resource leaks — a `CoroutineScope` created and never cancelled, a `Closeable`/`AutoCloseable`
+        outside `use {}`, a registered receiver/listener/callback with no matching unregister, a BLE or
+        socket connection not closed on every exit path. Flag these even when the pattern was moved in
+        from elsewhere.
+
+        11. Dead code and stale comments — a comment describing behaviour the code no longer has, an
+        unused local or parameter, a materialising call whose result is never consumed.
+
+        12. Repository convention violations — see AGENTS.md and .skills/. Highest value: `java.*` or
+        `android.*` in `commonMain`, hardcoded user-facing strings, `runCatching` in a suspend context
+        instead of `safeCatching`, OkHttp instead of Ktor, hand-edits to generated or Crowdin-owned files.
+
+        13. Comment problems — a comment that contradicts the code, a workaround with no tracking link, a
+        parser or protocol handler that omits the raw wire shape needed to read the edge cases, and
+        privacy- or security-sensitive behaviour whose comment fails to explain scope and WHY. Do not ask
+        for comments on obvious code.
+
+
+        Do NOT flag: style already enforced by detekt, spotless, or .editorconfig; missing KDoc, unless a
+        new public API is entirely undocumented; refactoring suggestions for code the PR did not touch;
+        generated output (Wire protos, Crowdin locale files, baseline profiles, docs screenshots);
+        missing tests for docs-only, comment-only, or mechanical-rename changes.
+
+
+        Moved or extracted code counts as newly written. Review it on its merits and flag pre-existing
+        defects that came along with it, labelled "pre-existing — good opportunity to fix during this
+        refactor" so the author can weigh scope.
+
+
+        One problem per comment. Cite the exact line, symbol, or condition. Give a fix direction — a
+        snippet when the fix is not obvious. Never restate a finding already raised in an existing
+        review thread.
     - path: "**/commonMain/**"
       instructions: >
         KMP common code. Flag any import of java.* or android.* — these break non-Android targets. Expect KMP equivalents instead (Okio, kotlinx Mutex/atomicfu, NumberFormatter.format() for floats).
@@ -72,6 +150,35 @@ reviews:
       instructions: Route map access through the injected `CompositionLocal` provider contracts; do not depend directly on Google Maps or osmdroid from feature code.
     - path: feature/car/
       instructions: Run unit tests with `./gradlew :feature:car:testGoogleDebugUnitTest`, and keep Robolectric pinned to SDK 36 for this module.
+    - path: core/database/
+      instructions: >-
+        Review focus: schema compatibility. A `@Database` version bump must ship a new
+        `core/database/schemas/<n>.json` AND an (n-1)→n test under `androidHostTest` that inserts rows at
+        the old version, migrates, and asserts row count and column values survive — not merely that the
+        migration executes. A column going nullable must assert both that pre-existing values are retained
+        and that the new NULL state is reachable. Flag `@Insert`+`@Update` pairs that should be `@Upsert`,
+        single-row queries missing `LIMIT 1`, and N+1 patterns (a loop issuing single-row queries) that
+        should be a chunked `WHERE IN`.
+    - path: core/network/
+      instructions: >-
+        Review focus: request lifecycle. Timeouts and base URLs come from `HttpClientDefaults`; flag
+        hardcoded timeouts or absolute URLs in callers. Check every failure path for cancellation
+        propagation (`safeCatching`, not `runCatching`) and for a response body that is closed on error as
+        well as success.
+    - path: .github/workflows/
+      instructions: >-
+        Review focus: unintended side effects. Flag a change that widens a trigger (especially
+        `pull_request_target` and anything granting write scopes to fork-authored code), a secret exposed
+        to an untrusted context, a cache key that lets one job poison another, and an unpinned third-party
+        action. Job-level `continue-on-error` or a removed `--fail`-style guard silently converts a broken
+        gate into a green tick — flag it.
+    - path: "**/*.gradle.kts"
+      instructions: >-
+        Review focus: build correctness over cleanliness. Several idioms here are load-bearing and look
+        redundant — do not suggest removing an explicit dependency declaration, a duplicated exclusion, or
+        an apparently no-op configuration block without evidence from the diff that it is dead. Flag
+        changes that alter variant/flavor wiring, drop a keep rule, or make a task's inputs/outputs
+        untracked (which silently disables caching and up-to-date checks).
 
   # Every CodeRabbit tool is enabled by default, so this block only ever needs to
   # turn things OFF or configure them. detekt is off because CI owns it (Zero Lint
@@ -102,10 +209,12 @@ reviews:
   pre_merge_checks:
     docstrings:
       mode: "off"
-    # The two defect classes that survive review-by-prose because they are about
-    # what's ABSENT from a diff — a sibling call site left unfixed, or a test that
-    # would still pass with the fix reverted. Warning, not error: these are
-    # judgment calls and a false positive must not block a merge.
+    # Defect classes that survive review-by-prose because they are about what is
+    # ABSENT from a diff — a sibling call site left unfixed, a test that would still
+    # pass with the fix reverted, a regression nobody covered, a behaviour quietly
+    # dropped while code moved files. A per-file reviewer never sees these; a
+    # whole-PR check does. Warning, not error: all four are judgment calls and a
+    # false positive must not block a merge.
     custom_checks:
       - name: "Sibling call sites and presence semantics"
         mode: "warning"
@@ -129,6 +238,76 @@ reviews:
           which items survived, and tests asserting emission ORDER under Dispatchers.Unconfined
           (not a stable contract). A test must assert the side effect only the intended path
           produces — a call counter, a request issued, a cache written.
+      - name: "Regression coverage for changed behavior"
+        mode: "warning"
+        instructions: >-
+          Do not stop at "tests pass" or "there are tests". For each non-trivial production change in
+          the diff, work through four steps and report only the gaps.
+
+
+          1. Changed behaviour — name the concrete code path, function, or configuration key from the
+          diff whose behaviour changed.
+
+          2. Observable surfaces — which of these can see the change: public API, the mesh/radio
+          protocol handling, persisted database rows, DataStore preferences, Compose UI state,
+          navigation, notifications, the foreground service lifecycle, BLE/serial/TCP transport,
+          MQTT, widgets, Android Auto, the desktop app, or R8/ProGuard-shaped release behaviour.
+
+          3. Regression risks — the specific ways this could break a working scenario: ordering and
+          timing changes, reconnect and retry paths, process death and state restore, schema
+          compatibility for rows written by an older build, cross-module call sites, flavor
+          differences (google vs fdroid), and platform differences (Android vs JVM vs iOS targets).
+
+          4. Coverage gap — name the test that should exist and does not.
+
+
+          A bug fix needs a test that FAILS without the fix. A test that only exercises the happy path,
+          or a regenerated snapshot/golden file, does not prove a behaviour change. Flag a PR whose only
+          test evidence is an updated screenshot golden, an updated Room schema JSON, or a regenerated
+          baseline profile when the change is behavioural.
+
+
+          State each finding as: impacted code path, the regression risk, the missing test shape. Be
+          specific enough that the author can write the test from the comment.
+
+
+          Do NOT ask for tests for: documentation-only or comment-only changes, mechanical renames,
+          dependency version bumps, or refactors the diff shows to be behaviour-preserving. Do not
+          demand a test category for a surface the change cannot reach — a `commonMain` formatting
+          helper does not need a transport test.
+      - name: "Moved code diffed against its original"
+        mode: "warning"
+        instructions: >-
+          Applies when the diff deletes a type/function in one file and adds something similar
+          elsewhere, or extracts code into a new file or module. Treat the moved code as newly written
+          and compare the OLD implementation against the NEW one line by line.
+
+
+          Flag any of the following that the move introduced silently:
+
+          - a removed `override`, or an interface member the new type no longer implements;
+
+          - a changed exception contract — something that threw now returns a default, or vice versa;
+
+          - a dropped `require`/`check`/`init` block validation, or a narrowed visibility widened;
+
+          - a default parameter value that changed, which alters every call site that omitted it;
+
+          - a nullability change on a numeric field, which is the presence-vs-sentinel-zero class;
+
+          - a lost `@Serializable`/`@Parcelize`/Koin annotation, or a scope change (`@Single` to
+          `@Factory`) that alters instance lifetime;
+
+          - a coroutine scope, dispatcher, or `SharingStarted` policy that changed during the move.
+
+
+          Then check the call sites of the removed declaration: every caller that relied on the old
+          behaviour must still be correct. Name any caller the PR left on the old assumption.
+
+
+          Pre-existing defects carried into the new location are in scope — label them "pre-existing —
+          good opportunity to fix during this refactor" so the author can decide on scope. Do not flag
+          a move that the diff shows to be genuinely mechanical.
 
 knowledge_base:
   # Learnings are how a confirmed finding stops recurring on the next PR. Pin the

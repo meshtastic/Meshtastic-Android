@@ -313,18 +313,53 @@ interface PacketDao {
     }
 
     /**
-     * Updates only an unambiguous row matching the identity available on an outgoing protobuf packet. Mesh packet IDs
+     * Resolves only an unambiguous row matching the identity available on an outgoing protobuf packet. Mesh packet IDs
      * are sender-scoped, so ID-only lookup can select an inbound packet or an unrelated command with the same ID.
      */
     @Transaction
-    suspend fun updateOutgoingMessageStatus(packet: MeshPacket, status: MessageStatus): Packet? {
+    suspend fun resolveOutgoingPacket(packet: MeshPacket): Packet? =
+        outgoingCandidates(packet, findPacketsWithId(packet.id)).singleOrNull()
+
+    /**
+     * Resolves and conditionally applies a queue-stage status without racing a terminal ACK/NAK update.
+     *
+     * @return the resolved row as read before the update, or null when no unambiguous outgoing row matches.
+     */
+    @Transaction
+    suspend fun applyOutgoingQueueStatus(packet: MeshPacket, status: MessageStatus): Packet? {
+        val match = resolveOutgoingPacket(packet) ?: return null
+        if (shouldApplyOutgoingQueueStatus(match.data.status, status)) {
+            update(match.copy(data = match.data.copy(status = status)))
+        }
+        return match
+    }
+
+    /**
+     * Reaction equivalent of [applyOutgoingQueueStatus], restricted to one unambiguous outgoing row.
+     *
+     * @return the resolved reaction as read before the update, or null when no unambiguous non-received row matches.
+     */
+    @Transaction
+    suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): ReactionEntity? {
+        val match =
+            findReactionsWithId(packetId).filter { it.status != MessageStatus.RECEIVED }.singleOrNull() ?: return null
+        if (shouldApplyOutgoingQueueStatus(match.status, status)) update(match.copy(status = status))
+        return match
+    }
+
+    private fun outgoingCandidates(packet: MeshPacket, stored: List<Packet>): List<Packet> {
         val portNum = packet.decoded?.portnum?.value
-        val matches =
-            findPacketsWithId(packet.id).filter { stored ->
-                stored.data.from.matchesNodeNum(packet.from, packet.from) &&
-                    stored.data.to.matchesNodeNum(packet.to, packet.from) &&
-                    (portNum == null || stored.data.dataType == portNum)
-            }
+        return stored.filter {
+            it.data.from.matchesNodeNum(packet.from, packet.from) &&
+                it.data.to.matchesNodeNum(packet.to, packet.from) &&
+                (portNum == null || it.data.dataType == portNum)
+        }
+    }
+
+    /** Updates the unique outgoing row, preferring the only candidate already at [status] when duplicates exist. */
+    @Transaction
+    suspend fun updateOutgoingMessageStatus(packet: MeshPacket, status: MessageStatus): Packet? {
+        val matches = outgoingCandidates(packet, findPacketsWithId(packet.id))
         val alreadyAtStatus = matches.filter { it.data.status == status }
         val match =
             when {
@@ -529,6 +564,15 @@ interface PacketDao {
         """,
     )
     suspend fun getReactionByPacketId(packetId: Int): ReactionEntity?
+
+    @Query(
+        """
+        SELECT * FROM reactions
+        WHERE status = :status
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        """,
+    )
+    suspend fun getReactionsByStatus(status: MessageStatus): List<ReactionEntity>
 
     @Transaction
     @Query(
@@ -754,6 +798,48 @@ interface PacketDao {
         return canTimeOut
     }
 
+    @Query(
+        """
+        UPDATE reactions
+        SET status = :failedStatus, routing_error = :routingError
+        WHERE myNodeNum = :myNodeNum
+        AND reply_id = :replyId
+        AND user_id = :userId
+        AND emoji = :emoji
+        AND status = :enrouteStatus
+        """,
+    )
+    suspend fun updateEnrouteReactionStatus(
+        myNodeNum: Int,
+        replyId: Int,
+        userId: String,
+        emoji: String,
+        routingError: Int,
+        enrouteStatus: MessageStatus,
+        failedStatus: MessageStatus,
+    ): Int
+
+    /**
+     * Atomically stamps [routingError] on a sent reaction only while it is still [MessageStatus.ENROUTE].
+     *
+     * @return true if a row was timed out.
+     */
+    suspend fun timeOutEnrouteReaction(
+        myNodeNum: Int,
+        replyId: Int,
+        userId: String,
+        emoji: String,
+        routingError: Int,
+    ): Boolean = updateEnrouteReactionStatus(
+        myNodeNum = myNodeNum,
+        replyId = replyId,
+        userId = userId,
+        emoji = emoji,
+        routingError = routingError,
+        enrouteStatus = MessageStatus.ENROUTE,
+        failedStatus = MessageStatus.ERROR,
+    ) == 1
+
     /**
      * Atomically finds reactions by [replacement]'s packetId + userId + emoji and updates every ownership-scoped copy,
      * borrowing [myNodeNum][ReactionEntity.myNodeNum] from each existing row. No-op if no match is found.
@@ -920,3 +1006,21 @@ private fun String?.matchesNodeNum(nodeNum: Int, localNodeNum: Int): Boolean =
         is NodeAddress.ByNum -> address.num == nodeNum
         is NodeAddress.ById -> false
     }
+
+/**
+ * Queue-stage status guard shared with callers that decide whether to arm follow-up work.
+ *
+ * Only [MessageStatus.ENROUTE] and [MessageStatus.ERROR] are owned by this transition. Terminal routing and SFPP
+ * statuses are applied by their dedicated state transitions.
+ */
+fun shouldApplyOutgoingQueueStatus(current: MessageStatus?, status: MessageStatus): Boolean = when (status) {
+    MessageStatus.ENROUTE -> current == null || current == MessageStatus.UNKNOWN || current == MessageStatus.QUEUED
+
+    MessageStatus.ERROR ->
+        current == null ||
+            current == MessageStatus.UNKNOWN ||
+            current == MessageStatus.QUEUED ||
+            current == MessageStatus.ENROUTE
+
+    else -> false
+}

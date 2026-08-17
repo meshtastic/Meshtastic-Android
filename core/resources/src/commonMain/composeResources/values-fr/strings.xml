@@ -27,6 +27,7 @@
     <string name="a11y_node_online">en ligne</string>
     <string name="a11y_node_role">rôle %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
+    <string name="about">A propros</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
     <!-- ACTION -->
@@ -38,6 +39,7 @@
     <string name="action_select_network">Sélectionner le réseau</string>
     <string name="action_send_reply">Envoyer une réponse</string>
     <string name="action_show_message_status">Afficher le statut du message</string>
+    <string name="action_translate_message">Traduire le message</string>
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">Remplacer le multiplicateur ADC</string>
     <string name="adc_multiplier_override_ratio">Facteur de remplacement du multiplicateur ADC</string>
@@ -110,6 +112,7 @@
     <string name="apply">Appliquer</string>
     <!-- AQI -->
     <string name="aqi_good">Bon</string>
+    <string name="aqi_very_unhealthy"></string>
     <string name="are_you_sure">Êtes-vous sûr ?</string>
     <string name="are_you_sure_change_default">Êtes-vous sûr de vouloir passer au canal par défaut ?</string>
     <string name="audio">Audio</string>
@@ -117,10 +120,13 @@
     <string name="available_pins">Broches disponibles</string>
     <string name="back">Retour</string>
     <string name="backup_keys">Sauvegarder les clés</string>
+    <string name="backup_keys_confirmation">Sauvegardez les clés publiques et privées pour sécuriser le stockage chiffré sur cet appareil.</string>
     <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
     <!-- BANDWIDTH -->
     <string name="bandwidth">Bande Passante</string>
+    <string name="bandwidth_unsupported">Non supporté (%1$s)</string>
+    <string name="bandwidth_unsupported_summary">Cette bande passante n'est pas prise en charge par la radio connectée dans la région sélectionnée. Choisissez une valeur supportée avant d'enregistrer.</string>
     <string name="baro_pressure">Baro</string>
     <string name="battery">Batterie</string>
     <string name="battery_ina_2xx_i2c_address">Adresse I2C de la batterie INA_2XX</string>
@@ -138,8 +144,16 @@
     <string name="bluetooth_feature_discovery">Découverte</string>
     <string name="bluetooth_feature_discovery_description">Trouvez et identifiez les dispositifs Meshtastic autour de  vous.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_location_services_disabled">Les services de localisation sont désactivés. Activez-les pour rechercher les appareils à proximité.</string>
+    <string name="bluetooth_scan_missing_permission">L'analyse Bluetooth nécessite une autorisation. Autorisez les périphériques à proximité (ou la localisation) pour trouver des périphériques.</string>
+    <string name="bluetooth_scan_start_failed">L'analyse Bluetooth n'a pas pu démarrer. Essayez à nouveau, ou activez/désactivez Bluetooth si le problème continue.</string>
+    <plurals name="bluetooth_scan_too_frequent">
+        <item quantity="one">Limite d'analyse Bluetooth atteinte. Réessayez dans %1$d seconde.</item>
+        <item quantity="other">Limite d'analyse Bluetooth atteinte. Réessayez dans %1$d secondes.</item>
+    </plurals>
     <string name="bold_heading">Titre en gras</string>
     <string name="bonding_failed_permissions">L'appairage a échoué. Accorder les autorisations de l'appareil à proximité et essayer à nouveau.</string>
+    <string name="bonding_failed_retry">L'appairage n'a pas abouti. Veuillez réessayer.</string>
     <string name="bottom_nav_settings">Réglages</string>
     <string name="broadcast_interval">Intervalle de diffusion</string>
     <string name="button_gpio">GPIO du bouton</string>
@@ -149,6 +163,7 @@
     <string name="call_sign_summary">Votre indicatif d'appel radio amateur, jusqu'à 8 caractères</string>
     <string name="camera_permission">Autorisation de la caméra</string>
     <string name="camera_permission_rationale">Autoriser l'accès à l'appareil photo pour scanner les codes QR.</string>
+    <string name="camera_unavailable">La caméra n'a pas pu démarrer. Essayez à nouveau, ou fermez le scanner et rouvrez-le.</string>
     <string name="cancel">Annuler</string>
     <string name="cancel_reply">Annuler la réponse</string>
     <string name="canned_message">Message prédéfini</string>
@@ -246,6 +261,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Nécessite un accéléromètre sur votre appareil.</string>
     <string name="config_lora_frequency_slot_summary">La fréquence de fonctionnement de votre nœud est calculée en fonction de la région, du préréglage du modem et de ce champ. Lorsque la valeur vaut 0, le slot est automatiquement calculé en fonction du nom du canal principal et sera différent de l'emplacement public par défaut. Revient à l'emplacement public par défaut si les canaux privés primaires et publics secondaires sont configurés.</string>
     <string name="config_lora_hop_limit_summary">Définit le nombre maximum de sauts, la valeur par défaut est 3. L'augmentation des sauts augmente également la congestion et devrait être utilisée avec prudence. Les messages broadcast à 0 saut ne recevront pas les ACKs (confirmation de réception).</string>
+    <string name="config_lora_modem_preset_licensed_summary">Les préréglages de cette région sont réservés aux opérateurs autorisés (radio amateur). Activez la radio amateur autorisée (Ham) dans la configuration utilisateur pour les sélectionner.</string>
     <string name="config_lora_modem_preset_summary">Préréglages de modem disponibles, la valeur par défaut est Long Fast.</string>
     <string name="config_lora_region_summary">La région où vous allez utiliser vos radios.</string>
     <string name="config_network_eth_enabled_summary">Activer Ethernet désactivera la connexion Bluetooth à l'application. Les connexions de nœuds via TCP ne sont pas disponibles sur les appareils Apple.</string>
@@ -261,6 +277,7 @@
     <string name="config_security_debug_log_api_enabled">Afficher en direct les journaux de débogage via le port série, consulter/exporter les journaux sans position via Bluetooth.</string>
     <string name="config_security_is_managed">L'appareil est géré par un administrateur de maillage, l'utilisateur ne peut accéder à aucun des paramètres de l'appareil.</string>
     <string name="config_security_private_key">Utilisée pour créer une clé partagée avec un appareil distant.</string>
+    <string name="config_security_private_key_remote">L'appareil ne partage pas sa clé privée sur l'administration à distance. Vous pouvez définir une nouvelle clé, mais elle ne pourra ne jamais être lue de nouveau.</string>
     <string name="config_security_public_key">Généré à partir de votre clé publique et envoyé à d'autres nœuds sur le maillage pour leur permettre de calculer une clé secrète partagée.</string>
     <string name="config_security_serial_enabled">Console série via l’API de flux.</string>
     <string name="configuration">Configuration</string>
@@ -306,20 +323,28 @@
     <string name="debug_filter_preset_title">Filtres prédéfinis</string>
     <string name="debug_filters">Filtres</string>
     <string name="debug_log_api_enabled">API de journalisation de débogage activée</string>
+    <string name="debug_logcat_empty">Aucun journal d'application à afficher</string>
     <string name="debug_logcat_refresh">Actualiser</string>
     <string name="debug_logs_export">Exporter les logs</string>
+    <string name="debug_logs_export_warning">Ce fichier peut contenir du contenu de vos messages, des emplacements précis et des détails sur le nœud. Vérifiez-le avant de le partager publiquement.</string>
+    <string name="debug_logs_exported">Journaux exportés</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_search_clear">Effacer la recherche</string>
     <string name="debug_search_next">Occurrence suivante</string>
     <string name="debug_search_prev">Occurrence précédente</string>
     <string name="debug_store_logs_summary">Désactiver pour passer l'écriture des journaux de maillage sur le disque</string>
     <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
+    <string name="deep_link_connect_message">Un lien demande à cette application de se connecter à l'appareil %1$s. Ne continuez que si vous avez confiance en l'origine du lien.</string>
+    <string name="deep_link_connect_title">Se connecter à cet appareil ?</string>
+    <string name="deep_link_disconnect_message">Un lien demande à cette application de se déconnecter de votre appareil. Continuez uniquement si vous faites confiance à l'origine du lien.</string>
+    <string name="deep_link_disconnect_title">Se déconnecter de votre appareil ?</string>
     <string name="default_">Défaut</string>
     <!-- DELETE -->
     <string name="delete">Supprimer</string>
     <string name="delete_custom_tile_source">Supprimer le réseau de tuile personnalisée</string>
     <string name="delete_for_everyone">Supprimer pour tout le monde</string>
     <string name="delete_for_me">Supprimer pour moi</string>
+    <string name="delete_key_backup_confirmation">Supprime la sauvegarde de la clé chiffrée stockée sur cet appareil. Cette opération est irréversible.</string>
     <plurals name="delete_messages">
         <item quantity="one">Supprimer le message ?</item>
         <item quantity="other">Supprimer %1$s messages ?</item>
@@ -337,6 +362,9 @@
     <string name="desktop_tray_quit">Quitter</string>
     <string name="desktop_tray_show">Afficher Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic application de bureau</string>
+    <string name="desktop_update_available_message">Meshtastic Desktop %1$s est prêt à télécharger.</string>
+    <string name="desktop_update_available_title">Mise à jour de l'app disponible</string>
+    <string name="desktop_update_download">Télécharger la mise à jour %1$s</string>
     <string name="details">Détails</string>
     <string name="detection_sensor">Capteur de détection</string>
     <string name="detection_sensor_config">Configuration du capteur de détection</string>
@@ -382,6 +410,7 @@
     <string name="discovery_empty_history">Aucune session de découverte pour l'instant</string>
     <string name="discovery_export_report">Exporter le rapport</string>
     <string name="discovery_history">Historique de découverte</string>
+    <string name="discovery_interrupted_scan_restored">Restauration de la précédente configuration (%1$s) après une analyse de découverte interrompue</string>
     <string name="discovery_keep_screen_awake">Gardez l'écran éveillé</string>
     <string name="discovery_keep_screen_awake_description">Empêche le mode Android Doze de baisser des paquets radio pendant les longs scans. Recommandé.</string>
     <string name="discovery_local_mesh">Découverte de maille locale</string>
@@ -389,6 +418,7 @@
     <string name="discovery_lora_presets_description">Sélectionnez un ou plusieurs préréglages à analyser</string>
     <string name="discovery_map">Carte de découverte</string>
     <string name="discovery_not_connected">Non connecté</string>
+    <string name="discovery_not_connected_description">Connectez-vous à un périphérique Meshtastic pour commencer à scanner.</string>
     <string name="discovery_paused">En pause : %1$s</string>
     <string name="discovery_preparing">Préparation de l'analyse</string>
     <string name="discovery_preset_home_label">%1$s (Accueil)</string>
@@ -405,11 +435,15 @@
     <string name="discovery_shifting_to">Déplacement vers %1$s</string>
     <string name="discovery_start_scan">Démarrer l'analyse</string>
     <string name="discovery_start_scan_disabled">Bouton de démarrage d'analyse désactivé. %1$s</string>
+    <string name="discovery_start_scan_reason_24ghz_unsupported">le matériel radio ne supporte pas le 2.4 GHz</string>
     <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
     <string name="discovery_stat_date">Date</string>
     <string name="discovery_stat_direct">Direct</string>
     <string name="discovery_stat_messages">Messages</string>
     <string name="discovery_stat_selected">Sélectionné</string>
+    <string name="discovery_summary_not_available">Analyse IA non disponible</string>
+    <string name="discovery_time_remaining">%1$s restants</string>
+    <string name="discovery_view_map">Voir la carte</string>
     <string name="disk_free_indexed">Disque libre %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Écran</string>
@@ -447,6 +481,9 @@
     <string name="edit_custom_tile_source">Modifier le réseau de tuile personnalisée</string>
     <string name="eight_hours">8 Heures</string>
     <!-- EMOJI -->
+    <string name="emoji_load_error">Impossible de charger les émojis</string>
+    <string name="emoji_no_results">Aucun émoji trouvé</string>
+    <string name="emoji_recently_used">Récemment utilisé</string>
     <string name="enable_power_saving_mode">Activer le mode économie d'énergie</string>
     <string name="enabled">Activé</string>
     <!-- ENCRYPTION -->
@@ -466,6 +503,7 @@
     <string name="environment_metrics_use_fahrenheit">Les mesures environnementales utilisent Fahrenheit</string>
     <string name="error">Erreur</string>
     <string name="error_duty_cycle">Limite du temps d'émission autorisé par heure (duty cycle) atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
+    <string name="error_recovery_exhausted">Impossible d'établir une connexion stable après plusieurs tentatives. Veuillez sélectionner à nouveau le nœud pour réessayer.</string>
     <string name="establish_session">Connecter &amp; administrer</string>
     <string name="establishing_session">Établissement de la session distante…</string>
     <string name="ethernet_config">Options Ethernet</string>
@@ -477,6 +515,8 @@
     <!-- EXPORT -->
     <string name="export_configuration">Exporter la configuration</string>
     <string name="export_data_csv">Exporter tous les paquets</string>
+    <string name="export_gpx">Exporter GPX</string>
+    <string name="export_node_db">Exporter la base de données du nœud</string>
     <string name="export_tak_data_package">Exporter le paquet de données TAK</string>
     <string name="external_notification">Notification externe</string>
     <string name="external_notification_config">Configuration de notification externe</string>
@@ -508,13 +548,24 @@
     <!-- FIRMWARE -->
     <string name="firmware">Micrologiciel</string>
     <string name="firmware_edition">Version du micrologiciel</string>
+    <string name="firmware_event_ended_banner">%1$s est déprécié. Utilisez un micrologiciel Meshtastic standard pour restaurer les fonctionnalités normales.</string>
+    <string name="firmware_event_ended_button">Mettre à jour le micrologiciel</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
+    <string name="firmware_recovery_banner">Fin de la mise à jour %1$s</string>
+    <string name="firmware_recovery_ble_failed">Impossible de terminer la mise à jour via le Bluetooth. Le programme d'amorçage par défaut ne peut pas correctement effectuer une mise à jour OTA. Connectez l'appareil sur un ordinateur via USB et tentez de flasher en utilisant les outils DFU du vendeur (par exemple, adafruit-nrfutil) pour restaurer l'appareil.</string>
+    <string name="firmware_recovery_button">Reprendre la mise à jour du micrologiciel</string>
     <string name="firmware_too_old">Mise à jour du micrologiciel requise.</string>
     <string name="firmware_update_almost_there">On y est presque...</string>
     <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_archive_missing_target">Aucun firmware pour %2$s (%3$s) n'a été trouvé dans "%1$s".</string>
+    <string name="firmware_update_available">Mise à jour du micrologiciel disponible</string>
     <string name="firmware_update_battery_low">Batterie trop faible (%1$d%). Veuillez charger votre appareil avant de mettre à jour.</string>
     <string name="firmware_update_checking">Vérification des mises à jour...</string>
+    <string name="firmware_update_confirm_file_button">Démarrer la mise à jour</string>
+    <string name="firmware_update_confirm_file_message">Vérifiez le nom du fichier sélectionné avant de mettre à jour. La mise à jour commencera qu'après confirmation.</string>
+    <string name="firmware_update_confirm_file_title">Confirmez le nom du micrologiciel</string>
     <string name="firmware_update_connecting_attempt">Connexion à l'appareil (tentative %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">La connexion de l'appareil a été modifiée durant la confirmation. Veuillez sélectionner à nouveau le micrologiciel.</string>
     <string name="firmware_update_copying">Yeah ! Attendez, copie du firmware...</string>
     <string name="firmware_update_currently_installed">Actuellement installé : %1$s</string>
     <string name="firmware_update_device">Appareil : %1$s</string>
@@ -530,6 +581,7 @@
     <string name="firmware_update_error">Erreur : %1$s</string>
     <string name="firmware_update_extracting">Extraction du firmware...</string>
     <string name="firmware_update_failed">Échec de la mise à jour</string>
+    <string name="firmware_update_filename_unavailable">Impossible de lire le nom du fichier sélectionné. Choisissez un micrologiciel local avec un nom de fichier visible.</string>
     <string name="firmware_update_flashing">Flash de l'appareil, veuillez patienter...</string>
     <string name="firmware_update_hang_tight">Accrochez-vous, nous travaillons dessus...</string>
     <string name="firmware_update_hash_rejected">Intégrité (hash) du firmware rejetée. Veuillez réessayer ou mettre à jours l'appareil via USB.</string>
@@ -540,17 +592,28 @@
     <string name="firmware_update_method_detail">Mettre à jour via %1$s</string>
     <string name="firmware_update_method_usb">Transfert de fichier USB</string>
     <string name="firmware_update_method_wifi">Mise à jour via WiFi</string>
+    <string name="firmware_update_missing_target">Les informations de destination du micrologiciel ne sont pas disponibles pour cet appareil.</string>
+    <string name="firmware_update_nightly">Nightly</string>
     <string name="firmware_update_no_device">Aucun appareil connecté</string>
     <string name="firmware_update_node_info_missing">Les informations de l'utilisateur du nœud sont manquantes.</string>
     <string name="firmware_update_not_found_in_release">Impossible de trouver le firmware pour %1$s dans cette version.</string>
+    <string name="firmware_update_notification_android">%1$s est installé. La version stable %2$s est disponible. Ouvrez le centre de mises à jour du microprogramme lorsque vous êtes prêt.</string>
+    <string name="firmware_update_notification_flasher">%1$s est installé. La version stable %2$s est disponible. Ouvrez Meshtastic Flasher pour mettre à jour ce matériel.</string>
+    <string name="firmware_update_open">Ouvrir les mises à jour du micrologiciel</string>
+    <string name="firmware_update_open_flasher">Ouvrir le Flasher Meshtastic</string>
     <string name="firmware_update_ota_failed">Échec de la mise à jour de l'OTA : %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">Le chargeur OTA de ce périphérique a rejeté la méthode de mise à jour demandée : %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Pour le RAK WisBlock RAK4631, utilisez l'outil DFU série du fournisseur (par exemple, adafruit-nrfutil dfu serial avec le fichier .zip du bootloader fourni). La copie du fichier .uf2 seul ne permettra pas de mettre à jour le bootloader.</string>
     <string name="firmware_update_rebooting">Redémarrage en mode DFU...</string>
     <string name="firmware_update_release_notes">Notes de Version</string>
+    <string name="firmware_update_requires_bin">%1$s nécessite un fichier .bin correspondant à la cible.</string>
+    <string name="firmware_update_requires_uf2">%1$s nécessite un fichier .uf2 correspondant à la cible.</string>
     <string name="firmware_update_retrieval_failed">Impossible de récupérer le fichier firmware.</string>
     <string name="firmware_update_retry">Réessayer</string>
     <string name="firmware_update_save_dfu_file">Veuillez enregistrer le fichier .uf2 sur le lecteur DFU de votre appareil.</string>
+    <string name="firmware_update_searching_device">Recherche de périphérique OTA sur le réseau...</string>
     <string name="firmware_update_select_file">Sélectionnez le fichier local</string>
+    <string name="firmware_update_slow_bootloader_hint">Les mises à jour sont lentes sur le chargeur d'amorçage de cet appareil. Flasher le chargeur d'amorçage OTAFIX permet des mises à jour BLE plus rapides.</string>
     <string name="firmware_update_source_local">Source : Fichier local</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_starting_dfu">Démarrage du mode DFU...</string>
@@ -562,6 +625,8 @@
     <string name="firmware_update_unknown_error">Une erreur inconnue s'est produite</string>
     <string name="firmware_update_unknown_hardware">Modèle de matériel inconnu : %1$d</string>
     <string name="firmware_update_unknown_release">Version distante inconnue</string>
+    <string name="firmware_update_unsupported_transport">Les mises à jour du microprogramme ne sont pas prises en charge par cette connexion pour cet appareil. Connectez une autre manière (par exemple Bluetooth) pour mettre à jour.</string>
+    <string name="firmware_update_unsupported_update_method">Les fichiers du firmware local ne sont pas pris en charge pour cette méthode de mise à jour.</string>
     <string name="firmware_update_uploading">Transfert du Firmware...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="firmware_update_usb_failed">Échec de la mise à jour USB</string>
@@ -578,6 +643,11 @@
     <string name="flip_screen">Inverser l'écran</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Gras</string>
+    <string name="format_code">Code</string>
+    <string name="format_italic">Italique</string>
+    <string name="format_link">Lien</string>
+    <string name="format_strikethrough">Barré</string>
     <string name="free_memory">Mémoire libre</string>
     <string name="free_memory_description">Mémoire système disponible en octets</string>
     <string name="freq">Fréq</string>
@@ -590,6 +660,10 @@
     <string name="generate_input_event_on_press">Générer un événement d'entrée sur Appui</string>
     <string name="generate_qr_code">Générer un QR Code</string>
     <!-- GEOFENCE -->
+    <string name="geofence">Zone géographique</string>
+    <string name="geofence_alerts_opt_in">Me notifier des franchissements</string>
+    <string name="geofence_alerts_opt_in_desc">Recevoir une alerte lorsque les nœuds entrent ou quittent cette zone géographique</string>
+    <string name="geofence_box_author_confirm">Confirmer la zone</string>
     <string name="geofence_off">Éteint</string>
     <string name="get_started">Commencer</string>
     <string name="good">Bon</string>
@@ -683,6 +757,8 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Radioamateur licencié (RA)</string>
     <string name="licensed_amateur_radio_text">L'activation de cette option désactive le chiffrement et n'est pas compatible avec le réseau Meshtastic par défaut.</string>
+    <string name="licensed_mode_enable_confirm">Activer le mode licence</string>
+    <string name="licensed_mode_enable_title">Activer le mode licence (Ham) ?</string>
     <!-- LOAD -->
     <string name="load">Charge</string>
     <string name="load_15_min">Charge 15 m</string>
@@ -711,7 +787,29 @@
     <string name="location_disabled">L'accès à la localisation est désactivé, impossible de fournir la position du maillage.</string>
     <string name="location_sharing">Partage de position</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Réessayer dans %1$d secondes.</string>
+    <string name="lockdown_confirm_passphrase">Confirmer la phrase de passe</string>
+    <string name="lockdown_disable">Désactiver le verrouillage</string>
+    <string name="lockdown_disable_message">Entrez votre phrase de passe pour désactiver le verrouillage. L'appareil déchiffrera son stockage et redémarrera.</string>
+    <string name="lockdown_enable">Activer le verrouillage</string>
+    <string name="lockdown_enable_ack">Je comprends</string>
+    <string name="lockdown_enable_warning">Attention : l'activation du verrouillage bloque le port de débogage (SWD) sur le matériel pris en charge. Vous pouvez désactiver le verrouillage à tout moment avec votre phrase de passe. Une restauration d'usine effacera l'entièreté de l'appareil si besoin.</string>
+    <string name="lockdown_enter_passphrase">Entrez la phrase de passe</string>
     <string name="lockdown_hide_passphrase">Masquer</string>
+    <string name="lockdown_hours_until_expiry">Heures jusqu'à expiration</string>
+    <string name="lockdown_incorrect_passphrase">Phrase de passe incorrecte.</string>
+    <string name="lockdown_lock_now">Verrouillage</string>
+    <string name="lockdown_lock_reason">Motif : %1$s</string>
+    <string name="lockdown_mode">Mode verrouillage</string>
+    <string name="lockdown_mode_setting_up">Mise en place…</string>
+    <string name="lockdown_passphrase">Phrase de passe</string>
+    <string name="lockdown_passphrases_do_not_match">Les phrases de passe ne correspondent pas</string>
+    <string name="lockdown_session_boots_remaining">Session : Redémarrage %1$d restant</string>
+    <string name="lockdown_session_expires">Expire le %1$s</string>
+    <string name="lockdown_session_minutes">Limite de sessions (minutes)</string>
+    <string name="lockdown_session_no_time_limit">Aucune limite de temps</string>
+    <string name="lockdown_set_passphrase">Définir la phrase de passe</string>
+    <string name="lockdown_show_passphrase">Afficher</string>
     <string name="lockdown_submit">Envoyer</string>
     <string name="locked">Verrouillé</string>
     <!-- LOG -->
@@ -776,6 +874,7 @@
     <string name="match_any">Correspondre à n'importe lequel | Tous</string>
     <string name="max">Max</string>
     <!-- MESH -->
+    <string name="mesh_beacon_broadcast_summary">Annoncez périodiquement ce maillage aux nœuds proches</string>
     <string name="mesh_beacon_offer_dismiss">Rejeter</string>
     <string name="mesh_beacon_preset_none">Aucun</string>
     <string name="mesh_map_location">Emplacement de la carte de maillage</string>

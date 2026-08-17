@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Um smáforrit</string>
     <string name="accept">Samþykkja</string>
     <!-- ACTION -->
     <string name="action_delete_message">Eyða skilaboðum</string>

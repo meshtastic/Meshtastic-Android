@@ -17,7 +17,9 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
 
 /**
  * Central interface for controlling the radio and mesh network.
@@ -48,6 +50,9 @@ interface RadioController :
      */
     val clientNotification: StateFlow<ClientNotification?>
 
+    /** Monotonic transport-session generation used to reject work captured by a replaced connection. */
+    val sessionGeneration: StateFlow<Long>
+
     /** Clears the current [clientNotification]. */
     fun clearClientNotification()
 
@@ -57,6 +62,24 @@ interface RadioController :
      * @return A unique 32-bit integer.
      */
     fun generatePacketId(): Int
+
+    /**
+     * Restores local radio settings only while [expectedDeviceAddress] is still selected.
+     *
+     * The selection check and the edit-settings transaction are serialized with [setDeviceAddress], so a delayed
+     * recovery task cannot apply one device's saved settings to a replacement radio. A concurrent device selection
+     * waits for the serialized edit-settings transaction to finish. [primaryChannel] is written before [config] when
+     * present, and both writes are idempotent for the same captured device/configuration so a failed attempt can be
+     * retried. If the channel write is accepted and the config write then fails, firmware may temporarily retain that
+     * staged channel state until the transaction is retried or the connection is replaced; callers must re-check
+     * selection ownership before every retry. Returns `false` without writing when [expectedDeviceAddress] is null or
+     * selection ownership has changed.
+     */
+    suspend fun restoreLocalConfiguration(
+        expectedDeviceAddress: String?,
+        config: Config,
+        primaryChannel: Channel? = null,
+    ): Boolean
 
     /** Starts providing the phone's location to the mesh. */
     fun startProvideLocation()

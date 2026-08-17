@@ -29,6 +29,7 @@
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="a11y_nodes_at_hop">Хоп %1$d: %2$d нод</string>
+    <string name="about">О приложении</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Подтверждения</string>
     <!-- ACTION -->
@@ -45,6 +46,7 @@
     <string name="actions">Действия</string>
     <string name="adc_multiplier_override">Коэффициент переопределения ADC</string>
     <string name="adc_multiplier_override_ratio">Коэффициент переопределения ADC</string>
+    <string name="adc_voltage">Напряжение АЦП</string>
     <!-- ADD -->
     <string name="add">Добавить</string>
     <string name="add_a_note">Добавить личную заметку…</string>
@@ -112,6 +114,7 @@
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="app_version">Версия</string>
     <string name="apply">Применить</string>
+    <string name="apps">Приложения</string>
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Хороший</string>
@@ -133,6 +136,10 @@
     <string name="bad">Плохой</string>
     <!-- BANDWIDTH -->
     <string name="bandwidth">Ширина канала</string>
+    <string name="bandwidth_default">По умолчанию (%1$s кГц)</string>
+    <string name="bandwidth_option_khz">%1$s кГц</string>
+    <string name="bandwidth_unsupported">Неподдерживаемый (%1$s)</string>
+    <string name="bandwidth_unsupported_summary">Эта полоса пропускания не поддерживается подключённым радио в выбранном регионе. Выберите поддерживаемое значение перед сохранением.</string>
     <string name="baro_pressure">Давл</string>
     <string name="battery">Батарея</string>
     <string name="battery_ina_2xx_i2c_address">I2C-адрес INA_2XX батареи</string>
@@ -290,6 +297,7 @@
     <string name="config_security_debug_log_api_enabled">Вывод журнала отладки по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
     <string name="config_security_is_managed">Устройство управляется сетевым администратором, пользователь не может изменять настройки устройства.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
+    <string name="config_security_private_key_remote">Устройство не передаёт свой приватный ключ через удалённое администрирование. Вы можете задать новый ключ, но его невозможно будет прочитать обратно.</string>
     <string name="config_security_public_key">Сгенерировано из вашего приватного ключа и отправлено другим узлам сети, чтобы они могли вычислить совместный секретный ключ.</string>
     <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
     <string name="configuration">Настройки</string>
@@ -311,6 +319,7 @@
     <string name="contrast_standard">Стандартный</string>
     <string name="conversations">Чаты</string>
     <string name="copy">Копировать</string>
+    <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Создавайте свои собственные сети</string>
     <string name="critical_alert">Критическое оповещение!</string>
     <string name="critical_alerts">Алерты</string>
@@ -558,9 +567,11 @@
     <string name="doc_title_translate">Перевести приложение</string>
     <string name="doc_title_units">Ед.изм. и локализация</string>
     <string name="doc_title_widget">Виджет на главный экран</string>
+    <string name="documentation">Документалка</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
+    <string name="downlink_enabled">MQTT Downlink включён</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
     <string name="download">Скачать</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
@@ -571,6 +582,18 @@
     <string name="edit_custom_tile_source">Редактировать источник сетевых плиток</string>
     <string name="eight_hours">8 часов</string>
     <!-- EMOJI -->
+    <string name="emoji_category_activities">Активности</string>
+    <string name="emoji_category_animals_nature">Животные и природа</string>
+    <string name="emoji_category_flags">Флаги</string>
+    <string name="emoji_category_food_drink">Еда и напитки</string>
+    <string name="emoji_category_objects">Предметы</string>
+    <string name="emoji_category_people_body">Люди и тело</string>
+    <string name="emoji_category_smileys_emotion">Смайлики и эмоции</string>
+    <string name="emoji_category_symbols">Символы</string>
+    <string name="emoji_category_travel_places">Путешествия и места</string>
+    <string name="emoji_load_error">Не удалось загрузить эмодзи</string>
+    <string name="emoji_no_results">Эмодзи не найдены</string>
+    <string name="emoji_recently_used">Недавно использованные</string>
     <string name="enable_power_saving_mode">Включить режим энергосбережения</string>
     <string name="enabled">Включено</string>
     <!-- ENCRYPTION -->
@@ -596,6 +619,7 @@
     <string name="ethernet_config">Настройки Ethernet</string>
     <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_firmware_running">Работает событийная прошивка</string>
     <string name="event_use_event_theme">Использовать тему событий</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="expand_chart">Развернуть диаграмму</string>
@@ -605,6 +629,7 @@
     <string name="export_configuration">Экспорт настроек</string>
     <string name="export_data_csv">Экспортировать все пакеты</string>
     <string name="export_gpx">Экспорт GPX</string>
+    <string name="export_node_db">Экспорт базы данных нод</string>
     <string name="export_tak_data_package">Экспорт пакета данных TAK</string>
     <string name="external_notification">Внешние уведомления</string>
     <string name="external_notification_config">Настройка внешнего уведомления</string>
@@ -772,6 +797,7 @@
     <string name="geofence_remove_area">Удалить область</string>
     <string name="geofence_set_area">Задать область на карте</string>
     <string name="get_started">Начать работу</string>
+    <string name="github_repository">Репозиторий GitHub</string>
     <string name="good">Хороший</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
@@ -888,6 +914,10 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Лицензия радиолюбителя (HAM)</string>
     <string name="licensed_amateur_radio_text">Включение данной опции отключает шифрование и несовместимо с основной сетью Meshtastic.</string>
+    <string name="licensed_mode_enable_confirm">Включить лицензированный режим</string>
+    <string name="licensed_mode_enable_title">Включить лицензированный (радиолюбительский) режим?</string>
+    <string name="licensed_mode_enable_warning">Лицензированный режим удаляет ключи шифрования каналов и отключает канал администратора, поэтому весь трафик передаётся в открытом виде, который может прочитать кто угодно, а эта прошивка не может его подписывать, поэтому другие ноды не смогут подтвердить, что сообщение исходит от тебя. Это несовместимо со стандартной сетью Meshtastic, и вы остаётесь ответственны за соблюдение требований вашей радиолюбительской лицензии и местных нормативов.</string>
+    <string name="licensed_mode_enable_warning_signed">Лицензированный режим удаляет ключи шифрования каналов и отключает канал администратора, поэтому весь трафик передаётся в открытом виде, который может прочитать кто угодно, но он имеет цифровую подпись, позволяя другим нодам убедиться, что сообщение исходит от тебя. Номер вашей ноды может однократно измениться, чтобы совпасть с твоим ключом идентификации, поэтому избранное, история сообщений, удалённое администрирование и другие ноды могут поначалу воспринять её как новую; вы остаётесь ответственны за соблюдение требований вашей радиолюбительской лицензии и местных нормативов.</string>
     <!-- LOAD -->
     <string name="load">Загрузка</string>
     <string name="load_15_min">Загрузка 15 мин</string>
@@ -1068,6 +1098,15 @@
     <string name="message_delivery_status">Статус доставки сообщения</string>
     <string name="message_device_managed">Это радио управляется и может быть изменено только удаленным администратором.</string>
     <string name="message_input_label">Сообщение</string>
+    <string name="message_routing_error_admin_bad_session_key">Сеанс администратора истёк</string>
+    <string name="message_routing_error_admin_bad_session_key_detail">Ключ сеанса администратора отсутствует, истёк или недействителен. Запросите новый сеанс, прежде чем повторить попытку.</string>
+    <string name="message_routing_error_admin_public_key_unauthorized">Ключ администратора не авторизован</string>
+    <string name="message_routing_error_admin_public_key_unauthorized_detail">Удалённая нода не авторизует твой ключ администратора.</string>
+    <string name="message_routing_error_bad_request">Неверный запрос</string>
+    <string name="message_routing_error_bad_request_detail">Назначение отклонило этот запрос как недействительный.</string>
+    <string name="message_routing_error_duty_cycle_limit">Ограничение рабочего цикла(Duty cycle)</string>
+    <string name="message_routing_error_duty_cycle_limit_detail">Местные ограничения эфирного времени временно блокируют отправку. Подождите перед повторной попыткой.</string>
+    <string name="message_routing_error_got_nak_detail">Нода отклонила это сообщение. Повторите попытку, когда маршрут изменится.</string>
     <string name="message_routing_error_max_retransmit">Не удалось доставить в сеть</string>
     <string name="message_routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>

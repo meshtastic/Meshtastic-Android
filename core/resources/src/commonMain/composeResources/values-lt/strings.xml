@@ -17,6 +17,7 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="about">Apie</string>
     <string name="accept">Priimti</string>
     <!-- ACTION -->
     <string name="action_delete_message">Ištrinti pranešimą</string>
