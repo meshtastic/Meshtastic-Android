@@ -93,6 +93,7 @@ internal fun InfoItem(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     valueStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
     iconTint: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
     iconSize: Dp = 14.dp,
     onClick: (() -> Unit)? = null,
@@ -130,7 +131,7 @@ internal fun InfoItem(
             )
         }
         Spacer(Modifier.height(4.dp))
-        Text(text = value, style = valueStyle, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = value, style = valueStyle, color = valueColor)
     }
 }
 
