@@ -141,6 +141,7 @@
     <string name="clean_nodes_older_than">Curăță nodurile văzute ultima dată mai vechi de %1$d zile</string>
     <string name="clean_now">Curăţă acum</string>
     <string name="clean_unknown_nodes">Curăță doar noduri necunoscute</string>
+    <!-- CLEAR -->
     <string name="clear">Șterge</string>
     <string name="clear_selection">Șterge selecția</string>
     <string name="client_notification">Notificare client</string>

@@ -182,6 +182,7 @@
     <string name="clean_nodes_older_than">清除最後出現時間超過 %1$d 日的節點</string>
     <string name="clean_now">立即清理</string>
     <string name="clean_unknown_nodes">僅清除不明節點</string>
+    <!-- CLEAR -->
     <string name="clear">清除</string>
     <string name="clear_selection">清除所選</string>
     <string name="clear_time_zone">清除時區</string>
@@ -519,7 +520,6 @@
     <string name="firmware_update_node_info_missing">缺少節點使用者資訊。</string>
     <string name="firmware_update_not_found_in_release">在發行版本中找不到 %1$s 的韌體。</string>
     <string name="firmware_update_ota_failed">OTA 更新失敗: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">對於 RAK WisBlock RAK4631，請使用廠商的序列 DFU 工具（例如，搭配提供的 bootloader .zip 檔使用 adafruit-nrfutil dfu serial）。僅複製 .uf2 檔案並不會更新 bootloader。</string>
     <string name="firmware_update_rebooting">正在進入 DFU 模式⋯⋯</string>
     <string name="firmware_update_release_notes">版本說明</string>
     <string name="firmware_update_retrieval_failed">無法取得韌體檔案。</string>
@@ -1263,7 +1263,6 @@
     <string name="tak_server_test_idle">傳送所有 %1$d 個測試固定裝置至 mesh</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d 個通過，%2$d 個失敗，共 %3$d/%4$d</string>
     <string name="tak_server_test_run">執行</string>
     <string name="tak_server_test_running">執行中：%1$s</string>
     <string name="tak_team">隊伍顏色</string>

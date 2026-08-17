@@ -106,6 +106,7 @@
     <string name="clean_nodes_older_than">Wyczyść węzły, które są starsze niż %1$d dni</string>
     <string name="clean_now">Wyczyść teraz</string>
     <string name="clean_unknown_nodes">Wyczyść tylko nieznane węzły</string>
+    <!-- CLEAR -->
     <string name="clear">Czyść</string>
     <string name="close">Zamknij</string>
     <string name="close_selection">Zamknij wybór</string>

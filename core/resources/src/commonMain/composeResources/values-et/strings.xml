@@ -225,6 +225,7 @@
     <string name="clean_nodes_older_than">Eemalda sõlmed mida pole nähtud rohkem kui %1$d päeva</string>
     <string name="clean_now">Eemalda nüüd</string>
     <string name="clean_unknown_nodes">Eemalda tundmatud sõlmed</string>
+    <!-- CLEAR -->
     <string name="clear">Kustuta</string>
     <string name="clear_selection">Ära vali midagi</string>
     <string name="clear_time_zone">Eemalda ajatsoon</string>
@@ -691,7 +692,6 @@
     <string name="firmware_update_open_flasher">Ava Meshtastic uuendaja</string>
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasuta tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil dfu jadapordi oma koos alglaaduri .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_release_notes">Väljalaske märkmed</string>
     <string name="firmware_update_requires_bin">%1$s nõuab sihtmärgile vastavat .bin faili.</string>
@@ -1637,7 +1637,6 @@
     <string name="tak_server_test_idle">Saada kõik %1$d testkinnitust kärgvõrku</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d läbitud, %2$d ebaõnnestunud %3$d/%4$d</string>
     <string name="tak_server_test_run">Käivita</string>
     <string name="tak_server_test_running">Töötav: %1$s</string>
     <string name="tak_team">Meeskonna värv</string>

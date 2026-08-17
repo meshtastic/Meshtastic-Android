@@ -127,6 +127,7 @@
     <string name="clean_nodes_older_than">%1$d napnál régebben látott csomópontok törlése</string>
     <string name="clean_now">Azonnali tisztítás</string>
     <string name="clean_unknown_nodes">Csak ismeretlen csomópontok törlése</string>
+    <!-- CLEAR -->
     <string name="clear">Töröl</string>
     <string name="clear_selection">Kijelölés törlése</string>
     <string name="client_notification">Kliens értesítés</string>

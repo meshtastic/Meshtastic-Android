@@ -224,6 +224,7 @@
     <string name="clean_nodes_older_than">最終確認が %1$d 日より前のノードをクリーンアップ</string>
     <string name="clean_now">今すぐクリーンアップ</string>
     <string name="clean_unknown_nodes">不明なノードのみをクリーンアップ</string>
+    <!-- CLEAR -->
     <string name="clear">削除</string>
     <string name="clear_selection">選択を解除</string>
     <string name="clear_time_zone">タイムゾーンをクリア</string>
@@ -686,7 +687,6 @@
     <string name="firmware_update_open_flasher">Meshtastic Flasher を開く</string>
     <string name="firmware_update_ota_failed">OTA 更新に失敗しました：%1$s</string>
     <string name="firmware_update_ota_unsupported_reason">このデバイスの OTA ローダーが、要求された更新方法を拒否しました：%1$s</string>
-    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 では、ベンダー提供のシリアル DFU ツール（例：付属のブートローダー .zip ファイルを使った adafruit-nrfutil dfu serial）を使用してください。.uf2 ファイルをコピーするだけではブートローダーは更新されません。</string>
     <string name="firmware_update_rebooting">DFU モードへ再起動しています…</string>
     <string name="firmware_update_release_notes">リリースノート</string>
     <string name="firmware_update_requires_bin">%1$s には、ターゲットに一致する .bin ファイルが必要です。</string>
@@ -1633,7 +1633,6 @@
     <string name="tak_server_test_idle">%1$d 件のテストフィクスチャをすべてメッシュに送信</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
-    <string name="tak_server_test_results">%1$d 件成功、%2$d 件失敗 / %3$d/%4$d</string>
     <string name="tak_server_test_run">実行</string>
     <string name="tak_server_test_running">実行中：%1$s</string>
     <string name="tak_team">チームカラー</string>

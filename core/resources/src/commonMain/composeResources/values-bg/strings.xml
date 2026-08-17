@@ -169,6 +169,7 @@
     <string name="clean_nodes_older_than">Почистване на възлите, последно видяни преди повече от %1$d дни</string>
     <string name="clean_now">Почистете сега</string>
     <string name="clean_unknown_nodes">Почистване само на неизвестните възли</string>
+    <!-- CLEAR -->
     <string name="clear">Изчисти</string>
     <string name="clear_selection">Изчистване на избора</string>
     <string name="clear_time_zone">Изчистване на часовата зона</string>
