@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
@@ -57,10 +58,12 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
         }
 
         // device_filter.xml lists no bootloader-mode ids (and none at all for Seeed's 0x2886), so no implicit grant
-        // exists here — an explicit request is the only route.
+        // exists here — an explicit request is the only route. Bounded by waitMillis too: requestPermission can
+        // return emptyFlow() (no UsbManager available), and first() on that throws instead of denying cleanly —
+        // firstOrNull() under a timeout treats both "empty flow" and "unanswered dialog" as a plain denial.
         if (
             !usbRepository.hasPermission(driver.device) &&
-            usbRepository.requestPermission(driver.device).first() != true
+            withTimeoutOrNull(waitMillis) { usbRepository.requestPermission(driver.device).firstOrNull() } != true
         ) {
             Logger.w { "USB permission denied; cannot unblock the erase image" }
             return false
@@ -76,7 +79,9 @@ class AndroidFirmwareUsbManager(private val context: Context, private val usbRep
         if (usbRepository.hasPermission(driver.device)) return@withTimeoutOrNull true
         // The permission dialog itself must share this budget — otherwise an unanswered dialog leaves the
         // caller (the post-update verification flow) parked forever instead of falling back to auto-recovery.
-        usbRepository.requestPermission(driver.device).first() == true
+        // firstOrNull(): requestPermission can return emptyFlow() (no UsbManager available), and first() on
+        // that throws instead of denying cleanly.
+        usbRepository.requestPermission(driver.device).firstOrNull() == true
     }
         ?: run {
             Logger.w { "USB permission preflight did not complete within ${waitMillis}ms" }
