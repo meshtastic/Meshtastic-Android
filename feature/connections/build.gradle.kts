@@ -37,7 +37,6 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.ble)
             implementation(projects.core.network)
-            implementation(projects.feature.settings)
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
