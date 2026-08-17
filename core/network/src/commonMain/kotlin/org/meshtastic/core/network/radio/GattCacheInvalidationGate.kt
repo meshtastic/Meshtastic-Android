@@ -25,8 +25,12 @@ package org.meshtastic.core.network.radio
  * unpair/re-pair cleared it.
  *
  * Refreshing is not free: it costs an extra disconnect → settle → reconnect round trip and throws away a valid cache,
- * so it must not fire on the ordinary out-of-range blip. The gate therefore arms only once a failure streak is long
- * enough that a transient cause has been ruled out, and fires **at most once per streak** — if a genuine refresh did
+ * so it must not fire on the ordinary out-of-range blip. A radio switched off for a minute, or a phone carried out of
+ * range and back, is not evidence of a stale cache — tearing down a link that was about to succeed would turn an
+ * ordinary reconnect into a failure plus a fresh round of backoff, which is worse than doing nothing at all.
+ *
+ * The gate therefore arms only once the failure streak has run for *minutes* (see [DEFAULT_FAILURE_THRESHOLD]) — the
+ * prolonged absence issue #6685 actually describes — and fires **at most once per streak**: if a genuine refresh did
  * not fix the connection, repeating it every attempt only adds latency.
  *
  * Not thread-safe by design: it is owned by [BleRadioTransport]'s single reconnect-loop coroutine.
@@ -82,11 +86,17 @@ internal class GattCacheInvalidationGate(private val failureThreshold: Int = DEF
         /**
          * Consecutive failures before a stale cache is suspected.
          *
-         * Matches [BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD]: by the third consecutive failure the policy has
-         * already told higher layers the disconnect is more than a blip, and roughly 35 s of backoff has elapsed — long
-         * enough that a device merely out of range has had several chances to answer. The refresh therefore happens on
-         * the fourth attempt.
+         * Deliberately far above [BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD] (3), which only marks a disconnect as
+         * "more than a blip" for the UI. Three failures are reached about 47 s into an ordinary out-of-range or
+         * powered-off gap, so refreshing there would sabotage a normal reconnect rather than repair a stale cache.
+         *
+         * Six is the first count at which [computeReconnectBackoff] has been saturated at its 60 s cap for two
+         * consecutive cycles: the retry ladder is exhausted and every further attempt is identical. With a
+         * [BleReconnectPolicy.DEFAULT_SETTLE_DELAY] before each attempt, the refresh lands on the seventh attempt, 3
+         * min 36 s into an unbroken streak (seven settle delays plus 5+10+20+40+60+60 s of backoff). That is minutes of
+         * continuous failure, which is what issue #6685's "out of range / power off" report describes, rather than the
+         * sub-minute blip the lower threshold catches.
          */
-        const val DEFAULT_FAILURE_THRESHOLD = BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD
+        const val DEFAULT_FAILURE_THRESHOLD = 6
     }
 }

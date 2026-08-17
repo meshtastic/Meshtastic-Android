@@ -25,6 +25,7 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
@@ -515,8 +516,8 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
         try {
-            // 3s settle + connectAndAwait + 500ms reconnect delay + reconnect connectAndAwait, then profile setup
-            // bounded by CONNECTED_GATE_TIMEOUT / SUBSCRIPTION_READY_TIMEOUT (5s each).
+            // 3s settle + connectAndAwait + POST_INVALIDATION_RECONNECT_DELAY (3s) + reconnect connectAndAwait,
+            // then profile setup bounded by CONNECTED_GATE_TIMEOUT / SUBSCRIPTION_READY_TIMEOUT (5s each).
             advanceTimeBy(20_000)
 
             // The transport consumed the flag during its first connect cycle: a second consume must return false.
@@ -537,14 +538,41 @@ class BleRadioTransportTest {
         }
     }
 
+    private fun bleTransportOn(scope: CoroutineScope, callback: RadioInterfaceService): BleRadioTransport =
+        BleRadioTransport(
+            scope = scope,
+            scanner = scanner,
+            bluetoothRepository = bluetoothRepository,
+            connectionFactory = connectionFactory,
+            callback = callback,
+            address = address,
+        )
+
     /**
-     * Issue #6685: a bonded radio that was out of range or powered off can come back with Android still serving a stale
-     * cached GATT service table, so every reconnect fails and [BleReconnectPolicy] (maxFailures = [Int.MAX_VALUE])
-     * retries forever. Once the failure streak reaches [GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD], the next
-     * attempt that reaches a connected link must refresh the cache and reconnect so discovery re-reads the device.
+     * Simulates the platform replaying a stale GATT service table: `profile()` cannot find the Meshtastic service, and
+     * the service only reappears once the platform has reported a *successful* cache refresh.
      *
-     * Timeline in virtual time (3 s settle before every attempt, backoff 5 s / 10 s / 20 s after failures 1–3):
-     * attempts fail at t = 3 s, 11 s, 24 s; the fourth attempt starts at t = 47 s and connects.
+     * Keyed on [FakeBleConnection.invalidateServiceCacheResult] as well as the call count so that a platform which
+     * cannot refresh at all (Android reflection miss → `false`) never recovers, which is what makes the recovery test
+     * below non-vacuous.
+     */
+    private fun FakeBleConnection.simulateStaleServiceTable() {
+        missingServices.add(SERVICE_UUID)
+        onDisconnect = {
+            if (invalidateServiceCacheResult && invalidateServiceCacheCalls > 0) missingServices.remove(SERVICE_UUID)
+        }
+    }
+
+    /**
+     * Issue #6685: a bonded radio that was out of range or powered off for a long time can come back with Android still
+     * serving a stale cached GATT service table, so every reconnect fails and [BleReconnectPolicy] (maxFailures =
+     * [Int.MAX_VALUE]) retries forever. Once the failure streak reaches
+     * [GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD], the next attempt that reaches a connected link must
+     * refresh the cache and reconnect so discovery re-reads the device.
+     *
+     * Timeline in virtual time (3 s settle before every attempt, backoff 5/10/20/40/60/60 s after failures 1–6):
+     * attempts fail at t = 3, 11, 24, 47, 90 and 153 s; the seventh attempt starts at t = 216 s (3 min 36 s) and
+     * connects. That the refresh is *not* reachable any earlier is the whole point — see the sub-threshold test below.
      */
     @Test
     fun `stale GATT cache is refreshed after the reconnect failure streak reaches the threshold`() = runTest {
@@ -556,20 +584,10 @@ class BleRadioTransportTest {
         connection.invalidateServiceCacheResult = true
         connection.failNextN = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD
 
-        val radioService = FakeRadioInterfaceService()
-
-        val bleTransport =
-            BleRadioTransport(
-                scope = this,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                callback = radioService,
-                address = address,
-            )
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
         bleTransport.start()
         try {
-            advanceTimeBy(70_000)
+            advanceTimeBy(240_000)
 
             assertEquals(
                 1,
@@ -577,8 +595,8 @@ class BleRadioTransportTest {
                 "the cache must be refreshed exactly once for the streak, not on every retry",
             )
             assertTrue(
-                connection.connectAndAwaitCalls >= 5,
-                "expected 3 failed attempts, the connected attempt, and the post-refresh reconnect " +
+                connection.connectAndAwaitCalls >= GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD + 2,
+                "expected the failed attempts, the connected attempt, and the post-refresh reconnect " +
                     "(got ${connection.connectAndAwaitCalls})",
             )
         } finally {
@@ -587,16 +605,16 @@ class BleRadioTransportTest {
     }
 
     /**
-     * Discriminator for the test above: without the threshold this test passes identically, because invalidating on
-     * every attempt would also satisfy the positive assertion. An ordinary out-of-range blip that recovers before the
-     * streak reaches [GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD] must cost no cache refresh and no extra
-     * disconnect/reconnect round trip.
+     * Discriminator for the test above, and the regression this guards: an ordinary out-of-range gap must cost no cache
+     * refresh and no extra disconnect/reconnect round trip. With the threshold at the policy's transient-disconnect
+     * value (3 failures ≈ 47 s) this test fails, because a completely ordinary absence would be treated as a stale
+     * cache and the reconnect that was about to succeed would be torn down instead.
      *
-     * Timeline: attempts fail at t = 3 s and 11 s; the third attempt starts at t = 24 s and connects with only two
-     * consecutive failures recorded.
+     * Timeline: attempts fail at t = 3, 11, 24, 47 and 90 s; the sixth attempt starts at t = 153 s and connects with
+     * one failure fewer than the threshold recorded.
      */
     @Test
-    fun `a short reconnect failure streak never refreshes the GATT cache`() = runTest {
+    fun `a reconnect failure streak below the threshold never refreshes the GATT cache`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
         scanner.emitDevice(device)
@@ -605,30 +623,20 @@ class BleRadioTransportTest {
         connection.invalidateServiceCacheResult = true
         connection.failNextN = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD - 1
 
-        val radioService = FakeRadioInterfaceService()
-
-        val bleTransport =
-            BleRadioTransport(
-                scope = this,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                callback = radioService,
-                address = address,
-            )
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
         bleTransport.start()
         try {
-            advanceTimeBy(40_000)
+            advanceTimeBy(180_000)
 
             assertTrue(
-                connection.connectAndAwaitCalls >= 3,
+                connection.connectAndAwaitCalls >= GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD,
                 "the connection must have recovered after the sub-threshold failures " +
                     "(got ${connection.connectAndAwaitCalls} attempts)",
             )
             assertEquals(
                 0,
                 connection.invalidateServiceCacheCalls,
-                "a transient blip must not throw away a valid GATT cache",
+                "an ordinary out-of-range gap must not throw away a valid GATT cache",
             )
         } finally {
             bleTransport.close()
@@ -659,32 +667,162 @@ class BleRadioTransportTest {
         connection.invalidateServiceCacheResult = true
         connection.failNextN = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD
 
-        val radioService = FakeRadioInterfaceService()
-
-        val bleTransport =
-            BleRadioTransport(
-                scope = this,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                callback = radioService,
-                address = address,
-            )
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
         bleTransport.start()
         try {
-            // First streak: three failures, then the fourth attempt connects and refreshes the cache at ~t = 47 s.
-            advanceTimeBy(60_000)
+            // First streak: threshold failures, then the next attempt connects and refreshes the cache at ~t = 216 s.
+            advanceTimeBy(240_000)
             assertEquals(1, connection.invalidateServiceCacheCalls, "the first streak must refresh the cache once")
 
             // End the streak with a disconnect the policy treats as non-failing, then arm a second streak behind it.
             connection.failNextN = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD
             connection.simulateRemoteDisconnect(DisconnectReason.LocalDisconnect)
 
-            advanceTimeBy(70_000)
+            advanceTimeBy(240_000)
             assertEquals(
                 2,
                 connection.invalidateServiceCacheCalls,
                 "a streak that follows an ended streak must earn its own cache refresh",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * A post-OTA refresh must not spend the failure streak's single allowance.
+     *
+     * The two triggers are independent: the post-OTA refresh is scheduled by the firmware-update flow, not by any
+     * failure streak. If it charged the streak, a radio that came back from an OTA into an unstable streak would have
+     * its stale-cache recovery disabled for that whole streak — the gate is only re-armed by a stable or intentional
+     * disconnect, which by definition cannot happen while a streak is running.
+     *
+     * Here the post-OTA refresh fires on the very first attempt (zero consecutive failures), then an unstable
+     * disconnect starts a streak that runs up to the threshold. The second refresh proves the allowance survived.
+     */
+    @Test
+    fun `a post-OTA cache refresh does not consume the stale-cache allowance`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        connection.invalidateServiceCacheResult = true
+
+        val radioService = FakeRadioInterfaceService()
+        radioService.requestGattCacheInvalidationOnNextConnect()
+
+        val bleTransport = bleTransportOn(this, radioService)
+        bleTransport.start()
+        try {
+            advanceTimeBy(20_000)
+            assertEquals(1, connection.invalidateServiceCacheCalls, "the post-OTA flag must refresh the cache once")
+
+            // An unstable (non-intentional, sub-minStableConnection) disconnect starts a streak, so the gate is never
+            // re-armed between the post-OTA refresh and the stale-cache refresh under test.
+            connection.failNextN = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD - 1
+            connection.simulateRemoteDisconnect(DisconnectReason.Timeout)
+
+            advanceTimeBy(300_000)
+            assertEquals(
+                2,
+                connection.invalidateServiceCacheCalls,
+                "the streak that followed the OTA must still earn its own stale-cache refresh",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * The recovery this whole mechanism exists for: connects succeed, but service discovery keeps replaying a cached
+     * table without the Meshtastic service, so every attempt fails at profile setup. Once the streak reaches the
+     * threshold the cache is refreshed, and *because of that refresh* the following attempt finds the service and the
+     * reconnect loop settles.
+     *
+     * Unlike a connect-time failure this exercises the actual issue #6685 shape — the device is reachable, the cached
+     * service table is not. The fake only makes the service reappear after a successful `invalidateServiceCache()`, so
+     * a passing run cannot be explained by anything other than the invalidation; the companion test below pins that
+     * down with the platform refusing to refresh.
+     *
+     * Timings are not asserted: attempts here fail after connecting, so each one also pays session-cleanup waits. The
+     * assertions are on end state — one refresh, the service table repaired, and a loop that stopped retrying.
+     */
+    @Test
+    fun `a stale service table recovers on the attempt that follows the cache refresh`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        connection.invalidateServiceCacheResult = true
+        connection.simulateStaleServiceTable()
+
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
+        bleTransport.start()
+        try {
+            advanceTimeBy(1_200_000)
+
+            assertEquals(
+                1,
+                connection.invalidateServiceCacheCalls,
+                "the streak must earn exactly one refresh, and that refresh must have been enough",
+            )
+            assertFalse(
+                SERVICE_UUID in connection.missingServices,
+                "the refresh must have replaced the stale service table",
+            )
+
+            val callsAfterRecovery = connection.connectAndAwaitCalls
+            advanceTimeBy(300_000)
+            assertEquals(
+                callsAfterRecovery,
+                connection.connectAndAwaitCalls,
+                "the loop must have settled on a working connection instead of continuing to retry",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * Negative control for the recovery test: with the platform unable to refresh (`invalidateServiceCache()` returning
+     * `false`, e.g. the Android reflection hop missing), the stale service table is never repaired and the loop keeps
+     * retrying. This is what proves the recovery above is caused by the invalidation rather than by the retry loop
+     * eventually getting lucky.
+     *
+     * A refresh that never happened must also not burn the streak's allowance, so the gate keeps asking on every
+     * subsequent attempt — hence the "more than once" assertion here versus "exactly once" above.
+     */
+    @Test
+    fun `a stale service table never recovers when the platform cannot refresh the cache`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        connection.invalidateServiceCacheResult = false
+        connection.simulateStaleServiceTable()
+
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
+        bleTransport.start()
+        try {
+            advanceTimeBy(1_200_000)
+
+            assertTrue(
+                connection.invalidateServiceCacheCalls >= 1,
+                "the gate must still have asked the platform to refresh",
+            )
+            assertTrue(
+                SERVICE_UUID in connection.missingServices,
+                "without a successful refresh the stale service table must persist",
+            )
+
+            val callsSoFar = connection.connectAndAwaitCalls
+            advanceTimeBy(300_000)
+            assertTrue(
+                connection.connectAndAwaitCalls > callsSoFar,
+                "the reconnect loop must still be retrying (stuck at $callsSoFar attempts)",
             )
         } finally {
             bleTransport.close()

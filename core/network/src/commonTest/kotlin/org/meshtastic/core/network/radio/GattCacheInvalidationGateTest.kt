@@ -17,10 +17,11 @@
 package org.meshtastic.core.network.radio
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 class GattCacheInvalidationGateTest {
 
@@ -94,12 +95,39 @@ class GattCacheInvalidationGateTest {
         assertFailsWith<IllegalArgumentException> { GattCacheInvalidationGate(failureThreshold = -1) }
     }
 
+    /**
+     * The refresh must sit far above the policy's transient-disconnect threshold. That threshold only decides when to
+     * tell higher layers a disconnect is more than a blip — it is reached roughly 47 s into an ordinary out-of-range or
+     * powered-off gap, which is no evidence at all of a stale service table. Refreshing there tears down a link that
+     * was about to succeed and costs the user a failed attempt plus a fresh round of backoff.
+     */
     @Test
-    fun `the default threshold matches the reconnect policy transient-disconnect threshold`() {
-        assertEquals(
-            BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD,
-            GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD,
-            "the cache refresh should coincide with the point the policy already calls the disconnect non-transient",
+    fun `the default threshold is far above the reconnect policy transient-disconnect threshold`() {
+        assertTrue(
+            GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD > BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD,
+            "a refresh at the transient-disconnect threshold would sabotage ordinary reconnects instead of repairing " +
+                "a stale cache (cache=${GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD}, " +
+                "transient=${BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD})",
+        )
+    }
+
+    /**
+     * Pins the intent behind the default rather than the number: the gate may only fire after *minutes* of unbroken
+     * failure, because the stale cache it repairs follows a prolonged absence (issue #6685 — "go out of range / power
+     * off"). Derived from the production settle delay and backoff ladder, so retuning either one cannot silently drag
+     * the refresh back into blip territory.
+     */
+    @Test
+    fun `the default threshold is only reachable after minutes of unbroken failure`() {
+        val threshold = GattCacheInvalidationGate.DEFAULT_FAILURE_THRESHOLD
+        val backoff =
+            (1..threshold).fold(Duration.ZERO) { total, failures -> total + computeReconnectBackoff(failures) }
+        // One settle delay precedes every attempt: the `threshold` attempts that fail, plus the one that refreshes.
+        val elapsedBeforeRefresh = BleReconnectPolicy.DEFAULT_SETTLE_DELAY * (threshold + 1) + backoff
+
+        assertTrue(
+            elapsedBeforeRefresh >= 3.minutes,
+            "the refresh must not be reachable inside an ordinary out-of-range gap (reached at $elapsedBeforeRefresh)",
         )
     }
 }
