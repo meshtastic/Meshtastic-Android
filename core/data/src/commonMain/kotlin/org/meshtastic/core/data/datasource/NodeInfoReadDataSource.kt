@@ -28,7 +28,6 @@ interface NodeInfoReadDataSource {
 
     fun getNodesFlow(
         sort: String,
-        filter: String,
         includeUnknown: Boolean,
         hopsAwayMax: Int,
         lastHeardMin: Int,

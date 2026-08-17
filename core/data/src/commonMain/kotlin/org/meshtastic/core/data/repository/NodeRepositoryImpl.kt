@@ -49,6 +49,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.matchesSearch
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.DeviceMetadata
@@ -191,12 +192,11 @@ class NodeRepositoryImpl(
     ): Flow<List<Node>> = nodeInfoReadDataSource
         .getNodesFlow(
             sort = sort.sqlValue,
-            filter = filter,
             includeUnknown = includeUnknown,
             hopsAwayMax = if (onlyDirect) 0 else -1,
             lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
         )
-        .mapLatest { list -> list.map { it.toModel() } }
+        .mapLatest { list -> list.map { it.toModel() }.filter { node -> node.matchesSearch(filter) } }
         .flowOn(dispatchers.io)
         .conflate()
 

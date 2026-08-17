@@ -137,6 +137,31 @@ class NodeTest {
         assertTrue(node.mismatchKey)
     }
 
+    @Test
+    fun matchesSearch_isCaseInsensitiveForNonAsciiLetters() {
+        val node = Node(num = 1, user = User(long_name = "KOLSÅS", short_name = "KOLS"))
+
+        // #6750: "kols" matched via ASCII-only SQL LIKE folding, but "kolså" did not.
+        assertTrue(node.matchesSearch("kols"))
+        assertTrue(node.matchesSearch("kolså"))
+        assertTrue(node.matchesSearch("KOLSÅS"))
+        assertFalse(node.matchesSearch("nomatch"))
+    }
+
+    @Test
+    fun matchesSearch_matchesHexAndDecimalNodeId() {
+        val node = Node(num = -1, user = User(id = "!ffffffff"))
+
+        assertTrue(node.matchesSearch("ffffffff"))
+        assertTrue(node.matchesSearch("4294967295"))
+        assertFalse(node.matchesSearch("1234"))
+    }
+
+    @Test
+    fun matchesSearch_blankFilterMatchesEveryNode() {
+        assertTrue(Node(num = 1).matchesSearch(""))
+    }
+
     private fun nodeWithPosition(num: Int, latitudeI: Int, longitudeI: Int): Node =
         Node(num = num, position = Position(latitude_i = latitudeI, longitude_i = longitudeI))
 }
