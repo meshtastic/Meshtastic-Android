@@ -266,6 +266,7 @@ fun SettingsScreen(
                     )
                     PersistenceSettingsContent(
                         cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                        onCheckCacheLimitEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
                         onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                         nodeShortName = ourNode?.user?.short_name ?: "",
                         onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },

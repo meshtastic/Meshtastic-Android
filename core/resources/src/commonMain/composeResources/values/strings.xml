@@ -172,6 +172,10 @@
     <string name="busy_noise_floor">Busy floor</string>
     <string name="button_gpio">Button GPIO</string>
     <string name="buzzer_gpio">Buzzer GPIO</string>
+    <plurals name="cache_limit_eviction_warning">
+        <item quantity="one">Lowering this will permanently delete the saved history for %1$d device.</item>
+        <item quantity="other">Lowering this will permanently delete the saved history for %1$d devices.</item>
+    </plurals>
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
     <string name="call_sign_summary">Your amateur radio call sign, up to 8 characters</string>

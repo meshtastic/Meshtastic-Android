@@ -151,6 +151,7 @@ broadcast_interval
 busy_noise_floor
 button_gpio
 buzzer_gpio
+cache_limit_eviction_warning
 calculating
 call_sign
 call_sign_summary

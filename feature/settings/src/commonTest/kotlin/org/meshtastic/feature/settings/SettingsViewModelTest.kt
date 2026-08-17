@@ -369,4 +369,16 @@ class SettingsViewModelTest {
         viewModel.setDbCacheLimit(200)
         databaseManager.cacheLimit.value shouldBe 10 // Clamped to MAX_CACHE_LIMIT
     }
+
+    @Test
+    fun `cachedDeviceCountExceeding is zero when nothing would be evicted`() = runTest {
+        databaseManager.existingDatabases.addAll(listOf("a", "b", "c"))
+        viewModel.cachedDeviceCountExceeding(5) shouldBe 0
+    }
+
+    @Test
+    fun `cachedDeviceCountExceeding counts devices past the new limit`() = runTest {
+        databaseManager.existingDatabases.addAll(listOf("a", "b", "c", "d", "e"))
+        viewModel.cachedDeviceCountExceeding(2) shouldBe 3
+    }
 }
