@@ -1672,24 +1672,34 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
             .toList()
     }
 
+    /**
+     * Device-specific DB names, excluding retired/detached/legacy/default pools. Must be called while holding [mutex].
+     * A detached pool is still live for a consumer of an earlier [currentDb] emission, so its files must remain
+     * protected until orderly shutdown.
+     */
+    private fun deviceDbNamesLocked(): List<String> {
+        val detachedDbNames = detachedDatabases.mapTo(mutableSetOf()) { it.dbName }
+        return listExistingDbNames().filterNot {
+            it in logicallyRetired ||
+                it in detachedDbNames ||
+                it == DatabaseConstants.LEGACY_DB_NAME ||
+                it == DatabaseConstants.DEFAULT_DB_NAME
+        }
+    }
+
+    override suspend fun cachedDeviceDbCount(): Int = withManagerOperation {
+        withContext(dispatchers.io) { mutex.withLock { deviceDbNamesLocked().size } }
+    }
+
     private suspend fun enforceCacheLimit() = withManagerOperation {
         mutex.withLock {
             // Deferred enforcement can wait behind a later switch. Resolve the protected name under the same mutex
             // that publishes currentDbName so the active database at execution time can never become an LRU victim.
             val activeDbName = currentDbName
             val limit = getCurrentCacheLimit()
-            val all = listExistingDbNames()
             val pendingRouteNames = pendingRouteDbNames(datastore.data.first())
-            val detachedDbNames = detachedDatabases.mapTo(mutableSetOf()) { it.dbName }
-            // Only enforce the limit over device-specific DBs. A detached pool is still live for a consumer of an
-            // earlier currentDb emission, so its files must remain protected until orderly shutdown.
-            val deviceDbs =
-                all.filterNot {
-                    it in logicallyRetired ||
-                        it in detachedDbNames ||
-                        it == DatabaseConstants.LEGACY_DB_NAME ||
-                        it == DatabaseConstants.DEFAULT_DB_NAME
-                }
+            // Only enforce the limit over device-specific DBs.
+            val deviceDbs = deviceDbNamesLocked()
 
             if (deviceDbs.size <= limit) return@withLock
             val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }

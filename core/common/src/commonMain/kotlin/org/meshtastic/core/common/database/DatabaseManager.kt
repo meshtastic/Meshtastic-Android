@@ -29,6 +29,9 @@ interface DatabaseManager {
     /** Sets the database cache limit. */
     fun setCacheLimit(limit: Int)
 
+    /** Returns how many device-specific databases are currently cached on disk, subject to eviction. */
+    suspend fun cachedDeviceDbCount(): Int
+
     /** Switches the active database to the one associated with the given [address]. */
     suspend fun switchActiveDatabase(address: String?)
 

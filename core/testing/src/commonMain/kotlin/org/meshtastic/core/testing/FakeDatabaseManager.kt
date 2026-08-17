@@ -69,6 +69,8 @@ class FakeDatabaseManager :
 
     override fun hasDatabaseFor(address: String?): Boolean = address != null && existingDatabases.contains(address)
 
+    override suspend fun cachedDeviceDbCount(): Int = existingDatabases.size
+
     companion object {
         private const val DEFAULT_CACHE_LIMIT = 100
     }

@@ -117,6 +117,10 @@ class SettingsViewModel(
         databaseManager.setCacheLimit(limit)
     }
 
+    /** How many currently-cached device databases would be evicted if the cache limit were lowered to [limit]. */
+    suspend fun cachedDeviceCountExceeding(limit: Int): Int =
+        (databaseManager.cachedDeviceDbCount() - limit).coerceAtLeast(0)
+
     // Notifications
     val messagesEnabled = notificationPrefs.messagesEnabled
     val nodeEventsEnabled = notificationPrefs.nodeEventsEnabled

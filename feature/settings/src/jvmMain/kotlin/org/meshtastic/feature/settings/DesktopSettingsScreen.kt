@@ -37,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -47,8 +46,6 @@ import org.meshtastic.core.resources.about
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.device_db_cache_limit
-import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.help_and_documentation
@@ -60,7 +57,6 @@ import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.resources.wifi_devices
-import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
@@ -76,6 +72,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
+import org.meshtastic.feature.settings.component.CacheLimitPreference
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
 import org.meshtastic.feature.settings.component.HomoglyphSetting
@@ -201,18 +198,10 @@ fun DesktopSettingsScreen(
                         onToggle = { radioConfigViewModel.toggleHomoglyphCharactersEncodingEnabled() },
                     )
 
-                    val cacheItems = remember {
-                        (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
-                            it.toLong() to it.toString()
-                        }
-                    }
-                    DropDownPreference(
-                        title = stringResource(Res.string.device_db_cache_limit),
-                        enabled = true,
-                        items = cacheItems,
-                        selectedItem = cacheLimit.toLong(),
-                        onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
-                        summary = stringResource(Res.string.device_db_cache_limit_summary),
+                    CacheLimitPreference(
+                        cacheLimit = cacheLimit,
+                        onCheckEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
+                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     )
                 }
 
