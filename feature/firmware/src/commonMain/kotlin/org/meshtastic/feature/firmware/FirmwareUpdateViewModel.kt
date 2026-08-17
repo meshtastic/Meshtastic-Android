@@ -1090,9 +1090,15 @@ class FirmwareUpdateViewModel(
             if (radioPrefs.isSerial()) {
                 Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
                 // The reboot gave the device a new USB identity, and Android scopes permission grants to the
-                // identity — without a fresh grant the auto-recovery below fails with SecurityException and a
-                // healthy update lands on VerificationFailed. Ask now, while the user is still watching.
-                if (!usbManager.ensureSerialPermission(USB_REATTACH_PERMISSION_WAIT)) {
+                // identity — without a fresh grant the auto-recovery fails with SecurityException and a healthy
+                // update lands on VerificationFailed. Ask now, while the user is still watching. On success,
+                // reconnect explicitly: auto-recovery's attach trigger already fired (and failed) while the
+                // permission dialog was still up, and it does not retry on a grant. At this point the device is
+                // enumerated and the grant is held, so the one-shot setDeviceAddress cannot land in the
+                // enumeration gap the bare-USB path avoids.
+                if (usbManager.ensureSerialPermission(USB_REATTACH_PERMISSION_WAIT)) {
+                    radioController.setDeviceAddress(fullAddr)
+                } else {
                     Logger.w { "Post-update USB permission preflight did not complete; relying on auto-recovery" }
                 }
             } else {

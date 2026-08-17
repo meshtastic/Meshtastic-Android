@@ -972,4 +972,33 @@ class FirmwareUpdateViewModelFileTest {
         advanceUntilIdle()
         verifySuspend { usbManager.ensureSerialPermission(any()) }
     }
+
+    @Test
+    fun `a granted USB permission preflight reconnects explicitly instead of waiting on auto-recovery`() = runTest {
+        // Auto-recovery's attach trigger fires while the permission dialog is still up and never retries on
+        // the grant, so verification must reconnect deterministically once the grant is in hand.
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { usbManager.ensureSerialPermission(any()) } returns true
+        every { usbManager.deviceDetachFlow() } returns flowOf(Unit)
+        everySuspend { fileHandler.copyToUri(any(), any()) } returns 1024L
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val artifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/firmware.uf2"), fileName = "firmware.uf2")
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) } calls {
+            @Suppress("UNCHECKED_CAST")
+            val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+            updateState(FirmwareUpdateState.AwaitingFileSave(uf2Artifact = artifact, fileName = "firmware.uf2"))
+            artifact
+        }
+        viewModel.startUpdate()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+
+        viewModel.saveDfuFile(CommonUri.parse("file:///output/firmware.uf2"))
+        advanceUntilIdle()
+
+        assertEquals("s/dev/ttyUSB0", radioController.lastSetDeviceAddress, "grant in hand → explicit reconnect")
+    }
 }
