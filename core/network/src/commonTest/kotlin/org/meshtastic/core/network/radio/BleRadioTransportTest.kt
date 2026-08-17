@@ -821,8 +821,9 @@ class BleRadioTransportTest {
             advanceTimeBy(1_200_000)
 
             assertTrue(
-                connection.invalidateServiceCacheCalls >= 1,
-                "the gate must still have asked the platform to refresh",
+                connection.invalidateServiceCacheCalls > 1,
+                "a refresh that never happened must not burn the allowance, so the gate must keep asking " +
+                    "(got ${connection.invalidateServiceCacheCalls} calls)",
             )
             assertTrue(
                 SERVICE_UUID in connection.missingServices,
