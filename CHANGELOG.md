@@ -13,6 +13,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat(lora): honor a pinned-preset intent advertised for UNSET by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6711
 * feat(icons): add Material icons for custom SF Symbols and fix soil telemetry icons by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6722
 * feat(settings): add About screen with hardware carousel and rename license screen to Acknowledgements by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6721
+* feat(firmware): add nRF52/RP2040 factory erase and OTAFIX bootloader upgrade over USB by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6526
+* feat(node): label SNR quality on the Node Details signal row by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6703
+* fix(database): raise default cache limit and warn before eviction by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6742
 #### 🖥️ Desktop
 * fix(lifecycle): harden packet admission and transport ownership by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6716
 #### 🛠️ Fixes
@@ -26,6 +29,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(firmware): add fallback painter to device hardware image by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6733
 * fix(map): restore osmbonuspack native styling, fix tile-scaling gap by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6735
 * fix(takserver): wire TAKPacket-SDK's logger, surface remarks-stripped by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6736
+* fix(node): confirm before clearing a node's position track by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6745
+* fix(takserver): route TAK self-test through the real v1/v2 dispatch path by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6746
+* fix(map): scope Google Maps clustering to the viewport above 1000 nodes by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6739
+* fix(node): make node-list search case-insensitive for non-ASCII names by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6753
+* fix(ble): refresh a stale GATT cache during ordinary reconnects by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6744
+* fix(connections): open the region picker directly from the region card by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6743
 #### 📝 Other Changes
 * refactor(firmware): dedupe the Android/JVM download byte-copy loop by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6737
 
@@ -113,6 +122,7 @@ Changes since [`v2.8.0`](https://github.com/meshtastic/Meshtastic-Android/releas
 * @clayburn made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6531
 * @simulationstation made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6602
 * @ayysasha made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6663
+* @beecho01 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6703
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
