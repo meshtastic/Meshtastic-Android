@@ -32,7 +32,9 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.isValidDeviceAddress
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -40,8 +42,17 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
+
+// English fallback for local_network_permission_denied_hint when resource lookup is unavailable. Kept above the
+// class KDoc so that KDoc still binds to the class. Internal so tests can assert the exact surfaced text.
+internal const val UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT =
+    "Local network access is turned off for Meshtastic. If this radio is on your local network, " +
+        "the connection will fail until you allow local network access in system settings."
 
 /**
  * Platform-agnostic orchestrator for the mesh service lifecycle.
@@ -65,12 +76,56 @@ class MeshServiceOrchestrator(
     private val databaseManager: DatabaseManager,
     private val connectionManager: MeshConnectionManager,
     private val dispatchers: CoroutineDispatchers,
+    private val localNetworkAccess: LocalNetworkAccess,
 ) {
     // Per-start coroutine scope. A fresh scope is created on each start() and cancelled on stop(), so all collectors
     // launched from start() are torn down cleanly and do not accumulate across start/stop/start cycles.
     // Held in an atomic ref so concurrent start()/stop() callers serialize on compareAndSet rather than racing through
     // a check-then-set on a plain var.
     private val scopeRef = atomic<CoroutineScope?>(null)
+
+    // Cold-start lifecycle invariant: a transport must NOT start for a selected address until
+    // the active DB has been switched to that same address. We enforce the ordering
+    // (valid address -> DB switch -> connect) by waiting for currentDeviceAddressFlow to
+    // surface a real selected address before performing the DB switch and connecting the
+    // radio. Address sync inside SharedRadioInterfaceService now runs independently of
+    // connect() (via its init{} listener), so this wait completes as soon as prefs load —
+    // without it, connect() would race ahead of the DB switch and the firmware handshake
+    // would write into the wrong (or null) DB.
+    //
+    // If no device is ever selected this suspends indefinitely for the lifetime of newScope;
+    // by design the radio must not connect without a selected device. This mirrors
+    // MeshService's foreground-service stay-alive gate (isValidDeviceAddress).
+    private suspend fun coldStartConnect() {
+        val address = radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
+        databaseManager.switchActiveDatabase(address)
+        // Load cached nodes from the now-active per-device DB before connect() so the firmware
+        // handshake doesn't see a stale/empty node set. Previously this ran synchronously in
+        // start() and raced ahead of the DB switch, reading the default (or null) DB.
+        nodeManager.loadCachedNodeDB()
+        // Android 17 gates the socket, not just discovery: a TCP connect without ACCESS_LOCAL_NETWORK times out
+        // rather than failing fast. There is no Activity here to request from, so warn — the alert is a StateFlow,
+        // still waiting when the user next opens the app — and then connect ANYWAY, for two load-bearing reasons:
+        // the address prefix says nothing about locality (a radio reached over a public IP, a port-forward, or a
+        // VPN needs no local-network permission and must keep working), and connect() is the sole installer of the
+        // transport-recovery listeners (BLE state, network availability, USB replug) — skipping it would leave a
+        // later successful manual connect with no recovery layer for the life of the process. The OS enforces the
+        // permission at the socket, so a genuinely local connect fails exactly as it would have; the difference is
+        // the user now has an explanation and the fix in hand.
+        if (address?.firstOrNull() == InterfaceId.TCP.id && !localNetworkAccess.isGranted()) {
+            Logger.w { "Local network access not granted; the persisted TCP reconnect may time out" }
+            serviceStateWriter.setErrorMessage(
+                // Same shape as ScannerViewModel's scan-failure messages: resource lookup can fail outside a
+                // fully wired resource environment, and an untranslated warning beats no warning at all.
+                text =
+                safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
+                    .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT),
+                severity = Severity.Warn,
+            )
+        }
+        Logger.i { "Per-device database initialized, connecting radio" }
+        radioInterfaceService.connect()
+    }
 
     /** Whether the orchestrator is currently running. */
     val isRunning: Boolean
@@ -122,28 +177,7 @@ class MeshServiceOrchestrator(
             }
             .launchIn(newScope)
 
-        // Cold-start lifecycle invariant: a transport must NOT start for a selected address until
-        // the active DB has been switched to that same address. We enforce the ordering
-        // (valid address -> DB switch -> connect) by waiting for currentDeviceAddressFlow to
-        // surface a real selected address before performing the DB switch and connecting the
-        // radio. Address sync inside SharedRadioInterfaceService now runs independently of
-        // connect() (via its init{} listener), so this wait completes as soon as prefs load —
-        // without it, connect() would race ahead of the DB switch and the firmware handshake
-        // would write into the wrong (or null) DB.
-        //
-        // If no device is ever selected this suspends indefinitely for the lifetime of newScope;
-        // by design the radio must not connect without a selected device. This mirrors
-        // MeshService's foreground-service stay-alive gate (isValidDeviceAddress).
-        newScope.handledLaunch {
-            val address = radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
-            databaseManager.switchActiveDatabase(address)
-            // Load cached nodes from the now-active per-device DB before connect() so the firmware
-            // handshake doesn't see a stale/empty node set. Previously this ran synchronously in
-            // start() and raced ahead of the DB switch, reading the default (or null) DB.
-            nodeManager.loadCachedNodeDB()
-            Logger.i { "Per-device database initialized, connecting radio" }
-            radioInterfaceService.connect()
-        }
+        newScope.handledLaunch { coldStartConnect() }
 
         // Mid-session device-address transitions (late process-lifecycle devAddr propagation,
         // user-initiated device switch, etc.): keep the active DB in sync with the selected

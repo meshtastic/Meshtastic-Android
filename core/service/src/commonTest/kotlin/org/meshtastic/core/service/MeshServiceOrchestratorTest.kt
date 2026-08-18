@@ -32,8 +32,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
@@ -48,6 +50,9 @@ import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -101,6 +106,9 @@ class MeshServiceOrchestratorTest {
         isSessionActive: (RadioSessionContext) -> Boolean = { activeSession.value == it },
         takEnabledFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
         takRunningFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
+        // Granted by default so every pre-existing test keeps reaching connect(); DEFAULT_ADDRESS is BLE
+        // anyway, but the cold-start ordering test deliberately uses a TCP address.
+        localNetworkAccess: LocalNetworkAccess = LocalNetworkAccess { true },
     ): MeshServiceOrchestrator {
         every { radioInterfaceService.receivedData } returns receivedData
         every { radioInterfaceService.connectionError } returns connectionError
@@ -157,6 +165,7 @@ class MeshServiceOrchestratorTest {
             databaseManager = databaseManager,
             connectionManager = connectionManager,
             dispatchers = dispatchers,
+            localNetworkAccess = localNetworkAccess,
         )
     }
 
@@ -526,5 +535,66 @@ class MeshServiceOrchestratorTest {
         connectionState.value = ConnectionState.Disconnected
         connectionState.value = ConnectionState.Connected
         assertFalse(orchestrator.isRunning)
+    }
+
+    @Test
+    fun tcpReconnectWarnsAndStillConnectsWhenLocalNetworkAccessIsMissing() = runTest {
+        // Android 17 gates the socket: without ACCESS_LOCAL_NETWORK a local TCP connect times out silently. The
+        // service has no Activity to request from, so the contract is warn-and-proceed — proceed because the address
+        // prefix says nothing about locality (public-IP/VPN radios need no permission) and because connect() is the
+        // sole installer of the transport-recovery listeners.
+        //
+        // Pre-warm the resource: the first read completes on compose-resources' own Dispatchers.Default scope, so an
+        // un-warmed lookup lands after the assertions (see ScannerViewModelTest's warmScanFailureStrings). The same
+        // safeCatchingAll-with-fallback shape as production keeps the expected text identical either way.
+        val expectedMessage =
+            safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
+                .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT)
+        val orchestrator =
+            createOrchestrator(
+                currentDeviceAddressFlow = MutableStateFlow<String?>("t192.168.1.100"),
+                localNetworkAccess = LocalNetworkAccess { false },
+            )
+
+        orchestrator.start()
+
+        verify { serviceRepository.setErrorMessage(expectedMessage, Severity.Warn) }
+        verify { radioInterfaceService.connect() }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun tcpReconnectConnectsWithoutAWarningWhenLocalNetworkAccessIsHeld() {
+        val orchestrator =
+            createOrchestrator(
+                currentDeviceAddressFlow = MutableStateFlow<String?>("t192.168.1.100"),
+                localNetworkAccess = LocalNetworkAccess { true },
+            )
+
+        orchestrator.start()
+
+        verify { radioInterfaceService.connect() }
+        verify(exactly(0)) { serviceRepository.setErrorMessage(any(), any()) }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun nonTcpReconnectIsUnaffectedByLocalNetworkAccess() {
+        // Guards against over-gating: ACCESS_LOCAL_NETWORK has nothing to do with a BLE radio, so a denied grant
+        // must neither warn nor keep a Bluetooth device from reconnecting.
+        val orchestrator =
+            createOrchestrator(
+                currentDeviceAddressFlow = MutableStateFlow<String?>(DEFAULT_ADDRESS),
+                localNetworkAccess = LocalNetworkAccess { false },
+            )
+
+        orchestrator.start()
+
+        verify { radioInterfaceService.connect() }
+        verify(exactly(0)) { serviceRepository.setErrorMessage(any(), any()) }
+
+        orchestrator.stop()
     }
 }
