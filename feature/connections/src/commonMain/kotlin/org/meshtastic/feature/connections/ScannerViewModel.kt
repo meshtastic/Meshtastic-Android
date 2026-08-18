@@ -66,6 +66,7 @@ import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.bluetooth_scan_too_frequent
 import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -77,6 +78,12 @@ import kotlin.time.Duration.Companion.seconds
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
+
+// English fallback for local_network_permission_denied_hint when resource lookup is unavailable. Internal so tests
+// can assert the exact surfaced text.
+internal const val LOCAL_NETWORK_PERMISSION_DENIED_HINT_FALLBACK =
+    "Local network access is turned off for Meshtastic. If this radio is on your local network, " +
+        "the connection will fail until you allow local network access in system settings."
 
 /**
  * How long to block scan restarts after a scan-start failure.
@@ -603,6 +610,21 @@ open class ScannerViewModel(
         uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
         addRecentAddress(fullAddress, displayAddress)
         changeDeviceAddress(fullAddress)
+    }
+
+    /**
+     * Surfaces the local-network warning for a TCP connect that proceeds without `ACCESS_LOCAL_NETWORK` — either the
+     * permission is permanently denied (no prompt possible) or an in-context request just resolved as a denial. The
+     * connect is attempted regardless (the target may be a public host or VPN peer, which the permission does not
+     * govern); this message names the fix for the case where it IS local and the connect is about to time out.
+     */
+    fun warnLocalNetworkPermissionDenied() {
+        safeLaunch(tag = "warnLocalNetworkPermissionDenied") {
+            val message =
+                safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
+                    .getOrDefault(LOCAL_NETWORK_PERMISSION_DENIED_HINT_FALLBACK)
+            serviceRepository.setErrorMessage(text = message, severity = Severity.Warn)
+        }
     }
 
     /**

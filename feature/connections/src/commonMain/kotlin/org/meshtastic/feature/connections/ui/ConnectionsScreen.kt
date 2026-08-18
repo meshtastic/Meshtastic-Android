@@ -44,6 +44,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -160,6 +163,45 @@ fun ConnectionsScreen(
     // network-scan toggle request in-context and route a permanent denial to settings.
     val localNetworkPermission = rememberLocalNetworkPermissionState()
     val bluetoothPermission = rememberBluetoothPermissionState()
+
+    // ACCESS_LOCAL_NETWORK gates the socket, not just discovery — a blocked local TCP connect times out rather than
+    // failing fast — but a TCP address says nothing about locality: public-IP/port-forward/VPN radios need no
+    // permission at all. Policy (see LocalNetworkGateAction): prompt when possible, warn when not, never block.
+    // A connect issued while the prompt is up is stashed with the status it saw; the LaunchedEffect below resolves it
+    // on the status transition the request produces — grant runs it, a denial warns and runs it anyway.
+    var pendingTcpConnect by remember { mutableStateOf<Pair<PermissionStatus, () -> Unit>?>(null) }
+    val gateTcpConnect: (connect: () -> Unit) -> Unit = { connect ->
+        when (localNetworkGateAction(localNetworkPermission.status)) {
+            LocalNetworkGateAction.PROCEED -> connect()
+
+            LocalNetworkGateAction.REQUEST_PERMISSION -> {
+                pendingTcpConnect = localNetworkPermission.status to connect
+                localNetworkPermission.request()
+            }
+
+            LocalNetworkGateAction.PROCEED_WITH_WARNING -> {
+                scanModel.warnLocalNetworkPermissionDenied()
+                connect()
+            }
+        }
+    }
+    LaunchedEffect(localNetworkPermission.status) {
+        val pending = pendingTcpConnect ?: return@LaunchedEffect
+        when (resolvePendingTcpConnect(stashedStatus = pending.first, currentStatus = localNetworkPermission.status)) {
+            PendingTcpConnectResolution.CONNECT -> {
+                pendingTcpConnect = null
+                pending.second()
+            }
+
+            PendingTcpConnectResolution.CONNECT_WITH_WARNING -> {
+                pendingTcpConnect = null
+                scanModel.warnLocalNetworkPermissionDenied()
+                pending.second()
+            }
+
+            PendingTcpConnectResolution.KEEP_WAITING -> Unit
+        }
+    }
 
     // Adapter-state, distinct from permission state: a permission can be granted while Bluetooth is off or the device
     // is off Wi-Fi. Detected separately so the UI can route to the adapter's settings rather than re-prompting.
@@ -450,7 +492,16 @@ fun ConnectionsScreen(
                                 isBleScanning = isBleScanning,
                                 isNetworkScanning = isNetworkScanning,
                                 activeTransport = activeTransport,
-                                onSelectDevice = { scanModel.onSelected(it) },
+                                onSelectDevice = { entry ->
+                                    // Recent TCP addresses are persisted, so this list renders without a scan — and
+                                    // therefore without the scan toggle's permission request ever having run. BLE and
+                                    // USB are unaffected by ACCESS_LOCAL_NETWORK, so only gate Tcp.
+                                    if (entry is DeviceListEntry.Tcp) {
+                                        gateTcpConnect { scanModel.onSelected(entry) }
+                                    } else {
+                                        scanModel.onSelected(entry)
+                                    }
+                                },
                                 onToggleBleScan = {
                                     when {
                                         // Always allow stopping an in-progress scan.
@@ -488,7 +539,9 @@ fun ConnectionsScreen(
                                     }
                                 },
                                 onAddManualAddress = { _, fullAddress ->
-                                    scanModel.connectToManualAddress(fullAddress)
+                                    // Typing an address is always allowed — the target may be a public host or VPN
+                                    // peer. The gate runs at connect, where the permission can actually matter.
+                                    gateTcpConnect { scanModel.connectToManualAddress(fullAddress) }
                                 },
                                 onRemoveRecentAddress = { scanModel.removeRecentAddress(it.fullAddress) },
                             )
