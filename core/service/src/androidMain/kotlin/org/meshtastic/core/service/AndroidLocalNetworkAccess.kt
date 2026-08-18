@@ -16,22 +16,11 @@
  */
 package org.meshtastic.core.service
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.content.ContextCompat
 import org.koin.core.annotation.Single
-
-/** API level at which ACCESS_LOCAL_NETWORK became a real runtime permission (Android 17 / API 37). */
-private const val LOCAL_NETWORK_PERMISSION_API = 37
+import org.meshtastic.core.common.hasLocalNetworkPermission
 
 @Single
 class AndroidLocalNetworkAccess(private val context: Context) : LocalNetworkAccess {
-    override fun isGranted(): Boolean =
-        // Below API 37 local-network access is implicit via INTERNET. The grant is keyed on targetSdk rather than on
-        // install history, so an existing install loses it as soon as it takes an update built against 37.
-        Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_LOCAL_NETWORK) ==
-            PackageManager.PERMISSION_GRANTED
+    override fun isGranted(): Boolean = context.hasLocalNetworkPermission()
 }

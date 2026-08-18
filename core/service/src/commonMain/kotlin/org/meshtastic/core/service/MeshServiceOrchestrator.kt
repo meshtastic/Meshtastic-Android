@@ -44,9 +44,15 @@ import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.local_network_permission_required
+import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
+
+// English fallback for local_network_permission_denied_hint when resource lookup is unavailable. Kept above the
+// class KDoc so that KDoc still binds to the class. Internal so tests can assert the exact surfaced text.
+internal const val UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT =
+    "Local network access is turned off for Meshtastic. If this radio is on your local network, " +
+        "the connection will fail until you allow local network access in system settings."
 
 /**
  * Platform-agnostic orchestrator for the mesh service lifecycle.
@@ -56,11 +62,6 @@ import org.meshtastic.core.takserver.TAKServerManager
  *
  * All injected dependencies are `commonMain` interfaces with real implementations in `core:data`.
  */
-// English fallback for local_network_permission_required when resource lookup is unavailable.
-private const val UNTRANSLATED_LOCAL_NETWORK_PERMISSION_REQUIRED =
-    "Meshtastic needs local network access to reach a radio over Wi-Fi. " +
-        "Open Connections and grant the permission to reconnect."
-
 @Suppress("LongParameterList")
 @Single
 class MeshServiceOrchestrator(
@@ -103,20 +104,24 @@ class MeshServiceOrchestrator(
         // start() and raced ahead of the DB switch, reading the default (or null) DB.
         nodeManager.loadCachedNodeDB()
         // Android 17 gates the socket, not just discovery: a TCP connect without ACCESS_LOCAL_NETWORK times out
-        // rather than failing fast. There is no Activity here to request from, so decline to try and say why —
-        // the alert is a StateFlow, so it is still waiting when the user next opens the app. Granting the
-        // permission and reselecting the device in ConnectionsScreen restarts the transport via setDeviceAddress.
+        // rather than failing fast. There is no Activity here to request from, so warn — the alert is a StateFlow,
+        // still waiting when the user next opens the app — and then connect ANYWAY, for two load-bearing reasons:
+        // the address prefix says nothing about locality (a radio reached over a public IP, a port-forward, or a
+        // VPN needs no local-network permission and must keep working), and connect() is the sole installer of the
+        // transport-recovery listeners (BLE state, network availability, USB replug) — skipping it would leave a
+        // later successful manual connect with no recovery layer for the life of the process. The OS enforces the
+        // permission at the socket, so a genuinely local connect fails exactly as it would have; the difference is
+        // the user now has an explanation and the fix in hand.
         if (address?.firstOrNull() == InterfaceId.TCP.id && !localNetworkAccess.isGranted()) {
-            Logger.w { "Local network access not granted; skipping reconnect to the persisted TCP address" }
+            Logger.w { "Local network access not granted; the persisted TCP reconnect may time out" }
             serviceStateWriter.setErrorMessage(
                 // Same shape as ScannerViewModel's scan-failure messages: resource lookup can fail outside a
                 // fully wired resource environment, and an untranslated warning beats no warning at all.
                 text =
-                safeCatchingAll { getStringSuspend(Res.string.local_network_permission_required) }
-                    .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_REQUIRED),
+                safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
+                    .getOrDefault(UNTRANSLATED_LOCAL_NETWORK_PERMISSION_DENIED_HINT),
                 severity = Severity.Warn,
             )
-            return
         }
         Logger.i { "Per-device database initialized, connecting radio" }
         radioInterfaceService.connect()
