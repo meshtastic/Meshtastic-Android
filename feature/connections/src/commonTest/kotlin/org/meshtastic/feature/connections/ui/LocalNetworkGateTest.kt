@@ -21,19 +21,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Covers the `ACCESS_LOCAL_NETWORK` gate applied to the Connections paths that open a socket without a scan having run
- * — manual address entry and the persisted recent-address list. On Android 17 an ungated connect times out rather than
- * failing fast, so a wrong branch here is a silent hang, not an error the user can act on.
+ * Covers the `ACCESS_LOCAL_NETWORK` policy applied to the Connections TCP-connect paths: prompt when possible, warn
+ * when not, never block. A TCP address says nothing about locality — public-IP/port-forward/VPN radios need no
+ * permission — so no branch may refuse the connect outright; on Android 17 the OS enforces the permission at the socket
+ * regardless.
  */
 class LocalNetworkGateTest {
 
     @Test
-    fun `granted proceeds`() {
+    fun `granted proceeds silently`() {
         assertEquals(LocalNetworkGateAction.PROCEED, localNetworkGateAction(PermissionStatus.GRANTED))
     }
 
     @Test
-    fun `never requested prompts in-context rather than opening settings`() {
+    fun `never requested prompts in-context`() {
         assertEquals(LocalNetworkGateAction.REQUEST_PERMISSION, localNetworkGateAction(PermissionStatus.NOT_REQUESTED))
     }
 
@@ -46,10 +47,56 @@ class LocalNetworkGateTest {
     }
 
     @Test
-    fun `permanent denial routes to app settings because the system will not prompt again`() {
+    fun `permanent denial warns but still proceeds because the system will not prompt again`() {
         assertEquals(
-            LocalNetworkGateAction.OPEN_APP_SETTINGS,
+            LocalNetworkGateAction.PROCEED_WITH_WARNING,
             localNetworkGateAction(PermissionStatus.PERMANENTLY_DENIED),
+        )
+    }
+
+    // ── Resolution of a connect stashed behind an in-flight permission request ──
+
+    @Test
+    fun `a grant runs the stashed connect`() {
+        assertEquals(
+            PendingTcpConnectResolution.CONNECT,
+            resolvePendingTcpConnect(
+                stashedStatus = PermissionStatus.NOT_REQUESTED,
+                currentStatus = PermissionStatus.GRANTED,
+            ),
+        )
+    }
+
+    @Test
+    fun `a first denial warns and runs the stashed connect anyway`() {
+        assertEquals(
+            PendingTcpConnectResolution.CONNECT_WITH_WARNING,
+            resolvePendingTcpConnect(
+                stashedStatus = PermissionStatus.NOT_REQUESTED,
+                currentStatus = PermissionStatus.DENIED_CAN_RETRY,
+            ),
+        )
+    }
+
+    @Test
+    fun `a denial that becomes permanent warns and runs the stashed connect anyway`() {
+        assertEquals(
+            PendingTcpConnectResolution.CONNECT_WITH_WARNING,
+            resolvePendingTcpConnect(
+                stashedStatus = PermissionStatus.DENIED_CAN_RETRY,
+                currentStatus = PermissionStatus.PERMANENTLY_DENIED,
+            ),
+        )
+    }
+
+    @Test
+    fun `an unchanged status keeps waiting for the request to resolve`() {
+        assertEquals(
+            PendingTcpConnectResolution.KEEP_WAITING,
+            resolvePendingTcpConnect(
+                stashedStatus = PermissionStatus.NOT_REQUESTED,
+                currentStatus = PermissionStatus.NOT_REQUESTED,
+            ),
         )
     }
 }

@@ -117,8 +117,6 @@ fun DeviceList(
     onSelectDevice: (DeviceListEntry) -> Unit,
     onToggleBleScan: () -> Unit,
     onToggleNetworkScan: () -> Unit,
-    canUseLocalNetwork: Boolean,
-    onRequestLocalNetworkAccess: () -> Unit,
     onAddManualAddress: (address: String, fullAddress: String) -> Unit,
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
@@ -167,11 +165,7 @@ fun DeviceList(
                     isNetworkScanning = isNetworkScanning,
                     onSelectDevice = onSelectDevice,
                     onToggleNetworkScan = onToggleNetworkScan,
-                    onAddManually = {
-                        // Opening the dialog is the gate, not the connect: requesting after the address is typed
-                        // would lose it across the permission round-trip and make the user retype the IP.
-                        if (canUseLocalNetwork) showAddDialog = true else onRequestLocalNetworkAccess()
-                    },
+                    onAddManually = { showAddDialog = true },
                     onRemoveRecentAddress = onRemoveRecentAddress,
                 )
 
