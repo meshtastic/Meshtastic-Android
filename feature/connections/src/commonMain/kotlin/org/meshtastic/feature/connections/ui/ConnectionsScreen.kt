@@ -161,6 +161,20 @@ fun ConnectionsScreen(
     val localNetworkPermission = rememberLocalNetworkPermissionState()
     val bluetoothPermission = rememberBluetoothPermissionState()
 
+    // ACCESS_LOCAL_NETWORK gates the socket, not just discovery — a blocked TCP connect times out rather than failing
+    // fast (b/local-network-permission docs), so every path that opens a socket to a radio needs the grant, not only
+    // the scan toggle. Routes a permanent denial to settings, mirroring onToggleBleScan/onToggleNetworkScan below.
+    val onRequestLocalNetworkAccess: () -> Unit = {
+        when (localNetworkGateAction(localNetworkPermission.status)) {
+            LocalNetworkGateAction.OPEN_APP_SETTINGS -> localNetworkPermission.openAppSettings()
+
+            LocalNetworkGateAction.REQUEST_PERMISSION -> localNetworkPermission.request()
+
+            // Already granted — the caller runs the action directly and never reaches here.
+            LocalNetworkGateAction.PROCEED -> Unit
+        }
+    }
+
     // Adapter-state, distinct from permission state: a permission can be granted while Bluetooth is off or the device
     // is off Wi-Fi. Detected separately so the UI can route to the adapter's settings rather than re-prompting.
     val bluetoothDisabled = isBluetoothDisabled()
@@ -450,7 +464,16 @@ fun ConnectionsScreen(
                                 isBleScanning = isBleScanning,
                                 isNetworkScanning = isNetworkScanning,
                                 activeTransport = activeTransport,
-                                onSelectDevice = { scanModel.onSelected(it) },
+                                onSelectDevice = { entry ->
+                                    // Recent TCP addresses are persisted, so this list renders without a scan — and
+                                    // therefore without the scan toggle's permission request ever having run. BLE and
+                                    // USB are unaffected by ACCESS_LOCAL_NETWORK, so only gate Tcp.
+                                    if (entry is DeviceListEntry.Tcp && !localNetworkPermission.isGranted) {
+                                        onRequestLocalNetworkAccess()
+                                    } else {
+                                        scanModel.onSelected(entry)
+                                    }
+                                },
                                 onToggleBleScan = {
                                     when {
                                         // Always allow stopping an in-progress scan.
@@ -487,6 +510,8 @@ fun ConnectionsScreen(
                                         }
                                     }
                                 },
+                                canUseLocalNetwork = localNetworkPermission.isGranted,
+                                onRequestLocalNetworkAccess = onRequestLocalNetworkAccess,
                                 onAddManualAddress = { _, fullAddress ->
                                     scanModel.connectToManualAddress(fullAddress)
                                 },

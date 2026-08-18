@@ -123,6 +123,8 @@ fun BluetoothScanPreview() {
                 onSelectDevice = {},
                 onToggleBleScan = {},
                 onToggleNetworkScan = {},
+                canUseLocalNetwork = true,
+                onRequestLocalNetworkAccess = {},
                 onAddManualAddress = { _, _ -> },
                 onRemoveRecentAddress = {},
             )
@@ -168,6 +170,8 @@ private fun BluetoothPanePreview() {
             onSelectDevice = {},
             onToggleBleScan = {},
             onToggleNetworkScan = {},
+            canUseLocalNetwork = true,
+            onRequestLocalNetworkAccess = {},
             onAddManualAddress = { _, _ -> },
             onRemoveRecentAddress = {},
         )
@@ -191,6 +195,8 @@ private fun NetworkPanePreview() {
             onSelectDevice = {},
             onToggleBleScan = {},
             onToggleNetworkScan = {},
+            canUseLocalNetwork = true,
+            onRequestLocalNetworkAccess = {},
             onAddManualAddress = { _, _ -> },
             onRemoveRecentAddress = {},
         )
@@ -222,6 +228,8 @@ private fun UsbPanePreview() {
             onSelectDevice = {},
             onToggleBleScan = {},
             onToggleNetworkScan = {},
+            canUseLocalNetwork = true,
+            onRequestLocalNetworkAccess = {},
             onAddManualAddress = { _, _ -> },
             onRemoveRecentAddress = {},
         )
@@ -245,6 +253,8 @@ private fun UsbPaneEmptyPreview() {
             onSelectDevice = {},
             onToggleBleScan = {},
             onToggleNetworkScan = {},
+            canUseLocalNetwork = true,
+            onRequestLocalNetworkAccess = {},
             onAddManualAddress = { _, _ -> },
             onRemoveRecentAddress = {},
         )
