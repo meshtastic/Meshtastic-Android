@@ -51,6 +51,7 @@ fun TakServerSectionDisabledPreview() {
             status = TakServerStatus.Off,
             clientCount = 0,
             onExport = {},
+            supportsTakV2 = true,
         )
     }
 }
@@ -67,6 +68,7 @@ fun TakServerSectionEnabledPreview() {
             status = TakServerStatus.WaitingForClient,
             clientCount = 0,
             onExport = {},
+            supportsTakV2 = true,
         )
     }
 }
@@ -83,6 +85,7 @@ fun TakServerSectionConnectedPreview() {
             status = TakServerStatus.Connected,
             clientCount = 1,
             onExport = {},
+            supportsTakV2 = true,
         )
     }
 }
@@ -99,6 +102,24 @@ fun TakServerSectionFailedPreview() {
             status = TakServerStatus.Failed,
             clientCount = 0,
             onExport = {},
+            supportsTakV2 = true,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun TakServerSectionV1FallbackPreview() {
+    AppTheme {
+        TakServerSection(
+            isTakServerEnabled = true,
+            onEnabledChange = {},
+            isMeshToCotEnabled = true,
+            onMeshToCotChange = {},
+            status = TakServerStatus.Connected,
+            clientCount = 1,
+            onExport = {},
+            supportsTakV2 = false,
         )
     }
 }

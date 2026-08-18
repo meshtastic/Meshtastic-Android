@@ -52,8 +52,10 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.getColorFrom
 import org.meshtastic.core.model.getStringResFrom
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
@@ -87,6 +89,7 @@ import org.meshtastic.core.resources.tak_server_test_result_unknown_error
 import org.meshtastic.core.resources.tak_server_test_results_v2
 import org.meshtastic.core.resources.tak_server_test_run
 import org.meshtastic.core.resources.tak_server_test_running
+import org.meshtastic.core.resources.tak_server_v1_fallback_notice
 import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TAKMeshIntegration
@@ -101,6 +104,7 @@ import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
 import org.meshtastic.core.ui.icon.Share
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -197,12 +201,22 @@ internal fun handleTakPermissionResult(granted: Boolean, isTakServerEnabled: Boo
 fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val takServerManager: TAKServerManager = koinInject()
+    val nodeRepository: NodeRepository = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
     val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
     val isTakServerRunning by takServerManager.isRunning.collectAsStateWithLifecycle()
     val isTakServerStarting by takServerManager.isStarting.collectAsStateWithLifecycle()
     val takClientCount by takServerManager.connectionCount.collectAsStateWithLifecycle()
     val hasTakServerStartError by takServerManager.hasStartError.collectAsStateWithLifecycle()
+    val myNodeInfo by nodeRepository.myNodeInfo.collectAsStateWithLifecycle()
+    // The Mesh-to-CoT bridge falls back to a legacy protocol (PLI + basic chat only, no
+    // markers/POIs) when the connected node's firmware predates the v2 TAK port — see
+    // TAKMeshIntegration.useTakV2() for the same check on the actual bridging path.
+    // Defaults to true (assume supported) when firmware is unknown -- no node connected yet,
+    // or myNodeInfo hasn't arrived -- rather than treating "unknown" the same as "confirmed
+    // unsupported": Capabilities(null).supportsTakV2 is false, which would otherwise show the
+    // fallback warning even when there's no connected node to be falling back for.
+    val supportsTakV2 = myNodeInfo?.firmwareVersion?.let { Capabilities(it).supportsTakV2 } ?: true
     val takServerStatus =
         TakServerStatus.resolve(
             isSupported = takServerManager.isSupported,
@@ -253,6 +267,7 @@ fun TakServerScreen(onBack: () -> Unit) {
                 status = takServerStatus,
                 clientCount = takClientCount,
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
+                supportsTakV2 = supportsTakV2,
             )
             TakMeshTestCard()
         }
@@ -269,6 +284,7 @@ internal fun TakServerSection(
     status: TakServerStatus,
     clientCount: Int,
     onExport: () -> Unit,
+    supportsTakV2: Boolean,
 ) {
     TitledCard(title = stringResource(Res.string.tak_server_section)) {
         SwitchPreference(
@@ -289,6 +305,10 @@ internal fun TakServerSection(
                 enabled = true,
                 onCheckedChange = onMeshToCotChange,
             )
+            if (isMeshToCotEnabled && !supportsTakV2) {
+                HorizontalDivider()
+                TakV1FallbackNotice()
+            }
             HorizontalDivider()
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -314,6 +334,23 @@ internal fun TakServerSection(
                 }
             }
         }
+    }
+}
+
+/** Warns that the connected node's firmware falls back to the legacy TAK bridge (PLI + chat only, no markers/POIs). */
+@Composable
+private fun TakV1FallbackNotice() {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(imageVector = MeshtasticIcons.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+        Text(
+            text = stringResource(Res.string.tak_server_v1_fallback_notice),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
