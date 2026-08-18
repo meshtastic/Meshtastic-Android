@@ -126,13 +126,7 @@ internal object TakV2Compressor {
 
                 // TAKTALK room/membership broadcast (y-).
                 packet.taktalk_room != null ->
-                    @Suppress("DEPRECATION")
                     TakPacketV2Data.Payload.TakTalkRoom(
-                        // sender_callsign deprecated in SDK v0.3.2 — sender
-                        // identity is now in envelope packet.callsign;
-                        // v0.3.1 packets still populate the legacy field so
-                        // we forward it for source-compat readers.
-                        senderCallsign = packet.taktalk_room!!.sender_callsign,
                         roomId = packet.taktalk_room!!.room_id,
                         roomName = packet.taktalk_room!!.room_name,
                         participants = packet.taktalk_room!!.participants.toList(),
