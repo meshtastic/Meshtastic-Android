@@ -932,6 +932,7 @@ load_indexed
 loading
 ### LOCAL ###
 local_mbtiles_file
+local_network_permission_required
 local_stats_bad
 local_stats_battery
 local_stats_diagnostics_prefix

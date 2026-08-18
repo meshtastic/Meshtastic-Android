@@ -35,6 +35,7 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
+            implementation(projects.core.resources)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.takserver)
 

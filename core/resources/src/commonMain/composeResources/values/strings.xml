@@ -962,6 +962,7 @@
     <string name="loading">Loading</string>
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Local MBTiles File</string>
+    <string name="local_network_permission_required">Meshtastic needs local network access to reach a radio over Wi-Fi. Open Connections and grant the permission to reconnect.</string>
     <string name="local_stats_bad">Bad %1$d</string>
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
