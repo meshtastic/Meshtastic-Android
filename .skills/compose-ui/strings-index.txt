@@ -1730,6 +1730,7 @@ tak_server_test_result_unknown_error
 tak_server_test_results_v2
 tak_server_test_run
 tak_server_test_running
+tak_server_v1_fallback_notice
 tak_team
 tak_team_blue
 tak_team_brown

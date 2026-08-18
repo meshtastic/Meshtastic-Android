@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.takserver.TAKPacketConversion.toCoTMessage
 import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toTAKPacketV2
 import org.meshtastic.proto.MemberRole
@@ -43,7 +44,6 @@ import org.meshtastic.proto.Team
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -438,63 +438,12 @@ class TAKMeshIntegration(
     private suspend fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
-            val cotMessage = convertV1ToCoT(takPacket) ?: return
+            val cotMessage = takPacket.toCoTMessage() ?: return
             takServerManager.broadcast(cotMessage)
             Logger.d { "V1 → TAK clients: ${cotMessage.type}" }
         } catch (e: Exception) {
             Logger.w(e) { "Failed to handle V1 packet: ${e.message}" }
         }
-    }
-
-    private fun convertV1ToCoT(takPacket: TAKPacket): CoTMessage? {
-        val callsign = takPacket.contact?.callsign ?: "UNKNOWN"
-        val senderUid = takPacket.contact?.device_callsign ?: "unknown"
-        val teamName = takPacket.group?.team?.toTakTeamName() ?: DEFAULT_TAK_TEAM_NAME
-        val roleName = takPacket.group?.role?.toTakRoleName() ?: DEFAULT_TAK_ROLE_NAME
-        val battery = takPacket.status?.battery ?: DEFAULT_TAK_BATTERY
-
-        val pli = takPacket.pli
-        if (pli != null) {
-            return CoTMessage.pli(
-                uid = senderUid,
-                callsign = callsign,
-                latitude = pli.latitude_i.toDouble() / TAK_COORDINATE_SCALE,
-                longitude = pli.longitude_i.toDouble() / TAK_COORDINATE_SCALE,
-                altitude = pli.altitude.toDouble(),
-                speed = pli.speed.toDouble(),
-                course = pli.course.toDouble(),
-                team = teamName,
-                role = roleName,
-                battery = battery,
-                staleMinutes = DEFAULT_TAK_STALE_MINUTES,
-            )
-        }
-
-        val chat = takPacket.chat
-        if (chat != null) {
-            val timeNow = Clock.System.now()
-            // Include chatroom in UID so ATAK routes DMs correctly — the UID format
-            // "GeoChat.<senderUid>.<chatroom>.<msgId>" is what ATAK uses to determine routing.
-            // Hardcoding "All Chat Rooms" here loses DM routing from legacy v1 nodes.
-            val chatroom = chat.to ?: "All Chat Rooms"
-            val msgId = Random.Default.nextInt().toString(TAK_HEX_RADIX)
-            return CoTMessage(
-                uid = "GeoChat.$senderUid.$chatroom.$msgId",
-                type = "b-t-f",
-                how = "h-g-i-g-o",
-                time = timeNow,
-                start = timeNow,
-                stale = timeNow + DEFAULT_TAK_STALE_MINUTES.minutes,
-                latitude = 0.0,
-                longitude = 0.0,
-                contact = CoTContact(callsign = callsign, endpoint = DEFAULT_TAK_ENDPOINT),
-                group = CoTGroup(name = teamName, role = roleName),
-                status = CoTStatus(battery = battery),
-                chat = CoTChat(chatroom = chatroom, senderCallsign = callsign, message = chat.message),
-            )
-        }
-
-        return null
     }
 
     companion object {

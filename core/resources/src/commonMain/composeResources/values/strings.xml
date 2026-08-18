@@ -1781,6 +1781,7 @@
     <string name="tak_server_test_results_v2">%1$d passed, %2$d expected drop, %3$d failed of %4$d/%5$d</string>
     <string name="tak_server_test_run">Run</string>
     <string name="tak_server_test_running">Running: %1$s</string>
+    <string name="tak_server_v1_fallback_notice">Connected node firmware doesn't support full TAK integration — only location and chat messages will bridge to ATAK. Markers and other event types need firmware 2.8.0 or newer.</string>
     <string name="tak_team">Team Color</string>
     <string name="tak_team_blue">Blue</string>
     <string name="tak_team_brown">Brown</string>
