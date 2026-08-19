@@ -88,6 +88,20 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem =
         else -> MeasurementSystem.METRIC
     }
 
+// CLDR unitPreferenceData lists these regions as defaulting to Fahrenheit; everywhere else is Celsius.
+actual fun getSystemTemperatureUnit(): TemperatureUnit =
+    when (Locale.getDefault().country.uppercase(Locale.getDefault())) {
+        "US",
+        "BS",
+        "BZ",
+        "KY",
+        "PR",
+        "PW",
+        -> TemperatureUnit.FAHRENHEIT
+
+        else -> TemperatureUnit.CELSIUS
+    }
+
 actual fun currentLocaleCode(): String = Locale.getDefault().language
 
 actual fun currentRegionCode(): String = Locale.getDefault().country

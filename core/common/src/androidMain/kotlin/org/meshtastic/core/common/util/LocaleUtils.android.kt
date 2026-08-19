@@ -19,6 +19,7 @@ package org.meshtastic.core.common.util
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
 import android.os.Build
+import androidx.core.text.util.LocalePreferences
 import java.util.Locale
 
 actual fun currentLocaleCode(): String = Locale.getDefault().language
@@ -51,4 +52,11 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
             else -> MeasurementSystem.METRIC
         }
     }
+}
+
+// LocalePreferences resolves from CLDR data and, on Android 14+, the user's Regional preferences
+// override. Kelvin (a valid regional preference) falls back to Celsius, which the app can display.
+actual fun getSystemTemperatureUnit(): TemperatureUnit = when (LocalePreferences.getTemperatureUnit()) {
+    LocalePreferences.TemperatureUnit.FAHRENHEIT -> TemperatureUnit.FAHRENHEIT
+    else -> TemperatureUnit.CELSIUS
 }

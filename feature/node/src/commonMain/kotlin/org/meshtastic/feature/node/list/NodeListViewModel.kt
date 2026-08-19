@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
+import org.meshtastic.core.common.util.TemperatureUnit
+import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -134,7 +134,7 @@ class NodeListViewModel(
 
     // OS locale rarely changes mid-session; snapshot once instead of per filter/sort emission.
     private val distanceUnits = DistanceUnit.getFromLocale().value
-    private val tempInFahrenheit = getSystemMeasurementSystem() == MeasurementSystem.IMPERIAL
+    private val tempInFahrenheit = getSystemTemperatureUnit() == TemperatureUnit.FAHRENHEIT
     val nodesUiState: StateFlow<NodesUiState> =
         combine(nodeSortOption, nodeFilter) { sort, nodeFilter ->
             NodesUiState(

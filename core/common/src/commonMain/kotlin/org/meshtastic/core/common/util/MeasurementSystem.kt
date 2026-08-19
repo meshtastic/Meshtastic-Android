@@ -25,6 +25,22 @@ enum class MeasurementSystem {
 /** returns the system's preferred measurement system. */
 expect fun getSystemMeasurementSystem(): MeasurementSystem
 
+/**
+ * The system's preferred temperature unit. Deliberately decoupled from [MeasurementSystem]: some locales mix systems
+ * (the UK measures road distance in miles but temperature in Celsius), so temperature must never be derived from the
+ * distance unit.
+ */
+enum class TemperatureUnit {
+    CELSIUS,
+    FAHRENHEIT,
+}
+
+/**
+ * Returns the temperature unit preferred by the OS locale, honoring the user's regional-preference override where the
+ * platform supports one (Android 14+ Settings > System > Languages > Regional preferences).
+ */
+expect fun getSystemTemperatureUnit(): TemperatureUnit
+
 /** Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr"). */
 expect fun currentLocaleCode(): String
 
